@@ -15,7 +15,12 @@ namespace Fsel.Identity.Infrastructure.Maps
         public StudentProfile()
         {
             CreateMap<Student, StudentModel>().IgnoreAllNonExisting();
+
+            CreateMap<Student, StudentModel>()
+                .ForMember(p => p.ParentEmail, n => n.MapFrom(m => m.ParentStudents.Count > 0 ? m.ParentStudents.FirstOrDefault()!.Parent!.Human!.Email : null));
+
             CreateMap<CreateStudentCommandModel, Student>().IgnoreAllNonExisting();
+            CreateMap<UpdateStudentBeginnerGuideCommandModel, Student>().IgnoreAllNonExisting();
             CreateMap<CreateStudentByParentCommandModel, Student>().IgnoreAllNonExisting();
             CreateMap<UpdateUserProfileCommandModel, Student>().IgnoreAllNonExisting();
             CreateMap<UpdateStudentProfileCommandModel, Student>().IgnoreAllNonExisting();

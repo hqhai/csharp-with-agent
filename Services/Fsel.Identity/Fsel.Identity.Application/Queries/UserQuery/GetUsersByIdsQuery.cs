@@ -33,11 +33,12 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<HumanModel>> methodResult = new MethodResult<IList<HumanModel>>();
 
-            if (request.UserIds == null)
+            if (request.UserIds == null || !request.UserIds.Any())
             {
+                methodResult.Result = new List<HumanModel>();
                 return methodResult;
             }
-            var humans = await _humanRepository.Queryable.Where(p => request.UserIds.Contains(p.UserId ?? string.Empty)).ToListAsync(cancellationToken);
+            var humans = await _humanRepository.Queryable.Where(p => p.UserId.HasValue && request.UserIds.Contains(p.UserId.Value)).ToListAsync(cancellationToken);
             methodResult.Result = _mapper.Map<IList<HumanModel>>(humans);
             return methodResult;
         }

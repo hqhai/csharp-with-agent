@@ -10,19 +10,22 @@ namespace Fsel.Identity.Application.Services.TrainingService
 
     public interface ITrainingService
     {
-        [Get("/class/get-class-by-student/{studentId}")]
+        [Get("/v1/class/get-class-by-student/{studentId}")]
         Task<IApiResponse<MethodResult<ClassModel>>> GetClassByStudentId([FromRoute] Guid studentId);
 
-        [Get("/admin/class/{classId}")]
+        [Get("/v1/admin/class/{classId}")]
         Task<IApiResponse<MethodResult<List<Guid>?>>> GetStudentIdsByClassId([FromRoute] Guid classId);
 
-        [Get("/class/class-course-student/{studentId}")]
+        [Get("/v1/class/class-course-student/{studentId}")]
         Task<IApiResponse<MethodResult<IList<StudentCourseModel>>>> GetClassCourseStudentAsync([FromRoute] Guid studentId);
 
-        [Post("/admin/class/user-class-by-teacherids")]
+        [Post("/v1/admin/class/user-class-by-teacherids")]
         Task<IApiResponse<MethodResult<List<UserClassModel>>>> GetUserClassByTeacherIds([FromBody] IList<Guid> ids);
 
-        [Post("/admin/class/user-class-by-csoids")]
+        [Post("/v1/admin/class/user-class-by-csoids")]
         Task<IApiResponse<MethodResult<List<UserClassModel>>>> GetUserClassByCSOIdsAsync([FromBody] IList<Guid> ids);
+
+        [Delete("/admin/student/delete-student/{id}")]
+        Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
     }
 }

@@ -38,7 +38,7 @@ namespace Fsel.Identity.Application.Queries.UserSettingQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<UserSettingModel> methodResult = new MethodResult<UserSettingModel>();
 
-            var userModel =await _userSettingRepository.Queryable.Where(x => x.UserId == _authContext.CurrentUserId.ToString()).FirstOrDefaultAsync(cancellationToken);
+            var userModel =await _userSettingRepository.Queryable.Where(x => x.UserId == _authContext.CurrentUserId).FirstOrDefaultAsync(cancellationToken);
 
             methodResult.Result = _mapper.Map<UserSettingModel>(userModel);
             methodResult.StatusCode = StatusCodes.Status200OK;

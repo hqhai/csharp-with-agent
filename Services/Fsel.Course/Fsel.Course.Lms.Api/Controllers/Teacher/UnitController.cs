@@ -8,14 +8,15 @@ namespace Fsel.Course.Lms.Api.Controllers.Teacher
     using Fsel.Course.Lms.Application.Queries.UnitQuery;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
     using Microsoft.AspNetCore.Mvc;
     using System.Net;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/teacher/unit")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Teacher))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Teacher))]
     public class UnitController : ControllerBase
     {
         private readonly IMediator _mediator;

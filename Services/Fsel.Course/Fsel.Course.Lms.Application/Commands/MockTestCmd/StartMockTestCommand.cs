@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -33,7 +34,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         private readonly AuthContext _authContext;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupConverter _sectionGroupConverter;
 
         public StartMockTestCommandHandler(ICourseRepository courseRepository
             , IUnitRepository unitRepository
@@ -41,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             , AuthContext authContext
             , IMockTestRepository mockTestRepository
             , IMockTestResultRepository mockTestResultRepository
-            , SectionConverter sectionConverter)
+            , SectionGroupConverter sectionGroupConverter)
         {
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
@@ -49,7 +50,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             _authContext = authContext;
             _mockTestRepository = mockTestRepository;
             _mockTestResultRepository = mockTestResultRepository;
-            _sectionConverter = sectionConverter;
+            _sectionGroupConverter = sectionGroupConverter;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(StartMockTestCommand request, CancellationToken cancellationToken)
@@ -116,11 +117,11 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                                 .ThenInclude(x => x.SectionGroup)
                                                 .ThenInclude(x => x!.Sections.Where(x => !x.IsDeleted))
                                                 .ThenInclude(x => x.SectionTimeCodes.Where(x => !x.IsDeleted))
-                                                .ThenInclude(x => x.MockTestAnswers)
+                                                .ThenInclude(x => x.MockTestAnswers.Where(x => !x.IsDeleted && x.MockTestResultId == mockTestResult.Id))
                                                 .Include(x => x.MockTestSections.Where(x => !x.IsDeleted))
                                                 .ThenInclude(x => x.SectionGroup)
                                                 .ThenInclude(x => x!.Sections.Where(x => !x.IsDeleted))
-                                                .ThenInclude(x => x.MockTestAnswers)
+                                                .ThenInclude(x => x.MockTestAnswers.Where(x => !x.IsDeleted && x.MockTestResultId == mockTestResult.Id))
                                                 .Include(x => x.MockTestResults.Where(x => !x.IsDeleted))
                                                 .Include(x => x.MockTestSections.Where(x => !x.IsDeleted))
                                                 .ThenInclude(x => x.SectionGroup)
@@ -154,7 +155,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 IsActive = mockTest.UnitSkillMockTests.Any() || mockTest.CourseUnitMockTests.Any(),
                 SectionGroups = mockTest.MockTestSections.Where(x => x.SectionGroup != null)
                          .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
-                         .Select(x => _sectionConverter.GetSectionGroupModel(x, !checkDone)).ToList(),
+                         .Select(x => _sectionGroupConverter.GetSectionGroupModel(x, !checkDone)).ToList(),
                 MockTestResult = mockTest.MockTestResults.Where(x => x.MockTestId == request.MockTestId && x.CourseId == request.CourseId && x.StudentId == studentId && (request.UnitId == null || x.UnitId == request.UnitId))
                 .Select(x => new MockTestResultModel
                 {
@@ -165,7 +166,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     Scores = x.SkillScores?.Average(x => x.Scores) ?? 0,
                     Percent = x.Percent,
                     Status = x.Status,
-                    CreatedDate = x.CreatedDate,
                     MockTestId = x.MockTestId,
                     StudentId = x.StudentId,
                     CourseId = course.Id,

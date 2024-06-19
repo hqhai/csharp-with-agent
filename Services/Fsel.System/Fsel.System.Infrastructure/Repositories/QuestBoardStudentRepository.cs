@@ -3,12 +3,12 @@
 namespace Fsel.System.Infrastructure.Repositories
 {
     using Fsel.Core.Base;
-    using Fsel.System.Domain.Entities;
+    using Fsel.System.Domain.Entities.QuestBoards;
     using Fsel.System.Domain.IRepositories;
 
     public class QuestBoardStudentRepository : BaseRepository<QuestBoardStudent>, IQuestBoardStudentRepository
     {
-        public QuestBoardStudentRepository(SystemDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public QuestBoardStudentRepository(SystemDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

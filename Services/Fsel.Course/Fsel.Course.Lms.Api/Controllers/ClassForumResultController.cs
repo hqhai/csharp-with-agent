@@ -6,24 +6,58 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.ClassForumCmd;
     using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/class-forum-result")]
     [ApiController]
     [Permission]
-    public class ClassForumResultController : ControllerBase
+    public class ClassForumResultController : BaseController
     {
         private readonly IMediator _mediator;
+        private readonly IClassForumResultRepository _classForumResultRepository;
 
-        public ClassForumResultController(IMediator mediator)
+        public ClassForumResultController(IMediator mediator, IClassForumResultRepository classForumResultRepository)
         {
             _mediator = mediator;
+            _classForumResultRepository = classForumResultRepository;
+        }
+
+        /// <summary>
+        /// Execute-list-query
+        /// </summary>
+        [HttpPost("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassForumResultModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
+        public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel cmd)
+        {
+            SetQuery(cmd);
+            var result = await _classForumResultRepository.GetListResultAsync<ClassForumResultModel>(cmd);
+            return result.GetActionResult();
+        }
+
+        /// <summary>
+        /// Execute-list-query
+        /// </summary>
+        [HttpGet("execute-query")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumResultInfoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Execute([FromQuery] BaseQueryModel query)
+        {
+            var result = await _classForumResultRepository.GetResultAsync<ClassForumResultInfoModel>(BaseQuery ?? query);
+            return result.GetActionResult();
         }
 
         /// <summary>
@@ -63,15 +97,41 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Update a Class forum result flagged
+        /// Update try again
         /// </summary>
-        [HttpPut("flag/{id}")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [HttpPut("retry/{id}")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Flag([FromRoute] Guid id)
+        public async Task<IActionResult> Retry([FromRoute] Guid id, [FromBody] RetryClassForumResultCommand command)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new FlagClassForumResultCommand { Id = id }).ConfigureAwait(false);
+            ArgumentNullException.ThrowIfNull(command);
+            command.Id = id;
+            MethodResult<ClassForumResultModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get student class forum result
+        /// </summary>
+        [HttpGet("get-current-class-forum")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumByStudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCurrentClassForum([FromQuery] GetCurrentClassForumQuery query)
+        {
+            MethodResult<ClassForumByStudentModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search class forum result
+        /// </summary>
+        [HttpGet("get-relevant-class-forums")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassForumResultModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchRelevantClassForums([FromQuery] SearchRelevantClassForumsQuery query)
+        {
+            MethodResult<PagingItemsModel<ClassForumResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

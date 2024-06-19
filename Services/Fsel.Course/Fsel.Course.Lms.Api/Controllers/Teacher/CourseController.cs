@@ -7,15 +7,15 @@ using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Lms.Application.Queries.CourseQuery;
 using Fsel.Shared.Enums;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
+using Asp.Versioning;
+using Fsel.Shared.Constants;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Course.Lms.Api.Controllers.Teacher
 {
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/teacher/course")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Teacher))]
     public class CourseController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -28,6 +28,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Teacher
         /// <summary>
         /// Get Course
         /// </summary>
+        [Common.Attributes.Permission(role: nameof(EnumRole.Teacher))]
         [HttpGet("get-course-by-level")]
         [ProducesResponseType(typeof(MethodResult<IList<CourseModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -50,12 +51,27 @@ namespace Fsel.Course.Lms.Api.Controllers.Teacher
         }
 
         /// <summary>
-        /// Get course
+        /// Get course contain class forum
         /// </summary>
+        [Common.Attributes.Permission(role: nameof(EnumRole.Teacher))]
         [HttpGet("list-courses-contain-class-forum")]
         [ProducesResponseType(typeof(MethodResult<IList<CourseModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListCourse([FromQuery] GetCoursesContainClassForumQuery query)
+        {
+            MethodResult<IList<CourseModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get course contain mock test
+        /// </summary>
+
+        [Common.Attributes.Permission(role: nameof(EnumRole.Teacher))]
+        [HttpGet("list-courses-contain-mock-test")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListCourseContainMockTest([FromQuery] GetCourseContainMockTestQuery query)
         {
             MethodResult<IList<CourseModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

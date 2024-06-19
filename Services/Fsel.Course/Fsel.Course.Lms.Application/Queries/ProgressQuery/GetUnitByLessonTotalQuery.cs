@@ -58,8 +58,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             unitResultModel = _mapper.Map<UnitResultModel>(unitResult);
             if (unitResult.SkillScores != null)
             {
-                unitResultModel.CorrectCount = unitResult.SkillScores.Sum(x => x.CorrectCount);
-                unitResultModel.CorrectTotal = unitResult.SkillScores.Sum(x => x.TotalCount);
+                unitResultModel.CorrectCount = (int)unitResult.SkillScores.Sum(x => x.CorrectCount);
+                unitResultModel.CorrectTotal = (int)unitResult.SkillScores.Sum(x => x.TotalCount);
                 unitResultModel.CountQuestion = unitResult.SkillScores.Sum(x => x.CountQuestion);
                 unitResultModel.TotalQuestion = unitResult.SkillScores.Sum(x => x.TotalQuestion);
             }

@@ -5,6 +5,7 @@ namespace Fsel.Course.Infrastructure.Repositories
     using System;
     using System.Linq;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
@@ -14,11 +15,13 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class MockTestRepository : BaseRepository<MockTest>, IMockTestRepository
     {
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupConverter _sectionGroupConverter;
+        private readonly IMapper _mapper;
 
-        public MockTestRepository(CourseDbContext dbContext, AuthContext authContext, SectionConverter sectionConverter) : base(dbContext, authContext)
+        public MockTestRepository(CourseDbContext dbContext, SectionGroupConverter sectionGroupConverter, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
         {
-            _sectionConverter = sectionConverter;
+            _sectionGroupConverter = sectionGroupConverter;
+            _mapper = mapper;
         }
 
         public async Task<bool> IsUnitSkillMockTest(Guid id)
@@ -35,7 +38,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 .AnyAsync(x => x.Id == id && x.UnitSkillMockTests.Count > 0);
         }
 
-        public override async Task<MockTest?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<MockTest?> GetIncludeByIdAsync(Guid id)
         {
             try
             {
@@ -88,8 +91,37 @@ namespace Fsel.Course.Infrastructure.Repositories
                                            MockTestType = x.MockTestType,
                                            SectionGroups = x.MockTestSections.Where(x => x.SectionGroup != null)
                                              .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
-                                             .Select(x => _sectionConverter.GetSectionGroupModel(x, false)).ToList(),
+                                             .Select(x => _sectionGroupConverter.GetSectionGroupModel(x, false)).ToList(),
                                        }).FirstOrDefaultAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<MockTest?> GetAsync(Guid mockTestId, Guid? studentId)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
+                                       .ThenInclude(x => x.SectionGroup)
+                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
+                                       .ThenInclude(x => x.SectionTimeCodes.Where(y => !y.IsDeleted))
+                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
+                                       .ThenInclude(x => x.SectionGroup)
+                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
+                                       .ThenInclude(x => x.SectionParts.Where(y => !y.IsDeleted))
+                                       .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
+                                       .ThenInclude(x => x.Question)
+                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
+                                       .ThenInclude(x => x.SectionGroup)
+                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
+                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
+                                       .ThenInclude(x => x.SectionGroup).ThenInclude(x => x!.SectionGroupResults.Where(x => x.StudentId == studentId))
+                                       .Where(x => x.Id == mockTestId)
+                                       .AsNoTracking()
+                                       .FirstOrDefaultAsync();
             }
             catch (Exception)
             {

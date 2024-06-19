@@ -5,8 +5,6 @@ using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Application.Services.UserServices.Models;
-using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Courses;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -60,12 +58,13 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
-            if (course.Status != EnumCourseStatus.New)
+
+            _mapper.Map(request, course);
+            if (!course.IsValid())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotInNewState), nameof(course.Status), course.Status);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course.Id), course.Id);
                 return methodResult;
             }
-            _mapper.Map(request, course);
             var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course.CourseTeachers.Select(x => x.TeacherId).ToList() });
             if (!teachers.IsSuccessStatusCode)
             {

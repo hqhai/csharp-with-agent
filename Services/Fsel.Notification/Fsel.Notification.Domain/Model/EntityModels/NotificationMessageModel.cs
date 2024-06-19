@@ -2,12 +2,12 @@
 
 namespace Fsel.Notification.Domain.Model.EntityModels
 {
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
     public class NotificationMessageModel : BaseModel
     {
-
         public Guid? UserId { get; set; }
         public Guid? SenderId { get; set; }
 
@@ -23,15 +23,22 @@ namespace Fsel.Notification.Domain.Model.EntityModels
 
         public Guid NotificationTypeId { get; set; }
 
-        public string? TemplateMessage { get; set; }
+        private string? _avatarPath;
+        public string? AvatarPath
+        {
+            set { _avatarPath = value; }
+            get { return _avatarPath.AddS3BaseUrl(); }
+        }
 
-        public string? TemplateLink { get; set; }
-        public string? AvatarPath { get; set; }
+        public EnumNotificationContent Content { get; set; }
 
+        public EnumNotificationType Type { get; set; }
+
+        public IList<Guid>? UserIds { get; set; }
 
         public string? Icon { get; set; }
 
-        public IList<string>? UserIds { get; set; }
+        public NotificationsTypeModel? NotificationType { get; set; }
     }
 
 }

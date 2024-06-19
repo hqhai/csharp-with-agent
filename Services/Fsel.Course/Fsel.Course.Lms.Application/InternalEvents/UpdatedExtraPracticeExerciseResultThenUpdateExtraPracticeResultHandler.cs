@@ -166,8 +166,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                 };
             extraPracticeResult.CorrectCount = correctCounts.Sum(x => x.CorrectCount);
             extraPracticeResult.Status = EnumResultStatus.Done;
-            extraPracticeResult.Percent = extraPracticeResult.CorrectTotal > 0 ? (double)extraPracticeResult.CorrectCount / extraPracticeResult.CorrectTotal : 0;
-
             _extraPracticeResultRepository.Update(extraPracticeResult);
             await _extraPracticeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -188,8 +186,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             extraPracticeResult.CorrectCount = correctCounts.Sum(x => x.CorrectCount);
             extraPracticeResult.Status = EnumResultStatus.Done;
-            extraPracticeResult.Percent = extraPracticeResult.CorrectTotal > 0 ? (double)extraPracticeResult.CorrectCount / extraPracticeResult.CorrectTotal : 0;
-
             _extraPracticeResultRepository.Update(extraPracticeResult);
             await _extraPracticeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -210,8 +206,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             extraPracticeResult.CorrectCount = correctCounts.Sum(x => x.CorrectCount);
             extraPracticeResult.Status = EnumResultStatus.Process;
-            extraPracticeResult.Percent = extraPracticeResult.CorrectTotal > 0 ? (double)extraPracticeResult.CorrectCount / extraPracticeResult.CorrectTotal : 0;
-
             _extraPracticeResultRepository.Update(extraPracticeResult);
             await _extraPracticeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }

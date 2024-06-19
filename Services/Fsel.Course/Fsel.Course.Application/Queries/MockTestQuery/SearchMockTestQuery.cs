@@ -10,6 +10,7 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.MockTests;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -32,7 +33,7 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<MockTestSearchModel>> methodResult = new MethodResult<PagingItemsModel<MockTestSearchModel>>();
 
-            var mockTestQuery = _mockTestRepository.Queryable
+            var mockTestQuery = _mockTestRepository.Queryable.Where(p => !p.IsArchive)
                                       .Include(x => x.MockTestSections.Where(y => !y.IsDeleted))
                                       .ThenInclude(x => x.SectionGroup)
                                       .Include(x => x.CourseUnitMockTests)
@@ -50,7 +51,7 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
                                       });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                mockTestQuery = mockTestQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                mockTestQuery = mockTestQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             if (request.MockTestType != null)
@@ -69,6 +70,10 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
+            lists.ForEach(x =>
+            {
+                x.Skills = x.Skills?.OrderBy(x => x).ToList();
+            });
             methodResult.Result = new PagingItemsModel<MockTestSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

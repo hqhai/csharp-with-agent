@@ -6,10 +6,15 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.LessonNotes;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -21,11 +26,15 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
     {
         private readonly ILessonNoteRepository _lessonNoteRepository;
         private readonly IMapper _mapper;
+        private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly ILessonResultRepository _lessonResultRepository;
 
-        public CreateLessonNoteCommandHandler(ILessonNoteRepository lessonNoteRepository, IMapper mapper)
+        public CreateLessonNoteCommandHandler(ILessonNoteRepository lessonNoteRepository, IMapper mapper, QuestBoardPublisher questBoardPublisher, ILessonResultRepository lessonResultRepository)
         {
             _lessonNoteRepository = lessonNoteRepository;
             _mapper = mapper;
+            _questBoardPublisher = questBoardPublisher;
+            _lessonResultRepository = lessonResultRepository;
         }
 
         public async Task<MethodResult<LessonNoteModel>> Handle(CreateLessonNoteCommand request, CancellationToken cancellationToken)
@@ -40,6 +49,17 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
                 return methodResult;
             }
 
+            if (request.Type == EnumNoteType.PersonalCourse && request.LessonResultId != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonResultId));
+                return methodResult;
+            }
+            else if (request.Type == EnumNoteType.CourseNote && request.LessonResultId == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonResultId));
+                return methodResult;
+            }
+
             await _lessonNoteRepository.ExecuteTransactionAsync(async () =>
             {
                 lessonNote = _lessonNoteRepository.Add(lessonNote);
@@ -47,9 +67,34 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<LessonNoteModel>(lessonNote);
+
+                #region Do QuestBoard
+
+                if (request.LessonResultId.HasValue)
+                {
+                    var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId.Value);
+                    if (lessonResult != null)
+                    {
+                        await DoQuestBoard(lessonResult.StudentId, cancellationToken);
+                    }
+                }
+
+                #endregion Do QuestBoard
+
                 return methodResult;
             });
             return methodResult;
+        }
+
+        private async Task DoQuestBoard(Guid studentId, CancellationToken cancellationToken)
+        {
+            await _questBoardPublisher.Publish(new QuestBoardQueueModel()
+            {
+                StudentID = studentId,
+                Type = EnumQuestBoardType.LearningQuests,
+                Category = EnumQuestBoardCategory.GalaxyNotes,
+                Value = 1
+            }, cancellationToken);
         }
     }
 }

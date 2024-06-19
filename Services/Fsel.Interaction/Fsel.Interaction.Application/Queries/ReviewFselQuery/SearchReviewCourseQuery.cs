@@ -59,14 +59,8 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                 courses = courses?.Where(x => x.CourseLevel == request.CourseLevel).ToList();
             }
             courseIds = courses?.Select(x => x.Id).ToList();
-            if (courseIds == null || !courseIds.Any())
-            {
-                methodResult.Result = default;
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
             var query = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails)
-            .Where(x => x.ReviewType == EnumReviewType.Course && x.CourseId.HasValue && courseIds.Contains(x.CourseId.Value))
+            .Where(x => x.ReviewType == EnumReviewType.Course && x.CourseId.HasValue && courseIds != null && courseIds.Any() && courseIds.Contains(x.CourseId.Value))
             .Select(x => GetCourse(x, courses)).ToListAsync(cancellationToken);
             if (request.NumberOfStars != null)
             {
@@ -77,12 +71,12 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
             {
                 query = query.Where(x => x.CourseLevel == request.CourseLevel).ToList();
             }
-            var stars = query.Any() ? NumberHelper.ConvertDoubleDecimal(query.Average(x => x.Stars)) : default;
+            var stars = query.Any() ? NumberHelper.ConvertRound(query.Average(x => x.Stars)) : default;
             int totalItem = query.Count;
             var lists = query.ApplySortAndPaging(request).ToList();
             foreach (var item in lists)
             {
-                item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
+                item.Stars = NumberHelper.ConvertRound(item.Stars);
             }
             methodResult.Result = new CourseReviewSearchModel { Stars = stars, PagingItemsModel = new PagingItemsModel<CourseReviewModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;

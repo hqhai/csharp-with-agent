@@ -4,24 +4,22 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 {
     using System;
     using System.Globalization;
-    using System.Text;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums;
-    using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
-    using OtpNet;
 
     public class SendOtpProfileCommand : IRequest<MethodResult<bool>>
     {
@@ -33,19 +31,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     {
         private readonly UserManager<User> _userManager;
         private readonly AuthContext _authContext;
-        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IMediator _mediator;
         private readonly AppSetting _appSetting;
 
         public SendOTpEmailUserCommandHandler(UserManager<User> userManager,
             AuthContext authContext,
-            IUserOtpCodeRepository userOtpCodeRepository,
             IMediator mediator,
             AppSetting appSetting)
         {
             _userManager = userManager;
             _authContext = authContext;
-            _userOtpCodeRepository = userOtpCodeRepository;
             _mediator = mediator;
             _appSetting = appSetting;
         }
@@ -54,34 +49,48 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-            var user = await _userManager.FindByIdAsync(_authContext.CurrentUserId.ToString());
+            var user = new User();
+            if (!string.IsNullOrEmpty(request.Email))
+            {
+                if (!request.Email.IsValidEmail())
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                    return methodResult;
+                }
+                user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == request.Email && x.Id != _authContext.CurrentUserId, cancellationToken: cancellationToken);
+                if (user != null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
+                    return methodResult;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(request.PhoneNumber))
+            {
+                if (!request.PhoneNumber.IsValidPhoneNumber())
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
+                    return methodResult;
+                }
+                user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber && x.Id != _authContext.CurrentUserId, cancellationToken: cancellationToken);
+                if (user != null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
+                }
+            }
+
+            user = await _userManager.FindByIdAsync(_authContext.CurrentUserId.ToString());
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
-            var userOtpCode = await _userOtpCodeRepository.Queryable
-                                  .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
-            if (userOtpCode == null)
-            {
-                var randomSecure = new RandomSecureHelper();
-                var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
-                var otp = totp.ComputeTotp();
 
-                userOtpCode = new UserOtpCode
-                {
-                    UserId = user.Id,
-                    OTPCode = otp,
-                    Status = EnumOtpCodeStatus.New,
-                    ExpiredTime = DateTime.Now.AddMinutes(_appSetting!.Otp!.StepTime)
-                };
-                _userOtpCodeRepository.Add(userOtpCode);
-                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            }
-
+            var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
             var param = new SendOtpTemplateModel
             {
-                OtpCode = userOtpCode.OTPCode,
+                OtpCode = userOtpCode.Result,
                 OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
             };
             var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);

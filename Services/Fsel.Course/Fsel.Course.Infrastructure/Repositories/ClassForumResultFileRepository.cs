@@ -8,7 +8,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class ClassForumResultFileRepository : BaseRepository<ClassForumResultFile>, IClassForumResultFileRepository
     {
-        public ClassForumResultFileRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public ClassForumResultFileRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

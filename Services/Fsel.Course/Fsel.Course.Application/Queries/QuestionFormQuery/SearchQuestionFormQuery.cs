@@ -2,12 +2,14 @@
 
 namespace Fsel.Course.Application.Queries.QuestionFormQuery
 {
+    using System.Globalization;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.QuestionForms;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -47,7 +49,7 @@ namespace Fsel.Course.Application.Queries.QuestionFormQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                questionFormQuery = questionFormQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                questionFormQuery = questionFormQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             int totalItem = await questionFormQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

@@ -3,19 +3,22 @@
 namespace Fsel.Course.Lms.Api.Controllers.Admin
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1;
     using Fsel.Course.Lms.Application.Queries.PlacementTestQuery;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/placement-test/admin")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Admin))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class PlacementTestController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -46,6 +49,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         public async Task<IActionResult> GetPTPointByIds([FromBody] IList<Guid>? ids)
         {
             MethodResult<List<StudentPTPointModel>> queryResult = await _mediator.Send(new GetPTPointByIdsQuery { StudentIds = ids }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Save PlacementTest Done
+        /// </summary>
+        [HttpPost("save-done")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SavePlacementTestDone([FromBody] SavePlacementTestDoneCommand command)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

@@ -3,11 +3,11 @@
 namespace Fsel.Training.Domain.Models.EntityModels
 {
     using System;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class ClassSearchModel
+    public class ClassSearchModel : BaseModel
     {
-        public Guid Id { get; set; }
         public string? ClassName { get; set; }
         public int NumberOfStudent { get; set; }
         public DateTime ExpectedDate { get; set; }

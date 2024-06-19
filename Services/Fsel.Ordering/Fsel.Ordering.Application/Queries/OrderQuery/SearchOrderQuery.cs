@@ -8,10 +8,10 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Ordering.Application.Services.CourseService;
-    using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Ordering.Domain.Models.QueryModels.Oders;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -52,8 +52,10 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 PackageName = x.Package!.Code.ToString(),
                 Status = x.Status,
                 PaymentMethod = x.PaymentMethod,
-                PackageId = x.PackageId,
+                PackageId = x.PackageId ?? default,
                 FullName = x.FullName,
+                IsTrial = x.IsTrial,
+                ExpireDate = x.ExpireDate,
             });
             if (request.Status.HasValue)
             {

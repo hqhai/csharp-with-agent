@@ -2,12 +2,15 @@
 
 namespace Fsel.Training.Application.Commands.CancelScheduleLiveCmd
 {
+    using System.Globalization;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.CancelScheduleLives;
@@ -15,7 +18,7 @@ namespace Fsel.Training.Application.Commands.CancelScheduleLiveCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-
+    using Fsel.Training.Application.Queues.Publishers;
     public class ReferenceCalendarCommand : CancelScheduleLiveCommandModel, IRequest<MethodResult<ClassLiveWorkFlowModel>>
     {
     }
@@ -26,16 +29,19 @@ namespace Fsel.Training.Application.Commands.CancelScheduleLiveCmd
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
         public ReferenceCalendarCommandHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository
             , AuthContext authContext
             , IUserService userService
-            , IMapper mapper)
+            , IMapper mapper
+            , NotificationMessagePublisher notificationMessagePublisher)
         {
             _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
             _authContext = authContext;
             _userService = userService;
             _mapper = mapper;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<ClassLiveWorkFlowModel>> Handle(ReferenceCalendarCommand request, CancellationToken cancellationToken)
@@ -80,7 +86,7 @@ namespace Fsel.Training.Application.Commands.CancelScheduleLiveCmd
             }
             else if (classLiveWorkFlow.Status == EnumWorkFlowCancelScheduleStatus.WaitVote.ToString() && classLiveWorkFlow.ClassLiveCalendar != null)
             {
-                if (classLiveWorkFlow.UpdatedDate != null && classLiveWorkFlow.UpdatedDate.Value.AddDays(2) > DateTime.Now)
+                if (classLiveWorkFlow.UpdatedDate != null && classLiveWorkFlow.UpdatedDate.Value.AddDays(2) > DateTime.UtcNow)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.VotingTimeIsNotEnoughForTwoDays));
                     return methodResult;
@@ -101,6 +107,27 @@ namespace Fsel.Training.Application.Commands.CancelScheduleLiveCmd
                 return methodResult;
             });
             return methodResult;
+        }
+
+        public async Task SendNotification(ClassLiveCalendar classLiveCalendar, CancellationToken cancellationToken)
+        {
+            var studentsResult = await _userService.GetStudentByClassIdAsync(classLiveCalendar?.ClassId ?? new Guid());
+
+            var students = studentsResult?.Content?.Result?.Select(x => x.Id).ToList();
+
+            string liveDate = classLiveCalendar?.LiveDate != null ? classLiveCalendar.LiveDate!.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)! : string.Empty;
+
+            NotificationSendingQueueModel notificationQueue = new NotificationSendingQueueModel()
+            {
+                ObjectId = classLiveCalendar!.Id,
+                UserIds = students,
+                Type = EnumNotificationType.LinkPopup,
+                Content = EnumNotificationContent.ChangeClassLiveTeacher,
+                PlatformCode = EnumPlatformCode.LMS,
+                ParamsMessage = new List<object> { classLiveCalendar?.Class?.Code ?? string.Empty, liveDate ?? string.Empty },
+            };
+            await _notificationMessagePublisher.Publish(notificationQueue, cancellationToken);
+
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class UnitLessonRepository : BaseRepository<UnitLesson>, IUnitLessonRepository
     {
-        public UnitLessonRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public UnitLessonRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
 

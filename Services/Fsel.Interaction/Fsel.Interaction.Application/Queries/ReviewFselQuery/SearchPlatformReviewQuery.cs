@@ -41,7 +41,7 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
             }
 
             var query = _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails)
-                .Where(x => x.ReviewType == EnumReviewType.Platform).Select(x => new StudentReviewTypeModel
+                .Where(x => x.ReviewType == EnumReviewType.MobilePlatform || x.ReviewType == EnumReviewType.WebPlatform).Select(x => new StudentReviewTypeModel
                 {
                     Id = x.Id,
                     CreatedDate = x.CreatedDate,
@@ -62,9 +62,13 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
             {
                 query = query.Where(x => x.Stars + 0.5 >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
             }
+            if (request.Type.HasValue)
+            {
+                query = query.Where(x => x.ReviewType == request.Type);
+            }
             var result = await query.ToListAsync(cancellationToken);
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var stars = totalItem > 0 ? NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars)) : default;
+            var stars = totalItem > 0 ? NumberHelper.ConvertRound(result.Average(x => x.Stars)) : default;
             var lists = await query
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
@@ -72,7 +76,7 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                     .ConfigureAwait(false);
             foreach (var item in lists)
             {
-                item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
+                item.Stars = NumberHelper.ConvertRound(item.Stars);
             }
             methodResult.Result = new StudentReviewSearchModel { Stars = stars, PagingItems = new PagingItemsModel<StudentReviewTypeModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;

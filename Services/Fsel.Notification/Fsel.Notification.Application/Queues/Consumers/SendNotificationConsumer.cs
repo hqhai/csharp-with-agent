@@ -1,45 +1,45 @@
 using System.Globalization;
+using Fsel.Core.Base;
 using Fsel.Notification.Application.Commands;
 using Fsel.Notification.Domain.IRepositories;
+using Fsel.Notification.Infrastructure.ValueSettings;
 using Fsel.Shared.Models.ShareModels;
-using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Notification.Application.Queues.Consumers
 {
-    public class SendNotificationConsumer : IConsumer<NotificationQueueModel>
+    public class SendNotificationConsumer : BaseConsumer<NotificationSendingQueueModel>
     {
         private readonly IMediator _mediator;
         private readonly INotificationTypeRepository _notificationTypeRepository;
+        private readonly AppSetting _appSetting;
 
-        public SendNotificationConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository)
+        public SendNotificationConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository, AppSetting appSetting, AuthContext authContext) : base(authContext)
         {
             _mediator = mediator;
             _notificationTypeRepository = notificationTypeRepository;
+            _appSetting = appSetting;
         }
 
-        public async Task Consume(ConsumeContext<NotificationQueueModel> context)
+        public override async Task ConsumeQueue(NotificationSendingQueueModel? message)
         {
-            var dataReceipt = context?.Message;
-
-            if (dataReceipt != null)
+            if (message != null)
             {
-                var notificationType = await _notificationTypeRepository.Queryable.FirstOrDefaultAsync(x => x.Type == dataReceipt.Type && x.Content == dataReceipt.Content);
+                var notificationType = await _notificationTypeRepository.Queryable.FirstOrDefaultAsync(x => x.Type == message.Type && x.Content == message.Content);
 
-                string message = dataReceipt.ParamsMessage != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateMessage ?? string.Empty, dataReceipt.ParamsMessage.ToArray()) : notificationType?.TemplateMessage!;
+                string messageNoti = message.ParamsMessage != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateMessage ?? string.Empty, message.ParamsMessage.ToArray()) : notificationType?.TemplateMessage!;
 
-                string link = dataReceipt.ParamsLink != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateLink ?? string.Empty, dataReceipt.ParamsLink.ToArray()) : notificationType?.TemplateLink!;
+                string link = message.ParamsLink != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateLink ?? string.Empty, message.ParamsLink.ToArray()) : notificationType?.TemplateLink!;
 
                 CreateNotificationCommand model = new CreateNotificationCommand()
                 {
-                    UserId = dataReceipt.UserId ?? default,
-                    ObjectId = dataReceipt.ObjectId,
-                    Message = message,
-                    Link = link,
-                    Roles = dataReceipt.Roles,
+                    UserIds = message.UserIds,
+                    ObjectId = message.ObjectId,
                     NotificationTypeId = notificationType?.Id ?? default,
-                    SenderId = dataReceipt.SenderId,
+                    SenderId = message.SenderId,
+                    Message = messageNoti,
+                    Link = link
                 };
                 await _mediator.Send(model).ConfigureAwait(false);
             }

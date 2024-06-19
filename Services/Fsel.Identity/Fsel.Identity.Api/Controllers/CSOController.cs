@@ -8,10 +8,12 @@ using Fsel.Identity.Application.Queries.CSOQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Asp.Versioning;
+using Fsel.Shared.Constants;
 
 namespace Fsel.Identity.Api.Controllers
 {
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/cso")]
     [ApiController]
     public class CSOController : ControllerBase
@@ -53,7 +55,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("get-cso-by-userIds")]
         [ProducesResponseType(typeof(MethodResult<IList<CSOModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetCsosByUserIds([FromBody] IList<string> userIds)
+        public async Task<IActionResult> GetCsosByUserIds([FromBody] IList<Guid> userIds)
         {
             MethodResult<IList<CSOModel>> commandResult = await _mediator.Send(new GetCsoByUserIdsQuery { UserIds = userIds }).ConfigureAwait(false);
             return commandResult.GetActionResult();

@@ -6,8 +6,8 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.Entities;
-    using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.SupportTickets;
     using Fsel.Interaction.Domain.Models.EntityModels;
@@ -41,6 +41,8 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
             MethodResult<SupportTicketModel> methodResult = new MethodResult<SupportTicketModel>();
 
             SupportTicket supportTicket = _mapper.Map<SupportTicket>(request);
+            supportTicket.Status = EnumSupportTicketStatus.NotSeen;
+            supportTicket.Code = NumberHelper.GenerateCodeNumber(8);
             if (!supportTicket.IsValid())
             {
                 methodResult.AddErrorBadRequest(supportTicket.ErrorMessages);
@@ -48,20 +50,17 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
             }
             if (!await _supportCategoryRepository.AnyAsync(request.SupportCategoryId ?? default))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSupportQuestionErrorCode.SupportCategoryIdNotExist), nameof(request.SupportCategoryId), request.SupportCategoryId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SupportCategoryId), request.SupportCategoryId);
                 return methodResult;
             }
-
-            if (!await _supportQuestionRepository.AnyAsync(request.SupportQuestionId ?? default))
+            if (!await _supportQuestionRepository.AnyAsync(request.SupportQuestionId ?? default) && request.SupportQuestionId != null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSupportQuestionErrorCode.SupportCategoryIdNotExist), nameof(request.SupportCategoryId), request.SupportCategoryId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SupportQuestionId), request.SupportQuestionId);
                 return methodResult;
             }
 
             await _supportTicketRepository.ExecuteTransactionAsync(async () =>
             {
-                supportTicket.Code = NumberHelper.GenerateCodeNumber(8);
-                supportTicket.Status = EnumSupportTicketStatus.NotSeen;
                 supportTicket = _supportTicketRepository.Add(supportTicket);
                 await _supportTicketRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

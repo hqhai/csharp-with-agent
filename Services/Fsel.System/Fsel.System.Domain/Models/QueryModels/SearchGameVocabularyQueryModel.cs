@@ -12,6 +12,6 @@ namespace Fsel.System.Domain.Models.QueryModels
         public Guid? WordCategoryId { get; set; }
         public EnumPartSpeech? PartSpeech { get; set; }
         public Guid? PlatformId { get; set; }
-
+        public IList<Guid>? GameVocabularyIds { get; set; }
     }
 }

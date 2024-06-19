@@ -1,0 +1,24 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Identity.Domain.Models.CommandModels.Students
+{
+    using OfficeOpenXml.Attributes;
+
+    public class ImportStudentToPlatformModel
+    {
+        [EpplusTableColumn(Header = "Full Name")]
+        public string? FullName { get; set; }
+
+        [EpplusTableColumn(Header = "Email")]
+        public string? Email { get; set; }
+
+        [EpplusTableColumn(Header = "Date Of Birth")]
+        public string? DateOfBirth { get; set; }
+
+        [EpplusTableColumn(Header = "Parent Email")]
+        public string? ParentEmail { get; set; }
+
+        [EpplusTableColumn(Header = "School")]
+        public string? School { get; set; }
+    }
+}

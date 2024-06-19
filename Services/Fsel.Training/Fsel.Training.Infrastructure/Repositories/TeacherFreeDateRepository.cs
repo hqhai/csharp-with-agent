@@ -8,7 +8,7 @@ namespace Fsel.Training.Infrastructure.Repositories
 
     public class TeacherFreeDateRepository : BaseRepository<TeacherFreeDate>, ITeacherFreeDateRepository
     {
-        public TeacherFreeDateRepository(TrainingDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public TeacherFreeDateRepository(TrainingDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

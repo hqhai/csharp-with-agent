@@ -8,7 +8,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class ReferralDiscountConfigRepository : BaseRepository<ReferralDiscountConfig>, IReferralDiscountConfigRepository
     {
-        public ReferralDiscountConfigRepository(SystemDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public ReferralDiscountConfigRepository(SystemDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

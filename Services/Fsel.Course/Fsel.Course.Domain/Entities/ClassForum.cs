@@ -43,8 +43,6 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public string? MediaPost { get; set; }
 
-        public bool IsActive { get; set; }
-
         /// <summary>
         /// Loại kỹ năng
         /// </summary>
@@ -80,6 +78,8 @@ namespace Fsel.Course.Domain.Entities
         public double SettingPresence { get; set; }
 
         public ICollection<ClassForumResult> ClassForumResults { get; set; } = new List<ClassForumResult>();
+
+        public ICollection<ClassForumResultRandom> ClassForumResultRandoms { get; set; } = new List<ClassForumResultRandom>();
 
         public ICollection<ClassForumFile> ClassForumFiles { get; set; } = new List<ClassForumFile>();
     }

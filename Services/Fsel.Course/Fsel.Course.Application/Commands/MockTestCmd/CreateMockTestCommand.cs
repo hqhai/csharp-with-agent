@@ -9,6 +9,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -16,7 +17,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class CreateMockTestCommand : CreateMockTestCommandModel, IRequest<MethodResult<MockTestModel>>
     {
@@ -26,16 +26,16 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     {
         private readonly IMapper _mapper;
         private readonly IMockTestRepository _mockTestRepository;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupManagerConverter _sectionGroupManagerConverter;
 
         public CreateMockTestCommandHandler(IMapper mapper
             , IMockTestRepository mockTestRepository
-            , SectionConverter sectionConverter
+            , SectionGroupManagerConverter sectionGroupManagerConverter
             )
         {
             _mapper = mapper;
             _mockTestRepository = mockTestRepository;
-            _sectionConverter = sectionConverter;
+            _sectionGroupManagerConverter = sectionGroupManagerConverter;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(CreateMockTestCommand request, CancellationToken cancellationToken)
@@ -45,16 +45,23 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             #region Validation
 
-            if (request.SectionGroups == null || request.SectionGroups.Count == 0)
+            if (request.SectionGroups == null || (!request.SectionGroups.Any() || request.SectionGroups.Any(x => x == null)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
                 return methodResult;
             }
-            if (await _mockTestRepository.Queryable.AnyAsync(x => x.Name == request.Name, cancellationToken))
+            if (request.MockTestType == EnumMockTestType.SkillMockTest && request.SectionGroups.Count != 1)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Name));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.SectionGroups));
                 return methodResult;
             }
+            else if (request.MockTestType == EnumMockTestType.FullMockTest && request.SectionGroups.Count != 4)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.SectionGroups));
+                return methodResult;
+            }
+
+            request.SectionGroups = request.SectionGroups.OrderBy(obj => obj.CourseSkill).ToList();
             MockTest mockTest = _mapper.Map<MockTest>(request);
             if (!mockTest.IsValid())
             {
@@ -64,41 +71,29 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             foreach (var sectionGroup in request.SectionGroups)
             {
-                if (sectionGroup == null)
+                if (sectionGroup == null || sectionGroup.Sections == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                     return methodResult;
                 }
-                else
+
+                sectionGroup.Sections = sectionGroup.Sections.OrderBy(x => x.DisplayOrder).Select((x, index) => { x.DisplayOrder = index; return x; }).ToList();
+                SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
+                if (!newSectionGroup.IsValid())
                 {
-                    if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
-                        return methodResult;
-                    }
-
-                    SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
-                    if (!method.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(method.ErrorMessages);
-                    }
-
-                    mockTest.MockTestSections.Add(new MockTestSection
-                    {
-                        SectionGroup = newSectionGroup
-                    });
-                    if (!newSectionGroup.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
-                        return methodResult;
-                    }
+                    methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
+                    return methodResult;
                 }
-            }
-
-            if (!methodResult.IsOK)
-            {
-                return methodResult;
+                var method = _sectionGroupManagerConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
+                if (!method.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    return methodResult;
+                }
+                mockTest.MockTestSections.Add(new MockTestSection
+                {
+                    SectionGroup = newSectionGroup
+                });
             }
 
             #endregion Validation

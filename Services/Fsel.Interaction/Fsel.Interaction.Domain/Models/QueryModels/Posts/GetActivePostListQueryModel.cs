@@ -10,7 +10,5 @@ namespace Fsel.Interaction.Domain.Models.QueryModels.Posts
         public EnumPostType PostType { get; set; }
 
         public string? TopicTagName { get; set; }
-
-        public override string? SortField { get; set; }
     }
 }

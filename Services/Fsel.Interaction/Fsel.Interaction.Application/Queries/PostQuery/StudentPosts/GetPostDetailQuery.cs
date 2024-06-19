@@ -9,6 +9,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.Posts;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -20,12 +21,16 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
     public class GetPostDetailQueryQueryHandler : IRequestHandler<GetPostDetailQuery, MethodResult<PostModel>>
     {
         private readonly IPostRepository _postRepository;
+        private readonly ICommentRepository _commentRepository;
+        private readonly IInteractionActionRepository _interactionActionRepository;
         private readonly IMapper _mapper;
 
-        public GetPostDetailQueryQueryHandler(IMapper mapper, IPostRepository postRepository)
+        public GetPostDetailQueryQueryHandler(IMapper mapper, IPostRepository postRepository, ICommentRepository commentRepository, IInteractionActionRepository interactionActionRepository)
         {
             _mapper = mapper;
             _postRepository = postRepository;
+            _commentRepository = commentRepository;
+            _interactionActionRepository = interactionActionRepository;
         }
 
         public async Task<MethodResult<PostModel>> Handle(GetPostDetailQuery request, CancellationToken cancellationToken)
@@ -35,13 +40,22 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
 
             var posts = await _postRepository.GetIncludeByIdAsync(request.PostId);
 
+            var comments = _commentRepository.Queryable.Where(x => x.ObjectId == request.PostId);
+
+            var peopleLikes = _interactionActionRepository.Queryable.Where(x => x.ObjectId == request.PostId && x.Type == EnumInteractionActionType.Like);
+
+            var postResult = _mapper.Map<PostModel>(posts);
+            postResult.Comments = _mapper.Map<List<CommentModel>>(comments);
+            postResult.ActionLikes = _mapper.Map<List<InteractionActionModel>>(peopleLikes);
+
+
             if (posts == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(posts));
                 return methodResult;
             }
 
-            methodResult.Result = _mapper.Map<PostModel>(posts);
+            methodResult.Result = postResult;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -2,6 +2,7 @@
 
 namespace Fsel.Interaction.Application.Queries.SupportTicketQuery
 {
+    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -37,6 +38,7 @@ namespace Fsel.Interaction.Application.Queries.SupportTicketQuery
                 return methodResult;
             }
             var supportTicketQuery = _supportTicketRepository.Queryable
+                                .Include(x => x.SupportQuestion)
                                 .Select(x => new SupportTicketModel
                                 {
                                     Id = x.Id,
@@ -53,10 +55,11 @@ namespace Fsel.Interaction.Application.Queries.SupportTicketQuery
                                     SupportQuestionId = x.SupportQuestionId,
                                     SupportCategoryId = x.SupportCategoryId,
                                     CreatedFullName = x.CreatedFullName,
+                                    QuestionName = x.SupportQuestion!.Name
                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                supportTicketQuery = supportTicketQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Code ?? string.Empty).Contains(request.Keyword));
+                supportTicketQuery = supportTicketQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Code ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             if (request.SupportCategoryId != null)
             {
@@ -65,6 +68,10 @@ namespace Fsel.Interaction.Application.Queries.SupportTicketQuery
             if (request.SupportQuestionId != null)
             {
                 supportTicketQuery = supportTicketQuery.Where(m => m.SupportQuestionId == request.SupportQuestionId);
+            }
+            if (request.Status != null)
+            {
+                supportTicketQuery = supportTicketQuery.Where(m => m.Status == request.Status);
             }
             int totalItem = await supportTicketQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await supportTicketQuery

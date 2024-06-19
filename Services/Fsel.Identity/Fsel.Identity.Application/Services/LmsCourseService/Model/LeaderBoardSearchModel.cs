@@ -17,7 +17,7 @@ namespace Fsel.Identity.Application.Services.LmsCourseService.Model
         public string? AvatarPath { get; set; }
         public string? FullName { get; set; }
         public int DailyStreak { get; set; }
-        public int TotalScore { get; set; }
+        public double TotalScore { get; set; }
         public Guid UserId { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
     }

@@ -6,17 +6,17 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bài viết của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
-    "templateLink": "",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}",
     "createdDate": "2023-08-28"
   },
   {
-    "id": "D789788A-1BA6-405B-F280-AE92CD3B4FC2",
+    "id": "E89B5850-33FF-4922-89E1-1A2F7DE29375",
     "type": "Text",
     "content": "CreateClassForumResult",
     "icon": "",
     "priority": 1,
     "templateMessage": "Bạn có bài đăng của học sinh đang chờ duyệt.",
-    "templateLink": "",
+    "templateLink": "/class-forum-management",
     "createdDate": "2023-08-28"
   },
   {
@@ -26,7 +26,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
-    "templateLink": "",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}&commentId={3}",
     "createdDate": "2023-08-28"
   },
   {
@@ -36,6 +36,36 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} vừa bình luận bài viết của bạn.",
+    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "10C2D5F8-1316-45E4-8FA1-E512EC1510C0",
+    "type": "LinkComment",
+    "content": "CommentPost",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "{0} vừa bình luận bài viết của bạn.",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "B09FA1F2-3936-4E52-AA9C-D3A354F1C566",
+    "type": "LinkPage",
+    "content": "LikePost",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "{0} vừa thích bài viết của bạn.",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "6A55C6BD-0494-4FE9-8A72-911210C8A215",
+    "type": "LinkComment",
+    "content": "ReplyCommentPost",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "{0} vừa trả lời bình luận của bạn.",
     "templateLink": "",
     "createdDate": "2023-08-28"
   },
@@ -46,27 +76,187 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} vừa trả lời bình luận của bạn.",
-    "templateLink": "",
+    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
     "createdDate": "2023-08-28"
   },
   {
-    "id": "a805f268-467b-4149-8d01-b2ea05e1f3bd",
+    "id": "CD8A1EDB-029F-4B2D-9725-C796E6FD7E5B",
     "type": "Text",
     "content": "OrderChangeStatus",
     "icon": "",
     "priority": 1,
     "templateMessage": "Bạn đã mua khóa học {0} thành công. Hãy bắt đầu học nào!",
-    "templateLink": "",
+    "templateLink": "/learn",
     "createdDate": "2023-08-28"
   },
   {
-    "id": "86c0df96-f131-42bf-b315-0a8a85584f6a",
+    "id": "3881403A-D412-4593-AEE5-5A38F4E078F9",
     "type": "Text",
     "content": "OrderCreate",
     "icon": "",
     "priority": 1,
     "templateMessage": "Bạn có hóa đơn khóa học mới phê duyệt. Nhấn để phê duyệt.",
+    "templateLink": "/payment",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "27007EDB-25D8-493E-84D8-85F6F9E165B2",
+    "type": "LinkComment",
+    "content": "DeleteComment",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bình luận của bạn trong bài viết của {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL.",
+    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "57C709A6-03BD-4A3F-AD34-F9449587E1DF",
+    "type": "LinkPage",
+    "content": "DeleteClassForumResult",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bài viết của bạn trong {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
+    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "810C70CA-4F3C-4D02-A491-708FA45D42EA",
+    "type": "LinkPage",
+    "content": "LikeClassForum",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "{0} đã thích bài viết của bạn.",
+    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "3AD02DE7-A8A8-4DB6-8286-486C81390ED3",
+    "type": "LinkComment",
+    "content": "LikeComment",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "{0} đã thích bình luận của bạn.",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}&commentId={3}",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "59942527-CA1F-4F18-A66B-CDCFE87B317E",
+    "type": "LinkPage",
+    "content": "AIFeedBack",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bài viết của bạn đã được hệ thống AI ChatGPT nhận xét. Nhấn để xem chi tiết",
+    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}?type=aiFeedback",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "4B5173D1-3D0B-4DF6-B3CA-15CD175926A1",
+    "type": "LinkPopup",
+    "content": "ChangeClassLiveTeacher",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Buổi {0} diễn ra vào ngày {1} đã thay đổi giáo viên",
     "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "85062A12-AB5B-486C-A8AB-DB329EA7F46D",
+    "type": "LinkPage",
+    "content": "MockTest",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bài {0} đã được giáo viên chấm điểm. Nhấn để xem chi tiết",
+    "templateLink": "/learn/mock-test-report?sectionGroupId={0}&mockTestResultId={1}&courseId={2}&unitId={3}",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "46526095-5284-46F0-8C86-E00D95F1C985",
+    "type": "LinkPage",
+    "content": "FullMockTest",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bài {0} đã được giáo viên chấm điểm. Nhấn để xem chi tiết",
+    "templateLink": "/learn/full-mock-test/{0}?courseId={1}",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "1A7F9999-79E2-4EB1-85A8-CC8D1398F732",
+    "type": "LinkPage",
+    "content": "ReviewFsel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Hãy chia sẻ cảm nhận của bạn về LMS!",
+    "templateLink": "/review",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "59BC5071-1EF7-4362-9BB0-8848BB6F8CED",
+    "type": "LinkPage",
+    "content": "DiscussionBoardInActive",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bay! Bay cao! Bay xa! Hãy cùng khám phá với các bạn trên khắp thế giới qua Diễn đàn chung nào!",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "9DA28757-2D28-40CB-B88C-CC51FC15BB43",
+    "type": "LinkPage",
+    "content": "LeaderBoard",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Chúc mừng bạn đã đạt top {0} trên Bảng xếp hạng!",
+    "templateLink": "/home",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "69CC9E39-82D5-4D1A-81B9-8C97EC54BFAD",
+    "type": "LinkPage",
+    "content": "ApprovePostClassForum",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bài đăng của bạn đã được phê duyệt. Nhấn để xem chi tiết",
+    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "75540141-A6D9-409D-A3CE-90C9A7577E8A",
+    "type": "LinkPage",
+    "content": "RejectApprovalPostClassForum",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bài viết của bạn trong {0} đã bị từ chối phê duyệt do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
+    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "05441907-46A9-4178-9A69-FCE295D670BE",
+    "type": "LinkPage",
+    "content": "NoticePayment",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Thời gian học thử của bạn sẽ kết thúc trong vòng 2 ngày tới. Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
+    "templateLink": "/pricing-plan",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "F9D5A75F-FD55-4B1E-ADE8-A446B6465E34",
+    "type": "LinkPage",
+    "content": "NoticeExpireAfterTwoWeek",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Khóa học của bạn sẽ kết thúc trong 2 tuần tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
+    "templateLink": "/pricing-plan",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "A99BFAAE-4139-4766-9405-EF24332FB51A",
+    "type": "LinkPage",
+    "content": "NoticeExpireAfterTwoDay",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Khóa học của bạn sẽ kết thúc trong 2 ngày tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
+    "templateLink": "/pricing-plan",
     "createdDate": "2023-08-28"
   }
 ]

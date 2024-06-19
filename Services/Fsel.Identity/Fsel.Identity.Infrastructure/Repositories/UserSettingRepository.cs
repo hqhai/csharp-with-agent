@@ -8,7 +8,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
     public class UserSettingRepository : BaseRepository<UserSetting>, IUserSettingRepository
     {
-        public UserSettingRepository(UserDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public UserSettingRepository(UserDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

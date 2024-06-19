@@ -20,5 +20,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public Guid ClassId { get; set; }
         public string? ClassCode { get; set; }
         public ClassModel? Class { get; set; }
+        public Guid? CourseId { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
     }
 }

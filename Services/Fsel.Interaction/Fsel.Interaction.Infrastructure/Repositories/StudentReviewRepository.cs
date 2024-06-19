@@ -8,7 +8,7 @@ namespace Fsel.Interaction.Infrastructure.Repositories
 
     public class StudentReviewRepository : BaseRepository<StudentReview>, IStudentReviewRepository
     {
-        public StudentReviewRepository(InteractionDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public StudentReviewRepository(InteractionDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

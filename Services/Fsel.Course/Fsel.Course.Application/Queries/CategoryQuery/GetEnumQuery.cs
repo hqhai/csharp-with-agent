@@ -65,7 +65,7 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                     break;
 
                 case EnumCourseSourceData.CurrentStatus:
-                    methodResult.Result = ConvertHelper.EnumToListModel<EnumCurrentStatus>();
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumAnswerStatus>();
                     break;
 
                 case EnumCourseSourceData.WorkFlowType:
@@ -98,6 +98,10 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
 
                 case EnumCourseSourceData.EnumFeature:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumFeature>();
+                    break;
+
+                case EnumCourseSourceData.MockTestScoreCriteria:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumMockTestScoreCriteria>();
                     break;
             }
 

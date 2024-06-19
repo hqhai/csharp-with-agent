@@ -2,20 +2,28 @@
 
 namespace Fsel.Identity.Domain.Models.EntityModels
 {
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Domain.Enums;
 
     public class HumanModel : BaseModel
     {
         public string? FullName { get; set; }
+        public string? UserName { get; set; }
         public DateTime? Birthday { get; set; }
         public string? Code { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
         public EnumGender? Gender { get; set; }
         public string? Email { get; set; }
-        public string? AvatarPath { get; set; }
-        public string? UserId { get; set; }
+
+        private string? _avatarPath;
+        public string? AvatarPath
+        {
+            set { _avatarPath = value; }
+            get { return _avatarPath.AddS3BaseUrl(); }
+        }
+        public Guid? UserId { get; set; }
         public TeacherModel? Teacher { get; set; }
         public CSOModel? CSO { get; set; }
         public StudentModel? Student { get; set; }

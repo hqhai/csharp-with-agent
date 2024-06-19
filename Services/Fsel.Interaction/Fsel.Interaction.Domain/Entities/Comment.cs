@@ -19,6 +19,6 @@ namespace Fsel.Interaction.Domain.Entities
 
         public Guid UserId { get; set; }
 
-        public EnumCommentType Type { get; set; }
+        public EnumInteractionType Type { get; set; }
     }
 }

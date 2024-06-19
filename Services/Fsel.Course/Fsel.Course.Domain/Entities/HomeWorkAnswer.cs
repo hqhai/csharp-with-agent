@@ -3,40 +3,18 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
-    using Fsel.Core.Entities;
 
-    public class HomeWorkAnswer : Entity
+    public class HomeWorkAnswer : BaseAnswer
     {
-        /// <summary>
-        /// Câu trả lời
-        /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public string? AnswerStr { get; set; }
-
-        [NotMapped]
-        public object? Answer
-        {
-            get { return ConvertHelper.Deserialize<object>(AnswerStr); }
-            set { AnswerStr = ConvertHelper.Serialize(value); }
-        }
-
-        /// <summary>
-        /// Số lượng câu trả lời đúng
-        /// </summary>
-        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int CorrectCount { get; set; }
-
         public HomeWorkQuestion? HomeWorkQuestion { get; set; }
 
         public HomeWorkResult? HomeWorkResult { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid? HomeWorkQuestionId { get; set; }
+        public Guid HomeWorkQuestionId { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid? HomeWorkResultId { get; set; }
+        public Guid HomeWorkResultId { get; set; }
     }
 }

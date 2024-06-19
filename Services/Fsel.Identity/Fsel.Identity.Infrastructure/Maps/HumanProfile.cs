@@ -22,7 +22,6 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<SignUpCommandModel, Human>().IgnoreAllNonExisting();
             CreateMap<User, Human>().IgnoreAllNonExisting();
             CreateMap<TokenModel, ConfirmOtpModel>().IgnoreAllNonExisting();
-            CreateMap<ConfirmOTPCommandModel, Human>().IgnoreAllNonExisting();
             CreateMap<CreateStudentByParentCommandModel, Human>().IgnoreAllNonExisting();
             CreateMap<CreateUserCommandModel, Human>().IgnoreAllNonExisting();
             CreateMap<UpdateUserCommandModel, Human>().ForMember(m => m.Id, opt => opt.Ignore()).IgnoreAllNonExisting();

@@ -70,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
             if (mockTestResult.Status != EnumResultStatus.Done)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultNotStatusDone), nameof(mockTestResult.Status));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultMustDone), nameof(mockTestResult));
                 return methodResult;
             }
             var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestSections).ThenInclude(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == mockTestResult.MockTestId, cancellationToken);

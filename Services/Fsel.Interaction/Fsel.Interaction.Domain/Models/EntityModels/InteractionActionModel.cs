@@ -4,6 +4,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
 {
     using System;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
 
     public class InteractionActionModel : BaseModel
     {
@@ -18,5 +19,11 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public bool IsDisable { get; set; }
 
         public bool IsLiked { get; set; }
+
+        public bool IsFlagged { get; set; }
+
+        public EnumInteractionType? BusinessType { get; set; }
+
+        public EnumInteractionActionType Type { get; set; }
     }
 }

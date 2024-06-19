@@ -8,5 +8,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.Lessons
         public Guid UnitId { get; set; }
         public Guid LessonId { get; set; }
         public Guid LessonResultId { get; set; }
+        public Guid? UserId { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace Fsel.Notification.Infrastructure.Repositories
 
     public class NotificationsRepository : BaseRepository<NotificationMessage>, INotificationsRepository
     {
-        public NotificationsRepository(NotificationsDBContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public NotificationsRepository(NotificationsDBContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

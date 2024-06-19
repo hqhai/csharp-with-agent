@@ -9,12 +9,12 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ExtraPracticeAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -29,6 +29,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
         private readonly IUserService _userService;
         private readonly ISectionTimeCodeRepository _sectionTimeCodeRepository;
         private readonly IMapper _mapper;
+        private readonly QuestionConverter _questionConverter;
         private readonly ISectionRepository _sectionRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IExtraPracticeAnswerRepository _extraPracticeAnswerRepository;
@@ -40,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             , IUserService userService
             , ISectionTimeCodeRepository sectionTimeCodeRepository
             , IMapper mapper
+            , QuestionConverter questionConverter
             , ISectionRepository sectionRepository
             , ISectionGroupRepository sectionGroupRepository
             , IExtraPracticeAnswerRepository extraPracticeAnswerRepository
@@ -51,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _userService = userService;
             _sectionTimeCodeRepository = sectionTimeCodeRepository;
             _mapper = mapper;
+            _questionConverter = questionConverter;
             _sectionRepository = sectionRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _extraPracticeAnswerRepository = extraPracticeAnswerRepository;
@@ -69,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), _authContext.CurrentUserId);
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
@@ -119,7 +122,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     extraPracticeResult.Percent = 0;
                 }
                 extraPracticeResult.CorrectCount = extraPracticeResult.ExtraPracticeAnswers.Sum(x => x.CorrectCount);
-                if (request.IsActive)
+                if (request.IsSubmit)
                 {
                     extraPracticeResult.Status = EnumResultStatus.Done;
                     extraPracticeResult.Percent = 100;
@@ -198,70 +201,65 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             IList<SkillScores> skillScores = new List<SkillScores>();
             foreach (var item in request.SectionGroups)
             {
-                var sectionGroup = await _sectionGroupRepository.GetByIdAsync(item.SectionGroupId);
-                if (sectionGroup == null)
+                if (item.Answers != null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(item.SectionGroupId), item.SectionGroupId);
-                    return methodResult;
-                }
-                var questionIds = request.SectionGroups.SelectMany(x => x.Answers!).Select(x => x.QuestionId ?? default).ToList();
-                var questions = await _questionRepository.GetByIdsAsync(questionIds);
-                int correctCountTotal = 0;
-                foreach (var answer in answers)
-                {
-                    if (answer.QuestionId != null)
+                    var sectionGroup = await _sectionGroupRepository.GetByIdAsync(item.SectionGroupId);
+                    if (sectionGroup == null)
                     {
-                        var question = await _questionRepository.Queryable.FirstOrDefaultAsync(x => x.Id == answer.QuestionId, cancellationToken);
-                        if (question == null)
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(item.SectionGroupId), item.SectionGroupId);
+                        return methodResult;
+                    }
+                    var questionIds = item.Answers.Where(x => x.QuestionId != null).Select(x => x.QuestionId ?? default).ToList();
+                    var questions = await _questionRepository.GetByIdsAsync(questionIds);
+                    var correctCountTotal = 0;
+                    foreach (var answer in item.Answers)
+                    {
+                        if (answer.QuestionId != null)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(answer.QuestionId), answer.QuestionId);
-                            return methodResult;
-                        }
-                        else if (question.Config == null)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question), question);
-                            return methodResult;
-                        }
-                        var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.QuestionId == answer.QuestionId && x.ExtraPracticeResultId == request.ExtraPracticeResultId, cancellationToken);
-                        if (extraPracticeAnswer == null)
-                        {
-                            var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
-                            if (answerConfig == null && !string.IsNullOrEmpty(answer.Answer?.ToString()))
+                            var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
+                            var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, request.IsSubmit);
+                            if (!questionResult.IsOK)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
+                                methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                                 return methodResult;
                             }
-                            extraPracticeResult.ExtraPracticeAnswers.Add(new ExtraPracticeAnswer
+
+                            var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
+                            var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.QuestionId == answer.QuestionId && x.ExtraPracticeResultId == request.ExtraPracticeResultId, cancellationToken);
+                            if (extraPracticeAnswer == null)
                             {
-                                Answer = answerConfig,
-                                CorrectCount = correctCount,
-                                ExtraPracticeResultId = extraPracticeResult.Id,
-                                QuestionId = answer.QuestionId
-                            });
-                            correctCountTotal += correctCount;
+                                extraPracticeResult.ExtraPracticeAnswers.Add(new ExtraPracticeAnswer
+                                {
+                                    Answer = answerConfig,
+                                    CorrectCount = correctCount,
+                                    ExtraPracticeResultId = extraPracticeResult.Id,
+                                    QuestionId = answer.QuestionId
+                                });
+                                correctCountTotal += correctCount;
+                            }
                         }
-                    }
-                    else if (answer.SectionTimeCodeId != null)
-                    {
-                        var method = await AddTypeSectionTimeCode(extraPracticeResult, answer, cancellationToken);
-                        if (!method.IsOK)
+                        else if (answer.SectionTimeCodeId != null)
                         {
-                            methodResult.AddErrorBadRequest(method.ErrorMessages);
-                            return methodResult;
+                            var method = await AddTypeSectionTimeCode(extraPracticeResult, answer, cancellationToken);
+                            if (!method.IsOK)
+                            {
+                                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                                return methodResult;
+                            }
                         }
-                    }
-                    else if (answer.SectionId != null)
-                    {
-                        var method = await AddSection(extraPracticeResult, answer, cancellationToken);
-                        if (!method.IsOK)
+                        else if (answer.SectionId != null)
                         {
-                            methodResult.AddErrorBadRequest(method.ErrorMessages);
-                            return methodResult;
+                            var method = await AddSection(extraPracticeResult, answer, cancellationToken);
+                            if (!method.IsOK)
+                            {
+                                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                                return methodResult;
+                            }
                         }
                     }
+                    var skillScore = new SkillScores { CorrectCount = correctCountTotal, Scores = correctCountTotal.GetIeltsScore(sectionGroup.CourseSkill), Skill = sectionGroup.CourseSkill, TotalCount = questions.Sum(x => x.CorrectTotal), CountQuestion = item.Answers.Count, TotalQuestion = questions.Count() };
+                    skillScores.Add(skillScore);
                 }
-                var skillScore = new SkillScores { CorrectCount = 0, Scores = 0, Skill = sectionGroup.CourseSkill, TotalCount = questions.Sum(x => x.CorrectTotal) };
-                skillScores.Add(skillScore);
             }
             extraPracticeResult.SkillScores = skillScores;
             return methodResult;

@@ -8,40 +8,37 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.OrderServices;
+    using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
     public class HomeWorkResultInputThenUpdateLessonResultHandler : BaseInternalLessonResultEventHandler,
         INotificationHandler<EntityChangedEvent<HomeWorkResult>>
     {
-        public HomeWorkResultInputThenUpdateLessonResultHandler(IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IMockTestRepository mockTestRepository, IHomeWorkQuestionRepository homeWorkQuestionRepository, IHomeWorkAnswerRepository homeWorkAnswerRepository, IQuestionRepository questionRepository, IHomeWorkRepository homeWorkRepository, FinishOneUnitPublisher finishOneUnitPublisher, FinishOneLevelPassPublisher finishOneLevelPassPublisher, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository) : base(videoResultRepository, classForumResultRepository, unitResultRepository, lessonResultRepository, courseResultRepository, courseRepository, unitRepository, mockTestRepository, homeWorkQuestionRepository, homeWorkAnswerRepository, questionRepository, homeWorkRepository, finishOneUnitPublisher, finishOneLevelPassPublisher, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
+        private readonly ILessonResultRepository _lessonResultRepository;
+
+        public HomeWorkResultInputThenUpdateLessonResultHandler(ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService) : base(lessonResultRepository, systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService)
         {
+            _lessonResultRepository = lessonResultRepository;
         }
 
         public async Task Handle(EntityChangedEvent<HomeWorkResult> notification, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(notification);
             var homeWorkResult = notification.Data;
-            var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.HomeWorkResults.Where(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId))
-                                                                        .Include(x => x.ClassForumResults.Where(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId))
-                                                                        .FirstOrDefaultAsync(x => x.Id == homeWorkResult.LessonResultId, cancellationToken);
-            if (lessonResult != null)
+            var isHomeWorkOtherDone = await _homeWorkResultRepository.Queryable.AnyAsync(x => x.LessonResultId == homeWorkResult.LessonResultId && x.Status != EnumResultStatus.Done, cancellationToken);
+            if (!isHomeWorkOtherDone)
             {
-                var isHomeWorksDone = lessonResult.HomeWorkResults.All(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId && x.Status == EnumResultStatus.Done);
-                var isClassForumDone = lessonResult.ClassForumResults.Any(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded));
-                await GetLessonResult(lessonResult, cancellationToken);
-
-                if (isClassForumDone && isHomeWorksDone)
+                var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.HomeWorkResults.Where(x => x.LessonResultId == homeWorkResult.LessonResultId))
+                                                                     .Include(x => x.ClassForumResults.Where(x => x.LessonResultId == homeWorkResult.LessonResultId))
+                                                                     .FirstOrDefaultAsync(x => x.Id == homeWorkResult.LessonResultId, cancellationToken);
+                if (lessonResult != null)
                 {
-                    lessonResult.Status = EnumResultStatus.Done;
-                    _lessonResultRepository.Update(lessonResult);
-                    await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
-                else
-                {
-                    _lessonResultRepository.Update(lessonResult);
-                    await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await UpdateLessonResultAsync(lessonResult, cancellationToken).ConfigureAwait(false);
                 }
             }
         }

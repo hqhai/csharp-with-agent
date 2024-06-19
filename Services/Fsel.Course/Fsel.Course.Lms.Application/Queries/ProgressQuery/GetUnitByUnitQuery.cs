@@ -7,48 +7,44 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Unit = Course.Domain.Entities.Unit;
 
     public class GetUnitByUnitQuery : IRequest<MethodResult<IList<UnitModel>>>
     {
         public Guid CourseId { get; set; }
-        public EnumProcessType Type { get; set; }
+        public EnumLearnProcessType Type { get; set; }
     }
 
     public class GetUnitByUnitVideoQueryHandler : IRequestHandler<GetUnitByUnitQuery, MethodResult<IList<UnitModel>>>
     {
         private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
-        private readonly ICourseRepository _courseRepository;
+        private readonly ILessonRepository _lessonRepository;
         private readonly IVideoRepository _videoRepository;
-        private readonly IVideoResultRepository _videoResultRepository;
+        private readonly ICourseRepository _courseRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;
 
         public GetUnitByUnitVideoQueryHandler(AuthContext authContext
             , IMapper mapper
-            , ICourseRepository courseRepository
+            , ILessonRepository lessonRepository
             , IVideoRepository videoRepository
-            , IVideoResultRepository videoResultRepository
+            , ICourseRepository courseRepository
             , IUnitRepository unitRepository
             , IUserService userService)
         {
             _authContext = authContext;
             _mapper = mapper;
-            _courseRepository = courseRepository;
+            _lessonRepository = lessonRepository;
             _videoRepository = videoRepository;
-            _videoResultRepository = videoResultRepository;
+            _courseRepository = courseRepository;
             _unitRepository = unitRepository;
             _userService = userService;
         }
@@ -70,149 +66,65 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            else if (course.CourseType == EnumCourseType.Ielts && request.Type == EnumProcessType.UnitTest)
+            else if (course.CourseType == EnumCourseType.Ielts && request.Type == EnumLearnProcessType.UnitTest)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotTypeAcademic), nameof(course));
                 return methodResult;
             }
-
-            var units = new List<Unit>();
-            if (request.Type == EnumProcessType.LessonVideo)
-            {
-                units = await _unitRepository.Queryable.Include(x => x.UnitLessons).ThenInclude(x => x.Lesson)
-                               .Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId))
-                               .Include(x => x.CourseUnitMockTests)
-                               .Include(x => x.LessonResults.Where(x => x.StudentId == studentId))
-                               .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
-                               .AsNoTracking()
-                               .ToListAsync(cancellationToken);
-            }
-            else if (request.Type == EnumProcessType.HomeWork)
-            {
-                units = await _unitRepository.Queryable.Include(x => x.UnitLessons).ThenInclude(x => x.Lesson).ThenInclude(x => x!.LessonHomeWorks).ThenInclude(x => x.HomeWork)
-                               .Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId))
-                               .Include(x => x.CourseUnitMockTests)
-                               .Include(x => x.LessonResults.Where(x => x.StudentId == studentId))
-                               .ThenInclude(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
-                               .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
-                               .AsNoTracking()
-                               .ToListAsync(cancellationToken);
-            }
-            else if (request.Type == EnumProcessType.ClassForum)
-            {
-                units = await _unitRepository.Queryable.Include(x => x.UnitLessons).ThenInclude(x => x.Lesson).ThenInclude(x => x!.ClassForum)
-                             .Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId))
-                             .Include(x => x.CourseUnitMockTests)
-                             .Include(x => x.LessonResults.Where(x => x.StudentId == studentId))
-                             .ThenInclude(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                             .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
-                             .AsNoTracking()
-                             .ToListAsync(cancellationToken);
-            }
-            else if (request.Type == EnumProcessType.UnitTest)
-            {
-                units = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId))
-                              .Include(x => x.UnitLessons)
-                              .ThenInclude(x => x.Lesson)
-                              .ThenInclude(x => x!.LessonVideos)
-                              .Include(x => x.CourseUnitMockTests)
-                              .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
-                              .AsNoTracking()
-                              .ToListAsync(cancellationToken);
-            }
-
-            if (units == null || units.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
-                return methodResult;
-            }
-            var unitModels = new List<UnitModel>();
-            foreach (var item in units)
-            {
-                var (countDone, totalDone) = await GetCountDone(item, request.Type, studentId);
-                unitModels.Add(GetUnitModel(item, request.CourseId, totalDone, countDone));
-            }
-            unitModels = unitModels.OrderBy(x => x.DisplayOrder).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = unitModels;
+            methodResult.Result = await GetListAsync(request, studentId);
             return methodResult;
         }
 
-        private async Task<(double, double)> GetCountDone(Unit x, EnumProcessType type, Guid? studentId)
+        private async Task<IList<UnitModel>?> GetListAsync(GetUnitByUnitQuery request, Guid? studentId)
         {
-            if (type == EnumProcessType.LessonVideo)
-            {
-                var countDone = x.LessonResults.Where(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done).Count();
-                var totalDone = x.UnitLessons.Select(x => x.Lesson).Count();
-                return (countDone, totalDone);
-            }
-            else if (type == EnumProcessType.HomeWork)
-            {
-                var homeWorks = x.UnitLessons.Select(x => x.Lesson).SelectMany(x => x.LessonHomeWorks).Select(x => x.HomeWork).ToList();
-                var countDone = x.LessonResults.SelectMany(x => x.HomeWorkResults).Where(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done).Count();
-                return (countDone, homeWorks.Count);
-            }
-            else if (type == EnumProcessType.UnitTest)
-            {
-                var videoIds = x.UnitLessons.Select(x => x.Lesson).SelectMany(x => x!.LessonVideos).Select(x => x!.VideoId).ToList();
-                var videoResultIds = await _videoResultRepository.Queryable.Where(x => x.StudentId == studentId && videoIds.Contains(x.VideoId)).Select(x => x.Id).ToListAsync();
-                var videos = await _videoRepository.Queryable.Include(x => x.VideoTimeCodes)
-                                                            .ThenInclude(x => x.VideoTimeCodeAnswers.Where(y => videoResultIds.Contains(y.VideoResultId)))
-                                                            .Include(x => x.VideoTimeCodes)
-                                                            .ThenInclude(x => x.TimeCodeExercises)
-                                                            .ThenInclude(x => x.Exercise)
-                                                            .ThenInclude(x => x!.ExerciseQuestions)
-                                                            .ThenInclude(x => x.Question)
-                                                            .Where(x => videoIds.Contains(x.Id))
-                                                            .ToListAsync();
-                if (videos == null || videos.Count == 0)
-                {
-                    return (0, 0);
-                }
-                var videoTimeCodes = videos.SelectMany(x => x.VideoTimeCodes).Where(x => x.TimeCodeType == EnumTimeCodeType.UnitTest).ToList();
-                var exercises = videoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise).ToList();
+            var units = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == studentId))
+                                                       .Include(x => x.CourseUnitMockTests.Where(x => !x.IsDeleted && x.CourseId == request.CourseId))
+                                                       .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
+                                                       .ToListAsync();
 
-                var skillScores = exercises.GroupBy(x => x!.CourseSkill).Select(x => new SkillScores
-                {
-                    Skill = x.Key,
-                    CountQuestion = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Count(),
-                    TotalQuestion = x.SelectMany(x => x!.VideoTimeCodeAnswers).Count(),
-                    CorrectCount = x.SelectMany(x => x!.VideoTimeCodeAnswers).Sum(x => x.CorrectCount),
-                    TotalCount = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
-                    Percent = NumberHelper.ConvertPercentDouble(x.SelectMany(x => x!.VideoTimeCodeAnswers).Sum(x => x.CorrectCount) / x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal))
-                }).ToList();
-                var countDone = skillScores.Sum(x => x.CountQuestion);
-                var totalDone = skillScores.Sum(x => x.TotalQuestion);
-                return (countDone, totalDone);
-            }
-            else if (type == EnumProcessType.ClassForum)
+            if (units.Any())
             {
-                var countDone = x.LessonResults.SelectMany(x => x.ClassForumResults).Where(x => x.StudentId == studentId && (x.Status == EnumClassForumResultStatus.Graded || x.Status == EnumClassForumResultStatus.PendingForGrading)).Count();
-                var totalDone = x.UnitLessons.Select(x => x.Lesson).Select(x => x!.ClassForum).Count();
-                return (countDone, totalDone);
+                var listUnit = new List<UnitModel>();
+                foreach (var unit in units)
+                {
+                    double percent = 0;
+                    switch (request.Type)
+                    {
+                        case EnumLearnProcessType.LessonVideo:
+                            percent = await _lessonRepository.GetPercentLesson(request.CourseId, unit.Id, studentId);
+                            break;
+
+                        case EnumLearnProcessType.HomeWork:
+                            percent = await _lessonRepository.GetPercentHomeWork(request.CourseId, unit.Id, studentId);
+                            break;
+
+                        case EnumLearnProcessType.ClassForum:
+                            percent = await _lessonRepository.GetPercentClassForum(request.CourseId, unit.Id, studentId);
+                            break;
+
+                        case EnumLearnProcessType.UnitTest:
+                            percent = await _videoRepository.GetPercent(request.CourseId, unit.Id, studentId);
+                            break;
+
+                        default:
+                            throw new NotImplementedException();
+                    }
+                    listUnit.Add(GetUnitModel(unit, request.CourseId, percent));
+                }
+                return listUnit.OrderBy(x => x.DisplayOrder).ToList();
             }
-            return (0, 0);
+            return default;
         }
 
-        private UnitModel GetUnitModel(Unit x, Guid courseId, double totalDone, double countDone)
+        private UnitModel GetUnitModel(Domain.Entities.Unit x, Guid courseId, double percent)
         {
-            var unitModel = new UnitModel
-            {
-                Id = x.Id,
-                Code = x.Code,
-                CourseLevel = x.CourseLevel,
-                CreatedDate = x.CreatedDate,
-                CreatedFullName = x.CreatedFullName,
-                CreatedUserId = x.CreatedUserId,
-                IsActive = true,
-                Name = x.Name,
-                DisplayOrder = x.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == courseId && y.UnitId == x.Id)?.DisplayOrder ?? default,
-                UpdatedDate = x.UpdatedDate,
-                UpdatedFullName = x.UpdatedFullName,
-                UpdatedUserId = x.UpdatedUserId,
-                UnitResult = _mapper.Map<UnitResultModel>(x.UnitResults.FirstOrDefault()),
-                Percent = totalDone > 0 ? NumberHelper.ConvertPercentDouble(countDone / totalDone) : default,
-            };
+            var displayOrder = x.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == courseId && y.UnitId == x.Id)?.DisplayOrder ?? default;
+            var unitModel = _mapper.Map<UnitModel>(x);
+            unitModel.DisplayOrder = displayOrder;
+            unitModel.IsActive = x.CourseUnitMockTests.Any();
+            unitModel.Percent = percent;
+            unitModel.UnitResult = _mapper.Map<UnitResultModel>(x.UnitResults.FirstOrDefault());
             return unitModel;
         }
     }

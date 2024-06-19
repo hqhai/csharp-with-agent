@@ -6,7 +6,6 @@ namespace Fsel.System.Domain.Entities
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
     using global::System.ComponentModel.DataAnnotations;
-    using global::System.ComponentModel.DataAnnotations.Schema;
 
     public class GameVocabulary : Entity
     {
@@ -19,45 +18,10 @@ namespace Fsel.System.Domain.Entities
         public EnumGameCefrLevel CefrLevel { get; set; }
         public EnumGameCourseLevel CourseLevel { get; set; }
         public EnumUnitNumber UnitOrder { get; set; }
-        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? AlternateSpellingStr { get; set; }
-
-        [NotMapped]
-        public IList<string>? AlternateSpelling
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(AlternateSpellingStr))
-                {
-                    return AlternateSpellingStr.Split(';').ToList();
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
-        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? UsEquivalent { get; set; }
         public EnumPartSpeech? PartSpeech { get; set; }
-        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? Definition { get; set; }
-        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? Hint { get; set; }
-        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? ExampleSentence { get; set; }
-        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? ImagePath { get; set; }
-        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? AudioPath { get; set; }
-        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? Synonym { get; set; }
-        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? Antonym { get; set; }
-        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? PhoneticTranscription { get; set; }
-        public Guid? PlatformId { get; set; }
         public Guid? WordCategoryId { get; set; }
         public GameTopic? GameTopic { get; set; }
+        public ICollection<GameVocabularyType> GameVocabularyTypes { get; set; } = new List<GameVocabularyType>();
+        public ICollection<GameVocabularyPlatform> GameVocabularyPlatforms { get; set; } = new List<GameVocabularyPlatform>();
     }
 }

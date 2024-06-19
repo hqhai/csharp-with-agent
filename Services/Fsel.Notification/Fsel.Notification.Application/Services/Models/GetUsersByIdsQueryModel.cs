@@ -4,6 +4,6 @@ namespace Fsel.Notification.Application.Services.Models
 {
     public class GetUsersByIdsQueryModel
     {
-        public IList<string>? UserIds { get; set; }
+        public IList<Guid>? UserIds { get; set; }
     }
 }

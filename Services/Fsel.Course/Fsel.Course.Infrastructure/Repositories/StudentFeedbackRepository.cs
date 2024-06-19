@@ -8,7 +8,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class StudentFeedbackRepository : BaseRepository<StudentFeedback>, IStudentFeedbackRepository
     {
-        public StudentFeedbackRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public StudentFeedbackRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

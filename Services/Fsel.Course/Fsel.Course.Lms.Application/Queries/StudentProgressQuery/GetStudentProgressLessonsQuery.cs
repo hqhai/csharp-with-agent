@@ -73,7 +73,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
-                methodResult.Result = default;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -88,20 +87,20 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
             if (unit == null)
             {
-                methodResult.Result = default;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var lessonIds = unit.UnitLessons.OrderBy(x => x.CreatedDate).Select(x => x.LessonId).ToList();
+            var featureAccessTimeQuerys = lessonIds.Select(x => new FeatureAccessTimeQueryModel
+            {
+                CourseId = request.CourseId,
+                UnitId = request.UnitId,
+                LessonId = x,
+                UserId = userId ?? default
+            }).ToList();
             var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
             {
-                FeatureAccessTimes = lessonIds.Select(x => new FeatureAccessTimeQueryModel
-                {
-                    CourseId = request.CourseId,
-                    UnitId = request.UnitId,
-                    LessonId = x,
-                    UserId = userId ?? default
-                }).ToList(),
+                FeatureAccessTimes = featureAccessTimeQuerys,
                 UserId = userId ?? default
             });
             if (!featureAccessTimeResults.IsSuccessStatusCode)
@@ -112,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var featureAccessTimes = featureAccessTimeResults.Content?.Result;
             foreach (var item in lessonIds)
             {
-                var lessonProgress = await GetLesson(item, studentId);
+                var lessonProgress = await GetLesson(request, item);
                 var featureAccessTime = featureAccessTimes?.FirstOrDefault(x => x.LessonId == item);
                 lessonProgress.Type = nameof(Lesson);
                 if (featureAccessTime != null)
@@ -127,7 +126,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             {
                 var mockTestId = unit.UnitSkillMockTests.Select(x => x.MockTestId).FirstOrDefault();
                 var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.MockTestId == mockTestId && x.StudentId == studentId).FirstOrDefaultAsync(cancellationToken);
-                var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = request.CourseId, ObjectId = mockTestId, UserId = userId ?? default, EnumFeature = EnumFeature.MockTest });
+                var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = request.CourseId, UnitId = request.UnitId, ObjectId = mockTestResult?.Id, UserId = userId ?? default, EnumFeature = EnumFeature.MockTest });
                 var featureAccessTimeTest = featureAccessTimeResult?.Content?.Result;
                 listLessonProgress.Add(await GetMockTest(request, mockTestId, featureAccessTimeTest));
             }
@@ -137,18 +136,18 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return methodResult;
         }
 
-        private async Task<LessonStudentProgressModel> GetLesson(Guid? lessonId, Guid? studentId)
+        private async Task<LessonStudentProgressModel> GetLesson(GetStudentProgressLessonsQuery request, Guid? lessonId)
         {
             LessonStudentProgressModel lessonProgress = new LessonStudentProgressModel();
             var counts = new List<int>();
-            var lessonResult = await _lessonResultRepository.GetAsync(lessonId, studentId);
+            var lessonResult = await _lessonResultRepository.GetAsync(request.CourseId, request.UnitId, lessonId, request.StudentId);
             lessonProgress.Type = nameof(lessonResult.Lesson);
             if (lessonResult != null)
             {
                 var lesson = lessonResult.Lesson;
                 counts.Add(lessonResult.VideoResult?.Status == EnumResultStatus.Done ? 1 : 0);
-                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == studentId).Count());
-                counts.Add(lessonResult.HomeWorkResults.Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == studentId).GroupBy(x => x.LessonResultId).Count());
+                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && (x.Status == EnumClassForumResultStatus.Denied || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == request.StudentId).Count());
+                counts.Add(lessonResult.HomeWorkResults.Any() && lessonResult.HomeWorkResults.All(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == request.StudentId) ? 1 : 0);
                 if (lesson != null)
                 {
                     lessonProgress.ObjectId = lesson.Id;
@@ -195,7 +194,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         CountQuestion = skillScore?.CountQuestion ?? default,
                         TotalQuestion = skillScore?.TotalQuestion ?? default,
                         Scores = skillScore?.Scores ?? default,
-                        Percent = skillScore?.Percent ?? default,
                     };
                     if (x.Skill == EnumCourseSkill.Speaking || x.Skill == EnumCourseSkill.Writing)
                     {
@@ -226,6 +224,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     {
                         mockTestProgress.TimeSpent = featureAccessTime.AccessTime;
                         mockTestProgress.LastVisited = featureAccessTime.LastVisited ?? null;
+                        mockTestProgress.Visit = featureAccessTime.Visit;
                     }
                 }
             }

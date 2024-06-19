@@ -8,7 +8,7 @@ namespace Fsel.Interaction.Infrastructure.Repositories
 
     public class SupportQuestionRepository : BaseRepository<SupportQuestion>, ISupportQuestionRepository
     {
-        public SupportQuestionRepository(InteractionDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public SupportQuestionRepository(InteractionDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

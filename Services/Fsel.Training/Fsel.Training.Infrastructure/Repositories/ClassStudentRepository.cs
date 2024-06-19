@@ -8,7 +8,7 @@ namespace Fsel.Training.Infrastructure.Repositories
 
     public class ClassStudentRepository : BaseRepository<ClassStudent>, IClassStudentRepository
     {
-        public ClassStudentRepository(TrainingDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public ClassStudentRepository(TrainingDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

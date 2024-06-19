@@ -15,4 +15,25 @@
     <ProjectReference Include="..\Fsel.Ordering.Application\Fsel.Ordering.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Resources\AppStore\PrivateKey.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Payoo.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\UrBox\Development\private_key_rsa">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\UrBox\Development\public_key_rsa.pub">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\UrBox\Production\private_key_rsa">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\UrBox\Production\public_key_rsa.pub">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

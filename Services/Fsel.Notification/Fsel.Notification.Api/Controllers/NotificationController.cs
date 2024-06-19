@@ -11,8 +11,12 @@ namespace Fsel.Notification.Api.Controllers
     using Fsel.Notification.Application.Queries;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Notification.Application.Commands;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
+    using Fsel.Notification.Domain.Model.CommandModels.Notification;
+    using Microsoft.AspNetCore.Authorization;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/notifications")]
     [ApiController]
     public class NotificationController : ControllerBase
@@ -47,6 +51,16 @@ namespace Fsel.Notification.Api.Controllers
         public async Task<IActionResult> CreateNotification([FromBody] CreateNotificationCommand cmd)
         {
             MethodResult<NotificationMessageModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpPost("test-socket-notification")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Authorize]
+        public async Task<IActionResult> CreateNotificationTest([FromBody] CreateNotificationTestCommand cmd)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

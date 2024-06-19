@@ -8,8 +8,8 @@ namespace Fsel.Identity.Domain.IRepositories
     {
         Task<UserToken?> GetByRefreshTokenAsync(string? refreshToken);
 
-        Task<UserToken> AddAsync(UserToken userToken);
+        Task<UserToken?> AddAsync(UserToken? userToken);
 
-        Task<UserToken> Remove(UserToken userToken);
+        Task<UserToken?> Remove(UserToken? userToken);
     }
 }

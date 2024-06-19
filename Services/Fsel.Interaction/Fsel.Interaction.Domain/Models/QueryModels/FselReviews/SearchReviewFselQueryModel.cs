@@ -10,5 +10,6 @@ namespace Fsel.Interaction.Domain.Models.QueryModels.FselReviews
         public Guid? CourseId { get; set; }
         public int? NumberOfStars { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
+        public EnumReviewType? Type { get; set; }
     }
 }

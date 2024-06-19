@@ -9,15 +9,27 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class VideoTimeCodeAnswerRepository : BaseRepository<VideoTimeCodeAnswer>, IVideoTimeCodeAnswerRepository
     {
-        public VideoTimeCodeAnswerRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public VideoTimeCodeAnswerRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
 
-        public async Task<VideoTimeCodeAnswer?> GetAsync(Guid videoResultId, Guid questionId, Guid? exerciseId, Guid? videoTimeCodeId)
+        public async Task<VideoTimeCodeAnswer?> GetAsync(Guid videoTimeCodeResultId, Guid questionId, Guid? exerciseId)
         {
             try
             {
-                return await Queryable.FirstOrDefaultAsync(x => x.QuestionId == questionId && x.ExerciseId == exerciseId && x.VideoTimeCodeId == videoTimeCodeId && x.VideoResultId == videoResultId);
+                return await Queryable.FirstOrDefaultAsync(x => x.QuestionId == questionId && x.ExerciseId == exerciseId && x.VideoTimeCodeResultId == videoTimeCodeResultId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<VideoTimeCodeAnswer?> GetAsync(Guid videoTimeCodeId, Guid videoResultId, Guid? questionId, Guid? exerciseId)
+        {
+            try
+            {
+                return await Queryable.FirstOrDefaultAsync(x => x.QuestionId == questionId && x.ExerciseId == exerciseId && x.VideoResultId == videoResultId && x.VideoTimeCodeId == videoTimeCodeId);
             }
             catch (Exception)
             {

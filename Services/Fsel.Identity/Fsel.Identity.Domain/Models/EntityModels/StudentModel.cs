@@ -4,6 +4,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 {
     using System;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Identity.Domain.Entities.BeginnerGuideConfigs;
     using Fsel.Shared.Enums;
 
     public class StudentModel : BaseModel
@@ -16,6 +17,12 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? Membership { get; set; }
         public Guid? ClassId { get; set; }
         public string? CodeClass { get; set; }
+        public string? ParentEmail { get; set; }
+        public long NumberOfToken { get; set; }
+        public Guid? ProvinceId { get; set; }
+        public Guid? DistrictId { get; set; }
+        public Guid? SchoolId { get; set; }
+        public StudentBeginnerGuide? BeginnerGuide { get; set; }
         public ParentProfileModel? Parent { get; set; }
     }
 }

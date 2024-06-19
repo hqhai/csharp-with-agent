@@ -2,6 +2,7 @@
 
 namespace Fsel.Interaction.Domain.Models.EntityModels
 {
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
 
     public class SupportCategoryModel : BaseModel
@@ -10,8 +11,14 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
 
         public string? Name { get; set; }
 
-        public string? IconPath { get; set; }
+        private string? _iconPath;
+        public string? IconPath
+        {
+            set { _iconPath = value; }
+            get { return _iconPath.AddS3BaseUrl(); }
+        }
 
         public bool IsActive { get; set; }
+        public int NumberOfQuestion { get; set; }
     }
 }

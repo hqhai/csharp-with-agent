@@ -1,4 +1,6 @@
 using System.Globalization;
+using Fsel.Core.Base;
+using Fsel.Core.Base.BaseModels;
 using Fsel.Notification.Application.Commands;
 using Fsel.Notification.Domain.IRepositories;
 using Fsel.Shared.Enums;
@@ -9,39 +11,53 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Notification.Application.Queues.Consumers
 {
-    public class InterationActionConsumer : IConsumer<InterationActionQueueModel>
+    public class InterationActionConsumer : BaseConsumer<InterationActionQueueModel>
     {
         private readonly IMediator _mediator;
         private readonly INotificationTypeRepository _notificationTypeRepository;
 
-        public InterationActionConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository)
+        public InterationActionConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository, AuthContext authContext) : base(authContext)
         {
             _mediator = mediator;
             _notificationTypeRepository = notificationTypeRepository;
         }
 
-        public async Task Consume(ConsumeContext<InterationActionQueueModel> context)
+        public override async Task ConsumeQueue(InterationActionQueueModel? message)
         {
-            var dataReceipt = context?.Message;
-
-            if (dataReceipt != null)
+            if (message != null)
             {
-                if (dataReceipt!.InterationType == EnumInteractionActionType.Flag)
+
+                var notificationType = await _notificationTypeRepository.Queryable.FirstOrDefaultAsync(x => x.Type == message.Type && x.Content == message.Content);
+
+                string messageNoti = message.ParamsMessage != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateMessage ?? string.Empty, message.ParamsMessage.ToArray()) : "";
+
+                string link = message.ParamsLink != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateLink ?? string.Empty, message.ParamsLink.ToArray()) : "";
+
+
+                if (message!.InterationType == EnumInteractionActionType.Flag)
                 {
-                    var notificationType = await _notificationTypeRepository.Queryable.FirstOrDefaultAsync(x => x.Type == dataReceipt.Type && x.Content == dataReceipt.Content);
-
-                    string message = dataReceipt.ParamsMessage != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateMessage ?? string.Empty, dataReceipt.ParamsMessage.ToArray()) : "";
-
-                    string link = dataReceipt.ParamsLink != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateLink ?? string.Empty, dataReceipt.ParamsLink.ToArray()) : "";
-
                     CreateNotificationCommand model = new CreateNotificationCommand()
                     {
-                        UserId = dataReceipt.UserId ?? default,
-                        ObjectId = dataReceipt.ObjectId,
-                        Message = message,
+                        UserIds = message.UserIds ?? default,
+                        ObjectId = message.ObjectId,
+                        Message = messageNoti,
                         Link = link,
-                        Roles = dataReceipt.Roles,
-                        NotificationTypeId = notificationType?.Id ?? default
+                        Roles = message.Roles,
+                        NotificationTypeId = notificationType?.Id ?? default,
+                        SenderId = message.SenderId ?? default,
+                    };
+                    await _mediator.Send(model).ConfigureAwait(false);
+                }
+                else if (message!.InterationType == EnumInteractionActionType.Like)
+                {
+                    UpdateNotificationCommand model = new UpdateNotificationCommand()
+                    {
+                        UserId = message.UserIds!.Single(),
+                        ObjectId = message.ObjectId,
+                        Message = messageNoti,
+                        Link = link,
+                        NotificationTypeId = notificationType?.Id ?? default,
+                        SenderId = message.SenderId ?? default
                     };
                     await _mediator.Send(model).ConfigureAwait(false);
                 }
@@ -49,8 +65,8 @@ namespace Fsel.Notification.Application.Queues.Consumers
                 {
                     CreateNotificationRemindCommand cmd = new CreateNotificationRemindCommand()
                     {
-                        ObjectId = dataReceipt.ObjectId,
-                        UserId = dataReceipt.UserId,
+                        ObjectId = message.ObjectId,
+                        UserIds = message.UserIds,
                         Status = EnumNotificationRemindStatus.Off
                     };
 

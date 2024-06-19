@@ -1,0 +1,459 @@
+[
+  {
+    "SchoolName": "THCS CLC Nam Từ Liêm",
+    "FullName": "Chu Bảo Nhung",
+    "Email": "vatlychatran2013@gmail.com",
+    "Grade": 6,
+    "StudentId": "6A7CB133-1B80-4D6A-9DE8-628F944F2546",
+    "UserId": "9531CA4C-DB6F-4E72-5181-08DC101B1414"
+  },
+  {
+    "SchoolName": "THCS CLC Nam Từ Liêm",
+    "FullName": "Vũ Hoàng Khánh Chi",
+    "Email": "minhnth27@gmail.com",
+    "Grade": 6,
+    "StudentId": "901EE10E-8AA2-40B2-A3DA-87D348FD9A58",
+    "UserId": "778A0DF7-87D9-45B2-67DB-08DC176BAE33"
+  },
+  {
+    "SchoolName": "THCS CLC Nam Từ Liêm",
+    "FullName": "Phạm Ngọc Yến",
+    "Email": "yenphamngoc12@gmail.com",
+    "Grade": 6,
+    "StudentId": "44C6A21E-122D-4E9E-842A-9F09563EB6E6",
+    "UserId": "3EC357D7-7AFD-4360-8212-08DC180F583F"
+  },
+  {
+    "SchoolName": "THCS CLC Nam Từ Liêm",
+    "FullName": "Trương Công Tùng",
+    "Email": "vulykta49@gmail.com",
+    "Grade": 7,
+    "StudentId": "9DE48D99-FD75-49E2-A574-D8F0F4425AE7",
+    "UserId": "5976319F-3097-4B7C-A6CF-08DC1013A7D1"
+  },
+  {
+    "SchoolName": "THCS CLC Nam Từ Liêm",
+    "FullName": "Vũ Minh Châu",
+    "Email": "minhchauv58@gmail.com",
+    "Grade": 7,
+    "StudentId": "B8E6836C-6923-4822-AA7C-6AD66E6F7D90",
+    "UserId": "C5F61BFE-FA0F-4917-A6D7-08DC1013A7D1"
+  },
+  {
+    "SchoolName": "THCS CLC Nam Từ Liêm",
+    "FullName": "Duy Đức Anh",
+    "Email": "duyducanh2019@gmail.com",
+    "Grade": 8,
+    "StudentId": "82ECCE3A-08C3-4A77-B63D-3A2BF38383F5",
+    "UserId": "B39E6F12-6ECA-40B6-518D-08DC101B1414"
+  },
+  {
+    "SchoolName": "THCS CLC Nam Từ Liêm",
+    "FullName": "Đỗ Kim Chi",
+    "Email": "dokimchi2162012@gmail.com",
+    "Grade": 6,
+    "StudentId": "E1421267-380A-4A3D-A41A-0B6F7BD6F810",
+    "UserId": "433C171C-7987-42CB-5180-08DC101B1414"
+  },
+  {
+    "SchoolName": "THCS CLC Nam Từ Liêm",
+    "FullName": "Đỗ Phương Thuỳ",
+    "Email": "dophuongthuy811@gmail.com",
+    "Grade": 6,
+    "StudentId": "921E8319-1C58-4341-AC1E-4ED087B1208F",
+    "UserId": "8AF3B1D0-F0FE-4FEC-518B-08DC101B1414"
+  },
+  {
+    "SchoolName": "THCS CLC Nam Từ Liêm",
+    "FullName": "Hoàng Duy Thắng",
+    "Email": "hoangduykhang.haui@gmail.com",
+    "Grade": 6,
+    "StudentId": "8FE7F6E1-0CCD-4C56-AC38-759A3D22D07E",
+    "UserId": "37FF68C9-4B93-49A1-67E1-08DC176BAE33"
+  },
+  {
+    "SchoolName": "THCS CLC Nam Từ Liêm",
+    "FullName": "Đỗ Minh Khánh",
+    "Email": "khanh1234567890aaabbbccc@gmail.com",
+    "Grade": 8,
+    "StudentId": "C611B5DE-C84A-4476-A14A-61AE40B77C05",
+    "UserId": "FD24EFC4-8747-465F-5185-08DC101B1414"
+  },
+  {
+    "SchoolName": "THCS CLC Nam Từ Liêm",
+    "FullName": "Đỗ Tự Anh Khôi",
+    "Email": "chaunhuadep@gmail.com",
+    "Grade": 7,
+    "StudentId": "624DD3CC-94DC-42BC-86F4-42498E2AAED1",
+    "UserId": "00920AB3-5D2E-4387-67E2-08DC176BAE33"
+  },
+  {
+    "SchoolName": "THCS CLC Nam Từ Liêm",
+    "FullName": "Vũ Nam Phong",
+    "Email": "vunamphong0506@gmail.com",
+    "Grade": 6,
+    "StudentId": "8CE5F856-7005-4C50-9986-A0B3556F33E9",
+    "UserId": "572A9807-6929-4786-67E0-08DC176BAE33"
+  },
+  {
+    "SchoolName": "THCS CLC Nam Từ Liêm",
+    "FullName": "Văn Minh Tùng",
+    "Email": "tuvankhaosat668vn@gmail.com",
+    "Grade": 7,
+    "StudentId": "F89C30C1-73C2-4903-A683-F79580722E8A",
+    "UserId": "D0F06C30-A8FC-4E0A-5184-08DC101B1414"
+  },
+  {
+    "SchoolName": "THCS CLC Nam Từ Liêm",
+    "FullName": "Phan Hải Yến",
+    "Email": "Ngoanvtthanhtra@gmail.com",
+    "Grade": 7,
+    "StudentId": "CAC673E1-ED1A-4348-BE0D-CB518F9B79A4",
+    "UserId": "914F5E16-3C5B-4800-A6D1-08DC1013A7D1"
+  },
+  {
+    "SchoolName": "THCS CLC Nam Từ Liêm",
+    "FullName": "Nguyễn Hải Hà",
+    "Email": "nguyenhaiha2987@gmail.com",
+    "Grade": 6,
+    "StudentId": "1DCF7E88-55F8-4CC0-942A-035AA08809D6",
+    "UserId": "408158DF-6B85-45BC-8213-08DC180F583F"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Long Biên",
+    "FullName": "Nguyễn Cảnh Vinh",
+    "Email": "thudang06@gmail.com",
+    "Grade": 6,
+    "StudentId": "CB92B892-BF89-437B-B689-A379AA4CCB93",
+    "UserId": "298CE18E-44AE-477D-6085-08DC1354F9E2"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Long Biên",
+    "FullName": "Đặng Lâm Nhật",
+    "Email": "lynguyen290684@gmail.com",
+    "Grade": 6,
+    "StudentId": "CF08F546-3FFD-423B-8166-45138671D954",
+    "UserId": "2668027B-0C4C-421B-8217-08DC180F583F"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Long Biên",
+    "FullName": "Trần Thu Hương",
+    "Email": "dungtv.t.g@gmail.com",
+    "Grade": 6,
+    "StudentId": "511207C5-B18D-46E1-B316-2D5C32EA5F87",
+    "UserId": "55BF447A-0DC1-4151-8215-08DC180F583F"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Long Biên",
+    "FullName": "Trần Ngọc Minh",
+    "Email": "macvinh1982hn@gmail.com",
+    "Grade": 6,
+    "StudentId": "ED38139F-CC33-4786-8D1F-5B6E2C8DB59A",
+    "UserId": "057B22FA-8143-4791-5196-08DC101B1414"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Long Biên",
+    "FullName": "Nguyễn Trọng Quốc Cường",
+    "Email": "hoan.utv@gmail.com",
+    "Grade": 6,
+    "StudentId": "D1022925-BB66-4020-8A6F-D53C6B61F5D2",
+    "UserId": "C78EE7FF-EB93-4A29-8210-08DC180F583F"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Long Biên",
+    "FullName": "Vũ Quốc An",
+    "Email": "vuquocan.thdtvh@gmail.com",
+    "Grade": 6,
+    "StudentId": "9F5D3CFC-0754-45CE-94AC-604EA03EEDD2",
+    "UserId": "E558FC99-6F8C-4CF2-5195-08DC101B1414"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Long Biên",
+    "FullName": "Đinh Nguyễn Trường Giang",
+    "Email": "loidinhtien@gmail.com",
+    "Grade": 6,
+    "StudentId": "02C69B63-D968-4139-A7C2-A6E862681D87",
+    "UserId": "4993F76F-4250-4C9A-246C-08DC1E1CCF02"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Long Biên",
+    "FullName": "Vũ Khánh Huyền",
+    "Email": "phamthuytram2510@gmail.com",
+    "Grade": 6,
+    "StudentId": "33AE29B3-C758-4D9E-AE23-0729865832DA",
+    "UserId": "707E0D98-B70F-4DB5-519A-08DC101B1414"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Long Biên",
+    "FullName": "Nguyễn Thảo Anh",
+    "Email": "anh.nt.cva.k2@gmail.com",
+    "Grade": 8,
+    "StudentId": "6B14A3AA-9AAE-48EA-9E5E-9366A727A887",
+    "UserId": "18F8862B-EBDA-478E-5197-08DC101B1414"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Long Biên",
+    "FullName": "Mai Đức Bảo",
+    "Email": "phamthanhhuong3977@gmail.com",
+    "Grade": 8,
+    "StudentId": "38B68922-ABE6-4FFA-A1C5-4051DDAC2A18",
+    "UserId": "E8C78DA5-D405-458D-F24D-08DC1358A8B5"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Long Biên",
+    "FullName": "Đinh Thị Mai An",
+    "Email": "dinhthimaian.5656@gmail.com",
+    "Grade": 7,
+    "StudentId": "1065E6EC-7057-4D78-BC7A-A157D25FA755",
+    "UserId": "03CA2237-1C8E-4B05-2466-08DC1E1CCF02"
+  },
+  {
+    "SchoolName": "THCS Long Biên",
+    "FullName": "Nguyễn Bảo Nam",
+    "Email": "nguyenthithanhthuy26101984@gmail.com",
+    "Grade": 5,
+    "StudentId": "0C97C16F-2F0F-404D-8B6D-36A4A1AA8F3A",
+    "UserId": "F93F408D-F974-47A8-67DC-08DC176BAE33"
+  },
+  {
+    "SchoolName": "THCS Long Biên",
+    "FullName": "Đinh Tuệ Minh",
+    "Email": "tueminh2711@gmail.com",
+    "Grade": 6,
+    "StudentId": "6E67E46D-E285-4C82-94F7-2828B41A8D26",
+    "UserId": "24619010-1841-4196-F24C-08DC1358A8B5"
+  },
+  {
+    "SchoolName": "THCS Long Biên",
+    "FullName": "Ngô Xuân Bảo Phúc",
+    "Email": "giang110pcbn@gmail.com",
+    "Grade": 8,
+    "StudentId": "3FFA5D41-7453-4765-A2A2-5714BD9B3C20",
+    "UserId": "E0E23961-424E-4D22-67E3-08DC176BAE33"
+  },
+  {
+    "SchoolName": "THCS Long Biên",
+    "FullName": "Phạm Hà Linh",
+    "Email": "thuynep298@gmail.com",
+    "Grade": 6,
+    "StudentId": "0C8E2E40-0E70-43BE-BCC1-7E22665AA423",
+    "UserId": "0552D7D2-950A-46BE-67DD-08DC176BAE33"
+  },
+  {
+    "SchoolName": "THCS Long Biên",
+    "FullName": "Phạm Bảo Hân",
+    "Email": "quyennguyen83hn@gmail.com",
+    "Grade": 8,
+    "StudentId": "22B7E213-4DFF-40C2-936A-8F2E76CE655F",
+    "UserId": "E4D95713-B66F-41F6-8219-08DC180F583F"
+  },
+  {
+    "SchoolName": "THCS Long Biên",
+    "FullName": "Nguyễn Ngọc Tú",
+    "Email": "thuanlongbien2018@gmail.com",
+    "Grade": 7,
+    "StudentId": "09BD822E-3C2E-4752-941D-FCDEB486009A",
+    "UserId": "7C51F8A2-412D-4AAC-6082-08DC1354F9E2"
+  },
+  {
+    "SchoolName": "THCS Long Biên",
+    "FullName": "Phạm Đào Anh Thư",
+    "Email": "hungthutb2007@gmail.com",
+    "Grade": 8,
+    "StudentId": "5508547A-F999-4EF9-A903-7C3DDB5CFC11",
+    "UserId": "7A3416FD-D1C2-4E87-821A-08DC180F583F"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Tây Hồ",
+    "FullName": "Đỗ Thái Phương My",
+    "Email": "phuongmydothai@gmail.com",
+    "Grade": 6,
+    "StudentId": "58A84647-A96D-442A-90FA-B55B64598EBD",
+    "UserId": "ADC46255-78DE-496E-519C-08DC101B1414"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Tây Hồ",
+    "FullName": "Phạm Vũ Minh",
+    "Email": "vtlien13@gmail.com",
+    "Grade": 6,
+    "StudentId": "FCCA81E3-7113-4CA0-B126-CF4BCD460BA4",
+    "UserId": "E1BA5AAF-BC35-435F-519B-08DC101B1414"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Tây Hồ",
+    "FullName": "Đoàn Lữ Thụy Phương",
+    "Email": "luthimai@gmail.com",
+    "Grade": 6,
+    "StudentId": "3159C5AA-4534-4292-800A-8CA03A46A700",
+    "UserId": "EA649A61-5610-4188-CA6F-08DC1298B675"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Tây Hồ",
+    "FullName": "Nguyễn Duy Hoàng Phương",
+    "Email": "2dhphuong@gmail.com",
+    "Grade": 7,
+    "StudentId": "E68BA7C9-16D6-404A-BD10-D76F77A626F8",
+    "UserId": "7463D025-E33C-4D01-67DF-08DC176BAE33"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Tây Hồ",
+    "FullName": "Nguyễn Việt Anh",
+    "Email": "nguyenthuha1287@gmail.com",
+    "Grade": 7,
+    "StudentId": "53F5868B-72AE-49E5-BC81-CB46941043C2",
+    "UserId": "70467C85-7907-4068-8214-08DC180F583F"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Tây Hồ",
+    "FullName": "Đinh Khánh Vân",
+    "Email": "dinhkhanhvan2010@gmail.com",
+    "Grade": 8,
+    "StudentId": "CBDE5DF1-1172-4076-A9E2-6AAD53FE248E",
+    "UserId": "CA55F437-BF2D-457D-CA6D-08DC1298B675"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Tây Hồ",
+    "FullName": "Nguyễn Trung Hải Lâm",
+    "Email": "hailam6a2@gmail.com",
+    "Grade": 8,
+    "StudentId": "3F383F2E-7BD1-4876-B436-9FF37E2AAA6C",
+    "UserId": "233E66DE-EA8A-400D-67DE-08DC176BAE33"
+  },
+  {
+    "SchoolName": "THCS Chu Văn An - Tây Hồ",
+    "FullName": "Lê Quốc Bảo Châu",
+    "Email": "justcharyeah@gmail.com",
+    "Grade": 8,
+    "StudentId": "4544FE57-5636-495A-AD38-344BDA59302E",
+    "UserId": "D3D4C882-11AB-4E8B-DB07-08DC1299E31B"
+  },
+  {
+    "SchoolName": "THCS Nguyễn Du - Nam Từ Liêm",
+    "FullName": "Nguyễn Thanh Tùng",
+    "Email": "thtrunga@gmail.com",
+    "Grade": 6,
+    "StudentId": "EDD4CCF4-B812-4A48-AC87-1B0D58FF01BE",
+    "UserId": "37B52CB5-A5A6-4028-6086-08DC1354F9E2"
+  },
+  {
+    "SchoolName": "THCS Nguyễn Du - Nam Từ Liêm",
+    "FullName": "Nguyễn Đình Nhân",
+    "Email": "nguyendinhnhan251012@gmail.com",
+    "Grade": 6,
+    "Column8": "x",
+    "StudentId": "B4EEBE9C-C408-47A4-971A-56F36F524C6F",
+    "UserId": "C75B1395-75D1-4F91-F246-08DC1358A8B5"
+  },
+  {
+    "SchoolName": "THCS Nguyễn Du - Nam Từ Liêm",
+    "FullName": "Nguyễn Đình Gia Bảo",
+    "Email": "mmecheems@gmail.com",
+    "Grade": 8,
+    "StudentId": "D6F52623-A4A7-419F-BB00-2DFAB99AA237",
+    "UserId": "046F4388-DE90-493A-6089-08DC1354F9E2"
+  },
+  {
+    "SchoolName": "THCS Nguyễn Du - Nam Từ Liêm",
+    "FullName": "Lê Hồng Anh",
+    "Email": "lehonganhhn@gmail.com",
+    "Grade": 7,
+    "StudentId": "C7EE1DAA-EB78-4673-8721-18D6CAA1422C",
+    "UserId": "E631CB62-2566-44DC-CA6E-08DC1298B675"
+  },
+  {
+    "SchoolName": "THCS Nguyễn Du - Nam Từ Liêm",
+    "FullName": "Trần Tiến Dũng",
+    "Email": "nguyenloan1502888@gmail.com",
+    "Grade": 7,
+    "StudentId": "71070A59-2BBD-45BB-BBCB-E835C7334180",
+    "UserId": "9A7AF053-14C8-4814-2465-08DC1E1CCF02"
+  },
+  {
+    "SchoolName": "THCS Nguyễn Du - Nam Từ Liêm",
+    "FullName": "Nguyễn Lê Duy Thái",
+    "Email": "leminhluyennd@gmail.com",
+    "Grade": 7,
+    "StudentId": "84C00298-8024-44F4-92D7-790EC671E9C5",
+    "UserId": "6967B3FC-3A8C-48CB-5D37-08DC134369DC"
+  },
+  {
+    "SchoolName": "THCS Nguyễn Du - Nam Từ Liêm",
+    "FullName": "Lê Hải Phong",
+    "Email": "thangbich11@gmail.com",
+    "Grade": 6,
+    "StudentId": "18A156CC-3518-4747-94DD-EDC85EB0DA8A",
+    "UserId": "C3C7F072-D7C1-498B-F252-08DC1358A8B5"
+  },
+  {
+    "SchoolName": "THCS Nguyễn Du - Nam Từ Liêm",
+    "FullName": "Vũ Quang Lâm",
+    "Email": "lucaslam2211@gmail.com",
+    "Grade": 8,
+    "StudentId": "7DFB070D-5EA1-4DCE-89C9-995E577DEBBA",
+    "UserId": "3A841A30-F97E-4DC2-8218-08DC180F583F"
+  },
+  {
+    "SchoolName": "THCS Nguyễn Du - Nam Từ Liêm",
+    "FullName": "Phạm Duy Khánh",
+    "Email": "trinhthuphuong2010@gmail.com",
+    "Grade": 7,
+    "StudentId": "3C838B0C-5A14-4CE5-A6EE-A8CFA7763BBE",
+    "UserId": "01E035CF-3C05-44FE-A6E5-08DC1013A7D1"
+  },
+  {
+    "SchoolName": "THCS Thanh Xuân",
+    "FullName": "Đào Hương Giang",
+    "Email": "huonglai.fh@gmail.com",
+    "Grade": 6,
+    "StudentId": "0AD9EC44-23D8-46A5-A5F7-5070F5BA55E7",
+    "UserId": "8CCD99C8-81E1-47D9-6088-08DC1354F9E2"
+  },
+  {
+    "SchoolName": "THCS Thanh Xuân",
+    "FullName": "Đặng Hồng Phúc",
+    "Email": "hongphuc2k112011@gmail.com",
+    "Grade": 7,
+    "StudentId": "5BCB719E-8C0B-4D1D-8282-52246316658F",
+    "UserId": "9302E565-2D79-44D2-F250-08DC1358A8B5"
+  },
+  {
+    "SchoolName": "THCS Thanh Xuân",
+    "FullName": "Chu Đức Tân",
+    "Email": "kissqdh@gmail.com",
+    "Grade": 7,
+    "StudentId": "9A285C5B-E0FE-414D-9643-CAA5D1C49319",
+    "UserId": "A50C4DEB-DEF3-418F-8211-08DC180F583F"
+  },
+  {
+    "SchoolName": "THCS Thanh Xuân",
+    "FullName": "Trần Đặng Hương Ly",
+    "Email": "trd.huonglyyy1305@gmail.com",
+    "Grade": 7,
+    "StudentId": "38F2AD98-3263-45F8-87AB-59DC0B277F90",
+    "UserId": "6CC62875-8E6B-4710-8216-08DC180F583F"
+  },
+  {
+    "SchoolName": "Tiểu học Ngọc Thuỵ",
+    "FullName": "Nguyễn Phương Nga",
+    "Email": "caophuonganh240185@gmail.com",
+    "Grade": 5,
+    "StudentId": "D320B930-E5C0-4C2A-90DF-DC00C8369D95",
+    "UserId": "5D02093A-ABBD-4536-67EA-08DC176BAE33"
+  },
+  {
+    "SchoolName": "THCS Nguyễn Du - Nam Từ Liêm",
+    "FullName": "Phan Bảo Phúc",
+    "Email": "kejiv79636@telvetto.com",
+    "Grade": 7,
+    "StudentId": "E963435E-5293-4DDF-8451-955BE0623440",
+    "UserId": "BFE091EB-D077-4D2B-F255-08DC1358A8B5"
+  },
+  {
+    "SchoolName": "THCS Hanoi Academy",
+    "FullName": "Phan Huy Gia Hưng",
+    "Email": "huukhoa@atlantic.edu.vn",
+    "Grade": 7,
+    "StudentId": "7cc48335-b67d-48b3-b1e1-1dba59c5018b",
+    "UserId": "3AC569A6-55F1-41CC-F1EA-08DC2488E8AC"
+  }
+]

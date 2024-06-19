@@ -5,11 +5,11 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
 
     public class UpdateStatusUserCommand : IRequest<MethodResult<UserModel>>
     {

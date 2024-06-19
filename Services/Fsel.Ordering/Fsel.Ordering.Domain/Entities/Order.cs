@@ -3,7 +3,6 @@
 using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
-using Fsel.Ordering.Domain.Enums;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Ordering.Domain.Entities
@@ -23,16 +22,35 @@ namespace Fsel.Ordering.Domain.Entities
         public string? FullName { get; set; }
 
         /// <summary>
-        /// Quốc gia
+        /// Email Người dùng
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public string? Email { get; set; }
+
+        /// <summary>
+        /// SDT Người dùng
+        /// </summary>
+        public string? PhoneNumber { get; set; }
+
+        /// <summary>
+        /// Quốc gia
+        /// </summary>
         public string? Country { get; set; }
 
         /// <summary>
-        /// Giá Khóa Học
+        /// Địa chỉ
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Address { get; set; }
+
+        /// <summary>
+        /// Id tỉnh, thành phố
+        /// </summary>
+        public Guid? ProvinceId { get; set; }
+
+        /// <summary>
+        /// Id quận, huyện
+        /// </summary>
+        public Guid? DistrictId { get; set; }
 
         /// <summary>
         /// Trạng thái Đơn hàng
@@ -42,7 +60,7 @@ namespace Fsel.Ordering.Domain.Entities
         ///<summary>
         /// Phương thức thanh toán
         ///</summary>
-        public EnumPaymentMethodStatus PaymentMethod { get; set; }
+        public EnumPaymentMethodStatus? PaymentMethod { get; set; }
 
         /// <summary>
         /// Giá Khóa Học
@@ -68,10 +86,21 @@ namespace Fsel.Ordering.Domain.Entities
         [Range(0, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public decimal TotalPrice { get; set; }
 
+        /// <summary>
+        /// Thời gian Học
+        /// </summary>
+        public DateTime? ExpireDate { get; set; }
+
+        /// <summary>
+        /// Học thử
+        /// </summary>
+        public bool IsTrial { get; set; }
+
         public Guid CourseId { get; set; }
         public Package? Package { get; set; }
-        public Guid PackageId { get; set; }
+        public Guid? PackageId { get; set; }
         public Guid UserId { get; set; }
         public Guid ClassId { get; set; }
+        public ICollection<OrderTransaction> OrderTransactions { get; set; } = new List<OrderTransaction>();
     }
 }

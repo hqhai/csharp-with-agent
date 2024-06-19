@@ -1,0 +1,28 @@
+[
+  {
+    "id": "ad566fae-9d00-48b7-a76c-e8fe84a9125f",
+    "createddate": "2023-10-17",
+    "createdfullname": "admin",
+    "isdeleted": false,
+    "startroundnumber": 1,
+    "endroundnumber": 9,
+    "currentunit": 2,
+    "currentunitOutside": 4,
+    "previousunit": 2,
+    "previousunitoutside": 2,
+    "numberquestionperGame": 10
+  },
+  {
+    "id": "a3561911-db7f-4942-a5bb-8a2615e4dca8",
+    "createddate": "2023-10-17",
+    "createdfullname": "admin",
+    "isdeleted": false,
+    "startroundnumber": 10,
+    "endroundnumber": 10000,
+    "currentunit": 5,
+    "currentunitOutside": 5,
+    "previousunit": 5,
+    "previousunitoutside": 5,
+    "numberquestionpergame": 20
+  }
+]

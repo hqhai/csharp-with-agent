@@ -8,5 +8,20 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// Class with more than 12 students
         /// </summary>
         ClassMoreThan12Students,
+
+        /// <summary>
+        /// received tokens
+        /// </summary>
+        UserReceivedTokens,
+
+        /// <summary>
+        /// User Not Established
+        /// </summary>
+        UserNotEstablished,
+
+        /// <summary>
+        /// User Not EnoughTime
+        /// </summary>
+        UserNotEnoughTime
     }
 }

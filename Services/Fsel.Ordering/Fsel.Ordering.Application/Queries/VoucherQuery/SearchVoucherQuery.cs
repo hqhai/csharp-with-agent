@@ -2,6 +2,7 @@
 
 namespace Fsel.Ordering.Application.Queries.VoucherQuery
 {
+    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -10,6 +11,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Ordering.Domain.Models.QueryModels.Vouchers;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -47,11 +49,11 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                                 EndDate = x.EndDate,
                                 CustomerTypes = x.CustomerTypes,
                                 CreatedDate = x.CreatedDate,
-                                IsActive = (x.IsActive == null ? (x.StartDate <= DateTime.Now && DateTime.Now <= x.EndDate) : x.IsActive),
+                                IsActive = (x.StartDate <= DateTime.UtcNow && DateTime.UtcNow <= x.EndDate),
                             });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                voucherQuery = voucherQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                voucherQuery = voucherQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             int totalItem = await voucherQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

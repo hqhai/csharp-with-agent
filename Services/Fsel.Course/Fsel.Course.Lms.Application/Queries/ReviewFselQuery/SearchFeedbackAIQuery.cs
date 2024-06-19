@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -96,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                groupedQuery = groupedQuery.Where(m => (m.CourseName ?? string.Empty).Contains(request.Keyword));
+                groupedQuery = groupedQuery.Where(m => (m.CourseName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             if (request.NumberOfStars != null)
@@ -112,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                     .ConfigureAwait(false);
             foreach (var item in lists)
             {
-                item.NumberOfStars = NumberHelper.ConvertDoubleDecimal(item.NumberOfStars);
+                item.NumberOfStars = NumberHelper.ConvertRound(item.NumberOfStars);
             }
             methodResult.Result = new PagingItemsModel<FeedbackClassForumAIModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

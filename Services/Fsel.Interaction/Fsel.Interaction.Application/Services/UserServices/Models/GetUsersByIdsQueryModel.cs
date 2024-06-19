@@ -10,6 +10,6 @@ namespace Fsel.Interaction.Application.Services.UserServices.Models
 
     public class GetUsersByIdsQueryModel
     {
-        public IList<string>? UserIds { get; set; }
+        public IList<Guid>? UserIds { get; set; }
     }
 }

@@ -8,5 +8,10 @@ namespace Fsel.Interaction.Domain.Enums.ErrorCodes
         /// Comment not flagged
         /// </summary>
         CommentNotFlagged,
+
+        /// <summary>
+        /// Contains Forbidden Keywords
+        /// </summary>
+        ContainsForbiddenKeywords
     }
 }

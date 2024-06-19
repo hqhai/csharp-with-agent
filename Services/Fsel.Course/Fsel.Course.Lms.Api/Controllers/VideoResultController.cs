@@ -3,19 +3,21 @@
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.VideoResultCmd;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/video-result")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Student))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class VideoResultController : ControllerBase
     {
         private readonly IMediator _mediator;

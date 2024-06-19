@@ -34,23 +34,25 @@ namespace Fsel.Identity.Application.Queries.DailyStreakQuery
 
             var student = await _studentRepository.Queryable.Include(x => x.StudentDailyStreaks)
                                         .Include(i => i.Human)
-                                        .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == _authContext.CurrentUserId.ToString(), cancellationToken);
+                                        .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == _authContext.CurrentUserId, cancellationToken);
             if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            var date = DateTime.Now;
+            var date = DateTime.UtcNow;
             var studentDailyQuery = student.StudentDailyStreaks.Where(x => x.DailyDate.Month == date.Month && x.DailyDate.Year == date.Year);
             var studentDailyStreak = new StudentDailyStreakModel();
             studentDailyStreak.NumberOfShield = student.NumberOfShield;
+            studentDailyStreak.IsCheckIn = studentDailyQuery.Any(x => x.DailyDate.Date == DateTime.UtcNow.Date);
             studentDailyStreak.NumberOfGift = studentDailyQuery.Where(x => x.IsGiftReceive).Count();
-            studentDailyStreak.DailyDayOfGifts = studentDailyQuery.OrderBy(x => x.DailyDate).Select(x => new StudentConsecutiveDayModel
+            studentDailyStreak.DailyDayOfGifts = studentDailyQuery.Where(x => x.LevelOfGift.HasValue && x.LevelOfGift != 0).OrderBy(x => x.DailyDate).Select(x => new StudentConsecutiveDayModel
             {
                 Id = x.Id,
                 IsGiftReceive = x.IsGiftReceive,
                 DailyDate = x.DailyDate,
-                LevelOfGift = x.LevelOfGift ?? default
+                LevelOfGift = x.LevelOfGift ?? default,
+                StudentId = student.Id,
             }).ToList();
             studentDailyStreak.CountStudentDaily = studentDailyQuery.Count();
             methodResult.Result = studentDailyStreak;

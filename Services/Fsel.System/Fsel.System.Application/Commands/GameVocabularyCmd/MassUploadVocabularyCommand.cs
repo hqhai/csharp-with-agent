@@ -4,22 +4,25 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
+    using Fsel.Common.Models.Excels;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
-    using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.GameVocabularies;
-    using Fsel.System.Domain.Models.EntityModels;
     using global::System.Globalization;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class MassUploadVocabularyCommand : MassUploadVocabularyCommandModel, IRequest<MethodResult<IList<GameVocabularyModel>>>
+    public class MassUploadVocabularyCommand : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
     }
 
-    public class MassUploadVocabularyCommandHandler : IRequestHandler<MassUploadVocabularyCommand, MethodResult<IList<GameVocabularyModel>>>
+    public class MassUploadVocabularyCommandHandler : IRequestHandler<MassUploadVocabularyCommand, MethodResult<Stream>>
     {
         private readonly IGameVocabularyRepository _gameVocabularyRepository;
         private readonly IGameTopicRepository _gameTopicRepository;
@@ -34,81 +37,72 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
             _userService = userService;
         }
 
-        public async Task<MethodResult<IList<GameVocabularyModel>>> Handle(MassUploadVocabularyCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<Stream>> Handle(MassUploadVocabularyCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<GameVocabularyModel>> methodResult = new MethodResult<IList<GameVocabularyModel>>();
+            var methodResult = new MethodResult<Stream>();
 
-            if (request.GameVocabularies == null || request.GameVocabularies.Count == 0)
+            var result = request.FormFile?.ImportAndValidateExcel(async (MassUploadVocabularyCommandModel x, IList<MassUploadVocabularyCommandModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
-                return methodResult;
-            }
-
-            #region Validate
-
-            var gameTopicIds = request.GameVocabularies.Where(x => x.WordCategoryId.HasValue).Select(n => n.WordCategoryId).ToList();
-            var gameTopics = await _gameTopicRepository.Queryable.Where(p => gameTopicIds.Contains(p.Id)).ToListAsync(cancellationToken);
-            if (gameTopics.Count != gameTopicIds.Count)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.GameTopicNotExist));
-                return methodResult;
-            }
-
-            var codes = request.GameVocabularies.Where(x => !string.IsNullOrEmpty(x.Code)).Select(n => n.Code).ToList();
-            if (codes.Any(p => p!.Length != 7 || !int.TryParse(p, out int checkCode)))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.InvalidCode));
-                return methodResult;
-            }
-            if (codes != null && codes.Count >= 2 && CheckDuplicate(codes))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.DuplicateCodes));
-                return methodResult;
-            }
-            if (codes != null && codes.Count > 0 && _gameVocabularyRepository.Queryable.Any(p => codes.Contains(p.Code)))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.CodeAlreadyExist));
-                return methodResult;
-            }
-
-            var keys = request.GameVocabularies.Where(x => !string.IsNullOrEmpty(x.Key)).Select(n => n.Key).ToList();
-            if (keys != null && keys.Count >= 2 && CheckDuplicate(keys))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.DuplicateKeys));
-                return methodResult;
-            }
-            if (keys != null && keys.Count > 0 && _gameVocabularyRepository.Queryable.Any(p => keys.Contains(p.Key)))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.KeyAlreadyExist));
-                return methodResult;
-            }
-
-            var platformIds = request.GameVocabularies.Where(x => x.PlatformId.HasValue).Select(n => n.PlatformId).ToList();
-            if (platformIds.Count > 0)
-            {
-                var platformsResult = await _userService.GetAllPlatform();
-                if (!platformsResult.IsSuccessStatusCode || platformsResult.Content?.Result == null)
+                if (!string.IsNullOrEmpty(x.Code) && CheckDuplicate(models.Where(p => !string.IsNullOrEmpty(p.Code)).Select(x => x.Code).ToList(), x.Code))
                 {
-                    methodResult.AddError(platformsResult.Error);
-                    return methodResult;
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Code), Message = "Duplicate Code" });
                 }
-                var platformEntityIds = platformsResult.Content.Result.Select(p => p.Id).ToList();
 
-                if (platformIds.Any(p => !platformEntityIds.Contains(p!.Value)))
+                if (!string.IsNullOrEmpty(x.Code) && (x.Code?.Length != 7 || !int.TryParse(x.Code, out int checkCode)))
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.PlatformNotExist));
-                    return methodResult;
-                };
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Code), Message = "Invalid Code" });
+                }
+
+                if (!string.IsNullOrEmpty(x.Code) && _gameVocabularyRepository.Queryable.Any(p => p.Code == x.Code))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Code), Message = "Code Already Exist" });
+                }
+
+                if (!string.IsNullOrEmpty(x.Key) && CheckDuplicate(models.Where(p => !string.IsNullOrEmpty(p.Key)).Select(x => x.Key).ToList(), x.Key))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Key), Message = "Duplicate Key" });
+                }
+
+                if (string.IsNullOrEmpty(x.Key))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Key), Message = "Key Null" });
+                }
+
+                if (_gameVocabularyRepository.Queryable.Any(p => p.Key == x.Key))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Key), Message = "Key Already Exist" });
+                }
+
+                if (!string.IsNullOrEmpty(x.WordCategory) && !_gameTopicRepository.Queryable.Any(p => p.Value == x.WordCategory))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.WordCategory), Message = "Word Category Not Exist" });
+                }
+
+                return await Task.FromResult(errors.Count == 0);
+            });
+
+            if (result?.Stream != null)
+            {
+                methodResult.Result = result.Stream;
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
             }
+
+            var datas = result?.Datas.ToList();
+            var gameVocabularies = new List<GameVocabulary>();
+
+            var platformsResult = await _userService.GetPlatformsQueryAsync(new BaseQueryModel { });
+            var platforms = platformsResult.Content?.Result;
+
             var countGameVocabulary = await _gameVocabularyRepository.Queryable.CountAsync(cancellationToken);
 
-            #endregion Validate
-
-            await _gameVocabularyRepository.ExecuteTransactionAsync(async () =>
+            if (datas != null)
             {
-                var gameVocabularies = _mapper.Map<IList<GameVocabulary>>(request.GameVocabularies);
-                foreach (var item in gameVocabularies)
+                foreach (var item in datas)
                 {
+                    var gameVocabulary = _mapper.Map<GameVocabulary>(item);
+
                     if (string.IsNullOrEmpty(item.Code))
                     {
                         while (true)
@@ -116,37 +110,72 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
                             string generateCode = countGameVocabulary.ToString("D7", CultureInfo.CurrentCulture);
                             if (!_gameVocabularyRepository.Queryable.Any(p => p.Code == generateCode) && !gameVocabularies.Any(p => p.Code == generateCode))
                             {
-                                item.Code = generateCode;
+                                gameVocabulary.Code = generateCode;
                                 break;
                             }
                             countGameVocabulary++;
                         }
                     }
-                    if (!item.IsValid())
-                    {
-                        methodResult.AddError(item.ErrorMessages);
-                        return methodResult;
-                    }
-                }
 
+                    gameVocabulary.WordCategoryId = _gameTopicRepository.Queryable.FirstOrDefault(p => p.Value == item.WordCategory)?.Id;
+
+                    AddGameVocabularyType(gameVocabulary, nameof(item.AlternateSpelling), item.AlternateSpelling);
+                    AddGameVocabularyType(gameVocabulary, nameof(item.UsEquivalent), item.UsEquivalent);
+                    AddGameVocabularyType(gameVocabulary, nameof(item.Definition), item.Definition);
+                    AddGameVocabularyType(gameVocabulary, nameof(item.Hint), item.Hint);
+                    AddGameVocabularyType(gameVocabulary, nameof(item.ExampleSentence), item.ExampleSentence);
+                    AddGameVocabularyType(gameVocabulary, nameof(item.Image), item.Image);
+                    AddGameVocabularyType(gameVocabulary, nameof(item.Audio), item.Audio);
+                    AddGameVocabularyType(gameVocabulary, nameof(item.Synonym), item.Synonym);
+                    AddGameVocabularyType(gameVocabulary, nameof(item.Antonym), item.Antonym);
+                    AddGameVocabularyType(gameVocabulary, nameof(item.PhoneticTranscription), item.PhoneticTranscription);
+                    AddGameVocabularyType(gameVocabulary, EnumGameVocabType.JumbledSpelling.ToString(), item.Key);
+
+                    var listEnumGameVocabType = gameVocabulary.GameVocabularyTypes?.Select(p => p.GameVocabType).ToList();
+
+                    var platformIds = new List<Guid>();
+                    if (listEnumGameVocabType?.Count > 0)
+                    {
+                        var platformCodes = PlatformCodeHelper.GetEnumPlatformCodes(listEnumGameVocabType);
+                        platformIds = platforms?.Where(p => platformCodes != null && platformCodes.Contains(p.Code)).Select(p => p.Id).Distinct().ToList();
+                    }
+
+                    if (platformIds != null && platformIds.Count > 0)
+                    {
+                        platformIds.ForEach(p => { gameVocabulary.GameVocabularyPlatforms.Add(new GameVocabularyPlatform { PlatformId = p }); });
+                    }
+
+                    gameVocabularies.Add(gameVocabulary);
+                }
+            }
+
+            await _gameVocabularyRepository.ExecuteTransactionAsync(async () =>
+            {
                 await _gameVocabularyRepository.AddList(gameVocabularies);
-                await _gameVocabularyRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<IList<GameVocabularyModel>>(gameVocabularies);
+                await _gameVocabularyRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             });
-
             return methodResult;
         }
 
-        private static bool CheckDuplicate(IList<string?> objects)
+        private static bool CheckDuplicate(IList<string?> objects, string? value)
         {
-            var duplicate = objects.GroupBy(c => c).Where(p => p.Count() > 1).Select(x => x.Key);
-            if (duplicate.Any())
+            var duplicate = objects.Where(p => p == value).ToList();
+            if (duplicate.Count >= 2)
             {
                 return true;
             }
             return false;
+        }
+
+        private static void AddGameVocabularyType(GameVocabulary gameVocabulary, string gameVocabularyType, string? value)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                gameVocabulary.GameVocabularyTypes.Add(new GameVocabularyType { GameVocabType = gameVocabularyType.EnumParse<EnumGameVocabType>(), QuestionContent = value });
+            }
         }
     }
 }

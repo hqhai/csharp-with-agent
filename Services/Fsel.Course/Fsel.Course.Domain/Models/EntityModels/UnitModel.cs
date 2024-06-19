@@ -13,8 +13,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int DisplayOrder { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public IList<LessonModel>? Lessons { get; set; }
-        public MockTestModel? SkillMockTest { get; set; }
         public UnitResultModel? UnitResult { get; set; }
+        public MockTestModel? SkillMockTest { get; set; }
         public double Percent { get; set; }
     }
 }

@@ -4,6 +4,9 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Enums.ErrorCodes;
@@ -26,6 +29,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
         private readonly IGameTopicRepository _gameTopicRepository;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
+
         public CreateGameVocabularyCommandHandler(IGameVocabularyRepository gameVocabularyRepository, IGameTopicRepository gameTopicRepository, IMapper mapper, IUserService userService)
         {
             _gameVocabularyRepository = gameVocabularyRepository;
@@ -40,6 +44,19 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
             MethodResult<GameVocabularyModel> methodResult = new MethodResult<GameVocabularyModel>();
 
             #region validate
+
+            if (request.GameVocabularyTypes?.Count > 0)
+            {
+                for (int i = request.GameVocabularyTypes.Count - 1; i >= 0; i--)
+                {
+                    var item = request.GameVocabularyTypes[i];
+                    if (string.IsNullOrEmpty(item.QuestionContent))
+                    {
+                        request.GameVocabularyTypes.RemoveAt(i);
+                    }
+                }
+            }
+
             if (!string.IsNullOrEmpty(request.Key) && _gameVocabularyRepository.Queryable.Any(p => p.Key == request.Key))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.KeyAlreadyExist));
@@ -63,22 +80,29 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
                 methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.GameTopicNotExist));
                 return methodResult;
             }
-            if (request.PlatformId.HasValue)
+
+            #endregion validate
+
+            #region Get all Platform
+
+            var platformsResult = await _userService.GetPlatformsQueryAsync(new BaseQueryModel { });
+            var platforms = platformsResult.Content?.Result;
+
+            #endregion Get all Platform
+
+            request.GameVocabularyTypes?.Add(new CreateGameVocabularyTypeCommandModel { GameVocabType = EnumGameVocabType.JumbledSpelling, QuestionContent = request.Key });
+
+            #region Generate automatic PlatformIds
+
+            var listEnumGameVocabType = request.GameVocabularyTypes?.Select(p => p.GameVocabType).ToList();
+            var platformIds = new List<Guid>();
+            if (listEnumGameVocabType?.Count > 0)
             {
-                var platformsResult = await _userService.GetAllPlatform();
-                if (!platformsResult.IsSuccessStatusCode || platformsResult.Content?.Result == null)
-                {
-                    methodResult.AddError(platformsResult.Error);
-                    return methodResult;
-                }
-                var platforms = platformsResult.Content.Result;
-                if (!platforms.Any(p => p.Id == request.PlatformId))
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.PlatformNotExist));
-                    return methodResult;
-                }
+                var platformCodes = PlatformCodeHelper.GetEnumPlatformCodes(listEnumGameVocabType);
+                platformIds = platforms?.Where(p => platformCodes != null && platformCodes.Contains(p.Code)).Select(p => p.Id).Distinct().ToList();
             }
-            #endregion
+
+            #endregion Generate automatic PlatformIds
 
             await _gameVocabularyRepository.ExecuteTransactionAsync(async () =>
             {
@@ -101,6 +125,16 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
                     methodResult.AddError(gameVocabulary.ErrorMessages);
                     return methodResult;
                 }
+
+                #region Create GameVocabularyPlatforms
+
+                if (platformIds != null || platformIds?.Count > 0)
+                {
+                    platformIds.ForEach(p => { gameVocabulary.GameVocabularyPlatforms.Add(new GameVocabularyPlatform { PlatformId = p }); });
+                }
+
+                #endregion Create GameVocabularyPlatforms
+
                 gameVocabulary = _gameVocabularyRepository.Add(gameVocabulary);
                 await _gameVocabularyRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;

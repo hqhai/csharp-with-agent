@@ -62,14 +62,12 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             }
             int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
             var placementTestResultModels = _mapper.Map<IList<PlacementTestResultModel>>(placementTestResults);
+
+            var placementTestResultInitial = placementTestResults.FirstOrDefault();
+
             foreach (var item in placementTestResultModels)
             {
-                var (ptNext, isLock) = item.Level.GetLevelInScore(item.Percent, age);
-                if (item.SkillScores != null && item.SkillScores.Count > 0)
-                {
-                    item.CountQuestion = item.SkillScores.Sum(x => x.CountQuestion);
-                    item.TotalQuestion = item.SkillScores.Sum(x => x.TotalQuestion);
-                }
+                var (ptNext, isLock) = item.Level.GetLevelInScore(item.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age));
                 item.CourseLevel = ptNext;
                 item.IsLock = isLock;
             }

@@ -1,16 +1,17 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using System.Linq;
 using Fsel.Common.ActionResults;
+using Fsel.Core.Base.Managers;
+using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Models.ShareModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
@@ -22,19 +23,22 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class LoginCommandHandler : IRequestHandler<LoginCommand, MethodResult<TokenModel>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
+        private readonly Microsoft.AspNetCore.Identity.SignInManager<User> _signInManager;
         private readonly IMediator _mediator;
         private readonly IPlatformRepository _platformRepository;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
         public LoginCommandHandler(UserManager<User> userManager,
-            SignInManager<User> signInManager,
+            Microsoft.AspNetCore.Identity.SignInManager<User> signInManager,
             IMediator mediator,
-            IPlatformRepository platformRepository)
+            IPlatformRepository platformRepository,
+            NotificationMessagePublisher notificationMessagePublisher)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _mediator = mediator;
             _platformRepository = platformRepository;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -44,28 +48,28 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
             if (request.Username == null || request.Password == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserNameAndPasswordNotEmpty), new Error(nameof(request.Username)), new Error(nameof(request.Password)));
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserNameAndPasswordNotEmpty), new Error(nameof(request.Username)), new Error(nameof(request.Password)));
                 return methodResult;
             }
 
             var user = await _userManager.FindByNameAsync(request.Username) ?? await _userManager.FindByEmailAsync(request.Username) ??
                 await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.Username, cancellationToken: cancellationToken);
-            if (user == null)
+            if (user == null || user.IsDeleted)
             {
-                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.UserNameAndPasswordIncorrect), new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
+                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.UserNameAndPasswordIncorrect), new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
                 return methodResult;
             }
 
             var platformCodes = await _platformRepository.Queryable.Include(x => x.UserPlatforms).Where(x => x.UserPlatforms.Select(n => n.UserId).Contains(user.Id)).Select(x => x.Code).ToListAsync(cancellationToken);
             if (platformCodes != null && platformCodes.Count > 0 && request.PlatformCode.HasValue && !platformCodes.Contains(request.PlatformCode.Value))
             {
-                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.UserIsNotOnAnyPlatform), new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
+                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.UserIsNotOnAnyPlatform), new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
                 return methodResult;
             }
 
             if (!user.LockoutEnabled)
             {
-                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.AccountHasBeenLocked), new Error(nameof(request.Username), request.Username));
+                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccountHasBeenLocked), new Error(nameof(request.Username), request.Username));
                 return methodResult;
             }
 
@@ -73,12 +77,27 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (!result.Succeeded)
             {
                 methodResult.AddError(
-                    StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.UserNameAndPasswordIncorrect), new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
+                    StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.UserNameAndPasswordIncorrect), new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
                 return methodResult;
             }
             var generateToken = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
             methodResult = generateToken;
             return methodResult;
+        }
+
+        public async Task SendNotification(User user, CancellationToken cancellationToken)
+        {
+            if (user != null)
+            {
+                NotificationSendingQueueModel notificationQueue = new NotificationSendingQueueModel()
+                {
+                    UserIds = new List<Guid> { user.Id },
+                    Type = EnumNotificationType.LinkPage,
+                    Content = EnumNotificationContent.ReviewFsel,
+                    PlatformCode = EnumPlatformCode.LMS,
+                };
+                await _notificationMessagePublisher.Publish(notificationQueue, cancellationToken);
+            }
         }
     }
 }

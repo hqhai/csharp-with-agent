@@ -36,13 +36,13 @@ namespace Fsel.Identity.Application.Queries.DailyStreakQuery
 
             var student = await _studentRepository.Queryable
                             .Include(i => i.Human)
-                            .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == _authContext.CurrentUserId.ToString(), cancellationToken);
+                            .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == _authContext.CurrentUserId, cancellationToken);
             if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            methodResult.Result = await _studentDailyStreakRepository.Queryable.Where(x => x.IsArmorialReceive && x.DailyDate.Year == request.Year).Select(x => x.DailyDate).ToListAsync(cancellationToken);
+            methodResult.Result = await _studentDailyStreakRepository.Queryable.Where(x => x.IsArmorialReceive && x.DailyDate.Year == request.Year && x.StudentId == student.Id).Select(x => x.DailyDate).OrderBy(x => x).ToListAsync(cancellationToken);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

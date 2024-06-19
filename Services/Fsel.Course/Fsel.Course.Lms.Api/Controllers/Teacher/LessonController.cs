@@ -9,12 +9,13 @@ namespace Fsel.Course.Lms.Api.Controllers.Teacher
     using Fsel.Course.Lms.Application.Queries.LessonQuery;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/teacher/lesson")]
-    [Authorize(Roles = nameof(EnumRole.Teacher))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Teacher))]
     [ApiController]
     public class LessonController : ControllerBase
     {

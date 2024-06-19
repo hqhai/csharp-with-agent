@@ -2,7 +2,9 @@
 
 namespace Fsel.Shared.Helpers
 {
+    using System.Linq;
     using Fsel.Common.Helpers;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
 
     public static class EnumCourseLevelHelper
@@ -20,9 +22,21 @@ namespace Fsel.Shared.Helpers
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS3),
         };
 
+        private static Dictionary<EnumCourseLevel, EnumCourseLevel> s_levelMapping = new Dictionary<EnumCourseLevel, EnumCourseLevel>
+            {
+                { EnumCourseLevel.B1Plus, EnumCourseLevel.MS1 },
+                { EnumCourseLevel.B2, EnumCourseLevel.MS2 },
+                { EnumCourseLevel.C1, EnumCourseLevel.MS3 }
+            };
+
         public static EnumCourseType GetEnumCourseType(this EnumCourseLevel courseLevel)
         {
             return s_courseTypeLevel.FirstOrDefault(x => x.Value == courseLevel).Key;
+        }
+
+        public static EnumCourseLevel GetLevelAcaToLevelIELTS(this EnumCourseLevel courseLevel)
+        {
+            return s_levelMapping.FirstOrDefault(x => x.Value == courseLevel).Key;
         }
 
         public static object GetEnumPlacementTestSkills()
@@ -115,6 +129,177 @@ namespace Fsel.Shared.Helpers
         public static IList<string> GetListCourseLevels(this EnumCourseType? courseType)
         {
             return GetEnumCourseLevels(courseType).Select(x => x.ToString()).ToList();
+        }
+
+        public static object? GetListCourseLevels(this EnumCourseType? courseType, EnumCourseLevel courseLevel)
+        {
+            int index = (int)s_courseTypeLevel.FirstOrDefault(x => x.Key == courseLevel.GetEnumCourseType() && x.Value == courseLevel).Value;
+            var levels = s_courseTypeLevel
+                        .Where((x, i) => i >= index - 1 && i <= index + 1 && x.Key == courseLevel.GetEnumCourseType())
+                        .Select(x => new
+                        {
+                            CourseLevel = x.Value,
+                            LevelName = x.Value.GetDescription()
+                        })
+                        .ToList();
+            if (levels == null || !levels.Any())
+            {
+                return default;
+            }
+            if (courseType == EnumCourseType.Academic)
+            {
+                return levels;
+            }
+            else
+            {
+                var listCourselevel = levels.Select(x => x.CourseLevel).ToList();
+                var courseLevelIELSTs = s_levelMapping.Where(x => listCourselevel.Contains(x.Key)).Select(x => x.Value).ToList();
+                return s_courseTypeLevel.Where(x => x.Key == courseType && courseLevelIELSTs.Contains(x.Value)).Select(x => new
+                {
+                    CourseLevel = x.Value,
+                    LevelName = x.Value.GetDescription()
+                }).ToList();
+            }
+        }
+
+        public static bool IsCheckCourseLevel(this EnumCourseLevel courseLevelSelected, EnumCourseLevel courseLevel)
+        {
+            int index = (int)s_courseTypeLevel.FirstOrDefault(x => x.Key == courseLevel.GetEnumCourseType() && x.Value == courseLevel).Value;
+            var levels = s_courseTypeLevel
+                        .Where((x, i) => i >= index - 1 && i <= index + 1 && x.Key == courseLevel.GetEnumCourseType())
+                        .Select(x => x.Value)
+                        .ToList();
+            if (courseLevel.GetEnumCourseType() == courseLevelSelected.GetEnumCourseType())
+            {
+                return levels.Any(x => x == courseLevelSelected);
+            }
+            else
+            {
+                var courseLevelIELSTs = s_levelMapping.Where(x => levels.Contains(x.Key)).Select(x => x.Value).ToList();
+                return courseLevelIELSTs.Any(x => x == courseLevelSelected);
+            }
+        }
+
+        public static EnumCourseLevel GetEnumNextCourseLevel(this EnumCourseType? courseType, EnumCourseLevel courseLevel)
+        {
+            if (courseType == EnumCourseType.Academic && courseLevel != EnumCourseLevel.C1)
+            {
+                courseLevel += 1;
+            }
+            if (courseType == EnumCourseType.Ielts && courseLevel != EnumCourseLevel.MS3)
+            {
+                courseLevel += 1;
+            }
+
+            return courseLevel;
+        }
+
+        public static string GetCourseTitle(EnumCourseLevel courseLevel)
+        {
+            switch (courseLevel)
+            {
+                case EnumCourseLevel.A1:
+                    return SendMailSetting.CourseA1Title;
+
+                case EnumCourseLevel.A2:
+                    return SendMailSetting.CourseA2Title;
+
+                case EnumCourseLevel.B1:
+                    return SendMailSetting.CourseB1Title;
+
+                case EnumCourseLevel.B1Plus:
+                    return SendMailSetting.CourseB1PlusTitle;
+
+                case EnumCourseLevel.B2:
+                    return SendMailSetting.CourseB2Title;
+
+                case EnumCourseLevel.C1:
+                    return SendMailSetting.CourseC1Title;
+
+                case EnumCourseLevel.MS1:
+                    return SendMailSetting.CourseMS1Title;
+
+                case EnumCourseLevel.MS2:
+                    return SendMailSetting.CourseMS2Title;
+
+                case EnumCourseLevel.MS3:
+                    return SendMailSetting.CourseMS3Title;
+
+                default:
+                    return string.Empty;
+            }
+        }
+
+        public static string GetCourseInfo(EnumCourseLevel? courseLevel)
+        {
+            switch (courseLevel)
+            {
+                case null:
+                    return SendMailSetting.CoursePreA1;
+
+                case EnumCourseLevel.A1:
+                    return SendMailSetting.CourseA1;
+
+                case EnumCourseLevel.A2:
+                    return SendMailSetting.CourseA2;
+
+                case EnumCourseLevel.B1:
+                    return SendMailSetting.CourseB1;
+
+                case EnumCourseLevel.B1Plus:
+                    return SendMailSetting.CourseB1Plus;
+
+                case EnumCourseLevel.B2:
+                    return SendMailSetting.CourseB2;
+
+                case EnumCourseLevel.C1:
+                    return SendMailSetting.CourseC1;
+
+                case EnumCourseLevel.MS1:
+                    return SendMailSetting.Mindset1;
+
+                case EnumCourseLevel.MS2:
+                    return SendMailSetting.Mindset2;
+
+                default:
+                    return SendMailSetting.Mindset3;
+            }
+        }
+
+        public static string GetLevelPhoto(EnumCourseLevel courseLevel)
+        {
+            switch (courseLevel)
+            {
+                case EnumCourseLevel.A1:
+                    return SendMailSetting.A1Photo;
+
+                case EnumCourseLevel.A2:
+                    return SendMailSetting.A2Photo;
+
+                case EnumCourseLevel.B1:
+                    return SendMailSetting.B1Photo;
+
+                case EnumCourseLevel.B1Plus:
+                    return SendMailSetting.B1PlusPhoto;
+
+                case EnumCourseLevel.B2:
+                    return SendMailSetting.B2Photo;
+
+                case EnumCourseLevel.C1:
+                    return SendMailSetting.C1Photo;
+
+                case EnumCourseLevel.MS1:
+                    return SendMailSetting.MS1Photo;
+
+                case EnumCourseLevel.MS2:
+                    return SendMailSetting.MS2Photo;
+
+                case EnumCourseLevel.MS3:
+                    return SendMailSetting.MS3Photo;
+
+                default:
+                    return string.Empty;
+            }
         }
     }
 }

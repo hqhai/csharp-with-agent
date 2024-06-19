@@ -13,11 +13,12 @@ namespace Fsel.Training.Api.Controllers.Cso
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/cso/work-flow")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.CSO))]
     public class ClassLiveWorkFlowController : ControllerBase
     {
         private readonly IMediator _mediator;

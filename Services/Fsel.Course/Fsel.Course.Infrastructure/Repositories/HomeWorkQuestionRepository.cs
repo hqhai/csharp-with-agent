@@ -9,7 +9,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class HomeWorkQuestionRepository : BaseRepository<HomeWorkQuestion>, IHomeWorkQuestionRepository
     {
-        public HomeWorkQuestionRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public HomeWorkQuestionRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
 

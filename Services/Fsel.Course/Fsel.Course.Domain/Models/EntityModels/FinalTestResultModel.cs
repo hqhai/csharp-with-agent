@@ -2,19 +2,14 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
-    using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.IEntities;
 
-    public class FinalTestResultModel : BaseModel
+    public class FinalTestResultModel : BaseLearnResultModel, ITokenResult
     {
-        public double Percent { get; set; }
-        public int CorrectCount { get; set; }
-        public int CorrectTotal { get; set; }
-        public EnumResultStatus Status { get; set; }
-        public IList<SkillScores>? SkillScores { get; set; }
-        public Guid StudentId { get; set; }
         public Guid FinalTestId { get; set; }
         public Guid CourseId { get; set; }
+        public double? ProgressPercent { get; set; }
+        public int? TokenFirstTime { get; set; }
+        public int? TokenLastTime { get; set; }
     }
 }

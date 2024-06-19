@@ -4,21 +4,22 @@ namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Collections.Generic;
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.HomeWorkQuery;
     using Fsel.Course.Lms.Application.Queries.LessonQuery;
     using Fsel.Course.Lms.Application.Queries.ProgressQuery;
-    using Fsel.Shared.Enums;
+    using Fsel.Course.Lms.Application.Queries.StudentProgressQuery;
+    using Fsel.Shared.Constants;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/progress")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Student))]
     public class ProgressController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -26,6 +27,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         public ProgressController(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        /// <summary>
+        /// get Course progress
+        /// </summary>
+        [HttpGet("course")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseUnitMockTestResultModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCourseProgress([FromQuery] GetCourseUnitMockTestByCourseQuery query)
+        {
+            MethodResult<IList<CourseUnitMockTestResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>
@@ -176,11 +189,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get unit class forum detail
         /// </summary>
         [HttpGet("unit/class-forum-detail/{classForumId}")]
-        [ProducesResponseType(typeof(MethodResult<IList<ClassForumScoreModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassForumAIModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUnitByClassForumDetail([FromRoute] Guid classForumId)
         {
-            MethodResult<IList<ClassForumScoreModel>> queryResult = await _mediator.Send(new GetUnitByClassForumDetailQuery { ClassForumId = classForumId }).ConfigureAwait(false);
+            MethodResult<IList<ClassForumAIModel>> queryResult = await _mediator.Send(new GetUnitByClassForumDetailQuery { ClassForumId = classForumId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -230,6 +243,48 @@ namespace Fsel.Course.Lms.Api.Controllers
         {
             MethodResult<IList<LessonHomeWorkResultModel>> queryResult = await _mediator.Send(new GetListHomeworkQuery { LessonResultId = lessonResultId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get studentprogress
+        /// </summary>
+        [HttpPost("students-competition")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionStudentProgressModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListStudentProgress([FromBody] GetStudentsProgressCoursesQuery query)
+        {
+            MethodResult<IList<CompetitionStudentProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Report Student
+        /// </summary>
+        [HttpPost("export-report-student")]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Export([FromQuery] ExportEmailStudentByProgressQuery query)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "report_student_export.xlsx");
+        }
+
+        /// <summary>
+        /// Report Student
+        /// </summary>
+        [HttpPost("export-report-progress-student")]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportProgressStudent([FromQuery] ExportEmailByReportProgressQuery query)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "report_progress_student_export.xlsx");
         }
     }
 }

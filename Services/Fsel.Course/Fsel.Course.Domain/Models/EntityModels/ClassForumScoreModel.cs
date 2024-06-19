@@ -15,7 +15,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public long? Score { get; set; }
 
         public EnumClassForumScoreCriteria Criteria { get; set; }
-
-        public ClassForumResultModel? ClassForumResult { get; set; }
     }
 }

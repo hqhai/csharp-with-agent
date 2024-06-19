@@ -29,16 +29,19 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
         private readonly IClassRepository _classRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
         public GetTeacherLiveDateByClassIdQueryHandler(ITeacherFreeDateRepository teacherFreeDateRepository
             , IClassRepository classRepository
             , IUserService userService
-            , IMapper mapper)
+            , IMapper mapper,
+IMediator mediator)
         {
             _teacherFreeDateRepository = teacherFreeDateRepository;
             _classRepository = classRepository;
             _userService = userService;
             _mapper = mapper;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<TeacherFreeDateModel>> Handle(GetTeacherLiveDateByClassIdQuery request, CancellationToken cancellationToken)
@@ -73,21 +76,13 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
             }
             else
             {
-                var teacherFreeDates = await _teacherFreeDateRepository.Queryable
-                                   .Include(x => x.TeacherFreeTimes)
-                                   .Where(x => x.StartDate.Date <= @class.StartDate.Value.Date && x.EndDate.Date >= @class.EndDate.Value.Date)
-                                   .ToArrayAsync(cancellationToken);
-                if (teacherFreeDates == null)
+                var teacherFreeDatesResult = await _mediator.Send(new GetListTeacherLiveDateByClassIdQuery { ClassId = request.ClassId }, cancellationToken);
+                var teacherFreeDates = teacherFreeDatesResult.Result;
+                if (teacherFreeDates != null)
                 {
-                    methodResult.Result = null;
+                    methodResult.Result = teacherFreeDates.FirstOrDefault();
                     methodResult.StatusCode = StatusCodes.Status200OK;
                     return methodResult;
-                }
-
-                teacherFreeDate = teacherFreeDates.FirstOrDefault(x => @class.LiveDays.All(n => x.TeacherFreeTimes.Any(x => x.Priority = true && x.DayOfWeek == n && x.LiveTimeFrameId == @class.LiveTimeFrameId)));
-                if (teacherFreeDate == null)
-                {
-                    teacherFreeDate = teacherFreeDates.FirstOrDefault(x => @class.LiveDays.All(n => x.TeacherFreeTimes.Any(x => x.Priority = false && x.DayOfWeek == n && x.LiveTimeFrameId == @class.LiveTimeFrameId)));
                 }
             }
 

@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Attributes;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Users
@@ -12,7 +13,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
         [Required]
         public string? FullName { get; set; }
 
-        [EmailAddress]
+        [EmailValid]
         public string? Email { get; set; }
 
         public string? Address { get; set; }

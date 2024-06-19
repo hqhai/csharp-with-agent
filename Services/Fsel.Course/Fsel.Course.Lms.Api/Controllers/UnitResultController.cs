@@ -3,19 +3,23 @@
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.UnitResultCmd;
+    using Fsel.Course.Lms.Application.Queries.StudentQuery;
     using Fsel.Course.Lms.Application.Queries.UnitQuery;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/unit-result")]
-    [Authorize(Roles = nameof(EnumRole.Student))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     [ApiController]
     public class UnitResultController : ControllerBase
     {
@@ -38,7 +42,6 @@ namespace Fsel.Course.Lms.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-
         /// <summary>
         /// Get Current Unit Indicator
         /// </summary>
@@ -50,6 +53,27 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetCurrentUnitIndicator([FromQuery] GetCurrentUnitIndicatorQuery query)
         {
             MethodResult<IList<SkillScores>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get course and unit by user id
+        /// </summary>
+        [HttpGet("get-course-unit-by-user-id/{id}")]
+        [ProducesResponseType(typeof(MethodResult<StudentCourseUnitModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCourseAndUnit([FromRoute] Guid id)
+        {
+            MethodResult<StudentCourseUnitModel> queryResult = await _mediator.Send(new GetCourseAndUnitByUserIdQuery { UserId = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpPut("open-next-unit/{userId}")]
+        [ProducesResponseType(typeof(MethodResult<StudentCourseUnitModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> OpenNextUnitForTrial([FromRoute] Guid userId)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(new OpenNextUnitForExtendCmd { UserId = userId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

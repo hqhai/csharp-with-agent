@@ -7,6 +7,6 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// ClassForumHasNotSubmit
         /// </summary>
-        ClassForumHasNotSubmit
+        ClassForumHasSubmitted
     }
 }

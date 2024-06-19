@@ -8,12 +8,14 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
+    using Fsel.Training.Application.Services.OrderServices;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class ActiveClassCommand : BaseCommandModel, IRequest<MethodResult<bool>>
     {
@@ -23,11 +25,13 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     {
         private readonly IClassRepository _classRepository;
         private readonly ISystemService _systemService;
+        private readonly IOrderService _orderService;
 
-        public ActiveClassCommandHandler(IClassRepository classRepository, ISystemService systemService)
+        public ActiveClassCommandHandler(IClassRepository classRepository, ISystemService systemService, IOrderService orderService)
         {
             _classRepository = classRepository;
             _systemService = systemService;
+            _orderService = orderService;
         }
 
         public async Task<MethodResult<bool>> Handle(ActiveClassCommand request, CancellationToken cancellationToken)
@@ -35,7 +39,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var classes = await _classRepository.GetByIdAsync(request.Id);
+            var classes = await _classRepository.Queryable.Include(p => p.ClassStudents).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (classes == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
@@ -46,31 +50,46 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.StatusOfClassIsNotNew));
                 return methodResult;
             }
-
-            if (classes.LiveTimeFrameId.HasValue && classes.LiveDays != null)
+            if (classes.ClassStudents.Any(p => !p.IsActive))
             {
-                List<Guid> courseIds = new List<Guid>();
-                courseIds.Add(classes.CourseId);
-                var courseTimeConfigResult = await _systemService.GetCourseTimeConfigByCourseId(courseIds);
-                if (!courseTimeConfigResult.IsSuccessStatusCode)
-                {
-                    methodResult.AddError(courseTimeConfigResult.Error);
-                    return methodResult;
-                }
-                var courseTimeConfig = courseTimeConfigResult.Content?.Result;
-                var endTime = courseTimeConfig!.FirstOrDefault(p => p.CourseId == classes.CourseId);
-                if (endTime == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CourseTimeNotInstalled));
-                    return methodResult;
-                }
-                classes.StartDate = DateTime.Now;
-                classes.EndDate = DateTime.Now.AddMonths(endTime.DurationMonth);
-                classes.Status = EnumClassStatus.Active;
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.OrdersNotApproved));
+                return methodResult;
+            }
+            var packagesResult = await _orderService.GetPackages();
+            var packages = packagesResult.Content?.Result;
+            var package = packages?.FirstOrDefault(p => p.Id == classes.PackageId);
+            if (package?.Code == EnumPackageCode.PREMIUM && (!classes.LiveTimeFrameId.HasValue || classes.LiveDays == null))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.LiveTimeFrameNullOrLiveDaysNull));
+                return methodResult;
+            }
 
+            List<Guid> courseIds = new List<Guid>();
+            courseIds.Add(classes.CourseId);
+
+            var courseTimeConfigResult = await _systemService.GetCourseTimeConfigByCourseId(courseIds);
+            if (!courseTimeConfigResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(courseTimeConfigResult.Error);
+                return methodResult;
+            }
+            var courseTimeConfig = courseTimeConfigResult.Content?.Result;
+            var endTime = courseTimeConfig!.FirstOrDefault(p => p.CourseId == classes.CourseId);
+            if (endTime == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CourseTimeNotInstalled));
+                return methodResult;
+            }
+            var dateNow = DateTime.UtcNow.Date;
+            classes.StartDate = dateNow;
+            classes.EndDate = dateNow.AddMonths(endTime.DurationMonth);
+            classes.Status = EnumClassStatus.Active;
+
+            if (package?.Code == EnumPackageCode.PREMIUM)
+            {
                 if (classes.LiveTimeFrameId.HasValue && classes.LiveDays != null)
                 {
-                    for (DateTime date = DateTime.Now; date <= classes.EndDate; date = date.AddDays(1))
+                    for (DateTime date = dateNow; date <= classes.EndDate; date = date.AddDays(1))
                     {
                         if (classes.LiveDays!.Contains(date.DayOfWeek))
                         {

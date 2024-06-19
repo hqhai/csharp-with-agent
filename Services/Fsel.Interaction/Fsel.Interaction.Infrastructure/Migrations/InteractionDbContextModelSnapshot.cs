@@ -151,8 +151,8 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -161,12 +161,95 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                     b.ToTable("CustomerSurveys");
                 });
 
+            modelBuilder.Entity("Fsel.Interaction.Domain.Entities.Flag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("FeedBack")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("FlagIssue")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid?>("ObjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Flags");
+                });
+
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.InteractionAction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
+
+                    b.Property<string>("BusinessType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -599,8 +682,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -681,8 +763,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -731,7 +812,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<string>("OtherProblem")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
@@ -834,7 +914,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<bool>("IsPilot")
+                    b.Property<bool?>("IsPilot")
                         .HasColumnType("bit");
 
                     b.Property<string>("Question")
@@ -867,14 +947,30 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("492d8bb9-cdbe-42e7-aa16-35a1915c3621"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"T\\u00ECm ki\\u1EBFm Google\",\"image\":\"gmail-icon.svg\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"facebook-icon.svg\"},{\"id\":3,\"content\":\"Youtube\",\"image\":\"youtube-icon.svg\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"tiktok-icon.svg\"},{\"id\":5,\"content\":\"B\\u1EA1n b\\u00E8/Gia \\u0111\\u00ECnh\",\"image\":\"friends_family-icon.svg\"},{\"id\":6,\"content\":\"Tin t\\u1EE9c/B\\u00E1o ch\\u00ED/Blog\",\"image\":\"blog-icon.svg\"},{\"id\":7,\"content\":\"Tivi\",\"image\":\"tv-icon.svg\"},{\"id\":8,\"content\":\"Kh\\u00E1c....\",\"image\":\"others-icon.svg\"}]",
+                            Id = new Guid("03d12e43-250b-49b7-bd08-b12135e47723"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"H\\u1ECDc sinh, sinh vi\\u00EAn\",\"image\":\"student.svg\",\"referenceQuestionId\":\"b223125a-a4e1-4e10-b4dd-cfcd747d74c5\"},{\"id\":2,\"content\":\"Ng\\u01B0\\u1EDDi \\u0111i l\\u00E0m\",\"image\":\"worker.svg\",\"referenceQuestionId\":\"35a71ae7-49c1-4878-a1db-edcd2834f1cd\"}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
                             DisplayLevel = 1,
                             DisplayOrder = 1f,
+                            Icon = "addd",
+                            IsDeleted = false,
+                            IsPilot = false,
+                            Question = "Bạn là?",
+                            Type = "ChooseMultipleColumn"
+                        },
+                        new
+                        {
+                            Id = new Guid("492d8bb9-cdbe-42e7-aa16-35a1915c3621"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Google\",\"image\":\"gmail-icon.svg\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"facebook-icon.svg\"},{\"id\":3,\"content\":\"YouTube\",\"image\":\"youtube-icon.svg\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"tiktok-icon.svg\"},{\"id\":5,\"content\":\"B\\u1EA1n b\\u00E8/gia \\u0111\\u00ECnh\",\"image\":\"friends_family-icon.svg\"},{\"id\":6,\"content\":\"Tin t\\u1EE9c/b\\u00E1o ch\\u00ED\",\"image\":\"blog-icon.svg\"},{\"id\":7,\"content\":\"TV\",\"image\":\"tv-icon.svg\"},{\"id\":8,\"content\":\"S\\u1EF1 ki\\u1EC7n/h\\u1ED9i th\\u1EA3o\",\"image\":\"event.svg\"},{\"id\":9,\"content\":\"Tr\\u01B0\\u1EDDng h\\u1ECDc\",\"image\":\"school.svg\"},{\"id\":10,\"content\":\"T\\u1EDD r\\u01A1i\",\"image\":\"leaflets.svg\"},{\"id\":11,\"content\":\"Kh\\u00E1c....\",\"image\":\"others-icon.svg\"}]",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayLevel = 1,
+                            DisplayOrder = 2f,
                             Icon = "addd",
                             IsDeleted = false,
                             IsPilot = false,
@@ -890,23 +986,22 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
                             DisplayLevel = 1,
-                            DisplayOrder = 2f,
+                            DisplayOrder = 3f,
                             Icon = "addd",
                             IsDeleted = false,
-                            IsPilot = false,
                             Question = "Chọn hướng đi của bạn",
                             Type = "YourDirection"
                         },
                         new
                         {
                             Id = new Guid("721d8bb9-cdbe-42e7-aa16-35a1915c1123"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"V\\u0103n h\\u00F3a\",\"image\":\"castle 1.png\"},{\"id\":2,\"content\":\"Du l\\u1ECBch\",\"image\":\"plane 1.png\"},{\"id\":3,\"content\":\"K\\u1EBFt b\\u1EA1n v\\u00E0 chia s\\u1EBB\",\"image\":\"friendship 1.png\"},{\"id\":4,\"content\":\"H\\u1ECDc t\\u1EADp\",\"image\":\"mortarboard 1.png\"},{\"id\":5,\"content\":\"C\\u01A1 h\\u1ED9i ngh\\u1EC1 nghi\\u1EC7p\",\"image\":\"case 1.png\"},{\"id\":6,\"content\":\"Kh\\u00E1c....\",\"image\":\"goal 1.png\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"V\\u0103n h\\u00F3a\",\"image\":\"castle 1.png\"},{\"id\":2,\"content\":\"Du l\\u1ECBch\",\"image\":\"plane 1.png\"},{\"id\":3,\"content\":\"K\\u1EBFt b\\u1EA1n\",\"image\":\"friendship 1.png\"},{\"id\":4,\"content\":\"H\\u1ECDc t\\u1EADp\",\"image\":\"mortarboard 1.png\"},{\"id\":5,\"content\":\"C\\u01A1 h\\u1ED9i ngh\\u1EC1 nghi\\u1EC7p\",\"image\":\"case 1.png\"},{\"id\":6,\"content\":\"Kh\\u00E1c....\",\"image\":\"goal 1.png\"}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
                             DisplayLevel = 1,
-                            DisplayOrder = 3f,
+                            DisplayOrder = 4f,
                             Icon = "fluent_target-arrow-16-filled.png",
                             IsDeleted = false,
                             IsPilot = false,
@@ -922,12 +1017,43 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
                             DisplayLevel = 1,
-                            DisplayOrder = 4f,
+                            DisplayOrder = 5f,
+                            Icon = "wideword.png",
+                            IsDeleted = false,
+                            Question = "Vị trí của bạn",
+                            Type = "YourPlace"
+                        },
+                        new
+                        {
+                            Id = new Guid("b223125a-a4e1-4e10-b4dd-cfcd747d74c5"),
+                            AnswerStr = "{\"country\":\"Other\",\"province\":\"Other\",\"district\":\"Other\",\"educationLevel\":\"Other\",\"school\":\"Other\"}",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayLevel = 1,
+                            DisplayOrder = 6f,
                             Icon = "wideword.png",
                             IsDeleted = false,
                             IsPilot = false,
-                            Question = "Vị trí của bạn",
-                            Type = "YourPlace"
+                            Question = "Trường học của bạn",
+                            Type = "Location"
+                        },
+                        new
+                        {
+                            Id = new Guid("35a71ae7-49c1-4878-a1db-edcd2834f1cd"),
+                            AnswerStr = "{\"country\":\"Other\",\"province\":\"Other\",\"district\":\"Other\"}",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayLevel = 1,
+                            DisplayOrder = 6f,
+                            Icon = "wideword.png",
+                            IsDeleted = false,
+                            IsPilot = false,
+                            Question = "Vị trí của bạn?",
+                            Type = "Location"
                         },
                         new
                         {
@@ -938,11 +1064,11 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
                             DisplayLevel = 1,
-                            DisplayOrder = 5f,
+                            DisplayOrder = 7f,
                             Icon = "time.png",
                             IsDeleted = false,
                             IsPilot = false,
-                            Question = "Xác định độ tuổi và giới tính",
+                            Question = "Giới tính của bạn",
                             Type = "AgeGender"
                         },
                         new
@@ -957,7 +1083,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             DisplayOrder = 1.1f,
                             IsDeleted = false,
                             IsPilot = true,
-                            Question = "Họ tên đầy đủ của bạn là gì",
+                            Question = "Họ tên",
                             Type = "ShortAnswer"
                         },
                         new
@@ -1047,7 +1173,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             DisplayOrder = 4f,
                             IsDeleted = false,
                             IsPilot = true,
-                            Question = "Bạn nhà có thể cam kết hoàn thành khóa học 6 tháng với tốc độ 3 buổi học mỗi tuần (7,5 giờ mỗi tuần) từ tháng 10 năm 2023 đến tháng 3 năm 2024 không?",
+                            Question = "Bạn nhà có thể cam kết hoàn thành khóa học 6 tháng với tốc độ 3 buổi học mỗi tuần (7,5 giờ mỗi tuần) từ tháng 11 năm 2023 đến tháng 4 năm 2024 không?",
                             Type = "MultipleChoiceVertical"
                         },
                         new
@@ -1107,7 +1233,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             DisplayOrder = 7f,
                             IsDeleted = false,
                             IsPilot = true,
-                            Question = "Chúng tôi sẽ tổ chức 2 buổi on-site (2 tiếng/buổi) tại trung tâm (33 Lạc Trung hoặc 125 Hoàng Ngân) để lấy ý kiến phản hồi của các bạn trong giai đoạn thử nghiệm. Bạn sẵn sàng đưa con mình tham dự những buổi học này ở mức độ nào?",
+                            Question = "Chúng tôi sẽ tổ chức 2 buổi gặp mặt trực tiếp (2 tiếng/buổi) tại trung tâm (33 Lạc Trung hoặc 125 Hoàng Ngân) để lấy ý kiến phản hồi của các bạn trong giai đoạn thử nghiệm. Bạn sẵn sàng đưa con mình tham dự những buổi học này ở mức độ nào?",
                             Type = "MultipleChoiceHorizontal"
                         },
                         new
@@ -1214,6 +1340,241 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsPilot = true,
                             Question = "Tại sao bạn muốn đăng ký chương trình học trải nghiệm của FSEL?",
                             Type = "ShortAnswer"
+                        });
+                });
+
+            modelBuilder.Entity("Fsel.Interaction.Domain.Entities.SurveyQuestionTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("AnswerStr")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Language")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Question")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("SurveyQuestionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SurveyQuestionId");
+
+                    b.ToTable("SurveyQuestionTranslations");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("f12f7c70-b9b5-49c5-8122-cc9c788e3354"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"H\\u1ECDc sinh, sinh vi\\u00EAn\",\"image\":\"student.svg\",\"referenceQuestionId\":\"b223125a-a4e1-4e10-b4dd-cfcd747d74c5\"},{\"id\":2,\"content\":\"Ng\\u01B0\\u1EDDi \\u0111i l\\u00E0m\",\"image\":\"worker.svg\",\"referenceQuestionId\":\"35a71ae7-49c1-4878-a1db-edcd2834f1cd\"}]",
+                            CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Bạn là?",
+                            SurveyQuestionId = new Guid("03d12e43-250b-49b7-bd08-b12135e47723")
+                        },
+                        new
+                        {
+                            Id = new Guid("45c7789a-5eb5-491c-b518-24a2ce7f1dcf"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Students\",\"image\":\"student.svg\",\"referenceQuestionId\":\"b223125a-a4e1-4e10-b4dd-cfcd747d74c5\"},{\"id\":2,\"content\":\"Working professionals\",\"image\":\"worker.svg\",\"referenceQuestionId\":\"35a71ae7-49c1-4878-a1db-edcd2834f1cd\"}]",
+                            CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "Who are you?",
+                            SurveyQuestionId = new Guid("03d12e43-250b-49b7-bd08-b12135e47723")
+                        },
+                        new
+                        {
+                            Id = new Guid("7910a8a2-b89d-4579-a657-de2858ad499c"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Google\",\"image\":\"gmail-icon.svg\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"facebook-icon.svg\"},{\"id\":3,\"content\":\"YouTube\",\"image\":\"youtube-icon.svg\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"tiktok-icon.svg\"},{\"id\":5,\"content\":\"B\\u1EA1n b\\u00E8/gia \\u0111\\u00ECnh\",\"image\":\"friends_family-icon.svg\"},{\"id\":6,\"content\":\"Tin t\\u1EE9c/b\\u00E1o ch\\u00ED\",\"image\":\"blog-icon.svg\"},{\"id\":7,\"content\":\"TV\",\"image\":\"tv-icon.svg\"},{\"id\":8,\"content\":\"S\\u1EF1 ki\\u1EC7n/h\\u1ED9i th\\u1EA3o\",\"image\":\"event.svg\"},{\"id\":9,\"content\":\"Tr\\u01B0\\u1EDDng h\\u1ECDc\",\"image\":\"school.svg\"},{\"id\":10,\"content\":\"T\\u1EDD r\\u01A1i\",\"image\":\"leaflets.svg\"},{\"id\":11,\"content\":\"Kh\\u00E1c....\",\"image\":\"others-icon.svg\"}]",
+                            CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Bạn biết đến Fsel từ đâu?",
+                            SurveyQuestionId = new Guid("492d8bb9-cdbe-42e7-aa16-35a1915c3621")
+                        },
+                        new
+                        {
+                            Id = new Guid("619b48dd-e305-4a8c-858d-fcbbdc980239"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Google\",\"image\":\"gmail-icon.svg\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"facebook-icon.svg\"},{\"id\":3,\"content\":\"YouTube\",\"image\":\"youtube-icon.svg\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"tiktok-icon.svg\"},{\"id\":5,\"content\":\"Friends/Family\",\"image\":\"friends_family-icon.svg\"},{\"id\":6,\"content\":\"News/Media\",\"image\":\"blog-icon.svg\"},{\"id\":7,\"content\":\"TV\",\"image\":\"tv-icon.svg\"},{\"id\":8,\"content\":\"Events/Conferences\",\"image\":\"event.svg\"},{\"id\":9,\"content\":\"School\",\"image\":\"school.svg\"},{\"id\":10,\"content\":\"Flyers\",\"image\":\"leaflets.svg\"},{\"id\":11,\"content\":\"Other....\",\"image\":\"others-icon.svg\"}]",
+                            CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "How do you know FSEL?",
+                            SurveyQuestionId = new Guid("492d8bb9-cdbe-42e7-aa16-35a1915c3621")
+                        },
+                        new
+                        {
+                            Id = new Guid("ba027423-106a-4bc6-a3a6-4b8386a44e51"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"V\\u0103n h\\u00F3a\",\"image\":\"castle 1.png\"},{\"id\":2,\"content\":\"Du l\\u1ECBch\",\"image\":\"plane 1.png\"},{\"id\":3,\"content\":\"K\\u1EBFt b\\u1EA1n\",\"image\":\"friendship 1.png\"},{\"id\":4,\"content\":\"H\\u1ECDc t\\u1EADp\",\"image\":\"mortarboard 1.png\"},{\"id\":5,\"content\":\"C\\u01A1 h\\u1ED9i ngh\\u1EC1 nghi\\u1EC7p\",\"image\":\"case 1.png\"},{\"id\":6,\"content\":\"Kh\\u00E1c....\",\"image\":\"goal 1.png\"}]",
+                            CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Tại sao bạn học ngoại ngữ",
+                            SurveyQuestionId = new Guid("721d8bb9-cdbe-42e7-aa16-35a1915c1123")
+                        },
+                        new
+                        {
+                            Id = new Guid("fd807c09-b8dc-49ba-9619-ad1a3220bc60"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Culture\",\"image\":\"castle 1.png\"},{\"id\":2,\"content\":\"Travel\",\"image\":\"plane 1.png\"},{\"id\":3,\"content\":\"Making friends\",\"image\":\"friendship 1.png\"},{\"id\":4,\"content\":\"Education\",\"image\":\"mortarboard 1.png\"},{\"id\":5,\"content\":\"Career opportunities\",\"image\":\"case 1.png\"},{\"id\":6,\"content\":\"Other....\",\"image\":\"goal 1.png\"}]",
+                            CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "Why are studying a foreign language?",
+                            SurveyQuestionId = new Guid("721d8bb9-cdbe-42e7-aa16-35a1915c1123")
+                        },
+                        new
+                        {
+                            Id = new Guid("365375de-db86-4167-bbe8-e5a3ca2c154e"),
+                            AnswerStr = "{\"country\":\"Other\",\"province\":\"Other\",\"district\":\"Other\",\"educationLevel\":\"Other\",\"school\":\"Other\"}",
+                            CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Trường học của bạn",
+                            SurveyQuestionId = new Guid("b223125a-a4e1-4e10-b4dd-cfcd747d74c5")
+                        },
+                        new
+                        {
+                            Id = new Guid("4393a6a5-ff24-4d2d-b468-4b2c17ae0063"),
+                            AnswerStr = "{\"country\":\"Other\",\"province\":\"Other\",\"district\":\"Other\",\"educationLevel\":\"Other\",\"school\":\"Other\"}",
+                            CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "Your school",
+                            SurveyQuestionId = new Guid("b223125a-a4e1-4e10-b4dd-cfcd747d74c5")
+                        },
+                        new
+                        {
+                            Id = new Guid("b606fff3-5363-4d82-a798-7059e9323321"),
+                            AnswerStr = "{\"country\":\"Other\",\"province\":\"Other\",\"district\":\"Other\"}",
+                            CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Vị trí của bạn?",
+                            SurveyQuestionId = new Guid("35a71ae7-49c1-4878-a1db-edcd2834f1cd")
+                        },
+                        new
+                        {
+                            Id = new Guid("d9343200-7b1b-475c-8330-a8d3e1a09be4"),
+                            AnswerStr = "{\"country\":\"Other\",\"province\":\"Other\",\"district\":\"Other\"}",
+                            CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "Your location?",
+                            SurveyQuestionId = new Guid("35a71ae7-49c1-4878-a1db-edcd2834f1cd")
+                        },
+                        new
+                        {
+                            Id = new Guid("b695a761-d0fa-4162-97c3-68403e9a8326"),
+                            AnswerStr = "{\"birthday\":null,\"ageGenderQuestions\":[{\"id\":1,\"content\":\"Male\"},{\"id\":2,\"content\":\"Female\"},{\"id\":3,\"content\":\"Other\"}]}",
+                            CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Giới tính của bạn",
+                            SurveyQuestionId = new Guid("2be9a620-143d-41f6-815b-2038c21a7b23")
+                        },
+                        new
+                        {
+                            Id = new Guid("e343b238-f2fc-418a-a171-6cce3d90d2a1"),
+                            AnswerStr = "{\"birthday\":null,\"ageGenderQuestions\":[{\"id\":1,\"content\":\"Male\"},{\"id\":2,\"content\":\"Female\"},{\"id\":3,\"content\":\"Other\"}]}",
+                            CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "Your Gender",
+                            SurveyQuestionId = new Guid("2be9a620-143d-41f6-815b-2038c21a7b23")
                         });
                 });
 
@@ -1349,6 +1710,17 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                     b.Navigation("SupportQuestion");
                 });
 
+            modelBuilder.Entity("Fsel.Interaction.Domain.Entities.SurveyQuestionTranslation", b =>
+                {
+                    b.HasOne("Fsel.Interaction.Domain.Entities.SurveyQuestion", "SurveyQuestion")
+                        .WithMany("Translations")
+                        .HasForeignKey("SurveyQuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SurveyQuestion");
+                });
+
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.Post", b =>
                 {
                     b.Navigation("PostTags");
@@ -1374,6 +1746,8 @@ namespace Fsel.Interaction.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.SurveyQuestion", b =>
                 {
                     b.Navigation("CustomerSurveys");
+
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.TopicTag", b =>

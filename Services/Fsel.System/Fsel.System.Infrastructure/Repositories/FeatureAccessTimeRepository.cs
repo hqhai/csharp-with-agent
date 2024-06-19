@@ -8,7 +8,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class FeatureAccessTimeRepository : BaseRepository<FeatureAccessTime>, IFeatureAccessTimeRepository
     {
-        public FeatureAccessTimeRepository(SystemDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public FeatureAccessTimeRepository(SystemDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

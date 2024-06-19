@@ -4,9 +4,11 @@ namespace Fsel.Training.Api.Controllers
 {
     using System.Collections.Generic;
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Constants;
     using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Commands.ClassLiveCmd;
     using Fsel.Training.Application.Commands.ClassStudentCmd;
@@ -18,7 +20,8 @@ namespace Fsel.Training.Api.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/class")]
     [ApiController]
     public class ClassController : ControllerBase
@@ -74,7 +77,7 @@ namespace Fsel.Training.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> RegisterClass([FromBody] RegisterClassCommand command)
         {
-            MethodResult<ClassModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -163,6 +166,18 @@ namespace Fsel.Training.Api.Controllers
         }
 
         /// <summary>
+        /// Class Course by StudentId
+        /// </summary>
+        [HttpPost("classes-by-studentids/diffirent-course")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListClassByStudentIds([FromBody] GetListClassBySpecificStudentIdsQuery query)
+        {
+            MethodResult<IList<CompetitionClassStudentModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Classes by StudentIds
         /// </summary>
         [HttpPost("classes-by-studentids")]
@@ -183,6 +198,18 @@ namespace Fsel.Training.Api.Controllers
         public async Task<IActionResult> ApproveAuto()
         {
             var queryResult = await _mediator.Send(new UpdateClassLiveAssignmentCommand()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Add student into class
+        /// </summary>
+        [HttpPost("add-student-into-class")]
+        [ProducesResponseType(typeof(MethodResult<Guid>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddStudentIntoClass([FromBody] AddStudentIntoClassCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

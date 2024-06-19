@@ -60,14 +60,14 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
                                     });
 
             int totalItem = await teacherFreeTimeQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await GetDatas(teacherFreeTimeQuery, request, cancellationToken);
+            var lists = await GetTeacherFreeTimes(teacherFreeTimeQuery, request, cancellationToken);
 
             methodResult.Result = new PagingItemsModel<TeacherFreeTimeModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        public async Task<IList<TeacherFreeTimeModel>> GetDatas(IQueryable<TeacherFreeTimeModel> teacherFreeTimeQuery, SearchTeacherFreeTimeByCsoQuery request, CancellationToken cancellationToken)
+        public async Task<IList<TeacherFreeTimeModel>> GetTeacherFreeTimes(IQueryable<TeacherFreeTimeModel> teacherFreeTimeQuery, SearchTeacherFreeTimeByCsoQuery request, CancellationToken cancellationToken)
         {
             var lists = await teacherFreeTimeQuery
                     .ApplySortAndPaging(request)
@@ -79,7 +79,7 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
 
             foreach (var item in lists)
             {
-                var teacher = teachers!.FirstOrDefault(x => x.Id == item.TeacherId);
+                var teacher = teachers?.FirstOrDefault(x => x.Id == item.TeacherId);
                 item.TeacherName = teacher?.Human?.FullName;
                 item.TeacherCode = teacher?.Human?.Code;
             }

@@ -10,6 +10,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
@@ -18,7 +19,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class UpdateMockTestCommand : UpdateMockTestCommandModel, IRequest<MethodResult<MockTestModel>>
     {
@@ -28,17 +28,16 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     {
         private readonly IMapper _mapper;
         private readonly IMockTestRepository _mockTestRepository;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupManagerConverter _sectionGroupManagerConverter;
 
         public UpdateMockTestCommandHandler(IMapper mapper
             , IMockTestRepository mockTestRepository
-            , SectionConverter sectionConverter)
+            , SectionGroupManagerConverter sectionGroupManagerConverter)
 
         {
             _mapper = mapper;
             _mockTestRepository = mockTestRepository;
-            _sectionConverter = sectionConverter;
-            _sectionConverter = sectionConverter;
+            _sectionGroupManagerConverter = sectionGroupManagerConverter;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(UpdateMockTestCommand request, CancellationToken cancellationToken)
@@ -48,17 +47,22 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             #region Validation
 
-            if (request.SectionGroups == null || request.SectionGroups.Count == 0)
+            if (request.SectionGroups == null || (!request.SectionGroups.Any() || request.SectionGroups.Any(x => x == null)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
                 return methodResult;
             }
-            if (await _mockTestRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Name == request.Name, cancellationToken))
+            if (request.MockTestType == EnumMockTestType.SkillMockTest && request.SectionGroups.Count != 1)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Name));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.SectionGroups));
                 return methodResult;
             }
-
+            else if (request.MockTestType == EnumMockTestType.FullMockTest && request.SectionGroups.Count != 4)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.SectionGroups));
+                return methodResult;
+            }
+            request.SectionGroups = request.SectionGroups.OrderBy(obj => obj.CourseSkill).ToList();
             var mockTest = await _mockTestRepository.GetIncludeByIdAsync(request.Id);
             if (mockTest == null)
             {
@@ -76,8 +80,13 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             var sectionQuestions = sectionGroups.SelectMany(x => x.Sections).SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).ToList();
             var questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
 
-            _mapper.Map(request, mockTest);
             mockTest.MockTestSections.Clear();
+            _mapper.Map(request, mockTest);
+            if (!mockTest.IsValid())
+            {
+                methodResult.AddErrorBadRequest(mockTest.ErrorMessages);
+                return methodResult;
+            }
 
             foreach (var sectionGroup in request.SectionGroups)
             {
@@ -86,33 +95,28 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                     return methodResult;
                 }
+
+                sectionGroup.Sections = sectionGroup.Sections.OrderBy(x => x.DisplayOrder).Select((x, index) => { x.DisplayOrder = index; return x; }).ToList();
                 var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
-                if (!method.IsOK)
-                {
-                    methodResult.AddErrorBadRequest(method.ErrorMessages);
-                }
-                mockTest.MockTestSections.Add(new MockTestSection { SectionGroup = newSectionGroup });
                 if (!newSectionGroup.IsValid())
                 {
                     methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
+                    return methodResult;
                 }
-            }
-            if (!mockTest.IsValid())
-            {
-                methodResult.AddErrorBadRequest(mockTest.ErrorMessages);
-                return methodResult;
-            }
-            else if (!methodResult.IsOK)
-            {
-                return methodResult;
+                var method = _sectionGroupManagerConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
+                if (!method.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    return methodResult;
+                }
+                mockTest.MockTestSections.Add(new MockTestSection { SectionGroup = newSectionGroup });
             }
 
             #endregion Validation
 
             await _mockTestRepository.ExecuteTransactionAsync(async () =>
             {
-                await _sectionConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
+                await _sectionGroupManagerConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
                 mockTest = _mockTestRepository.Update(mockTest);
                 await _mockTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

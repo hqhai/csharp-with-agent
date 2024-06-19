@@ -13,11 +13,13 @@ namespace Fsel.Training.Api.Controllers.Cso
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/cso/teacher-free-date")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.CSO))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.CSO))]
     public class TeacherFreeDateController : ControllerBase
     {
         private readonly IMediator _mediator;

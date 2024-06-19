@@ -3,17 +3,17 @@
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base;
+using Fsel.Core.Entities;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Infrastructure.Configs;
 using Fsel.Shared.Constants;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Identity.Infrastructure
 {
-    public class UserDbContext : BaseIdentityDbContext<User, Role, string, IdentityUserClaim<string>, IdentityRoleClaim<string>, UserToken>
+    public class UserDbContext : BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserToken>
     {
         public UserDbContext(DbContextOptions<UserDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
@@ -23,7 +23,12 @@ namespace Fsel.Identity.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            //SeedPlatforms(builder);
+            builder.Entity<Role>().HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<UserToken>().HasQueryFilter(e => !e.IsDeleted);
+
+            SeedPlatforms(builder);
+            SeedRoles(builder);
 
             builder.ApplyConfiguration(new HumanEntityTypeConfiguration());
             builder.ApplyConfiguration(new TeacherEntityTypeConfiguration());
@@ -37,8 +42,9 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new UserSettingEntityTypeConfiguration());
             builder.ApplyConfiguration(new PlatformEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserPlatformEntityTypeConfiguration());
-
             builder.ApplyConfiguration(new StudenrRankingEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentFocusTimeEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentTrialRegistrationEntityTypeConfiguration());
             base.OnModelCreating(builder);
         }
 
@@ -59,6 +65,8 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<Platform> Platform { get; set; }
         public DbSet<UserPlatform> UserPlatforms { get; set; }
         public DbSet<StudentRanking> StudentRankings { get; set; }
+        public DbSet<StudentFocusTime> StudentFocusTimes { get; set; }
+        public DbSet<StudentTrialRegistration> StudentTrialRegistrations { get; set; }
 
         #endregion Db Set
 
@@ -89,17 +97,15 @@ namespace Fsel.Identity.Infrastructure
             }
         }
 
-        //private static void SeedRoles(ModelBuilder builder)
-        //{
-        //    builder.Entity<Role>().HasData
-        //        (
-        //            new Role() { Name = EnumRole.MasterAdmin.ToString(), NormalizedName = EnumRole.MasterAdmin.ToString() },
-        //            new Role() { Name = EnumRole.Admin.ToString(), NormalizedName = EnumRole.Admin.ToString() },
-        //            new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.CSO.ToString() },
-        //            new Role() { Name = EnumRole.Teacher.ToString(), NormalizedName = EnumRole.Teacher.ToString() },
-        //            new Role() { Name = EnumRole.Parent.ToString(), NormalizedName = EnumRole.Parent.ToString() },
-        //            new Role() { Name = EnumRole.Student.ToString(), NormalizedName = EnumRole.Student.ToString() }
-        //        );
-        //}
+        private static void SeedRoles(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.RoleFileName);
+            var roles = ConvertHelper.DeserializeFromFilePath<IList<Role>>(path);
+            if (roles != null)
+            {
+                ArgumentNullException.ThrowIfNull(roles);
+                builder.Entity<Role>().HasData(roles);
+            }
+        }
     }
 }

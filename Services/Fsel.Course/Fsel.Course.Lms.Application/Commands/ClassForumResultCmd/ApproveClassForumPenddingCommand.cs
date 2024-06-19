@@ -10,12 +10,18 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -30,13 +36,21 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly IOrderService _orderService;
+        private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
-        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext, IUserService userService)
+        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext, IUserService userService, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher)
         {
             _classForumResultRepository = classForumResultRepository;
             _mapper = mapper;
             _authContext = authContext;
             _userService = userService;
+            _questBoardPublisher = questBoardPublisher;
+            _orderService = orderService;
+            _lessonResultRepository = lessonResultRepository;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(ApproveClassForumPenddingCommand request, CancellationToken cancellationToken)
@@ -45,6 +59,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             var methodResult = new MethodResult<ClassForumResultModel>();
 
             var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumResultFiles)
+                                                                    .Include(x => x.ClassForum)
+                                                                    .Include(x => x.ClassForumScores)
                                                                     .Where(e => e.Id == request.ClassForumResultId)
                                                                     .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
@@ -56,12 +72,19 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
             var csoId = csoResults.Content?.Result?.Id;
 
+            var studentResult = await _userService.GetStudentByUserIdAsync(classForumResult.CreatedUserId);
+            var student = studentResult.Content?.Result;
+
+            var packageResults = await _orderService.GetPackages();
+            var packages = packageResults.Content?.Result;
+
+            var studentPackageCode = packages?.FirstOrDefault(x => x.Id == student?.PackageId)?.Code;
+
             if (classForumResult.Status != EnumClassForumResultStatus.Pending)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotPendding));
                 return methodResult;
             }
-
             //if (classForumResult.CheckCsoId != csoId)
             //{
             //    methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.CsoInvalid), nameof(classForumResult.CheckCsoId));
@@ -69,27 +92,74 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             //}
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
+                Dictionary<EnumNotificationType, EnumNotificationContent> enumNotification = new();
+
                 if (request.IsApprove)
                 {
-                    classForumResult.Status = EnumClassForumResultStatus.PendingForGrading;
+                    if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.Autodot || (studentPackageCode == EnumPackageCode.BASIC && classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.TeacherGrading))
+                    {
+                        classForumResult.Status = EnumClassForumResultStatus.Graded;
+                    }
+
                     var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
                     var csoId = csoResults.Content?.Result?.Id;
                     classForumResult.CheckCsoId = csoId;
+
+                    var courseId = classForumResult.LessonResult?.CourseId;
+
+                    enumNotification = new Dictionary<EnumNotificationType, EnumNotificationContent>()
+                    {
+                        { EnumNotificationType.LinkPage, EnumNotificationContent.ApprovePostClassForum }
+                    };
                 }
                 else
                 {
                     classForumResult.Status = EnumClassForumResultStatus.Denied;
                     classForumResult.CheckStartDate = null;
                     classForumResult.CheckCsoId = null;
+
+                    enumNotification = new Dictionary<EnumNotificationType, EnumNotificationContent>()
+                    {
+                        { EnumNotificationType.LinkPage, EnumNotificationContent.RejectApprovalPostClassForum }
+                    };
                 }
 
                 _classForumResultRepository.Update(classForumResult);
                 await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                //Thông báo cho user khi bài viết được phê duyệt
+                await SendNotification(classForumResult, enumNotification, cancellationToken);
+
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
                 return methodResult;
             });
             return methodResult;
+        }
+
+        public async Task SendNotification(ClassForumResult classForumResult, Dictionary<EnumNotificationType, EnumNotificationContent> enumNotification, CancellationToken cancellationToken)
+        {
+            var lessonResult = await _lessonResultRepository.GetIncludeByIdAsync(classForumResult.LessonResultId);
+            if (lessonResult != null)
+            {
+                var user = await _userService.GetUserByStudentId(lessonResult.StudentId);
+                var userId = user?.Content?.Result?.Human?.UserId;
+
+                List<object> paramLinksValue = new List<object> { lessonResult.LessonId.ToString() ?? string.Empty, lessonResult.CourseId.ToString() ?? string.Empty, lessonResult?.UnitId.ToString() ?? string.Empty };
+
+                NotificationSendingQueueModel model = new NotificationSendingQueueModel()
+                {
+                    ObjectId = lessonResult!.StudentId,
+                    UserIds = new List<Guid>() { userId ?? default },
+                    SenderId = _authContext.CurrentUserId,
+                    ParamsLink = paramLinksValue,
+                    ParamsMessage = new List<object> { classForumResult?.ClassForum?.PromptName ?? string.Empty, },
+                    Type = enumNotification.FirstOrDefault().Key,
+                    Content = enumNotification.FirstOrDefault().Value
+                };
+
+                await _notificationMessagePublisher.Publish(model, cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 }

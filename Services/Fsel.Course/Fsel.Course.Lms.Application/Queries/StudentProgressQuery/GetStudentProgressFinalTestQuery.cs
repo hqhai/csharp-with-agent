@@ -59,40 +59,37 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
-                methodResult.Result = default;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var courseUnitMockTests = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == request.CourseId).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken);
             if (courseUnitMockTests == null || !courseUnitMockTests.Any())
             {
-                methodResult.Result = default;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             if (course.CourseType == EnumCourseType.Ielts)
             {
-                methodResult.Result = default;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var finalTestId = courseUnitMockTests.Where(x => x.FinalTestId != null).Select(x => x.FinalTestId ?? default).FirstOrDefault();
-            var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel
-            {
-                UserId = userId ?? default,
-                ObjectId = finalTestId,
-                EnumFeature = EnumFeature.FinalTest,
-                CourseId = course.Id
-            });
 
-            var featureAccessTime = featureAccessTimeResult?.Content?.Result;
             var finalTestResult = await _finalTestResultRepository.Queryable.Where(x => x.FinalTestId == finalTestId && x.CourseId == request.CourseId && x.StudentId == request.StudentId).FirstOrDefaultAsync(cancellationToken);
             if (finalTestResult == null)
             {
-                methodResult.Result = default;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
+            var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel
+            {
+                UserId = userId ?? default,
+                ObjectId = finalTestResult.Id,
+                EnumFeature = EnumFeature.FinalTest,
+                CourseId = course.Id
+            });
+            var featureAccessTime = featureAccessTimeResult?.Content?.Result;
+
             var finalTest = await _finalTestRepository.Queryable.Include(x => x.FinalTestSections)
                                                     .ThenInclude(x => x.SectionGroup)
                                                     .ThenInclude(x => x!.Sections)
@@ -124,21 +121,24 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         Skill = x.CourseSkill,
                         CorrectCount = correctCount,
                         TotalCount = correctTotal,
-                        Percent = NumberHelper.ConvertPercentDouble(correctTotal > 0 ? correctCount / correctTotal : default),
                         CountQuestion = countQuestion,
-                        TotalQuestion = totalQuestion
+                        TotalQuestion = totalQuestion,
                     };
                     return skillScores;
                 }).ToList();
             }
-            var totalSkill = finalStudentProgress.SkillScores.Count;
-            var skillDone = finalStudentProgress.SkillScores.Where(x => x.CountQuestion == x.TotalQuestion).Count();
+            var skillScores = finalStudentProgress.SkillScores;
+            var totalSkill = skillScores.Count;
+            var skillDone = skillScores.Where(x => x.CountQuestion == x.TotalQuestion).Count();
             var isDone = finalTestResult.Status == EnumResultStatus.Done;
 
             finalStudentProgress.Status = finalTestResult.Status;
-            finalStudentProgress.CorrectPercent = Math.Round(finalStudentProgress.SkillScores.Average(x => x.Percent), 0);
             finalStudentProgress.ContentProgress = string.Format("{0} / {1}", isDone ? 1 : 0, 1);
-            finalStudentProgress.ProcessPercent = NumberHelper.ConvertPercentDouble(finalStudentProgress.SkillScores.Average(x => x.CountQuestion / x.TotalQuestion));
+            if (skillScores.Any())
+            {
+                finalStudentProgress.CorrectPercent = NumberHelper.ConvertPercentDouble(skillScores.Sum(x => x.CorrectCount) / skillScores.Sum(x => x.TotalCount));
+                finalStudentProgress.ProcessPercent = NumberHelper.ConvertPercentDouble((double)skillScores.Average(x => x.CountQuestion / x.TotalQuestion));
+            }
             finalStudentProgress.TotalSkill = totalSkill;
             if (featureAccessTime != null)
             {

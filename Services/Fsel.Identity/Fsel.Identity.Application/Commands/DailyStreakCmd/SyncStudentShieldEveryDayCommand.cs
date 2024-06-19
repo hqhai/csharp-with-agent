@@ -28,7 +28,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-            var date = DateTime.Now.Date.AddDays(-1);
+            var date = DateTime.UtcNow.Date.AddDays(-1);
             var endDay = DateTime.DaysInMonth(date.Year, date.Month);
             var students = await _studentRepository.Queryable.Include(x => x.StudentDailyStreaks).Where(x => x.NumberOfShield > 0 && !x.StudentDailyStreaks.Any(x => x.DailyDate.Date == date)).ToListAsync(cancellationToken);
             var studentUpdates = new List<Student>();

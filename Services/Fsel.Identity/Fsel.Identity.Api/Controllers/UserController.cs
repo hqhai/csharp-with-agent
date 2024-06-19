@@ -1,20 +1,22 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Net;
+using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Identity.Application.Commands.AuthCmd;
+using Fsel.Identity.Application.Commands.LandingPages;
 using Fsel.Identity.Application.Commands.UserCmd;
 using Fsel.Identity.Application.Queries.UserQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
-using Fsel.Shared.Enums;
+using Fsel.Shared.Constants;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Identity.Api.Controllers
 {
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/user")]
     [ApiController]
     public class UserController : ControllerBase
@@ -32,7 +34,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("change-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Authorize]
+        [Common.Attributes.Permission]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -42,7 +44,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Update profile user
         /// </summary>
-        [Authorize]
+        [Common.Attributes.Permission]
         [HttpPut("update-profile-user")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -55,7 +57,6 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Update Code Student
         /// </summary>
-/*        [Authorize(Roles = nameof(EnumRole.Student))]*/
         [HttpPut("update-code-student")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -68,7 +69,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Get User Profile
         /// </summary>
-        [Authorize]
+        [Common.Attributes.Permission]
         [HttpGet("get-user-profile")]
         [ProducesResponseType(typeof(MethodResult<UserProfileModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -111,6 +112,43 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> GetUsersByIds([FromQuery] GetUserByIdQuery query)
         {
             MethodResult<HumanModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get info student or guest by student id
+        /// </summary>
+        [HttpGet("get-by-student-id/{id}")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetInfoStudentOrGuest([FromRoute] Guid id)
+        {
+            MethodResult<StudentModel> commandResult = await _mediator.Send(new GetInfoStudentOrGuestByStudentIdQuery { StudentId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Delete
+        /// </summary>
+        [HttpDelete]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission]
+        public async Task<IActionResult> DeleteUser()
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteUserCommand()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// receive data from landing page
+        /// </summary>
+        [HttpPost("receive-data-from-landing-page")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ReceiveDataFromLandingPage([FromBody] ReceiveDataFromLandingPageCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

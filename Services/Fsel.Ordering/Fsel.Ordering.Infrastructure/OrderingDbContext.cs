@@ -1,11 +1,11 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.Constants;
+using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Ordering.Domain.Entities;
-using Fsel.Ordering.Domain.Entities.PackageConfigs;
 using Fsel.Ordering.Infrastructure.Configs;
-using Fsel.Shared.Enums;
+using Fsel.Shared.Constants;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -28,6 +28,8 @@ namespace Fsel.Ordering.Infrastructure
             modelBuilder.ApplyConfiguration(new VoucherEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VoucherPackageEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UserVoucherEnityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new OrderTransactionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PackageTranslationEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -42,6 +44,8 @@ namespace Fsel.Ordering.Infrastructure
         public DbSet<UserVoucher> UserVouchers { get; set; }
 
         public DbSet<UserReferral> UserReferrals { get; set; }
+        public DbSet<OrderTransaction> OrderTransactions { get; set; }
+        public DbSet<PackageTranslation> PackageTranslations { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -60,55 +64,15 @@ namespace Fsel.Ordering.Infrastructure
 
         private static void SeedPackages(ModelBuilder builder)
         {
-            builder.Entity<Package>().HasData
-                (
-                    new Package()
-                    {
-                        Id = Guid.Parse("42d7ddb2-9f36-4f86-badc-67dc16bb722b"),
-                        Code = EnumPackageCode.BASIC,
-                        Price = 1000000,
-                        Description = new List<PackageConfig>()
-                        {
-                            new PackageConfig { Content = "Bài giảng , bài tập tên nền tảng E-learning", Status = true },
-                            new PackageConfig { Content = "Truy cập bài tập hướng dẫn, và bài thi Unit", Status = true },
-                            new PackageConfig { Content = "Diễn đàn", Status = true },
-                            new PackageConfig { Content = "Giảng viên nhận xét", Status = false },
-                            new PackageConfig { Content = "Truy cập tiết học trực tuyến cho kỹ năng nói với Giảng viên", Status = false },
-                        },
-                        CreatedDate = new DateTime(2023, 7, 24)
-                    },
-                    new Package()
-                    {
-                        Id = Guid.Parse("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"),
-                        Code = EnumPackageCode.STANDARD,
-                        Price = 3000000,
-                        Description = new List<PackageConfig>()
-                        {
-                            new PackageConfig { Content = "Bài giảng , bài tập tên nền tảng E-learning", Status = true },
-                            new PackageConfig { Content = "Truy cập bài tập hướng dẫn, và bài thi Unit", Status = true },
-                            new PackageConfig { Content = "Diễn đàn", Status = true },
-                            new PackageConfig { Content = "Giảng viên nhận xét", Status = true },
-                            new PackageConfig { Content = "Truy cập tiết học trực tuyến cho kỹ năng nói với Giảng viên", Status = false },
-                        },
-                        CreatedDate = new DateTime(2023, 7, 24)
-                    },
-                    new Package()
-                    {
-                        Id = Guid.Parse("d13ee4ab-785a-425c-bd70-b74b61df42eb"),
-                        Code = EnumPackageCode.PREMIUM,
-                        Price = 10000000,
-                        Description = new List<PackageConfig>()
-                        {
-                            new PackageConfig { Content = "Bài giảng , bài tập tên nền tảng E-learning", Status = true },
-                            new PackageConfig { Content = "Truy cập bài tập hướng dẫn, và bài thi Unit", Status = true },
-                            new PackageConfig { Content = "Diễn đàn", Status = true },
-                            new PackageConfig { Content = "Giảng viên nhận xét", Status = true },
-                            new PackageConfig { Content = "Truy cập tiết học trực tuyến cho kỹ năng nói với Giảng viên", Status = true }
-                        },
-                        CreatedDate = new DateTime(2023, 7, 24)
-                    }
-                );
-            ;
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.PackageFileName);
+            var packages = ConvertHelper.DeserializeFromFilePath<IList<Package>>(path);
+            ArgumentNullException.ThrowIfNull(packages);
+
+            var packageTranslations = packages.SelectMany(x => x.Translations).ToList();
+            packages.ForEach(x => x.Translations.Clear());
+
+            builder.Entity<Package>().HasData(packages);
+            builder.Entity<PackageTranslation>().HasData(packageTranslations);
         }
     }
 }

@@ -3,19 +3,22 @@
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.LessonNoteCmd;
     using Fsel.Course.Lms.Application.Queries.LessonNoteQuery;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/lesson-note")]
-    [Authorize(Roles = nameof(EnumRole.Student))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     [ApiController]
     public class LessonNoteController : ControllerBase
     {
@@ -69,7 +72,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Delete a Lesson Note
         /// </summary>
         [HttpDelete("{id}")]
-        [ProducesResponseType(typeof(MethodResult<LessonNoteModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
@@ -88,6 +91,18 @@ namespace Fsel.Course.Lms.Api.Controllers
             ArgumentNullException.ThrowIfNull(command);
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search lesson note 
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<LessonNoteModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Search([FromQuery] SearchLessonNoteQuery query)
+        {
+            MethodResult<PagingItemsModel<LessonNoteModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

@@ -42,6 +42,15 @@ namespace Fsel.Interaction.Application.Commands.SupportQuetionCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSupportQuestionErrorCode.SupportCategoryIdNotExist), nameof(request.SupportCategoryId), request.SupportCategoryId);
                 return methodResult;
             }
+            if (request.IsFrequent)
+            {
+                var supportQuestions = _supportQuetionRepository.Queryable.Where(x => x.IsFrequent && x.IsActive).ToList().Count;
+                if (supportQuestions >= 10)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSupportQuestionErrorCode.SupportQuestionHaveOver10FrequentQuesions));
+                    return methodResult;
+                }
+            }
 
             await _supportQuetionRepository.ExecuteTransactionAsync(async () =>
             {

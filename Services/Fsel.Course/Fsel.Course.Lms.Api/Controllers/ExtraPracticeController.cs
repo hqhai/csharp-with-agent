@@ -13,11 +13,13 @@ namespace Fsel.Course.Lms.Api.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/extraPractice")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Student))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class ExtraPracticeController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -162,7 +164,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Create ExtraPractice Answer Book
         /// </summary>
-        [HttpPost("create-answer-book")]
+        [HttpPost("create-book-video-embed-answer")]
         [ProducesResponseType(typeof(MethodResult<ExtraPracticeExerciseResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateAnswerBook([FromBody] CreateExtraPracticeAnswerBookCommand command)
@@ -174,7 +176,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Create ExtraPractice Answer MockTest
         /// </summary>
-        [HttpPost("create-answer-mock-test")]
+        [HttpPost("create-mock-test-answer")]
         [ProducesResponseType(typeof(MethodResult<ExtraPracticeResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateAnswerMockTest([FromBody] CreateExtraPracticeAnswerMockTestCommand command)
@@ -186,7 +188,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Create ExtraPractice Answer PlacementTest
         /// </summary>
-        [HttpPost("create-answer-placement-test")]
+        [HttpPost("create-placement-test-answer")]
         [ProducesResponseType(typeof(MethodResult<ExtraPracticeResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateAnswerPlacementTest([FromBody] CreateExtraPracticeAnswerPlacementTestCommand command)
@@ -198,7 +200,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Create ExtraPractice Answer Video
         /// </summary>
-        [HttpPost("create-answer-video")]
+        [HttpPost("create-time-code-video-answer")]
         [ProducesResponseType(typeof(MethodResult<ExtraPracticeResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateAnswerVideo([FromBody] CreateExtraPracticeAnswerVideoCommand command)
@@ -208,14 +210,14 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Restart ExtraPractice Answer Video
+        /// Restart ExtraPractice Answer
         /// </summary>
-        [HttpPost("restart-answer-video")]
+        [HttpPost("restart-answer")]
         [ProducesResponseType(typeof(MethodResult<ExtraPracticeResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> RestartAnswerVideo([FromBody] RestartExtraPracticeAnswerVideoCommand command)
+        public async Task<IActionResult> RestartAnswer([FromQuery] Guid extraPracticeResultId)
         {
-            MethodResult<ExtraPracticeResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<ExtraPracticeResultModel> queryResult = await _mediator.Send(new RestartExtraPracticeAnswerCommand { ExtraPracticeResultId = extraPracticeResultId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

@@ -6,7 +6,19 @@ namespace Fsel.Storage.Infrastructure.ValueSettings
 
     public class AppSetting : BaseAppSetting
     {
-        public StorageConfig? StorageConfig { get; set; }
+        public new StorageConfig? StorageConfig { get; set; }
+        public OpenAiConfig? OpenAiConfig { get; set; }
+        public new Services? Services { get; set; }
+    }
+
+    public class Services : BaseServices
+    {
+    }
+
+    public class OpenAiConfig
+    {
+        public string? Uri { get; set; }
+        public string? ApiKey { get; set; }
     }
 
     public class StorageFolder

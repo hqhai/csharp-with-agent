@@ -3,6 +3,7 @@
 using Fsel.Core.Extensions;
 using Fsel.Shared.Constants;
 using Fsel.Training.Application.Queues.Consumers;
+using Fsel.Training.Application.Queues.Publishers;
 using Fsel.Training.Application.Services.CourseServices;
 using Fsel.Training.Application.Services.OrderServices;
 using Fsel.Training.Application.Services.SystemServices;
@@ -34,6 +35,8 @@ builder.Services.AddScoped<ITeacherFreeDateRepository, TeacherFreeDateRepository
 builder.Services.AddScoped<ITeacherFreeTimeRepository, TeacherFreeTimeRepository>();
 builder.Services.AddScoped<IClassLiveWorkFlowRepository, ClassLiveWorkFlowRepository>();
 builder.Services.AddScoped<IClassLiveWorkFlowPlanRepository, ClassLiveWorkFlowPlanRepository>();
+builder.Services.AddScoped<ITeacherFreeTimeLiveRepository, TeacherFreeTimeLiveRepository>();
+builder.Services.AddScoped<NotificationMessagePublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.CourseApiUrl);

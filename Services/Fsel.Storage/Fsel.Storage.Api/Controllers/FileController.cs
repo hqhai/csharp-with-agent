@@ -3,14 +3,17 @@
 namespace Fsel.Storage.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Shared.Attributes;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using Fsel.Storage.Application.Services.AmazonS3Services;
-    using Fsel.Storage.Domain.Enums;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/file")]
     [ApiController]
     public class FileController : ControllerBase
@@ -30,10 +33,25 @@ namespace Fsel.Storage.Api.Controllers
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [HttpPost("{type}")]
-        public async Task<IActionResult> Upload([FromRoute] EnumFolderType type, IFormFile file)
+        [HttpPost("{folderType}")]
+        public async Task<IActionResult> Upload([FromRoute] EnumFolderType folderType, [FromQuery] EnumBucketType? bucketType, IFormFile file, [FromQuery] bool isResize = false, [FromQuery] bool isValidEmpty = false)
         {
-            var commandResult = await _amazonS3Service.UploadFileAsync(file, type);
+            var commandResult = await _amazonS3Service.UploadFileAsync(bucketType, file, folderType, isResize, isValidEmpty);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Upload file
+        /// </summary>
+        [DisableFormValueModelBinding]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [HttpPost("multiple/{folderType}")]
+        public async Task<IActionResult> Uploads([FromRoute] EnumFolderType folderType, [FromQuery] EnumBucketType? bucketType, IList<IFormFile> files, [FromQuery] bool isResize = false, [FromQuery] bool isValidEmpty = false)
+        {
+            var commandResult = await _amazonS3Service.UploadFilesAsync(bucketType, files, folderType, isResize, isValidEmpty);
             return commandResult.GetActionResult();
         }
     }

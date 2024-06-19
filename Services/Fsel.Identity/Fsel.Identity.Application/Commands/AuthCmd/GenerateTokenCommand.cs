@@ -6,10 +6,11 @@ using System.Text;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
+using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Application.Services.LmsCourseService;
 using Fsel.Identity.Application.Services.OrderService;
-using Fsel.Identity.Application.Services.OrderServices.Model;
+using Fsel.Identity.Application.Services.OrderService.Model;
 using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
@@ -19,7 +20,6 @@ using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -27,7 +27,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 {
     public class GenerateTokenCommand : IRequest<MethodResult<TokenModel>>
     {
-        public string? Id { get; set; }
+        public Guid? Id { get; set; }
     }
 
     public class GenerateTokenCommandHandler : IRequestHandler<GenerateTokenCommand, MethodResult<TokenModel>>
@@ -38,6 +38,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly ILmsCourseService _lmsCourseService;
         private readonly IUserTokenRepository _userTokenRepository;
         private readonly IOrderService _orderService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly AppSetting _appSetting;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
@@ -46,7 +47,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ILmsCourseService lmsCourseService,
             IUserTokenRepository userTokenRepository,
             IOrderService orderService,
-            AppSetting appSetting)
+            AppSetting appSetting,
+            IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _interactionService = interactionService;
@@ -55,6 +57,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _userTokenRepository = userTokenRepository;
             _orderService = orderService;
             _appSetting = appSetting;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(GenerateTokenCommand request, CancellationToken cancellationToken)
@@ -75,7 +78,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 new Claim(JwtClaimNames.UserName, user.UserName ?? string.Empty),
                 new Claim(JwtClaimNames.FullName, user.FullName ?? string.Empty),
                 new Claim(JwtClaimNames.Email, user.Email ?? string.Empty),
-                new Claim(JwtClaimNames.UserId, user.Id ?? string.Empty),
+                new Claim(JwtClaimNames.UserId, user.Id.ToString()),
                 new Claim(JwtClaimNames.Sub, _appSetting.Jwt?.Subject ?? string.Empty),
                 new Claim(JwtClaimNames.Jti, jti),
             };
@@ -91,12 +94,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 _appSetting.Jwt?.Issuer ?? string.Empty,
                 _appSetting.Jwt?.Audience ?? string.Empty,
                 authClaims,
-                expires: DateTime.Now.AddMinutes(_appSetting.Jwt?.TokenValidityInMinutes ?? default),
+                expires: DateTime.UtcNow.AddMinutes(_appSetting.Jwt?.TokenValidityInMinutes ?? default),
                 signingCredentials: signin
                 );
 
             var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
             var refreshToken = TokenHelper.GenerateRefreshToken();
+            var forwarded = _httpContextAccessor.HttpContext?.Request?.Headers["X-Forwarded-For"];
 
             await _userTokenRepository.AddAsync(new UserToken
             {
@@ -104,8 +108,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 Value = accessToken,
                 RefreshToken = refreshToken,
                 LoginProvider = JwtBearerDefaults.AuthenticationScheme,
-                UserId = user.Id ?? string.Empty,
-                RefreshTokenExpiryTime = DateTime.Now.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default)
+                UserId = user.Id,
+                RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default),
+                IpAddress = forwarded?.ToString()
             });
 
             var tokenLogin = new TokenModel
@@ -117,6 +122,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 Roles = userRoles.ToList(),
                 Code = user.Human?.Code
             };
+
             if (userRoles.Contains(EnumRole.Student.ToString()))
             {
                 var student = user.Human?.Student;
@@ -125,13 +131,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 var classStudent = await _trainingService.GetClassByStudentId(student?.Id ?? default);
                 var @class = classStudent?.Content?.Result;
                 var isPlacementTest = await _lmsCourseService.IsPlacementTestAsync(student?.Id ?? default);
-                var isSurvey = await _interactionService.IsSurveyCompleted(Guid.Parse(request.Id ?? string.Empty));
+                var isSurvey = await _interactionService.IsSurveyCompleted(request.Id ?? default);
                 tokenLogin.IsPlacementTest = isPlacementTest?.Content?.Result;
                 if (@class != null)
                 {
-                    var isOrder = await _orderService.IsCheckStatusUser(new IsCheckPaymentStatusByUserModel { CourseId = @class.CourseId, ClassId = @class.Id, PackageId = @class.PackageId, UserId = Guid.Parse(request.Id ?? string.Empty) });
+                    var order = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, UserId = request.Id });
+
                     tokenLogin.ClassCode = @class.Code;
-                    tokenLogin.IsOrder = isOrder?.Content?.Result;
+                    tokenLogin.IsOrder = order?.Content?.Result == EnumOrderStatus.Payment;
                 }
                 if (isSurvey.IsSuccessStatusCode)
                 {

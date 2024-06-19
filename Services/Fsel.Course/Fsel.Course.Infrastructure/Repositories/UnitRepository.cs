@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using AutoMapper;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
@@ -9,11 +10,14 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class UnitRepository : BaseRepository<Unit>, IUnitRepository
     {
-        public UnitRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        private readonly IMapper _mapper;
+
+        public UnitRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
         {
+            _mapper = mapper;
         }
 
-        public override async Task<Unit?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<Unit?> GetIncludeByIdAsync(Guid id)
         {
             try
             {
@@ -26,6 +30,22 @@ namespace Fsel.Course.Infrastructure.Repositories
                 .ThenInclude(x => x.Lesson)
                 .ThenInclude(x => x!.LessonInstructions.Where(n => !n.IsDeleted))
                 .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<Unit?> GetIncludeAsync(Guid? id, Guid? studentId)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.UnitSkillMockTests)
+                                    .Include(x => x.MockTestResults.Where(x => x.StudentId == studentId))
+                                    .Include(x => x.UnitLessons)
+                                    .Include(x => x.LessonResults.Where(x => x.StudentId == studentId))
+                                    .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
             {

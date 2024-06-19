@@ -43,6 +43,7 @@ namespace Fsel.Identity.Application.Queries.CSOQuery
                 FullName = x.Human!.FullName,
                 Email = x.Human!.Email,
                 PhoneNumber = x.Human!.PhoneNumber,
+                AvatarPath = x.Human!.AvatarPath,
 
             }).ToListAsync(cancellationToken);
 

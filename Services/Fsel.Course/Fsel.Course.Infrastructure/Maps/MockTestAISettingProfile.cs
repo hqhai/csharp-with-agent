@@ -1,0 +1,19 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+using AutoMapper;
+using Fsel.Core.Extensions;
+using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Models.CommandModels.Sections;
+
+namespace Fsel.Course.Infrastructure.Maps
+{
+    public class MockTestAISettingProfile : Profile
+    {
+        public MockTestAISettingProfile()
+        {
+            CreateMap<MockTestAISetting, MockTestAISettingModel>().IgnoreAllNonExisting();
+            CreateMap<MockTestAICriteriaSetting, MockTestAICriteriaSettingModel>().IgnoreAllNonExisting();
+            CreateMap<MockTestAICriteriaSettingModel, MockTestAICriteriaSetting>().IgnoreAllNonExisting();
+        }
+    }
+}

@@ -9,11 +9,11 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
     public class StudentRepository : BaseRepository<Student>, IStudentRepository
     {
-        public StudentRepository(UserDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public StudentRepository(UserDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
 
-        public override async Task<Student?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<Student?> GetIncludeByIdAsync(Guid id)
         {
             try
             {
@@ -27,7 +27,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
             }
         }
 
-        public async Task<IList<Student>> GetIncludeByIdsAsync(IList<Guid> ids, int? siteId = null)
+        public async Task<IList<Student>> GetIncludeByIdsAsync(IList<Guid> ids)
         {
             try
             {

@@ -8,7 +8,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class LiveTimeFrameRepository : BaseRepository<LiveTimeFrame>, ILiveTimeFrameRepository
     {
-        public LiveTimeFrameRepository(SystemDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public LiveTimeFrameRepository(SystemDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

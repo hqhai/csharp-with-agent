@@ -8,7 +8,7 @@ namespace Fsel.Identity.Domain.Entities
 
     public class UserSetting : Entity
     {
-        public string? UserId { get; set; }
+        public Guid? UserId { get; set; }
 
         public bool NotifiGame { get; set; }
 
@@ -17,6 +17,8 @@ namespace Fsel.Identity.Domain.Entities
         public bool NotifiLesson { get; set; }
 
         public bool NotifiForum { get; set; }
+
+        public bool NotifiEmail { get; set; }
 
         /// <summary>
         /// Tên ngôn ngữ

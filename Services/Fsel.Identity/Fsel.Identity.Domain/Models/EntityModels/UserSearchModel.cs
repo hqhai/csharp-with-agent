@@ -6,7 +6,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
     public class UserSearchModel
     {
-        public string? Id { get; set; }
+        public Guid? Id { get; set; }
         public DateTime CreatedDate { get; set; }
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }

@@ -2,26 +2,46 @@
 
 namespace Fsel.System.Api.Controllers
 {
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Constants;
     using Fsel.System.Application.Commands.GameVocabularyCmd;
     using Fsel.System.Application.Queries.GameVocabularies;
+    using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/game-vocabulary")]
     [ApiController]
     public class GameVocabularyController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly IGameVocabularyRepository _gameVocabularyRepository;
 
-        public GameVocabularyController(IMediator mediator)
+        public GameVocabularyController(IMediator mediator, IGameVocabularyRepository gameVocabularyRepository)
         {
             _mediator = mediator;
+            _gameVocabularyRepository = gameVocabularyRepository;
+        }
+
+        /// <summary>
+        /// Execute-list-query
+        /// </summary>
+        [HttpPost("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<IList<GameVocabularyModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
+        public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel query)
+        {
+            var result = await _gameVocabularyRepository.GetListResultAsync<GameVocabularyModel>(query);
+            return result.GetActionResult();
         }
 
         /// <summary>
@@ -65,7 +85,7 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Search game vocabulary
         /// </summary>
-        [HttpGet]
+        [HttpGet("search")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<GameVocabularyModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchGameVocabularyQuery query)
@@ -90,12 +110,32 @@ namespace Fsel.System.Api.Controllers
         /// Mass upload game vocabulary
         /// </summary>
         [HttpPost("mass-upload")]
-        [ProducesResponseType(typeof(MethodResult<IList<GameVocabularyModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> MassUpload([FromBody] MassUploadVocabularyCommand command)
+        public async Task<IActionResult> MassUpload([FromForm] BaseImportCommandModel command)
         {
-            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
+            ArgumentNullException.ThrowIfNull(command);
+
+            MethodResult<Stream> commandResult = await _mediator.Send(new MassUploadVocabularyCommand { FormFile = command.FormFile }).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Mass-Upload-GameVocabulary.xlsx");
+        }
+
+        /// <summary>
+        /// Export template student to cohort
+        /// </summary>
+        [HttpGet("export-template")]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportTemplateStudentToCohort()
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(new ExportTemplateMassUploadQuery { }).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Template-Mass-Upload-Vocabulary.xlsx");
         }
     }
 }

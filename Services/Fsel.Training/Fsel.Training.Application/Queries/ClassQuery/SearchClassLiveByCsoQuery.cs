@@ -4,6 +4,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -74,7 +75,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                                         });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                classLiveQuery = classLiveQuery.Where(m => m.Id.ToString() == request.Keyword || (m!.ClassCode ?? string.Empty).Contains(request.Keyword));
+                classLiveQuery = classLiveQuery.Where(m => m.Id.ToString() == request.Keyword || (m.ClassCode ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             int totalItem = await classLiveQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

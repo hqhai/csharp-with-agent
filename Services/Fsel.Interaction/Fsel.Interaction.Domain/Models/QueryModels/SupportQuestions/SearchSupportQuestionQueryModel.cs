@@ -7,5 +7,6 @@ namespace Fsel.Interaction.Domain.Models.QueryModels.SupportQuestions
     public class SearchSupportQuestionQueryModel : BaseQueryModel
     {
         public Guid? SupportCategoryId { get; set; }
+        public bool? IsFrequent { get; set; }
     }
 }

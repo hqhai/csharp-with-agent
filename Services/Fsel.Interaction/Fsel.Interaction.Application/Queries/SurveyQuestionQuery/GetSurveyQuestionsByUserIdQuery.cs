@@ -11,7 +11,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
 
     public class GetSurveyQuestionsByUserIdQuery : IRequest<MethodResult<IList<SurveyQuestionInfoModel>>>
     {
-        public string? Id { get; set; }
+        public Guid? Id { get; set; }
     }
 
     public class GetSurveyQuestionsByUserIdQueryHandler : IRequestHandler<GetSurveyQuestionsByUserIdQuery, MethodResult<IList<SurveyQuestionInfoModel>>>
@@ -37,7 +37,6 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
                                                                                 Question = x.Question,
                                                                                 Type = x.Type,
                                                                                 DisplayLevel = x.DisplayLevel,
-                                                                                IsPilot = x.IsPilot,
                                                                                 Answer = x.CustomerSurveys.FirstOrDefault(y => y.SurveyQuestionId == x.Id && y.UserId == request.Id)!.Answer
                                                                             }).ToListAsync(cancellationToken);
 

@@ -1,21 +1,24 @@
 // Copyright (c) Atlantic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.LessonCmd;
     using Fsel.Course.Lms.Application.Queries.LessonQuery;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/lesson")]
-    [Authorize(Roles = nameof(EnumRole.Student))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     [ApiController]
     public class LessonController : ControllerBase
     {
@@ -32,7 +35,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<LessonsMockTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetLesson([FromQuery] GetLessonQuery query)
+        [ApiVersion(ApiSettings.APIVersion1)]
+        public async Task<IActionResult> GetLessons([FromQuery] GetLessonQuery query)
         {
             MethodResult<LessonsMockTestModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -56,6 +60,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("start-lesson")]
         [ProducesResponseType(typeof(MethodResult<LessonResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [ApiVersion(ApiSettings.APIVersion1)]
         public async Task<IActionResult> StartLesson([FromBody] StartLessonCommand query)
         {
             MethodResult<LessonResultModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);

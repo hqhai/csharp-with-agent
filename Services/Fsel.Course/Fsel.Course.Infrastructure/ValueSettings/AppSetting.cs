@@ -9,12 +9,34 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public Smtp? Smtp { get; set; }
         public Otp? Otp { get; set; }
         public ConstantUrl? ConstantUrl { get; set; }
+        public ResourceContent? ResourceContent { get; set; }
+        public OpenAiConfig? OpenAiConfig { get; set; }
         public new Services? Services { get; set; }
+        public AzureAiConfig? AzureAiConfig { get; set; }
     }
 
     public class ConstantUrl
     {
-        public string? ConfirmOtpUrl { get; set; }
+        public string? LinkMockTestReport { get; set; }
+    }
+
+    public class ResourceContent
+    {
+        public string? LmsWebsiteUrl { get; set; }
+        public string? HotLine { get; set; }
+    }
+
+    public class OpenAiConfig
+    {
+        public string? Uri { get; set; }
+        public string? ApiKey { get; set; }
+    }
+
+    public class AzureAiConfig
+    {
+        public string? FirstApiKey { get; set; }
+        public string? SecondApiKey { get; set; }
+        public string? Location { get; set; }
     }
 
     public class Services : BaseServices

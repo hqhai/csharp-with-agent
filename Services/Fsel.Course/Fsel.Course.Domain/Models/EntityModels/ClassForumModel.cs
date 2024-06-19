@@ -3,6 +3,7 @@
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Domain.Enums;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Helpers;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
@@ -15,7 +16,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? MediaPost { get; set; }
 
-        public bool IsActive { get; set; }
+        public string? MediaPostContent => StringHelper.ProcessHtml(MediaPost, false);
+
+        public IEnumerable<string>? AudioPaths => StringHelper.GetIframeUrls(MediaPost, true);
+
+        public IEnumerable<string>? VideoPaths => StringHelper.GetIframeUrls(MediaPost, false);
 
         public EnumCourseSkill CourseSkill { get; set; }
 

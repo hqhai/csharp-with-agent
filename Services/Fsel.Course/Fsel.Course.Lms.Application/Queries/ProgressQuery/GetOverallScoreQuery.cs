@@ -70,6 +70,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 overallScoreModel.SkillScores = courseResult.SkillScores;
                 overallScoreModel.IsPlacement = false;
                 overallScoreModel.Percent = courseResult.Percent;
+                overallScoreModel.NextCourseLevel = EnumCourseLevelHelper.GetEnumNextCourseLevel(course.CourseType, course.CourseLevel);
             }
             else
             {
@@ -89,10 +90,9 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                             Scores = x.Average(x => x.Scores),
                             CountQuestion = x.Sum(x => x.CountQuestion),
                             TotalQuestion = x.Sum(x => x.TotalQuestion),
-                            Percent = NumberHelper.ConvertDoubleDecimal(x.Average(x => x.Percent))
                         }).ToList();
                     overallScoreModel.IsPlacement = false;
-                    overallScoreModel.Percent = unitResults.Average(x => x.Percent);
+                    overallScoreModel.Percent = NumberHelper.ConvertRound(unitResults.Any() ? unitResults.Average(x => x.Percent) : default);
                 }
                 else
                 {
@@ -107,7 +107,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     overallScoreModel.Percent = placementTestScore.Percent;
                 }
             }
-            overallScoreModel.CourseLevel = level ?? default;
+            overallScoreModel.CourseLevel = course.CourseLevel;
             overallScoreModel.CourseType = course.CourseType;
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = overallScoreModel;

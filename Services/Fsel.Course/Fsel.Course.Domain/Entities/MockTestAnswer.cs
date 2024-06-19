@@ -7,38 +7,76 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
-    using Fsel.Core.Entities;
+    using Fsel.Shared.Helpers;
+    using StringHelper = Shared.Helpers.StringHelper;
 
-    public class MockTestAnswer : Entity
+    public class MockTestAnswer : BaseAnswer
     {
+        private const string answerStr = "{\"answers\":";
+        public SectionQuestion? SectionQuestion { get; set; }
+        public Guid? SectionQuestionId { get; set; }
+        public SectionTimeCode? SectionTimeCode { get; set; }
+        public Guid? SectionTimeCodeId { get; set; }
+        public Section? Section { get; set; }
+        public Guid? SectionId { get; set; }
+
         /// <summary>
         /// Câu trả lời
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public string? AnswerStr { get; set; }
+        private string? _answerStr;
 
-        [NotMapped]
-        public object? Answer
+        public override string? AnswerStr
         {
-            get { return ConvertHelper.Deserialize<object>(AnswerStr); }
-            set { AnswerStr = ConvertHelper.Serialize(value); }
+            get { return _answerStr; }
+            set
+            {
+                _answerStr = value;
+                if (!string.IsNullOrEmpty(value) && !value.Contains(answerStr, StringComparison.InvariantCulture))
+                {
+                    TimeCount = MediaHelper.GetMediaDurationAsync(value);
+                    if (TimeCount == null)
+                    {
+                        WordCount = StringHelper.CountWords(value);
+                    }
+                }
+            }
         }
 
-        /// <summary>
-        /// Số lượng câu trả lời đúng
-        /// </summary>
-        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int CorrectCount { get; set; }
+        [NotMapped]
+        public override object? Answer
+        {
+            get { return ConvertHelper.Deserialize<object>(AnswerStr); }
+            set { AnswerStr = value != null ? ConvertHelper.Serialize(value) : null; }
+        }
 
-        public Guid? SectionQuestionId { get; set; }
+        private int? _timeCount;
 
-        public SectionQuestion? SectionQuestion { get; set; }
+        public int? TimeCount
+        {
+            get { return _timeCount == null && !string.IsNullOrEmpty(AnswerStr) && !AnswerStr.Contains(answerStr, StringComparison.InvariantCulture) ? MediaHelper.GetMediaDurationAsync(AnswerStr) : _timeCount; }
+            set { _timeCount = value; }
+        }
 
-        public Guid MockTestResultId { get; set; }
+        private int? _wordCount;
+
+        public int? WordCount
+        {
+            get { return _wordCount == null && _timeCount == null && !string.IsNullOrEmpty(AnswerStr) && !AnswerStr.Contains(answerStr, StringComparison.InvariantCulture) ? StringHelper.CountWords(AnswerStr) : _wordCount; }
+            set { _wordCount = value; }
+        }
+
         public MockTestResult? MockTestResult { get; set; }
-        public Guid? SectionTimeCodeId { get; set; }
-        public SectionTimeCode? SectionTimeCode { get; set; }
-        public Guid? SectionId { get; set; }
-        public Section? Section { get; set; }
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public Guid MockTestResultId { get; set; }
+
+        public SectionGroupResult? SectionGroupResult { get; set; }
+        public Guid? SectionGroupResultId { get; set; }
+
+        public string? GradingAlFeedback { get; set; }
+
+        public string? SpeechTextAnswer { get; set; }
+
+        public double? PronunciationScore { get; set; }
     }
 }

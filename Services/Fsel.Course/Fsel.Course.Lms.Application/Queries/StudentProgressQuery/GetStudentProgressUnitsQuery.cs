@@ -61,14 +61,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
-                methodResult.Result = default;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var courseUnitMockTests = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == request.CourseId).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken);
             if (courseUnitMockTests == null || !courseUnitMockTests.Any())
             {
-                methodResult.Result = default;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -113,8 +111,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             if (unit != null)
             {
                 var lessonIds = unit.UnitLessons.Select(x => x.LessonId).ToList();
-                var mockTestId = unit.UnitSkillMockTests.Any() ? unit.UnitSkillMockTests.FirstOrDefault()?.Id : null;
-                var (currentProgress, progress) = await GetContentComplete(lessonIds, studentId, mockTestId);
+                var mockTestId = unit.UnitSkillMockTests.Any() ? unit.UnitSkillMockTests.FirstOrDefault()?.MockTestId : null;
+                var (currentProgress, progress) = await GetContentComplete(lessonIds, studentId, mockTestId, unit.Id);
                 var featureAccessTime = featureAccessTimeResults?.FirstOrDefault(x => x.UnitId == unitId);
                 var unitResult = unit.UnitResults.FirstOrDefault(x => x.StudentId == studentId && x.UnitId == unit.Id && x.CourseId == courseUnitMockTest.CourseId);
                 unitProgress.Type = nameof(courseUnitMockTest.Unit);
@@ -129,7 +127,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
                 unitProgress.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
                 unitProgress.TotalLesson = lessonIds.Count;
-                unitProgress.ProcessPercent = NumberHelper.ConvertPercentDouble((double)currentProgress / progress);
+                unitProgress.ProcessPercent = NumberHelper.GetPercent(currentProgress, progress);
                 if (featureAccessTime != null)
                 {
                     unitProgress.TimeSpent = featureAccessTime.AccessTime;
@@ -139,31 +137,33 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return unitProgress;
         }
 
-        private async Task<(int, int)> GetContentComplete(IList<Guid>? lessonIds, Guid? studentId, Guid? mockTestId)
+        private async Task<(int, int)> GetContentComplete(IList<Guid>? lessonIds, Guid? studentId, Guid? mockTestId, Guid unitId)
         {
-            var countVideo = 0;
-            var countHomeWork = 0;
-            var countClassForum = 0;
-            var countMockTest = 0;
+            var counts = new List<int>();
             if (lessonIds != null && lessonIds.Any())
             {
-                var lessonResults = await _lessonResultRepository.GetListAsync(lessonIds, studentId);
+                var lessonResults = await _lessonResultRepository.GetListAsync(lessonIds, studentId, unitId);
                 if (lessonResults != null && lessonResults.Any())
                 {
-                    countVideo = lessonResults.Select(x => x.VideoResult).Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == studentId).Count();
-                    countClassForum = lessonResults.SelectMany(x => x.ClassForumResults).Where(x => x != null && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == studentId).Count();
-                    countHomeWork = lessonResults.SelectMany(x => x.HomeWorkResults).Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == studentId).GroupBy(x => x.LessonResultId).Count();
+                    var countVideo = lessonResults.Select(x => x.VideoResult).Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == studentId).Count();
+                    var countClassForum = lessonResults.SelectMany(x => x.ClassForumResults).Where(x => x != null && (x.Status == EnumClassForumResultStatus.Denied || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == studentId).Count();
+                    var countHomeWork = lessonResults.Select(x =>
+                    {
+                        return x.HomeWorkResults.Any() && x.HomeWorkResults.All(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == studentId) ? 1 : 0;
+                    }).Sum();
+                    counts.AddRange(new List<int> { countHomeWork, countClassForum, countVideo });
                 }
             }
             if (mockTestId != null)
             {
-                var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestId == mockTestId && x.StudentId == studentId);
+                var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestId == mockTestId && x.StudentId == studentId && x.UnitId == unitId);
                 if (mockTestResult != null)
                 {
-                    countMockTest = mockTestResult.Status == EnumResultStatus.Done ? 1 : 0;
+                    var countMockTest = mockTestResult.Status == EnumResultStatus.Done ? 1 : 0;
+                    counts.Add(countMockTest);
                 }
             }
-            return (countVideo + countClassForum + countHomeWork + countMockTest, (lessonIds?.Count ?? default) * 3 + countMockTest);
+            return (counts.Sum(), (lessonIds?.Count ?? default) * 3 + (mockTestId != null ? 1 : 0));
         }
     }
 }

@@ -3,27 +3,32 @@
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.CourseQuery;
     using Fsel.Course.Lms.Application.Queries.StudentQuery;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/student")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Student))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class StudentController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<StudentController> _logger;
 
-        public StudentController(IMediator mediator)
+        public StudentController(IMediator mediator, ILogger<StudentController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         /// <summary>
@@ -58,6 +63,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> StudentSetting()
         {
+            //_logger.LogError("StudentSetting: " + Request.HttpContext.ToCurl());
             MethodResult<StudentSettingModel> queryResult = await _mediator.Send(new GetStudentSettingQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }

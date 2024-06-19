@@ -1,29 +1,50 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Net;
+using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
+using Fsel.Common.Helpers;
 using Fsel.Core.Base.Interfaces;
+using Fsel.Course.Lms.Application.Commands.TestCmd;
 using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
 using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
 using Fsel.Shared.Models.ShareModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Course.Lms.Api.Controllers
 {
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/test")]
     [ApiController]
     public class TestController : ControllerBase
     {
         private readonly IMediator _mediator;
         private readonly IQueueProvider _queueProvider;
+        private readonly ILogger<TestController> _logger;
 
-        public TestController(IMediator mediator, IQueueProvider queueProvider)
+        public TestController(IMediator mediator, IQueueProvider queueProvider, ILogger<TestController> logger)
         {
             _mediator = mediator;
             _queueProvider = queueProvider;
+            _logger = logger;
+        }
+
+        /// <summary>
+        /// Search Course
+        /// </summary>
+        [HttpGet("get-curl")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        public IActionResult GetCurl()
+        {
+            _logger.LogError(Request.HttpContext.ToCurl());
+            MethodResult<string> queryResult = new MethodResult<string> { Result = nameof(Search) };
+            return queryResult.GetActionResult();
         }
 
         /// <summary>
@@ -32,8 +53,10 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         public IActionResult Search()
         {
+            var a = TimeZoneInfo.GetSystemTimeZones();
             MethodResult<string> queryResult = new MethodResult<string> { Result = nameof(Search) };
             return queryResult.GetActionResult();
         }
@@ -66,5 +89,37 @@ namespace Fsel.Course.Lms.Api.Controllers
             MethodResult<bool> queryResult = new MethodResult<bool>();
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Update Module Process
+        /// </summary>
+        [HttpPut("module-process")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> UpdateModuleProcess([FromBody] UpdateModuleProcessCommand command)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Delete Video Time Code Answers
+        /// </summary>
+        [HttpPost("queue-test/{queueName}/{queueTopic}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public IActionResult QueueTest([FromRoute] string queueName, [FromRoute] string queueTopic, [FromBody] QueueTestModel data)
+        {
+            _queueProvider.Publish(queueName, queueTopic, data?.Data);
+
+            MethodResult<bool> queryResult = new MethodResult<bool>();
+            return queryResult.GetActionResult();
+        }
+    }
+
+    public class QueueTestModel
+    {
+        public object? Data { get; set; }
     }
 }

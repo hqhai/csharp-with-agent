@@ -7,6 +7,21 @@ namespace Fsel.Shared.Enums
         SendOtp,
         SendOtpAndLink,
         SendStudentPTOnline,
-        SendSurveyToParentStudent
+        SendSurveyToParentStudent,
+        SendStudentCompleteUnitGood,
+        SendStudentCompleteUnitWeak,
+        SendStudentCompleteCourseIetls,
+        SendStudentCompleteCourseAcademic,
+        Unit1Report,
+        Unit2AboveReport,
+        WeeklyReport,
+        WeeklyReport2,
+        WeeklyReport3,
+        WeeklyReport4,
+        StudentCompletePT,
+        SendMailMidCourseAcademic,
+        SendMailMidCourseIELT,
+        PaymentApproval,
+        MailFromLandingPage
     }
 }

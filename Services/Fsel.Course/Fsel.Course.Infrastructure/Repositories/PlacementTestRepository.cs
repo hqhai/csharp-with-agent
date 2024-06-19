@@ -11,11 +11,11 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class PlacementTestRepository : BaseRepository<PlacementTest>, IPlacementTestRepository
     {
-        public PlacementTestRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public PlacementTestRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
 
-        public override async Task<PlacementTest?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<PlacementTest?> GetIncludeByIdAsync(Guid id)
         {
             try
             {

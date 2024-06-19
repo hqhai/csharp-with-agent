@@ -7,11 +7,11 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Identity.Domain.Models.QueryModels.Users;
     using MediatR;
-    using Microsoft.AspNetCore.Identity;
 
     public class GetUsersByRoleQuery : GetUsersByRoleQueryModel, IRequest<MethodResult<IList<UserModel>>>
     {

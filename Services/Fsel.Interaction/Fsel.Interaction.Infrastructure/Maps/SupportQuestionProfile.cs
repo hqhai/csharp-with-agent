@@ -16,6 +16,7 @@ namespace Fsel.Interaction.Infrastructure.Maps
             CreateMap<CreateSupportQuestionCommandModel, SupportQuestion>().IgnoreAllNonExisting();
             CreateMap<UpdateSupportQuestionCommandModel, SupportQuestion>().IgnoreAllNonExisting();
             CreateMap<UpdateStatusSupportQuestionCommandModel, SupportQuestion>().IgnoreAllNonExisting();
+            CreateMap<UpdateFrequentStatusSupportQuestionCommandModel, SupportQuestion>().IgnoreAllNonExisting();
         }
     }
 }

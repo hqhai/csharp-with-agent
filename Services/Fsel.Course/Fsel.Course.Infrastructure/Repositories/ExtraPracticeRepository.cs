@@ -10,7 +10,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class ExtraPracticeRepository : BaseRepository<ExtraPractice>, IExtraPracticeRepository
     {
-        public ExtraPracticeRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public ExtraPracticeRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
 
@@ -123,7 +123,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     }).FirstOrDefaultAsync();
         }
 
-        public override async Task<ExtraPractice?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<ExtraPractice?> GetIncludeByIdAsync(Guid id)
         {
             try
             {

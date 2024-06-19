@@ -69,8 +69,8 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var userIds = lists.Select(x => x.UserId.ToString()).ToList();
-            userIds.AddRange(postsbyCommentFlag.Where(x => lists.Select(n => n.Id).Contains(x.PostId)).SelectMany(x => x.Comments).Select(x => x.UserId.ToString()));
+            var userIds = lists.Select(x => x.UserId).ToList();
+            userIds.AddRange(postsbyCommentFlag.Where(x => lists.Select(n => n.Id).Contains(x.PostId)).SelectMany(x => x.Comments).Select(x => x.UserId));
 
             var studentsResult = await _userService.GetStudentByUserIdsAsync(userIds);
             var students = studentsResult.Content?.Result;

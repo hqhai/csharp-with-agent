@@ -9,7 +9,16 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public Smtp? Smtp { get; set; }
         public Otp? Otp { get; set; }
         public ConstantUrl? ConstantUrl { get; set; }
+        public GoogleSheetConfig? GoogleSheetConfig { get; set; }
         public new Services? Services { get; set; }
+
+        public OpenAiConfig? OpenAiConfig { get; set; }
+    }
+
+    public class OpenAiConfig
+    {
+        public string? Uri { get; set; }
+        public string? ApiKey { get; set; }
     }
 
     public class ConstantUrl
@@ -17,10 +26,27 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public string? ConfirmOtpUrl { get; set; }
     }
 
+    public class GoogleSheetConfig
+    {
+        public string? I18NSpreadSheetId { get; set; }
+        public string? I18NSheetVN { get; set; }
+        public string? I18NSheetEN { get; set; }
+        public string? I18NSheetFR { get; set; }
+
+        public string? MailMarketingSpreadSheetId { get; set; }
+        public string? MailMarketingSheet { get; set; }
+        public string? LandingPageSpreadSheetId { get; set; }
+        public string? LandingPageSheet { get; set; }
+        public string? LandingPageFSELSpreadSheetId { get; set; }
+        public string? LandingPageFSELSheet { get; set; }
+    }
+
     public class Services : BaseServices
     {
         public string? LmsCourseApiUrl { get; set; }
         public string? OrderApiUrl { get; set; }
+        public string? DictionaryApiUrl { get; set; }
+        public string? StorageApiUrl { get; set; }
     }
 
     public class Otp

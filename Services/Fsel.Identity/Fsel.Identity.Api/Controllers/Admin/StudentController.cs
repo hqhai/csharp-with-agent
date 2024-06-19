@@ -12,13 +12,17 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
+    using Fsel.Identity.Application.Commands.StudentCmd;
+    using Fsel.Identity.Application.Commands.AuthCmd;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/student")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Admin))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class StudentController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -112,6 +116,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         {
             MethodResult<PagingItemsModel<StudentSearchAdminModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// delete
+        /// </summary>
+        [HttpDelete("delete-user/{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> DeleteStudentFromClass([FromRoute] Guid id)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteListDataStudentCommand { UserId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

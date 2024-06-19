@@ -9,10 +9,12 @@ using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Asp.Versioning;
+using Fsel.Shared.Constants;
 
 namespace Fsel.Identity.Api.Controllers
 {
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/teacher")]
     [ApiController]
     public class TeacherController : ControllerBase
@@ -66,7 +68,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<TeacherModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Authorize]
+        [Common.Attributes.Permission]
         public async Task<IActionResult> SearchTeacher([FromQuery] SearchTeacherQuery query)
         {
             MethodResult<PagingItemsModel<TeacherModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);

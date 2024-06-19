@@ -4,7 +4,7 @@ namespace Fsel.Course.Infrastructure.Common
 {
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions;
-    using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class QuestionTypeConverter
     {
@@ -16,20 +16,19 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 case EnumQuestionType.Multichoice:
                 case EnumQuestionType.Dropdown:
-                    var multichoice = config.Deserialize<MutipleChoiceQuestion>();
+                    var multichoice = config.Deserialize<MultipleChoiceQuestion>();
                     result = isDisableAnswers ? ClearAnswers(multichoice) : multichoice;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
                     break;
 
                 case EnumQuestionType.Checklist:
-                    var checklist = config.Deserialize<MutipleChoiceQuestion>();
+                    var checklist = config.Deserialize<MultipleChoiceQuestion>();
                     result = isDisableAnswers ? ClearAnswers(checklist) : checklist;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(checklist) : default;
                     break;
 
                 case EnumQuestionType.Listing:
-                    var listingQuestion = config.Deserialize<ListingQuestion>();
-                    result = isDisableAnswers ? ClearAnswers(listingQuestion) : listingQuestion;
+                    result = config.Deserialize<ListingQuestion>();
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
                     break;
 
@@ -48,8 +47,7 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case EnumQuestionType.ShortAnswerWordCount:
-                    var shortAnswerWordCount = config.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
-                    result = isDisableAnswers ? ClearAnswers(shortAnswerWordCount) : shortAnswerWordCount;
+                    result = config.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
                     break;
 
@@ -61,13 +59,13 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.GapFillWordBankScoreByQuestion:
                     var gapFillWordBankScoreQuestion = config.Deserialize<GapFillQuestion>();
-                    result = gapFillWordBankScoreQuestion;
+                    result = isDisableAnswers ? ClearAnswers(gapFillWordBankScoreQuestion) : gapFillWordBankScoreQuestion;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrectBySubQuestion(gapFillWordBankScoreQuestion) : default;
                     break;
 
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                     var gapFillWordBankScoreByGap = config.Deserialize<GapFillQuestion>();
-                    result = gapFillWordBankScoreByGap;
+                    result = isDisableAnswers ? ClearAnswers(gapFillWordBankScoreByGap) : gapFillWordBankScoreByGap;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrectByGap(gapFillWordBankScoreByGap) : default;
                     break;
 
@@ -79,8 +77,18 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
                     var dragAndDropSentenceOrderQuestion = config.Deserialize<DragAndDropSentenceOrderQuestion>();
-                    result = dragAndDropSentenceOrderQuestion;
+                    result = isDisableAnswers ? ClearAnswers(dragAndDropSentenceOrderQuestion) : dragAndDropSentenceOrderQuestion;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(dragAndDropSentenceOrderQuestion) : default;
+                    break;
+
+                case EnumQuestionType.DragAndDropListSentenceOrder:
+                    var dragAndDropList = config.Deserialize<DragAndDropListSentenceOrderQuestion>();
+                    if (dragAndDropList != null)
+                    {
+                        dragAndDropList.Contents = dragAndDropList.Contents?.Select((x, index) => { x.Id = ++index; return x; }).ToList();
+                    }
+                    result = isDisableAnswers ? ClearAnswers(dragAndDropList) : dragAndDropList;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
                     break;
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
@@ -90,8 +98,8 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case EnumQuestionType.ExercisePreparation:
-                    var exercisePreparation = config.Deserialize<ExercisePreparationQuestion>();
-                    result = exercisePreparation;
+                    result = config.Deserialize<ExercisePreparationQuestion>();
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
                     break;
 
                 default:
@@ -121,23 +129,14 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static object? ClearAnswers(ShortAnswerQuestionWordBaseQuestion? data)
         {
-            if (data != null && data.Contents != null && data.Contents.Count > 0)
+            if (data != null && data.Content != null && data.Content.Any())
             {
-                data.Contents.Clear();
+                data.Content.Clear();
             }
             return data;
         }
 
-        private static object? ClearAnswers(ListingQuestion? data)
-        {
-            if (data != null)
-            {
-                data.ExactWordCount = null;
-            }
-            return data;
-        }
-
-        private static object? ClearAnswers(MutipleChoiceQuestion? data)
+        private static object? ClearAnswers(MultipleChoiceQuestion? data)
         {
             if (data != null && data.Contents != null)
             {
@@ -149,13 +148,21 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswers(ShortAnswerQuestionWordCountBaseQuestion? data)
+        private static object? ClearAnswers(DragAndDropSentenceOrderQuestion? data)
         {
-            if (data != null)
+            if (data != null && data.Contents != null)
             {
-                data.ExactWordCount = null;
+                foreach (var item in data.Contents)
+                {
+                    item.Words = GenerateRandomLoop(item.Words);
+                }
             }
             return data;
+        }
+
+        private static object? ClearAnswers(DragAndDropListSentenceOrderQuestion? data)
+        {
+            return GenerateRandomLoop(data?.Contents);
         }
 
         private static object? ClearAnswers(MatchingTypeQuestion? data)
@@ -173,7 +180,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in data.Contents)
                 {
-                    item.Words!.Clear();
+                    item.Words = GenerateRandomLoop(item.Words);
                 }
             }
             return data;
@@ -188,7 +195,7 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static int GetTotalCorrect(MutipleChoiceQuestion? data)
+        private static int GetTotalCorrect(MultipleChoiceQuestion? data)
         {
             int number = 0;
             if (data != null && data.Contents != null)
@@ -244,6 +251,16 @@ namespace Fsel.Course.Infrastructure.Common
                 return data.Contents.Count;
             }
             return default;
+        }
+
+        private static IList<T>? GenerateRandomLoop<T>(IList<T>? datas)
+        {
+            var rand = new Random();
+            if (datas != null)
+            {
+                return datas.OrderBy(_ => rand.Next()).ToList();
+            }
+            return datas;
         }
     }
 }

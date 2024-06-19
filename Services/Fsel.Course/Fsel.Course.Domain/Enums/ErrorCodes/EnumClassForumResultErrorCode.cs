@@ -38,13 +38,35 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Feedback Positive Or FeedBack Both Have Value
         /// </summary>
         FeedbackPositiveOrFeedBackBothHaveValue,
+
         /// <summary>
         /// Cso Id Invalid
         /// </summary>
         CsoInvalid,
+
         /// <summary>
         /// Teacher Id Invalid
         /// </summary>
         TeacherInvalid,
+
+        /// <summary>
+        /// Contains Forbidden Keywords
+        /// </summary>
+        ContainsForbiddenKeywords,
+
+        /// <summary>
+        /// Class Forum result Status not pendding For Grading or Graded
+        /// </summary>
+        ClassForumResultStatusNotPendingForGradingOrGraded,
+
+        /// <summary>
+        /// Class Forum result Status not pendding For Grading or Graded
+        /// </summary>
+        ClassForumDetailHaveMoreThan2,
+
+        /// <summary>
+        /// Time's up for the ClassForum.
+        /// </summary>
+        TimeUpPostClassForum
     }
 }

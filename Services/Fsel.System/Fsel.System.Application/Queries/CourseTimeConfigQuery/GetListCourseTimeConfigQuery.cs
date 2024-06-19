@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Application.Querys.CourseTimeConfigQuery
+namespace Fsel.System.Application.Queries.CourseTimeConfigQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
@@ -51,6 +51,7 @@ namespace Fsel.System.Application.Querys.CourseTimeConfigQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
+            
 
             methodResult.Result = new PagingItemsModel<CourseTimeConfigModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

@@ -8,7 +8,7 @@ namespace Fsel.Interaction.Infrastructure.Repositories
 
     public class CustomerSurveyRepository : BaseRepository<CustomerSurvey>, ICustomerSurveyRepository
     {
-        public CustomerSurveyRepository(InteractionDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public CustomerSurveyRepository(InteractionDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

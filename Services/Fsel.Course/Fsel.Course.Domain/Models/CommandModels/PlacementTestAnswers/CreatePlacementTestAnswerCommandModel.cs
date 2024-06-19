@@ -7,6 +7,8 @@ namespace Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers
     public class CreatePlacementTestAnswerCommandModel
     {
         public EnumPlacementTestLevel Level { get; set; }
+        public double TotalQuestion { get; set; }
+        public double CountQuestion { get; set; }
         public IList<PlacementTestAnswerSkillQuestionModel>? Skills { get; set; }
     }
 

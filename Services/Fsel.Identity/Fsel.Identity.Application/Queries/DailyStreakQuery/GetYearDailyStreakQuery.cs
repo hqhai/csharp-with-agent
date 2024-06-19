@@ -37,13 +37,17 @@ namespace Fsel.Identity.Application.Queries.DailyStreakQuery
 
             var student = await _studentRepository.Queryable
                             .Include(i => i.Human)
-                            .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == _authContext.CurrentUserId.ToString(), cancellationToken);
+                            .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == _authContext.CurrentUserId, cancellationToken);
             if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
             var years = await _studentDailyStreakRepository.Queryable.Where(x => x.StudentId == student.Id).GroupBy(x => x.DailyDate.Year).Select(x => x.Key).ToListAsync(cancellationToken);
+            if (!years.Any())
+            {
+                years.Add(DateTime.UtcNow.Year);
+            }
             methodResult.Result = years;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

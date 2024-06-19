@@ -20,10 +20,10 @@ services:
             - Otp__StepTime=3
             - Otp__StepDayWithAdmin=7
             - ConstantUrl__ConfirmOtpUrl=http://42.96.58.145:4300/login/first-login?otp={0}
-            - SERVICES_SenderApiUrl=http://42.96.58.145:5206/api/v1
-            - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/
-            - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
-            - SERVICES_OrderApiUrl=http://42.96.58.145:5209/api/v1
+            - SERVICES_SenderApiUrl=http://sender-testing.fsel-testing.svc/api/v1
+            - SERVICES_InteractionApiUrl=http://interaction-testing.fsel-testing.svc/api/
+            - SERVICES_ClassApiUrl=http://training-testing.fsel-testing.svc/api/v1
+            - SERVICES_OrderApiUrl=http://ordering-testing.fsel-testing.svc/api/v1
         ports:
             - 5201:80
             - 7201:443
@@ -47,10 +47,10 @@ services:
             - Otp__StepTime=3
             - Otp__StepDayWithAdmin=7
             - ConstantUrl__ConfirmOtpUrl=http://42.96.58.145:4300/login/first-login?otp={0}
-            - SERVICES_SenderApiUrl=http://42.96.58.145:5206/api/v1
-            - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/
-            - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
-            - SERVICES_OrderApiUrl=http://42.96.58.145:5209/api/v1
+            - SERVICES_SenderApiUrl=http://sender-testing.fsel-testing.svc/api/v1
+            - SERVICES_InteractionApiUrl=http://interaction-testing.fsel-testing.svc/api/
+            - SERVICES_ClassApiUrl=http://training-testing.fsel-testing.svc/api/v1
+            - SERVICES_OrderApiUrl=http://ordering-testing.fsel-testing.svc/api/v1
         ports:
             - 5202:80
             - 7202:443
@@ -71,7 +71,7 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
+            - SERVICES_UserApiUrl=http://user-testing.fsel-testing.svc/api/v1
         ports:
             - 5203:80
             - 7203:443
@@ -92,11 +92,11 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
-            - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
-            - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/v1
-            - SERVICES_SystemApiUrl=http://42.96.58.145:52010/api/v1
-            - SERVICES_NotificationApiUrl=http://42.96.58.145:5502/api/v1
+            - SERVICES_UserApiUrl=http://user-testing.fsel-testing.svc/api/v1
+            - SERVICES_ClassApiUrl=http://training-testing.fsel-testing.svc/api/v1
+            - SERVICES_InteractionApiUrl=http://interaction-testing.fsel-testing.svc/api/v1
+            - SERVICES_SystemApiUrl=http://system-testing.fsel-testing.svc/api/v1
+            - SERVICES_NotificationApiUrl=http://notification-testing.fsel-testing.svc/api/v1
         ports:
             - 5204:80
             - 7204:443
@@ -161,8 +161,8 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
-            - SERVICES_CourseApiUrl=http://42.96.58.145:5203/api/v1
+            - SERVICES_UserApiUrl=http://user-testing.fsel-testing.svc/api/v1
+            - SERVICES_CourseApiUrl=http://lcmsapi-testing.fsel-testing.svc/api/v1
         ports:
             - 5207:80
             - 7207:443
@@ -183,7 +183,7 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
+            - SERVICES_UserApiUrl=http://user-testing.fsel-testing.svc/api/v1
         ports:
             - 5208:80
             - 7208:443
@@ -204,10 +204,10 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
-            - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
-            - SERVICES_LmsCourseApiUrl=http://42.96.58.145:5204/api/v1
-            - SERVICES_OrderApiUrl=http://42.96.58.145:5209/api/v1
+            - SERVICES_UserApiUrl=http://user-testing.fsel-testing.svc/api/v1
+            - SERVICES_ClassApiUrl=http://training-testing.fsel-testing.svc/api/v1
+            - SERVICES_LmsCourseApiUrl=http://lmsapi-testing.fsel-testing.svc/api/v1
+            - SERVICES_OrderApiUrl=http://ordering-testing.fsel-testing.svc/api/v1
         ports:
             - 5209:80
             - 7209:443
@@ -228,9 +228,9 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
-            - SERVICES_OrderApiUrl=http://42.96.58.145:5209/api/v1
-            - SERVICES_LmsCourseApiUrl=http://42.96.58.145:5204/api/v1
+            - SERVICES_UserApiUrl=http://user-testing.fsel-testing.svc/api/v1
+            - SERVICES_OrderApiUrl=http://ordering-testing.fsel-testing.svc/api/v1
+            - SERVICES_LmsCourseApiUrl=http://lmsapi-testing.fsel-testing.svc/api/v1
         ports:
             - 52010:80
             - 7010:443

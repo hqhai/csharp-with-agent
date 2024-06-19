@@ -8,7 +8,7 @@ namespace Fsel.Interaction.Infrastructure.Repositories
 
     public class InteractionActionRepository : BaseRepository<InteractionAction>, IInteractionActionRepository
     {
-        public InteractionActionRepository(InteractionDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public InteractionActionRepository(InteractionDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

@@ -6,6 +6,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Users;
@@ -13,7 +14,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
     public class UpdateUserProfileCommand : UpdateUserProfileCommandModel, IRequest<MethodResult<UserModel>>
@@ -82,7 +82,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             return methodResult;
         }
 
-        private async Task<User?> UpdateTeacher(string userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
+        private async Task<User?> UpdateTeacher(Guid userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
         {
             var userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Teacher)
@@ -114,7 +114,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             return userView;
         }
 
-        private async Task<User?> UpdateCSO(string userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
+        private async Task<User?> UpdateCSO(Guid userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
         {
             var userView = await _userManager.Users.Include(x => x.Human)
                                                   .ThenInclude(x => x!.CSO)
@@ -130,7 +130,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             return userView;
         }
 
-        private async Task<User?> UpdateStudent(string userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
+        private async Task<User?> UpdateStudent(Guid userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
         {
             var userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Student)
@@ -188,7 +188,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             return userView;
         }
 
-        private async Task<User?> UpdateParent(string userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
+        private async Task<User?> UpdateParent(Guid userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
         {
             List<User> users = new List<User>();
             User? userView = null;
@@ -239,7 +239,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             return userView;
         }
 
-        private async Task<User?> UpdateRoleRemaining(string userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
+        private async Task<User?> UpdateRoleRemaining(Guid userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
         {
             var userView = await _userManager.Users.Include(x => x.Human)
                                      .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);

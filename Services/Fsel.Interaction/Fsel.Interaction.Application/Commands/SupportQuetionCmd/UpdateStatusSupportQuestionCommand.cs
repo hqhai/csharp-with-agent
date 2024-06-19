@@ -11,6 +11,7 @@ namespace Fsel.Interaction.Application.Commands.SupportQuetionCmd
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.SupportQuestions;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Interaction.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -41,6 +42,15 @@ namespace Fsel.Interaction.Application.Commands.SupportQuetionCmd
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSupportQuestionErrorCode.SupportQuestionNotExist));
                 return methodResult;
+            }
+            if (supportQuestion.IsFrequent)
+            {
+                var supportQuestions = _supportQuestionRepository.Queryable.Where(x => x.IsFrequent && x.IsActive).ToList().Count;
+                if (supportQuestions >= 10)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSupportQuestionErrorCode.SupportQuestionHaveOver10FrequentQuesions));
+                    return methodResult;
+                }
             }
             _mapper.Map(request, supportQuestion);
 

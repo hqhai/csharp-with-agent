@@ -12,17 +12,37 @@ namespace Fsel.System.Api.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
+    using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.System.Domain.IRepositories;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/feature-access-time")]
     [ApiController]
-    public class FeatureAccessTimeController : ControllerBase
+    public class FeatureAccessTimeController : BaseController
     {
         private readonly IMediator _mediator;
-
-        public FeatureAccessTimeController(IMediator mediator)
+        private readonly IFeatureAccessTimeRepository _featureAccessTimeRepository;
+        public FeatureAccessTimeController(IMediator mediator, IFeatureAccessTimeRepository featureAccessTimeRepository)
         {
             _mediator = mediator;
+            _featureAccessTimeRepository = featureAccessTimeRepository;
+        }
+
+        /// <summary>
+        /// execute list query
+        /// </summary>
+        [HttpGet("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ReceiveToken([FromQuery] BaseQueryModel query)
+        {
+            SetQuery(query);
+            var commandResult = await _featureAccessTimeRepository.GetListResultAsync<FeatureAccessTimeModel>(query);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
@@ -55,11 +75,53 @@ namespace Fsel.System.Api.Controllers
         [HttpPost("save")]
         [ProducesResponseType(typeof(MethodResult<FeatureAccessTimeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Authorize(Roles = nameof(EnumRole.Student))]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> Save([FromBody] SaveFeatureAccessTimeCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Student Feature Access Time
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpGet("access-time-chart")]
+        [ProducesResponseType(typeof(MethodResult<IList<FeatureAcessTimeChartModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        public async Task<IActionResult> GetStudentFeatureAccessTime([FromQuery] GetFeatureAccessTimeChartQuery query)
+        {
+            MethodResult<IList<FeatureAcessTimeChartModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get feature access business
+        /// </summary>
+        [HttpGet("get-feature-access-time-business")]
+        [ProducesResponseType(typeof(MethodResult<IList<FeatureAccessTimeBusinessModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetFeatureAccessBusiness([FromQuery] GetFeatureAccessTimeBusinessQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+
+        /// <summary>
+        /// Get feature access business
+        /// </summary>
+        [HttpPost("get-feature-access-time-by-userIds")]
+        [ProducesResponseType(typeof(MethodResult<IList<FeatureAccessTimeBusinessModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetFeatureAccessTimeByUserId([FromBody] IList<Guid> userIds)
+        {
+            var queryResult = await _mediator.Send(new GetFeatureAccessTimeByUserIdQuery { UserIds = userIds }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+
     }
 }

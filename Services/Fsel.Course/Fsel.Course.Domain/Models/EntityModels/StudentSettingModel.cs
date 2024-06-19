@@ -13,6 +13,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseLevel? StartPTLevel { get; set; }
         public int ModuleNumber { get; set; }
         public bool IsLockPT { get; set; }
-        public bool IsLockOrder { get; set; }
+        public EnumTrialRegistrationStatus? Status { get; set; }
+        public StudentBeginnerGuideModel? BeginnerGuide { get; set; }
+        public double NumberOfToken { get; set; }
+        public CourseModel? Course { get; set; }
     }
 }

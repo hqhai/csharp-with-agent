@@ -3,6 +3,7 @@
 namespace Fsel.Training.Application.Queries.ClassQuery
 {
     using System;
+    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -65,7 +66,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                classQuery = classQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                classQuery = classQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             int totalItem = await classQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

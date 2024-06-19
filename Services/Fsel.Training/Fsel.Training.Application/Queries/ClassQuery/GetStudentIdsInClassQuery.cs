@@ -40,7 +40,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
                 return methodResult;
             }
-            var studentIds = await _classStudentRepository.Queryable.Where(p => p.ClassId == request.ClassId).Select(x => x.StudentId).ToListAsync(cancellationToken);
+            var studentIds = await _classStudentRepository.Queryable.Where(p => p.ClassId == request.ClassId && p.IsActive).Select(x => x.StudentId).ToListAsync(cancellationToken);
             methodResult.Result = studentIds;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

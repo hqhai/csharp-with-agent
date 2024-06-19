@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.StudentQuery
 {
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -9,7 +10,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.OrderServices;
-    using Fsel.Course.Lms.Application.Services.OrderServices.Model;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -27,18 +27,24 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
         private readonly IUserService _userService;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IOrderService _orderService;
+        private readonly ICourseRepository _courseRepository;
+        private readonly IMapper _mapper;
         private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
 
         public SettingStudentCheckQueryHandler(IUserService userService,
             IPlacementTestResultRepository placementTestResultRepository,
             IOrderService orderService,
+            ICourseRepository courseRepository,
+            IMapper mapper,
             ITrainingService trainingService,
             AuthContext authContext)
         {
             _userService = userService;
             _placementTestResultRepository = placementTestResultRepository;
             _orderService = orderService;
+            _courseRepository = courseRepository;
+            _mapper = mapper;
             _trainingService = trainingService;
             _authContext = authContext;
         }
@@ -56,20 +62,38 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             }
             var student = studentResult?.Content?.Result;
             int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
+
             if (student != null)
             {
+                settingStudentModel.NumberOfToken = student.NumberOfToken;
                 var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
-                                                                               .ToListAsync(cancellationToken);
-                var placementTestResult = placementTestResults.OrderByDescending(x => x.CreatedDate).FirstOrDefault();
-                var (levelNext, isLock) = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent, age) ?? (null, default);
+                                                                              .OrderByDescending(x => x.CreatedDate)
+                                                                              .ToListAsync(cancellationToken);
 
+                var placementTestResultLast = placementTestResults.FirstOrDefault();
+
+                var placementTestResultInitial = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == student.Id)
+                                                                               .OrderBy(x => x.CreatedDate)
+                                                                               .FirstOrDefaultAsync(cancellationToken);
+
+                var (levelNext, isLock) = placementTestResultLast?.Level.GetLevelInScore(placementTestResultLast.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age)) ?? (null, default);
+
+                settingStudentModel.BeginnerGuide = student.BeginnerGuide;
                 settingStudentModel.ModuleNumber = placementTestResults.Count + 1;
                 settingStudentModel.Level = student.CourseLevel;
-                settingStudentModel.IsPlacementTest = placementTestResult != null;
-                settingStudentModel.ClassId = student.ClassId ?? null;
-                settingStudentModel.PTLevel = placementTestResult?.Level ?? null;
+                settingStudentModel.IsPlacementTest = placementTestResultLast != null;
+                settingStudentModel.ClassId = student.ClassId;
+                settingStudentModel.PTLevel = placementTestResultLast?.Level;
                 settingStudentModel.IsLockPT = isLock;
-                settingStudentModel.StartPTLevel = placementTestResults.OrderBy(x => x.CreatedDate).FirstOrDefault() == null ? student.CourseLevel : placementTestResults.OrderBy(x => x.CreatedDate).FirstOrDefault()?.Level.GetCourseLevelByPlacementTestLevel();
+                settingStudentModel.StartPTLevel = placementTestResultInitial == null ? student.CourseLevel : placementTestResultInitial.Level.GetCourseLevelByPlacementTestLevel();
+
+                var status = await _orderService.GetCurrentStatusAsync(_authContext.CurrentUserId);
+                if (!status.IsSuccessStatusCode)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(status));
+                    return methodResult;
+                }
+                settingStudentModel.Status = status?.Content?.Result;
                 var classResult = await _trainingService.GetClassByStudentId(student.Id);
                 if (!classResult.IsSuccessStatusCode)
                 {
@@ -83,14 +107,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                     methodResult.Result = settingStudentModel;
                     return methodResult;
                 }
-
-                var isLockOrder = await _orderService.IsCheckStatusUser(new IsCheckPaymentStatusByUserModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = _authContext.CurrentUserId });
-                if (!isLockOrder.IsSuccessStatusCode)
+                var course = await _courseRepository.GetByIdAsync(@class.CourseId);
+                if (course != null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isLockOrder));
-                    return methodResult;
+                    settingStudentModel.Course = _mapper.Map<CourseModel>(course);
                 }
-                settingStudentModel.IsLockOrder = isLockOrder?.Content?.Result ?? default;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

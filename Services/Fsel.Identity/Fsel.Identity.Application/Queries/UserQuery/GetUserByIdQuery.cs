@@ -13,7 +13,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
     public class GetUserByIdQuery : IRequest<MethodResult<HumanModel>>
     {
-        public string? Id { get; set; }
+        public Guid? Id { get; set; }
     }
     public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, MethodResult<HumanModel>>
     {

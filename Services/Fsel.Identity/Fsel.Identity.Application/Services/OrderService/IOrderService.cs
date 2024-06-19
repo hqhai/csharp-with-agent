@@ -3,26 +3,34 @@
 namespace Fsel.Identity.Application.Services.OrderService
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Identity.Application.Services.OrderService.CommandModels;
     using Fsel.Identity.Application.Services.OrderService.Model;
-    using Fsel.Identity.Application.Services.OrderServices.Model;
+    using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
     public interface IOrderService
     {
-        [Get("/package")]
+        [Get("/v1/package")]
         Task<IApiResponse<MethodResult<List<PackageModel>>>> GetPackages();
 
-        [Post("/user-referral")]
+        [Post("/v1/user-referral")]
         Task<IApiResponse<MethodResult<bool>>> CreateUserReferralAsync([Body] CreateUserReferralCommandModel command);
 
-        [Get("/order/is-status-payment")]
-        Task<IApiResponse<MethodResult<bool>>> IsCheckStatusUser([FromQuery] IsCheckPaymentStatusByUserModel query);
+        [Get("/v1/order/get-status")]
+        Task<IApiResponse<MethodResult<EnumOrderStatus?>>> GetStatusAsync([FromQuery] GetStatusByUserCommandModel query);
 
-        [Post("/order")]
+        [Post("/v1/order")]
         Task<IApiResponse<MethodResult<OrderModel>>> CreateOrder([Body] CreateOrderCommandModel command);
 
-        [Put("/admin/order/change-status-order")]
+        [Put("/v1/admin/order/change-status-order")]
         Task<IApiResponse<MethodResult<bool>>> ChangeStatusOrder([Body] ChangeStatusOrderCommandModel command);
+
+        [Post("/v1/admin/order/create-order-for-student")]
+        Task<IApiResponse<MethodResult<OrderModel>>> CreateOrderForStudentAsync([Body] CreateOrderByUserIdCommandModel command);
+        [Get("/v1/order/get-order-by-status")]
+        Task<IApiResponse<MethodResult<IList<OrderSearchModel>>>> GetOrderByStatusAsync([FromQuery] GetOrderByStatusQueryModel query);
+        [Delete("/v1/admin/order/delete-student/{id}")]
+        Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
     }
 }

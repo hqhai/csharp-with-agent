@@ -3,6 +3,7 @@
 namespace Fsel.Course.Application.Queries.FinalTestQuery
 {
     using System;
+    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -12,6 +13,7 @@ namespace Fsel.Course.Application.Queries.FinalTestQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.FinalTests;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -38,7 +40,7 @@ namespace Fsel.Course.Application.Queries.FinalTestQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var finalTestQuery = _finalTestRepository.Queryable
+            var finalTestQuery = _finalTestRepository.Queryable.Where(p => !p.IsArchive).Include(cum => cum.CourseUnitMockTests)
                                                 .Select(x => new FinalTestSearchModel
                                                 {
                                                     Id = x.Id,
@@ -47,11 +49,11 @@ namespace Fsel.Course.Application.Queries.FinalTestQuery
                                                     CreatedDate = x.CreatedDate,
                                                     CreatedFullName = x.CreatedFullName,
                                                     ExecutionTime = x.ExecutionTime,
-                                                    IsActive = x.IsActive,
+                                                    IsActive = x.CourseUnitMockTests.Count > 0,
                                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                finalTestQuery = finalTestQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                finalTestQuery = finalTestQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             if (request.FinalTestLevel != null)
             {

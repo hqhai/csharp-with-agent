@@ -3,17 +3,19 @@
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.PlacementTestCmd;
     using Fsel.Course.Lms.Application.Queries.PlacementTestQuery;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/placement-test")]
     [ApiController]
     public class PlacementTestController : ControllerBase
@@ -26,15 +28,41 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// get PlacementTest
+        /// Get Levels By Student
+        /// </summary>
+        [HttpGet("levels")]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        [ProducesResponseType(typeof(MethodResult<object>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetLevelsByStudentsAsync([FromQuery] GetLevelsByStudentQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Choose Student Course
+        /// </summary>
+        [HttpPost("choose-student-course")]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ChooseStudentCourse([FromBody] ChooseStudentLevelToCourseCommand command)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get PlacementTest
         /// </summary>
         [HttpGet("level")]
-        [Authorize(Roles = nameof(EnumRole.Student))]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         [ProducesResponseType(typeof(MethodResult<PlacementTestBankModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] GetPlacementTestQuery command)
+        public async Task<IActionResult> Get([FromQuery] GetPlacementTestQuery query)
         {
-            MethodResult<PlacementTestBankModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<PlacementTestBankModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -66,7 +94,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get PlacementTest Result
         /// </summary>
         [HttpGet("get-result")]
-        [Authorize(Roles = nameof(EnumRole.Student))]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         [ProducesResponseType(typeof(MethodResult<PlacementTestResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetResult()
@@ -79,7 +107,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get list PlacementTest Result
         /// </summary>
         [HttpGet("get-list-result")]
-        [Authorize(Roles = nameof(EnumRole.Student))]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         [ProducesResponseType(typeof(MethodResult<IList<PlacementTestResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListResult()
@@ -92,9 +120,10 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Create PlacementTest Answers
         /// </summary>
         [HttpPost("create-answers")]
-        [Authorize(Roles = nameof(EnumRole.Student))]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         [ProducesResponseType(typeof(MethodResult<IList<PlacementTestResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         public async Task<IActionResult> CreateAnswer([FromBody] CreatePlacementTestAnswerCommand command)
         {
             MethodResult<IList<PlacementTestResultModel>> queryResult = await _mediator.Send(command).ConfigureAwait(false);

@@ -1,3 +1,6 @@
+using Fsel.Core.Base;
+using Fsel.Core.Base.BaseModels;
+using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Extensions;
 using Fsel.Realtime.Application.Hubs;
 using Fsel.Shared.Constants;
@@ -7,21 +10,29 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Fsel.Realtime.Application.Queues.Consumers
 {
-    public class LeaderBoardConsumer : IConsumer<LeaderBoardQueueModel>
+    public class LeaderBoardConsumer : BaseConsumer<LeaderBoardQueueModel>
     {
         private readonly IHubContext<LeaderBoardHub> _leaderBoardHubContext;
+        private readonly IQueueProvider _queueProvider;
 
-        public LeaderBoardConsumer(IHubContext<LeaderBoardHub> leaderBoardHubContext)
+        public LeaderBoardConsumer(IHubContext<LeaderBoardHub> leaderBoardHubContext, IQueueProvider queueProvider, AuthContext authContext) : base(authContext)
         {
             _leaderBoardHubContext = leaderBoardHubContext;
+            _queueProvider = queueProvider;
         }
 
-        public async Task Consume(ConsumeContext<LeaderBoardQueueModel> context)
+        public override async Task ConsumeQueue(LeaderBoardQueueModel? message)
         {
-            if (context != null)
+            if (message != null)
             {
-                var courseLevel = context.Message.CourseLevel.ToString();
-                await _leaderBoardHubContext.GetGroup(courseLevel!).SendAsync(RealtimeSettings.LeaderBoardHub.Methods.LeaderBoardMessage, context.Message);
+                var courseLevel = message.CourseLevel.ToString();
+                await _leaderBoardHubContext.GetGroup(courseLevel!).SendAsync(RealtimeSettings.LeaderBoardHub.Methods.LeaderBoardMessage, message);
+
+                try
+                {
+                    _queueProvider.Publish(RealtimeSettings.LeaderBoardHub.Methods.LeaderBoardMessage, courseLevel, message);
+                }
+                catch { }
             }
         }
     }

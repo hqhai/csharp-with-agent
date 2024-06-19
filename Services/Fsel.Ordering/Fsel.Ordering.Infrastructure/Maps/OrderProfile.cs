@@ -5,7 +5,7 @@ namespace Fsel.Ordering.Infrastructure.Maps
     using AutoMapper;
     using Fsel.Core.Extensions;
     using Fsel.Ordering.Domain.Entities;
-    using Fsel.Ordering.Domain.Models.CommandModels.Orders;
+    using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1;
     using Fsel.Ordering.Domain.Models.EntityModels;
 
     public class OrderProfile : Profile
@@ -14,7 +14,9 @@ namespace Fsel.Ordering.Infrastructure.Maps
         {
             CreateMap<Order, GenerateRamdomOrderModel>().IgnoreAllNonExisting();
             CreateMap<Order, OrderModel>().IgnoreAllNonExisting();
+            CreateMap<Domain.Models.CommandModels.Orders.CreateOrderCommandModel, Order>().IgnoreAllNonExisting();
             CreateMap<CreateOrderCommandModel, Order>().IgnoreAllNonExisting();
+            CreateMap<CreateOrderToUserIdCommandModel, Order>().IgnoreAllNonExisting();
         }
     }
 }

@@ -9,11 +9,11 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
     public class TeacherRepository : BaseRepository<Teacher>, ITeacherRepository
     {
-        public TeacherRepository(UserDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public TeacherRepository(UserDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
 
-        public override async Task<Teacher?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<Teacher?> GetIncludeByIdAsync(Guid id)
         {
             try
             {
@@ -27,7 +27,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
             }
         }
 
-        public async Task<IList<Teacher>> GetIncludeByIdsAsync(IList<Guid> ids, int? siteId = null)
+        public async Task<IList<Teacher>> GetIncludeByIdsAsync(IList<Guid> ids)
         {
             try
             {
@@ -42,13 +42,13 @@ namespace Fsel.Identity.Infrastructure.Repositories
             }
         }
 
-        public async Task<Teacher?> GetIncludeByUserIdAsync(Guid userId, int? siteId = null)
+        public async Task<Teacher?> GetIncludeByUserIdAsync(Guid userId)
         {
             try
             {
                 return await Queryable
                 .Include(x => x.Human)
-                .FirstOrDefaultAsync(x => x.Human!.UserId == userId.ToString());
+                .FirstOrDefaultAsync(x => x.Human!.UserId == userId);
             }
             catch (Exception)
             {

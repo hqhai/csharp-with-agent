@@ -8,6 +8,8 @@ namespace Fsel.Shared.Enums
         HomeWork,
         VideoLesson,
         MockTest,
-        FinalTest
+        FinalTest,
+        DiscussionBoard,
+        Other
     }
 }

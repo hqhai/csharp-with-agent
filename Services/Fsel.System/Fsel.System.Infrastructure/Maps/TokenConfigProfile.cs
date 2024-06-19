@@ -1,0 +1,23 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.System.Infrastructure.Maps
+{
+    using AutoMapper;
+    using Fsel.Core.Extensions;
+    using Fsel.Shared.Models.ShareModels;
+    using Fsel.System.Domain.Entities;
+    using Fsel.System.Domain.Models.CommandModels.TokenConfigs;
+
+    public class TokenConfigProfile : Profile
+    {
+        public TokenConfigProfile()
+        {
+            CreateMap<TokenConfig, TokenConfigModel>().IgnoreAllNonExisting();
+            CreateMap<UpdateTokenConfigCommandModel, TokenConfig>().IgnoreAllNonExisting();
+
+            CreateMap<TokenCoinConfigs, TokenConfigDailyCheckIns>();
+            CreateMap<TokenCoinConfigs, TokenConfigs>();
+            CreateMap<TokenCoinConfigs, TokenConfigFocusModes>();
+        }
+    }
+}

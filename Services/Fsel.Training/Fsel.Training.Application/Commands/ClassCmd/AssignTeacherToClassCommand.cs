@@ -8,6 +8,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.Classes;
     using MediatR;
@@ -32,10 +33,15 @@ namespace Fsel.Training.Application.Commands.ClassCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            var classes = await _classRepository.GetByIdAsync(request.ClassId);
-            if (classes == null)
+            var @class = await _classRepository.GetByIdAsync(request.ClassId);
+            if (@class == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@class));
+                return methodResult;
+            }
+            if (@class.TeacherId == request.TeacherId)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.TeacherIsAlreadyInTheClass), nameof(@class));
                 return methodResult;
             }
             var teacherResult = await _userService.GetTeacherByIdAsync(request.TeacherId);
@@ -51,11 +57,11 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacher));
                 return methodResult;
             }
-            classes.TeacherId = request.TeacherId;
-            classes.TeacherApprovalStatus = EnumTeacherApprovalStatus.Pending;
+            @class.TeacherId = request.TeacherId;
+            @class.TeacherApprovalStatus = EnumTeacherApprovalStatus.Pending;
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
-                _classRepository.Update(classes);
+                _classRepository.Update(@class);
                 await _classRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;

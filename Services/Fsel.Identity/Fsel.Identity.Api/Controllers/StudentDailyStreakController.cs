@@ -7,22 +7,41 @@ namespace Fsel.Identity.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Identity.Application.Commands.DailyStreakCmd;
     using Fsel.Identity.Application.Queries.DailyStreakQuery;
-    using Fsel.Identity.Application.Queries.StudentQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Core.Base;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/student-daily-streak")]
     [ApiController]
-    public class StudentDailyStreakController : ControllerBase
+    public class StudentDailyStreakController : BaseController
     {
         private readonly IMediator _mediator;
-
-        public StudentDailyStreakController(IMediator mediator)
+        private readonly IStudentDailyStreakRepository _studentDailyStreakRepository;
+        public StudentDailyStreakController(IMediator mediator, IStudentDailyStreakRepository studentDailyStreakRepository)
         {
             _mediator = mediator;
+            _studentDailyStreakRepository = studentDailyStreakRepository;
         }
+
+        /// <summary>
+        /// execute list query
+        /// </summary>
+        [HttpGet("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ReceiveToken([FromQuery] BaseQueryModel query)
+        {
+            SetQuery(query);
+            var commandResult = await _studentDailyStreakRepository.GetListResultAsync<StudentConsecutiveDayModel>(query);
+            return commandResult.GetActionResult();
+        }
+
 
         /// <summary>
         /// Receive Token Student
@@ -69,6 +88,30 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> GetStudentArmorials([FromQuery] GetStudentArmorialQuery query)
         {
             MethodResult<IList<DateTime>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get daily streak
+        /// </summary>
+        [HttpGet("get-daily-streak/{id}")]
+        [ProducesResponseType(typeof(MethodResult<DailyStreakModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetDailyStreak([FromRoute] Guid id)
+        {
+            MethodResult<DailyStreakModel> commandResult = await _mediator.Send(new GetDailyStreakByUserIdQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create a daily streak
+        /// </summary>
+        [HttpPost]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Create([FromBody] CreateStudentDailyStreakCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

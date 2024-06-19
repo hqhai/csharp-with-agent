@@ -60,12 +60,6 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                 return methodResult;
             }
             var course = courseResults?.Content?.Result?.FirstOrDefault();
-            if (course == null)
-            {
-                methodResult.Result = default;
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
             var studentReviews = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails)
                                                                             .Where(x => x.ReviewType == EnumReviewType.Course && x.CourseId == request.CourseId)
                                                                             .ToListAsync(cancellationToken);
@@ -79,17 +73,17 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
             {
                 query = query.Where(x => x.Stars + 0.5 >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5).ToList();
             }
-            var stars = query.Any() ? NumberHelper.ConvertDoubleDecimal(query.Average(x => x.Stars)) : default;
+            var stars = query.Any() ? NumberHelper.ConvertRound(query.Average(x => x.Stars)) : default;
             int totalItem = query.Count;
             var lists = query.ApplySortAndPaging(request).ToList();
 
             foreach (var item in lists)
             {
-                item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
-                item.Code = course.Code;
+                item.Stars = NumberHelper.ConvertRound(item.Stars);
+                item.Code = course?.Code;
             }
 
-            methodResult.Result = new StudentReviewSearchModel { Stars = stars, Code = course.Code, PagingItems = new PagingItemsModel<StudentReviewTypeModel>(lists, request, totalItem) };
+            methodResult.Result = new StudentReviewSearchModel { Stars = stars, Code = course?.Code, PagingItems = new PagingItemsModel<StudentReviewTypeModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -8,6 +8,10 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Models;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -16,28 +20,34 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
     public class GetStudentByUserIdsQuery : IRequest<MethodResult<IList<StudentModel>>>
     {
-        public IList<string>? UserIds { get; set; }
+        public IList<Guid>? UserIds { get; set; }
     }
 
     public class GetStudentByUserIdsQueryHandler : IRequestHandler<GetStudentByUserIdsQuery, MethodResult<IList<StudentModel>>>
     {
         private readonly IMapper _mapper;
         private readonly IStudentRepository _studentRepository;
+        private readonly ISystemService _systemService;
 
-        public GetStudentByUserIdsQueryHandler(IMapper mapper, IStudentRepository studentRepository)
+        public GetStudentByUserIdsQueryHandler(IMapper mapper, IStudentRepository studentRepository, ISystemService systemService)
         {
             _mapper = mapper;
             _studentRepository = studentRepository;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<IList<StudentModel>>> Handle(GetStudentByUserIdsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<StudentModel>> methodResult = new MethodResult<IList<StudentModel>>();
-
+            if (request.UserIds == null || !request.UserIds.Any())
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
             var students = await _studentRepository.Queryable
                                         .Include(i => i.Human)
-                                        .Where(i => i.Human != null && request.UserIds!.Contains(i.Human.UserId!))
+                                        .Where(i => i.Human != null && i.Human.UserId.HasValue && request.UserIds.Contains(i.Human.UserId.Value))
                                         .Select(x => new StudentModel
                                         {
                                             Id = x.Id,
@@ -46,14 +56,27 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                                             CourseLevel = x.CourseLevel,
                                             CreatedDate = x.CreatedDate,
                                             School = x.School,
+                                            SchoolId = x.SchoolId,
                                             Human = _mapper.Map<HumanProfileModel>(x.Human)
                                         }).ToListAsync(cancellationToken);
-
-            /*if (students == null)
+            var schoolResults = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
             {
-                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentsNotExist));
+                Filters = new List<GenericFilterModel>() { new GenericFilterModel { Property = "Id", Operator = Common.Enums.EnumFilterOperator.Equal, Value = students.Select(x => x.SchoolId).ToList() } },
+                IncludePaths = new List<string>() { "School" }
+            });
+            if (!schoolResults.IsSuccessStatusCode || schoolResults.Content?.Result == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
-            }*/
+            }
+
+            foreach (var student in students)
+            {
+                if (student.SchoolId != null)
+                {
+                    student.School = schoolResults.Content?.Result?.Where(x => x.Id == student.SchoolId).FirstOrDefault()?.Name;
+                }
+            }
             methodResult.Result = _mapper.Map<IList<StudentModel>>(students);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

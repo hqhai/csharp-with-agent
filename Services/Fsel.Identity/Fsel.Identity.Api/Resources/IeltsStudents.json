@@ -1,0 +1,250 @@
+[
+  {
+    "SchoolName": "THCS Long Biên",
+    "FullName": "Nguyễn Cao Sơn Lĩnh",
+    "Email": "zeroonwastaken@gmail.com",
+    "Grade": 8,
+    "StudentId": "28673CA3-55A6-4F4B-A252-1B554490D768",
+    "UserId": "585CECA5-95C4-4272-6080-08DC1354F9E2"
+  },
+  {
+    "SchoolName": "THCS Nguyễn Du",
+    "FullName": "Nguyễn Hồng Phong",
+    "Email": "maiphonggd@gmail.com",
+    "Grade": 8,
+    "StudentId": "DC456893-7BB9-4EBD-819C-4B218548A2E7",
+    "UserId": "DFCD4F00-D0C8-4A94-F254-08DC1358A8B5"
+  },
+  {
+    "SchoolName": "THPT Nhân Chính",
+    "FullName": "Dương Mạnh Dũng",
+    "Email": "davidduongg2008@gmail.com",
+    "Grade": 10,
+    "StudentId": "1610BAA2-7D04-4A1F-BB38-0E528E5C7415",
+    "UserId": "26914FB5-D034-4A1E-F1E7-08DC2488E8AC"
+  },
+  {
+    "SchoolName": "THPT Nhân Chính",
+    "FullName": "Phan Hà Anh",
+    "Email": "phanhaanh0982008@gmail.com",
+    "Grade": 10,
+    "StudentId": "9937249F-4247-4E8F-987B-A9E2BC2CD1EC",
+    "UserId": "EAF20900-0F4C-4240-9CDD-08DC1E62725C"
+  },
+  {
+    "SchoolName": "THPT Nhân Chính",
+    "FullName": "Ngô Hải Long",
+    "Email": "Ngohailong.10a9thptnc@gmail.com",
+    "Grade": 10,
+    "StudentId": "9EC4DEA1-A931-46DB-8A4F-A3BE5B5730B2",
+    "UserId": "FCA08F84-C72E-4F9A-F1E2-08DC2488E8AC"
+  },
+  {
+    "SchoolName": "THPT Nhân Chính",
+    "FullName": "Nguyễn Hà Linh",
+    "Email": "halinh484678@gmail.com",
+    "Grade": 11,
+    "StudentId": "84C0A80A-1325-4A4D-8306-2D8DC27DB172",
+    "UserId": "16C8048D-9B2B-4652-2484-08DC1E1CCF02"
+  },
+  {
+    "SchoolName": "THPT Nhân Chính",
+    "FullName": "Bùi Thục Quyên",
+    "Email": "quyenbt0108@gmail.com",
+    "Grade": 11,
+    "StudentId": "2EB5D326-AD75-409D-9F5A-7EF288EE13DC",
+    "UserId": "EE233303-B224-4EFF-247A-08DC1E1CCF02"
+  },
+  {
+    "SchoolName": "THPT Nhân Chính",
+    "FullName": "Phan Trí Quân",
+    "Email": "byxminocryhazard@gmail.com",
+    "Grade": 11,
+    "StudentId": "3E457DEE-1524-4635-BBAB-B1B592BC6EC2",
+    "UserId": "B4F32EC1-6C82-4966-9CDB-08DC1E62725C"
+  },
+  {
+    "SchoolName": "THPT Nhân Chính",
+    "FullName": "Hoàng Thị Thu An",
+    "Email": "mevahuy19772013@gmail.com",
+    "Grade": 11,
+    "StudentId": "057BEEF4-CF79-4E5D-BFB5-09112F684808",
+    "UserId": "35B90281-F180-430B-33AC-08DC24737C2D"
+  },
+  {
+    "SchoolName": "THPT Nhân Chính",
+    "FullName": "Phùng Quang Thanh",
+    "Email": "phungquangthanh2252007@gmail.com",
+    "Grade": 11,
+    "StudentId": "231199C2-DD9F-4F76-84B6-62ED3D014394",
+    "UserId": "B21851C2-4A83-4619-8489-08DC23BDA235"
+  },
+  {
+    "SchoolName": "THPT Trần Phú",
+    "FullName": "Nguyễn Nhật Quang Vinh",
+    "Email": "billvip20142007@gmail.com",
+    "Grade": 11,
+    "StudentId": "632E14A9-16E0-4966-B855-BE527ADA81E4",
+    "UserId": "7A4B6211-C990-4209-2477-08DC1E1CCF02"
+  },
+  {
+    "SchoolName": "THPT Trần Phú",
+    "FullName": "Nguyễn Trọng Kiên",
+    "Email": "kienlub27@gmail.com",
+    "Grade": 11,
+    "StudentId": "F8D6342D-290D-46CF-A48E-B11A96BB5AEC",
+    "UserId": "08D5B388-5BD0-4973-FB53-08DC24931A83"
+  },
+  {
+    "SchoolName": "THPT Trần Phú",
+    "FullName": "Thái Thanh Nguyên",
+    "Email": "tnt270108@gmail.com",
+    "Grade": 10,
+    "StudentId": "32B1F178-C7EB-43F9-A787-221F94B15A9A",
+    "UserId": "8E4B4C87-376F-4376-9CD4-08DC1E62725C"
+  },
+  {
+    "SchoolName": "THPT Trần Phú",
+    "FullName": "Huỳnh Hải Nam",
+    "Email": "hainamhuynh983@gmail.com",
+    "Grade": 10,
+    "StudentId": "D599F035-B241-4C87-9990-619138350C4F",
+    "UserId": "511066A2-AD2F-4DE7-2478-08DC1E1CCF02"
+  },
+  {
+    "SchoolName": "THPT Trần Phú",
+    "FullName": "Nguyễn Quang Tùng",
+    "Email": "quangtungngx@gmail.com",
+    "Grade": 10,
+    "StudentId": "DBDD7181-C183-41B3-9CE6-FD2C6B70F8D9",
+    "UserId": "FE02DD8A-7709-4B7A-848B-08DC23BDA235"
+  },
+  {
+    "SchoolName": "THPT Trần Phú",
+    "FullName": "Phạm Trần Bảo Chi",
+    "Email": "phamtranbaochi22042008@gmail.com",
+    "Grade": 10,
+    "StudentId": "A9A81E0A-AF60-427C-9475-FFB3C7540B55",
+    "UserId": "220C1C54-DBFF-44D1-2479-08DC1E1CCF02"
+  },
+  {
+    "SchoolName": "THPT Trần Phú",
+    "FullName": "Lê Quang Linh",
+    "Email": "khoai280308@gmail.com",
+    "Grade": 10,
+    "StudentId": "0C4A6A36-0D30-402F-AD9D-A272C44D3BC0",
+    "UserId": "AFB22A34-FD2C-426F-F1E6-08DC2488E8AC"
+  },
+  {
+    "SchoolName": "THPT Trần Phú",
+    "FullName": "Đỗ Hà Anh",
+    "Email": "haanhdo146999@gmail.com",
+    "Grade": 10,
+    "StudentId": "C1352C89-B54E-4301-9F8C-D4B8DA95BE71",
+    "UserId": "290A7BBF-DB94-4756-9CD7-08DC1E62725C"
+  },
+  {
+    "SchoolName": "THPT Trần Phú",
+    "FullName": "Trần Việt Anh",
+    "Email": "tranvietanh24900@gmail.com",
+    "Grade": 10,
+    "StudentId": "B4416CDB-E5D9-43A0-B031-DF6F51457EC4",
+    "UserId": "40899931-9510-43CD-FB49-08DC24931A83"
+  },
+  {
+    "SchoolName": "THPT Trần Phú",
+    "FullName": "Trương Minh Châu",
+    "Email": "truongminhchau268@gmail.com",
+    "Grade": 10,
+    "StudentId": "F8180EBF-A356-4B4B-831C-FA281AEFD2BF",
+    "UserId": "05BD0B28-905A-4230-2485-08DC1E1CCF02"
+  },
+  {
+    "SchoolName": "THPT Trần Phú",
+    "FullName": "Phạm Minh Anh",
+    "Email": "minhanhpham270608@gmail.com",
+    "Grade": 10,
+    "StudentId": "EF2F4110-4123-401D-A6C8-15EFBD718585",
+    "UserId": "1D926A93-786B-4306-247E-08DC1E1CCF02"
+  },
+  {
+    "SchoolName": "THPT Trần Phú",
+    "FullName": "Bùi Quang Đức",
+    "Email": "duckiii.2k@gmail.com",
+    "Grade": 10,
+    "StudentId": "42087DBB-1188-4DB9-8624-2BAE0C5EBC01",
+    "UserId": "443FF8CC-2C74-4B23-FB58-08DC24931A83"
+  },
+  {
+    "SchoolName": "THPT Trần Phú",
+    "FullName": "Nguyễn Đan Quỳnh",
+    "Email": "ddquynhx.1512z@gmail.com",
+    "Grade": 10,
+    "StudentId": "C1D9D27F-8FDA-4971-A73C-55F659B47BFF",
+    "UserId": "E3CB8DC0-9D62-434E-F1EC-08DC2488E8AC"
+  },
+  {
+    "SchoolName": "THPT Trần Phú",
+    "FullName": "Lê Quỳnh Anh",
+    "Email": "leq51040@gmail.com",
+    "Grade": 10,
+    "StudentId": "FF3D6430-B381-45D8-9592-576E569A0724",
+    "UserId": "CBDC1D5A-E455-439F-F1EB-08DC2488E8AC"
+  },
+  {
+    "SchoolName": "THPT Lê Quý Đôn",
+    "FullName": "Vũ Hà Thương",
+    "Email": "vuhathuong2302@gmail.com",
+    "Grade": 11,
+    "StudentId": "149C98A3-6DFB-4875-A83B-494DD42AC09B",
+    "UserId": "F188F989-B997-4FFF-FB4B-08DC24931A83"
+  },
+  {
+    "SchoolName": "THPT Yên Hòa",
+    "FullName": "Đỗ Châu Oanh",
+    "Email": "chauoanh.04@gmail.com",
+    "Grade": 11,
+    "StudentId": "3A6D35FD-87E9-41FA-B951-755EF5B6B04B",
+    "UserId": "BED47116-B9FC-4022-FB4A-08DC24931A83"
+  },
+  {
+    "SchoolName": "THPT Yên Hòa",
+    "FullName": "Võ Thị Phương Linh",
+    "Email": "vothiphuonglinh1005@gmail.com",
+    "Grade": 11,
+    "StudentId": "17FB0C8B-9FB1-417F-9A89-DF9C1B8EE5E5",
+    "UserId": "0911FDDD-43BD-49F2-F1DF-08DC2488E8AC"
+  },
+  {
+    "SchoolName": "Hệ thống giáo dục Lômônôxốp",
+    "FullName": "Nguyễn Lê Minh Anh",
+    "Email": "minhanh2008.nlma0702@gmail.com",
+    "Grade": 10,
+    "StudentId": "B7834104-C66E-417A-AEB4-F0DE23CE4B9B",
+    "UserId": "389057C9-9702-4D4F-FB57-08DC24931A83"
+  },
+  {
+    "SchoolName": "Hệ thống giáo dục Lômônôxốp",
+    "FullName": "Đỗ Gia Hiển",
+    "Email": "ghien1801@gmail.com",
+    "Grade": 11,
+    "StudentId": "39B13BBC-895F-40C5-B652-82C9AC09221C",
+    "UserId": "D56B4484-C9B7-4517-33AB-08DC24737C2D"
+  },
+  {
+    "SchoolName": "Hệ thống giáo dục Lômônôxốp",
+    "FullName": "Nguyễn Ngọc Minh Huyền",
+    "Email": "mh0132401@gmail.com",
+    "Grade": 11,
+    "StudentId": "971C48F5-7A08-4EC6-B329-74AD13482D3C",
+    "UserId": "8AE2DB82-A701-4293-FB56-08DC24931A83"
+  },
+  {
+    "SchoolName": "Hệ thống giáo dục Lômônôxốp",
+    "FullName": "Phạm Nguyễn Trang Nhung",
+    "Email": "vaderr1406@gmail.com",
+    "Grade": 11,
+    "StudentId": "A0B0A06A-AA41-4452-B3C8-F378E2E501CD",
+    "UserId": "0F2E7867-FFF2-443E-FB52-08DC24931A83"
+  }
+]

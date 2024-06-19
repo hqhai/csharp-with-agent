@@ -2,14 +2,14 @@
 
 namespace Fsel.Identity.Infrastructure.Repositories
 {
+    using AutoMapper;
     using Fsel.Core.Base;
     using Fsel.Core.Entities;
     using Fsel.Identity.Domain.Entities;
-    using Microsoft.AspNetCore.Identity;
 
-    public class BaseRepository<T> : BaseIdentityRepository<T, User, Role, string, IdentityUserClaim<string>, IdentityRoleClaim<string>, UserToken> where T : Entity
+    public class BaseRepository<T> : BaseIdentityRepository<T, User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserToken> where T : Entity
     {
-        public BaseRepository(BaseIdentityDbContext<User, Role, string, IdentityUserClaim<string>, IdentityRoleClaim<string>, UserToken> dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public BaseRepository(BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserToken> dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

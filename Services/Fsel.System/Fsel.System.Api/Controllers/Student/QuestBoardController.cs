@@ -2,22 +2,23 @@
 
 namespace Fsel.System.Api.Controllers.Student
 {
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
-    using Fsel.System.Application.Commands.QuestBoardStudentCmd;
-    using Fsel.System.Application.Queries.QuestBoardStudentQuery;
+    using Fsel.System.Application.Commands.QuestBoardCmd;
+    using Fsel.System.Application.Queries.QuestBoardQuery;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/student/quest-board")]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [Route(Settings.APIDefaultRoute + "/quest-board")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Student))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class QuestBoardController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -28,39 +29,27 @@ namespace Fsel.System.Api.Controllers.Student
         }
 
         /// <summary>
-        /// Search Quest Board by Student
+        /// get quest boards
         /// </summary>
-        [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<QuestBoardByStudentModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-quest-boards")]
+        [ProducesResponseType(typeof(MethodResult<DashboardQuestBoardModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromQuery] SearchQuestBoardByStudentQuery query)
+        public async Task<IActionResult> GetQuestBoards()
         {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
+            var commandResult = await _mediator.Send(new GetQuestBoardsByStudentQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
-        /// QuestBoard Reward Student
+        /// get quest boards
         /// </summary>
-        [HttpPost("reward-student/{id}")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<bool>>), (int)HttpStatusCode.OK)]
+        [HttpPost("receive-tokens")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> QuestBoardRewardStudent([FromRoute] Guid id)
+        public async Task<IActionResult> ReceiveTokens([FromBody] ReceiveTokenFromQuestBoardDoneCommand command)
         {
-            var queryResult = await _mediator.Send(new QuestRewardCommand { Id = id }).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Taking Mission Student
-        /// </summary>
-        [HttpPost("taking-mission")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<bool>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> TakingMissionStudent([FromBody] TakingMissionCommand command)
-        {
-            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
-            return queryResult.GetActionResult();
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

@@ -3,7 +3,10 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Shared.Constants;
 using Fsel.System.Domain.Entities;
+using Fsel.System.Domain.Entities.ChatBot;
+using Fsel.System.Domain.Entities.Chatbots;
 using Fsel.System.Domain.Entities.Configs;
+using Fsel.System.Domain.Entities.QuestBoards;
 using Fsel.System.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -20,15 +23,33 @@ namespace Fsel.System.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
-            //SeedQuestBoards(modelBuilder);
+            SeedQuestBoards(modelBuilder);
+            SeedQuestBoardOveralls(modelBuilder);
+            SeedFocusTimeConfig(modelBuilder);
+            SeedApprovalTimeConfig(modelBuilder);
+            SeedTokenConfig(modelBuilder);
             modelBuilder.ApplyConfiguration(new TeachingCostEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ReferralDiscountConfigConfiguration());
-            modelBuilder.ApplyConfiguration(new QuestBoardConfigConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardConfigConfiguration());
-            modelBuilder.ApplyConfiguration(new QuestBoardStudentConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestBoardStudentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestBoardOverallEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestBoardOverallStudentEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new FeatureAccessTimeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new GameTopicEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameVocabularyEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new GameVocabularyTypeEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new FocusTimeConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new GameVocabularyPlatformEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ApprovalTimeEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new TokenConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LocationEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new SchoolEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ChatbotConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ChatbotSkillConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ChatbotTokenConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ErrorReportEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TokenHistoryEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ChatBotEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -41,9 +62,23 @@ namespace Fsel.System.Infrastructure
         public DbSet<ReferralDiscountConfig> ReferralDiscountConfigs { get; set; }
         public DbSet<QuestBoardStudent> QuestBoardStudents { get; set; }
         public DbSet<QuestBoard> QuestBoards { get; set; }
-        public DbSet<QuestBoardConfig> QuestBoardConfigs { get; set; }
+        public DbSet<QuestBoardOverall> QuestBoardOveralls { get; set; }
+        public DbSet<QuestBoardOverallStudent> QuestBoardOverallStudents { get; set; }
         public DbSet<GameTopic> GameTopics { get; set; }
         public DbSet<GameVocabulary> GameVocabularies { get; set; }
+        public DbSet<GameVocabularyType> GameVocabularyTypes { get; set; }
+        public DbSet<FocusTimeConfig> FocusTimeConfigs { get; set; }
+        public DbSet<GameVocabularyPlatform> GameVocabularyPlatforms { get; set; }
+        public DbSet<ApprovalTimeConfig> ApprovalTimeConfigs { get; set; }
+        public DbSet<TokenConfig> TokenConfigs { get; set; }
+        public DbSet<Location> Locations { get; set; }
+        public DbSet<School> Schools { get; set; }
+        public DbSet<ErrorReport> ErrorReports { get; set; }
+        public DbSet<TokenHistory> TokenHistories { get; set; }
+        public DbSet<ChatbotConfig> ChatbotConfigs { get; set; }
+        public DbSet<ChatbotSkillConfig> ChatbotSkillConfigs { get; set; }
+        public DbSet<ChatbotTokenConfigs> ChatbotTokenConfigs { get; set; }
+        public DbSet<ChatBot> ChatBots { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -63,25 +98,43 @@ namespace Fsel.System.Infrastructure
         private static void SeedQuestBoards(ModelBuilder builder)
         {
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.QuestBoardFileName);
-            var questBoardConfigs = ConvertHelper.DeserializeFromFilePath<IList<QuestBoardConfig>>(path);
-            ArgumentNullException.ThrowIfNull(questBoardConfigs);
-            builder.Entity<QuestBoardConfig>().HasData(questBoardConfigs);
+            var questBoards = ConvertHelper.DeserializeFromFilePath<IList<QuestBoard>>(path);
+            ArgumentNullException.ThrowIfNull(questBoards);
+            builder.Entity<QuestBoard>().HasData(questBoards);
         }
 
-        private static void SeedCourselevel(ModelBuilder builder)
+        private static void SeedQuestBoardOveralls(ModelBuilder builder)
         {
-            /*builder.Entity<CourseTimeConfig>().HasData
-                (
-                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.A1, Id = Guid.Parse("9ceb5cf5-271c-4c53-8d2d-3d273740fccd") },
-                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.A2, Id = Guid.Parse("07312932-5caf-4e01-a670-6cd4aa8650da") },
-                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.B1, Id = Guid.Parse("8dd3c007-775f-4ef6-ad10-efc404c5a2be") },
-                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.B1Plus, Id = Guid.Parse("a0904fa2-fce2-432a-bb85-a3f87c1344b4") },
-                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.B2, Id = Guid.Parse("18e6bccf-1c88-4886-bc71-bec2c556f913") },
-                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.RFE, Id = Guid.Parse("85bc760a-be1e-497d-bf62-2126c6178479") },
-                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.MS3, Id = Guid.Parse("2045c855-e5a8-4818-8bf7-d477d02c1b02") },
-                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.MS2, Id = Guid.Parse("382bae8a-55aa-4da0-8287-71182cb17a7c") },
-                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.MS1, Id = Guid.Parse("e0a504cf-ceb2-415a-ad73-cec5429f0e07") }
-                );*/
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.QuestBoardOverallFileName);
+            var questBoardOveralls = ConvertHelper.DeserializeFromFilePath<IList<QuestBoardOverall>>(path);
+            ArgumentNullException.ThrowIfNull(questBoardOveralls);
+            builder.Entity<QuestBoardOverall>().HasData(questBoardOveralls);
+        }
+
+        private static void SeedFocusTimeConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.FocusTimeFileName);
+            var focusTimeConfigs = ConvertHelper.DeserializeFromFilePath<IList<FocusTimeConfig>>(path);
+            ArgumentNullException.ThrowIfNull(focusTimeConfigs);
+            builder.Entity<FocusTimeConfig>().HasData(focusTimeConfigs);
+        }
+
+        private static void SeedTokenConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TokenConfig);
+            var tokenConfigs = ConvertHelper.DeserializeFromFilePath<IList<TokenConfig>>(path);
+            Console.WriteLine(path.Serialize());
+            Console.WriteLine(tokenConfigs.Serialize());
+            ArgumentNullException.ThrowIfNull(tokenConfigs);
+            builder.Entity<TokenConfig>().HasData(tokenConfigs);
+        }
+
+        private static void SeedApprovalTimeConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.ApprovalTimeFileName);
+            var approvalTimeConfigs = ConvertHelper.DeserializeFromFilePath<IList<ApprovalTimeConfig>>(path);
+            ArgumentNullException.ThrowIfNull(approvalTimeConfigs);
+            builder.Entity<ApprovalTimeConfig>().HasData(approvalTimeConfigs);
         }
     }
 }

@@ -51,18 +51,16 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
-                var classnew = await _classRepository.Queryable.Include(x => x.ClassStudents).OrderBy(x => x.CreatedDate)
-                           .FirstOrDefaultAsync(x => x.CourseId == request.CourseId, cancellationToken);
-
-                if (classnew == null)
+                var classActive = await _classRepository.Queryable.Where(p => p.CourseId == request.CourseId).Include(x => x.ClassStudents).FirstOrDefaultAsync(cancellationToken);
+                if (classActive == null)
                 {
-                    classnew = await CreateClassAsync(code, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays);
+                    classActive = await CreateClassAsync(code, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays);
                 }
-                else if (classnew.ClassStudents.Count > 99 || classnew.Status == EnumClassStatus.Active)
-                {
-                    var code = await _mediator.Send(new GetNewClassCodeQuery { Code = request.Code, CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
-                    classnew = await CreateClassAsync(code.Result, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays).ConfigureAwait(false);
-                }
+                //else
+                //{
+                //    var code = await _mediator.Send(new GetNewClassCodeQuery { Code = request.Code, CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
+                //    classActive = await CreateClassAsync(code.Result, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays).ConfigureAwait(false);
+                //}
                 var student = await _userService.GetStudentByUserIdAsync(request.UserId ?? default);
                 if (student == null)
                 {
@@ -71,14 +69,14 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 }
                 var studentId = student?.Content?.Result?.Id;
 
-                var classStudent = await _classStudentRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.ClassId == classnew.Id, cancellationToken);
+                var classStudent = await _classStudentRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.ClassId == classActive.Id, cancellationToken);
                 if (classStudent == null)
                 {
-                    await UpdateClassAsync(classnew, studentId ?? default);
+                    await UpdateClassAsync(classActive, studentId ?? default);
                 }
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<ClassModel>(classnew);
+                methodResult.Result = _mapper.Map<ClassModel>(classActive);
                 return methodResult;
             });
 
@@ -87,13 +85,16 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
         private async Task<Class> CreateClassAsync(string? code, Guid courseId, Guid packageId, Guid? liveTimeFrameId, IList<DayOfWeek>? liveDays)
         {
-            var newClass = new Class();
-            newClass.Code = code;
-            newClass.Name = code;
-            newClass.CourseId = courseId;
-            newClass.PackageId = packageId;
-            newClass.LiveTimeFrameId = liveTimeFrameId;
-            newClass.LiveDays = liveDays;
+            var newClass = new Class
+            {
+                Code = code,
+                Name = code,
+                CourseId = courseId,
+                Status = EnumClassStatus.Active,
+                PackageId = packageId,
+                LiveTimeFrameId = liveTimeFrameId,
+                LiveDays = liveDays,
+            };
             _classRepository.Add(newClass);
             await _classRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             return newClass;

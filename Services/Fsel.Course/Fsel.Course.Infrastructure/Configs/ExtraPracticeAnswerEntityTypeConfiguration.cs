@@ -3,7 +3,10 @@
 namespace Fsel.Course.Infrastructure.Configs
 {
     using System;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,6 +15,7 @@ namespace Fsel.Course.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<ExtraPracticeAnswer> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+
             builder.HasOne(a => a.Question)
                 .WithMany(b => b.ExtraPracticeAnswers)
                 .HasForeignKey(b => b.QuestionId)
@@ -32,10 +36,26 @@ namespace Fsel.Course.Infrastructure.Configs
                .HasForeignKey(b => b.ExtraPracticeExerciseResultId)
                .OnDelete(DeleteBehavior.Cascade);
 
+            builder.HasOne(a => a.VideoTimeCode)
+                      .WithMany(b => b.ExtraPracticeAnswers)
+                      .HasForeignKey(b => b.VideoTimeCodeId)
+                      .OnDelete(DeleteBehavior.NoAction);
+
             builder.HasOne(a => a.Section)
               .WithMany(b => b.ExtraPracticeAnswers)
               .HasForeignKey(b => b.SectionId)
               .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.SectionGroupResult)
+             .WithMany(b => b.ExtraPracticeAnswers)
+             .HasForeignKey(b => b.SectionGroupResultId)
+             .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Property(e => e.Status)
+                   .HasMaxLength(100)
+                   .HasConversion(
+                       v => v.ToString(),
+                       v => v.EnumParse<EnumAnswerStatus>());
         }
     }
 }

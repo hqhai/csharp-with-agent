@@ -11,7 +11,12 @@ namespace Fsel.Shared.Constants
             public const string SyncStudentShieldEveryDayJob = "SyncStudentShieldEveryDayJob";
             public const string UpdateOcCheckInClassForumResultJob = "UpdateOcCheckInClassForumResultJob";
             public const string UpdateTeacherGradingInClassForumAndMockTestJob = "UpdateTeacherGradingInClassForumAndMockTestJob";
+            public const string EndTrialRegistrationJob = "EndTrialRegistrationJob";
             public const string LeaderBoardJob = "LeaderBoardJob";
+            public const string CompleteTestWhenTimeOutJob = "CompleteTestWhenTimeOutJob";
+            public const string WeeklyReport = "WeeklyReport";
+            public const string ReviewFselJob = "ReviewFselJob";
+            public const string NoticeAccessTime = "NoticeAccessTime";
         }
     }
 }

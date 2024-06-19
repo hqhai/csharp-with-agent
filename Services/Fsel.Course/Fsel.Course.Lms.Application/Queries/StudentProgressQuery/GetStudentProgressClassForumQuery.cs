@@ -60,25 +60,22 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.LessonId == request.LessonId && x.StudentId == request.StudentId, cancellationToken);
             if (lessonResult == null || lessonResult.Status == EnumResultStatus.Unfinished)
             {
-                methodResult.Result = null;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var videoResult = await _videoResultRepository.Queryable.Where(x => x.StudentId == request.StudentId && x.LessonResultId == lessonResult.Id).FirstOrDefaultAsync(cancellationToken);
             if (videoResult == null)
             {
-                methodResult.Result = null;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
             if (classForum == null)
             {
-                methodResult.Result = null;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumScores).FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId, cancellationToken);
+            var classForumResult = await _classForumResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId, cancellationToken);
             if (classForumResult != null)
             {
                 var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel
@@ -106,8 +103,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             classForumStudentProgress.SkillScores = new SkillScores
             {
                 Skill = classForum.CourseSkill,
-                TotalCount = 36,
-                CorrectCount = classForumResult?.ClassForumScores.Sum(x => x.Score) ?? default,
+                TotalCount = classForumResult?.CorrectTotal ?? default,
+                CorrectCount = classForumResult?.CorrectCount ?? default,
             };
             classForumStudentProgress.ClassForumId = classForum.Id;
             if (videoResult.Status == EnumResultStatus.Done)
@@ -115,7 +112,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 classForumStudentProgress.Status = EnumResultStatus.New;
                 if (classForumResult != null)
                 {
-                    if (classForumResult.Status == EnumClassForumResultStatus.PendingForGrading || classForumResult.Status == EnumClassForumResultStatus.Graded)
+                    if (classForumResult.Status == EnumClassForumResultStatus.Graded)
                     {
                         classForumStudentProgress.Status = EnumResultStatus.Done;
                     }

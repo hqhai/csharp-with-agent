@@ -31,7 +31,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<FeatureAccessTimeModel> methodResult = new MethodResult<FeatureAccessTimeModel>();
             FeatureAccessTimeModel? featureAccessTime;
-            var query = _featureAccessTimeRepository.Queryable.Where(x => x.CreatedUserId == request.UserId && x.CourseId == request.CourseId);
+            var query = _featureAccessTimeRepository.Queryable.Where(x => x.CreatedUserId == request.UserId && x.CourseId == request.CourseId && x.ObjectId.HasValue);
 
             if (request.UnitId != null)
             {

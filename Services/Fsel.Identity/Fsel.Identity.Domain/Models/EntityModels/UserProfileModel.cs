@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Domain.Models.EntityModels
 {
+    using Fsel.Common.Helpers;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Shared.Enums;
 
@@ -14,10 +15,18 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
         public string? School { get; set; }
+        public string? SchoolName { get; set; }
         public EnumGender? Gender { get; set; }
         public bool? PhoneNumberConfirmed { get; set; }
         public string? Email { get; set; }
-        public string? AvatarPath { get; set; }
+
+        private string? _avatarPath;
+        public string? AvatarPath
+        {
+            set { _avatarPath = value; }
+            get { return _avatarPath.AddS3BaseUrl(); }
+        }
+
         public Guid? ClassId { get; set; }
         public string? CodeClass { get; set; }
         public IList<string>? Roles { get; set; }
@@ -26,10 +35,34 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public int CountPTResult { get; set; }
         public string? Membership { get; set; }
         public string? Occupation { get; set; }
-        public string? PassportPath { get; set; }
-        public string? UniversityDegreePath { get; set; }
-        public string? CertificationPath { get; set; }
-        public string? PoliceClearancePath { get; set; }
+
+        private string? _passportPath;
+        public string? PassportPath
+        {
+            set { _passportPath = value; }
+            get { return _passportPath.AddS3BaseUrl(); }
+        }
+
+        private string? _universityDegreePath;
+        public string? UniversityDegreePath
+        {
+            set { _universityDegreePath = value; }
+            get { return _universityDegreePath.AddS3BaseUrl(); }
+        }
+
+        private string? _certificationPath;
+        public string? CertificationPath
+        {
+            set { _certificationPath = value; }
+            get { return _certificationPath.AddS3BaseUrl(); }
+        }
+
+        private string? _policeClearancePath;
+        public string? PoliceClearancePath
+        {
+            set { _policeClearancePath = value; }
+            get { return _policeClearancePath.AddS3BaseUrl(); }
+        }
         public IList<TeacherBankAccountModel>? TeacherBankAccounts { get; set; }
         public IList<StudentProfileModel>? Students { get; set; }
         public ParentProfileModel? Parent { get; set; }

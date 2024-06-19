@@ -10,5 +10,7 @@ namespace Fsel.Course.Domain.IRepositories
         Task<bool> IsUnitUsed(Guid id);
 
         Task<List<Unit>?> GetListAsync(IList<Guid>? ids, Guid? studentId);
+
+        Task<Unit?> GetIncludeAsync(Guid? id, Guid? studentId);
     }
 }

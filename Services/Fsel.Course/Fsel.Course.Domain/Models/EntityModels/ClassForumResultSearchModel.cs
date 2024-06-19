@@ -12,7 +12,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid GradingTeacherId { get; set; }
 
-        public EnumClassForumResultStatus Status { get; set; }
+        public EnumClassForumResultStatus? Status { get; set; }
 
         public Guid LessonResultId { get; set; }
 
@@ -22,15 +22,13 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? LessonName { get; set; }
 
         public string? UnitName { get; set; }
-
+        public string? WordContent { get; set; }
         public string? PostArea { get; set; }
         public Guid? TeacherId { get; set; }
         public Guid? CourseId { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public EnumCourseType CourseType { get; set; }
-
-        public bool? IsFlagged { get; set; }
         public ClassForumModel? ClassForum { get; set; }
 
         public LessonResultModel? LessonResult { get; set; }

@@ -6,7 +6,6 @@ namespace Fsel.Interaction.Api.Controllers.Student
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Interaction.Application.Commands.ActionCmd;
     using Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd;
     using Fsel.Interaction.Application.Queries.PostQuery;
     using Fsel.Interaction.Application.Queries.PostQuery.StudentPosts;
@@ -14,8 +13,10 @@ namespace Fsel.Interaction.Api.Controllers.Student
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/student/post")]
     [ApiController]
     public class PostController : ControllerBase
@@ -132,5 +133,7 @@ namespace Fsel.Interaction.Api.Controllers.Student
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+
     }
 }

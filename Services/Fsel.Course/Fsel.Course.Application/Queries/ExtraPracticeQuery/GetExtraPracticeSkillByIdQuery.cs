@@ -31,7 +31,7 @@ namespace Fsel.Course.Application.Queries.ExtraPracticeQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ExtraPracticeSkillModel> methodResult = new MethodResult<ExtraPracticeSkillModel>();
-            var extraPractice = await _extraPracticeRepository.Queryable
+            var extraPractice = await _extraPracticeRepository.Queryable.Where(p => !p.IsArchive)
                         .Include(x => x.PlacementTest)
                             .ThenInclude(x => x!.PlacementTestSections)
                             .ThenInclude(x => x.SectionGroup)

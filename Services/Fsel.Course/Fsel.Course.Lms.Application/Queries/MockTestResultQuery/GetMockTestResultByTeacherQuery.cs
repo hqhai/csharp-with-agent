@@ -2,9 +2,12 @@
 
 namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 {
+    using System.Threading;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -23,20 +26,22 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     public class GetMockTestResultByTeacherQueryHandler : IRequestHandler<GetMockTestResultByTeacherQuery, MethodResult<MockTestModel>>
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
         private readonly IMockTestRepository _mockTestRepository;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
-        private readonly ICourseRepository _courseRepository;
+        private readonly IMapper _mapper;
 
-        public GetMockTestResultByTeacherQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, SectionConverter sectionConverter, AuthContext authContext, IUserService userService, ICourseRepository courseRepository)
+        public GetMockTestResultByTeacherQueryHandler(IMockTestResultRepository mockTestResultRepository, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMockTestRepository mockTestRepository, SectionGroupConverter sectionGroupConverter, AuthContext authContext, IUserService userService, IMapper mapper)
         {
             _mockTestResultRepository = mockTestResultRepository;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
             _mockTestRepository = mockTestRepository;
-            _sectionConverter = sectionConverter;
+            _sectionGroupConverter = sectionGroupConverter;
             _authContext = authContext;
             _userService = userService;
-            _courseRepository = courseRepository;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(GetMockTestResultByTeacherQuery request, CancellationToken cancellationToken)
@@ -44,100 +49,97 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<MockTestModel> methodResult = new MethodResult<MockTestModel>();
 
-            var mockTestResult = await _mockTestResultRepository.GetByIdAsync(request.MockTestResultId);
+
+            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).FirstOrDefaultAsync(x => x.Id == request.MockTestResultId,cancellationToken);
             if (mockTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
-            var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestResults)
-                                    .Include(x => x!.MockTestSections)
-                                        .ThenInclude(x => x.SectionGroup)
-                                        .ThenInclude(x => x!.Sections)
-                                        .ThenInclude(x => x.SectionTimeCodes)
-                                        .ThenInclude(x => x.MockTestAnswers)
-                                     .Include(x => x!.MockTestSections)
-                                        .ThenInclude(x => x.SectionGroup)
-                                        .ThenInclude(x => x!.Sections)
-                                        .ThenInclude(x => x.MockTestAnswers)
-                                     .Include(x => x!.MockTestSections)
-                                        .ThenInclude(x => x.SectionGroup)
-                                        .ThenInclude(x => x!.MockTestScores)
-                                        .Include(x => x!.MockTestResults)
-                                        .ThenInclude(x => x.Course)
-                                        .ThenInclude(x => x!.CourseUnitMockTests)
-                                    .Where(x => x.Id == mockTestResult.MockTestId)
-                                    .AsNoTracking()
-                                    .FirstOrDefaultAsync(cancellationToken);
-
-            var isCheckFull = mockTest!.MockTestType == EnumMockTestType.FullMockTest;
-
+            var mockTest = await _mockTestRepository.GetByIdAsync(mockTestResult.MockTestId);
+            (mockTest, int displayOrder, string? code) = await GetMockTestAsync(mockTest, mockTestResult);
+            if (mockTest == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTest));
+                return methodResult;
+            }
             var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
             var teacherId = teacherResult.Content?.Result?.Id;
-
-            if (mockTestResult.GradingStartDate.HasValue && mockTestResult.GradingStartDate.Value.AddMinutes(30) < DateTime.Now)
+            if (mockTestResult.GradingStartDate.HasValue && mockTestResult.GradingStartDate.Value.AddMinutes(30) < DateTime.UtcNow)
             {
                 mockTestResult.GradingTeacherId = null;
                 mockTestResult.GradingStartDate = null;
             }
-            else
+            else if (mockTestResult.GradingTeacherId == null)
             {
-                if (mockTestResult.GradingTeacherId == null)
-                {
-                    mockTestResult.GradingTeacherId = teacherId;
-                    mockTestResult.GradingStartDate = DateTime.Now;
-                }
-            }
-            var mockTestModel = new MockTestModel
-            {
-                Id = mockTest!.Id,
-                Name = mockTest.Name,
-                MockTestType = mockTest.MockTestType,
-                CreatedDate = mockTest.CreatedDate,
-                CreatedFullName = mockTest.CreatedFullName,
-                CreatedUserId = mockTest.CreatedUserId,
-                IsActive = mockTest.UnitSkillMockTests.Any() || mockTest.CourseUnitMockTests.Any(),
-                SectionGroups = mockTest.MockTestSections.Where(x => x.SectionGroup != null)
-                         .Select(x => x.SectionGroup)
-                         .Where(x => !isCheckFull || (x!.CourseSkill != EnumCourseSkill.Reading || x.CourseSkill != EnumCourseSkill.Listening))
-                         .Where(x => x!.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing)
-                         .OrderBy(x => x!.CreatedDate)
-                         .Select(x => _sectionConverter.GetSectionGroupModel(x, false)).ToList(),
-                MockTestResult = mockTest.MockTestResults.Where(x => x.Id == mockTestResult.Id)
-                .Select(x => new MockTestResultModel
-                {
-                    Id = x.Id,
-                    CorrectCount = x.CorrectCount,
-                    CorrectTotal = x.CorrectTotal,
-                    SkillScores = x.SkillScores != null ? x.SkillScores : null,
-                    Scores = x.SkillScores != null ? x.SkillScores.Average(x => x.Scores) : 0,
-                    Percent = x.Percent,
-                    Status = x.Status,
-                    CreatedDate = x.CreatedDate,
-                    MockTestId = x.MockTestId,
-                    StudentId = x.StudentId,
-                    CourseId = x.CourseId,
-                    UnitId = x.UnitId,
-                    GradingStartDate = x.GradingStartDate,
-                    GradingTeacherId = x.GradingTeacherId,
-                    UnitDisplayOrder = x.MockTest!.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault(),
-                    CourseCode = x.MockTest.MockTestResults.Select(x => x.Course?.Code).FirstOrDefault(),
-                }).FirstOrDefault()
-            };
-
-            if (mockTestModel.MockTestType == EnumMockTestType.SkillMockTest)
-            {
-                mockTestModel.PostArea = "U" + mockTestModel.MockTestResult?.UnitDisplayOrder + "_" + mockTestModel.MockTestResult?.CourseCode;
-            }
-            else
-            {
-                mockTestModel.PostArea = "FM" + mockTestModel.MockTestResult?.UnitDisplayOrder + "_" + mockTestModel.MockTestResult?.CourseCode;
+                mockTestResult.GradingTeacherId = teacherId;
+                mockTestResult.GradingStartDate = DateTime.UtcNow;
             }
             mockTestResult = _mockTestResultRepository.Update(mockTestResult);
-            await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            methodResult.Result = mockTestModel;
+            await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            methodResult.Result = GetMockTestDto(mockTest, mockTestResult, displayOrder, code);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task<(MockTest?, int, string?)> GetMockTestAsync(MockTest? mockTest, MockTestResult mockTestResult)
+        {
+            mockTest = await _mockTestRepository.Queryable.Include(x => x!.MockTestSections)
+                                               .ThenInclude(x => x.SectionGroup)
+                                               .ThenInclude(x => x!.Sections)
+                                               .ThenInclude(x => x.SectionTimeCodes)
+                                               .ThenInclude(x => x.MockTestAnswers.Where(x => x.MockTestResultId == mockTestResult.Id))
+                                               .Where(x => x.Id == mockTestResult.MockTestId)
+                                               .AsNoTracking()
+                                               .FirstOrDefaultAsync();
+            if (mockTest != null)
+            {
+                var courseUnitMockTest = await _courseUnitMockTestRepository.Queryable
+                                                              .Where(x => (mockTestResult.UnitId.HasValue ? x.UnitId == mockTestResult.UnitId : x.MockTestId == mockTestResult.MockTestId) && x.CourseId == mockTestResult.CourseId)
+                                                              .Select(x => new
+                                                              {
+                                                                  UnitDisplayOrder = x.Number,
+                                                                  CourseCode = x.Course!.Code
+                                                              }).FirstOrDefaultAsync();
+                return (mockTest, courseUnitMockTest?.UnitDisplayOrder ?? default, courseUnitMockTest?.CourseCode);
+            }
+
+            return (mockTest, default, string.Empty);
+        }
+
+        private MockTestResultModel GetMockTestResult(MockTestResult mockTestResult, MockTest mockTest, int displayOrder, string? code)
+        {
+            var mockTestResultDto = _mapper.Map<MockTestResultModel>(mockTestResult);
+            mockTestResultDto.Scores = mockTestResult.SkillScores != null ? mockTestResult.SkillScores.Average(x => x.Scores) : 0;
+            var courseUnitMockTests = mockTest.UnitSkillMockTests.Where(x => x.UnitId == mockTestResult.UnitId).Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests);
+            mockTestResultDto.UnitDisplayOrder = displayOrder;
+            mockTestResultDto.CourseCode = code;
+            mockTestResultDto.MockTestScores = mockTestResult.MockTestScores;
+            return mockTestResultDto;
+        }
+
+        private MockTestModel GetMockTestDto(MockTest? mockTest, MockTestResult? mockTestResult, int displayOrder, string? code)
+        {
+            ArgumentNullException.ThrowIfNull(mockTest);
+            ArgumentNullException.ThrowIfNull(mockTestResult);
+            var mockTestDto = _mapper.Map<MockTestModel>(mockTest);
+            mockTestDto.IsActive = mockTest.UnitSkillMockTests.Any() || mockTest.CourseUnitMockTests.Any();
+            mockTestDto.SectionGroups = mockTest.MockTestSections.Where(x => x.SectionGroup != null)
+                    .Select(x => x.SectionGroup)
+                    .Where(x => !(mockTest.MockTestType == EnumMockTestType.FullMockTest) || x!.CourseSkill == EnumCourseSkill.Speaking)
+                    .OrderBy(x => x!.CreatedDate)
+                    .Select(x => _sectionGroupConverter.GetSectionGroupModel(x, false)).ToList();
+            mockTestDto.MockTestResult = GetMockTestResult(mockTestResult, mockTest, displayOrder, code);
+
+            if (mockTestDto.MockTestType == EnumMockTestType.SkillMockTest)
+            {
+                mockTestDto.PostArea = "U" + mockTestDto.MockTestResult.UnitDisplayOrder + "_" + mockTestDto.MockTestResult.CourseCode;
+            }
+            else
+            {
+                mockTestDto.PostArea = "FM" + mockTestDto.MockTestResult.UnitDisplayOrder + "_" + mockTestDto.MockTestResult.CourseCode;
+            }
+            return mockTestDto;
         }
     }
 }

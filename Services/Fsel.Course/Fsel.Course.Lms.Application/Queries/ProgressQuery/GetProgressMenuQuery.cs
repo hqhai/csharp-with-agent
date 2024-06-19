@@ -58,7 +58,9 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var studentId = studentResult?.Content?.Result?.Id;
 
             var units = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.CourseId == request.CourseId && x.StudentId == studentId))
+                                                        .Include(x => x.CourseUnitMockTests.Where(x => x.CourseId == request.CourseId))
                                                         .Include(x => x.UnitLessons)
+                                                        .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
                                                         .ToListAsync(cancellationToken);
             if (units == null || units.Count == 0)
             {
@@ -69,37 +71,39 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var lessonIds = units.SelectMany(x => x.UnitLessons).Select(x => x.LessonId).ToList();
 
             var lessonExtraPractices = await _lessonExtraPracticeRepository.Queryable.Include(x => x.ExtraPractice)
-                .ThenInclude(x => x!.ExtraPracticeResults)
+                .ThenInclude(x => x!.ExtraPracticeResults.Where(x => x.StudentId == studentId))
                 .Where(x => lessonIds.Contains(x.LessonId))
                 .ToListAsync(cancellationToken);
-            var numberOfPracticesDone = lessonExtraPractices.Select(x => x.ExtraPractice)
+            if (lessonExtraPractices.Any())
+            {
+                progressMenu.NumberOfPracticesDone = lessonExtraPractices.Select(x => x.ExtraPractice)
                                                             .Where(x => x!.ExtraPracticeResults.Count > 0)
                                                             .SelectMany(x => x!.ExtraPracticeResults)
                                                             .Where(x => x.Status == EnumResultStatus.Done)
                                                             .Count();
+            }
+
             var classForums = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
                                                                    .Where(x => lessonIds.Contains(x.LessonId))
                                                                    .ToListAsync(cancellationToken);
             var numberOfPostsCreated = classForums.SelectMany(x => x.ClassForumResults)
-                                                    .Where(x => x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded)
+                                                    .Where(x => x.Status == EnumClassForumResultStatus.Graded)
                                                     .Count();
-            var logActionResults = await _systemService.GetLogActionsByUserId(_authContext.CurrentUserId);
-            if (!logActionResults.IsSuccessStatusCode)
+            var dailyStreakResult = await _userService.GetDailyStreak(studentId ?? default);
+            if (!dailyStreakResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(logActionResults));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(dailyStreakResult));
                 return methodResult;
             }
-            var (numberOfDaysStreak, isDaysStreakIncrease) = (0, true);
-            var logActions = logActionResults?.Content?.Result;
-            if (logActions != null)
+            var dailyStreak = dailyStreakResult?.Content?.Result;
+            if (dailyStreak != null)
             {
-                progressMenu.NumberOfDaysStreak = logActions.NumberOfDaysStreak;
-                progressMenu.IsDaysStreakIncrease = logActions.IsDaysStreakIncrease;
+                progressMenu.NumberOfDaysStreak = dailyStreak.NumberOfDaysStreak;
+                progressMenu.IsDaysStreakIncrease = dailyStreak.IsDaysStreakIncrease;
             }
 
             progressMenu.NumberOfUnitDone = numberOfUnitDone;
             progressMenu.NumberOfPostsCreated = numberOfPostsCreated;
-            progressMenu.NumberOfPracticesDone = numberOfPracticesDone;
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = progressMenu;
             return methodResult;

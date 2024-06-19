@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
@@ -12,7 +13,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
     public class ApproveTeacherBankCommand : IRequest<MethodResult<UserModel>>
@@ -42,7 +42,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             var methodResult = new MethodResult<UserModel>();
             var user = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Teacher)
-                                                   .ThenInclude(x => x!.TeacherBankAccounts).FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
+                                                   .ThenInclude(x => x!.TeacherBankAccounts).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));

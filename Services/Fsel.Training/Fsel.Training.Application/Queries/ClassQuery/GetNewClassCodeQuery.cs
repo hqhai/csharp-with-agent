@@ -29,7 +29,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<string> methodResult = new MethodResult<string>();
 
-            var currentDate = DateTime.Now;
+            var currentDate = DateTime.UtcNow;
             var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
             var lastDigitOfYear = currentDate.Year % 10;
             var level = request.CourseLevel.GetCodeByEnumCourseLevel();

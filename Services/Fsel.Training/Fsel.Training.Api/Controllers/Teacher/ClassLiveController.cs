@@ -15,11 +15,13 @@ namespace Fsel.Training.Api.Controllers.Teacher
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/teacher/class-live")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Teacher))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Teacher))]
     public class ClassLiveController : ControllerBase
     {
         private readonly IMediator _mediator;

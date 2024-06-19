@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using System.Globalization;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
@@ -72,7 +73,7 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                teacherQuery = teacherQuery.Where(m => m.Id.ToString() == request.Keyword || m.Human!.FullName!.Contains(request.Keyword));
+                teacherQuery = teacherQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Human != null && (m.Human.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim())));
             }
 
             int totalItem = await teacherQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

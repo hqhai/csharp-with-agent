@@ -3,15 +3,18 @@
 namespace Fsel.Ordering.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Ordering.Application.Commands.OrderCmds;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
     public class OrderController : ControllerBase
@@ -26,7 +29,7 @@ namespace Fsel.Ordering.Api.Controllers
         /// <summary>
         /// Generate Random Order
         /// </summary>
-        [HttpGet("")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<GenerateRamdomOrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GenerateRandomOrder([FromQuery] GenerateRamdomOrderQuery query)
@@ -38,12 +41,24 @@ namespace Fsel.Ordering.Api.Controllers
         /// <summary>
         /// Check Status User
         /// </summary>
-        [HttpGet("is-status-payment")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-status")]
+        [ProducesResponseType(typeof(MethodResult<EnumOrderStatus?>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> IsCheckStatusUser([FromQuery] GetStatusOrderByUserQuery query)
+        public async Task<IActionResult> GetStatus([FromQuery] GetStatusOrderByUserQuery query)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<EnumOrderStatus?> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Check Status User
+        /// </summary>
+        [HttpGet("get-list-order")]
+        [ProducesResponseType(typeof(MethodResult<Guid>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListOrder([FromQuery] GetListOrderQuery query)
+        {
+            MethodResult<Guid> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -57,6 +72,55 @@ namespace Fsel.Ordering.Api.Controllers
         {
             MethodResult<OrderModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Payment success
+        /// </summary>
+        [HttpGet("payment-success/{secretKey}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> PaymentSuccess([FromRoute] string secretKey)
+        {
+            var commandResult = await _mediator.Send(new PaymentSuccessCommand { SecretKey = secretKey }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Payment
+        /// </summary>
+        [HttpPost("payment")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Payment([FromBody] PaymentCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+
+        /// <summary>
+        /// Check Current Status Of User
+        /// </summary>
+        [HttpGet("get-current-status/{id}")]
+        [ProducesResponseType(typeof(MethodResult<EnumTrialRegistrationStatus?>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCurrentStatus([FromRoute] Guid id)
+        {
+            MethodResult<EnumTrialRegistrationStatus?> commandResult = await _mediator.Send(new GetCurrentStatusQuery { UserId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search Course
+        /// </summary>
+        [HttpGet("get-order-by-status")]
+        [ProducesResponseType(typeof(MethodResult<IList<OrderSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetOrderByStatus([FromQuery] GetOrderByStatusQuery query)
+        {
+            MethodResult<IList<OrderSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using System;
+    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -13,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ReviewFsels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -68,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             }
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => (m.CreatedFullName ?? string.Empty).Contains(request.Keyword));
+                query = query.Where(m => (m.CreatedFullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query

@@ -22,12 +22,14 @@ namespace Fsel.Course.Domain.Entities
             get { return TimeSpan.FromSeconds(ExecutionTime); }
         }
 
+        public string? AudioPath { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
 
         public ICollection<Section> Sections { get; set; } = new List<Section>();
-        public ICollection<MockTestScore>? MockTestScores { get; set; } = new List<MockTestScore>();
+        public ICollection<MockTestScore> MockTestScores { get; set; } = new List<MockTestScore>();
         public ICollection<MockTestSection> MockTestSections { get; set; } = new List<MockTestSection>();
         public ICollection<FinalTestSection> FinalTestSections { get; set; } = new List<FinalTestSection>();
         public ICollection<PlacementTestSection> PlacementTestSections { get; set; } = new List<PlacementTestSection>();
+        public ICollection<SectionGroupResult> SectionGroupResults { get; set; } = new List<SectionGroupResult>();
     }
 }

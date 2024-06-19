@@ -45,10 +45,11 @@ namespace Fsel.Interaction.Application.Queries.SupportCategoryQuery
                                     CreatedDate = x.CreatedDate,
                                     IconPath = x.IconPath,
                                     IsActive = x.IsActive,
+                                    NumberOfQuestion = x.SupportQuestions.Count
                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                supportCategoryQuery = supportCategoryQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                supportCategoryQuery = supportCategoryQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             int totalItem = await supportCategoryQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await supportCategoryQuery

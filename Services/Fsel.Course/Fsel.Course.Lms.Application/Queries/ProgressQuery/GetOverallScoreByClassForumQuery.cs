@@ -82,7 +82,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var classForumIds = units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson).Select(x => x!.ClassForum).Select(x => x!.Id).ToList();
 
             var classForums = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                                                                         .ThenInclude(x => x.ClassForumScores)
                                                                          .Where(x => classForumIds.Contains(x.Id))
                                                                          .ToListAsync(cancellationToken);
             if (classForums == null || classForums.Count == 0)
@@ -93,10 +92,9 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var skillScores = classForums.GroupBy(x => x.CourseSkill).Select(x => new SkillScores
             {
                 Skill = x.Key,
-                CorrectCount = x.SelectMany(x => x.ClassForumResults).SelectMany(x => x.ClassForumScores).Sum(x => x.Score),
-                TotalCount = 36,
+                CorrectCount = x.SelectMany(x => x.ClassForumResults).Sum(x => x.CorrectCount),
+                TotalCount = x.SelectMany(x => x.ClassForumResults).Sum(x => x.CorrectTotal)
             }).ToList();
-            skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? NumberHelper.ConvertDoublePercent(x.CorrectCount / x.TotalCount) : default);
             overallScoreReport.SkillScores = skillScores;
             overallScoreReport.CourseSkills = classForums.Select(x => x.CourseSkill).Distinct().ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;

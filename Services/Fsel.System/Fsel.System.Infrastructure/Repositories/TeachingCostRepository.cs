@@ -8,7 +8,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class TeachingCostRepository : BaseRepository<TeachingCost>, ITeachingCostRepository
     {
-        public TeachingCostRepository(SystemDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public TeachingCostRepository(SystemDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

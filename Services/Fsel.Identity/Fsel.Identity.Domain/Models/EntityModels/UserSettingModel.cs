@@ -6,7 +6,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
     public class UserSettingModel : BaseModel
     {
-        public string? UserId { get; set; }
+        public Guid? UserId { get; set; }
 
         public bool NotifiGame { get; set; }
 
@@ -15,6 +15,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public bool NotifiLesson { get; set; }
 
         public bool NotifiForum { get; set; }
+
+        public bool NotifiEmail { get; set; }
 
         public string? Language { get; set; }
     }

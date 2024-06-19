@@ -38,7 +38,7 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                 return methodResult;
             }
 
-            var homeWorkQuery = _homeWorkRepository.Queryable
+            var homeWorkQuery = _homeWorkRepository.Queryable.Where(p => !p.IsArchive)
                                     .Include(x => x.LessonHomeWorks.Where(n => !n.IsDeleted))
                                     .Select(x => new HomeWorkSearchModel
                                     {
@@ -54,7 +54,7 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                homeWorkQuery = homeWorkQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                homeWorkQuery = homeWorkQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Code ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             if (request.CourseLevel != null)
@@ -66,6 +66,12 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
             {
                 homeWorkQuery = homeWorkQuery.Where(m => m.CourseSkill == request.CourseSkill);
             }
+
+            request.SortBy.Add(new Common.Models.GenericSortModel
+            {
+                Property = nameof(HomeWorkSearchModel.Code),
+                IsDesc = false
+            });
 
             int totalItem = await homeWorkQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await homeWorkQuery

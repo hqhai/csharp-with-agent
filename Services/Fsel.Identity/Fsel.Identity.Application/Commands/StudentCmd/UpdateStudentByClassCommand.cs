@@ -42,6 +42,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
+            student.CourseLevel = request.CourseLevel;
             student.ClassId = request.ClassId;
             student.PackageId = request.PackageId;
             student.NumberOfShield += request.NumberOfShield;
@@ -49,7 +50,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             {
                 student = _studentRepository.Update(student);
                 await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<StudentModel>(student);
                 return methodResult;
             });

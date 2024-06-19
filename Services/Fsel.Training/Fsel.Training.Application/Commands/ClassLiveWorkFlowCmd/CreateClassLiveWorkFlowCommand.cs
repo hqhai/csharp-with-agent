@@ -96,7 +96,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                 if (request.Type == EnumWorkFlowType.ChangeTeacher)
                 {
                     status = EnumWorkFlowChangeTeacherStatus.RequestChangeTeacher.ToString();
-                    DateTime dateTime = DateTime.Now;
+                    DateTime dateTime = DateTime.UtcNow;
                     if (startTimeLive < dateTime)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotChangeTeacher));
@@ -107,7 +107,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                 {
                     status = EnumWorkFlowCancelScheduleStatus.RequestCancel.ToString();
 
-                    DateTime dateTime = DateTime.Now;
+                    DateTime dateTime = DateTime.UtcNow;
                     var learnAgainDate = liveDate.AddHours(startTime ?? 0).AddDays(2);
                     var endTimeLive = liveDate.AddHours(startTime ?? 0).AddHours(-1);
                     var check = dateTime > startTimeLive && dateTime < endTimeLive;

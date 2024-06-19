@@ -1,3 +1,5 @@
+using Fsel.Core.Base;
+using Fsel.Core.Base.Interfaces;
 using Fsel.Realtime.Application.Hubs;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Models.ShareModels;
@@ -6,20 +8,28 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Fsel.Realtime.Application.Queues.Consumers
 {
-    public class DiscussionBoardConsumer : IConsumer<DiscussionBoardQueueModel>
+    public class DiscussionBoardConsumer : BaseConsumer<DiscussionBoardQueueModel>
     {
         private readonly IHubContext<DiscussionBoardHub> _discussionBoardHubContext;
+        private readonly IQueueProvider _queueProvider;
 
-        public DiscussionBoardConsumer(IHubContext<DiscussionBoardHub> discussionBoardHubContext)
+        public DiscussionBoardConsumer(IHubContext<DiscussionBoardHub> discussionBoardHubContext, IQueueProvider queueProvider, AuthContext authContext) : base(authContext)
         {
             _discussionBoardHubContext = discussionBoardHubContext;
+            _queueProvider = queueProvider;
         }
 
-        public async Task Consume(ConsumeContext<DiscussionBoardQueueModel> context)
+        public override async Task ConsumeQueue(DiscussionBoardQueueModel? message)
         {
-            if (context != null)
+            if (message != null)
             {
-                await _discussionBoardHubContext.Clients.All.SendAsync(RealtimeSettings.DiscussionBoardHub.Methods.CommentLikeMessage, context.Message);
+                await _discussionBoardHubContext.Clients.All.SendAsync(RealtimeSettings.DiscussionBoardHub.Methods.CommentLikeMessage, message);
+
+                try
+                {
+                    _queueProvider.Publish(RealtimeSettings.DiscussionBoardHub.Methods.CommentLikeMessage, RealtimeSettings.DiscussionBoardHub.Methods.CommentLikeMessage, message);
+                }
+                catch { }
             }
         }
     }

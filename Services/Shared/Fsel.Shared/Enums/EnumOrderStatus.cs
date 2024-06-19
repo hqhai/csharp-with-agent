@@ -1,11 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Domain.Enums
+namespace Fsel.Shared.Enums
 {
     public enum EnumOrderStatus
     {
         New,
         Payment,
-        Reject
+        Reject,
+        Fail
     }
 }

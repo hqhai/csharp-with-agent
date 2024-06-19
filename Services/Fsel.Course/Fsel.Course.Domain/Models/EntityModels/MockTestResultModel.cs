@@ -3,28 +3,25 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
-    using Fsel.Course.Domain.Enums;
 
-    public class MockTestResultModel : BaseModel
+    public class MockTestResultModel : BaseLearnResultModel
     {
-        public double Percent { get; set; }
-        public int CorrectCount { get; set; }
-        public int CorrectTotal { get; set; }
         public string? FeedbackNote { get; set; }
         public int FeedbackStars { get; set; }
-        public EnumResultStatus Status { get; set; }
-        public Guid StudentId { get; set; }
         public Guid MockTestId { get; set; }
         public Guid? UnitId { get; set; }
         public Guid CourseId { get; set; }
         public DateTime? GradingStartDate { get; set; }
         public Guid? GradingTeacherId { get; set; }
+        public bool? IsTeacherGraded { get; set; }
+        public bool? IsCheckScoreColor { get; set; }
+        public double? TargetBandScore { get; set; }
         public double Scores { get; set; }
-        public IList<SkillScores>? SkillScores { get; set; }
         public object? MockTestScores { get; set; }
         public int? UnitDisplayOrder { get; set; }
         public string? CourseCode { get; set; }
+        public double? ProgressPercent { get; set; }
+        public int? TokenFirstTime { get; set; }
+        public int? TokenLastTime { get; set; }
     }
 }

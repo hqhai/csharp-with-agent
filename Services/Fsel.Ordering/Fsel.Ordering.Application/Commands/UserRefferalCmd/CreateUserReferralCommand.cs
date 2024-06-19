@@ -103,8 +103,8 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
             var voucher = new Voucher
             {
                 Name = "ReferralCode",
-                StartDate = DateTime.Now.Date,
-                EndDate = DateTime.Now.Date.AddMonths(1),
+                StartDate = DateTime.UtcNow.Date,
+                EndDate = DateTime.UtcNow.Date.AddMonths(1),
                 IsGlobal = false,
                 IsActive = true,
                 CustomerTypes = customerTypes,

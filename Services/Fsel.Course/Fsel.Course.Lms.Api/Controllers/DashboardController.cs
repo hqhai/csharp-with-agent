@@ -9,8 +9,12 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Course.Lms.Application.Queries.DashboardQuery;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/dashboard")]
     [ApiController]
     public class DashboardController : ControllerBase
@@ -35,9 +39,22 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// Get Current-Position
+        /// </summary>
+        [HttpGet("current-student")]
+        [ProducesResponseType(typeof(MethodResult<LeaderBoardSearchModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCurrentStudentUser()
+        {
+            MethodResult<LeaderBoardSearchModel> queryResult = await _mediator.Send(new GetCurrentPositionQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get Lesson Overview
         /// </summary>
         [HttpGet("lesson-overview")]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         [ProducesResponseType(typeof(MethodResult<LessonOverviewModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetLessonOverview()

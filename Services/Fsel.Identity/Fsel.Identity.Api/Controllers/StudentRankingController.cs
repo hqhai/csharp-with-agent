@@ -9,10 +9,13 @@ using Fsel.Identity.Application.Queries.StudentRanking;
 using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Asp.Versioning;
+using Fsel.Shared.Constants;
 
 namespace Fsel.Identity.Api.Controllers
 {
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/student-ranking")]
     [ApiController]
     public class StudentRankingController : ControllerBase
@@ -36,7 +39,6 @@ namespace Fsel.Identity.Api.Controllers
             return commandResult.GetActionResult();
         }
 
-
         /// <summary>
         /// Lấy ra list danh sách xếp hạng của học sinh
         /// </summary>
@@ -51,8 +53,18 @@ namespace Fsel.Identity.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-
-
-
+        /// <summary>
+        /// Lấy ra list danh sách xếp hạng của học sinh
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        [HttpGet("student-competition-ranking")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentRankingModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentRanking([FromQuery] GetStudentRankingCompetitionQuery query)
+        {
+            MethodResult<PagingItemsModel<StudentRankingModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

@@ -54,7 +54,7 @@ namespace Fsel.Ordering.Application.Queries.UserRefferalQuery
 
             foreach (var item in userReferral)
             {
-                var user = userResult?.FirstOrDefault(x => x.Human?.UserId == item.ReceiverId.ToString());
+                var user = userResult?.FirstOrDefault(x => x.Human?.UserId == item.ReceiverId);
                 item.StudentName = user?.Human?.FullName;
                 item.StudentCode = user?.Human?.Code;
             }

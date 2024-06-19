@@ -3,14 +3,12 @@
 namespace Fsel.Ordering.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
+    using Fsel.Core.Base.Interfaces;
     using Fsel.Core.Entities;
-    using Fsel.Ordering.Domain.Entities.PackageConfigs;
     using Fsel.Shared.Enums;
 
-    public class Package : Entity
+    public class Package : Entity, IMultiLingualObject<PackageTranslation>
     {
         /// <summary>
         /// Code
@@ -18,24 +16,52 @@ namespace Fsel.Ordering.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public EnumPackageCode? Code { get; set; }
 
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(100)]
+        public string? Name { get; set; }
+
         /// <summary>
         /// Giá Khóa Học
         /// </summary>
         [Range(0, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public decimal Price { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public string? DescriptionStr { get; set; }
+        [Range(0, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public decimal PriceMonth { get; set; }
 
-        [NotMapped]
-        public IList<PackageConfig>? Description
-        {
-            get { return ConvertHelper.Deserialize<IList<PackageConfig>>(DescriptionStr); }
-            set { DescriptionStr = ConvertHelper.Serialize(value); }
-        }
+        /// <summary>
+        /// Thời gian Khóa Học
+        /// </summary>
+        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int MonthNumber { get; set; }
+
+        /// <summary>
+        /// Thời gian Khóa Học
+        /// </summary>
+        [Range(0, double.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public double MonthBonusNumber { get; set; }
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public string? IncentivesWhenPurchasing { get; set; }
+
+        public EnumPackageSuggest? Suggest { get; set; }
 
         public ICollection<Order> Orders { get; set; } = new List<Order>();
 
         public ICollection<VoucherPackage> VoucherPackages { get; set; } = new List<VoucherPackage>();
+
+        public ICollection<PackageTranslation> Translations { get; set; } = new List<PackageTranslation>();
+    }
+
+    public class PackageTranslation : Entity, ITranslationObject
+    {
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public string? IncentivesWhenPurchasing { get; set; }
+
+        public Guid PackageId { get; set; }
+
+        public Package? Package { get; set; }
+
+        public string? Language { get; set; }
     }
 }

@@ -2,24 +2,29 @@
 
 namespace Fsel.Shared.Helpers
 {
+    using System.Text;
+    using Fsel.Common.Helpers;
+    using OtpNet;
+
     public static class NumberHelper
     {
-        public static double RoundNumberDouble(double number)
+        public static double RoundNumberDouble(double number, bool roundUp = false)
         {
-            double decimalPart = number % 1;
-
-            if (decimalPart == 0.25)
+            if (roundUp)
             {
-                return Math.Floor(number) + 0.5;
-            }
-            else if (decimalPart == 0.75)
-            {
-                return Math.Ceiling(number);
+                return Math.Ceiling(number * 2) / 2;
             }
             else
             {
-                return Math.Round(number, 1, MidpointRounding.AwayFromZero);
+                return Math.Floor(number * 2) / 2;
             }
+        }
+
+        public static string GetRandomCode()
+        {
+            var randomSecure = new RandomSecureHelper();
+            var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
+            return totp.ComputeTotp();
         }
 
         public static string GenerateCode(int length)
@@ -48,26 +53,30 @@ namespace Fsel.Shared.Helpers
 
         public static double ConvertDoublePercent(double value)
         {
-            double convertedValue = Math.Round(value / 100, 2);
+            double convertedValue = Math.Round(value / 100, 0, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
 
-        public static double ConvertDouble(double value)
+        public static double ConvertRound(double value, int digits = 0)
         {
-            double convertedValue = Math.Round(value, 2);
-            return convertedValue;
-        }
-
-        public static double ConvertDoubleDecimal(double value)
-        {
-            double convertedValue = Math.Round(value, 0);
+            double convertedValue = Math.Round(value, digits, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
 
         public static double ConvertPercentDouble(double value)
         {
-            double convertedValue = Math.Round(value * 100, 0);
+            double convertedValue = Math.Round(value * 100, 0, MidpointRounding.AwayFromZero);
             return convertedValue;
+        }
+
+        public static double GetPercent(this double correctCount, double correctTotal)
+        {
+            return correctTotal > 0 ? ConvertPercentDouble(correctCount / correctTotal) : default;
+        }
+
+        public static double GetPercent(this int correctCount, int correctTotal)
+        {
+            return correctTotal > 0 ? ConvertPercentDouble((double)correctCount / correctTotal) : default;
         }
     }
 }

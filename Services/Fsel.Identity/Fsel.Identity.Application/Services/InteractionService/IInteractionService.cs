@@ -11,13 +11,16 @@ namespace Fsel.Identity.Application.Services.InteractionService
 
     public interface IInteractionService
     {
-        [Get("/customerSurvey/IsCompleted/{id}")]
+        [Get("/v1/customerSurvey/IsCompleted/{id}")]
         Task<IApiResponse<MethodResult<bool>>> IsSurveyCompleted([FromRoute] Guid id);
 
-        [Get("/surveyQuestion/{userId}")]
-        Task<IApiResponse<MethodResult<IList<StudentSurveyQuestionModel>>>> SurveyQuestionsByUserId([FromRoute] string userId);
+        [Get("/v1/surveyQuestion/{userId}")]
+        Task<IApiResponse<MethodResult<IList<StudentSurveyQuestionModel>>>> SurveyQuestionsByUserId([FromRoute] Guid userId);
 
-        [Post("/customerSurvey")]
+        [Post("/v1/customerSurvey")]
         Task<IApiResponse<MethodResult<IList<CustomerSurveyModel>>>> CreateSurvey([FromBody] CreateCustomerSurveyCommandModel model);
+
+        [Delete("/admin/student/delete-student/{id}")]
+        Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
     }
 }
