@@ -79,14 +79,6 @@ namespace Fsel.Shared.Constants
             }
         }
 
-        public static class ChatBotHub
-        {
-            public const string Pattern = $"/chat-bot";
-
-            public static class Methods
-            {
-                public const string ChatBot = $"ChatBot";
-            }
-        }
+        
     }
 }

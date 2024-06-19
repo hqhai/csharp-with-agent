@@ -1,10 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Models.CommandModels.FeatureAccessTimes
+namespace Fsel.Shared.Models.ShareModels
 {
-    public class SaveFeatureAccessTimeCommandModel
+    using System;
+
+    public class TrackingTimeModel
     {
-        public string? Type { get; set; }
+        public string? EnumFeature { get; set; }
         public long? AccessTime { get; set; }
         public Guid? ObjectId { get; set; }
         public Guid? CourseId { get; set; }
@@ -13,4 +15,5 @@ namespace Fsel.System.Domain.Models.CommandModels.FeatureAccessTimes
 
         public Guid UserId { get; set; }
     }
+
 }
