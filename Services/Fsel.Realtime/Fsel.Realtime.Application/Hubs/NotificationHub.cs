@@ -3,12 +3,17 @@
 namespace Fsel.Realtime.Application.Hubs
 {
     using Fsel.Core.Base;
+    using Fsel.Core.Services.IpApiServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels;
     using Microsoft.AspNetCore.SignalR;
 
     public class NotificationHub : BaseHub
     {
+        public NotificationHub(AuthContext authContext, IIpApiService ipApiService) : base(authContext, ipApiService)
+        {
+        }
+
         public void Send(NotificationQueueModel? model)
         {
             Clients.All.SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, model);

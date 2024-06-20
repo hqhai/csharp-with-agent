@@ -12,6 +12,7 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public ResourceContent? ResourceContent { get; set; }
         public OpenAiConfig? OpenAiConfig { get; set; }
         public new Services? Services { get; set; }
+        public AzureAiConfig? AzureAiConfig { get; set; }
     }
 
     public class ConstantUrl
@@ -29,6 +30,13 @@ namespace Fsel.Course.Infrastructure.ValueSettings
     {
         public string? Uri { get; set; }
         public string? ApiKey { get; set; }
+    }
+
+    public class AzureAiConfig
+    {
+        public string? FirstApiKey { get; set; }
+        public string? SecondApiKey { get; set; }
+        public string? Location { get; set; }
     }
 
     public class Services : BaseServices
