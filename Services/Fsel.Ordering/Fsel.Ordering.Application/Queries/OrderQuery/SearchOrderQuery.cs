@@ -57,6 +57,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 FullName = x.FullName,
                 IsTrial = x.IsTrial,
                 ExpireDate = x.ExpireDate,
+                Email = x.Email,
             });
             if (request.Status.HasValue)
             {
