@@ -50,7 +50,11 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
-
+            if (user.Human == null || user.Human.Student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user.Human));
+                return methodResult;
+            }
             if (request.Birthday == null && request.YearBirthday == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Birthday));
@@ -69,25 +73,25 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             var lastOfBirthDay = request.Birthday!.Value.Year % 100;
             var number = request.Gender == EnumGender.Male ? 0 : request.Gender == EnumGender.Female ? 1 : 2;
             var code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfBirthDay}{stt:000}";
-            if (await _studentRepository.Queryable.Include(x => x.Human).AnyAsync(x => x!.Human!.Code == code, cancellationToken))
+            if (await _studentRepository.Queryable.Include(x => x.Human).AnyAsync(x => x.Human != null && x.Human.Code == code, cancellationToken))
             {
                 code = $"HN_{weekNumber}{lastDigitOfYear}{number}{2}{lastOfBirthDay}{stt:000}";
             }
-            user.Human!.Code = code;
+            user.Human.Code = code;
             int age = DateTimeHelper.GetYearOld(request.Birthday);
             if (age <= 13)
             {
-                user.Human!.Student!.CourseLevel = EnumCourseLevel.A2;
+                user.Human.Student.CourseLevel = EnumCourseLevel.A2;
             }
             else if (age >= 14)
             {
-                user.Human!.Student!.CourseLevel = EnumCourseLevel.B1;
+                user.Human.Student.CourseLevel = EnumCourseLevel.B1;
             }
 
-            user.Human.Student!.ProvinceId = request.ProvinceId;
+            user.Human.Student.ProvinceId = request.ProvinceId;
             user.Human.Student.DistrictId = request.DistrictId;
             user.Human.Student.SchoolId = request.SchoolId;
-
+            user.Human.Student.School = request.SchoolName;
             _mapper.Map(request, user.Human);
             await _userManager.UpdateAsync(user);
 
