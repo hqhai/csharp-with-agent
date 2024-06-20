@@ -71,5 +71,7 @@ namespace Fsel.Shared.Constants
 
 
 
+        public const string IeltsStudentResult = "Resources//IeltsStudentsResult.json";
+        public const string AcademicStudentsResult = "Resources//AcademicStudentsResult.json";
     }
 }
