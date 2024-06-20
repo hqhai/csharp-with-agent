@@ -90,6 +90,10 @@ namespace Fsel.Shared.Constants
                 public const string UpdateOcCheckInClassForumResult = $"{KeyQueue}_UpdateOcCheckInClassForumResult";
                 public const string CompleteTestWhenTimeOut = $"{KeyQueue}_CompleteTestWhenTimeOut";
                 public const string SetTimeToCompleteTest = $"{KeyQueue}_SetTimeToCompleteTest";
+                public const string SetTimeRetryMockTest = $"{KeyQueue}SetTimeRetryMockTest";
+                public const string SetTimeRetryClassForum = $"{KeyQueue}SetTimeRetryClassForum";
+                public const string RetryMockTestAction = $"{KeyQueue}RetryMockTestAction";
+                public const string RetryClassForumAction = $"{KeyQueue}RetryClassForumAction";
                 public const string SetTimeClassForumDone = $"{KeyQueue}_SetTimeClassForumDone";
                 public const string DeleteClassForumByFlag = $"{KeyQueue}_DeleteClassForumByFlag";
                 public const string ClassForumAIResponse = $"{KeyQueue}_ClassForumAIResponse";

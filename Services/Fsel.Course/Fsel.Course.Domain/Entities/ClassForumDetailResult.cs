@@ -102,5 +102,7 @@ namespace Fsel.Course.Domain.Entities
         public ClassForumResult? ClassForumResult { get; set; }
 
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();
+
+        public int RetryTime { get; set; }
     }
 }

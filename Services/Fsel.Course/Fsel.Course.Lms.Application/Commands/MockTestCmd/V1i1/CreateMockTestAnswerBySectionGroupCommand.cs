@@ -203,6 +203,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
             sectionGroupResultDto.IsTestDone = mockTestResult.Status == EnumResultStatus.Done;
+
             methodResult.Result = sectionGroupResultDto;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
