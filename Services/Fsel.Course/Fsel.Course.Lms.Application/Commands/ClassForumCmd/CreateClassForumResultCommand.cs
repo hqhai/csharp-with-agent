@@ -173,15 +173,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 return methodResult;
             });
 
-            var classForumDetailResultFirstSubmit = query.Where(x => x.ClassForumResultId == classForumResult!.Id && x.SubmissionCount == EnumSubmissionCount.FirstSubmit).FirstOrDefault();
-            if (classForumResult != null && classForumDetailResultFirstSubmit?.Status == EnumClassForumResultStatus.Pending)
+            var countClassForumDetailResults = await _classForumDetailResultRepository.Queryable.Where(x => classForumResult != null && x.ClassForumResultId == classForumResult.Id).CountAsync(cancellationToken);
+            if (classForumResult != null && classForumDetailResultAttemp1?.Status == EnumClassForumResultStatus.Pending && countClassForumDetailResults == 1)
             {
                 var tokenHistorys = new List<TokenHistoryQueueModel>
                 {
                     new TokenHistoryQueueModel
                     {
                         ObjectId = classForumResult.Id,
-                        VolatileToken = classForumResult.TokenFirstTime!.Value,
+                        VolatileToken = classForumResult.TokenFirstTime.HasValue ? classForumResult.TokenFirstTime.Value : default,
                         Feature = EnumTokenFeature.Learn,
                         Mission = GetTokenMission(classForum,classForumResult),
                         Type = EnumTokenHistoryType.Recevived,
@@ -321,23 +321,18 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
 
         private async Task<int?> GetTokenAsync(ClassForum classForum, ClassForumResult classForumResult, EnumCourseType courseType)
         {
-            var classForumDetailResult = classForumResult.ClassForumDetailResults.Where(x => x.ClassForumResultId == classForumResult.Id).FirstOrDefault();
-            if (classForumDetailResult != null && classForumDetailResult.Status == EnumClassForumResultStatus.Pending)
+            var tokenConfigs = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
             {
-                var tokenConfigs = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
-                {
-                    Feature = EnumTokenFeature.Learn,
-                    Mission = GetTokenMission(classForum, classForumResult),
-                    CourseType = courseType
-                });
-                if (!tokenConfigs.IsSuccessStatusCode)
-                {
-                    return default;
-                }
-                var tokenConfig = tokenConfigs.Content?.Result;
-                return (int?)(tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default);
+                Feature = EnumTokenFeature.Learn,
+                Mission = GetTokenMission(classForum, classForumResult),
+                CourseType = courseType
+            });
+            if (!tokenConfigs.IsSuccessStatusCode)
+            {
+                return default;
             }
-            return default;
+            var tokenConfig = tokenConfigs.Content?.Result;
+            return (int?)(tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default);
         }
 
         private async Task<Guid> PublishAIClassForumResponseAsync(Guid classForumDetailResultId, Guid classForumResultId, ClassForum classForum, CreateClassForumResultCommand request, int displayOrder, CancellationToken cancellationToken)
