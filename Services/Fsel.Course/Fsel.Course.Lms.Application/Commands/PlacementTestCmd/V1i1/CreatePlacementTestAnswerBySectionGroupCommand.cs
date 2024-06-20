@@ -291,7 +291,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             var sendResult = new MethodResult<bool>();
             if (!string.IsNullOrEmpty(student.Human?.Email))
             {
-                sendResult = await _mediator.Send(new SenderCommand { Email = student.Human.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.StudentCompletePT }, cancellationToken).ConfigureAwait(false);
+                sendResult = await _mediator.Send(new SenderCommand { Email = student.Human.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.StudentCompletePT, IsCCEmail = true }, cancellationToken).ConfigureAwait(false);
             }
         }
 
