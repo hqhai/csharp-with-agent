@@ -93,7 +93,6 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             //filter những học sinh bật thông báo email.
             students = students.Where(x => studentFilterResult.Contains(x.Human!.UserId)).ToList();
 
-
             DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value.AddDays(1).Date : DateTime.UtcNow.Date;
 
             DateTime lastFridayAt13 = request.StartDate.HasValue ? request.StartDate.Value : currentDate.AddDays(-7);
@@ -447,6 +446,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 Params = model,
                 Template = model.SenderTemplate,
                 CcEmail = parentEmail,
+                IsCCEmail = true
             }, cancellationToken).ConfigureAwait(false);
         }
 
