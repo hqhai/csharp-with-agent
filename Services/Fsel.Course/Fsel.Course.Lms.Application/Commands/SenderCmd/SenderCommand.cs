@@ -19,6 +19,7 @@ namespace Fsel.Course.Lms.Application.Commands.SenderCmd
         public string? Content { get; set; }
         public string? Subject { get; set; }
         public object? Params { get; set; }
+        public bool? IsCCEmail { get; set; }
         public EnumSenderTemplate? Template { get; set; }
     }
 
@@ -44,6 +45,7 @@ namespace Fsel.Course.Lms.Application.Commands.SenderCmd
                     Subject = request.Subject,
                     Params = request.Params,
                     Template = request.Template,
+                    IsCCEmail = request.IsCCEmail,
                     ToEmails = new List<string> { $"{request.Email}" },
                     CcEmails = !string.IsNullOrEmpty(request.CcEmail) ? new List<string> { $"{request.CcEmail}" } : new List<string>()
                 };
