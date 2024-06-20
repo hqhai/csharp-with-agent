@@ -20,6 +20,8 @@ namespace Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot
         public Guid SectionGroupId { get; set; }
         public string? WordContent { get; set; }
         public Guid MockTestResultId { get; set; }
+
+        public bool IsRetry { get; set; }
     }
 
     public class MockTestAIGradingModel
