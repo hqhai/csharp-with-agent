@@ -8,6 +8,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.AdminCmd;
+    using Fsel.Identity.Application.Commands.StudentCmd;
     using Fsel.Identity.Application.Queries.AdminQuery;
     using Fsel.Identity.Application.Queries.StudentQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
