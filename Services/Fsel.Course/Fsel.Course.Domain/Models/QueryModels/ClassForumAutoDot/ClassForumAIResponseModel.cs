@@ -14,8 +14,6 @@ namespace Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot
         public string? WordContent { get; set; }
         public bool? IsRetry { get; set; } = false;
 
-        public int DisplayOrder { get; set; }
-
         public EnumSubmissionCount SubmissionCount { get; set; }
     }
 

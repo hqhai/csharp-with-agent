@@ -357,7 +357,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     SettingTopP = classForum.SettingTopP,
                     SettingWordMaxLength = classForum.SettingWordMaxLength,
                     SystemRoleAlConfig = classForum.SystemRoleAlConfig,
-                    DisplayOrder = displayOrder,
                     SubmissionCount = displayOrder == DisplayOrderFirst ? EnumSubmissionCount.FirstSubmit : EnumSubmissionCount.SecondSubmit
                 }, cancellationToken);
             }
