@@ -2,7 +2,6 @@
 
 namespace Fsel.Identity.Application.Queries.AdminQuery
 {
-    using System.Globalization;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -41,12 +40,15 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 CreatedDate = x.CreatedDate,
                 Birthday = x.Human!.Birthday,
                 CourseLevel = x.CourseLevel,
+                Email = x.Human.Email,
                 FullName = x.Human.FullName,
                 Type = x.CourseLevel.GetEnumCourseType()
             });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                query = query.Where(m => m.Id.ToString() == request.Keyword
+                                    || (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim())
+                                    || (m.Email ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
