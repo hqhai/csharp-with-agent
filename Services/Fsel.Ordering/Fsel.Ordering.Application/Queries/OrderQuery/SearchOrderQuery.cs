@@ -41,7 +41,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var orders = _orderRepository.Queryable.Include(p => p.Package).Select(x => new OrderSearchModel
+            var query = _orderRepository.Queryable.Include(p => p.Package).Select(x => new OrderSearchModel
             {
                 Id = x.Id,
                 UserId = x.UserId,
@@ -59,10 +59,15 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             });
             if (request.Status.HasValue)
             {
-                orders = orders.Where(p => request.Status == false ? p.Status == EnumOrderStatus.New : p.Status != EnumOrderStatus.New);
+                query = query.Where(p => request.Status == false ? p.Status == EnumOrderStatus.New : p.Status != EnumOrderStatus.New);
             }
-            int totalItem = await orders.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await orders
+
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                query = query.Where(m => (m.Email ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()) || (m.Code ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+            }
+            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await query
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
