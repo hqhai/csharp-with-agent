@@ -5,6 +5,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Ordering.Application.Services.CourseService;
@@ -64,7 +65,14 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => (m.Email ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()) || (m.Code ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                if (request.Keyword.IsValidEmail())
+                {
+                    query = query.Where(x => x.Email != null).Where(m => (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
+                }
+                else
+                {
+                    query = query.Where(x => x.Code != null).Where(m => (m.Code ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
+                }
             }
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
