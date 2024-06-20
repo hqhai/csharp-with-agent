@@ -16,7 +16,8 @@ namespace Fsel.Interaction.Api.Controllers
     using Asp.Versioning;
     using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/interaction-action")]
     [ApiController]
     public class InteractionActionController : ControllerBase
@@ -29,8 +30,6 @@ namespace Fsel.Interaction.Api.Controllers
             _mediator = mediator;
             _interactionActionRepository = interactionActionRepository;
         }
-
-
 
         /// <summary>
         /// Execute-list-query

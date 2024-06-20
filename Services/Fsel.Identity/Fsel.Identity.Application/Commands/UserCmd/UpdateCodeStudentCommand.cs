@@ -95,17 +95,17 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             user.Human.Student.ProvinceId = request.ProvinceId;
             user.Human.Student.DistrictId = request.DistrictId;
             user.Human.Student.SchoolId = request.SchoolId;
-            if (!request.SchoolId.HasValue)
+            if (request.SchoolId.HasValue)
             {
-                user.Human.Student.School = request.SchoolName;
-            }
-            else
-            {
-                var schoolResults = await _systemService.ExecuteListSchoolQueryAsync(new Core.Base.BaseModels.BaseQueryModel { Keyword = request.SchoolId.ToString() });
+                var schoolResults = await _systemService.GetSchoolsAsync(new List<Guid> { request.SchoolId.Value });
                 if (schoolResults.IsSuccessStatusCode)
                 {
                     user.Human.Student.School = schoolResults.Content?.Result?.FirstOrDefault()?.Name;
                 }
+            }
+            else
+            {
+                user.Human.Student.School = request.SchoolName;
             }
 
             _mapper.Map(request, user.Human);
