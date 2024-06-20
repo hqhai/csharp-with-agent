@@ -25,7 +25,6 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
                 ClassForumDetailResultId = message?.ClassForumDetailResultId ?? default,
                 WordContent = message?.WordContent ?? default,
                 IsRetry = message?.IsRetry ?? default,
-                DisplayOrder = message?.DisplayOrder ?? default,
                 SubmissionCount = message?.SubmissionCount ?? default,
                 SettingModel = message?.SettingModel ?? default,
                 SettingTemperature = message?.SettingTemperature ?? default,
