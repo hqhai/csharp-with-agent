@@ -19,7 +19,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
         public override async Task ConsumeQueue(SetTimeRetryClassForumModel? message)
         {
 
-            await _mediator.Send(new SubmitClassforumAICommand
+            await _mediator.Send(new SubmitClassForumAICommand
             {
                 ClassForumResultId = message?.ClassForumResultId ?? default,
                 ClassForumDetailResultId = message?.ClassForumDetailResultId ?? default,
