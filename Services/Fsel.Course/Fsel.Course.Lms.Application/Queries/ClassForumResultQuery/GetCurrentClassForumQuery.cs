@@ -115,6 +115,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             classForumByStudentModel.ClassForumResultCurrentStudent = _mapper.Map<ClassForumResultModel>(classForumResult);
             var classForumResultModel = classForumByStudentModel.ClassForumResultCurrentStudent;
 
+            var classForumDetailResulAttemp1 = classForumResult?.ClassForumDetailResults.FirstOrDefault(x => x.SubmissionCount == EnumSubmissionCount.FirstSubmit);
+
             if (classForumResultModel != null)
             {
                 classForumResultModel.ClassForumDetailResults = classForumResult?.ClassForumDetailResults.Select(x =>
