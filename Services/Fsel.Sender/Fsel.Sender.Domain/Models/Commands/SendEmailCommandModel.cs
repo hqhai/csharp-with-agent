@@ -9,5 +9,6 @@ namespace Fsel.Sender.Domain.Models.Commands
         public IList<string> CcEmails { get; set; } = new List<string>();
         public string? Subject { get; set; }
         public string? Content { get; set; }
+        public bool? IsCCEmail { get; set; }
     }
 }
