@@ -237,7 +237,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
 
             if (request.IsSubmit)
             {
-                await PublishAIClassForumResponseAsync(classForumDetailResult.Id, classForumResult.Id, classForum, request, DisplayOrderSecond, cancellationToken);
+                await PublishAIClassForumResponseAsync(classForumDetailResult, classForum, request, cancellationToken);
                 if (classForumDetailResult.Status != EnumClassForumResultStatus.Draft && classForumResult.SubmissionCount == EnumSubmissionCount.FirstSubmit)
                 {
                     await _setTimeClassForumDonePublisher.Publish(new Core.Base.BaseModels.BaseQueueModel { QueueId = classForumResult.Id.ToString() }, cancellationToken);
@@ -270,7 +270,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             if (request.IsSubmit)
             {
-                await PublishAIClassForumResponseAsync(classForumDetailResult.Id, classForumResult.Id, classForum, request, submissionCount == EnumSubmissionCount.FirstSubmit ? DisplayOrderFirst : DisplayOrderSecond, cancellationToken);
+                await PublishAIClassForumResponseAsync(classForumDetailResult, classForum, request, cancellationToken);
             }
             return classForumResult;
         }
@@ -335,14 +335,14 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             return (int?)(tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default);
         }
 
-        private async Task<Guid> PublishAIClassForumResponseAsync(Guid classForumDetailResultId, Guid classForumResultId, ClassForum classForum, CreateClassForumResultCommand request, int displayOrder, CancellationToken cancellationToken)
+        private async Task PublishAIClassForumResponseAsync(ClassForumDetailResult classForumDetailResult, ClassForum classForum, CreateClassForumResultCommand request, CancellationToken cancellationToken)
         {
             if (classForum.IsAlFeedBack)
             {
                 await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
                 {
-                    ClassForumResultId = classForumResultId,
-                    ClassForumDetailResultId = classForumDetailResultId,
+                    ClassForumResultId = classForumDetailResult.ClassForumResultId,
+                    ClassForumDetailResultId = classForumDetailResult.Id,
                     WordContent = request.WordContent,
                     UserAIConfig = classForum.UserAlConfig,
                     SettingModel = classForum.SettingModel,
@@ -352,11 +352,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     SettingTopP = classForum.SettingTopP,
                     SettingWordMaxLength = classForum.SettingWordMaxLength,
                     SystemRoleAlConfig = classForum.SystemRoleAlConfig,
-                    DisplayOrder = displayOrder,
-                    SubmissionCount = displayOrder == DisplayOrderFirst ? EnumSubmissionCount.FirstSubmit : EnumSubmissionCount.SecondSubmit
+                    SubmissionCount = classForumDetailResult.SubmissionCount ?? default
                 }, cancellationToken);
             }
-            return classForumDetailResultId;
         }
     }
 }
