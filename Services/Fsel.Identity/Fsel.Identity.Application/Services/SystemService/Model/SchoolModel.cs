@@ -31,5 +31,12 @@ namespace Fsel.Identity.Application.Services.SystemService.Model
         public Guid? LocationId { get; set; }
 
         public bool IsActive { get; set; }
+
+        public Location? Location { get; set; }
+    }
+
+    public class Location
+    {
+        public string? LongPath { get; set; }
     }
 }

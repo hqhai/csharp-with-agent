@@ -54,6 +54,8 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 PaymentMethod = x.PaymentMethod,
                 PackageId = x.PackageId ?? default,
                 FullName = x.FullName,
+                IsTrial = x.IsTrial,
+                ExpireDate = x.ExpireDate,
             });
             if (request.Status.HasValue)
             {
