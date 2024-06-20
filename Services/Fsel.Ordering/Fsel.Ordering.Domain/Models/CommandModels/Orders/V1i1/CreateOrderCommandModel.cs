@@ -6,13 +6,18 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1
 
     public class CreateOrderCommandModel
     {
-        public EnumCourseLevel? CourseLevel { get; set; }
+        public string? FullName { get; set; }
+        public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
-        public string? Address { get; set; }
         public EnumPaymentMethodStatus PaymentMethod { get; set; }
-        public Guid? PackageId { get; set; }
+        public Guid PackageId { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
-        public bool IsTrial { get; set; }
+        public string? Address { get; set; }
+        public bool IsInvoice { get; set; }
+        public string? CompanyName { get; set; }
+        public string? CompanyAddress { get; set; }
+        public string? CompanyTaxCode { get; set; }
+        public string? ReferralCode { get; set; }
     }
 }

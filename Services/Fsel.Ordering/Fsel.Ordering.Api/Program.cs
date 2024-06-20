@@ -44,6 +44,7 @@ builder.Services.AddScoped<VnPayLibrary>();
 // Publisher
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
+builder.Services.AddScoped<AddExpiredDateForStudentPublisher>();
 
 //Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);

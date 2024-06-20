@@ -112,14 +112,6 @@ namespace Fsel.Ordering.Application.Commands.Payoo
                 checkFlow = false;
                 _logger.LogError($"Package not exist: OrderId: {order.Id}");
             }
-            var numberOfShield = (package != null && package.Code.HasValue) ? (int)package.Code.Value : default;
-
-            var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.UserId, CourseId = order.CourseId, PackageId = order.PackageId ?? default, NumberOfShield = numberOfShield });
-            if (!addStudentIntoClassResult.IsSuccessStatusCode)
-            {
-                checkFlow = false;
-                _logger.LogError($"Add Student into class error: {addStudentIntoClassResult.StatusCode}, OrderId: {order.Id}");
-            }
 
             var updateNextUnitResult = await _courseService.UpdateNextUnit(order.UserId);
             if (!updateNextUnitResult.IsSuccessStatusCode)
@@ -130,7 +122,6 @@ namespace Fsel.Ordering.Application.Commands.Payoo
 
             order.Status = checkFlow ? EnumOrderStatus.Payment : EnumOrderStatus.Fail;
             order.ExpireDate = checkFlow ? DateTime.UtcNow.AddMonths(package!.MonthNumber) : null;
-            order.ClassId = checkFlow ? addStudentIntoClassResult.Content?.Result ?? default : default;
 
             try
             {

@@ -1,4 +1,4 @@
-// Copyright (c) Atlantic. All rights reserved.
+// Copyright(c) Atlantic.All rights reserved.
 
 namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 {
@@ -120,73 +120,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
-                if (order == null)
-                {
-                    if (!string.IsNullOrEmpty(request.DecodedPayload?.NotificationType.ToString()) && !string.IsNullOrEmpty(request.DecodedPayload.Subtype.ToString()) && IsPaymentSuccess(request.DecodedPayload.NotificationType, request.DecodedPayload.Subtype))
-                    {
-                        order = await _orderRepository.Queryable.Where(p => p.UserId.ToString() == request.TransactionInfo.AppAccountToken && p.Status == EnumOrderStatus.Payment).OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-                        if (order == null)
-                        {
-                            _logger.LogError($"There is no order in payment status, userId: {request.TransactionInfo.AppAccountToken}");
-                            return methodResult;
-                        }
-                        var userId = new Guid(request.TransactionInfo.AppAccountToken);
-
-                        var studentResult = await _userService.GetStudentByUserIdAsync(userId);
-
-                        if (!studentResult.IsSuccessStatusCode)
-                        {
-                            _logger.LogError($"UserId is not valid, userId: {request.TransactionInfo.AppAccountToken}");
-                            return methodResult;
-                        }
-
-                        var student = studentResult.Content?.Result;
-
-                        var courseResult = await _courseService.GetCoursesByIdsAsync(new List<Guid>() { order.CourseId });
-                        if (!courseResult.IsSuccessStatusCode || courseResult.Content?.Result?.Count == 0)
-                        {
-                            _logger.LogError($"CourseId is not valid, userId: {order.CourseId}");
-                            return methodResult;
-                        }
-
-                        var course = courseResult.Content?.Result;
-
-                        var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = course!.First().CourseLevel, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
-
-                        string code = codeSend.Result?.Code ?? string.Empty;
-
-                        if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken) && order != null && order.Code != code)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(code));
-                            return methodResult;
-                        }
-
-                        var newOrder = _orderRepository.Add(new Order()
-                        {
-                            UserId = userId,
-                            CourseId = order!.CourseId,
-                            IsTrial = false,
-                            PackageId = package.Id,
-                            PaymentMethod = EnumPaymentMethodStatus.AppStore,
-                            Country = order.Country,
-                            FullName = student?.Human?.FullName,
-                            Email = student?.Human?.Email,
-                            Code = code,
-                            Status = EnumOrderStatus.Payment,
-                            Price = package.Price,
-                            DiscountPercent = 0,
-                            DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent)),
-                            TotalPrice = order.Price - order.DiscountPrice,
-                            ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber)
-                        });
-                    }
-                    else
-                    {
-                        _logger.LogError($"Order is null, userId: {request.TransactionInfo.AppAccountToken}");
-                        return methodResult;
-                    }
-                }
-                else
                 {
                     order.OrderTransactions.Add(new OrderTransaction()
                     {

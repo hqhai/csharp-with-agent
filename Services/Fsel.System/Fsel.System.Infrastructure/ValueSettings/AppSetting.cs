@@ -24,6 +24,8 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public string? I18NSheetVN { get; set; }
         public string? I18NSheetEN { get; set; }
         public string? I18NSheetFR { get; set; }
+        public string? OrderInfoSpreadSheetId { get; set; }
+        public string? OrderInfoSheet { get; set; }
     }
 
     public class Services : BaseServices

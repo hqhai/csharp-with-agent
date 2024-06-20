@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
-using Amazon.S3.Model;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Shared.Enums;
@@ -35,7 +34,6 @@ namespace Fsel.Ordering.Domain.Entities
         /// SDT Người dùng
         /// </summary>
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? PhoneNumber { get; set; }
 
         /// <summary>
@@ -104,7 +102,18 @@ namespace Fsel.Ordering.Domain.Entities
 
         public Guid UserId { get; set; }
 
+        /// <summary>
+        /// Học thử
+        /// </summary>
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? ReferralCode { get; set; }
+
         #region Company invoice information
+
+        /// <summary>
+        /// Có xuất hóa đơn hay không
+        /// </summary>
+        public bool IsInvoice { get; set; }
 
         /// <summary>
         /// Tên công ty

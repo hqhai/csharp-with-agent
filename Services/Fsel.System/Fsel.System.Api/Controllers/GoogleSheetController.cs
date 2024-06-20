@@ -6,6 +6,7 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Shared.Constants;
+    using Fsel.System.Application.Commands.GoogleSheets;
     using Fsel.System.Application.Queries.GoogleSheets;
     using Fsel.System.Application.Services.GoogleSheetServices.Models;
     using global::System.Net;
@@ -34,6 +35,18 @@ namespace Fsel.System.Api.Controllers
         public async Task<IActionResult> GetDataFromFileI18N()
         {
             var commandResult = await _mediator.Send(new GetDataFromFileI18NQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get data from file i18n
+        /// </summary>
+        [HttpPost("add-payment-info-to-google-sheet")]
+        [ProducesResponseType(typeof(MethodResult<VoidMethodResult>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddPaymentInfoToGoogleSheet([FromBody] AddPaymentInfoToGoogleSheetCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

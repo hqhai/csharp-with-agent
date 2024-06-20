@@ -46,7 +46,6 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 Id = x.Id,
                 UserId = x.UserId,
                 Code = x.Code,
-                CourseId = x.CourseId,
                 CreatedDate = x.CreatedDate,
                 CreatedFullName = x.CreatedFullName,
                 PackageName = x.Package!.Code.ToString(),
@@ -65,14 +64,14 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            var courses = await _lmsCourseService.GetCoursesByIdsAsync(lists.Select(p => p.CourseId).ToList()!);
-            if (courses.IsSuccessStatusCode)
-            {
-                foreach (var item in lists)
-                {
-                    item.CourseName = courses.Content?.Result?.FirstOrDefault(x => item.CourseId == x.Id)?.CourseLevel;
-                }
-            }
+            //var courses = await _lmsCourseService.GetCoursesByIdsAsync(lists.Select(p => p.CourseId).ToList()!);
+            //if (courses.IsSuccessStatusCode)
+            //{
+            //    foreach (var item in lists)
+            //    {
+            //        item.CourseName = courses.Content?.Result?.FirstOrDefault(x => item.CourseId == x.Id)?.CourseLevel;
+            //    }
+            //}
 
             methodResult.Result = new PagingItemsModel<OrderSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
