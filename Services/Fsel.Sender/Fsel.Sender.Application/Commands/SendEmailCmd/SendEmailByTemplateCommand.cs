@@ -52,7 +52,8 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
                 ToEmails = request.ToEmails,
                 BccEmails = request.BccEmails,
                 CcEmails = request.CcEmails,
-                Content = body
+                Content = body,
+                IsCCEmail = request.IsCCEmail,
             }, cancellationToken);
 
             #endregion Validation
