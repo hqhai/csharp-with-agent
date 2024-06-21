@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
     using System.IO;
     using System.Text;
     using System.Text.RegularExpressions;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;

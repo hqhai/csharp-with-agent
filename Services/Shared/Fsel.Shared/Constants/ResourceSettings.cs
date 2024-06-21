@@ -5,7 +5,8 @@ namespace Fsel.Shared.Constants
     public static class ResourceSettings
     {
         public const string NotificationType = "Resources//NotificationType.json";
-        public const string QuestBoardFileName = "Resources//QuestBoardConfig.json";
+        public const string QuestBoardFileName = "Resources//QuestBoard.json";
+        public const string QuestBoardOverallFileName = "Resources//QuestBoardOverall.json";
         public const string ApprovalTimeFileName = "Resources//ApprovalTimeConfig.json";
         public const string FocusTimeFileName = "Resources//FocusTimeConfig.json";
         public const string GameCenterFileName = "Resources//GameCenterConfig.json";
@@ -68,7 +69,6 @@ namespace Fsel.Shared.Constants
         public const string SpeakingGrammar = "Resources//SpeakingAiConfig//GrammarRangeConfig.txt";
         public const string SpeakingFluency = "Resources//SpeakingAiConfig//FluencyConfig.txt";
         public const string SpeakingLexical = "Resources//SpeakingAiConfig//LexicalResourceConfig.txt";
-
 
 
         public const string IeltsStudentResult = "Resources//IeltsStudentsResult.json";

@@ -3,14 +3,14 @@
 namespace Fsel.Storage.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Shared.Attributes;
-    using Fsel.Storage.Application.Services.AmazonS3Services;
-    using Fsel.Storage.Domain.Enums;
-    using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
+    using Fsel.Storage.Application.Services.AmazonS3Services;
+    using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]

@@ -3,26 +3,28 @@
 namespace Fsel.Identity.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.DailyStreakCmd;
     using Fsel.Identity.Application.Queries.DailyStreakQuery;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Core.Base;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/student-daily-streak")]
     [ApiController]
     public class StudentDailyStreakController : BaseController
     {
         private readonly IMediator _mediator;
         private readonly IStudentDailyStreakRepository _studentDailyStreakRepository;
+
         public StudentDailyStreakController(IMediator mediator, IStudentDailyStreakRepository studentDailyStreakRepository)
         {
             _mediator = mediator;
@@ -42,16 +44,15 @@ namespace Fsel.Identity.Api.Controllers
             return commandResult.GetActionResult();
         }
 
-
         /// <summary>
         /// Receive Token Student
         /// </summary>
         [HttpPost("receive-token")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<double?>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ReceiveToken([FromBody] ReceiveTokensStudentCommand command)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<double?> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

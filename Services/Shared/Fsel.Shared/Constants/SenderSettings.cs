@@ -5,6 +5,7 @@ namespace Fsel.Shared.Constants
     public static class SenderSettings
     {
         public const string HostName = "FSEL";
+        public const string HostNameCareers = "careers@atlantic.edu.vn";
         public const string SendOtpSubject = "[LMS - FSEL] Thông báo mã OTP";
         public const string SendOtpSubjectFullName = "[LMS - FSEL] Thông báo mã OTP cho người dùng {0}";
 

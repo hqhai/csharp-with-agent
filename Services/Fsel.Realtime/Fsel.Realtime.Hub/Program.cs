@@ -15,6 +15,10 @@ builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.Services.AddScoped<FeatureAccessTimePublisher>();
+builder.Services.AddScoped<SetTimeModulePublisher>();
+builder.Services.AddScoped<GetTimeModulePublisher>();
+builder.Services.AddScoped<ChatBotPublisher>();
+builder.Services.AddScoped<SetTimeModuleHub>();
 
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
@@ -24,7 +28,10 @@ queues: new Dictionary<string, Type>
     { QueueSettings.NotificationQueue.NameQueue.Notification, typeof(NotificationConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.AIFeedBack, typeof(AIFeedBackConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.MockTestWriting, typeof(MockTestAIFeedBackConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.ChatBotRealTime, typeof(ChatBotConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.DisconnectSocketCalculateTime, typeof(DisconnectSocketCalculateTimeConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.MockTestSpeaking, typeof(MockTestAISpeakingConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
 });
 
 var app = builder.Build();
@@ -37,4 +44,6 @@ app.UseHubs<ClassForumAIFeedBackHub>(RealtimeSettings.ClassForumAIFeedBackHub.Pa
 app.UseHubs<MockTestWritingHub>(RealtimeSettings.MockTestWritingAIFeedBackHub.Pattern);
 app.UseHubs<MockTestSpeakingHub>(RealtimeSettings.MockTestSpeakingAIFeedBackHub.Pattern);
 app.UseHubs<FeatureAccessTimeHub>(RealtimeSettings.FeatureAccessTimeHub.Pattern);
+app.UseHubs<SetTimeModuleHub>(RealtimeSettings.SetTimeModuleHub.Pattern);
+app.UseHubs<ChatBotHub>(RealtimeSettings.ChatBotHub.Pattern);
 app.Run();

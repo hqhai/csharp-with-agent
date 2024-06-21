@@ -20,8 +20,6 @@ namespace Fsel.Realtime.Application.Hubs
             {
                 await Groups.AddGroupAsync(Context.ConnectionId, mockTestCriteria);
             }
-
-            await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedHubAsync(Exception? exception)
@@ -31,8 +29,6 @@ namespace Fsel.Realtime.Application.Hubs
             {
                 await Groups.RemoveGroupAsync(Context.ConnectionId, mockTestCriteria);
             }
-
-            await base.OnDisconnectedAsync(exception);
         }
     }
 }

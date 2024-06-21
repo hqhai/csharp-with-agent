@@ -12,6 +12,9 @@ namespace Fsel.Shared.Constants
         }
 
         public const int DelayOneMinute = 1;
+        public const int DelayThreeMinute = 3;
+        public const int DelayTenMinutes = 10;
+        public const int DelayTwoHours = 2;
         public const int DelayWorkerSecond = 60;
         public const int AmountTrialDays = 14;
 
@@ -50,6 +53,24 @@ namespace Fsel.Shared.Constants
             public const string UnitNumber = "Unit Number";
             public const string GrammarTopicList = "Grammar Topic List";
             public const string VocabularyLists = "Vocabulary Lists";
+        }
+
+        public static class ChatBotSetup
+        {
+            public const int RatioRound = 2; // làm tròn đến số thật phân
+            public const int NumberDeletedElement = 2; // Số phần tử bị xóa đi trong mảng
+
+            public const int Temperature = 0;
+            public const string Model = "gpt-4-turbo";
+            public const int PresencePenalty = 0;
+            public const int TopP = 0;
+        }
+
+
+        public static class CustomerSupport
+        {
+            public const string TitleMail = "Xử lý sự cố ChatGPT học sinh {0}";
+            public const string Content = "Sự cố ChatGPT học sinh {0}\r\n\r\nVị trí gặp sự cố: tên {1}";
         }
     }
 }

@@ -1,5 +1,4 @@
 using Fsel.Core.Base;
-using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Realtime.Application.Hubs;
 using Fsel.Shared.Constants;

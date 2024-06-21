@@ -306,6 +306,48 @@ namespace Fsel.Notification.Infrastructure.Migrations
                         },
                         new
                         {
+                            Id = new Guid("10c2d5f8-1316-45e4-8fa1-e512ec1510c0"),
+                            Content = "CommentPost",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "",
+                            TemplateMessage = "{0} vừa bình luận bài viết của bạn.",
+                            Type = "LinkComment"
+                        },
+                        new
+                        {
+                            Id = new Guid("b09fa1f2-3936-4e52-aa9c-d3a354f1c566"),
+                            Content = "LikePost",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "",
+                            TemplateMessage = "{0} vừa thích bài viết của bạn.",
+                            Type = "LinkPage"
+                        },
+                        new
+                        {
+                            Id = new Guid("6a55c6bd-0494-4fe9-8a72-911210c8a215"),
+                            Content = "ReplyCommentPost",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "",
+                            TemplateMessage = "{0} vừa trả lời bình luận của bạn.",
+                            Type = "LinkComment"
+                        },
+                        new
+                        {
                             Id = new Guid("9e983172-dba2-4ca7-b602-372c011ecb99"),
                             Content = "ReplyComment",
                             CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),

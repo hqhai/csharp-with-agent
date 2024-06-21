@@ -20,8 +20,6 @@ namespace Fsel.Realtime.Application.Hubs
             {
                 await Groups.AddGroupAsync(Context.ConnectionId, courseLevel);
             }
-
-            await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedHubAsync(Exception? exception)
@@ -31,8 +29,6 @@ namespace Fsel.Realtime.Application.Hubs
             {
                 await Groups.RemoveGroupAsync(Context.ConnectionId, courseLevel);
             }
-
-            await base.OnDisconnectedAsync(exception);
         }
     }
 }

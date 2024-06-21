@@ -137,8 +137,25 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                             methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError), nameof(classStudent));
                             return methodResult;
                         }
+
+                        if (student.SchoolId != null)
+                        {
+                            var schoolResult = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
+                            {
+                                Filters = new List<GenericFilterModel>() { new GenericFilterModel { Property = "Id", Operator = Common.Enums.EnumFilterOperator.Equal, Value = student.SchoolId } },
+                                IncludePaths = new List<string>() { "School" }
+                            });
+                            if (!schoolResult.IsSuccessStatusCode || schoolResult.Content?.Result == null)
+                            {
+                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                                return methodResult;
+                            }
+                            student.School = schoolResult.Content?.Result?.FirstOrDefault(x => x.Id == student.SchoolId)?.Name;
+                        }
+
                         _mapper.Map(student, userModel);
                         userModel.CodeClass = classStudent.Content?.Result?.Code;
+
                         if (student.ParentStudents.Count > 0)
                         {
                             var parent = student.ParentStudents.FirstOrDefault()?.Parent;

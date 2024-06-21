@@ -44,7 +44,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.ClassForum)
                                     .ThenInclude(x => x!.Lesson)
-                                    .Where(x => x.Status == EnumClassForumResultStatus.Graded || x.Status == EnumClassForumResultStatus.PendingForGrading)
+                                    .Where(x => x.Status == EnumClassForumResultStatus.Graded || x.Status == EnumClassForumResultStatus.Denied)
                                     .AsNoTracking()
                                     .Select(x => new ClassForumResultSearchModel
                                     {

@@ -78,5 +78,7 @@ namespace Fsel.Course.Domain.Entities
         public string? SpeechTextAnswer { get; set; }
 
         public double? PronunciationScore { get; set; }
+
+        public int RetryTime { get; set; }
     }
 }
