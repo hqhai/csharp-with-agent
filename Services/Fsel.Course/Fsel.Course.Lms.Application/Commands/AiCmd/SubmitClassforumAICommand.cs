@@ -37,6 +37,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly SetTimeRetryClassForumPublisher _setTimeRetryClassForumPublisher;
         private readonly ISenderService _senderService;
         private const int Max_Time_Retry = 3;
+
         public SubmitAIResponseCommandHandler(ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, NotificationMessagePublisher notificationMessagePublisher, IMediator mediator, IClassForumDetailResultRepository classForumDetailResultRepository, SetTimeRetryClassForumPublisher setTimeRetryClassForumPublisher, IMapper mapper, AppSetting appSetting, ISenderService senderService)
         {
             _lessonResultRepository = lessonResultRepository;
@@ -67,7 +68,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 UserAIConfig = userAiConfig,
             }, cancellationToken).ConfigureAwait(false);
 
-
             #region Retry
 
             var checkDataClassForum = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
@@ -75,16 +75,15 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             if (checkDataClassForum == null && classForumDetailResult != null && classForumDetailResult.RetryTime <= Max_Time_Retry)
             {
                 var model = _mapper.Map<SetTimeRetryClassForumModel>(request);
+                model.StartDate = DateTime.UtcNow;
                 await _setTimeRetryClassForumPublisher.Publish(model, cancellationToken);
                 classForumDetailResult.RetryTime += 1;
             }
-
 
             var classForumDetailResultOwner = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResult).FirstOrDefault(x => x.Id == request.ClassForumDetailResultId);
 
             if (classForumDetailResult != null && classForumDetailResult.RetryTime > Max_Time_Retry)
             {
-
                 SendEmailCommandModel model = new SendEmailCommandModel
                 {
                     ToEmails = new List<string> { _appSetting!.CustomerSupportConfig!.Email! },
@@ -100,13 +99,13 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 }, cancellationToken);
             }
 
-            #endregion
+            #endregion Retry
 
             var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
 
             if (classForumDetailResult != null)
             {
-                classForumDetailResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
+                classForumDetailResult.GradingAlFeedback = classForumAIs != null ? ConvertHelper.Serialize(classForumAIs) : default;
                 _classForumDetailResultRepository.Update(classForumDetailResult);
                 await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -120,7 +119,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             if (!string.IsNullOrEmpty(aIResponse))
             {
-
                 if (classForumDetailResultOwner != null)
                 {
                     var lessonResult = await _lessonResultRepository.GetIncludeByIdAsync(classForumDetailResultOwner.ClassForumResult!.LessonResultId);
