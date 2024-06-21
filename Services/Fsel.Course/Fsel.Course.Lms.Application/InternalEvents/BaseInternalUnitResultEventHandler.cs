@@ -675,6 +675,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 Params = model,
                 Template = model.SenderTemplate,
                 CcEmail = student?.ParentEmail,
+                IsCCEmail = true
             }, cancellationToken).ConfigureAwait(false);
         }
 
@@ -691,6 +692,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 Params = model,
                 Template = model.CourseType == EnumCourseType.Academic ? EnumSenderTemplate.SendMailMidCourseAcademic : EnumSenderTemplate.SendMailMidCourseIELT,
                 CcEmail = student?.ParentEmail,
+                IsCCEmail = true
             }, cancellationToken).ConfigureAwait(false);
         }
 
