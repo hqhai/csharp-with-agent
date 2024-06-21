@@ -48,7 +48,7 @@ namespace Fsel.Realtime.Application.Hubs
             await DisConnectAsync(type, objectId);
             if (!string.IsNullOrEmpty(userId.ToString()))
             {
-                await _setTimeModuleHubContext.GetGroup(_authContext.CurrentUserId.ToString()).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, "Disconnect");
+                await _setTimeModuleHubContext.GetGroup(_authContext.CurrentUserId.ToString()).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "Disconnect" });
                 await Groups.RemoveGroupAsync(Context.ConnectionId, userId.ToString());
             }
 
@@ -72,11 +72,11 @@ namespace Fsel.Realtime.Application.Hubs
             {
                 await DisConnectAsync(setTimeModule.Type, setTimeModule.ObjectId.ToString(), connectionId, setTimeModule.SubmissionCount);
 
-                await _setTimeModuleHubContext.GetGroup(userId).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, "Disconnect");
+                await _setTimeModuleHubContext.GetGroup(userId).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "Disconnect" });
                 await _setTimeModuleHubContext.Groups.RemoveGroupAsync(connectionId, userId);
             }
 
-            _logger.LogInformation($"Disconnect Submit Socket SetTimeModule  Type : {setTimeModule.Type}, ObjectId : {setTimeModule.ObjectId.ToString()}, DateTime: {DateTime.UtcNow}");
+            _logger.LogInformation($"Disconnect Submit Socket SetTimeModule  Type : {setTimeModule.Type}, ObjectId : {setTimeModule.ObjectId}, DateTime: {DateTime.UtcNow}");
         }
 
         public async Task StartTime()
