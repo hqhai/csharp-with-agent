@@ -31,7 +31,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.ChatBotRealTime, typeof(ChatBotConsumer) },
     { QueueSettings.LmsQueue.NameQueue.DisconnectSocketCalculateTime, typeof(DisconnectSocketCalculateTimeConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.MockTestSpeaking, typeof(MockTestAISpeakingConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
 });
 
 var app = builder.Build();
