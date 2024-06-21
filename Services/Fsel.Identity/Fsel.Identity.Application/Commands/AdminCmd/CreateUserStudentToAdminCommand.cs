@@ -74,11 +74,11 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
-            if (_environment.IsProduction())
-            {
-                methodResult.AddError(StatusCodes.Status401Unauthorized, "Not Have Access Production");
-                return methodResult;
-            }
+            //if (_environment.IsProduction())
+            //{
+            //    methodResult.AddError(StatusCodes.Status401Unauthorized, "Not Have Access Production");
+            //    return methodResult;
+            //}
             if (string.IsNullOrEmpty(request.Email))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
