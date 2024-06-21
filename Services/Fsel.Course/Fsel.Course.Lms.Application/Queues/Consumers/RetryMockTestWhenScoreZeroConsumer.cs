@@ -18,12 +18,11 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
 
         public override async Task ConsumeQueue(SetTimeRetryMockTestModel? message)
         {
-
             await _mediator.Send(new SubmitMockTestAnswerAICommand
             {
                 SectionId = message?.SectionId ?? default,
                 SectionGroupId = message?.SectionGroupId ?? default,
-                WordContent = message?.WordContent ?? default ,
+                WordContent = message?.WordContent ?? default,
                 MockTestResultId = message?.MockTestResultId ?? default,
                 IsRetry = message?.IsRetry ?? default,
                 SettingModel = message?.SettingModel ?? default,
@@ -34,7 +33,6 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
                 SettingPresence = message?.SettingPresence ?? default,
                 SystemRoleAlConfig = message?.SystemRoleAlConfig ?? default,
                 UserAIConfig = message?.UserAIConfig ?? default
-
             }).ConfigureAwait(false);
         }
     }
