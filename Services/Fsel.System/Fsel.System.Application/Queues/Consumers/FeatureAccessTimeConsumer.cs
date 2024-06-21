@@ -1,8 +1,6 @@
 using Fsel.Core.Base;
-using Fsel.Core.Base.BaseModels;
 using Fsel.Shared.Models.ShareModels;
 using Fsel.System.Application.Commands.FeatureAccessTimeCmd;
-using MassTransit;
 using MediatR;
 
 namespace Fsel.System.Application.Queues.Consumers
