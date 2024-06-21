@@ -51,9 +51,21 @@ namespace Fsel.System.Application.Queries.GoogleSheets
 
                 foreach (var dataItem in data)
                 {
-                    var student = dataItem[0].ToString();
-                    var oc = dataItem[1].ToString();
-                    var om = dataItem[2].ToString();
+                    string? student = string.Empty;
+                    if (dataItem.Count > 0)
+                    {
+                        student = dataItem[0].ToString();
+                    }
+                    string? oc = string.Empty;
+                    if (dataItem.Count > 1)
+                    {
+                        oc = dataItem[1].ToString();
+                    }
+                    string? om = string.Empty;
+                    if (dataItem.Count > 2)
+                    {
+                        om = dataItem[2].ToString();
+                    }
                     if (!string.IsNullOrEmpty(student) && !string.IsNullOrEmpty(oc))
                     {
                         ccEmails.Add(new CCEmailModel
