@@ -43,14 +43,18 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
                 if (listCCEmailResult.IsSuccessStatusCode)
                 {
                     var listCCEmail = listCCEmailResult.Content?.Result;
-                    var ccEmail = listCCEmail?.Where(p => !string.IsNullOrEmpty(p.StudentEmail) && request.ToEmails.Contains(p.StudentEmail)).Select(p => p.CsoEmail).ToList();
+                    var ccEmail = listCCEmail?.Where(p => !string.IsNullOrEmpty(p.StudentEmail) && request.ToEmails.Contains(p.StudentEmail)).ToList();
                     if (ccEmail != null && ccEmail.Count > 0)
                     {
                         foreach (var item in ccEmail)
                         {
-                            if (!string.IsNullOrEmpty(item) && item.IsValidEmail())
+                            if (!string.IsNullOrEmpty(item.OCEmail) && item.OCEmail.IsValidEmail())
                             {
-                                request.CcEmails.Add(item);
+                                request.CcEmails.Add(item.OCEmail);
+                            }
+                            if (!string.IsNullOrEmpty(item.OMEmail) && item.OMEmail.IsValidEmail())
+                            {
+                                request.CcEmails.Add(item.OMEmail);
                             }
                         }
                     }

@@ -12,7 +12,8 @@ namespace Fsel.System.Application.Queries.GoogleSheets
     public class CCEmailModel
     {
         public string? StudentEmail { get; set; }
-        public string? CsoEmail { get; set; }
+        public string? OCEmail { get; set; }
+        public string? OMEmail { get; set; }
     }
 
     public class GetCCEmailsAccordingToStudentsQuery : IRequest<MethodResult<IList<CCEmailModel>>>
@@ -50,14 +51,16 @@ namespace Fsel.System.Application.Queries.GoogleSheets
 
                 foreach (var dataItem in data)
                 {
-                    var key = dataItem.FirstOrDefault()?.ToString();
-                    var value = dataItem.LastOrDefault()?.ToString();
-                    if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value))
+                    var student = dataItem[0].ToString();
+                    var oc = dataItem[1].ToString();
+                    var om = dataItem[2].ToString();
+                    if (!string.IsNullOrEmpty(student) && !string.IsNullOrEmpty(oc))
                     {
                         ccEmails.Add(new CCEmailModel
                         {
-                            StudentEmail = key,
-                            CsoEmail = value,
+                            StudentEmail = student,
+                            OCEmail = oc,
+                            OMEmail = om
                         });
                     }
                 }
