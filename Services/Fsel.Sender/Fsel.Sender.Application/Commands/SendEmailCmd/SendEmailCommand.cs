@@ -4,6 +4,7 @@ using Amazon.SimpleEmail.Model;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Sender.Application.Services;
+using Fsel.Sender.Application.Services.SystemServices;
 using Fsel.Sender.Domain.Models.Commands;
 using Fsel.Sender.Domain.Models.Entities;
 using Fsel.Sender.Domain.ValueSettings;
@@ -20,17 +21,47 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
     {
         private readonly AppSetting _appSetting;
         private readonly SESWrapper _wrapper;
+        private readonly ISystemService _systemService;
 
-        public SendEmailCommandHandler(AppSetting appSetting, SESWrapper wrapper)
+        public SendEmailCommandHandler(AppSetting appSetting, SESWrapper wrapper, ISystemService systemService)
         {
             _appSetting = appSetting;
             _wrapper = wrapper;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<bool>> Handle(SendEmailCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
+
+            #region Get CC Email
+
+            if (request.IsCCEmail.HasValue && request.IsCCEmail == true)
+            {
+                var listCCEmailResult = await _systemService.GetCCEmail();
+                if (listCCEmailResult.IsSuccessStatusCode)
+                {
+                    var listCCEmail = listCCEmailResult.Content?.Result;
+                    var ccEmail = listCCEmail?.Where(p => !string.IsNullOrEmpty(p.StudentEmail) && request.ToEmails.Contains(p.StudentEmail)).ToList();
+                    if (ccEmail != null && ccEmail.Count > 0)
+                    {
+                        foreach (var item in ccEmail)
+                        {
+                            if (!string.IsNullOrEmpty(item.OCEmail) && item.OCEmail.IsValidEmail())
+                            {
+                                request.CcEmails.Add(item.OCEmail);
+                            }
+                            if (!string.IsNullOrEmpty(item.OMEmail) && item.OMEmail.IsValidEmail())
+                            {
+                                request.CcEmails.Add(item.OMEmail);
+                            }
+                        }
+                    }
+                }
+            }
+
+            #endregion Get CC Email
 
             #region Validation
 
