@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -115,19 +116,13 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId && x.StudentId == studentId).FirstOrDefaultAsync();
             if (sectionGroupResult == null)
             {
-                _logger.LoggerRequest(request);
+                _logger.LoggerRequest(new
+                {
+                    Timestamp = DateTimeOffset.UtcNow.ToString("o"),
+                    Request = ConvertHelper.Serialize(request)
+                });
                 sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, MockTestResultId = request.MockTestResultId, Status = EnumResultStatus.New });
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
-
-                //if (sectionGroup.CourseSkill != EnumCourseSkill.Speaking)
-                //{
-                //    await _getTimeToCompleteTestPublisher.Publish(new SetTimeToCompleteTestModel
-                //    {
-                //        ExecutionTime = sectionGroup.ExecutionTime,
-                //        ObjectResultId = sectionGroupResult.Id,
-                //        ObjectResultType = nameof(MockTest)
-                //    }, CancellationToken.None).ConfigureAwait(false);
-                //}
             }
             else if (sectionGroupResult.Status != EnumResultStatus.Done)
             {

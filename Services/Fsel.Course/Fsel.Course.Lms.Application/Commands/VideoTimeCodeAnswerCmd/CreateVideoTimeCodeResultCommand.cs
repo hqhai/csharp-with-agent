@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -45,8 +46,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoTimeCodeResultModel> methodResult = new MethodResult<VideoTimeCodeResultModel>();
 
-            _logger.LoggerRequest(request);
-
             var videoResult = await _videoResultRepository.GetByIdAsync(request.VideoResultId);
             if (videoResult == null)
             {
@@ -69,6 +68,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoTimeCodeId == request.VideoTimeCodeId && x.VideoResultId == request.VideoResultId).FirstOrDefaultAsync();
             if (videoTimeCodeResult == null)
             {
+                _logger.LoggerRequest(new
+                {
+                    Timestamp = DateTimeOffset.UtcNow.ToString("o"),
+                    Request = ConvertHelper.Serialize(request)
+                });
                 videoTimeCodeResult = new VideoTimeCodeResult
                 {
                     VideoResultId = request.VideoResultId,
