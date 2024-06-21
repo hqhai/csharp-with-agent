@@ -163,6 +163,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             }
 
             #region Retry
+
             //set up thời gian retry
             if (mockTestAnswer != null && (taskResponse == null || coherence == null || lexicalResource == null || grammaticalRange == null) && mockTestAnswer.RetryTime <= Max_Times_Retry)
             {
@@ -194,8 +195,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             {
                 mockTestResult.Status = EnumResultStatus.Unfinished;
             }
-            #endregion
 
+            #endregion Retry
 
             bool checkSkillMockTest = mockTestResult.MockTest.MockTestType == EnumMockTestType.SkillMockTest;
 
