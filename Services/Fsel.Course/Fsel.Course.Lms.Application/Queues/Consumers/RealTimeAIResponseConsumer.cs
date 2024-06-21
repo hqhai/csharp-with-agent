@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queues.Consumers
 {
     using Fsel.Course.Lms.Application.Commands.AiCmd;
-    using MassTransit;
     using MediatR;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Core.Base;
@@ -24,9 +23,11 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
                 return;
             }
 
-            await _mediator.Send(new SubmitClassforumAICommand
+            await _mediator.Send(new SubmitClassForumAICommand
             {
                 UserAIConfig = message.UserAIConfig,
+                ClassForumResultId = message.ClassForumResultId,
+                ClassForumDetailResultId = message.ClassForumDetailResultId,
                 SystemRoleAlConfig = message.SystemRoleAlConfig,
                 SettingWordMaxLength = message.SettingWordMaxLength,
                 SettingTopP = message.SettingTopP,
@@ -36,6 +37,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
                 SettingModel = message.SettingModel,
                 WordContent = message.WordContent,
                 IsRetry = message.IsRetry,
+                SubmissionCount = message.SubmissionCount,
             }).ConfigureAwait(false);
         }
     }

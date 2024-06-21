@@ -12,7 +12,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTestResults;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1;
     using Fsel.Course.Lms.Application.InternalEvents;
     using Fsel.Course.Lms.Application.Queues.Publishers;
@@ -99,11 +98,11 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
-            if (mockTestResult.MockTestScores.Count > 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(mockTestResult.MockTestScores));
-                return methodResult;
-            }
+            //if (mockTestResult.MockTestScores.Count > 0)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(mockTestResult.MockTestScores));
+            //    return methodResult;
+            //}
             var sectionGroupIds = request.MockTestScores.Select(y => y.SectionGroupId).Distinct().ToList();
 
             var sectionGroups = await _sectionGroupRepository.Queryable.Where(x => sectionGroupIds.Contains(x.Id)).ToListAsync(cancellationToken);
@@ -112,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroups));
                 return methodResult;
             }
-            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(x => sectionGroupIds.Contains(x.SectionGroupId) && x.MockTestResultId == mockTestResult.Id).ToListAsync(cancellationToken);
+            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(x => sectionGroupIds.Contains(x.SectionGroupId) && x.MockTestResultId == mockTestResult.Id).ToListAsync(cancellationToken);
             if (sectionGroupResults == null || !sectionGroupResults.Any())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroupResults));

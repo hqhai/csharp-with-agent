@@ -1,11 +1,82 @@
 [
   {
+    "id": "03d12e43-250b-49b7-bd08-b12135e47723",
+    "createdDate": "2023-07-21",
+    "question": "Bạn là?",
+    "description": "addd",
+    "icon": "addd",
+    "displayOrder": 1,
+    "displayLevel": 1,
+    "type": "ChooseMultipleColumn",
+    "isPilot": false,
+    "answers": [
+      {
+        "id": 1,
+        "content": "Học sinh, sinh viên",
+        "image": "student.svg",
+        "referenceQuestionId": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5"
+      },
+      {
+        "id": 2,
+        "content": "Người đi làm",
+        "image": "worker.svg",
+        "referenceQuestionId": "35a71ae7-49c1-4878-a1db-edcd2834f1cd"
+      }
+    ],
+    "translations": [
+      {
+        "id": "f12f7c70-b9b5-49c5-8122-cc9c788e3354",
+        "createdDate": "2023-10-17",
+        "surveyQuestionId": "03d12e43-250b-49b7-bd08-b12135e47723",
+        "question": "Bạn là?",
+        "language": "vi-VN",
+        "description": "addd",
+        "answers": [
+          {
+            "id": 1,
+            "content": "Học sinh, sinh viên",
+            "image": "student.svg",
+            "referenceQuestionId": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5"
+          },
+          {
+            "id": 2,
+            "content": "Người đi làm",
+            "image": "worker.svg",
+            "referenceQuestionId": "35a71ae7-49c1-4878-a1db-edcd2834f1cd"
+          }
+        ]
+      },
+      {
+        "id": "45c7789a-5eb5-491c-b518-24a2ce7f1dcf",
+        "createdDate": "2023-10-17",
+        "surveyQuestionId": "03d12e43-250b-49b7-bd08-b12135e47723",
+        "question": "Who are you?",
+        "language": "en-US",
+        "description": "addd",
+        "answers": [
+          {
+            "id": 1,
+            "content": "Students",
+            "image": "student.svg",
+            "referenceQuestionId": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5"
+          },
+          {
+            "id": 2,
+            "content": "Working professionals",
+            "image": "worker.svg",
+            "referenceQuestionId": "35a71ae7-49c1-4878-a1db-edcd2834f1cd"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "492D8BB9-CDBE-42E7-AA16-35A1915C3621",
     "createdDate": "2023-07-21",
     "question": "Bạn biết đến Fsel từ đâu?",
     "description": "addd",
     "icon": "addd",
-    "displayOrder": 1,
+    "displayOrder": 2,
     "displayLevel": 1,
     "type": "ChooseMultipleColumn",
     "isPilot": false,
@@ -22,7 +93,7 @@
       },
       {
         "id": 3,
-        "content": "Youtube",
+        "content": "YouTube",
         "image": "youtube-icon.svg"
       },
       {
@@ -42,7 +113,7 @@
       },
       {
         "id": 7,
-        "content": "Tivi",
+        "content": "TV",
         "image": "tv-icon.svg"
       },
       {
@@ -87,7 +158,7 @@
           },
           {
             "id": 3,
-            "content": "Youtube",
+            "content": "YouTube",
             "image": "youtube-icon.svg"
           },
           {
@@ -107,7 +178,7 @@
           },
           {
             "id": 7,
-            "content": "Tivi",
+            "content": "TV",
             "image": "tv-icon.svg"
           },
           {
@@ -136,7 +207,7 @@
         "id": "619b48dd-e305-4a8c-858d-fcbbdc980239",
         "createdDate": "2023-10-17",
         "surveyQuestionId": "492D8BB9-CDBE-42E7-AA16-35A1915C3621",
-        "question": "How did you know fsel? ",
+        "question": "How do you know FSEL?",
         "language": "en-US",
         "description": "addd",
         "answers": [
@@ -152,7 +223,7 @@
           },
           {
             "id": 3,
-            "content": "Youtube",
+            "content": "YouTube",
             "image": "youtube-icon.svg"
           },
           {
@@ -172,7 +243,7 @@
           },
           {
             "id": 7,
-            "content": "Tivi",
+            "content": "TV",
             "image": "tv-icon.svg"
           },
           {
@@ -205,7 +276,7 @@
     "question": "Chọn hướng đi của bạn",
     "description": "addd",
     "icon": "addd",
-    "displayOrder": 2,
+    "displayOrder": 3,
     "displayLevel": 1,
     "type": "YourDirection",
     "isPilot": null,
@@ -226,7 +297,7 @@
     "question": "Tại sao bạn học ngoại ngữ",
     "description": "addd",
     "icon": "fluent_target-arrow-16-filled.png",
-    "displayOrder": 2,
+    "displayOrder": 4,
     "displayLevel": 1,
     "type": "ChooseMultipleColumn",
     "isPilot": false,
@@ -307,7 +378,7 @@
         "id": "fd807c09-b8dc-49ba-9619-ad1a3220bc60",
         "createdDate": "2023-10-17",
         "surveyQuestionId": "721D8BB9-CDBE-42E7-AA16-35A1915C1123",
-        "question": "Why do you study foreign languages",
+        "question": "Why are studying a foreign language?",
         "language": "en-US",
         "description": "addd",
         "answers": [
@@ -351,7 +422,7 @@
     "question": "Vị trí của bạn",
     "description": "addd",
     "icon": "wideword.png",
-    "displayOrder": 3,
+    "displayOrder": 5,
     "displayLevel": 1,
     "type": "YourPlace",
     "isPilot": null,
@@ -368,7 +439,7 @@
     "question": "Trường học của bạn",
     "description": "addd",
     "icon": "wideword.png",
-    "displayOrder": 4,
+    "displayOrder": 6,
     "displayLevel": 1,
     "type": "Location",
     "isPilot": false,
@@ -376,6 +447,7 @@
       "country": "Other",
       "province": "Other",
       "district": "Other",
+      "educationLevel": "Other",
       "school": "Other"
     },
     "translations": [
@@ -390,6 +462,7 @@
           "country": "Other",
           "province": "Other",
           "district": "Other",
+          "educationLevel": "Other",
           "school": "Other"
         }
       },
@@ -404,7 +477,52 @@
           "country": "Other",
           "province": "Other",
           "district": "Other",
+          "educationLevel": "Other",
           "school": "Other"
+        }
+      }
+    ]
+  },
+  {
+    "id": "35a71ae7-49c1-4878-a1db-edcd2834f1cd",
+    "createdDate": "2023-07-21",
+    "question": "Vị trí của bạn?",
+    "description": "addd",
+    "icon": "wideword.png",
+    "displayOrder": 6,
+    "displayLevel": 1,
+    "type": "Location",
+    "isPilot": false,
+    "answers": {
+      "country": "Other",
+      "province": "Other",
+      "district": "Other"
+    },
+    "translations": [
+      {
+        "id": "b606fff3-5363-4d82-a798-7059e9323321",
+        "createdDate": "2023-10-17",
+        "surveyQuestionId": "35a71ae7-49c1-4878-a1db-edcd2834f1cd",
+        "question": "Vị trí của bạn?",
+        "language": "vi-VN",
+        "description": "addd",
+        "answers": {
+          "country": "Other",
+          "province": "Other",
+          "district": "Other"
+        }
+      },
+      {
+        "id": "d9343200-7b1b-475c-8330-a8d3e1a09be4",
+        "createdDate": "2023-10-17",
+        "surveyQuestionId": "35a71ae7-49c1-4878-a1db-edcd2834f1cd",
+        "question": "Your location?",
+        "language": "en-US",
+        "description": "addd",
+        "answers": {
+          "country": "Other",
+          "province": "Other",
+          "district": "Other"
         }
       }
     ]
@@ -412,10 +530,10 @@
   {
     "id": "2BE9A620-143D-41F6-815B-2038C21A7B23",
     "createdDate": "2023-07-21",
-    "question": "Xác định độ tuổi và giới tính",
+    "question": "Giới tính của bạn",
     "description": "addd",
     "icon": "time.png",
-    "displayOrder": 5,
+    "displayOrder": 7,
     "type": "AgeGender",
     "displayLevel": 1,
     "isPilot": false,
@@ -441,7 +559,7 @@
         "id": "b695a761-d0fa-4162-97c3-68403e9a8326",
         "createdDate": "2023-10-17",
         "surveyQuestionId": "2BE9A620-143D-41F6-815B-2038C21A7B23",
-        "question": "Xác định độ tuổi và giới tính",
+        "question": "Giới tính của bạn",
         "language": "vi-VN",
         "description": "addd",
         "answers": {
@@ -466,7 +584,7 @@
         "id": "e343b238-f2fc-418a-a171-6cce3d90d2a1",
         "createdDate": "2023-10-17",
         "surveyQuestionId": "2BE9A620-143D-41F6-815B-2038C21A7B23",
-        "question": "age and gender",
+        "question": "Your Gender",
         "language": "en-US",
         "description": "addd",
         "answers": {

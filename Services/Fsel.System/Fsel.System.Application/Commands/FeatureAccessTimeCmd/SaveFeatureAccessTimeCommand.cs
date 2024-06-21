@@ -6,6 +6,9 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
+    using Fsel.System.Application.Commands.QuestBoardCmd;
+    using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.FeatureAccessTimes;
@@ -22,13 +25,19 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
     {
         private readonly IMapper _mapper;
         private readonly IFeatureAccessTimeRepository _featureAccessTimeRepository;
-        List<FeatureAccessTime> _featureAccessTimes = new List<FeatureAccessTime>();
-        List<FeatureAccessTime> _featureAccessTimesUpdate = new List<FeatureAccessTime>();
+        private List<FeatureAccessTime> _featureAccessTimes = new List<FeatureAccessTime>();
+        private List<FeatureAccessTime> _featureAccessTimesUpdate = new List<FeatureAccessTime>();
+        private readonly AuthContext _authContext;
+        private readonly IMediator _mediator;
+        private readonly IUserService _userService;
 
-        public SaveFeatureAccessTimeCommandHandler(IMapper mapper, IFeatureAccessTimeRepository featureAccessTimeRepository)
+        public SaveFeatureAccessTimeCommandHandler(IMapper mapper, IFeatureAccessTimeRepository featureAccessTimeRepository, AuthContext authContext, IMediator mediator, IUserService userService)
         {
             _mapper = mapper;
             _featureAccessTimeRepository = featureAccessTimeRepository;
+            _authContext = authContext;
+            _mediator = mediator;
+            _userService = userService;
         }
 
         public async Task<MethodResult<FeatureAccessTimeModel>> Handle(SaveFeatureAccessTimeCommand request, CancellationToken cancellationToken)
@@ -36,16 +45,22 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<FeatureAccessTimeModel> methodResult = new MethodResult<FeatureAccessTimeModel>();
 
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(studentResult.Error);
+                return methodResult;
+            }
+            var student = studentResult.Content?.Result;
+
             await _featureAccessTimeRepository.ExecuteTransactionAsync(async () =>
             {
                 //Phân tách dữ liệu accesstime theo từng khung giờ
                 var accessTimes = GetAccessTimeByRangeHour(DateTime.UtcNow, request.AccessTime);
 
-
                 EnumFeature featureType = ConvertType(request.Type!);
                 foreach (var (time, seconds) in accessTimes)
                 {
-
                     var featureAccessTimeCheck = await _featureAccessTimeRepository.Queryable.OrderByDescending(x => x.LastVisited).FirstOrDefaultAsync(x => x.CreatedUserId == request.UserId && (x.ObjectId == request.ObjectId || x.EnumFeature == EnumFeature.Other) && x.EnumFeature == featureType, cancellationToken);
 
                     if (featureAccessTimeCheck == null || !IsSameRangeHour(featureAccessTimeCheck))
@@ -58,11 +73,11 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
                     }
                     else if (featureAccessTimeCheck != null && IsSameRangeHour(featureAccessTimeCheck))
                     {
-                        UpdateExistingFeatureAccessTime(featureAccessTimeCheck, request, seconds, time);
+                        UpdateExistingFeatureAccessTime(featureAccessTimeCheck, request, seconds);
                     }
                     else if (featureAccessTimeCheck != null)
                     {
-                        UpdateExistingFeatureAccessTime(featureAccessTimeCheck, request, seconds, time);
+                        UpdateExistingFeatureAccessTime(featureAccessTimeCheck, request, seconds);
                     }
                 }
 
@@ -72,10 +87,29 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 //methodResult.Result = _mapper.Map<FeatureAccessTimeModel>(featureAccessTime);
+
+                if ((request.Type == EnumFeature.VideoLesson.ToString() || request.Type == EnumFeature.HomeWork.ToString() || request.Type == EnumFeature.MockTest.ToString() || request.Type == EnumFeature.FinalTest.ToString()) && request.AccessTime.HasValue)
+                {
+                    int minute = DateTimeHelper.ConvertSecondsToMinutes(request.AccessTime.Value);
+                    await DoQuestBoard(student!.Id, EnumQuestBoardCategory.ExploreTheLearningGalaxy, minute, cancellationToken);
+                    await DoQuestBoard(student!.Id, EnumQuestBoardCategory.LearningSpaceship, minute, cancellationToken);
+                }
+
                 return methodResult;
             });
 
             return methodResult;
+        }
+
+        private async Task DoQuestBoard(Guid studentId, EnumQuestBoardCategory category, int value, CancellationToken cancellationToken)
+        {
+            await _mediator.Send(new DoQuestBoardCommand()
+            {
+                StudentID = studentId,
+                Type = EnumQuestBoardType.LearningQuests,
+                Category = category,
+                Value = value
+            }, cancellationToken);
         }
 
         private static EnumFeature ConvertType(string value)
@@ -85,28 +119,23 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
         private void AddNewFeatureAccessTime(SaveFeatureAccessTimeCommand request, long accessTime, DateTime vistedTime)
         {
-
             var featureAccessTime = _mapper.Map<FeatureAccessTime>(request);
             featureAccessTime.Visit = 1;
-            featureAccessTime.LastVisited = vistedTime;
+            featureAccessTime.LastVisited = DateTime.UtcNow;
             featureAccessTime.AccessTime = accessTime;
             featureAccessTime.EnumFeature = ConvertType(request.Type!);
             _featureAccessTimes.Add(featureAccessTime);
         }
 
-        private void UpdateExistingFeatureAccessTime(FeatureAccessTime featureAccessTime, SaveFeatureAccessTimeCommand request, long accessTime, DateTime vistedTime)
+        private void UpdateExistingFeatureAccessTime(FeatureAccessTime featureAccessTime, SaveFeatureAccessTimeCommand request, long accessTime)
         {
-            if (request.AccessTime == null)
-            {
-                featureAccessTime.Visit += 1;
-            }
-            featureAccessTime.LastVisited = vistedTime;
+            featureAccessTime.Visit += 1;
             featureAccessTime.AccessTime += accessTime;
+            featureAccessTime.LastVisited = DateTime.UtcNow;
+            ;
             featureAccessTime.EnumFeature = ConvertType(request.Type!);
             _featureAccessTimesUpdate.Add(featureAccessTime);
         }
-
-
 
         private static bool IsSameRangeHour(FeatureAccessTime featureAccessTime)
         {
@@ -123,8 +152,6 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
             }
             return isValid;
         }
-
-
 
         /// <summary>
         /// Tính toán accesstime theo từng khung giờ

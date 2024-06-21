@@ -66,6 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     var student = students.FirstOrDefault(x => x.Id == courseResult.StudentId);
                     studentProgressModel.StudentId = courseResult.StudentId;
                     studentProgressModel.FullName = student?.Human?.FullName;
+                    studentProgressModel.Email = student?.Human?.Email;
                 }
                 studentProgressModel.Level = courseResult.CourseLevel ?? default;
                 studentProgressModel.CourseType = courseResult.CourseType ?? default;
@@ -76,9 +77,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                studentProgress = studentProgress.Where(m => (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim())).ToList();
+                studentProgress = studentProgress.Where(m => (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()) || (m.Email ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim())).ToList();
             }
-
             if (request.CourseType != null)
             {
                 studentProgress = studentProgress.Where(m => m.CourseType == request.CourseType).ToList();

@@ -25,6 +25,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
         private readonly IStudentRepository _studentRepository;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly ITrainingService _trainingService;
+
         public SearchStudentsInClassQueryHandler(IStudentRepository studentRepository, ILmsCourseService lmsCourseService, ITrainingService trainingService)
         {
             _studentRepository = studentRepository;
@@ -43,7 +44,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 return methodResult;
             }
 
-            var students = _studentRepository.Queryable.Where(p => p.ClassId.HasValue).Include(x => x.Human).Select(i => new SearchStudentsInClassModel
+            var query = _studentRepository.Queryable.Where(p => p.ClassId.HasValue).Include(x => x.Human).Select(i => new SearchStudentsInClassModel
             {
                 Id = i.Id,
                 FullName = i.Human!.FullName,
@@ -56,7 +57,9 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                students = students.Where(m => (!string.IsNullOrEmpty(m.FullName) && m.FullName.ToLower().Contains(request.Keyword.ToLower()) || (!string.IsNullOrEmpty(m.Code) && m.Code == request.Keyword)));
+                query = query.Where(m => (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower())
+                                            || (m.Code ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower())
+                                            || (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
             }
             if (request.ClassId.HasValue)
             {
@@ -67,11 +70,11 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                     return methodResult;
                 }
                 var studentIds = studentIdsResult.Content?.Result;
-                students = students.Where(p => studentIds != null && studentIds.Contains(p.Id));
+                query = query.Where(p => studentIds != null && studentIds.Contains(p.Id));
             }
 
-            int totalItem = await students.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await students
+            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await query
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)

@@ -80,6 +80,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<StudentFeedback> StudentFeedbacks { get; set; }
         public DbSet<ClassForumResultRandom> ClassForumResultRandoms { get; set; }
         public DbSet<MockTestAISetting> MockTestAISettings { get; set; }
+        public DbSet<ClassForumDetailResult> ClassForumDetailResults { get; set; }
         public DbSet<MockTestAICriteriaSetting> MockTestAICriteriaSettings { get; set; }
         public DbSet<ProsodyScore> ProsodyScore { get; set; }
 
@@ -152,6 +153,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new MockTestAISettingTypeConfiguration());
             modelBuilder.ApplyConfiguration(new MockTestScoreEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new MockTestAICriteriaSettingTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassForumDetailResultTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ProsodyScoreEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);

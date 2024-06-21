@@ -4,10 +4,8 @@ using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Ordering.Domain.Entities;
-using Fsel.Ordering.Domain.Entities.PackageConfigs;
 using Fsel.Ordering.Infrastructure.Configs;
 using Fsel.Shared.Constants;
-using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -31,6 +29,7 @@ namespace Fsel.Ordering.Infrastructure
             modelBuilder.ApplyConfiguration(new VoucherPackageEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UserVoucherEnityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new OrderTransactionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PackageTranslationEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -46,6 +45,7 @@ namespace Fsel.Ordering.Infrastructure
 
         public DbSet<UserReferral> UserReferrals { get; set; }
         public DbSet<OrderTransaction> OrderTransactions { get; set; }
+        public DbSet<PackageTranslation> PackageTranslations { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -67,7 +67,12 @@ namespace Fsel.Ordering.Infrastructure
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.PackageFileName);
             var packages = ConvertHelper.DeserializeFromFilePath<IList<Package>>(path);
             ArgumentNullException.ThrowIfNull(packages);
+
+            var packageTranslations = packages.SelectMany(x => x.Translations).ToList();
+            packages.ForEach(x => x.Translations.Clear());
+
             builder.Entity<Package>().HasData(packages);
+            builder.Entity<PackageTranslation>().HasData(packageTranslations);
         }
     }
 }

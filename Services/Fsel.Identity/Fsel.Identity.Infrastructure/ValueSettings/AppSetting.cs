@@ -9,7 +9,14 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public Smtp? Smtp { get; set; }
         public Otp? Otp { get; set; }
         public ConstantUrl? ConstantUrl { get; set; }
+        public ResourceContent? ResourceContent { get; set; }
         public new Services? Services { get; set; }
+    }
+
+    public class ResourceContent
+    {
+        public string? LmsWebsiteUrl { get; set; }
+        public string? HotLine { get; set; }
     }
 
     public class ConstantUrl
@@ -24,6 +31,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public string? OrderApiUrl { get; set; }
         public string? LmsCourseApiUrl { get; set; }
         public string? SystemApiUrl { get; set; }
+        public string? ClassApiUrl { get; set; }
     }
 
     public class Otp

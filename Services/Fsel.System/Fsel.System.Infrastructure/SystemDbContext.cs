@@ -3,8 +3,10 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Shared.Constants;
 using Fsel.System.Domain.Entities;
+using Fsel.System.Domain.Entities.ChatBot;
 using Fsel.System.Domain.Entities.Chatbots;
 using Fsel.System.Domain.Entities.Configs;
+using Fsel.System.Domain.Entities.QuestBoards;
 using Fsel.System.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -22,14 +24,16 @@ namespace Fsel.System.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
             SeedQuestBoards(modelBuilder);
+            SeedQuestBoardOveralls(modelBuilder);
             SeedFocusTimeConfig(modelBuilder);
             SeedApprovalTimeConfig(modelBuilder);
             SeedTokenConfig(modelBuilder);
             modelBuilder.ApplyConfiguration(new TeachingCostEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ReferralDiscountConfigConfiguration());
-            modelBuilder.ApplyConfiguration(new QuestBoardConfigConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardConfigConfiguration());
-            modelBuilder.ApplyConfiguration(new QuestBoardStudentConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestBoardStudentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestBoardOverallEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestBoardOverallStudentEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new FeatureAccessTimeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new GameTopicEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameVocabularyEntityTypeConfiguration());
@@ -45,6 +49,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new ChatbotTokenConfigEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ErrorReportEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TokenHistoryEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ChatBotEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -57,7 +62,8 @@ namespace Fsel.System.Infrastructure
         public DbSet<ReferralDiscountConfig> ReferralDiscountConfigs { get; set; }
         public DbSet<QuestBoardStudent> QuestBoardStudents { get; set; }
         public DbSet<QuestBoard> QuestBoards { get; set; }
-        public DbSet<QuestBoardConfig> QuestBoardConfigs { get; set; }
+        public DbSet<QuestBoardOverall> QuestBoardOveralls { get; set; }
+        public DbSet<QuestBoardOverallStudent> QuestBoardOverallStudents { get; set; }
         public DbSet<GameTopic> GameTopics { get; set; }
         public DbSet<GameVocabulary> GameVocabularies { get; set; }
         public DbSet<GameVocabularyType> GameVocabularyTypes { get; set; }
@@ -72,6 +78,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<ChatbotConfig> ChatbotConfigs { get; set; }
         public DbSet<ChatbotSkillConfig> ChatbotSkillConfigs { get; set; }
         public DbSet<ChatbotTokenConfigs> ChatbotTokenConfigs { get; set; }
+        public DbSet<ChatBot> ChatBots { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -91,9 +98,17 @@ namespace Fsel.System.Infrastructure
         private static void SeedQuestBoards(ModelBuilder builder)
         {
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.QuestBoardFileName);
-            var questBoardConfigs = ConvertHelper.DeserializeFromFilePath<IList<QuestBoardConfig>>(path);
-            ArgumentNullException.ThrowIfNull(questBoardConfigs);
-            builder.Entity<QuestBoardConfig>().HasData(questBoardConfigs);
+            var questBoards = ConvertHelper.DeserializeFromFilePath<IList<QuestBoard>>(path);
+            ArgumentNullException.ThrowIfNull(questBoards);
+            builder.Entity<QuestBoard>().HasData(questBoards);
+        }
+
+        private static void SeedQuestBoardOveralls(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.QuestBoardOverallFileName);
+            var questBoardOveralls = ConvertHelper.DeserializeFromFilePath<IList<QuestBoardOverall>>(path);
+            ArgumentNullException.ThrowIfNull(questBoardOveralls);
+            builder.Entity<QuestBoardOverall>().HasData(questBoardOveralls);
         }
 
         private static void SeedFocusTimeConfig(ModelBuilder builder)
