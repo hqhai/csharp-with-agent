@@ -60,11 +60,11 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-            if (_environment.IsProduction())
-            {
-                methodResult.AddError(StatusCodes.Status401Unauthorized, "Not Have Access Production");
-                return methodResult;
-            }
+            //if (_environment.IsProduction())
+            //{
+            //    methodResult.AddError(StatusCodes.Status401Unauthorized, "Not Have Access Production");
+            //    return methodResult;
+            //}
 
             if (string.IsNullOrEmpty(request.Type))
             {
