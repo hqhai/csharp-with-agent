@@ -21,7 +21,7 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
             {
                 return;
             }
-            await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, request, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.GetTimeModule, request, cancellationToken);
         }
     }
 }

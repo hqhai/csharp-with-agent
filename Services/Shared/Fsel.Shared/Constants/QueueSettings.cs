@@ -103,6 +103,7 @@ namespace Fsel.Shared.Constants
                 public const string UpdateClassForumResultToExpiredTime = $"{KeyQueue}_UpdateClassForumResultToExpiredTime";
                 public const string DisconnectSocketCalculateTime = $"{KeyQueue}_DisconnectSocketCalculateTime";
                 public const string DoQuestBoard = $"{KeyQueue}_DoQuestBoard";
+                public const string GetTimeModule = $"{KeyQueue}_GetTimeModule";
             }
         }
 
