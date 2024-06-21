@@ -78,16 +78,7 @@ namespace Fsel.Course.Domain.Entities
         {
             get
             {
-                double correctTotal = default;
-                if (!string.IsNullOrEmpty(GradingAlFeedback))
-                {
-                    var classForumAIs = Common.Helpers.ConvertHelper.Deserialize<List<ClassForumAIModel>>(GradingAlFeedback);
-                    if (classForumAIs != null && classForumAIs.Any())
-                    {
-                        correctTotal = classForumAIs.Count * MaxScore;
-                    }
-                }
-                return Score + correctTotal;
+                return CorrectCount + Score;
             }
         }
 
