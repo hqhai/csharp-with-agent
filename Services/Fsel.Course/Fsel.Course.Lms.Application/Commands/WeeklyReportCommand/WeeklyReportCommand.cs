@@ -76,22 +76,22 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             {
                 return methodResult;
             }
+            students = students.Where(p => p.Human?.Email?.ToLower(CultureInfo.CurrentCulture) == "nguyenhuukhoa5462@gmail.com1").ToList();
+            //UserSettingQuery query = new UserSettingQuery
+            //{
+            //    UserIds = students!.Select(x => x.Human!.UserId).ToList(),
+            //};
 
-            UserSettingQuery query = new UserSettingQuery
-            {
-                UserIds = students!.Select(x => x.Human!.UserId).ToList(),
-            };
+            ////Lấy những học sinh bật thông báo Gửi Email hàng tuần
+            //var studentFilter = await _userService.GetListUserSetting(query);
+            //var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
 
-            //Lấy những học sinh bật thông báo Gửi Email hàng tuần
-            var studentFilter = await _userService.GetListUserSetting(query);
-            var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
-
-            if (studentFilterResult == null || studentFilterResult.Count == 0)
-            {
-                return methodResult;
-            }
-            //filter những học sinh bật thông báo email.
-            students = students.Where(x => studentFilterResult.Contains(x.Human!.UserId)).ToList();
+            //if (studentFilterResult == null || studentFilterResult.Count == 0)
+            //{
+            //    return methodResult;
+            //}
+            ////filter những học sinh bật thông báo email.
+            //students = students.Where(x => studentFilterResult.Contains(x.Human!.UserId)).ToList();
 
             DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value.AddDays(1).Date : DateTime.UtcNow.Date;
 
