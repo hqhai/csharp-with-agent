@@ -69,7 +69,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 var student = students?.FirstOrDefault(x => x.Id == groupPlacementTest.Key);
                 if (student == null)
                 {
-                    break;
+                    continue;
                 }
                 groupPlacementTest.OrderBy(x => x.CreatedDate).ForEach(x =>
                 {
