@@ -76,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             {
                 return methodResult;
             }
-            students = students.Where(p => p.Human?.Email?.ToLower(CultureInfo.CurrentCulture) == "nguyenhuukhoa5462@gmail.com1").ToList();
+            students = students.Where(p => p.Human?.Email?.ToLower(CultureInfo.CurrentCulture) == "nguyenhuukhoa5462@gmail.com").ToList();
             //UserSettingQuery query = new UserSettingQuery
             //{
             //    UserIds = students!.Select(x => x.Human!.UserId).ToList(),
