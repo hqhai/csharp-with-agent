@@ -30,6 +30,11 @@ namespace Fsel.Ordering.Domain.Entities
         public DateTime? EndDate { get; set; }
 
         /// <summary>
+        /// Sự kiện mặc định
+        /// </summary>
+        public bool IsDefault { get; set; }
+
+        /// <summary>
         /// Mô tả
         /// </summary>
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]

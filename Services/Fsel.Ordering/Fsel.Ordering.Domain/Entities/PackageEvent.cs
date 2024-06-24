@@ -38,11 +38,6 @@ namespace Fsel.Ordering.Domain.Entities
         /// </summary>
         public EnumPackageSuggest? Suggest { get; set; }
 
-        /// <summary>
-        /// Sự kiện mặc định
-        /// </summary>
-        public bool IsDefault { get; set; }
-
         public Guid PackageId { get; set; }
         public Guid EventId { get; set; }
         public Package? Package { get; set; }

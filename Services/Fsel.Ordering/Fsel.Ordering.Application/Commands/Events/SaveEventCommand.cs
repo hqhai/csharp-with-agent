@@ -77,6 +77,11 @@ namespace Fsel.Ordering.Application.Commands.Events
             }
 
             var existEventDate = await _eventRepository.Queryable.AnyAsync(p => (p.StartDate <= request.StartDate && p.EndDate >= request.StartDate) || (p.StartDate <= request.EndDate && p.EndDate >= request.EndDate), cancellationToken);
+            if (existEventDate)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.ThereWereEventsDuringThisTimePeriod), EnumEventErrorCode.ThereWereEventsDuringThisTimePeriod.GetDescription());
+                return;
+            }
 
             await _eventRepository.ExecuteTransactionAsync(async () =>
             {
@@ -119,11 +124,24 @@ namespace Fsel.Ordering.Application.Commands.Events
                 return;
             }
 
+            if (request.StartDate.Date > request.EndDate.Date)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.StartDateIsGreaterThanEndDate), EnumEventErrorCode.StartDateIsGreaterThanEndDate.GetDescription());
+                return;
+            }
+
             var @event = await _eventRepository.Queryable.Include(p => p.Translations).Include(p => p.PackageEvents).FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
             if (@event == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return;
+            }
+
+            var existEventDate = await _eventRepository.Queryable.AnyAsync(p => p.Id != @event.Id && ((p.StartDate <= request.StartDate && p.EndDate >= request.StartDate) || (p.StartDate <= request.EndDate && p.EndDate >= request.EndDate)), cancellationToken);
+            if (existEventDate)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.ThereWereEventsDuringThisTimePeriod), EnumEventErrorCode.ThereWereEventsDuringThisTimePeriod.GetDescription());
                 return;
             }
 

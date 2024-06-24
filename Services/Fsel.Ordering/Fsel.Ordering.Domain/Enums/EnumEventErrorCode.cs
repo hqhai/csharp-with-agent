@@ -19,6 +19,9 @@ namespace Fsel.Ordering.Domain.Enums
         MissingVersionOfPackageEventOrTranslation,
 
         [Description("Id Package Sai")]
-        PackageIdIsWrong
+        PackageIdIsWrong,
+
+        [Description("Sự kiện đang hoạt động")]
+        TheEventIsActive
     }
 }

@@ -129,6 +129,7 @@ namespace Fsel.Shared.Constants
                 public const string SendNotification = $"{KeyQueue}_SendNotification";
                 public const string FinishSubmission = $"{KeyQueue}_FinishSubmission";
                 public const string NoticePayment = $"{KeyQueue}_NoticePayment";
+                public const string JobActiveEvent = $"{KeyQueue}_JobActiveEvent";
             }
         }
 
