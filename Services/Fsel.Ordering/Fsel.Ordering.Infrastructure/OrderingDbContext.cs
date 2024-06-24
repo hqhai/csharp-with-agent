@@ -31,6 +31,9 @@ namespace Fsel.Ordering.Infrastructure
             modelBuilder.ApplyConfiguration(new VoucherPackageEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UserVoucherEnityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new OrderTransactionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new EventEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PackageEventEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new EventTranslationEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -46,6 +49,9 @@ namespace Fsel.Ordering.Infrastructure
 
         public DbSet<UserReferral> UserReferrals { get; set; }
         public DbSet<OrderTransaction> OrderTransactions { get; set; }
+        public DbSet<Event> Events { get; set; }
+        public DbSet<PackageEvent> PackageEvents { get; set; }
+        public DbSet<EventTranslation> EventTranslations { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

@@ -47,5 +47,6 @@ namespace Fsel.Ordering.Domain.Entities
         public ICollection<Order> Orders { get; set; } = new List<Order>();
 
         public ICollection<VoucherPackage> VoucherPackages { get; set; } = new List<VoucherPackage>();
+        public ICollection<PackageEvent> PackageEvents { get; set; } = new List<PackageEvent>();
     }
 }

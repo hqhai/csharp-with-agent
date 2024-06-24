@@ -39,11 +39,16 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             {
                 if (!student.ExpiredDate.HasValue || student.ExpiredDate.Value.Date < DateTime.UtcNow.Date)
                 {
-                    if (request.Month.HasValue)
+                    if (request.Month.HasValue && request.Day.HasValue)
+                    {
+                        student.ExpiredDate = DateTime.UtcNow.AddMonths(request.Month.Value);
+                        student.ExpiredDate = student.ExpiredDate.Value.AddDays(request.Day.Value);
+                    }
+                    else if (request.Month.HasValue)
                     {
                         student.ExpiredDate = DateTime.UtcNow.AddMonths(request.Month.Value);
                     }
-                    if (request.Day.HasValue)
+                    else if (request.Day.HasValue)
                     {
                         student.ExpiredDate = DateTime.UtcNow.AddDays(request.Day.Value);
                     }
