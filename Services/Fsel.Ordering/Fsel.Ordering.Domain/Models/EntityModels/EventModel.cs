@@ -4,8 +4,6 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
 {
     using System;
     using System.Collections.Generic;
-    using Fsel.Common.Enums.ErrorCodes;
-    using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
@@ -28,5 +26,14 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public int MonthBonus { get; set; }
         public EnumPackageSuggest? Suggest { get; set; }
         public bool IsDefault { get; set; }
+    }
+
+    public class EventTranslationModel : BaseModel
+    {
+        public string? Description { get; set; }
+
+        public Guid EventId { get; set; }
+
+        public string? Language { get; set; }
     }
 }

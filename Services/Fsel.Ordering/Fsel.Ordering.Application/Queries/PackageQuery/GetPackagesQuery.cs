@@ -46,12 +46,12 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@event));
                 return methodResult;
             }
-
+            var eventModel = _mapper.Map<EventModel>(@event);
             var packages = await _packageRepository.Queryable.ToListAsync(cancellationToken);
 
             foreach (var item in @event.PackageEvents)
             {
-                var package = packages.FirstOrDefault(p => p.Id == item.Id);
+                var package = packages.FirstOrDefault(p => p.Id == item.PackageId);
                 if (package == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
@@ -60,7 +60,7 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
                 packageModels.Add(new PackageModel()
                 {
                     Id = package.Id,
-                    EventId = @event.Id,
+                    EventId = eventModel.Id,
                     Code = package.Code,
                     Name = package.Name,
                     Price = item.Price,
@@ -68,8 +68,8 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
                     Month = package.MonthNumber,
                     MonthBonus = item.MonthBonus,
                     DayBonus = item.DayBonus,
-                    ImagePaths = @event.ImagePaths,
-                    EventDescription = @event.Description,
+                    ImagePaths = eventModel.ImagePaths,
+                    EventDescription = eventModel.Description,
                 });
             }
 

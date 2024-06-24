@@ -24,6 +24,7 @@ namespace Fsel.Ordering.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
             SeedPackages(modelBuilder);
+            SeedEvents(modelBuilder);
 
             modelBuilder.ApplyConfiguration(new OrderEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PackageEntityTypeConfiguration());
@@ -74,6 +75,22 @@ namespace Fsel.Ordering.Infrastructure
             var packages = ConvertHelper.DeserializeFromFilePath<IList<Package>>(path);
             ArgumentNullException.ThrowIfNull(packages);
             builder.Entity<Package>().HasData(packages);
+        }
+
+        private static void SeedEvents(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.EventFileName);
+            var events = ConvertHelper.DeserializeFromFilePath<IList<Event>>(path);
+            ArgumentNullException.ThrowIfNull(events);
+
+            var eventTranslations = events.SelectMany(x => x.Translations).ToList();
+            events.ForEach(x => x.Translations.Clear());
+            var packageEvents = events.SelectMany(x => x.PackageEvents).ToList();
+            events.ForEach(x => x.PackageEvents.Clear());
+
+            builder.Entity<Event>().HasData(events);
+            builder.Entity<EventTranslation>().HasData(eventTranslations);
+            builder.Entity<PackageEvent>().HasData(packageEvents);
         }
     }
 }

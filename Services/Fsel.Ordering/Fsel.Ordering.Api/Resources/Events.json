@@ -5,7 +5,7 @@
     "name": "Sự kiện mặc định",
     "description": "Tặng thêm thời gian học khi mua gói 6 tháng, 12 tháng nhân sự kiện ra mắt FSEL.",
     "monthNumber": 1,
-    "imagePathsStr": [ "https://s3-sgn10.fptcloud.com/fsel-public/Images/BannerEvent_7538_1719195644832.jpg" ],
+    "imagePathsStr": "[ \"https://s3-sgn10.fptcloud.com/fsel-public/Images/BannerEvent_7538_1719195644832.jpg\" ]",
     "status": "Active",
     "isDefault": true,
     "createdDate": "2024-06-24",
@@ -32,7 +32,7 @@
         "language": "fr-FR"
       }
     ],
-    "packageEvent": [
+    "packageEvents": [
       {
         "id": "7ec4ded7-afd4-4c84-8b71-12c8d89afabd",
         "createdDate": "2024-06-24",
@@ -49,8 +49,8 @@
         "createdDate": "2024-06-24",
         "price": 2400000,
         "priceMonth": 320000,
-        "dayBonus": 1,
-        "monthBonus": 15,
+        "dayBonus": 15,
+        "monthBonus": 1,
         "suggest": "BestSeller",
         "packageId": "daa6fc87-6461-49d4-b3a5-c9e4cc30bc59",
         "eventId": "2371c9af-01a6-489b-8399-0e2a13db0646"
