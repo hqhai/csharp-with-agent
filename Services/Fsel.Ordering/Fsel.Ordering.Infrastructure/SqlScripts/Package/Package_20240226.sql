@@ -30,7 +30,7 @@ CREATE TABLE [dbo].[Packages](
 GO
 
 -- Testing
-UPDATE [dbo].[Packages] SET [Name] = N'Fsel_1_Months_Testing', [Code] = N'BASIC' WHERE [Id] = N'42d7ddb2-9f36-4f86-badc-67dc16bb722b'
+UPDATE [dbo].[Packages] SET [Name] = N'Fsel_1_Month_Testing', [Code] = N'BASIC' WHERE [Id] = N'42d7ddb2-9f36-4f86-badc-67dc16bb722b'
 GO
 UPDATE [dbo].[Packages] SET [Name] = N'Fsel_6_Months_Testing', [Code] = N'BASIC' WHERE [Id] = N'daa6fc87-6461-49d4-b3a5-c9e4cc30bc59'
 GO
