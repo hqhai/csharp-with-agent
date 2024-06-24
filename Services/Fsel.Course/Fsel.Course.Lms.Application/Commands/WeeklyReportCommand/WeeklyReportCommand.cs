@@ -64,9 +64,9 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            _logger.LogWarning("Call WeeklyReportCommand - body: " + request.Serialize());
+            _logger.LogWarning("Call WeeklyReportCommand - body: " + ConvertHelper.Serialize(request));
 
-            return methodResult;
+            //return methodResult;
 
             var students = new List<StudentModel>();
 
