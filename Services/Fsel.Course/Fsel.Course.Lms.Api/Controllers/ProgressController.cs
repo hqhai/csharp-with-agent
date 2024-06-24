@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Course.Lms.Application.Queries.ProgressQuery;
     using Fsel.Course.Lms.Application.Queries.StudentProgressQuery;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -262,6 +263,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// </summary>
         [HttpPost("export-report-student")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> Export([FromQuery] ExportEmailStudentByProgressQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -277,6 +279,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// </summary>
         [HttpPost("export-report-progress-student")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> ExportProgressStudent([FromQuery] ExportEmailByReportProgressQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);

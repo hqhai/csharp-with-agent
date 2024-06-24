@@ -61,5 +61,17 @@ namespace Fsel.System.Api.Controllers
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get CC emails
+        /// </summary>
+        [HttpGet("get-cc-email")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCCEmail()
+        {
+            var commandResult = await _mediator.Send(new GetCCEmailsAccordingToStudentsQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

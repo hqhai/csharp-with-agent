@@ -189,6 +189,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<DateTime?>("ProcessDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("RetryTime")
+                        .HasColumnType("int");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -3091,6 +3094,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<double?>("PronunciationScore")
                         .HasColumnType("float");
+
+                    b.Property<int>("RetryTime")
+                        .HasColumnType("int");
 
                     b.Property<Guid?>("SectionGroupResultId")
                         .HasColumnType("uniqueidentifier");
