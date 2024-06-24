@@ -58,6 +58,18 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         }
 
         /// <summary>
+        /// Get Order
+        /// </summary>
+        [HttpGet("{userId}")]
+        [ProducesResponseType(typeof(MethodResult<OrderModel?>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetByUserId([FromRoute] Guid userId)
+        {
+            var commandResult = await _mediator.Send(new GetOrderByUserIdQuery { UserId = userId }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// App Store
         /// </summary>
         [AllowAnonymous]

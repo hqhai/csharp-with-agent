@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             ArgumentNullException.ThrowIfNull(notification);
             Thread.Sleep(1000);
             var videoResult = notification.Data;
-            var lessonResult = await _lessonResultRepository.GetByIdAsync(videoResult.LessonResultId);
+            var lessonResult = videoResult.LessonResult;
             if (lessonResult != null && videoResult.Status == EnumResultStatus.Done)
             {
                 var skillScores = videoResult.VideoSkillScores?.FirstOrDefault(x => x.Type == EnumTimeCodeType.Standalone)?.SkillScores;

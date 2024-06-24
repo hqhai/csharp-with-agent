@@ -28,10 +28,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Hosting;
 
     public class CreateUserStudentToAdminCommand : IRequest<MethodResult<UserModel>>
     {
         public string? Email { get; set; }
+        public bool IsTrialRegistration { get; set; }
         public Guid CourseId { get; set; }
     }
 
@@ -46,13 +48,15 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly ILmsCourseService _lmsCourseService;
         private readonly IInteractionService _interactionService;
         private readonly IPlatformRepository _platformRepository;
+        private readonly IHostEnvironment _environment;
+
         private const string DefaultPassword = "Admin@123";
         private const string RoleStudent = nameof(Student);
-        private const int TotalUserDateNow = 50;
+        private const int TotalUserDateNow = 2100;
         private const int MinAgeYoung = 14;
         private const int MaxAgeChildren = 13;
 
-        public CreateUserStudentToAdminCommandHandler(IMediator mediator, IMapper mapper, AuthContext authContext, UserManager<User> userManager, IOrderService orderService, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IInteractionService interactionService, IPlatformRepository platformRepository)
+        public CreateUserStudentToAdminCommandHandler(IMediator mediator, IMapper mapper, AuthContext authContext, UserManager<User> userManager, IOrderService orderService, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IInteractionService interactionService, IPlatformRepository platformRepository, IHostEnvironment environment = null)
         {
             _mediator = mediator;
             _mapper = mapper;
@@ -63,12 +67,18 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             _lmsCourseService = lmsCourseService;
             _interactionService = interactionService;
             _platformRepository = platformRepository;
+            _environment = environment;
         }
 
         public async Task<MethodResult<UserModel>> Handle(CreateUserStudentToAdminCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
+            //if (_environment.IsProduction())
+            //{
+            //    methodResult.AddError(StatusCodes.Status401Unauthorized, "Not Have Access Production");
+            //    return methodResult;
+            //}
             if (string.IsNullOrEmpty(request.Email))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
@@ -162,7 +172,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 }
             });
             await _lmsCourseService.SavePlacementTestDoneAsync(new SavePlacementTestDoneCommandModel { CourseLevel = GetCourseLevel(course.CourseLevel), StudentId = student?.Id ?? default });
-            var orderResult = await SaveOrderAsync(user, course);
+            var orderResult = await SaveOrderAsync(user, course, request.IsTrialRegistration);
             if (!orderResult.IsOK)
             {
                 methodResult.AddErrorBadRequest(orderResult.ErrorMessages);
@@ -194,7 +204,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
         }
 
-        private async Task<VoidMethodResult> SaveOrderAsync(User user, CourseModel course)
+        private async Task<VoidMethodResult> SaveOrderAsync(User user, CourseModel course, bool isTrialRegistration)
         {
             var methodResult = new VoidMethodResult();
             var packagesResult = await _orderService.GetPackages();
@@ -218,6 +228,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
                 CourseId = course.Id,
                 PackageId = package.Id,
+                IsTrialRegistration = isTrialRegistration
             });
             if (!createOrderResult.IsSuccessStatusCode)
             {

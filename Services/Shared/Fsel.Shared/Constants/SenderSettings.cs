@@ -5,6 +5,7 @@ namespace Fsel.Shared.Constants
     public static class SenderSettings
     {
         public const string HostName = "FSEL";
+        public const string HostNameCareers = "no-reply@fsel.vn";
         public const string SendOtpSubject = "[LMS - FSEL] Thông báo mã OTP";
         public const string SendOtpSubjectFullName = "[LMS - FSEL] Thông báo mã OTP cho người dùng {0}";
 
@@ -28,5 +29,6 @@ namespace Fsel.Shared.Constants
 
         public const string TitlePT = "[FSEL] CÙNG XEM KẾT QUẢ ĐÁNH GIÁ ĐẦU VÀO BẠN NHÉ!";
         public const string MidCourseTitle = "[FSEL] BÁO CÁO HỌC TẬP GIỮA KHÓA";
+        public const string PaymentApproval = "[FSEL] TÀI KHOẢN CỦA BẠN ĐÃ ĐƯỢC PHÊ DUYỆT";
     }
 }

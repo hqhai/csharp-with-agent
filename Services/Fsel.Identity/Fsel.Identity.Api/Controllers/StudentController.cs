@@ -14,11 +14,9 @@ namespace Fsel.Identity.Api.Controllers
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -225,6 +223,30 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> GetStudentByEmail([FromQuery] string email)
         {
             MethodResult<StudentModel> commandResult = await _mediator.Send(new GetStudentByEmailQuery { Email = email }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get student by email
+        /// </summary>
+        [HttpPost("get-student-by-emails")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentByEmails([FromBody] IList<string> emails)
+        {
+            MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(new GetStudentByEmailsQuery { Emails = emails }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get student by FullNames
+        /// </summary>
+        [HttpPost("get-student-by-full-names")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentByFullNames([FromBody] IList<string> fullNames)
+        {
+            MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(new GetStudentByFullNamesQuery { FullNames = fullNames }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
