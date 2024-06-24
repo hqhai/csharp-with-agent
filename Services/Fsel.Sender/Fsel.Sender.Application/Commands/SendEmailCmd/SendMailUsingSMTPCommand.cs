@@ -132,6 +132,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
                 {
                     client.ServerCertificateValidationCallback = (s, c, h, e) => true;
                     await client.ConnectAsync(_appSetting?.SmtpGoogle?.SmtpServer ?? string.Empty, _appSetting?.SmtpGoogle?.Port ?? 0, true);
+                    client.AuthenticationMechanisms.Remove("XOAUTH2");
                     await client.AuthenticateAsync(_appSetting?.SmtpGoogle?.Username ?? string.Empty, _appSetting?.SmtpGoogle?.Password ?? string.Empty);
                     await client.SendAsync(mailMessage);
                 }

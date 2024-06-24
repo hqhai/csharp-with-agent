@@ -87,7 +87,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                                                                    .Where(x => lessonIds.Contains(x.LessonId))
                                                                    .ToListAsync(cancellationToken);
             var numberOfPostsCreated = classForums.SelectMany(x => x.ClassForumResults)
-                                                    .Where(x => x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded)
+                                                    .Where(x => x.Status == EnumClassForumResultStatus.Graded)
                                                     .Count();
             var dailyStreakResult = await _userService.GetDailyStreak(studentId ?? default);
             if (!dailyStreakResult.IsSuccessStatusCode)

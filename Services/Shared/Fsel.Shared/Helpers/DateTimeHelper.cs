@@ -90,5 +90,21 @@ namespace Fsel.Shared.Helpers
             long minutes = seconds / 60;
             return (int)minutes;
         }
+
+        public static ICollection<DateTime> GetWeekDays(DateTime date)
+        {
+            // Tìm ngày thứ Hai của tuần chứa ngày ngẫu nhiên
+            int diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
+            DateTime monday = date.AddDays(-1 * diff).Date;
+
+            // Tạo danh sách các ngày từ thứ Hai đến Chủ nhật
+            List<DateTime> weekDays = new List<DateTime>();
+            for (int i = 0; i < 7; i++)
+            {
+                weekDays.Add(monday.AddDays(i));
+            }
+
+            return weekDays;
+        }
     }
 }

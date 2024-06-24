@@ -60,16 +60,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 return methodResult;
             }
 
-
-
-            classForumResult.RetryWordContent = request.WordContent;
-            classForumResult.RetryContent = request.Content;
-
             if (request.FilePaths != null)
             {
                 request.FilePaths.ForEach(x => classForumResult.ClassForumResultFiles.Add(new ClassForumResultFile
                 {
-                    IsRetry = true,
                     FilePath = x,
                 }));
             }
@@ -106,11 +100,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     SettingTopP = classForum.SettingTopP,
                     SettingWordMaxLength = classForum.SettingWordMaxLength,
                     SystemRoleAlConfig = classForum.SystemRoleAlConfig,
-                    IsRetry = true
+                    IsRetry = true,
                 }, cancellationToken);
             }
         }
-
-
     }
 }

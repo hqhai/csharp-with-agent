@@ -11,6 +11,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public long? Score { get; set; }
         public EnumMockTestScoreCriteria Criteria { get; set; }
 
+        public Guid? SectionGroupId { get; set; }
+
         public string? CriteriaDescription
         {
             get

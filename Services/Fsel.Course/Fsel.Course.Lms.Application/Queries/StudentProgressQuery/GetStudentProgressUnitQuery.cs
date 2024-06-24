@@ -104,7 +104,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 if (lessonResults != null && lessonResults.Any())
                 {
                     var countVideo = lessonResults.Select(x => x.VideoResult).Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == request.StudentId).Count();
-                    var countClassForum = lessonResults.SelectMany(x => x.ClassForumResults).Where(x => x != null && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == request.StudentId).Count();
+                    var countClassForum = lessonResults.SelectMany(x => x.ClassForumResults).Where(x => x != null && (x.Status == EnumClassForumResultStatus.Denied || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == request.StudentId).Count();
                     var countHomeWork = lessonResults.Select(x =>
                     {
                         return x.HomeWorkResults.Any() && x.HomeWorkResults.All(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == request.StudentId) ? 1 : 0;
