@@ -289,7 +289,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             {
                 classForumResult.TokenFirstTime = await GetTokenAsync(classForum, classForumResult, course.CourseType);
                 await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 await _setTimeClassForumDonePublisher.Publish(new Core.Base.BaseModels.BaseQueueModel { QueueId = classForumResult.Id.ToString() }, cancellationToken);
             }
             else
