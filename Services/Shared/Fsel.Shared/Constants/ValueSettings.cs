@@ -66,6 +66,11 @@ namespace Fsel.Shared.Constants
             public const int TopP = 0;
         }
 
+        public static class StudentDailyStreak
+        {
+            public const int CheckInGoalTime = 54000;
+        }
+
 
         public static class CustomerSupport
         {
