@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
     using Amazon.Runtime.Internal.Util;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
-    using Fsel.Common.Helpers;
     using Fsel.Common.Models;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
@@ -64,9 +63,9 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            _logger.LogWarning("Call WeeklyReportCommand - body: " + ConvertHelper.Serialize(request));
+            _logger.LogWarning("Call WeeklyReportCommand - body: " + Fsel.Common.Helpers.ConvertHelper.Serialize(request));
 
-            //return methodResult;
+            return methodResult;
 
             var students = new List<StudentModel>();
 
