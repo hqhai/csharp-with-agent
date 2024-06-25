@@ -72,7 +72,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             var checkDataClassForum = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
 
-            if (checkDataClassForum == null && classForumDetailResult != null && classForumDetailResult.RetryTime <= Max_Time_Retry)
+            bool conditionRetry = checkDataClassForum?.All(x => x != null) ?? default;
+
+            if ((checkDataClassForum == null || !conditionRetry) && classForumDetailResult != null && classForumDetailResult.RetryTime <= Max_Time_Retry)
             {
                 var model = _mapper.Map<SetTimeRetryClassForumModel>(request);
                 model.StartDate = DateTime.UtcNow;
@@ -80,7 +82,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 classForumDetailResult.RetryTime += 1;
             }
 
-            var classForumDetailResultOwner = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResult).FirstOrDefault(x => x.Id == request.ClassForumDetailResultId);
+            var classForumDetailResultOwner = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResult).ThenInclude(x => x.LessonResult).ThenInclude(x => x.Lesson).FirstOrDefault(x => x.Id == request.ClassForumDetailResultId);
 
             if (classForumDetailResult != null && classForumDetailResult.RetryTime > Max_Time_Retry)
             {
@@ -91,12 +93,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     Subject = ValueSettings.CustomerSupport.TitleMail.Format(classForumDetailResultOwner?.CreatedFullName ?? default),
                     CcEmails = _appSetting.CustomerSupportConfig.CCEmail
                 };
-                await _mediator.Send(new SenderCommand
-                {
-                    Email = _appSetting!.CustomerSupportConfig!.Email,
-                    Content = ValueSettings.CustomerSupport.Content.Format(classForumDetailResultOwner?.CreatedFullName ?? default, classForumDetailResult.ClassForumResult?.LessonResult?.Lesson?.Name ?? default),
-                    Subject = ValueSettings.CustomerSupport.TitleMail.Format(classForumDetailResultOwner?.CreatedFullName ?? default)
-                }, cancellationToken);
+                await _senderService.SendEmailAsync(model);
             }
 
             #endregion Retry

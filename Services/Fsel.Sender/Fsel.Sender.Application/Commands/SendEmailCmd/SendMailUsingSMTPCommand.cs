@@ -6,6 +6,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Sender.Domain.Models.Commands;
+    using Fsel.Sender.Application.Services.SystemServices;
     using MediatR;
     using Fsel.Sender.Domain.ValueSettings;
     using Fsel.Sender.Domain.Models.Entities;
@@ -21,16 +22,46 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
     public class SendMailUsingSMTPCommandHandler : IRequestHandler<SendMailUsingSMTPCommand, MethodResult<bool>>
     {
         private readonly AppSetting _appSetting;
+        private readonly ISystemService _systemService;
 
-        public SendMailUsingSMTPCommandHandler(AppSetting appSetting)
+        public SendMailUsingSMTPCommandHandler(AppSetting appSetting, ISystemService systemService)
         {
             _appSetting = appSetting;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<bool>> Handle(SendMailUsingSMTPCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
+
+            #region Get CC Email
+
+            if (request.IsCCEmail.HasValue && request.IsCCEmail == true)
+            {
+                var listCCEmailResult = await _systemService.GetCCEmail();
+                if (listCCEmailResult.IsSuccessStatusCode)
+                {
+                    var listCCEmail = listCCEmailResult.Content?.Result;
+                    var ccEmail = listCCEmail?.Where(p => !string.IsNullOrEmpty(p.StudentEmail) && request.ToEmails.Contains(p.StudentEmail)).ToList();
+                    if (ccEmail != null && ccEmail.Count > 0)
+                    {
+                        foreach (var item in ccEmail)
+                        {
+                            if (!string.IsNullOrEmpty(item.OCEmail) && item.OCEmail.IsValidEmail())
+                            {
+                                request.CcEmails.Add(item.OCEmail);
+                            }
+                            if (!string.IsNullOrEmpty(item.OMEmail) && item.OMEmail.IsValidEmail())
+                            {
+                                request.CcEmails.Add(item.OMEmail);
+                            }
+                        }
+                    }
+                }
+            }
+
+            #endregion Get CC Email
 
             #region Validation
 
