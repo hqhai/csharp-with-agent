@@ -7,6 +7,7 @@ namespace Fsel.Ordering.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Ordering.Application.Commands.Events;
+    using Fsel.Ordering.Application.Queries.Events;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
     using MediatR;
@@ -46,6 +47,18 @@ namespace Fsel.Ordering.Api.Controllers
         public async Task<IActionResult> ChangeEvent([FromBody] ChangeEventCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get event by id
+        /// </summary>
+        [HttpGet("get-by-id/{id}")]
+        [ProducesResponseType(typeof(MethodResult<EventModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetById([FromRoute] Guid id)
+        {
+            var commandResult = await _mediator.Send(new GetEventByIdQuery() { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

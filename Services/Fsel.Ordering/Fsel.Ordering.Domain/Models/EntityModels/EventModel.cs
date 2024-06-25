@@ -16,16 +16,19 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public string? Description { get; set; }
         public IList<string>? ImagePaths { get; set; }
         public EnumEventPackageStatus Status { get; set; }
+        public IList<PackageEventModel>? PackageEvents { get; set; }
+        public IList<EventTranslationModel>? Translations { get; set; }
     }
 
     public class PackageEventModel : BaseModel
     {
         public decimal Price { get; set; }
+        public Guid PackageId { get; set; }
         public decimal PriceMonth { get; set; }
         public int DayBonus { get; set; }
         public int MonthBonus { get; set; }
+        public int Month { get; set; }
         public EnumPackageSuggest? Suggest { get; set; }
-        public bool IsDefault { get; set; }
     }
 
     public class EventTranslationModel : BaseModel
