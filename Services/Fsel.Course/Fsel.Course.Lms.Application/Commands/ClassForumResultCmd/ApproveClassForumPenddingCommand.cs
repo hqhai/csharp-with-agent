@@ -134,6 +134,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
                 return methodResult;
             });
+
             return methodResult;
         }
 
