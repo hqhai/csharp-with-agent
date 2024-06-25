@@ -7,5 +7,9 @@ namespace Fsel.Identity.Application.Services.LmsCourseService.Model
         public Guid UserId { get; set; }
 
         public string? Name { get; set; }
+
+        public string? CurrentLesson { get; set; }
+
+        public int? LessonCompleted { get; set; }
     }
 }
