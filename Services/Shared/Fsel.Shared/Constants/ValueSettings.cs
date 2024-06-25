@@ -70,7 +70,7 @@ namespace Fsel.Shared.Constants
         public static class CustomerSupport
         {
             public const string TitleMail = "Xử lý sự cố ChatGPT học sinh {0}";
-            public const string Content = "Sự cố ChatGPT học sinh {0}\r\n\r\nVị trí gặp sự cố: tên {1}";
+            public const string Content = "Sự cố ChatGPT học sinh {0}\r\n\r\nVị trí gặp sự cố: {1}";
         }
     }
 }

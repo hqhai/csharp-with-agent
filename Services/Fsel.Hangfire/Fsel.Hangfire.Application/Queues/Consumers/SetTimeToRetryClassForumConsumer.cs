@@ -18,7 +18,7 @@ namespace Fsel.Hangfire.Application.Queues.Consumers
         {
             if (message != null)
             {
-                JobExtensions.SetScheduleJob<RetryClassForumWhenNotReturnScoreWorker, SetTimeRetryClassForumModel>(message.StartDate.AddMinutes(ValueSettings.DelayThreeMinute), message);
+                JobExtensions.SetScheduleJob<RetryClassForumWhenNotReturnScoreWorker, SetTimeRetryClassForumModel>(message.StartDate.AddMinutes(1), message);
             }
             return Task.CompletedTask;
         }
