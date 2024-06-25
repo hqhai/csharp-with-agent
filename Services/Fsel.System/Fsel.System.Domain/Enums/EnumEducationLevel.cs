@@ -19,6 +19,9 @@ namespace Fsel.System.Domain.Enums
         University,
 
         [Description("Cao đẳng")]
-        College
+        College,
+
+        [Description("Liên Cấp")]
+        InterLevel
     }
 }

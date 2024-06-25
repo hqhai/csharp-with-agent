@@ -11,6 +11,9 @@ using Fsel.Course.Lms.Application.InternalEvents;
 using Fsel.Course.Lms.Application.Queues.Consumers;
 using Fsel.Course.Lms.Application.Queues.Publishers;
 using Fsel.Course.Lms.Application.Services.AiService;
+using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
+using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService;
+using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
 using Fsel.Course.Lms.Application.Services.InteractionService;
 using Fsel.Course.Lms.Application.Services.NotificationServices;
 using Fsel.Course.Lms.Application.Services.OrderServices;
@@ -101,10 +104,16 @@ builder.Services.AddScoped<IMockTestScoreRepository, MockTestScoreRepository>();
 builder.Services.AddScoped<IClassForumResultRandomRepository, ClassForumResultRandomRepository>();
 builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRepository>();
 builder.Services.AddScoped<IMockTestAISettingRepository, MockTestAISettingRepository>();
+builder.Services.AddScoped<IClassForumDetailResultRepository, ClassForumDetailResultRepository>();
+builder.Services.AddScoped<IProsodyScoreRepository, ProsodyScoreRepository>();
+builder.Services.AddScoped<ISpeakingAIService, SpeakingAIService>();
+builder.Services.AddScoped<ISpeakingEvaluationAIService, SpeakingEvaluationAIService>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
+builder.Services.AddScoped<SetTimeRetryMockTestPublisher>();
+builder.Services.AddScoped<SetTimeRetryClassForumPublisher>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
@@ -124,6 +133,7 @@ builder.Services.AddScoped<LinQAnswerHelper>();
 
 // Publisher
 builder.Services.AddScoped<FinishOneFinalTestPublisher>();
+builder.Services.AddScoped<SetTimeClassForumDonePublisher>();
 builder.Services.AddScoped<FinishOneHomeWorkPublisher>();
 builder.Services.AddScoped<FinishOneLessonPublisher>();
 builder.Services.AddScoped<FinishOneLevelPassPublisher>();
@@ -138,6 +148,9 @@ builder.Services.AddScoped<SubmitClassForumGradingPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
 builder.Services.AddScoped<SubmitMockTestCriteriaPublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
+builder.Services.AddScoped<DisconnectSocketCalculateTimePublisher>();
+builder.Services.AddScoped<SubmitAiSpeakingAnswerPublisher>();
+builder.Services.AddScoped<GetTimeModulePublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -165,7 +178,12 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.DeleteClassForumByFlag, typeof(DeleteClassForumByFlagConsumer) },
     { QueueSettings.LmsQueue.NameQueue.ClassForumAIResponse, typeof(RealTimeAIResponseConsumer) },
     { QueueSettings.LmsQueue.NameQueue.MockTestAnwserResponse, typeof(AiFeedBackResponseConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.UpdateClassForumResultToExpiredTime, typeof(UpdateClassForumResultToExpiredTimeConsumer) },
     { QueueSettings.LmsQueue.NameQueue.WeeklyReport, typeof(WeeklyReportConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.SetTimeModule, typeof(SetTimeModuleConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.RetryMockTestAction, typeof(RetryMockTestWhenScoreZeroConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.RetryClassForumAction, typeof(RetryClassForumConsumer) },
 });
 
 var app = builder.Build();

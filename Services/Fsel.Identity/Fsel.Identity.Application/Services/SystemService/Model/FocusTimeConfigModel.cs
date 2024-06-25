@@ -7,7 +7,6 @@ namespace Fsel.Identity.Application.Services.SystemService.Model
     public class FocusTimeConfigModel : BaseModel
     {
         public double TargetTime { get; set; }
-
         public string? Description { get; set; }
     }
 }

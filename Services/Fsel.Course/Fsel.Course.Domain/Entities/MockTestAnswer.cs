@@ -4,8 +4,11 @@ namespace Fsel.Course.Domain.Entities
 {
     using System;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Shared.Helpers;
+    using StringHelper = Shared.Helpers.StringHelper;
 
     public class MockTestAnswer : BaseAnswer
     {
@@ -22,7 +25,6 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         private string? _answerStr;
 
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public override string? AnswerStr
         {
             get { return _answerStr; }
@@ -38,6 +40,13 @@ namespace Fsel.Course.Domain.Entities
                     }
                 }
             }
+        }
+
+        [NotMapped]
+        public override object? Answer
+        {
+            get { return ConvertHelper.Deserialize<object>(AnswerStr); }
+            set { AnswerStr = value != null ? ConvertHelper.Serialize(value) : null; }
         }
 
         private int? _timeCount;
@@ -65,5 +74,11 @@ namespace Fsel.Course.Domain.Entities
         public Guid? SectionGroupResultId { get; set; }
 
         public string? GradingAlFeedback { get; set; }
+
+        public string? SpeechTextAnswer { get; set; }
+
+        public double? PronunciationScore { get; set; }
+
+        public int RetryTime { get; set; }
     }
 }
