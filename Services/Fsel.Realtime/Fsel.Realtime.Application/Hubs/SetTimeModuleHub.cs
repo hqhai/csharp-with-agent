@@ -31,7 +31,11 @@ namespace Fsel.Realtime.Application.Hubs
 
         public override async Task OnConnectedHubAsync()
         {
-            await Groups.AddGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
+            string type = (Context.GetHttpContext()?.Request.Query["Type"].ToString()!);
+            string objectId = Context.GetHttpContext()?.Request.Query["ObjectId"].ToString()!;
+            await Groups.AddGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString())
+                ;
+            _logger.LogInformation($"Connected Socket SetTimeModule  Type : {type}, ObjectId : {objectId}, DateTime: {DateTime.UtcNow}");
         }
 
         public override async Task OnDisconnectedHubAsync(Exception? exception = default)
