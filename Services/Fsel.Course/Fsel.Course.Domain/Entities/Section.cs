@@ -45,7 +45,5 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<MockTestAnswer> MockTestAnswers { get; set; } = new List<MockTestAnswer>();
 
         public ICollection<MockTestAISetting>? MockTestAISettings { get; set; }
-
-
     }
 }

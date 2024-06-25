@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.InteractionService;
@@ -94,6 +95,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             classForumResult = await _classForumResultRepository.Queryable
+                .Include(x => x.ClassForumDetailResults)
+                .ThenInclude(x => x.ClassForumResultFiles)
                 .Include(x => x.LessonResult)
                 .ThenInclude(x => x!.Lesson)
                 .ThenInclude(x => x!.UnitLessons)
@@ -123,6 +126,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 WordContent = classForumResult.WordContent,
                 WordCount = classForumResult.WordCount,
                 TimeCount = classForumResult.TimeCount,
+                CorrectCount = classForumResult.CorrectCount,
+                CorrectTotal = classForumResult.CorrectTotal,
+                SkillScores = classForumResult.SkillScores,
                 Status = classForumResult.Status,
                 ClassForumId = classForumResult.ClassForumId,
                 ClassForum = _mapper.Map<ClassForumModel>(classForumResult.ClassForum),
@@ -142,11 +148,19 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     Criteria = x.Criteria,
                     Score = x.Score
                 }).ToList(),
-                PostArea = "L" + lesson?.DisplayOrder + "_" + "U" + unit?.Number + "_" + course?.Code
+                PostArea = "L" + lesson?.DisplayOrder + "_" + "U" + unit?.Number + "_" + course?.Code,
+                ClassForumDetailResults = classForumResult.ClassForumDetailResults.Select(x =>
+                {
+                    x.Score = GetTargetCount(x, classForumResult);
+                    return _mapper.Map<ClassForumDetailResultModel>(x);
+                }).ToList(),
             };
             var studentResult = await _userService.GetStudentByUserIdAsync(classForumResultModel.CreatedUserId);
-            var student = studentResult.Content?.Result;
-            classForumResultModel.CourseLevel = student!.CourseLevel;
+            var student = studentResult?.Content?.Result;
+            if (student?.CourseLevel != null)
+            {
+                classForumResultModel.CourseLevel = student.CourseLevel;
+            }
 
             List<Guid> classForumResultIds = new List<Guid>() { classForumResultModel.Id };
             var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumResultIds, UserId = _authContext.CurrentUserId });
@@ -163,6 +177,21 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             methodResult.Result = classForumResultModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private static int GetTargetCount(ClassForumDetailResult classForumDetailResult, ClassForumResult classForumResult)
+        {
+            int targetScore = default;
+            var classForum = classForumResult.ClassForum;
+            if (classForum?.CourseSkill == EnumCourseSkill.Writing && classForum?.TaggetWordLimit <= classForumDetailResult.WordCount)
+            {
+                ++targetScore;
+            }
+            if (classForum?.CourseSkill == EnumCourseSkill.Speaking && classForum?.TaggetTimeLimit <= classForumDetailResult.TimeCount)
+            {
+                ++targetScore;
+            }
+            return targetScore;
         }
     }
 }

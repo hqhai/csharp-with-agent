@@ -33,7 +33,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             var classForumResult = await _classForumResultRepository.Queryable.Where(x => request.Ids!.Contains(x.Id)).ToListAsync(cancellationToken);
 
             await _classForumResultRepository.DeleteListAsync(classForumResult);
-            await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

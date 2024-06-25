@@ -43,6 +43,8 @@ namespace Fsel.Course.Infrastructure.Configs
                   .HasConversion(
                       v => v.ToString(),
                       v => v.EnumParse<EnumAnswerStatus>());
+
+            builder.Property(e => e.AnswerStr).IsRequired(false);
         }
     }
 }
