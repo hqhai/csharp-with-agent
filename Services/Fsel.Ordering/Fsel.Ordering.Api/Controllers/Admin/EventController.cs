@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Api.Controllers
+namespace Fsel.Ordering.Api.Controllers.Admin
 {
     using System.Net;
     using Asp.Versioning;
@@ -10,6 +10,7 @@ namespace Fsel.Ordering.Api.Controllers
     using Fsel.Ordering.Application.Queries.Events;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +18,7 @@ namespace Fsel.Ordering.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/event")]
     [ApiController]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class EventController : ControllerBase
     {
         private readonly IMediator _mediator;
