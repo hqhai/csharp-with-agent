@@ -65,7 +65,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
             _logger.LogWarning("Call WeeklyReportCommand - body: " + Fsel.Common.Helpers.ConvertHelper.Serialize(request));
 
-            //return methodResult;
+            return methodResult;
 
             var students = new List<StudentModel>();
 
