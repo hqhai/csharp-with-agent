@@ -24,35 +24,34 @@ namespace Fsel.Sender.Api.Controllers
             _mediator = mediator;
         }
 
-        ///// <summary>
-        ///// SendMail
-        ///// </summary>
-        //[HttpPost]
-        //[ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        //[ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        //public async Task<IActionResult> SendEmail([FromBody] SendEmailCommand command)
-        //{
-        //    MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-        //    return commandResult.GetActionResult();
-        //}
+        /// <summary>
+        /// SendMail
+        /// </summary>
+        [HttpPost]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendEmail([FromBody] SendEmailCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
 
-        ///// <summary>
-        ///// SendMail
-        ///// </summary>
-        //[HttpPost("send-by-template")]
-        //[ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        //[ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        //public async Task<IActionResult> SendEmail([FromBody] SendEmailByTemplateCommand command)
-        //{
-        //    MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-        //    return commandResult.GetActionResult();
-        //}
+        /// <summary>
+        /// SendMail
+        /// </summary>
+        [HttpPost("send-by-template")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendEmail([FromBody] SendEmailByTemplateCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
 
         /// <summary>
         /// send mail using smtp
         /// </summary>
-        [HttpPost]
-        //[HttpPost("send-mail-using-smtp")]
+        [HttpPost("send-mail-using-smtp")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SendEmailUsingSMTP([FromBody] SendMailUsingSMTPCommand command)
@@ -64,8 +63,7 @@ namespace Fsel.Sender.Api.Controllers
         /// <summary>
         /// send mail by template using smtp
         /// </summary>
-        [HttpPost("send-by-template")]
-        //[HttpPost("send-mail-by-template-using-smtp")]
+        [HttpPost("send-mail-by-template-using-smtp")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SendEmailByTemplateUsingSMTP([FromBody] SendMailByTemplateUsingSMTPCommand command)
