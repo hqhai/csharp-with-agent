@@ -11,7 +11,7 @@ namespace Fsel.Hangfire.Host.Jobs
     {
         public static void Setup()
         {
-            JobExtensions.SetEnqueueJob<TestWorker>();
+            //JobExtensions.SetEnqueueJob<TestWorker>();
             //JobExtensions.SetRecurringJob<AssignmentScheduleWorker>(WorkerSettings.JobName.AssignmentScheduleJob, Cron.MinuteInterval(15));
             JobExtensions.SetRecurringJob<EndTrialRegistrationWorker>(WorkerSettings.JobName.EndTrialRegistrationJob, Cron.Daily());
             JobExtensions.SetRecurringJob<UpdateTeacherGradingInClassForumAndMockTestWorker>(WorkerSettings.JobName.UpdateOcCheckInClassForumResultJob, Cron.MinuteInterval(15));
