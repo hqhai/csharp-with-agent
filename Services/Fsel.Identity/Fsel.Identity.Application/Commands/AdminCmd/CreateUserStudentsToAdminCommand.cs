@@ -33,11 +33,11 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<UserModel>>();
-            if (_environment.IsProduction())
-            {
-                methodResult.AddError(StatusCodes.Status401Unauthorized, "Not Have Access Production");
-                return methodResult;
-            }
+            //if (_environment.IsProduction())
+            //{
+            //    methodResult.AddError(StatusCodes.Status401Unauthorized, "Not Have Access Production");
+            //    return methodResult;
+            //}
 
             if (request.Emails == null || !request.Emails.Any())
             {
