@@ -46,6 +46,7 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@event));
                 return methodResult;
             }
+
             var eventModel = _mapper.Map<EventModel>(@event);
             var packages = await _packageRepository.Queryable.ToListAsync(cancellationToken);
 

@@ -30,6 +30,11 @@ namespace Fsel.Ordering.Application.Commands.Events
             var methodResult = new MethodResult<bool>();
 
             var currentDate = DateTime.UtcNow;
+            var eventActive = await _eventRepository.Queryable.FirstOrDefaultAsync(p => p.Status == EnumEventPackageStatus.Active, cancellationToken);
+            if (eventActive == null)
+            {
+                return methodResult;
+            }
             var @event = await _eventRepository.Queryable.Where(p => p.StartDate.HasValue && p.EndDate.HasValue && p.StartDate.Value.Date <= currentDate.Date && p.EndDate.Value.Date <= currentDate.Date).FirstOrDefaultAsync(cancellationToken);
             if (@event == null)
             {
@@ -39,10 +44,16 @@ namespace Fsel.Ordering.Application.Commands.Events
             {
                 return methodResult;
             }
+            if (eventActive.Id == @event.Id)
+            {
+                return methodResult;
+            }
             await _eventRepository.ExecuteTransactionAsync(async () =>
             {
                 @event.Status = EnumEventPackageStatus.Active;
+                eventActive.Status = EnumEventPackageStatus.Inactive;
                 @event = _eventRepository.Update(@event);
+                eventActive = _eventRepository.Update(eventActive);
                 await _eventRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;

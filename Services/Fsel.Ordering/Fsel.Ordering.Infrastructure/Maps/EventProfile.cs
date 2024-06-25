@@ -12,9 +12,9 @@ namespace Fsel.Ordering.Infrastructure.Maps
     {
         public EventProfile()
         {
-            CreateMap<Event, EventModel>().IgnoreAllNonExisting();
             CreateMap<EventTranslation, Event>().IgnoreEntity()?.ReverseMap();
-            CreateMap<EventTranslation, EventTranslationModel>().IgnoreAllNonExisting()?.ReverseMap();
+            CreateMap<Event, EventModel>().IgnoreAllNonExisting()?.MapTranslations<Event, EventModel, EventTranslation>();
+
             CreateMap<SaveEventCommandModel, Event>().IgnoreAllNonExisting();
             CreateMap<SavePackageEventCommandModel, PackageEvent>().IgnoreAllNonExisting();
             CreateMap<SaveEventTranslationCommandModel, EventTranslation>().IgnoreAllNonExisting();

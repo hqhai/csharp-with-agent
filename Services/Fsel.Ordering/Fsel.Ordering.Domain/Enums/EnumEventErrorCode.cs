@@ -22,6 +22,9 @@ namespace Fsel.Ordering.Domain.Enums
         PackageIdIsWrong,
 
         [Description("Sự kiện đang hoạt động")]
-        TheEventIsActive
+        TheEventIsActive,
+
+        [Description("Code đã tồn tại")]
+        CodeIsAlreadyExist,
     }
 }

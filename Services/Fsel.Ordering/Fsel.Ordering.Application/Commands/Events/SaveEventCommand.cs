@@ -13,6 +13,7 @@ namespace Fsel.Ordering.Application.Commands.Events
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Events;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -38,7 +39,7 @@ namespace Fsel.Ordering.Application.Commands.Events
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<EventModel>();
-            if (request.Id.HasValue)
+            if (!request.Id.HasValue)
             {
                 await Create(request, methodResult, cancellationToken);
             }
@@ -57,6 +58,11 @@ namespace Fsel.Ordering.Application.Commands.Events
             if (request.PackageEvents == null || request.PackageEvents.Count != 3 || request.Translations == null || request.Translations.Count != 3)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.MissingVersionOfPackageEventOrTranslation), EnumEventErrorCode.MissingVersionOfPackageEventOrTranslation.GetDescription());
+                return;
+            }
+            if (await _eventRepository.Queryable.AnyAsync(p => p.Code.ToLower() == request.Code.ToLower(), cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.CodeIsAlreadyExist), EnumEventErrorCode.CodeIsAlreadyExist.GetDescription());
                 return;
             }
             var packageIds = request.PackageEvents.Select(x => x.PackageId).Distinct().ToList();
@@ -86,6 +92,7 @@ namespace Fsel.Ordering.Application.Commands.Events
             await _eventRepository.ExecuteTransactionAsync(async () =>
             {
                 var @event = _mapper.Map<Event>(request);
+                @event.Status = EnumEventPackageStatus.Inactive;
                 if (!@event.IsValid())
                 {
                     methodResult.AddError(@event.ErrorMessages);
@@ -110,6 +117,11 @@ namespace Fsel.Ordering.Application.Commands.Events
             if (request.PackageEvents == null || request.PackageEvents.Count != 3 || request.Translations == null || request.Translations.Count != 3)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return;
+            }
+            if (await _eventRepository.Queryable.AnyAsync(p => p.Code.ToLower() == request.Code.ToLower() && p.Id != request.Id, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.CodeIsAlreadyExist), EnumEventErrorCode.CodeIsAlreadyExist.GetDescription());
                 return;
             }
             var packageIds = request.PackageEvents.Select(x => x.PackageId).Distinct().ToList();
@@ -145,33 +157,29 @@ namespace Fsel.Ordering.Application.Commands.Events
                 return;
             }
 
-            foreach (var item in @event.Translations)
-            {
-                var translation = request.Translations.FirstOrDefault(x => x.Id == item.Id);
-                if (translation == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                    return;
-                }
-            }
-            foreach (var item in @event.PackageEvents)
-            {
-                var packageEvent = request.PackageEvents.FirstOrDefault(x => x.Id == item.Id);
-                if (packageEvent == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                    return;
-                }
-            }
-
             await _eventRepository.ExecuteTransactionAsync(async () =>
             {
-                _mapper.Map(request, @event);
-                if (!@event.IsValid())
+                foreach (var item in @event.Translations)
                 {
-                    methodResult.AddError(@event.ErrorMessages);
-                    return methodResult;
+                    var translation = request.Translations.FirstOrDefault(x => x.Id == item.Id);
+                    if (translation == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                        return methodResult;
+                    }
+                    UpdateTranslation(translation, item);
                 }
+                foreach (var item in @event.PackageEvents)
+                {
+                    var packageEvent = request.PackageEvents.FirstOrDefault(x => x.Id == item.Id);
+                    if (packageEvent == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                        return methodResult;
+                    }
+                    UpdatePackageEvent(packageEvent, item);
+                }
+                UpdateEvent(request, @event);
                 @event = _eventRepository.Update(@event);
                 await _eventRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -180,6 +188,31 @@ namespace Fsel.Ordering.Application.Commands.Events
             });
 
             return;
+        }
+
+        private static void UpdateEvent(SaveEventCommandModel request, Event @event)
+        {
+            @event.Code = request.Code;
+            @event.Name = request.Name;
+            @event.StartDate = request.StartDate;
+            @event.EndDate = request.EndDate;
+            @event.Description = request.Description;
+            @event.ImagePaths = request.ImagePaths;
+        }
+
+        private static void UpdateTranslation(SaveEventTranslationCommandModel request, EventTranslation eventTranslation)
+        {
+            eventTranslation.Language = request.Language;
+            eventTranslation.Description = request.Description;
+        }
+
+        private static void UpdatePackageEvent(SavePackageEventCommandModel request, PackageEvent packageEvent)
+        {
+            packageEvent.Price = request.Price;
+            packageEvent.PriceMonth = request.PriceMonth;
+            packageEvent.DayBonus = request.DayBonus;
+            packageEvent.MonthBonus = request.MonthBonus;
+            packageEvent.Suggest = request.Suggest;
         }
     }
 }
