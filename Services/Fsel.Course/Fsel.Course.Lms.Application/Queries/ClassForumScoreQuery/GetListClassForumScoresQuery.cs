@@ -11,14 +11,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -60,13 +56,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
                 return methodResult;
             }
 
-            var classForumResult = await _classForumResultRepository.Queryable.Where(x => x.Id == request.ClassForumResultId).FirstOrDefaultAsync(cancellationToken);
-            if (classForumResult?.IsViewed == false)
+            var classForumResult = await _classForumResultRepository.GetByIdAsync(request.ClassForumResultId);
+            if (classForumResult != null && classForumResult.IsViewed == false)
             {
-                classForumResult!.IsViewed = true;
-
+                classForumResult.IsViewed = true;
                 _classForumResultRepository.Update(classForumResult);
-                await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             var classForumScores = await _classForumScoreRepository.Queryable
