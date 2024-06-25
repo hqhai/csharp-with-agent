@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
@@ -12,12 +13,13 @@ namespace Fsel.Identity.Api.Controllers
     using Fsel.Identity.Application.Queries.StudentQuery;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/student")]
     [ApiController]
     public class StudentController : BaseController
@@ -156,19 +158,36 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Get list student by student ids
         /// </summary>
-        [HttpPost("import-student-to-course")]
+        [HttpPost("import-students-into-platform")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ImportStudent([FromForm] ImportStudentToCourseCommand command)
+        [Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> ImportStudentsIntoPlatform([FromForm] ImportStudentsIntoPlatformCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
 
-            MethodResult<Stream> commandResult = await _mediator.Send(new ImportStudentToCourseCommand { FormFile = command.FormFile }).ConfigureAwait(false);
+            MethodResult<Stream> commandResult = await _mediator.Send(new ImportStudentsIntoPlatformCommand { FormFile = command.FormFile }).ConfigureAwait(false);
             if (!commandResult.IsOK || commandResult.Result == null)
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result, Settings.Excels.ContentType, "import-student-to-course.xlsx");
+            return File(commandResult.Result, Settings.Excels.ContentType, "import-student-into-platform.xlsx");
+        }
+
+        /// <summary>
+        /// Get list student by student ids
+        /// </summary>
+        [HttpPost("export-template-students-into-platform")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportTemplateStudentsIntoPlatform()
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(new ExportTemplateCreateAccountStudentCommand { }).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Template_Create_Account_Student.xlsx");
         }
 
         /// <summary>
@@ -192,6 +211,42 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> UpdateBeginnerGuide([FromBody] UpdateStudentBeginnerGuideCommand query)
         {
             MethodResult<StudentModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get student by email
+        /// </summary>
+        [HttpGet("get-student-by-email")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentByEmail([FromQuery] string email)
+        {
+            MethodResult<StudentModel> commandResult = await _mediator.Send(new GetStudentByEmailQuery { Email = email }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get student by email
+        /// </summary>
+        [HttpPost("get-student-by-emails")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentByEmails([FromBody] IList<string> emails)
+        {
+            MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(new GetStudentByEmailsQuery { Emails = emails }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get student by FullNames
+        /// </summary>
+        [HttpPost("get-student-by-full-names")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentByFullNames([FromBody] IList<string> fullNames)
+        {
+            MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(new GetStudentByFullNamesQuery { FullNames = fullNames }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

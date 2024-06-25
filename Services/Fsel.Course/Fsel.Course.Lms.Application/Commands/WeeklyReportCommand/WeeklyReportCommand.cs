@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
     using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
+    using Amazon.Runtime.Internal.Util;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
     using Fsel.Common.Models;
@@ -23,6 +24,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
     using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class WeeklyReportCommand : IRequest<MethodResult<bool>>
     {
@@ -41,8 +43,9 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IMediator _mediator;
         private readonly AppSetting _appSetting;
+        private readonly ILogger<WeeklyReportCommandHandler> _logger;
 
-        public WeeklyReportCommandHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting)
+        public WeeklyReportCommandHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting, ILogger<WeeklyReportCommandHandler> logger)
         {
             _userService = userService;
             _finalTestResultRepository = finalTestResultRepository;
@@ -52,12 +55,17 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             _unitResultRepository = unitResultRepository;
             _mediator = mediator;
             _appSetting = appSetting;
+            _logger = logger;
         }
 
         public async Task<MethodResult<bool>> Handle(WeeklyReportCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
+
+            _logger.LogWarning("Call WeeklyReportCommand - body: " + Fsel.Common.Helpers.ConvertHelper.Serialize(request));
+
+            return methodResult;
 
             var students = new List<StudentModel>();
 
@@ -243,7 +251,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                                 //    unitName += html;
                                 //}
                                 var (color, skillName, icon) = SendMailHelper.ConvertEnum(ls.Skill);
-                                var html = string.Format(CultureInfo.InvariantCulture, skillScoresHtml, icon, skillName, ls.Percent, ls.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - ls.Percent, ls.Percent + "%");
+                                var html = string.Format(CultureInfo.InvariantCulture, skillScoresHtml, icon, skillName, ls.Percent, ls.Percent < 100 ? SendMailSetting.NoBorderRight : SendMailSetting.Border, color, 100 - ls.Percent, ls.Percent > 0 ? SendMailSetting.NoBorderLeft : SendMailSetting.Border, ls.Percent + "%");
                                 unitName += html;
                             }
                             index++;
@@ -432,6 +440,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 Params = model,
                 Template = model.SenderTemplate,
                 CcEmail = parentEmail,
+                IsCCEmail = true
             }, cancellationToken).ConfigureAwait(false);
         }
 

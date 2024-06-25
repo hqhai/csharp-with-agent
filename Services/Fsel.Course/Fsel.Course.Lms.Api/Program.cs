@@ -50,6 +50,7 @@ builder.Services.AddScoped<IExtraPracticeResultRepository, ExtraPracticeResultRe
 builder.Services.AddScoped<IExtraPracticeAnswerRepository, ExtraPracticeAnswerRepository>();
 builder.Services.AddScoped<IExtraPracticeChapterRepository, ExtraPracticeChapterRepository>();
 builder.Services.AddScoped<BaseInternalUnitResultEventHandler>();
+builder.Services.AddScoped<MockTestResultInputThenUpdateUnitResultHandler>();
 
 builder.Services.AddScoped<IClassForumRepository, ClassForumRepository>();
 builder.Services.AddScoped<IHomeWorkRepository, HomeWorkRepository>();
@@ -135,6 +136,7 @@ builder.Services.AddScoped<GetTimeToCompleteTestPublisher>();
 builder.Services.AddScoped<SubmitAIResponsePublisher>();
 builder.Services.AddScoped<SubmitClassForumGradingPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
+builder.Services.AddScoped<SubmitMockTestCriteriaPublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 
 // Refit

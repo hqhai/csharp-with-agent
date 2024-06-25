@@ -2,9 +2,10 @@
 
 namespace Fsel.Ordering.Domain.Models.EntityModels
 {
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class OrderModel
+    public class OrderModel : BaseModel
     {
         public Guid Id { get; set; }
         public string? Code { get; set; }
@@ -19,10 +20,12 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public double DiscountPercent { get; set; }
         public double DiscountPrice { get; set; }
         public double TotalPrice { get; set; }
+        public bool IsTrial { get; set; }
         public Guid CourseId { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
         public PackageModel? Package { get; set; }
         public Guid UserId { get; set; }
+        public DateTime? ExpireDate { get; set; }
     }
 }

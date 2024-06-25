@@ -23,6 +23,9 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public string? I18NSpreadSheetId { get; set; }
         public string? I18NSheetVN { get; set; }
         public string? I18NSheetEN { get; set; }
+        public string? I18NSheetFR { get; set; }
+        public string? CCEmailSpreadSheetId { get; set; }
+        public string? CCEmailSheet { get; set; }
     }
 
     public class Services : BaseServices

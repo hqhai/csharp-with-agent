@@ -10,6 +10,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
 
     public class AnswerTypeConverter
     {
@@ -357,14 +358,23 @@ namespace Fsel.Course.Infrastructure.Common
             }
             foreach (var item in dataAnswer.Answers)
             {
-                if (dataQuestion.Link.Any(x => x.FromId == item.FromId && (item.ToId.HasValue && x.ToId == item.ToId)))
+                var link = dataQuestion.Link.FirstOrDefault(x => x.FromId == item.FromId);
+                if (link == null)
                 {
-                    number++;
-                    item.IsExact = true;
+                    item.IsExact = false;
                 }
                 else
                 {
-                    item.IsExact = false;
+                    var textQuestion = dataQuestion.To?.FirstOrDefault(x => x.Id == link.ToId)?.Content.ReplaceWord();
+                    var textAnswer = dataQuestion.To?.FirstOrDefault(x => x.Id == item.ToId)?.Content.ReplaceWord();
+                    var isExact = dataQuestion.Link.Any(x => x.FromId == item.FromId && (item.ToId.HasValue && x.ToId == item.ToId))
+                        || textAnswer == textQuestion;
+
+                    if (isExact)
+                    {
+                        number++;
+                    }
+                    item.IsExact = isExact;
                 }
                 if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                 {
@@ -660,23 +670,24 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.MatchingType2:
                     return new MatchingTypeAnswer();
 
-                case EnumQuestionType.ShortAnswerWordBase:
-                    return new ShortAnswerWordBaseAnswer();
-
-                case EnumQuestionType.ShortAnswerWordCount:
-                    return new ShortAnswerWordCountBaseAnswer();
-
                 case EnumQuestionType.GapFillScoreByQuestion:
                 case EnumQuestionType.GapFillWordBankScoreByQuestion:
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
                     return new GapFillAnswer();
 
-                case EnumQuestionType.DragAndDropSentenceOrder:
-                    return new DragAndDropSentenceOrderAnswer();
-
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
                     return new MultipleOptionSentenceCompletionAnswer();
+
+                case EnumQuestionType.ShortAnswerWordCount:
+                    return new ShortAnswerWordCountBaseAnswer();
+
+                case EnumQuestionType.ShortAnswerWordBase:
+                    return new ShortAnswerWordBaseAnswer();
+
+                case EnumQuestionType.DragAndDropSentenceOrder:
+                case EnumQuestionType.DragAndDropListSentenceOrder:
+                    return new DragAndDropSentenceOrderAnswer();
 
                 case EnumQuestionType.ExercisePreparation:
                     return default;

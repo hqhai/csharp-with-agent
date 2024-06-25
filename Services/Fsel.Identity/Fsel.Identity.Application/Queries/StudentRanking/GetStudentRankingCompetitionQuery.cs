@@ -32,6 +32,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
         private readonly IStudentRepository _studentRepository;
         private const double Process_Ratio = 0.75;
         private const double Overall_Ratio = 0.25;
+        private DateTime _expiredCompetition = new DateTime(2024, 6, 14, 16, 59, 0); // thời điểm khóa leaderboard
 
         public GetStudentRankingCompetitionQueryHandler(ILmsCourseService lmsCourseService, IHostEnvironment environment, IStudentRepository studentRepository)
         {
@@ -45,7 +46,22 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<StudentRankingModel>> methodResult = new MethodResult<PagingItemsModel<StudentRankingModel>>();
 
-            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.IeltsStudentsName);
+
+
+            if (DateTime.UtcNow > _expiredCompetition)
+            {
+                string fileResult = request.CourseType == EnumCourseType.Academic ? ResourceSettings.AcademicStudentsResult : ResourceSettings.IeltsStudentResult;
+                string pathResult = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileResult);
+                var finalResult = ConvertHelper.DeserializeFromFilePath<List<StudentRankingModel>>(pathResult);
+
+                int totalResult = finalResult.Count();
+                var listsResult = finalResult.ApplyPaging(request).ToList();
+                methodResult.Result = new PagingItemsModel<StudentRankingModel>(listsResult, request, totalResult);
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+
+            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsName);
             if (_environment.IsProduction() && request.CourseType == EnumCourseType.Academic)
             {
                 path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsName);
@@ -101,7 +117,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                              CompetitionEndDate = new DateTime(2024, 6, 15),
                              FullName = studentFile.FullName,
                              AvatarPath = studentInfo?.Human?.AvatarPath ?? string.Empty, // Thêm kiểm tra null và mặc định giá trị nếu null
-                             UserId = studentFile.UserId
+                             UserId = studentFile.UserId,
+                             RankingScore = Process_Ratio * studentResult?.ContentCompleted + Overall_Ratio * studentResult?.TotalScore
                          };
 
             result = result.OrderByDescending(x => (Process_Ratio * x.Process + Overall_Ratio * x.OverallScore));
