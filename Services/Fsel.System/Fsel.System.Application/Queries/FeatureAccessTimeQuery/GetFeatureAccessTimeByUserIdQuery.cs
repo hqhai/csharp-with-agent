@@ -33,7 +33,12 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             var querys = await _featureAccessTimeRepository.Queryable
                 .Where(x => request.UserIds.Contains(x.CreatedUserId))
                 .GroupBy(x => x.CreatedUserId)
-                .Select(group => group.OrderByDescending(x => x.CreatedUserId).First())
+                                                           .Select(x => new GetFeatureAccessTimeIntegrationModel
+                                                           {
+                                                               CreatedUserId = x.Key,
+                                                               LastVisited = x.OrderByDescending(x => x.LastVisited).FirstOrDefault() != null ? x.OrderByDescending(x => x.LastVisited).FirstOrDefault()!.LastVisited : null,
+                                                               AccessTime = x.Sum(x => x.AccessTime)
+                                                           })
                 .ToListAsync(cancellationToken);
 
             if (querys == null)
@@ -45,5 +50,14 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             methodResult.Result = _mapper.Map(querys, methodResult.Result);
             return methodResult;
         }
+    }
+
+    public class GetFeatureAccessTimeIntegrationModel
+    {
+        public Guid? CreatedUserId { get; set; }
+
+        public DateTime? LastVisited { get; set; }
+
+        public long? AccessTime { get; set; }
     }
 }

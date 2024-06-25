@@ -47,17 +47,5 @@ namespace Fsel.Course.Lms.Api.Controllers.Integration
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
-        /// <summary>
-        /// Integration Lesson
-        /// </summary>
-        [HttpGet("integration-lesson-results")]
-        [ProducesResponseType(typeof(MethodResult<IList<LessonIntegration>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetIntegrationLessonResults([FromQuery] IntegrationLessonResultsQuery query)
-        {
-            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
     }
 }
