@@ -99,6 +99,9 @@ namespace Fsel.Ordering.Domain.Entities
         public Package? Package { get; set; }
 
         public Guid? PackageId { get; set; }
+        public Event? Event { get; set; }
+
+        public Guid? EventId { get; set; }
 
         public Guid UserId { get; set; }
 

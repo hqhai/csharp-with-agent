@@ -26,5 +26,8 @@ namespace Fsel.Ordering.Domain.Enums
 
         [Description("Code đã tồn tại")]
         CodeIsAlreadyExist,
+
+        [Description("Sự kiện đã hết hạn")]
+        EventHasExpired
     }
 }

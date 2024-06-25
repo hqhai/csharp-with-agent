@@ -87,6 +87,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             order.CompanyAddress = request.CompanyAddress;
             order.CompanyTaxCode = request.CompanyTaxCode;
             order.ReferralCode = request.ReferralCode;
+            order.EventId = request.EventId;
         }
     }
 }

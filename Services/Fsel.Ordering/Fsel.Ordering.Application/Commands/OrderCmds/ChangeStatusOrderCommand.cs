@@ -17,6 +17,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
+    using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
@@ -47,6 +48,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly AddExpiredDateForStudentPublisher _addExpiredDateForStudentPublisher;
         private readonly ISystemService _systemService;
         private readonly IMediator _mediator;
+        private readonly IPackageEventRepository _packageEventRepository;
 
         public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository
             , ITrainingService trainingService
@@ -60,7 +62,8 @@ ISenderServices senderServices,
 AppSetting appSetting,
 AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher,
 ISystemService systemService,
-IMediator mediator)
+IMediator mediator,
+IPackageEventRepository packageEventRepository)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
@@ -75,6 +78,7 @@ IMediator mediator)
             _addExpiredDateForStudentPublisher = addExpiredDateForStudentPublisher;
             _systemService = systemService;
             _mediator = mediator;
+            _packageEventRepository = packageEventRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeStatusOrderCommand request, CancellationToken cancellationToken)
@@ -138,13 +142,22 @@ IMediator mediator)
                 {
                     allowOpenNextUnit = true;
 
-                    order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber);
+                    var packageEvent = await _packageEventRepository.Queryable.FirstOrDefaultAsync(p => p.PackageId == package.Id && p.EventId == order.EventId, cancellationToken);
+
+                    if (packageEvent == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventNotExist), nameof(packageEvent));
+                        return methodResult;
+                    }
+
+                    order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber + packageEvent.MonthBonus);
+                    order.ExpireDate = order.ExpireDate.Value.AddDays(packageEvent.DayBonus);
 
                     await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
                     {
                         StudentId = student!.Id,
-                        Month = package.MonthNumber,
-                        Day = null
+                        Month = package.MonthNumber + packageEvent.MonthBonus,
+                        Day = packageEvent.DayBonus
                     }, cancellationToken);
 
                     if (order.IsInvoice)

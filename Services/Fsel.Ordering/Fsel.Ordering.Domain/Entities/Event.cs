@@ -60,6 +60,7 @@ namespace Fsel.Ordering.Domain.Entities
 
         public ICollection<PackageEvent> PackageEvents { get; set; } = new List<PackageEvent>();
         public ICollection<EventTranslation> Translations { get; set; } = new List<EventTranslation>();
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 
     public class EventTranslation : Entity, ITranslationObject

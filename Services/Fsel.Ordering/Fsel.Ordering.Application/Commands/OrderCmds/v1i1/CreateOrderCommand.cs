@@ -13,6 +13,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
+    using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1;
     using Fsel.Ordering.Domain.Models.EntityModels;
@@ -36,8 +37,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
         private readonly IPackageRepository _packageRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly IEventRepository _eventRepository;
 
-        public CreateOrderCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, NotificationMessagePublisher notificationMessagePublisher, IPackageRepository packageRepository, AuthContext authContext, IUserService userService)
+        public CreateOrderCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, NotificationMessagePublisher notificationMessagePublisher, IPackageRepository packageRepository, AuthContext authContext, IUserService userService, IEventRepository eventRepository)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
@@ -46,6 +48,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             _packageRepository = packageRepository;
             _authContext = authContext;
             _userService = userService;
+            _eventRepository = eventRepository;
         }
 
         public async Task<MethodResult<OrderModel>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -69,7 +72,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             if ((!string.IsNullOrEmpty(request.PhoneNumber) && !request.PhoneNumber.IsValidPhoneNumber()) || !request.Email.IsValidEmail())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
                 return methodResult;
             }
 
@@ -84,6 +87,23 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
                 return methodResult;
+            }
+
+            var @event = await _eventRepository.GetByIdAsync(request.EventId);
+            if (@event == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventNotExist), nameof(@event));
+                return methodResult;
+            }
+
+            if (!@event.IsDefault)
+            {
+                var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+                if (@event.StartDate?.Date > currentDate.Date || @event.EndDate?.Date < currentDate.Date)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventHasExpired), nameof(@event));
+                    return methodResult;
+                }
             }
 
             var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student?.Human?.Code }, cancellationToken).ConfigureAwait(false);
@@ -116,6 +136,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     CompanyName = request.CompanyName,
                     CompanyTaxCode = request.CompanyTaxCode,
                     ReferralCode = request.ReferralCode,
+                    EventId = request.EventId,
                 }, cancellationToken).ConfigureAwait(false);
 
                 if (!updateOrderResult.IsOK)

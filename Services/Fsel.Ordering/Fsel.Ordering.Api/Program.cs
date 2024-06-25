@@ -40,6 +40,7 @@ builder.Services.AddScoped<IUserVoucherRepository, UserVoucherRepository>();
 builder.Services.AddScoped<IOrderTransactionRepository, OrderTransactionRepository>();
 builder.Services.AddScoped<INotificationProcessor, NotificationProcessor>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
+builder.Services.AddScoped<IPackageEventRepository, PackageEventRepository>();
 builder.Services.AddScoped<VnPayLibrary>();
 
 // Publisher

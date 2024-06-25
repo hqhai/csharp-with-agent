@@ -7,20 +7,17 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Constants;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
-    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.InAppPurchase;
-    using Fsel.Ordering.Application.Services.InAppPurchase.Models;
     using Fsel.Ordering.Application.Services.SystemService;
     using Fsel.Ordering.Application.Services.SystemService.Models;
     using Fsel.Ordering.Application.Services.TrainingService;
-    using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
+    using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
@@ -53,8 +50,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
         private readonly IMediator _mediator;
+        private readonly IPackageEventRepository _packageEventRepository;
 
-        public GetInfoTransactionFromAppStoreCommandHandler(IOrderRepository orderRepository, IAppStoreService appStoreService, AppSetting appSetting, INotificationProcessor notificationProcessor, ILogger<GetInfoTransactionFromAppStoreCommand> logger, IHostEnvironment hostEnvironment, IPackageRepository packageRepository, ITrainingService trainingService, ILmsCourseService courseService, AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher, IUserService userService, ISystemService systemService, IMediator mediator)
+        public GetInfoTransactionFromAppStoreCommandHandler(IOrderRepository orderRepository, IAppStoreService appStoreService, AppSetting appSetting, INotificationProcessor notificationProcessor, ILogger<GetInfoTransactionFromAppStoreCommand> logger, IHostEnvironment hostEnvironment, IPackageRepository packageRepository, ITrainingService trainingService, ILmsCourseService courseService, AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher, IUserService userService, ISystemService systemService, IMediator mediator, IPackageEventRepository packageEventRepository)
         {
             _orderRepository = orderRepository;
             _appStoreService = appStoreService;
@@ -69,6 +67,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             _userService = userService;
             _systemService = systemService;
             _mediator = mediator;
+            _packageEventRepository = packageEventRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(GetInfoTransactionFromAppStoreCommand request, CancellationToken cancellationToken)
@@ -189,6 +188,14 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
+                var packageEvent = await _packageEventRepository.Queryable.FirstOrDefaultAsync(p => p.PackageId == package.Id && p.EventId == order.EventId, cancellationToken);
+
+                if (packageEvent == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventNotExist), nameof(packageEvent));
+                    return methodResult;
+                }
+
                 var updateNextUnitResult = await _courseService.UpdateNextUnit(order.UserId);
                 if (!updateNextUnitResult.IsSuccessStatusCode)
                 {
@@ -197,7 +204,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     return methodResult;
                 }
 
-                order.ExpireDate = DateTime.UtcNow.AddMonths(package!.MonthNumber);
+                order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber + packageEvent.MonthBonus);
+                order.ExpireDate = order.ExpireDate.Value.AddDays(packageEvent.DayBonus);
+
                 order.Status = EnumOrderStatus.Payment;
 
                 order.OrderTransactions.Add(new OrderTransaction()
@@ -206,7 +215,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     Type = EnumOrderTransactionType.AppStore,
                     Status = EnumOrderTransactionStatus.Success
                 });
-                order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber);
+
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
@@ -221,8 +230,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
                 {
                     StudentId = student!.Id,
-                    Month = package.MonthNumber,
-                    Day = null
+                    Month = package.MonthNumber + packageEvent.MonthBonus,
+                    Day = packageEvent.DayBonus
                 }, cancellationToken);
 
                 if (order.IsInvoice)
