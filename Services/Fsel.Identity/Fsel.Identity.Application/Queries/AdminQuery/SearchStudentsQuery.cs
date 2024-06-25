@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Queries.AdminQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Identity.Domain.IRepositories;
@@ -44,11 +45,17 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 FullName = x.Human.FullName,
                 Type = x.CourseLevel.GetEnumCourseType()
             });
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => m.Id.ToString() == request.Keyword
-                                    || (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim())
-                                    || (m.Email ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                if (request.Keyword.IsValidEmail())
+                {
+                    query = query.Where(m => (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
+                }
+                else
+                {
+                    query = query.Where(m => m.Id.ToString() == request.Keyword || (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
+                }
             }
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query

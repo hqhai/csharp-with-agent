@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
@@ -29,14 +30,17 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private readonly UserManager<User> _userManager;
         private readonly AuthContext _authContext;
         private readonly IStudentRepository _studentRepository;
+        private readonly ISystemService _systemService;
         private readonly IMapper _mapper;
 
         public UpdateCodeStudentCommandHandler(UserManager<User> userManager, AuthContext authContext, IStudentRepository studentRepository,
+            ISystemService systemService,
             IMapper mapper)
         {
             _userManager = userManager;
             _authContext = authContext;
             _studentRepository = studentRepository;
+            _systemService = systemService;
             _mapper = mapper;
         }
 
@@ -91,7 +95,19 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             user.Human.Student.ProvinceId = request.ProvinceId;
             user.Human.Student.DistrictId = request.DistrictId;
             user.Human.Student.SchoolId = request.SchoolId;
-            user.Human.Student.School = request.SchoolName;
+            if (request.SchoolId.HasValue)
+            {
+                var schoolResults = await _systemService.GetSchoolsAsync(new List<Guid> { request.SchoolId.Value });
+                if (schoolResults.IsSuccessStatusCode)
+                {
+                    user.Human.Student.School = schoolResults.Content?.Result?.FirstOrDefault()?.Name;
+                }
+            }
+            else
+            {
+                user.Human.Student.School = request.SchoolName;
+            }
+
             _mapper.Map(request, user.Human);
             await _userManager.UpdateAsync(user);
 
