@@ -283,7 +283,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
             else if (courseManager.CourseType == EnumCourseType.Ielts)
             {
                 var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTest).ThenInclude(x => x.CourseUnitMockTests.Where(x => x.CourseId == courseResult.CourseId))
-                                                        .Where(x => x.CourseId == courseResult.CourseId && x.StudentId == courseResult.StudentId && x.Status != EnumResultStatus.Unfinished)
+                                                        .Where(x => !x.UnitId.HasValue && x.CourseId == courseResult.CourseId && x.StudentId == courseResult.StudentId && x.Status != EnumResultStatus.Unfinished)
                                                         .OrderByDescending(x => x.CreatedDate)
                                                         .ThenByDescending(x => x.UpdatedDate)
                                                         .FirstOrDefaultAsync();
