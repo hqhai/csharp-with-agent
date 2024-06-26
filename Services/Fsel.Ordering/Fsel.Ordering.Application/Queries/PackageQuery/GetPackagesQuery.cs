@@ -58,20 +58,15 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
                     return methodResult;
                 }
-                packageModels.Add(new PackageModel()
-                {
-                    Id = package.Id,
-                    EventId = eventModel.Id,
-                    Code = package.Code,
-                    Name = package.Name,
-                    Price = item.Price,
-                    PriceMonth = item.PriceMonth,
-                    Month = package.MonthNumber,
-                    MonthBonus = item.MonthBonus,
-                    DayBonus = item.DayBonus,
-                    ImagePaths = eventModel.ImagePaths,
-                    EventDescription = eventModel.Description,
-                });
+                var packageModel = _mapper.Map<PackageModel>(package);
+                packageModel.EventId = eventModel.Id;
+                packageModel.Price = item.Price;
+                packageModel.PriceMonth = item.PriceMonth;
+                packageModel.MonthBonus = item.MonthBonus;
+                packageModel.DayBonus = item.DayBonus;
+                packageModel.ImagePaths = eventModel.ImagePaths;
+                packageModel.EventDescription = eventModel.Description;
+                packageModels.Add(packageModel);
             }
 
             methodResult.Result = packageModels;
