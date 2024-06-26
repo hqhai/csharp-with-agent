@@ -4,7 +4,6 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -48,6 +47,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 
             var query = _courseRepository.Queryable.Include(x => x.CourseUnitMockTests)
                                                    .Include(x => x.CourseResults)
+                                                   .Where(x => !x.ParentCourseId.HasValue)
                                                    .Where(x => x.CourseResults.Any() && x.CourseUnitMockTests.Any(x => !x.UnitId.HasValue && !x.MockTestId.HasValue && !x.FinalTestId.HasValue));
 
             if (!string.IsNullOrEmpty(request.Keyword))

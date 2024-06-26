@@ -130,8 +130,11 @@ builder.Services.AddScoped<SectionGroupManagerConverter>();
 // Helper
 builder.Services.AddScoped<LinQHelper>();
 builder.Services.AddScoped<LinQAnswerHelper>();
-
+builder.Services.AddScoped<ChangeCourseHelper>();
 // Publisher
+builder.Services.AddScoped<QuestBoardPublisher>();
+builder.Services.AddScoped<SaveUserCourseSettingPublisher>();
+builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<FinishOneFinalTestPublisher>();
 builder.Services.AddScoped<SetTimeClassForumDonePublisher>();
 builder.Services.AddScoped<FinishOneHomeWorkPublisher>();
@@ -141,7 +144,6 @@ builder.Services.AddScoped<FinishOneUnitPublisher>();
 builder.Services.AddScoped<FinishOneUnitTestPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<CreateOrderPublisher>();
-builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<GetTimeToCompleteTestPublisher>();
 builder.Services.AddScoped<SubmitAIResponsePublisher>();
 builder.Services.AddScoped<SubmitClassForumGradingPublisher>();

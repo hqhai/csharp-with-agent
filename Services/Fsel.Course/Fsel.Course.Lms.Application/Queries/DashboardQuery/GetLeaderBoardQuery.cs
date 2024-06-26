@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 {
     using System.Collections.Generic;
+    using System.Globalization;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
@@ -127,10 +128,10 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 {
                     NotificationSendingQueueModel model = new NotificationSendingQueueModel()
                     {
-                        ObjectId = studentId ?? default,
-                        UserIds = new List<Guid>() { studentId ?? default },
+                        ObjectId = (Guid)studentId,
+                        UserIds = new List<Guid>() { (Guid)studentId },
                         SenderId = _authContext.CurrentUserId,
-                        ParamsMessage = new List<object> { locationStudent.ToString() ?? string.Empty },
+                        ParamsMessage = new List<object> { locationStudent.ToString(CultureInfo.CurrentCulture) },
                         Type = EnumNotificationType.LinkPage,
                         Content = EnumNotificationContent.LeaderBoard
                     };

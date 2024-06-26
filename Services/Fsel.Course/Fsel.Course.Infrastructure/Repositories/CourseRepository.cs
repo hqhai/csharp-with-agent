@@ -184,7 +184,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             if (unitResult != null)
             {
                 displayOrderUnit = unitResult.Unit?.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder ?? default;
-                var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId).ToListAsync();
+                var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.UnitId == unitResult.UnitId && x.CourseId == courseResult.CourseId).ToListAsync();
                 if (lessonResults != null && lessonResults.Any())
                 {
                     if (lessonResults.All(x => x.Status == EnumResultStatus.Done))

@@ -17,7 +17,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Email { get; set; }
 
         [EpplusTableColumn(Header = "Level students choose")]
-        public EnumCourseLevel CurrentLevel { get; set; }
+        public EnumCourseLevel? CurrentLevel { get; set; }
 
         [EpplusTableColumn(Header = "Course")]
         public string? CourseName { get; set; }
