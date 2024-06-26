@@ -3,6 +3,8 @@
 namespace Fsel.Ordering.Application.Queries.OrderQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
+    using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -16,10 +18,12 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     public class GetCurrentStatusQueryHandler : IRequestHandler<GetCurrentStatusQuery, MethodResult<EnumTrialRegistrationStatus?>>
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly IUserService _userService;
 
-        public GetCurrentStatusQueryHandler(IOrderRepository orderRepository)
+        public GetCurrentStatusQueryHandler(IOrderRepository orderRepository, IUserService userService)
         {
             _orderRepository = orderRepository;
+            _userService = userService;
         }
 
         public async Task<MethodResult<EnumTrialRegistrationStatus?>> Handle(GetCurrentStatusQuery request, CancellationToken cancellationToken)
@@ -36,11 +40,29 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 return methodResult;
             }
 
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(studentResult.Error);
+                return methodResult;
+            }
+            var student = studentResult.Content?.Result;
+
+            if (student == null)
+            {
+                methodResult.Result = currentStatus;
+                return methodResult;
+            }
+
             DateTime currentDate = DateTime.UtcNow;
             var currentExpireDate = query.ExpireDate;
             var checkTrial = query.IsTrial;
 
-            if (currentDate.Date > currentExpireDate?.Date && currentDate.Month >= currentExpireDate?.Month && currentDate.Year >= currentExpireDate?.Year)
+            if (!student.ExpiredDate.HasValue)
+            {
+                currentStatus = EnumTrialRegistrationStatus.New;
+            }
+            else if (student.ExpiredDate.Value.Date < currentDate.Date)
             {
                 currentStatus = EnumTrialRegistrationStatus.Expired;
             }
@@ -48,7 +70,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             {
                 currentStatus = EnumTrialRegistrationStatus.Trial;
             }
-            else if (!checkTrial && query.Status == EnumOrderStatus.Payment)
+            else
             {
                 currentStatus = EnumTrialRegistrationStatus.Payment;
             }
