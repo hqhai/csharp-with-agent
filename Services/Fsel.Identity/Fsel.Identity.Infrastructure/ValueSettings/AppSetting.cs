@@ -22,6 +22,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     public class ConstantUrl
     {
         public string? ConfirmOtpUrl { get; set; }
+        public string? RegisterUrl { get; set; }
     }
 
     public class Services : BaseServices
