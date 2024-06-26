@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Commands.AuthCmd;
     using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.InteractionService.Models;
@@ -28,6 +29,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Net.Http.Headers;
     using Microsoft.Extensions.Hosting;
 
     public class CreateUserStudentToAdminCommand : IRequest<MethodResult<UserModel>>
@@ -39,6 +41,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
     public class CreateUserStudentToAdminCommandHandler : IRequestHandler<CreateUserStudentToAdminCommand, MethodResult<UserModel>>
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
@@ -56,8 +59,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private const int MinAgeYoung = 14;
         private const int MaxAgeChildren = 13;
 
-        public CreateUserStudentToAdminCommandHandler(IMediator mediator, IMapper mapper, AuthContext authContext, UserManager<User> userManager, IOrderService orderService, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IInteractionService interactionService, IPlatformRepository platformRepository, IHostEnvironment environment = null)
+        public CreateUserStudentToAdminCommandHandler(IHttpContextAccessor httpContextAccessor, IMediator mediator, IMapper mapper, AuthContext authContext, UserManager<User> userManager, IOrderService orderService, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IInteractionService interactionService, IPlatformRepository platformRepository, IHostEnvironment environment = null)
         {
+            _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
             _mapper = mapper;
             _authContext = authContext;
@@ -74,11 +78,11 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
-            if (_environment.IsProduction())
-            {
-                methodResult.AddError(StatusCodes.Status401Unauthorized, "Not Have Access Production");
-                return methodResult;
-            }
+            //if (_environment.IsProduction())
+            //{
+            //    methodResult.AddError(StatusCodes.Status401Unauthorized, "Not Have Access Production");
+            //    return methodResult;
+            //}
             if (string.IsNullOrEmpty(request.Email))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
@@ -151,6 +155,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 return methodResult;
             }
+            var tokenResult = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken);
+            if (tokenResult.Result?.AccessToken != null && _httpContextAccessor.HttpContext != null)
+            {
+                _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Authorization] = "Bearer " + tokenResult.Result?.AccessToken;
+            }
+
             var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = GetBirthdayToCourseLevel(course.CourseLevel) }, cancellationToken);
             if (!updateCode.IsOK)
             {

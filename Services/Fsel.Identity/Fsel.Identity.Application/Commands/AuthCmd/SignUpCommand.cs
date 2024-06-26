@@ -168,8 +168,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);
                                     return methodResult;
                                 }
-                                // làm nhiệm vụ
-                                // await DoQuestBoard(request.ReferralCode, cancellationToken);
                             }
 
                             #region Send Code OTP
@@ -224,33 +222,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;
-        }
-
-        public async Task DoQuestBoard(string code, CancellationToken cancellationToken)
-        {
-            var humanId = _humanRepository!.Queryable!.FirstOrDefault(x => x.Code == code)!.Id;
-
-            var humanInfo = await _humanRepository.GetIncludeByIdAsync(humanId);
-            if (humanInfo?.Student != null)
-            {
-                IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SuccessfulIntroduceCode };
-                var studentId = humanInfo!.Student!.Id;
-                var classModel = await _trainingService.GetClassByStudentId(studentId!);
-
-                if (classModel?.Content?.Result != null && classModel?.Content?.Result.CourseId != null)
-                {
-                    var courseId = classModel.Content!.Result!.CourseId;
-                    QuestBoardQueueModel questBoardQueueModel = new QuestBoardQueueModel
-                    {
-                        StudentId = studentId!,
-                        Categories = categories,
-                        AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
-                        CourseId = courseId
-                    };
-
-                    await _questBoardPublisher.Publish(questBoardQueueModel, cancellationToken);
-                }
-            }
         }
     }
 }

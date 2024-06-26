@@ -281,13 +281,11 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var units = await query.Where(x => unitIds.Contains(x.Id))
                              .AsNoTracking()
                              .ToListAsync();
-            return units.Select(x => new UnitModel
+            return units.Select(x =>
             {
-                Id = x.Id,
-                Name = x.Name,
-                Code = x.Code,
-                CourseLevel = x.CourseLevel,
-                UnitResult = _mapper.Map<UnitResultModel>(x.UnitResults.FirstOrDefault()),
+                var unit = _mapper.Map<UnitModel>(x);
+                unit.UnitResult = _mapper.Map<UnitResultModel>(x.UnitResults.FirstOrDefault());
+                return unit;
             }).ToList();
         }
 
@@ -300,13 +298,11 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                                                                 .AsNoTracking()
                                                                 .ToListAsync();
 
-            return mockTests.Select(x => new MockTestModel
+            return mockTests.Select(x =>
             {
-                Id = x.Id,
-                ExecutionTime = x.ExecutionTime,
-                MockTestType = x.MockTestType,
-                Name = x.Name,
-                MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTestResults.FirstOrDefault()),
+                var mockTest = _mapper.Map<MockTestModel>(x);
+                mockTest.MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTestResults.FirstOrDefault());
+                return mockTest;
             }).ToList();
         }
 
@@ -318,13 +314,11 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                                                                 .Where(y => y.Id == courseUnitMockTest.FinalTestId)
                                                                 .AsNoTracking()
                                                                 .ToListAsync();
-            return finalTests.Select(x => new FinalTestModel
+            return finalTests.Select(x =>
             {
-                Id = x.Id,
-                ExecutionTime = x.ExecutionTime,
-                FinalTestLevel = x.FinalTestLevel,
-                Name = x.Name,
-                FinalTestResult = _mapper.Map<FinalTestResultModel>(x.FinalTestResults.FirstOrDefault()),
+                var finalTest = _mapper.Map<FinalTestModel>(x);
+                finalTest.FinalTestResult = _mapper.Map<FinalTestResultModel>(x.FinalTestResults.FirstOrDefault());
+                return finalTest;
             }).FirstOrDefault();
         }
 

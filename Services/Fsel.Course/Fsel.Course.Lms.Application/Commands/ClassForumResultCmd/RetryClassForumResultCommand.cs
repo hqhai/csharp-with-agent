@@ -60,16 +60,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 return methodResult;
             }
 
-
-
-            classForumResult.RetryWordContent = request.WordContent;
-            classForumResult.RetryContent = request.Content;
-
             if (request.FilePaths != null)
             {
                 request.FilePaths.ForEach(x => classForumResult.ClassForumResultFiles.Add(new ClassForumResultFile
                 {
-                    IsRetry = true,
                     FilePath = x,
                 }));
             }
@@ -78,10 +72,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             {
                 classForumResult = _classForumResultRepository.Update(classForumResult);
 
-                await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
+                await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 await SendToAIGrading(classForum, classForumResult, request.WordContent!, cancellationToken);
-
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
                 return methodResult;
@@ -106,11 +98,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     SettingTopP = classForum.SettingTopP,
                     SettingWordMaxLength = classForum.SettingWordMaxLength,
                     SystemRoleAlConfig = classForum.SystemRoleAlConfig,
-                    IsRetry = true
+                    IsRetry = true,
                 }, cancellationToken);
             }
         }
-
-
     }
 }

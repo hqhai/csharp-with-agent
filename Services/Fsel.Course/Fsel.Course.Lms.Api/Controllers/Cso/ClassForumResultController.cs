@@ -68,12 +68,12 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
         /// <summary>
         /// Delete a Class Forum result
         /// </summary>
-        [HttpDelete("{id}")]
+        [HttpPut("update-status/{id}")]
         [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new DeleteClassForumResultCommand { Id = id }).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(new UpdateStatusClassForumResultCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

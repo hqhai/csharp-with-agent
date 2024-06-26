@@ -141,17 +141,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         {
             var lessonResultIds = await GetLessonResultIdsAsync(request, studentId);
             var classForumResults = await _classForumResultRepository.Queryable.Include(x => x.ClassForumScores).Where(x => lessonResultIds.Contains(x.LessonResultId) && classForumIds.Contains(x.ClassForumId)).ToListAsync();
-            var skillScoreClassForums = classForumResults.Select(x =>
+
+            return new SkillScores
             {
-                var score = x.ClassForumScores.Sum(x => x.Score);
-                var totalCount = 36;
-                return new SkillScores
-                {
-                    CorrectCount = score,
-                    TotalCount = totalCount
-                };
-            }).ToList();
-            return new SkillScores { CountQuestion = skillScoreClassForums.Count, CorrectCount = skillScoreClassForums.Sum(x => x.CorrectCount), TotalCount = skillScoreClassForums.Sum(x => x.TotalCount) };
+                CountQuestion = classForumResults.Count,
+                CorrectCount = classForumResults.Sum(x => x.CorrectCount),
+                TotalCount = classForumResults.Sum(x => x.CorrectTotal)
+            };
         }
 
         private async Task<IList<Guid>> GetLessonIdsAsync(GetOverallScoreByClassForumQuery request)

@@ -97,13 +97,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             {
                 var lessonResult = lessonResults.FirstOrDefault(y => y.LessonId == x.LessonId);
                 var classForumReport = _mapper.Map<ClassForumReportModel>(x);
-                classForumReport.TotalCorrect = 36;
                 classForumReport.LessonResultId = lessonResult?.Id;
                 classForumReport.ClassForumResultScore = x.ClassForumResults.Select(x => new ClassForumResultScoreModel
                 {
                     Id = x.Id,
-                    CorrectCount = x.ClassForumScores.Count > 0 ? x.ClassForumScores.Sum(x => x.Score) : default,
-                    TotalCorrect = 36,
+                    CorrectCount = x.CorrectCount,
+                    TotalCorrect = x.CorrectTotal,
+                    Percent = x.Percent,
                     Status = x.Status,
                 }).FirstOrDefault();
                 return classForumReport;
