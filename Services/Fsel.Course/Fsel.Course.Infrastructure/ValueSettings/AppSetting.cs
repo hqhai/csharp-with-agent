@@ -13,11 +13,20 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public OpenAiConfig? OpenAiConfig { get; set; }
         public new Services? Services { get; set; }
         public AzureAiConfig? AzureAiConfig { get; set; }
+
+        public CustomerSupportConfig? CustomerSupportConfig { get; set; }
     }
 
     public class ConstantUrl
     {
         public string? LinkMockTestReport { get; set; }
+    }
+
+
+    public class CustomerSupportConfig
+    {
+        public string? Email { get; set; }
+        public IList<string> CCEmail { get; set; } = new List<string>();
     }
 
     public class ResourceContent

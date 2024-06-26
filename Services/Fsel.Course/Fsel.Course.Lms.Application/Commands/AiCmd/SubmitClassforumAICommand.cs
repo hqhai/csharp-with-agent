@@ -5,38 +5,53 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
+    using Fsel.Course.Infrastructure.ValueSettings;
+    using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.SenderService;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
+    using Kros.Extensions;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class SubmitClassforumAICommand : ClassForumAIResponseModel, IRequest<bool>
+    public class SubmitClassForumAICommand : ClassForumAIResponseModel, IRequest<bool>
     {
     }
 
-    public class SubmitAIResponseCommandHandler : IRequestHandler<SubmitClassforumAICommand, bool>
+    public class SubmitAIResponseCommandHandler : IRequestHandler<SubmitClassForumAICommand, bool>
     {
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
+        private readonly AppSetting _appSetting;
         private readonly IClassForumDetailResultRepository _classForumDetailResultRepository;
+        private readonly SetTimeRetryClassForumPublisher _setTimeRetryClassForumPublisher;
+        private readonly ISenderService _senderService;
+        private const int Max_Time_Retry = 3;
 
-        public SubmitAIResponseCommandHandler(ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, NotificationMessagePublisher notificationMessagePublisher, IMediator mediator, IClassForumDetailResultRepository classForumDetailResultRepository)
+        public SubmitAIResponseCommandHandler(ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, NotificationMessagePublisher notificationMessagePublisher, IMediator mediator, IClassForumDetailResultRepository classForumDetailResultRepository, SetTimeRetryClassForumPublisher setTimeRetryClassForumPublisher, IMapper mapper, AppSetting appSetting, ISenderService senderService)
         {
             _lessonResultRepository = lessonResultRepository;
             _submitAIResponsePublisher = submitAIResponsePublisher;
             _notificationMessagePublisher = notificationMessagePublisher;
             _mediator = mediator;
             _classForumDetailResultRepository = classForumDetailResultRepository;
+            _setTimeRetryClassForumPublisher = setTimeRetryClassForumPublisher;
+            _mapper = mapper;
+            _appSetting = appSetting;
+            _senderService = senderService;
         }
 
-        public async Task<bool> Handle(SubmitClassforumAICommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(SubmitClassForumAICommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var classForumDetailResult = await _classForumDetailResultRepository.GetByIdAsync(request.ClassForumDetailResultId);
@@ -53,26 +68,54 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 UserAIConfig = userAiConfig,
             }, cancellationToken).ConfigureAwait(false);
 
+            #region Retry
+
+            var checkDataClassForum = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
+
+            bool conditionRetry = checkDataClassForum?.All(x => x != null) ?? default;
+
+            if ((checkDataClassForum == null || !conditionRetry) && classForumDetailResult != null && classForumDetailResult.RetryTime <= Max_Time_Retry)
+            {
+                var model = _mapper.Map<SetTimeRetryClassForumModel>(request);
+                model.StartDate = DateTime.UtcNow;
+                await _setTimeRetryClassForumPublisher.Publish(model, cancellationToken);
+                classForumDetailResult.RetryTime += 1;
+            }
+
+            var classForumDetailResultOwner = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResult).ThenInclude(x => x.LessonResult).ThenInclude(x => x.Lesson).FirstOrDefault(x => x.Id == request.ClassForumDetailResultId);
+
+            if (classForumDetailResult != null && classForumDetailResult.RetryTime > Max_Time_Retry)
+            {
+                SendEmailCommandModel model = new SendEmailCommandModel
+                {
+                    ToEmails = new List<string> { _appSetting!.CustomerSupportConfig!.Email! },
+                    Content = ValueSettings.CustomerSupport.Content.Format(classForumDetailResultOwner?.CreatedFullName ?? default, classForumDetailResult.ClassForumResult?.LessonResult?.Lesson?.Name ?? default),
+                    Subject = ValueSettings.CustomerSupport.TitleMail.Format(classForumDetailResultOwner?.CreatedFullName ?? default),
+                    CcEmails = _appSetting.CustomerSupportConfig.CCEmail
+                };
+                await _senderService.SendEmailAsync(model);
+            }
+
+            #endregion Retry
+
+            var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
+
             if (classForumDetailResult != null)
             {
-                var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
-                classForumDetailResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
-
+                classForumDetailResult.GradingAlFeedback = classForumAIs != null ? ConvertHelper.Serialize(classForumAIs) : default;
                 _classForumDetailResultRepository.Update(classForumDetailResult);
                 await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
             {
-                GradingAlFeedback = aIResponse,
+                GradingAlFeedback = ConvertHelper.Serialize(classForumAIs),
                 ClassForumResultId = request.ClassForumResultId,
                 EnumSubmissionCount = request.SubmissionCount
             }, cancellationToken);
 
             if (!string.IsNullOrEmpty(aIResponse))
             {
-                var classForumDetailResultOwner = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResult).FirstOrDefault(x => x.Id == request.ClassForumDetailResultId);
-
                 if (classForumDetailResultOwner != null)
                 {
                     var lessonResult = await _lessonResultRepository.GetIncludeByIdAsync(classForumDetailResultOwner.ClassForumResult!.LessonResultId);

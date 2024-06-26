@@ -22,6 +22,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;

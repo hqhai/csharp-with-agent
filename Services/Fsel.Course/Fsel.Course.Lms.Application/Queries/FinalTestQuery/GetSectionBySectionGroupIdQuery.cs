@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -82,7 +83,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 return methodResult;
             }
 
-            var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId, sectionGroup);
+            var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId);
             methodResult.Result = await _sectionGroupConverter.GetSectionGroupDto(sectionGroup, sectionGroupResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
@@ -95,12 +96,16 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             await _finalTestResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        private async Task<SectionGroupResult> GetAndAddSectionGroupResult(GetSectionBySectionGroupIdQuery request, Guid studentId, SectionGroup sectionGroup)
+        private async Task<SectionGroupResult> GetAndAddSectionGroupResult(GetSectionBySectionGroupIdQuery request, Guid studentId)
         {
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(x => x.SectionGroupId == request.SectionGroupId && x.FinalTestResultId == request.FinalTestResultId && x.StudentId == studentId).FirstOrDefaultAsync();
             if (sectionGroupResult == null)
             {
-                _logger.LoggerRequest(request);
+                _logger.LoggerRequest(new
+                {
+                    Timestamp = DateTimeOffset.UtcNow.ToString("o"),
+                    Request = ConvertHelper.Serialize(request)
+                });
                 sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, FinalTestResultId = request.FinalTestResultId, Status = EnumResultStatus.New });
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }

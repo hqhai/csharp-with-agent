@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
     using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
+    using Amazon.Runtime.Internal.Util;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
     using Fsel.Common.Models;
@@ -23,6 +24,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
     using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class WeeklyReportCommand : IRequest<MethodResult<bool>>
     {
@@ -41,8 +43,9 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IMediator _mediator;
         private readonly AppSetting _appSetting;
+        private readonly ILogger<WeeklyReportCommandHandler> _logger;
 
-        public WeeklyReportCommandHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting)
+        public WeeklyReportCommandHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting, ILogger<WeeklyReportCommandHandler> logger)
         {
             _userService = userService;
             _finalTestResultRepository = finalTestResultRepository;
@@ -52,12 +55,17 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             _unitResultRepository = unitResultRepository;
             _mediator = mediator;
             _appSetting = appSetting;
+            _logger = logger;
         }
 
         public async Task<MethodResult<bool>> Handle(WeeklyReportCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
+
+            _logger.LogWarning("Call WeeklyReportCommand - body: " + Fsel.Common.Helpers.ConvertHelper.Serialize(request));
+
+            return methodResult;
 
             var students = new List<StudentModel>();
 
@@ -76,23 +84,22 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             {
                 return methodResult;
             }
+            students = students.Where(p => p.Human?.Email?.ToLower(CultureInfo.CurrentCulture) == "nguyenhuukhoa5462@gmail.com").ToList();
+            //UserSettingQuery query = new UserSettingQuery
+            //{
+            //    UserIds = students!.Select(x => x.Human!.UserId).ToList(),
+            //};
 
-            UserSettingQuery query = new UserSettingQuery
-            {
-                UserIds = students!.Select(x => x.Human!.UserId).ToList(),
-            };
+            ////Lấy những học sinh bật thông báo Gửi Email hàng tuần
+            //var studentFilter = await _userService.GetListUserSetting(query);
+            //var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
 
-            //Lấy những học sinh bật thông báo Gửi Email hàng tuần
-            var studentFilter = await _userService.GetListUserSetting(query);
-            var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
-
-            if (studentFilterResult == null || studentFilterResult.Count == 0)
-            {
-                return methodResult;
-            }
-            //filter những học sinh bật thông báo email.
-            students = students.Where(x => studentFilterResult.Contains(x.Human!.UserId)).ToList();
-
+            //if (studentFilterResult == null || studentFilterResult.Count == 0)
+            //{
+            //    return methodResult;
+            //}
+            ////filter những học sinh bật thông báo email.
+            //students = students.Where(x => studentFilterResult.Contains(x.Human!.UserId)).ToList();
 
             DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value.AddDays(1).Date : DateTime.UtcNow.Date;
 
@@ -447,6 +454,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 Params = model,
                 Template = model.SenderTemplate,
                 CcEmail = parentEmail,
+                IsCCEmail = true
             }, cancellationToken).ConfigureAwait(false);
         }
 

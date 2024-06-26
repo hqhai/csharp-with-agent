@@ -23,7 +23,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
                 return;
             }
 
-            await _mediator.Send(new SubmitClassforumAICommand
+            await _mediator.Send(new SubmitClassForumAICommand
             {
                 UserAIConfig = message.UserAIConfig,
                 ClassForumResultId = message.ClassForumResultId,

@@ -16,6 +16,8 @@ namespace Fsel.Course.Domain.Entities
 
     public class ClassForumDetailResult : Entity, ISubmissionCount
     {
+        private const int MaxScore = 2;
+
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Content { get; set; }
 
@@ -91,5 +93,7 @@ namespace Fsel.Course.Domain.Entities
         public ClassForumResult? ClassForumResult { get; set; }
 
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();
+
+        public int RetryTime { get; set; }
     }
 }

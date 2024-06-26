@@ -22,6 +22,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.SenderTemplates;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 

@@ -109,6 +109,12 @@ builder.Services.AddScoped<IProsodyScoreRepository, ProsodyScoreRepository>();
 builder.Services.AddScoped<ISpeakingAIService, SpeakingAIService>();
 builder.Services.AddScoped<ISpeakingEvaluationAIService, SpeakingEvaluationAIService>();
 
+builder.Services.AddScoped<QuestBoardPublisher>();
+builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
+builder.Services.AddScoped<CreateTokenHistoryPublisher>();
+builder.Services.AddScoped<SetTimeRetryMockTestPublisher>();
+builder.Services.AddScoped<SetTimeRetryClassForumPublisher>();
+
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
 builder.Services.AddScoped<QuestionTypeConverter>();
@@ -144,6 +150,7 @@ builder.Services.AddScoped<SubmitClassForumGradingPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
 builder.Services.AddScoped<SubmitMockTestCriteriaPublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
+builder.Services.AddScoped<DisconnectSocketCalculateTimePublisher>();
 builder.Services.AddScoped<SubmitAiSpeakingAnswerPublisher>();
 builder.Services.AddScoped<GetTimeModulePublisher>();
 
@@ -176,7 +183,9 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.UpdateClassForumResultToExpiredTime, typeof(UpdateClassForumResultToExpiredTimeConsumer) },
     { QueueSettings.LmsQueue.NameQueue.WeeklyReport, typeof(WeeklyReportConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.SetTimeModule, typeof(SetTimeModuleConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.RetryMockTestAction, typeof(RetryMockTestWhenScoreZeroConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.RetryClassForumAction, typeof(RetryClassForumConsumer) },
 });
 
 var app = builder.Build();

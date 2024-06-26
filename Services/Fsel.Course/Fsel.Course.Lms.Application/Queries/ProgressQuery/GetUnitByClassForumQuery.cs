@@ -97,7 +97,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             {
                 var lessonResult = lessonResults.FirstOrDefault(y => y.LessonId == x.LessonId);
                 var classForumReport = _mapper.Map<ClassForumReportModel>(x);
-                classForumReport.TotalCorrect = 36;
                 classForumReport.LessonResultId = lessonResult?.Id;
                 classForumReport.ClassForumResultScore = x.ClassForumResults.Select(x => new ClassForumResultScoreModel
                 {
