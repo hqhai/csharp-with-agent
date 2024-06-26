@@ -755,6 +755,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<Guid?>("DistrictId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("ExpiredDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<Guid>("HumanId")
                         .HasColumnType("uniqueidentifier");
 

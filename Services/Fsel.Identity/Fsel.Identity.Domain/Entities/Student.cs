@@ -47,6 +47,7 @@ namespace Fsel.Identity.Domain.Entities
         public Guid? SchoolId { get; set; }
         public Human? Human { get; set; }
         public Guid HumanId { get; set; }
+        public DateTime? ExpiredDate { get; set; }
         public ICollection<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();
         public ICollection<StudentDailyStreak> StudentDailyStreaks { get; set; } = new List<StudentDailyStreak>();
     }
