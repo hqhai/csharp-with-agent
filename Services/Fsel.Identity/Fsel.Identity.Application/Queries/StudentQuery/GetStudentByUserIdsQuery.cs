@@ -8,6 +8,10 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Models;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -23,11 +27,13 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     {
         private readonly IMapper _mapper;
         private readonly IStudentRepository _studentRepository;
+        private readonly ISystemService _systemService;
 
-        public GetStudentByUserIdsQueryHandler(IMapper mapper, IStudentRepository studentRepository)
+        public GetStudentByUserIdsQueryHandler(IMapper mapper, IStudentRepository studentRepository, ISystemService systemService)
         {
             _mapper = mapper;
             _studentRepository = studentRepository;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<IList<StudentModel>>> Handle(GetStudentByUserIdsQuery request, CancellationToken cancellationToken)
@@ -50,8 +56,27 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                                             CourseLevel = x.CourseLevel,
                                             CreatedDate = x.CreatedDate,
                                             School = x.School,
+                                            SchoolId = x.SchoolId,
                                             Human = _mapper.Map<HumanProfileModel>(x.Human)
                                         }).ToListAsync(cancellationToken);
+            //var schoolResults = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
+            //{
+            //    Filters = new List<GenericFilterModel>() { new GenericFilterModel { Property = "Id", Operator = Common.Enums.EnumFilterOperator.Equal, Value = students.Select(x => x.SchoolId).ToList() } },
+            //    IncludePaths = new List<string>() { "School" }
+            //});
+            //if (!schoolResults.IsSuccessStatusCode || schoolResults.Content?.Result == null)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+            //    return methodResult;
+            //}
+
+            //foreach (var student in students)
+            //{
+            //    if (student.SchoolId != null)
+            //    {
+            //        student.School = schoolResults.Content?.Result?.Where(x => x.Id == student.SchoolId).FirstOrDefault()?.Name;
+            //    }
+            //}
             methodResult.Result = _mapper.Map<IList<StudentModel>>(students);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

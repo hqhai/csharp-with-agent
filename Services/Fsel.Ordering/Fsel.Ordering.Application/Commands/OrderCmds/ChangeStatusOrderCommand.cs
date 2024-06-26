@@ -250,5 +250,10 @@ IPackageEventRepository packageEventRepository)
             }
             return methodResult;
         }
+
+        private bool IsInteger(double number)
+        {
+            return number == (int)number;
+        }
     }
 }

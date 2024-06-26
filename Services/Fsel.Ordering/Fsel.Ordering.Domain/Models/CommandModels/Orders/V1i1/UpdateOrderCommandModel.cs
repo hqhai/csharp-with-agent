@@ -15,7 +15,7 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1
         public string? Email { get; set; }
         public string? Address { get; set; }
         public string? Code { get; set; }
-        public EnumPaymentMethodStatus PaymentMethod { get; set; }
+        public EnumPaymentMethodStatus? PaymentMethod { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
         public Guid EventId { get; set; }

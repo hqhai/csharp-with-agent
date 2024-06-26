@@ -3,7 +3,7 @@
 namespace Fsel.System.Infrastructure.Repositories
 {
     using Fsel.Core.Base;
-    using Fsel.System.Domain.Entities;
+    using Fsel.System.Domain.Entities.QuestBoards;
     using Fsel.System.Domain.IRepositories;
 
     public class QuestBoardStudentRepository : BaseRepository<QuestBoardStudent>, IQuestBoardStudentRepository

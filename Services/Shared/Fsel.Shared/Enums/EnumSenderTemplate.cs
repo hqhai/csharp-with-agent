@@ -23,6 +23,7 @@ namespace Fsel.Shared.Enums
         SendMailMidCourseIELT,
         PaymentApproval,
         MailPaymentForStudent,
-        MailPaymentForCustomer
+        MailPaymentForCustomer,
+        MailFromLandingPage
     }
 }

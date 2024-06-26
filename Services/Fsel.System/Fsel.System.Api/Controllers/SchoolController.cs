@@ -56,5 +56,30 @@ namespace Fsel.System.Api.Controllers
             MethodResult<PagingItemsModel<SchoolModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get School by Ids
+        /// </summary>
+        [HttpPost("get-school-by-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<object>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSchoolByIds([FromBody] IList<Guid> ids)
+        {
+            var queryResult = await _mediator.Send(new GetSchoolByIdsQuery { Ids = ids }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get List School
+        /// </summary>
+        [HttpPost("get-by-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<SchoolModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
+        public async Task<IActionResult> Gets([FromBody] IList<Guid>? ids)
+        {
+            MethodResult<IList<SchoolModel>> queryResult = await _mediator.Send(new GetSchoolsByIdsQuery { Ids = ids }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
