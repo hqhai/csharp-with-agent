@@ -42,20 +42,20 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             var student = await _studentRepository.Queryable
                                         .Include(i => i.Human)
                                         .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == request.Id, cancellationToken);
-            if (student?.SchoolId != null)
-            {
-                var schoolResult = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
-                {
-                    Filters = new List<GenericFilterModel>() { new GenericFilterModel { Property = "Id", Operator = Common.Enums.EnumFilterOperator.Equal, Value = student.SchoolId } },
-                    IncludePaths = new List<string>() { "School" }
-                });
-                if (!schoolResult.IsSuccessStatusCode || schoolResult.Content?.Result == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                    return methodResult;
-                }
-                student.School = schoolResult.Content?.Result?.FirstOrDefault(x => x.Id == student.SchoolId)?.Name;
-            }
+            //if (student?.SchoolId != null)
+            //{
+            //    var schoolResult = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
+            //    {
+            //        Filters = new List<GenericFilterModel>() { new GenericFilterModel { Property = "Id", Operator = Common.Enums.EnumFilterOperator.Equal, Value = student.SchoolId } },
+            //        IncludePaths = new List<string>() { "School" }
+            //    });
+            //    if (!schoolResult.IsSuccessStatusCode || schoolResult.Content?.Result == null)
+            //    {
+            //        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+            //        return methodResult;
+            //    }
+            //    student.School = schoolResult.Content?.Result?.FirstOrDefault(x => x.Id == student.SchoolId)?.Name;
+            //}
             methodResult.Result = _mapper.Map<StudentModel>(student);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
