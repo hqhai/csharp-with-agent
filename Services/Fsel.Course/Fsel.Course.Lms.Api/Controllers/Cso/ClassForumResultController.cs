@@ -3,17 +3,16 @@
 namespace Fsel.Course.Lms.Api.Controllers.Cso
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -23,7 +22,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
     {
         private readonly IMediator _mediator;
 
-        public ClassForumResultController(IMediator mediator, IClassForumResultRepository classForumResultRepository)
+        public ClassForumResultController(IMediator mediator)
         {
             _mediator = mediator;
         }

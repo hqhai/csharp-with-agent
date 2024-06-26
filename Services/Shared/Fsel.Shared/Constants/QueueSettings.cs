@@ -26,6 +26,7 @@ namespace Fsel.Shared.Constants
                 public const string SetTimeToSendReviewFsel = $"{KeyQueue}_SetTimeToSendReviewFsel";
                 public const string SendNotification = $"{KeyQueue}_SendNotification";
                 public const string CreateTokenHistory = $"{KeyQueue}_CreateTokenHistory";
+                public const string SaveUserCourseSetting = $"{KeyQueue}_SaveUserCourseSetting";
             }
         }
 
