@@ -17,3 +17,4 @@ namespace Fsel.Shared.Models.ShareModels
         public DateTime? DailyDate { get; set; }
     }
 }
+
