@@ -102,11 +102,6 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             // lấy user
             var users = await _humanRepository.Queryable
-                                              .Include(x => x.User)
-                                              .Include(x => x.Student)
-                                              .ThenInclude(x => x!.ParentStudents)
-                                              .ThenInclude(x => x.Parent)
-                                              .ThenInclude(x => x!.Human)
                                               .Where(x => x.UpdatedDate == null ? (x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date) : (x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date))
                                               .ToListAsync(cancellationToken);
             if (users == null)
@@ -120,8 +115,18 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             var userIds = userIdentityIds.Concat(userPtTestIds).Concat(userOrderIds).ToList();
             var distinctUserIds = userIds.Distinct().ToList();
 
+            // lấy all user từ list hợp nhất
+            var userCombines = await _humanRepository.Queryable
+                                                     .Include(x => x.User)
+                                                     .Include(x => x.Student)
+                                                     .ThenInclude(x => x!.ParentStudents)
+                                                     .ThenInclude(x => x.Parent)
+                                                     .ThenInclude(x => x!.Human)
+                                                     .Where(x => x.UserId.HasValue && distinctUserIds.Contains(x.UserId.Value))
+                                                     .ToListAsync(cancellationToken);
+
             // Thông tin trường học
-            var schoolIds = users.Where(x => x.Student != null && x.Student.SchoolId.HasValue).Select(x => x.Student?.SchoolId ?? Guid.Empty).ToList();
+            var schoolIds = userCombines.Where(x => x.Student != null && x.Student.SchoolId.HasValue).Select(x => x.Student?.SchoolId ?? Guid.Empty).ToList();
             var school = await _systemService.GetSchoolByIds(schoolIds);
             var schoolResult = school.Content?.Result;
 
@@ -131,7 +136,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             #region Trả dữ liệu
             List<ClientsIntegrationModel> clientsIntegrations = new List<ClientsIntegrationModel>();
-            clientsIntegrations = _mapper.Map<List<ClientsIntegrationModel>>(users);
+            clientsIntegrations = _mapper.Map<List<ClientsIntegrationModel>>(userCombines);
 
             clientsIntegrations.ForEach(item =>
             {
