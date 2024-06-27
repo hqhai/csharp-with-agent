@@ -79,6 +79,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                         //send mail
                         await SendMail(skillScores, percent, unit, unitResult, course, lessonResults.ToList(), cancellationToken);
+
+                        await DoQuestBoard(studentId, cancellationToken);
                     }
 
                     if (isUnitUpdate)
@@ -101,6 +103,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     }
                 }
             }
+        }
+
+        private async Task DoQuestBoard(Guid studentId, CancellationToken cancellationToken)
+        {
+            await _questBoardPublisher.Publish(new QuestBoardQueueModel()
+            {
+                StudentID = studentId,
+                Type = EnumQuestBoardType.BeginnerQuests,
+                Category = EnumQuestBoardCategory.CompleteTheFirstUnit,
+                Value = 1
+            }, cancellationToken);
         }
 
         public async Task SendMailMidCourseReport(Guid studentId, Course course, CancellationToken cancellationToken)
@@ -245,11 +258,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                 if (classForumResultFromUnit1ToNow.Where(p => p.ClassForum != null).Any(p => p.ClassForum!.CourseSkill == item))
                 {
-                    var classForumScores = classForumResultFromUnit1ToNow.Where(p => p.ClassForum != null && p.ClassForum.CourseSkill == item).SelectMany(p => p.ClassForumScores);
+                    var classForumResults = classForumResultFromUnit1ToNow.Where(p => p.ClassForum != null && p.ClassForum.CourseSkill == item);
 
-                    var totalScore = classForumScores.Sum(p => p.Score);
-
-                    var percent = (int)(totalScore * 100) / (classForumScores.Count() * 9);
+                    var percent = (int)classForumResults.Average(p => p.Percent);
 
                     var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, percent, percent < 100 ? SendMailSetting.NoBorderRight : SendMailSetting.Border, color, 100 - percent, percent > 0 ? SendMailSetting.NoBorderLeft : SendMailSetting.Border, percent + "%");
 
@@ -342,7 +353,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
             var listClassForumResult = await _classForumResultRepository.Queryable.Where(p => lessonResultIds.Contains(p.LessonResultId)).ToListAsync(cancellationToken);
-            var isSendEmail = lessonResultIds.Count == listClassForumResult.Count && !listClassForumResult.Any(p => p.Status != EnumClassForumResultStatus.Graded);
+            var isSendEmail = lessonResultIds.Count == listClassForumResult.Count && !listClassForumResult.Any(p => p.Status != EnumClassForumResultStatus.Graded && p.Status != EnumClassForumResultStatus.Denied);
 
             if (course.CourseType == EnumCourseType.Ielts && isSendEmail)
             {
@@ -694,26 +705,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 CcEmail = student?.ParentEmail,
                 IsCCEmail = true
             }, cancellationToken).ConfigureAwait(false);
-        }
-
-        public async Task DoQuestBoard(Guid userId, Guid unitId, Guid courseId, CancellationToken cancellationToken)
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneUnit };
-            var student = await _userService.GetStudentByUserIdAsync(userId);
-            var studentId = student?.Content?.Result?.Id;
-
-            bool checkFirstTimeDoneLesson = _unitResultRepository.Queryable.Any(u => u.UnitId == unitId && u.CourseId == courseId && u.Status == EnumResultStatus.Done);
-
-            if (!checkFirstTimeDoneLesson)
-            {
-                await _questBoardPublisher.Publish(new QuestBoardQueueModel
-                {
-                    StudentId = (Guid)studentId!,
-                    Categories = categories,
-                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
-                    CourseId = courseId
-                }, cancellationToken);
-            }
         }
     }
 }

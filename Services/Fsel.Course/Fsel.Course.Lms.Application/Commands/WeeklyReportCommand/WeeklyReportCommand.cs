@@ -84,6 +84,22 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             {
                 return methodResult;
             }
+            students = students.Where(p => p.Human?.Email?.ToLower(CultureInfo.CurrentCulture) == "nguyenhuukhoa5462@gmail.com").ToList();
+            //UserSettingQuery query = new UserSettingQuery
+            //{
+            //    UserIds = students!.Select(x => x.Human!.UserId).ToList(),
+            //};
+
+            ////Lấy những học sinh bật thông báo Gửi Email hàng tuần
+            //var studentFilter = await _userService.GetListUserSetting(query);
+            //var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
+
+            //if (studentFilterResult == null || studentFilterResult.Count == 0)
+            //{
+            //    return methodResult;
+            //}
+            ////filter những học sinh bật thông báo email.
+            //students = students.Where(x => studentFilterResult.Contains(x.Human!.UserId)).ToList();
 
             DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value.AddDays(1).Date : DateTime.UtcNow.Date;
 
@@ -216,7 +232,6 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                         .Where(p => p.UpdatedDate.HasValue && p.UpdatedDate.Value.Date >= lastFridayAt13.Date && p.UpdatedDate.Value.Date < currentDate.Date)
                         .Where(x => x.ClassForumResults.Any(x => x.Status == EnumClassForumResultStatus.Graded))
                         .OrderBy(n => n.CreatedDate).ToListAsync(cancellationToken);
-                    int index = 1;
 
                     if (lessonResultsDone.Count > 0)
                     {
@@ -254,7 +269,6 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                                 var html = string.Format(CultureInfo.InvariantCulture, skillScoresHtml, icon, skillName, ls.Percent, ls.Percent < 100 ? SendMailSetting.NoBorderRight : SendMailSetting.Border, color, 100 - ls.Percent, ls.Percent > 0 ? SendMailSetting.NoBorderLeft : SendMailSetting.Border, ls.Percent + "%");
                                 unitName += html;
                             }
-                            index++;
                         }
                         weeklyReport.IsLessonDone = SendMailSetting.Display;
                     }
@@ -405,7 +419,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             if (lessonResult != null)
             {
                 counts.Add(lessonResult.VideoResult?.Status == EnumResultStatus.Done ? 1 : 0);
-                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == studentId).Count());
+                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && (x.Status == EnumClassForumResultStatus.Denied || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == studentId).Count());
                 counts.Add(lessonResult.HomeWorkResults.Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == studentId).GroupBy(x => x.LessonResultId).Count());
             }
             if (counts.Count == 0)

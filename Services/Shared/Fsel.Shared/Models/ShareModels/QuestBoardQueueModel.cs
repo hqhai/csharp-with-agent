@@ -6,14 +6,9 @@ namespace Fsel.Shared.Models.ShareModels
 
     public class QuestBoardQueueModel
     {
-        public Guid StudentId { get; set; }
-
-        public IList<EnumQuestBoardCategory>? Categories { get; set; }
-
-        public float AchievedPoint { get; set; }
-
-        public Guid? ObjectId { get; set; }
-
-        public Guid CourseId { get; set; }
+        public Guid StudentID { get; set; }
+        public EnumQuestBoardType Type { get; set; }
+        public EnumQuestBoardCategory Category { get; set; }
+        public int Value { get; set; }
     }
 }

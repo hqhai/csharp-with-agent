@@ -17,6 +17,8 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTestAnswers
         public Guid? SectionId { get; set; }
         public Guid? QuestionId { get; set; }
         public object? Answer { get; set; }
+
+        public string? SpeechTextAnswer { get; set; }
     }
 
     public class MockTestSectionGroupAnswerModel

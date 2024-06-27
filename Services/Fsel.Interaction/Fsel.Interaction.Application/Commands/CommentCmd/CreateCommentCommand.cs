@@ -2,7 +2,6 @@
 
 namespace Fsel.Interaction.Application.Commands.CommentCmd
 {
-    using System.ComponentModel.Design;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -27,7 +26,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Newtonsoft.Json;
 
     public class CreateCommentCommand : CreateCommentCommandModel, IRequest<MethodResult<CommentModel>>
     {
@@ -38,59 +36,71 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private readonly IMapper _mapper;
         private readonly ICommentRepository _commentRepository;
         private readonly DiscussionBoardCommentPublisher _discussionBoardCommentPublisher;
-        private readonly NotificationMessagePublisher _classForumCommentPublisher;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly AuthContext _authContext;
         private readonly ICourseService _courseService;
         private readonly ISystemService _systemService;
         private readonly IUserService _userService;
         private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly IPostRepository _postRepository;
 
-        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, ICourseService courseService, ISystemService systemService, IUserService userService, QuestBoardPublisher questBoardPublisher)
+        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher notificationMessagePublisher, ICourseService courseService, ISystemService systemService, IUserService userService, QuestBoardPublisher questBoardPublisher, IPostRepository postRepository)
         {
             _mapper = mapper;
             _commentRepository = commentRepository;
             _discussionBoardCommentPublisher = discussionBoardCommentPublisher;
-            _classForumCommentPublisher = classForumCommentPublisher;
+            _notificationMessagePublisher = notificationMessagePublisher;
             _authContext = authContext;
             _courseService = courseService;
             _systemService = systemService;
             _userService = userService;
             _questBoardPublisher = questBoardPublisher;
+            _postRepository = postRepository;
         }
 
         public async Task<MethodResult<CommentModel>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(request.Content);
             MethodResult<CommentModel> methodResult = new MethodResult<CommentModel>();
+
             Comment comment = _mapper.Map<Comment>(request);
-            // Check từ khoá cấm
-            var listForbiddenWordResult = await _systemService.CheckContainForbiddenWord(request.Content);
-            var forbiddenWord = listForbiddenWordResult.Content?.Result;
-            if (forbiddenWord.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCommentErrorCode.ContainsForbiddenKeywords), string.Join(", ", forbiddenWord));
-                return methodResult;
-            }
-            await _commentRepository.Queryable.FirstOrDefaultAsync(x => x.ObjectId == request.ObjectId, cancellationToken);
             comment.UserId = _authContext.CurrentUserId;
             if (!comment.IsValid())
             {
                 methodResult.AddErrorBadRequest(comment.ErrorMessages);
                 return methodResult;
             }
-            var fullname = await _commentRepository.Queryable.FirstOrDefaultAsync(cancellationToken);
+
+            #region Check từ khoá cấm
+
+            var listForbiddenWordResult = await _systemService.CheckContainForbiddenWord(request.Content);
+            var forbiddenWord = listForbiddenWordResult.Content?.Result;
+            if (forbiddenWord == null || forbiddenWord.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCommentErrorCode.ContainsForbiddenKeywords), string.Join(", ", forbiddenWord));
+                return methodResult;
+            }
+
+            #endregion Check từ khoá cấm
 
             await _commentRepository.ExecuteTransactionAsync(async () =>
             {
                 comment = _commentRepository.Add(comment);
                 await _commentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                NotificationSendingQueueModel model = new NotificationSendingQueueModel();
                 List<object> paramLinksValue = new List<object>();
                 switch (request.Type)
                 {
                     case EnumInteractionType.DiscussionBoard:
                         await _discussionBoardCommentPublisher.Publish(comment, cancellationToken).ConfigureAwait(false);
+
+                        //Gửi thông báo
+                        var post = _postRepository.Queryable.FirstOrDefault(x => x.Id == request.ObjectId);
+                        if (post != null && post.CreatedUserId != _authContext.CurrentUserId)
+                        {
+                            await PublishNotification(paramLinksValue, request.ObjectId, EnumNotificationContent.CommentPost, EnumNotificationType.LinkComment, new List<Guid>() { post.CreatedUserId }, cancellationToken);
+                        }
 
                         break;
 
@@ -124,7 +134,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         }
 
                         var lesson = await _courseService.GetLessonResult(classForumResult.LessonResultId ?? default);
-
                         paramLinksValue = new List<object>
                                      {
                                         lesson?.Content?.Result?.Id ?? default,
@@ -133,26 +142,36 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                                         classForumResult?.Id ?? default,
                                      };
 
-                        model = new NotificationSendingQueueModel()
-                        {
-                            ObjectId = request.ObjectId,
-                            UserIds = new List<Guid>() { postOwner.CreatedUserId },
-                            SenderId = _authContext.CurrentUserId,
-                            Content = EnumNotificationContent.Comment,
-                            Type = EnumNotificationType.LinkComment,
-                            ParamsLink = paramLinksValue,
-                            ParamsMessage = new List<object> { _authContext.CurrentUsername! ?? string.Empty, }
-                        };
+                        await PublishNotification(paramLinksValue, request.ObjectId, EnumNotificationContent.Comment, EnumNotificationType.LinkComment, new List<Guid>() { postOwner.CreatedUserId }, cancellationToken);
 
-                        #region DoQuestBoard
-                        if (_authContext.CurrentUserId != postOwner!.CreatedUserId)
+                        #region Do QuestBoard
+
+                        var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+                        if (studentResult.IsSuccessStatusCode)
                         {
-                            await DoMainQuest(classForumResult!.CourseId, comment.Id, cancellationToken);
-                            await DoDailyQuest(classForumResult!.CourseId, comment.Id, cancellationToken);
+                            var student = studentResult.Content?.Result;
+                            var classForumResultsOfStudentResult = await _courseService.ExecuteListClassForumResultQueryAsync(new BaseQueryModel
+                            {
+                                Filters = new List<GenericFilterModel>
+                                            {
+                                                new GenericFilterModel
+                                                {
+                                                    Property = "StudentId",
+                                                    Value = student!.Id,
+                                                    Operator = Common.Enums.EnumFilterOperator.Equal
+                                                }
+                                            },
+                                IncludePaths = new List<string> { "LessonResult" }
+                            });
+                            var classForumResultsOfStudent = classForumResultsOfStudentResult.Content?.Result;
+                            var classForumResultOfStudent = classForumResultsOfStudent?.OrderByDescending(p => p.CreatedDate).FirstOrDefault();
+                            if (classForumResultOfStudent?.Id == postOwner?.Id)
+                            {
+                                await DoQuestBoard(student.Id, cancellationToken);
+                            }
                         }
-                        #endregion
 
-                        await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
+                        #endregion Do QuestBoard
 
                         break;
 
@@ -166,9 +185,17 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             break;
                         }
 
-                        var classForumResultOfCommentOwnerResult = await _courseService.GetClassForumResultInfoByIdAsync(new BaseQueryModel
+                        var postResult = await _postRepository.Queryable.FirstOrDefaultAsync(x => x.Id == commentOwner!.ObjectId);
+                        if (postResult != null)
                         {
-                            Filters = new List<GenericFilterModel>
+                            var resultId = postResult.Id; // sau để gán vào paramLink
+                            await PublishNotification(paramLinksValue, request.ObjectId, EnumNotificationContent.ReplyCommentPost, EnumNotificationType.LinkComment, new List<Guid> { commentOwner!.CreatedUserId }, cancellationToken);
+                        }
+                        else
+                        {
+                            var classForumResultOfCommentOwnerResult = await _courseService.GetClassForumResultInfoByIdAsync(new BaseQueryModel
+                            {
+                                Filters = new List<GenericFilterModel>
                                             {
                                                 new GenericFilterModel
                                                 {
@@ -177,18 +204,12 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                                                     Operator = Common.Enums.EnumFilterOperator.Equal
                                                 }
                                             },
-                            IncludePaths = new List<string> { "LessonResult" }
-                        });
-                        var classForumResultOfCommentOwner = classForumResultOfCommentOwnerResult.Content?.Result;
+                                IncludePaths = new List<string> { "LessonResult" }
+                            });
+                            var classForumResultOfCommentOwner = classForumResultOfCommentOwnerResult.Content?.Result;
+                            var lessonOfCommentOwner = await _courseService.GetLessonResult(classForumResultOfCommentOwner?.LessonResultId ?? default);
 
-                        if (classForumResultOfCommentOwner == null)
-                        {
-                            break;
-                        }
-
-                        var lessonOfCommentOwner = await _courseService.GetLessonResult(classForumResultOfCommentOwner.LessonResultId ?? default);
-
-                        paramLinksValue = new List<object>
+                            paramLinksValue = new List<object>
                                     {
                                         lessonOfCommentOwner?.Content?.Result?.Id ?? default,
                                         classForumResultOfCommentOwner?.CourseId ?? default,
@@ -196,22 +217,12 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                                         classForumResultOfCommentOwner?.Id ?? default,
                                     };
 
-                        model = new NotificationSendingQueueModel()
-                        {
-                            ParamsMessage = new List<object> { _authContext.CurrentUsername ?? string.Empty },
-                            ObjectId = request.ObjectId,
-                            Content = EnumNotificationContent.ReplyComment,
-                            Type = EnumNotificationType.LinkComment,
-                            SenderId = _authContext.CurrentUserId,
-                            ParamsLink = paramLinksValue,
-                            UserIds = new List<Guid> { commentOwner!.CreatedUserId },
-                        };
-
-                        await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
+                            await PublishNotification(paramLinksValue, request.ObjectId, EnumNotificationContent.ReplyComment, EnumNotificationType.LinkComment, new List<Guid> { commentOwner!.CreatedUserId }, cancellationToken);
+                        }
                         break;
                 }
-                var commentModel = _mapper.Map<CommentModel>(comment);
 
+                var commentModel = _mapper.Map<CommentModel>(comment);
                 var userResult = await _userService.GetUserByIdAsync(_authContext.CurrentUserId.ToString());
                 commentModel.FullName = userResult.Content?.Result?.FullName;
 
@@ -223,49 +234,15 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             return methodResult;
         }
 
-        public async Task DoMainQuest(Guid courseId, Guid commentId, CancellationToken cancellationToken)
+        private async Task DoQuestBoard(Guid studentId, CancellationToken cancellationToken)
         {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CommentOnOtherPost };
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var studentId = student?.Content?.Result?.Id;
-
-            var hasFirstComment = _commentRepository.Queryable.Any(c => c.CreatedUserId == _authContext.CurrentUserId && c.Type == EnumInteractionType.ClassForum);
-
-            if (!hasFirstComment && studentId.HasValue)
+            await _questBoardPublisher.Publish(new QuestBoardQueueModel()
             {
-                QuestBoardQueueModel questBoardModel = new QuestBoardQueueModel()
-                {
-                    StudentId = (Guid)studentId!,
-                    Categories = categories,
-                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
-                    ObjectId = commentId,
-                    CourseId = courseId,
-                };
-                //await DoQuestBoard(questBoardModel, cancellationToken);
-            }
-        }
-
-        public async Task DoDailyQuest(Guid courseId, Guid commentId, CancellationToken cancellationToken)
-        {
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var studentResult = student?.Content?.Result;
-
-            QuestBoardQueueModel questBoardModel = new QuestBoardQueueModel
-            {
-                StudentId = studentResult!.Id,
-                Categories = new List<EnumQuestBoardCategory>(),
-                ObjectId = commentId,
-                CourseId = courseId,
-                AchievedPoint = 0
-            };
-
-            await MissionDailyDiscussionBoard(questBoardModel, cancellationToken);
-            await MissionDailyClassForum(questBoardModel, studentResult, cancellationToken);
-        }
-
-        private async Task DoQuestBoard(QuestBoardQueueModel questBoardModel, CancellationToken cancellationToken)
-        {
-            await _questBoardPublisher.Publish(questBoardModel, cancellationToken);
+                StudentID = studentId,
+                Type = EnumQuestBoardType.LearningQuests,
+                Category = EnumQuestBoardCategory.ConnectingAllies,
+                Value = 1
+            }, cancellationToken);
         }
 
         private async Task<List<Guid>> GetListPostOwner(IList<Guid> objectIds)
@@ -288,47 +265,20 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             return result;
         }
 
-
-        private async Task MissionDailyDiscussionBoard(QuestBoardQueueModel questBoardModel, CancellationToken cancellationToken)
+        private async Task PublishNotification(List<object> paramLinks, Guid objectId, EnumNotificationContent enumNotificationContent, EnumNotificationType enumNotificationType, List<Guid> userIds, CancellationToken cancellationToken)
         {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { };
-            var isCommentDiscussionBoard = _commentRepository.Queryable.Any(c => c.CreatedUserId == _authContext.CurrentUserId &&
-                                                                         c.Type == EnumInteractionType.DiscussionBoard &&
-                                                                         c.CreatedDate.Date == DateTime.UtcNow.Date &&
-                                                                         c.CreatedDate.Month == DateTime.UtcNow.Month &&
-                                                                         c.CreatedDate.Year == DateTime.UtcNow.Year);
-
-            if (isCommentDiscussionBoard)
+            var model = new NotificationSendingQueueModel()
             {
-                questBoardModel.Categories!.Add(EnumQuestBoardCategory.DiscussionBoardInteract);
-                questBoardModel.AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point;
+                ParamsMessage = new List<object> { _authContext.CurrentUsername ?? string.Empty },
+                ObjectId = objectId,
+                Content = enumNotificationContent,
+                Type = enumNotificationType,
+                SenderId = _authContext.CurrentUserId,
+                ParamsLink = paramLinks,
+                UserIds = userIds,
+            };
 
-                // await DoQuestBoard(questBoardModel, cancellationToken);
-            }
-
-        }
-
-        private async Task MissionDailyClassForum(QuestBoardQueueModel questBoardModel, StudentModel studentResult, CancellationToken cancellationToken)
-        {
-            var listOwnerObjectId = _commentRepository.Queryable.Where(c => c.CreatedUserId == _authContext.CurrentUserId &&
-                                                                          c.Type == EnumInteractionType.ClassForum &&
-                                                                          c.CreatedDate.Date == DateTime.UtcNow.Date &&
-                                                                          c.CreatedDate.Month == DateTime.UtcNow.Month &&
-                                                                          c.CreatedDate.Year == DateTime.UtcNow.Year)
-                                                              .Select(x => x.ObjectId)
-                                                              .Distinct()
-                                                              .ToList();
-
-            var ownerPostIds = await GetListPostOwner(listOwnerObjectId);
-            var listStudentOwnerPost = await _userService.GetStudentByUserIdsAsync(ownerPostIds);
-            if (listStudentOwnerPost?.Content?.Result != null && studentResult != null)
-            {
-                var countCommentOnClassMatePost = listStudentOwnerPost?.Content?.Result.Count(x => x.ClassId == studentResult.ClassId);
-                questBoardModel.AchievedPoint = (countCommentOnClassMatePost ?? 0);
-                questBoardModel.Categories!.Add(EnumQuestBoardCategory.CommentOnNewLessonOfTwoClassMate);
-
-                // await DoQuestBoard(questBoardModel, cancellationToken);
-            }
+            await _notificationMessagePublisher.Publish(model, cancellationToken).ConfigureAwait(false);
         }
     }
 }
