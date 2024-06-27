@@ -26,6 +26,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -53,9 +54,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private readonly IMapper _mapper;
         private readonly ISpeakingAIService _speakingAIService;
         private readonly ISpeakingEvaluationAIService _evaluationAIService;
+        private readonly SubmitSpeakingAIPublisher _submitSpeakingAIPublisher;
         private readonly ILogger<object> _logger;
 
-        public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, AuthContext authContext, IUserService userService, QuestionConverter questionConverter, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestResultRepository mockTestResultRepository, ISectionRepository sectionRepository, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, ISectionTimeCodeRepository sectionTimeCodeRepository, ISectionGroupRepository sectionGroupRepository, SubmitMockTestAnswerPublisher submitMockTestAnswerPublisher, IMediator mediator, IMapper mapper, ILogger<object> logger, ISpeakingAIService speakingAIService, ISpeakingEvaluationAIService evaluationAIService)
+        public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, AuthContext authContext, IUserService userService, QuestionConverter questionConverter, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestResultRepository mockTestResultRepository, ISectionRepository sectionRepository, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, ISectionTimeCodeRepository sectionTimeCodeRepository, ISectionGroupRepository sectionGroupRepository, SubmitMockTestAnswerPublisher submitMockTestAnswerPublisher, IMediator mediator, IMapper mapper, ILogger<object> logger, ISpeakingAIService speakingAIService, ISpeakingEvaluationAIService evaluationAIService, SubmitSpeakingAIPublisher submitSpeakingAIPublisher)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -74,6 +76,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             _logger = logger;
             _speakingAIService = speakingAIService;
             _evaluationAIService = evaluationAIService;
+            _submitSpeakingAIPublisher = submitSpeakingAIPublisher;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateMockTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -167,7 +170,14 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             });
             if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && sectionGroup.Sections.Any() && request.IsSubmit)
             {
-                await _speakingAIService.EvaluationSpeakingAI(request.MockTestResultId, request.SectionGroupId, cancellationToken);
+                // await _speakingAIService.EvaluationSpeakingAI(request.MockTestResultId, request.SectionGroupId, cancellationToken);
+
+                SpeakingAIEvaluationModel speakingEvaluationModel = new SpeakingAIEvaluationModel()
+                {
+                    MockTestResultId = request.MockTestResultId,
+                    SectionGroupId = request.SectionGroupId,
+                };
+                await _submitSpeakingAIPublisher.Publish(speakingEvaluationModel, cancellationToken);
             }
 
             if (sectionGroup.CourseSkill == EnumCourseSkill.Writing && sectionGroup.Sections.Any() && request.IsSubmit)

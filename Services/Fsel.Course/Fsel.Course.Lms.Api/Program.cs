@@ -151,6 +151,7 @@ builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<DisconnectSocketCalculateTimePublisher>();
 builder.Services.AddScoped<SubmitAiSpeakingAnswerPublisher>();
 builder.Services.AddScoped<GetTimeModulePublisher>();
+builder.Services.AddScoped<SubmitSpeakingAIPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -184,6 +185,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.RetryMockTestAction, typeof(RetryMockTestWhenScoreZeroConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
     { QueueSettings.LmsQueue.NameQueue.RetryClassForumAction, typeof(RetryClassForumConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.SpeakingAI, typeof(SpeakingAIEvaluationConsumer) },
 });
 
 var app = builder.Build();
