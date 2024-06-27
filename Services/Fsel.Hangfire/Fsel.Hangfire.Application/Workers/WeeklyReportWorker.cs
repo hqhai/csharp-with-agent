@@ -21,7 +21,7 @@ namespace Fsel.Hangfire.Application.Workers
 
         public async Task RunAsync()
         {
-            if (_webHostEnvironment.IsStaging())
+            if (_webHostEnvironment.IsProduction() || _webHostEnvironment.IsStaging())
             {
                 await _weeklyReportPublisher.Publish(CancellationToken.None);
             }
