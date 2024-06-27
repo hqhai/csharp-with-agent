@@ -16,6 +16,10 @@ namespace Fsel.Ordering.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public EnumPackageCode? Code { get; set; }
 
+        /// <summary>
+        /// Name
+        /// </summary>
+
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(100)]
         public string? Name { get; set; }
@@ -25,6 +29,10 @@ namespace Fsel.Ordering.Domain.Entities
         /// </summary>
         [Range(0, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public decimal Price { get; set; }
+
+        /// <summary>
+        /// Giá trên tháng
+        /// </summary>
 
         [Range(0, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public decimal PriceMonth { get; set; }
@@ -36,21 +44,19 @@ namespace Fsel.Ordering.Domain.Entities
         public int MonthNumber { get; set; }
 
         /// <summary>
-        /// Thời gian Khóa Học
+        /// Gợi ý
         /// </summary>
-        [Range(0, double.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public double MonthBonusNumber { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? IncentivesWhenPurchasing { get; set; }
-
-        public EnumPackageSuggest? Suggest { get; set; }
 
         public ICollection<Order> Orders { get; set; } = new List<Order>();
 
         public ICollection<VoucherPackage> VoucherPackages { get; set; } = new List<VoucherPackage>();
 
         public ICollection<PackageTranslation> Translations { get; set; } = new List<PackageTranslation>();
+
+        public ICollection<PackageEvent> PackageEvents { get; set; } = new List<PackageEvent>();
     }
 
     public class PackageTranslation : Entity, ITranslationObject

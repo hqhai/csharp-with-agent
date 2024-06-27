@@ -76,8 +76,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
                 return methodResult;
             }
-            var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
-            var code = codeSend.Result?.Code;
+            var codeSend = await _mediator.Send(new GenerateRandomOrderQuery(), cancellationToken).ConfigureAwait(false);
+            var code = codeSend.Result;
 
             if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code || (x.Status == EnumOrderStatus.New && x.UserId == request.UserId), cancellationToken))
             {

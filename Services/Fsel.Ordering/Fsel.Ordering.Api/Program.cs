@@ -39,11 +39,14 @@ builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
 builder.Services.AddScoped<IUserVoucherRepository, UserVoucherRepository>();
 builder.Services.AddScoped<IOrderTransactionRepository, OrderTransactionRepository>();
 builder.Services.AddScoped<INotificationProcessor, NotificationProcessor>();
+builder.Services.AddScoped<IEventRepository, EventRepository>();
+builder.Services.AddScoped<IPackageEventRepository, PackageEventRepository>();
 builder.Services.AddScoped<VnPayLibrary>();
 
 // Publisher
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
+builder.Services.AddScoped<AddExpiredDateForStudentPublisher>();
 
 //Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -62,7 +65,8 @@ builder.Services.AddRefitClient<IAppStoreService>().ConfigureHttpClient(x =>
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.OrderingQueue.NameQueue.NoticePayment, typeof(NoticePaymentConsumer) }
+    { QueueSettings.OrderingQueue.NameQueue.NoticePayment, typeof(NoticePaymentConsumer) },
+    { QueueSettings.OrderingQueue.NameQueue.JobActiveEvent, typeof(JobActiveEventConsumer) }
 });
 //builder.AddMassTransit(appSetting,
 //queues: new Dictionary<string, Type>
