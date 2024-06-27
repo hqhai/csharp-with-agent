@@ -6,6 +6,7 @@ namespace Fsel.Ordering.Api.Controllers.Admin
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Ordering.Application.Commands.Events;
     using Fsel.Ordering.Application.Queries.Events;
     using Fsel.Ordering.Domain.Models.EntityModels;
@@ -61,6 +62,18 @@ namespace Fsel.Ordering.Api.Controllers.Admin
         public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
             var commandResult = await _mediator.Send(new GetEventByIdQuery() { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search event
+        /// </summary>
+        [HttpGet("search")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<EventModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchEvent([FromQuery] SearchEventQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
