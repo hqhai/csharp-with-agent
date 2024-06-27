@@ -14,6 +14,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string? Description { get; set; }
+        public bool IsDefault { get; set; }
         public IList<string>? ImagePaths { get; set; }
         public EnumEventPackageStatus Status { get; set; }
         public IList<PackageEventModel>? PackageEvents { get; set; }
