@@ -79,7 +79,7 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                         Name = code,
                         CourseId = request.CourseId,
                         Status = EnumClassStatus.Active,
-                        PackageId = request.PackageId,
+                        PackageId = request.PackageId ?? default,
                         ClassStudents = new List<ClassStudent>()
                     {
                         new ClassStudent() { StudentId = student.Id, IsActive = true }
@@ -103,7 +103,7 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 {
                     StudentId = student.Id,
                     ClassId = @class.Id,
-                    PackageId = @class.PackageId,
+                    PackageId = request.PackageId,
                     CourseLevel = course.CourseLevel,
                     NumberOfShield = request.NumberOfShield,
                     CourseId = @class.CourseId
