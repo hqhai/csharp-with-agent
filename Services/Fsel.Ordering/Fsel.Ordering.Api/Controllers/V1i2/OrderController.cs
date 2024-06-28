@@ -13,7 +13,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
