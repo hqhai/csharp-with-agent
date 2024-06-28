@@ -59,27 +59,6 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 return methodResult;
             }
 
-            // lấy order
-            var queryOrder = new GetOrderByStatusQueryModel
-            {
-                StartDate = request.StartDate,
-                EndDate = request.EndDate,
-                Status = true
-            };
-            var orders = await _orderService.GetOrderByStatusAsync(queryOrder);
-            if (!orders.IsSuccessStatusCode)
-            {
-                methodResult.AddError(orders.Error);
-                return methodResult;
-            }
-            var orderResults = orders.Content?.Result;
-            if (orderResults == null)
-            {
-                methodResult.AddError(orders.Error);
-                return methodResult;
-            }
-            var userOrderIds = orderResults.Select(x => x.UserId).ToList();
-
             // lấy pt
             var queryPtTest = new GetPTTestModel
             {
@@ -95,7 +74,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             var ptTestResults = ptTest.Content?.Result;
             if (ptTestResults == null)
             {
-                methodResult.AddError(orders.Error);
+                methodResult.AddError(ptTest.Error);
                 return methodResult;
             }
             var userPtTestIds = ptTestResults.Select(x => x.UserId).ToList();
@@ -111,9 +90,33 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             }
             var userIdentityIds = users.Select(x => x.UserId ?? Guid.Empty).ToList();
 
-            // Hợp nhất UserId
-            var userIds = userIdentityIds.Concat(userPtTestIds).Concat(userOrderIds).ToList();
+            // Hợp nhất UserId chưa có order
+            var userIds = userIdentityIds.Concat(userPtTestIds).ToList();
             var distinctUserIds = userIds.Distinct().ToList();
+
+            // lấy order
+            var queryOrder = new GetOrderByStatusQueryModel
+            {
+                StartDate = request.StartDate,
+                EndDate = request.EndDate,
+                Status = true,
+                UserIds = distinctUserIds
+            };
+            var orders = await _orderService.GetOrderByStatusAsync(queryOrder);
+            if (!orders.IsSuccessStatusCode)
+            {
+                methodResult.AddError(orders.Error);
+                return methodResult;
+            }
+            var orderResults = orders.Content?.Result;
+            if (orderResults == null)
+            {
+                methodResult.AddError(orders.Error);
+                return methodResult;
+            }
+
+            var userOrderIds = orderResults.Select(x => x.UserId).ToList();
+            var distinctUserIdHasOrders = userOrderIds.Distinct().ToList();
 
             // lấy all user từ list hợp nhất
             var userCombines = await _humanRepository.Queryable
@@ -122,7 +125,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                                      .ThenInclude(x => x!.ParentStudents)
                                                      .ThenInclude(x => x.Parent)
                                                      .ThenInclude(x => x!.Human)
-                                                     .Where(x => x.UserId.HasValue && distinctUserIds.Contains(x.UserId.Value))
+                                                     .Where(x => x.UserId.HasValue && distinctUserIdHasOrders.Contains(x.UserId.Value))
                                                      .ToListAsync(cancellationToken);
 
             // Thông tin trường học
@@ -131,7 +134,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             var schoolResult = school.Content?.Result;
 
             // Lấy ra lần đăng nhập cuối cùng
-            var featureAccessTime = await _systemService.GetFeatureAccessTimeByUserIds(distinctUserIds);
+            var featureAccessTime = await _systemService.GetFeatureAccessTimeByUserIds(distinctUserIdHasOrders);
             var featureAccessTimeResult = featureAccessTime.Content?.Result;
 
             #region Trả dữ liệu
