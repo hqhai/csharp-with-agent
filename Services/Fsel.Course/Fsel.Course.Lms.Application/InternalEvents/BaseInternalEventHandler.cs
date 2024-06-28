@@ -45,6 +45,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         protected readonly ISystemService _systemService;
         protected readonly IOrderService _orderService;
         private readonly QuestBoardPublisher _questBoardPublisher;
+        private const int TotalScoreClassForum = 36;
         private const int PercentClassForumAcademic = 20;
         private const int PercentClassForumIELST = 32;
         private const int PercentHomeWorkAcademic = 14;
@@ -175,6 +176,19 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
             }
             return (skillScores, GetDoublePercentUnit(skillScores, percentSkill));
+        }
+
+        public SkillScores GetSkillScores(ClassForumResult classForumResult)
+        {
+            ArgumentNullException.ThrowIfNull(classForumResult);
+            return new SkillScores
+            {
+                Skill = classForumResult.ClassForum?.CourseSkill ?? default,
+                TotalQuestion = 1,
+                CountQuestion = 1,
+                TotalCount = TotalScoreClassForum,
+                CorrectCount = classForumResult.ClassForumScores.Sum(x => x.Score),
+            };
         }
 
         public async Task<(List<SkillScores>, double)> GetHomeWordsSkillScores(IList<Guid>? lessonResultIds, int percentSkill = default, EnumCourseType? courseType = null)
@@ -392,7 +406,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             switch (false)
             {
                 case var value when value == (courseUnitMockTest.UnitId == null):
-                    var unitResultNext = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.UnitId == courseUnitMockTest.UnitId && x.CourseId == courseUnitMockTest.CourseId, cancellationToken);
+                    var unitResultNext = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.UnitId == courseUnitMockTest.UnitId, cancellationToken);
                     if (unitResultNext == null)
                     {
                         break;
@@ -409,7 +423,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     break;
 
                 case var value when value == (courseUnitMockTest.FinalTestId == null):
-                    var finalTestResultNext = await _finalTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.FinalTestId == courseUnitMockTest.FinalTestId && x.CourseId == courseUnitMockTest.CourseId, cancellationToken);
+                    var finalTestResultNext = await _finalTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.FinalTestId == courseUnitMockTest.FinalTestId, cancellationToken);
                     if (finalTestResultNext != null && finalTestResultNext.Status == EnumResultStatus.Unfinished)
                     {
                         finalTestResultNext.Status = EnumResultStatus.New;
@@ -419,7 +433,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     break;
 
                 case var value when value == (courseUnitMockTest.MockTestId == null):
-                    var mockTestResultNext = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.MockTestId == courseUnitMockTest.MockTestId && x.CourseId == courseUnitMockTest.CourseId, cancellationToken);
+                    var mockTestResultNext = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.MockTestId == courseUnitMockTest.MockTestId, cancellationToken);
                     if (mockTestResultNext != null && mockTestResultNext.Status == EnumResultStatus.Unfinished)
                     {
                         mockTestResultNext.Status = EnumResultStatus.New;
@@ -474,12 +488,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (courseResult.Status != EnumResultStatus.Done)
             {
                 await SendStudentCompleteCourse(studentId, course.Id, courseResult, cancellationToken);
-                await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel
-                {
-                    BaseCourseLevel = course.CourseLevel,
-                    CourseLevel = course.CourseLevel,
-                    Id = courseResult.CreatedUserId,
-                }).ConfigureAwait(false);
                 await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
                 {
                     CourseLevel = course.CourseLevel,

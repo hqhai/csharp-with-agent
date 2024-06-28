@@ -32,6 +32,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             ArgumentNullException.ThrowIfNull(notification);
             var mockTestResult = notification.Data;
             var mockTest = await _mockTestRepository.GetByIdAsync(mockTestResult.MockTestId);
+
             if (mockTest != null && mockTest.MockTestType == EnumMockTestType.SkillMockTest && mockTestResult.Status == EnumResultStatus.Done)
             {
                 var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons)
