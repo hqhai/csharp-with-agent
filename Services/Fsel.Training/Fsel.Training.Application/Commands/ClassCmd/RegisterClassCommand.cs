@@ -9,11 +9,8 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
-    using Fsel.Shared.Models.ShareModels;
     using Fsel.Training.Application.Queries.ClassQuery;
-    using Fsel.Training.Application.Queues.Publishers;
     using Fsel.Training.Application.Services.CourseServices;
-    using Fsel.Training.Application.Services.CourseServices.Models;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.Entities;
@@ -34,7 +31,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
         private readonly IClassStudentRepository _classStudentRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
-        private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         private readonly ICourseService _courseService;
         private readonly AuthContext _authContext;
         private readonly IMediator _mediator;
@@ -43,7 +39,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             IClassStudentRepository classStudentRepository,
             IUserService userService,
             IMapper mapper,
-            SaveUserCourseSettingPublisher saveUserCourseSettingPublisher,
             ICourseService courseService,
             AuthContext authContext,
             IMediator mediator)
@@ -52,7 +47,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             _classStudentRepository = classStudentRepository;
             _userService = userService;
             _mapper = mapper;
-            _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _courseService = courseService;
             _authContext = authContext;
             _mediator = mediator;
