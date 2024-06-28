@@ -11,7 +11,7 @@ namespace Fsel.Identity.Application.Services.LmsCourseService.Model
 
         public string? Status { get; set; }
 
-        public EnumPlacementTestLevel? Level { get; set; }
+        public EnumCourseLevel? Level { get; set; }
 
         public IList<IntegrationPlacementTestResultModels>? PlacementTestResults { get; set; }
     }
