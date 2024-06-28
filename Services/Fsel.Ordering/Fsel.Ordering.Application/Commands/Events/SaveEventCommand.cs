@@ -181,6 +181,11 @@ namespace Fsel.Ordering.Application.Commands.Events
                         return methodResult;
                     }
                     UpdateTranslation(translation, item);
+                    if (!item.IsValid())
+                    {
+                        methodResult.AddError(item.ErrorMessages);
+                        return methodResult;
+                    }
                 }
                 foreach (var item in @event.PackageEvents)
                 {
@@ -191,8 +196,18 @@ namespace Fsel.Ordering.Application.Commands.Events
                         return methodResult;
                     }
                     UpdatePackageEvent(packageEvent, item);
+                    if (!item.IsValid())
+                    {
+                        methodResult.AddError(item.ErrorMessages);
+                        return methodResult;
+                    }
                 }
                 UpdateEvent(request, @event);
+                if (!@event.IsValid())
+                {
+                    methodResult.AddError(@event.ErrorMessages);
+                    return methodResult;
+                }
                 @event = _eventRepository.Update(@event);
                 await _eventRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
