@@ -46,16 +46,20 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseStudentProgressModel> methodResult = new MethodResult<CourseStudentProgressModel>();
             CourseStudentProgressModel courseProgress = new CourseStudentProgressModel();
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId });
-            if (!studentResults.IsSuccessStatusCode)
+            var studentResult = await _userService.GetUserByStudentId(request.StudentId);
+            if (!studentResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
                 return methodResult;
             }
-
-            var student = studentResults?.Content?.Result?.FirstOrDefault();
-            var studentId = student?.Id;
-            var userId = student?.Human?.UserId ?? default;
+            var student = studentResult.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+            var studentId = student.Id;
+            var userId = student.Human?.UserId ?? default;
             var packageResults = await _orderService.GetPackages();
             if (!packageResults.IsSuccessStatusCode)
             {
@@ -97,6 +101,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var featureAccessTimes = featureAccessTimeResults.Content?.Result;
             var featureAccessTime = featureAccessTimes?.FirstOrDefault();
             var @class = @classes?.FirstOrDefault(x => x.CourseId == course.Id);
+            if (@class != null)
+            {
+                courseProgress.ClassId = @class.Id;
+                courseProgress.CodeClass = @class.Code;
+                courseProgress.StartDate = @class.StartDate;
+                courseProgress.EndDate = @class.EndDate;
+            }
             var courseResult = await _courseResultRepository.Queryable.Include(x => x.Course).FirstOrDefaultAsync(x => x.StudentId == studentId && x.CourseId == course.Id, cancellationToken);
             if (courseResult != null)
             {
@@ -116,15 +127,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 courseProgress.Visit = featureAccessTime.Visit;
                 courseProgress.TimeSpent = featureAccessTime.AccessTime;
             }
-            if (@class != null)
+            var package = packages?.FirstOrDefault(x => x.Id == student.PackageId);
+            if (package != null)
             {
-                var package = packages?.FirstOrDefault(x => x.Id == @class.PackageId);
-                courseProgress.ClassId = @class.Id;
-                courseProgress.CodeClass = @class.Code;
-                courseProgress.StartDate = @class.StartDate;
-                courseProgress.EndDate = @class.EndDate;
-                courseProgress.PackageId = @class.PackageId;
-                courseProgress.PackageCode = package?.Code ?? default;
+                courseProgress.PackageId = package.Id;
+                courseProgress.PackageCode = package.Code;
             }
             methodResult.Result = courseProgress;
             methodResult.StatusCode = StatusCodes.Status200OK;

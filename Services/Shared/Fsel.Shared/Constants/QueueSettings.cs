@@ -26,6 +26,7 @@ namespace Fsel.Shared.Constants
                 public const string SetTimeToSendReviewFsel = $"{KeyQueue}_SetTimeToSendReviewFsel";
                 public const string SendNotification = $"{KeyQueue}_SendNotification";
                 public const string CreateTokenHistory = $"{KeyQueue}_CreateTokenHistory";
+                public const string AddExpiredDateForStudent = $"{KeyQueue}_AddExpiredDateForStudent";
             }
         }
 
@@ -104,6 +105,7 @@ namespace Fsel.Shared.Constants
                 public const string DisconnectSocketCalculateTime = $"{KeyQueue}_DisconnectSocketCalculateTime";
                 public const string DoQuestBoard = $"{KeyQueue}_DoQuestBoard";
                 public const string GetTimeModule = $"{KeyQueue}_GetTimeModule";
+                public const string SaveUserCourseSetting = $"{KeyQueue}_SaveUserCourseSetting";
             }
         }
 
@@ -142,6 +144,7 @@ namespace Fsel.Shared.Constants
                 public const string SendNotification = $"{KeyQueue}_SendNotification";
                 public const string FinishSubmission = $"{KeyQueue}_FinishSubmission";
                 public const string NoticePayment = $"{KeyQueue}_NoticePayment";
+                public const string JobActiveEvent = $"{KeyQueue}_JobActiveEvent";
             }
         }
 
@@ -163,6 +166,7 @@ namespace Fsel.Shared.Constants
             public static class NameQueue
             {
                 public const string UpdateClassLiveAssignment = $"{KeyQueue}_UpdateClassLiveAssignment";
+                public const string SaveUserCourseSetting = $"{KeyQueue}_SaveUserCourseSetting";
             }
         }
 

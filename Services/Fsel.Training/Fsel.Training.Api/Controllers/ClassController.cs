@@ -214,5 +214,17 @@ namespace Fsel.Training.Api.Controllers
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Add student into class
+        /// </summary>
+        [HttpPost("choose-level-by-student")]
+        [ProducesResponseType(typeof(MethodResult<Guid>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ChooseLevelByStudent([FromBody] ChooseLevelByStudentCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

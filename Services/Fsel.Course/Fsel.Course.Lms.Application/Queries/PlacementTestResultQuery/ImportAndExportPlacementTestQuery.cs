@@ -46,7 +46,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             {
                 return methodResult;
             }
-            var listEmail = new List<ImportStudentEmailModel>();
             var placementTestResultExports = new List<PlacementTestResultExportModel>();
             var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentEmailModel x, IList<ImportStudentEmailModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
@@ -56,7 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 }
                 return await Task.FromResult(errors.Count == 0);
             });
-            listEmail = result.Datas.ToList();
+            var listEmail = result.Datas.ToList();
             var studentResultToEmail = await _userService.GetStudentByEmailsAsync(listEmail.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).ToList());
             if (!studentResultToEmail.IsSuccessStatusCode)
             {
