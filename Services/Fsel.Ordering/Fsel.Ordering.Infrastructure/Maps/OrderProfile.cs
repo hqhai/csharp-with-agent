@@ -17,6 +17,8 @@ namespace Fsel.Ordering.Infrastructure.Maps
             CreateMap<Domain.Models.CommandModels.Orders.CreateOrderCommandModel, Order>().IgnoreAllNonExisting();
             CreateMap<CreateOrderCommandModel, Order>().IgnoreAllNonExisting();
             CreateMap<CreateOrderToUserIdCommandModel, Order>().IgnoreAllNonExisting();
+            CreateMap<Order, OrderSearchModel>().ForMember(x => x.PackageName, a => a.MapFrom(src => src.Package != null ? src.Package.Code : null))
+                                                .ForMember(x => x.MonthNumber, a => a.MapFrom(src => src.Package!.MonthNumber));
         }
     }
 }
