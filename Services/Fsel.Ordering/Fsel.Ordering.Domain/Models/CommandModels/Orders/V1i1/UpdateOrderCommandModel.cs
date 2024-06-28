@@ -10,7 +10,6 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1
     {
         public Order? Order { get; set; }
         public Package? Package { get; set; }
-        public Guid CourseId { get; set; }
         public string? FullName { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Email { get; set; }
@@ -19,5 +18,11 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1
         public EnumPaymentMethodStatus? PaymentMethod { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
+        public Guid EventId { get; set; }
+        public bool IsInvoice { get; set; }
+        public string? CompanyName { get; set; }
+        public string? CompanyAddress { get; set; }
+        public string? CompanyTaxCode { get; set; }
+        public string? ReferralCode { get; set; }
     }
 }
