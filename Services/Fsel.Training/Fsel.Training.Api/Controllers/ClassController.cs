@@ -6,6 +6,7 @@ namespace Fsel.Training.Api.Controllers
     using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
@@ -49,6 +50,7 @@ namespace Fsel.Training.Api.Controllers
         /// get class list status new
         /// </summary>
         [HttpGet("get-class-by-student/{studentId}")]
+        [ServerCache(CacheSettings.TimeCache.FiveMinutes)]
         [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetClassByStudentId([FromRoute] Guid studentId)
