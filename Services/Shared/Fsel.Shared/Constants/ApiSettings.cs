@@ -6,6 +6,7 @@ namespace Fsel.Shared.Constants
     {
         public const string APIVersion1 = "1.0";
         public const string APIVersion1i1 = "1.1";
+        public const string APIVersion1i2 = "1.2";
         public const string APIVersion2 = "2.0";
     }
 }

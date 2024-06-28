@@ -22,7 +22,7 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
             {
                 return;
             }
-            await _queueProvider.Publish(QueueSettings.UserQueue.NameQueue.SaveUserCourseSetting, request, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.SaveUserCourseSetting, request, cancellationToken);
         }
     }
 }

@@ -58,7 +58,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             EnumCourseLevel[] enumValues = (EnumCourseLevel[])Enum.GetValues(typeof(EnumCourseLevel));
 
             // Lấy ra danh sách StudentId đã hoàn thành khóa học
-            var studentIds = await _courseResultRepository.Queryable.Where(x => x.Status != EnumResultStatus.New).Select(c => c.StudentId).Distinct().ToListAsync(cancellationToken);
+            var studentIds = await _courseResultRepository.Queryable.Where(x => x.Status != EnumResultStatus.New && x.WorkingStatus == EnumWorkingStatus.Active).Select(c => c.StudentId).Distinct().ToListAsync(cancellationToken);
 
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
             if (!studentResults.IsSuccessStatusCode)
