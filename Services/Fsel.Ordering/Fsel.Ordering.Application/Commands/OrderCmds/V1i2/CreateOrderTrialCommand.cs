@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
+namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
 {
     using System;
     using System.Threading;
@@ -31,7 +31,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
         private readonly IMediator _mediator;
         private readonly AddExpiredDateForStudentPublisher _addExpiredDateForStudentPublisher;
 
-        public CreateOrderTrialCommandHandler(IUserService userService, IOrderRepository orderRepository, AuthContext authContext, MediatR.IMediator mediator, AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher)
+        public CreateOrderTrialCommandHandler(IUserService userService, IOrderRepository orderRepository, AuthContext authContext, IMediator mediator, AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher)
         {
             _userService = userService;
             _orderRepository = orderRepository;

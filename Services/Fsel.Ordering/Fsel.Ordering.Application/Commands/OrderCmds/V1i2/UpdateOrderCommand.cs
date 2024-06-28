@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
+namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
 {
     using System;
     using System.Threading;
@@ -82,6 +82,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
             order.PackageId = request.Package?.Id;
+            order.IsInvoice = request.IsInvoice;
+            order.CompanyName = request.CompanyName;
+            order.CompanyAddress = request.CompanyAddress;
+            order.CompanyTaxCode = request.CompanyTaxCode;
+            order.ReferralCode = request.ReferralCode;
+            order.EventId = request.EventId;
         }
     }
 }

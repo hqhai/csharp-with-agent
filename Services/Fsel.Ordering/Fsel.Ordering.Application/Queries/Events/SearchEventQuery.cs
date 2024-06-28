@@ -45,6 +45,7 @@ namespace Fsel.Ordering.Application.Queries.Events
                 Status = x.Status,
                 IsDefault = x.IsDefault,
                 CreatedDate = x.CreatedDate,
+                EventStatus = x.Status == EnumEventPackageStatus.Active,
             });
 
             if (!string.IsNullOrEmpty(request.Keyword))

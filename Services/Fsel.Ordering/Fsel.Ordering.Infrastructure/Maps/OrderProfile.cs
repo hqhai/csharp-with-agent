@@ -15,6 +15,7 @@ namespace Fsel.Ordering.Infrastructure.Maps
             CreateMap<Order, OrderModel>().IgnoreAllNonExisting();
             CreateMap<Domain.Models.CommandModels.Orders.CreateOrderCommandModel, Order>().IgnoreAllNonExisting();
             CreateMap<CreateOrderCommandModel, Order>().IgnoreAllNonExisting();
+            CreateMap<Domain.Models.CommandModels.Orders.V1i2.CreateOrderCommandModel, Order>().IgnoreAllNonExisting();
             CreateMap<CreateOrderToUserIdCommandModel, Order>().IgnoreAllNonExisting();
         }
     }
