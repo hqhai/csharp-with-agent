@@ -1,0 +1,53 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Ordering.Api.Controllers.V1i2
+{
+    using System.Net;
+    using Asp.Versioning;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Constants;
+    using Fsel.Ordering.Application.Commands.OrderCmds.V1i2;
+    using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
+    using MediatR;
+    using Microsoft.AspNetCore.Mvc;
+
+    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [Route(Settings.APIDefaultRoute + "/order")]
+    [ApiController]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+    public class OrderController : ControllerBase
+    {
+        private readonly IMediator _mediator;
+
+        public OrderController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        /// <summary>
+        /// Create Order
+        /// </summary>
+        [HttpPost]
+        [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Create([FromBody] CreateOrderCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create Order
+        /// </summary>
+        [HttpPost("create-order-trial")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Create([FromBody] CreateOrderTrialCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+    }
+}
