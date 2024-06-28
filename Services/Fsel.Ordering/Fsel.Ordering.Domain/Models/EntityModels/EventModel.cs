@@ -17,6 +17,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public bool IsDefault { get; set; }
         public IList<string>? ImagePaths { get; set; }
         public EnumEventPackageStatus Status { get; set; }
+        public bool EventStatus { get; set; }
         public IList<PackageEventModel>? PackageEvents { get; set; }
         public IList<EventTranslationModel>? Translations { get; set; }
     }
