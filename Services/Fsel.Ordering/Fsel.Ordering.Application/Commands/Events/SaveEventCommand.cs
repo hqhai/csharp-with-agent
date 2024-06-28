@@ -76,7 +76,12 @@ namespace Fsel.Ordering.Application.Commands.Events
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.PackageIdIsWrong), EnumEventErrorCode.PackageIdIsWrong.GetDescription());
                 return;
             }
-            if (request.StartDate.Date > request.EndDate.Date)
+            if (!request.StartDate.HasValue || !request.EndDate.HasValue)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return;
+            }
+            if (request.StartDate.Value.Date > request.EndDate.Value.Date)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.StartDateIsGreaterThanEndDate), EnumEventErrorCode.StartDateIsGreaterThanEndDate.GetDescription());
                 return;
@@ -136,18 +141,26 @@ namespace Fsel.Ordering.Application.Commands.Events
                 return;
             }
 
-            if (request.StartDate.Date > request.EndDate.Date)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.StartDateIsGreaterThanEndDate), EnumEventErrorCode.StartDateIsGreaterThanEndDate.GetDescription());
-                return;
-            }
-
             var @event = await _eventRepository.Queryable.Include(p => p.Translations).Include(p => p.PackageEvents).FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
             if (@event == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return;
+            }
+
+            if (!@event.IsDefault)
+            {
+                if (!request.StartDate.HasValue || !request.EndDate.HasValue)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                    return;
+                }
+                if (request.StartDate.Value.Date > request.EndDate.Value.Date)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.StartDateIsGreaterThanEndDate), EnumEventErrorCode.StartDateIsGreaterThanEndDate.GetDescription());
+                    return;
+                }
             }
 
             var existEventDate = await _eventRepository.Queryable.AnyAsync(p => p.Id != @event.Id && ((p.StartDate <= request.StartDate && p.EndDate >= request.StartDate) || (p.StartDate <= request.EndDate && p.EndDate >= request.EndDate)), cancellationToken);
