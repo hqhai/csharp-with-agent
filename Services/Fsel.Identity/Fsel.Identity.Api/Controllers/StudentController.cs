@@ -51,6 +51,7 @@ namespace Fsel.Identity.Api.Controllers
         /// Get Student by UserId
         /// </summary>
         [HttpGet("get-by-user-id/{id}")]
+        [ServerCache(CacheSettings.TimeCache.TwoMinutes)]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetByUserId([FromRoute] Guid id)
