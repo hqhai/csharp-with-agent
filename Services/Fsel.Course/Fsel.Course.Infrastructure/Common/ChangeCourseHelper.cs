@@ -30,7 +30,7 @@ namespace Fsel.Course.Infrastructure.Common
         public async Task<bool?> IsStudentsAchieveScoresAsync(Guid studentId, EnumCourseLevel? baseCourseLevel)
         {
             var courseResult = await _courseResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId)
-                                                                      .Where(x => x.Course != null && (x.Course.CourseLevel == baseCourseLevel || x.Course.CourseLevel == baseCourseLevel.GetLevelIELTSToAca()))
+                                                                      .Where(x => x.Course != null && x.Course.CourseLevel == baseCourseLevel)
                                                                       .OrderByDescending(x => x.CreatedDate)
                                                                       .FirstOrDefaultAsync();
             bool? isStudentsAchieveScores;

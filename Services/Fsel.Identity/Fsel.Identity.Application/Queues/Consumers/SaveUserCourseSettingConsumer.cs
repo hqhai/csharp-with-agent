@@ -3,22 +3,23 @@
 namespace Fsel.Identity.Application.Queues.Consumers
 {
     using System.Threading.Tasks;
-    using Fsel.Core.Base;
     using Fsel.Identity.Application.Commands.UserCourseSettingCmd;
     using Fsel.Shared.Models.ShareModels;
+    using MassTransit;
     using MediatR;
 
-    public class SaveUserCourseSettingConsumer : BaseConsumer<SaveUserCourseSettingQueueModel>
+    public class SaveUserCourseSettingConsumer : IConsumer<SaveUserCourseSettingQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public SaveUserCourseSettingConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
+        public SaveUserCourseSettingConsumer(IMediator mediator)
         {
             _mediator = mediator;
         }
 
-        public override async Task ConsumeQueue(SaveUserCourseSettingQueueModel? message)
+        public async Task Consume(ConsumeContext<SaveUserCourseSettingQueueModel> context)
         {
+            var message = context?.Message;
             if (message == null)
             {
                 return;

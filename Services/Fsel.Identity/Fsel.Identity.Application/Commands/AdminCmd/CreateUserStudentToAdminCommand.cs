@@ -197,7 +197,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         {
             if (courseLevel.GetEnumCourseType() == EnumCourseType.Ielts)
             {
-                courseLevel = courseLevel.GetLevelAcaToLevelIELTS() ?? default;
+                courseLevel = courseLevel.GetLevelAcaToLevelIELTS();
             }
             return courseLevel;
         }
