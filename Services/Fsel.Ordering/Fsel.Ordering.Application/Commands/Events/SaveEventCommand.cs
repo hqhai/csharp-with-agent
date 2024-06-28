@@ -103,6 +103,22 @@ namespace Fsel.Ordering.Application.Commands.Events
                     methodResult.AddError(@event.ErrorMessages);
                     return methodResult;
                 }
+                foreach (var item in @event.Translations)
+                {
+                    if (!item.IsValid())
+                    {
+                        methodResult.AddError(item.ErrorMessages);
+                        return methodResult;
+                    }
+                }
+                foreach (var item in @event.PackageEvents)
+                {
+                    if (!item.IsValid())
+                    {
+                        methodResult.AddError(item.ErrorMessages);
+                        return methodResult;
+                    }
+                }
                 @event = _eventRepository.Add(@event);
                 await _eventRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
