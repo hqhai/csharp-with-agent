@@ -55,8 +55,9 @@ namespace Fsel.Ordering.Application.Queries.Events
 
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
-                    .ApplySortAndPaging(request)
+                    .ApplyPaging(request)
                     .AsNoTracking()
+                    .OrderByDescending(x => x.EventStatus)
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
