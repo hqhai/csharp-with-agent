@@ -39,7 +39,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels.IntegrationModel
 
         public DateTime? LastDate { get; set; }
 
-        public EnumPlacementTestLevel? PTLevel { get; set; }
+        public EnumCourseLevel? PTLevel { get; set; }
 
     }
 }
