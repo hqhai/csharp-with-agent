@@ -87,5 +87,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Post("/v1/user-setting/users")]
         Task<IApiResponse<MethodResult<List<UserSettingModel>>>> GetListUserSetting([Body] UserSettingQuery query);
+
+        [Post("/v1/student/get-by-user-ids")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetUserByIds([FromBody] IList<Guid>? userIds);
     }
 }
