@@ -59,7 +59,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
             var featureAccessTimeCheck = await _featureAccessTimeRepository.Queryable.OrderByDescending(x => x.LastVisited).FirstOrDefaultAsync(x => x.CreatedUserId == request.UserId && (x.ObjectId == request.ObjectId || x.EnumFeature == EnumFeature.Other) && x.EnumFeature == featureType, cancellationToken);
 
-            bool isActiveToday = featureAccessTimeCheck != null && featureAccessTimeCheck.EnumFeature != EnumFeature.Other;
+            bool isActiveToday = (featureAccessTimeCheck != null && featureAccessTimeCheck.EnumFeature != EnumFeature.Other) || (featureType != EnumFeature.Other && featureAccessTimeCheck == null);
             //focus mode
             if (isActiveToday)
             {
@@ -72,7 +72,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
             }
 
             //Daily checkin
-            long existsTime = featureAccessTimeCheck!.AccessTime + (long)request.AccessTime!;
+            long existsTime = featureAccessTimeCheck != null ? featureAccessTimeCheck.AccessTime + (long)request.AccessTime! : 0;
 
             if (existsTime >= ValueSettings.StudentDailyStreak.CheckInGoalTime)
             {
