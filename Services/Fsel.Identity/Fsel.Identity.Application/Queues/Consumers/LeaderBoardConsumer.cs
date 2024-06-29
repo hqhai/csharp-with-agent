@@ -3,6 +3,7 @@
 using Fsel.Core.Base;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.StudentRankingCmd;
+using MassTransit;
 using MediatR;
 
 namespace Fsel.Identity.Application.Queues.Consumers
