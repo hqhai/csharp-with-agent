@@ -41,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
         private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         private readonly IUserService _userService;
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
         public ChangeCourseLevelCommandHandler(IMapper mapper
             , ITrainingService trainingService
@@ -49,7 +50,8 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             , ICourseRepository courseRepository
             , SaveUserCourseSettingPublisher saveUserCourseSettingPublisher
             , IUserService userService
-            , ICourseResultRepository courseResultRepository)
+            , ICourseResultRepository courseResultRepository
+            ,NotificationMessagePublisher notificationMessagePublisher)
         {
             _mapper = mapper;
             _trainingService = trainingService;
@@ -59,6 +61,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _userService = userService;
             _courseResultRepository = courseResultRepository;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<CourseResultModel>> Handle(ChangeCourseLevelCommand request, CancellationToken cancellationToken)
@@ -182,10 +185,34 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 UserId = _authContext.CurrentUserId
             }, cancellationToken).ConfigureAwait(false);
 
-            await _userService.UpdateCourseToStudentAsync(courseResult.CourseId);
+
+
+            var updateResult = await _userService.UpdateCourseToStudentAsync(courseResult.CourseId);
+
+            if (updateResult.IsSuccessStatusCode)
+            {
+                await SendNotification(course, courseResult, cancellationToken);
+            }
+
             methodResult.Result = _mapper.Map<CourseResultModel>(courseResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+
+        private async Task SendNotification(Course course, CourseResult courseResult, CancellationToken cancellationToken)
+        {
+            NotificationSendingQueueModel notificationModel = new NotificationSendingQueueModel()
+            {
+                UserIds = new List<Guid>() { courseResult.CreatedUserId },
+                ParamsMessage = new List<object> { course.Name ?? string.Empty, },
+                Type = EnumNotificationType.LinkPage,
+                Content = EnumNotificationContent.CourseChange,
+                PlatformCode = EnumPlatformCode.LMS,
+                ObjectId = courseResult.Id,
+            };
+
+            await _notificationMessagePublisher.Publish(notificationModel, cancellationToken);
         }
 
         private async Task<bool> IsUsedLevel(StudentModel student, EnumCourseLevel courseLevel)

@@ -6,6 +6,7 @@ namespace Fsel.Realtime.Application.Hubs
     using Fsel.Core.Extensions;
     using Fsel.Core.Services.IpApiServices;
     using Fsel.Realtime.Application.Queues.Publishers;
+    using Fsel.Realtime.Application.Trackers;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
