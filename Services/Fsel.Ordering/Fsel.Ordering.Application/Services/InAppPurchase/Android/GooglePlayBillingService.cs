@@ -2,6 +2,7 @@
 
 namespace Fsel.Ordering.Application.Services.InAppPurchase.Android
 {
+    using Fsel.Shared.Constants;
     using Google.Apis.AndroidPublisher.v3;
     using Google.Apis.AndroidPublisher.v3.Data;
     using Google.Apis.Auth.OAuth2;
@@ -12,10 +13,10 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Android
         private readonly AndroidPublisherService _service;
         private bool _disposed;
 
-        public GooglePlayBillingService(string credentialsPath)
+        public GooglePlayBillingService()
         {
             GoogleCredential credential;
-            using (var stream = new FileStream(credentialsPath, FileMode.Open, FileAccess.Read))
+            using (var stream = new FileStream(ResourceSettings.AndroidPrivateKey, FileMode.Open, FileAccess.Read))
             {
                 credential = GoogleCredential.FromStream(stream).CreateScoped(AndroidPublisherService.Scope.Androidpublisher);
             }
