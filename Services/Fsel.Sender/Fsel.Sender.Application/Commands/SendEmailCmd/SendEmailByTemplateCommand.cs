@@ -4,7 +4,9 @@ using System.Globalization;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Sender.Domain.Models.Commands;
+using Fsel.Sender.Domain.ValueSettings;
 using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -17,10 +19,12 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
     public class SendEmailByTemplateCommandHandler : IRequestHandler<SendEmailByTemplateCommand, MethodResult<bool>>
     {
         private readonly IMediator _mediator;
+        private readonly AppSetting _appSetting;
 
-        public SendEmailByTemplateCommandHandler(IMediator mediator)
+        public SendEmailByTemplateCommandHandler(IMediator mediator, AppSetting appSetting)
         {
             _mediator = mediator;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<bool>> Handle(SendEmailByTemplateCommand request, CancellationToken cancellationToken)
@@ -45,6 +49,18 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             {
                 body = body.Replace($"[{item.Key}]", item.Value, StringComparison.CurrentCultureIgnoreCase);
             });
+
+            if (request.Template == EnumSenderTemplate.SendOtp)
+            {
+                var bccEmail = _appSetting.EmailConfig?.BCCEmail;
+                if (bccEmail != null && bccEmail.Count > 0)
+                {
+                    bccEmail.ForEach(email =>
+                    {
+                        request.BccEmails.Add(email);
+                    });
+                }
+            }
 
             methodResult = await _mediator.Send(new SendEmailCommand
             {
