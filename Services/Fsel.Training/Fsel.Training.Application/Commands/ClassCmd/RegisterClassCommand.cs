@@ -87,7 +87,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
-                var classActive = await _classRepository.Queryable.FirstOrDefaultAsync(p => p.CourseId == request.CourseId, cancellationToken);
+                var classActive = await _classRepository.Queryable.FirstOrDefaultAsync(p => p.CourseId == course.Id, cancellationToken);
                 if (classActive == null)
                 {
                     classActive = await CreateClassAsync(code, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays);
