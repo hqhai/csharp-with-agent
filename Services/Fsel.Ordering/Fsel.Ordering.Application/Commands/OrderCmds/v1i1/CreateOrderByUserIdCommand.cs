@@ -7,7 +7,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Application.Services.CourseService;
@@ -36,6 +35,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     {
         private readonly IMapper _mapper;
         private readonly IOrderRepository _orderRepository;
+        private readonly IEventRepository _eventRepository;
         private readonly IMediator _mediator;
         private readonly IPackageRepository _packageRepository;
         private readonly AuthContext _authContext;
@@ -43,10 +43,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
         private readonly IUserService _userService;
         private readonly ITrainingService _trainingService;
 
-        public CreateOrderByUserIdCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, IPackageRepository packageRepository, AuthContext authContext, ILmsCourseService courseService, IUserService userService, ITrainingService trainingService)
+        public CreateOrderByUserIdCommandHandler(IMapper mapper, IOrderRepository orderRepository, IEventRepository eventRepository, IMediator mediator, IPackageRepository packageRepository, AuthContext authContext, ILmsCourseService courseService, IUserService userService, ITrainingService trainingService)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
+            _eventRepository = eventRepository;
             _mediator = mediator;
             _packageRepository = packageRepository;
             _authContext = authContext;
@@ -124,6 +125,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             {
                 newOrder = _mapper.Map<Order>(request);
             }
+            newOrder.EventId = _eventRepository.Queryable.FirstOrDefault()?.Id;
 
             AddDataIntoOrder(newOrder, code, package.Price, existsOrder?.CourseId ?? course!.Id, student);
 
@@ -143,16 +145,14 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 newOrder.TotalPrice = 0;
                 newOrder.UserId = request.UserId;
                 await _userService.CreateStudentTrialRegistration();
-
-                var numberOfShield = package.Code.HasValue ? (int)package.Code.Value : default;
-                var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = request.UserId, CourseId = request.CourseId, PackageId = newOrder.PackageId ?? default, NumberOfShield = numberOfShield });
-                if (!addStudentIntoClassResult.IsSuccessStatusCode)
-                {
-                    methodResult.AddError(addStudentIntoClassResult.Error);
-                    return methodResult;
-                }
             }
-
+            var numberOfShield = package.Code.HasValue ? (int)package.Code.Value : default;
+            var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = request.UserId, CourseId = request.CourseId, PackageId = newOrder.PackageId ?? default, NumberOfShield = numberOfShield });
+            if (!addStudentIntoClassResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(addStudentIntoClassResult.Error);
+                return methodResult;
+            }
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
                 if (isOrderEmpty)
@@ -170,6 +170,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             });
             if (!request.IsTrialRegistration)
             {
+                Thread.Sleep(3000);
                 var changeStatusOrderResult = await _mediator.Send(new ChangeStatusOrderCommand
                 {
                     OrderId = newOrder.Id,
