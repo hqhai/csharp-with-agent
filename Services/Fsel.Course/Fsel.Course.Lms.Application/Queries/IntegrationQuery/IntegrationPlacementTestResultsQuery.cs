@@ -16,8 +16,11 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
 
     public class IntegrationPlacementTestResultsQuery : IRequest<MethodResult<IList<IntegrationPlacementTestResults>>>
     {
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? StartDate { get; set; }
+
+        public DateTime? EndDate { get; set; }
+
+        public IList<Guid>? UserIds { get; set; }
     }
 
     public class IntegrationPlacementTestResultsQueryHandler : IRequestHandler<IntegrationPlacementTestResultsQuery, MethodResult<IList<IntegrationPlacementTestResults>>>
@@ -35,9 +38,25 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<IntegrationPlacementTestResults>>();
 
+            if (request.UserIds == null)
+            {
+                var placementTestResultHasTimes = await _placementTestResultRepository.Queryable
+                                                                 .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate))
+                                                                 .ToListAsync(cancellationToken);
+
+                var datas = placementTestResultHasTimes.GroupBy(x => x.CreatedUserId)
+                                              .Select(x => new IntegrationPlacementTestResults
+                                              {
+                                                  UserId = x.Key,
+                                              }).ToList();
+
+                methodResult.Result = datas;
+                return methodResult;
+            }
+
             var placementTestResults = await _placementTestResultRepository.Queryable
-                                                             .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate))
-                                                             .ToListAsync(cancellationToken);
+                                                                           .Where(x => request.UserIds.Contains(x.CreatedUserId))
+                                                                           .ToListAsync(cancellationToken);
 
             var userIds = placementTestResults.Select(x => x.CreatedUserId).Distinct().ToList();
             var users = await _userService.GetUserByIds(userIds);

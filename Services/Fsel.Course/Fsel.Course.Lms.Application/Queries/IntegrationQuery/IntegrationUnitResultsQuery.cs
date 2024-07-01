@@ -13,8 +13,11 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
 
     public class IntegrationUnitResultsQuery : IRequest<MethodResult<IList<UnitResultIntegration>>>
     {
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? StartDate { get; set; }
+
+        public DateTime? EndDate { get; set; }
+
+        public IList<Guid>? UserIds { get; set; }
     }
 
     public class IntegrationUnitResultsQueryHandler : IRequestHandler<IntegrationUnitResultsQuery, MethodResult<IList<UnitResultIntegration>>>
@@ -32,12 +35,30 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<UnitResultIntegration>>();
 
+            if (request.UserIds == null)
+            {
+                var lessonResultHasTimes = await _lessonResultRepository.Queryable
+                                                                        .Include(x => x.Lesson)
+                                                                        .Where(x => (x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) :
+                                                                              (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate)) &&
+                                                                              (x.Status == EnumResultStatus.New || x.Status == EnumResultStatus.Process))
+                                                                        .ToListAsync(cancellationToken);
+
+                var datas = lessonResultHasTimes.GroupBy(x => x.CreatedUserId)
+                                                .Select(x => new UnitResultIntegration
+                                                {
+                                                    UserId = x.Key
+                                                }).ToList();
+
+                methodResult.Result = datas;
+                return methodResult;
+            }
+
             var lessonResults = await _lessonResultRepository.Queryable
-                                                             .Include(x => x.Lesson)
-                                                             .Where(x => (x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) :
-                                                                                            (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate)) &&
-                                                                                            (x.Status == EnumResultStatus.New || x.Status == EnumResultStatus.Process))
-                                                             .ToListAsync(cancellationToken);
+                                                 .Include(x => x.Lesson)
+                                                 .Where(x => request.UserIds.Contains(x.CreatedUserId) &&
+                                                       (x.Status == EnumResultStatus.New || x.Status == EnumResultStatus.Process))
+                                                 .ToListAsync(cancellationToken);
 
             IList<UnitResultIntegration> unitResults = new List<UnitResultIntegration>();
 
