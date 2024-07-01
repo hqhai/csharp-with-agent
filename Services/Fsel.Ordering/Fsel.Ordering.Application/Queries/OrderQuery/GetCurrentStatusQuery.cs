@@ -3,7 +3,6 @@
 namespace Fsel.Ordering.Application.Queries.OrderQuery
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Shared.Enums;
@@ -55,14 +54,14 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             }
 
             DateTime currentDate = DateTime.UtcNow;
-            var currentExpireDate = query.ExpireDate;
+            var currentExpireDate = student.ExpiredDate ?? query.ExpireDate;
             var checkTrial = query.IsTrial;
 
-            if (!student.ExpiredDate.HasValue)
+            if (!currentExpireDate.HasValue)
             {
                 currentStatus = EnumTrialRegistrationStatus.New;
             }
-            else if (student.ExpiredDate.Value.Date < currentDate.Date)
+            else if (currentExpireDate.Value.Date < currentDate.Date)
             {
                 currentStatus = EnumTrialRegistrationStatus.Expired;
             }

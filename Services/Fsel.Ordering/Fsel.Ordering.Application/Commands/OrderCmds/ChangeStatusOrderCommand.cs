@@ -22,7 +22,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
     using Fsel.Ordering.Infrastructure.ValueSettings;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -107,7 +106,7 @@ IPackageEventRepository packageEventRepository)
             }
             var student = studentResult.Content?.Result;
 
-            var courseResults = await _lmsCourseService.GetCoursesByIdsAsync(new List<Guid> { student?.CourseId ?? default });
+            var courseResults = await _lmsCourseService.GetCoursesByIdsAsync(new List<Guid> { student?.CourseId ?? order.CourseId ?? default });
             if (!courseResults.IsSuccessStatusCode)
             {
                 methodResult.AddError(courseResults.Error);
