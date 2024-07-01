@@ -67,13 +67,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult.MockTest));
                 return methodResult;
             }
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { mockTestResult.StudentId });
-            if (!studentResults.IsSuccessStatusCode)
+            var studentResult = await _userService.GetUserByStudentId(mockTestResult.StudentId);
+            if (!studentResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
                 return methodResult;
             }
-            var student = studentResults.Content?.Result?.FirstOrDefault();
+            var student = studentResult.Content?.Result;
             if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));

@@ -7,7 +7,6 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Shared.Enums;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
@@ -36,11 +35,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 
             MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
 
-            var @class = await _classRepository.Queryable
-                                            .Include(x => x.ClassStudents.Where(n => !n.IsDeleted))
-                                            .Where(e => e.Status != EnumClassStatus.Done && e.ClassStudents.Select(n => n.StudentId).Contains(request.StudentId))
-                                            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-
+            var @class = await _classRepository.Queryable.Include(x => x.ClassStudents.Where(n => !n.IsDeleted))
+                                            .FirstOrDefaultAsync(e => e.ClassStudents.Any(x => x.StudentId == request.StudentId && x.IsActive), cancellationToken);
             methodResult.Result = _mapper.Map<ClassModel>(@class);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

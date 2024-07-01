@@ -56,8 +56,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return methodResult;
             }
             var student = studentResult?.Content?.Result;
-            var level = student?.CourseLevel;
-            var studentId = student?.Id;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+            var level = student.CourseLevel;
+            var studentId = student.Id;
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {

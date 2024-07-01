@@ -91,13 +91,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             StudentModel? student;
             if (request.StudentId.HasValue)
             {
-                var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId.Value });
-                if (!studentResults.IsSuccessStatusCode)
+                var studentResult = await _userService.GetUserByStudentId(request.StudentId.Value);
+                if (!studentResult.IsSuccessStatusCode)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
                     return methodResult;
                 }
-                student = studentResults.Content?.Result?.FirstOrDefault();
+                student = studentResult.Content?.Result;
             }
             else
             {
@@ -302,7 +302,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
         private async Task UpdateVideoTimeCodeResultAsync(VideoTimeCode videoTimeCode, VideoResult videoResult, bool isSubmit, EnumCourseType courseType, StudentModel student, CancellationToken cancellationToken)
         {
-            var videoTimeCodeResult = _videoTimeCodeResultRepository.Queryable.First(x => x.VideoResultId == videoResult.Id && x.VideoTimeCodeId == videoTimeCode.Id);
+            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.FirstOrDefaultAsync(x => x.VideoResultId == videoResult.Id && x.VideoTimeCodeId == videoTimeCode.Id, cancellationToken);
             if (videoTimeCodeResult == null)
             {
                 return;
