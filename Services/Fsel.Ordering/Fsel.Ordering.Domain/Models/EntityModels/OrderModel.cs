@@ -27,5 +27,6 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public PackageModel? Package { get; set; }
         public Guid UserId { get; set; }
         public DateTime? ExpireDate { get; set; }
+        public Guid? EventId { get; set; }
     }
 }

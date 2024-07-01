@@ -57,7 +57,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForm?.ClassForumResults?.Select(x => x.Id).ToList(), UserId = _authContext.CurrentUserId });
                 var actions = actionsResult.Content?.Result;
 
-                var studentResult = await _userService.GetStudentsByStudentIdsAsync(classForumQuery!.ClassForumResults.Select(x => x.StudentId).ToList());
+                var studentResult = await _userService.GetStudentsByStudentIdsAsync(classForumQuery.ClassForumResults.Select(x => x.StudentId).ToList());
                 var students = studentResult.Content?.Result;
                 if (actions != null)
                 {
