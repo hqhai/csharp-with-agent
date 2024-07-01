@@ -126,17 +126,5 @@ namespace Fsel.Course.Lms.Api.Controllers
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-
-        /// <summary>
-        /// Integration Placement Test Result
-        /// </summary>
-        [HttpGet("integration-placement-test-results")]
-        [ProducesResponseType(typeof(MethodResult<IList<object>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetIntegrationPlacementTestResult([FromQuery] IntegrationPlacementTestResultsQuery query)
-        {
-            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
     }
 }

@@ -30,7 +30,6 @@ namespace Fsel.Identity.Application.Commands.LandingPages
         private readonly AppSetting _appSetting;
         private const string InstructUserNotExist = "Để tham gia vào chương trình này, quý khách truy cập theo đường dẫn dưới đây để xác nhận tạo tài khoản.";
         private const string InstructUserAlreadyExist = "Hệ thống nhận thấy email của bạn đã được đăng kí. Vui lòng truy cập đường dẫn để đăng nhập";
-        private const string RegisterUrl = "https://lms-testing.fsel.edu.vn/auth/register?name={0}&phone={1}&email={2}&birthdate={3}";
 
         public ReceiveDataFromLandingPageCommandHandler(UserManager<User> userManager, ISenderService senderService, ISystemService systemService, AppSetting appSetting)
         {
@@ -73,9 +72,15 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             }
             else
             {
+                var registerUrl = _appSetting.ConstantUrl?.RegisterUrl;
+                if (string.IsNullOrEmpty(registerUrl))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                    return methodResult;
+                }
                 model.Instruct = InstructUserNotExist;
                 model.NameContinue = "Tạo Tài Khoản Ngay";
-                model.Continue = string.Format(CultureInfo.InvariantCulture, RegisterUrl, model.FullName, model.PhoneNumber, model.Email, model.BirthDay);
+                model.Continue = string.Format(CultureInfo.InvariantCulture, registerUrl, model.FullName, model.PhoneNumber, model.Email, model.BirthDay);
             }
 
             await _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel

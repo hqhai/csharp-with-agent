@@ -72,7 +72,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            if (!request.CourseLevel.IsCheckCourseLevel(student.CourseLevel))
+            if (!student.CourseLevel.HasValue)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+            if (!request.CourseLevel.IsCheckCourseLevel(student.CourseLevel.Value))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.YouChoseTheWrongLevel), nameof(request.CourseLevel));
                 return methodResult;
@@ -102,9 +107,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             var course = courseResult.Content?.Result;
             var newOrder = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == request.UserId && p.Status == EnumOrderStatus.New, cancellationToken);
             var isOrderEmpty = newOrder == null;
-            var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
 
-            string code = codeSend.Result?.Code ?? string.Empty;
+            var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student.Human?.Code }, cancellationToken).ConfigureAwait(false);
+            string code = codeSend.Result ?? string.Empty;
 
             if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken) && newOrder != null && newOrder.Code != code)
             {
@@ -140,7 +145,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 await _userService.CreateStudentTrialRegistration();
 
                 var numberOfShield = package.Code.HasValue ? (int)package.Code.Value : default;
-                var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = request.UserId, CourseId = newOrder.CourseId, PackageId = newOrder.PackageId ?? default, NumberOfShield = numberOfShield });
+                var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = request.UserId, CourseId = request.CourseId, PackageId = newOrder.PackageId ?? default, NumberOfShield = numberOfShield });
                 if (!addStudentIntoClassResult.IsSuccessStatusCode)
                 {
                     methodResult.AddError(addStudentIntoClassResult.Error);
@@ -186,7 +191,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
         {
             order.FullName = student.Human?.FullName;
             order.Email = student.Human?.Email;
-            order.Country = EnumCountryKey.Vietnam.ToString();
             order.Status = EnumOrderStatus.New;
             order.UserId = student.Human?.UserId ?? default;
             order.Code = code;

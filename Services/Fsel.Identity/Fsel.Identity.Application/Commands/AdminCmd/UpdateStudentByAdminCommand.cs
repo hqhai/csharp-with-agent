@@ -164,11 +164,11 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             if (@class != null)
             {
                 userModel.CodeClass = @class.Code;
-                var package = await _orderService.GetPackages();
-                if (package.IsSuccessStatusCode)
-                {
-                    userModel.Membership = package.Content?.Result?.FirstOrDefault(p => p.Id == @class.PackageId)?.Code;
-                }
+            }
+            var package = await _orderService.GetPackages();
+            if (package.IsSuccessStatusCode)
+            {
+                userModel.Membership = package.Content?.Result?.FirstOrDefault(p => p.Id == student?.PackageId)?.Code;
             }
             return userModel;
         }

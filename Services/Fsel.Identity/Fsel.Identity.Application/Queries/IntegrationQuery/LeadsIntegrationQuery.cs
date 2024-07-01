@@ -59,27 +59,6 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 return methodResult;
             }
 
-            // lấy order
-            var queryOrder = new GetOrderByStatusQueryModel
-            {
-                StartDate = request.StartDate,
-                EndDate = request.EndDate,
-                Status = false
-            };
-            var orders = await _orderService.GetOrderByStatusAsync(queryOrder);
-            if (!orders.IsSuccessStatusCode)
-            {
-                methodResult.AddError(orders.Error);
-                return methodResult;
-            }
-            var orderResults = orders.Content?.Result;
-            if (orderResults == null)
-            {
-                methodResult.AddError(orders.Error);
-                return methodResult;
-            }
-            var userOrderIds = orderResults.Select(x => x.UserId).ToList();
-
             // lấy Pt
             var queryPtTest = new GetPTTestModel
             {
@@ -100,7 +79,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             }
             var userPtTestIds = ptTestResults.Select(x => x.UserId).ToList();
 
-            // lấy unit
+            // lấy unit lesson
             var queryUnits = await _lmsCourseService.GetUnitResults(queryPtTest);
             if (!queryUnits.IsSuccessStatusCode)
             {
@@ -115,28 +94,8 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             }
             var userUnitResultIds = unitResults.Select(x => x.UserId).ToList();
 
-            // lấy lesson
-            var queryLessons = await _lmsCourseService.GetLessonResults(queryPtTest);
-            if (!queryLessons.IsSuccessStatusCode)
-            {
-                methodResult.AddError(queryLessons.Error);
-                return methodResult;
-            }
-            var lessonResults = queryLessons.Content?.Result;
-            if (lessonResults == null)
-            {
-                methodResult.AddError(queryLessons.Error);
-                return methodResult;
-            }
-            var userLessonResultIds = lessonResults.Select(x => x.UserId).ToList();
-
-            //lấy User
+            //lấy User đăng ký trong khoảng thời gian
             var users = await _humanRepository.Queryable
-                                              .Include(x => x.User)
-                                              .Include(x => x.Student)
-                                              .ThenInclude(x => x!.ParentStudents)
-                                              .ThenInclude(x => x.Parent)
-                                              .ThenInclude(x => x!.Human)
                                               .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate))
                                               .ToListAsync(cancellationToken);
             if (users == null)
@@ -146,37 +105,72 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             }
             var userIdentityIds = users.Select(x => x.UserId ?? Guid.Empty).ToList();
 
-            // Hợp nhất UserId
-            var listUserIds = userIdentityIds.Concat(userPtTestIds).Concat(userUnitResultIds).Concat(userLessonResultIds).Concat(userOrderIds).ToList();
-            var distinctUserIds = listUserIds.Distinct().ToList();
+            // hợp nhất UserId chưa có order
+            var userIds = userIdentityIds.Concat(userPtTestIds).Concat(userUnitResultIds).ToList();
+            var distinctUserIds = userIds.Distinct().ToList();
+
+            // lấy order
+            var queryOrder = new GetOrderByStatusQueryModel
+            {
+                StartDate = request.StartDate,
+                EndDate = request.EndDate,
+                Status = false,
+                UserIds = distinctUserIds
+            };
+            var orders = await _orderService.GetOrderByStatusAsync(queryOrder);
+            if (!orders.IsSuccessStatusCode)
+            {
+                methodResult.AddError(orders.Error);
+                return methodResult;
+            }
+            var orderResults = orders.Content?.Result;
+            if (orderResults == null)
+            {
+                methodResult.AddError(orders.Error);
+                return methodResult;
+            }
+            var userOrderIds = orderResults.Select(x => x.UserId).ToList();
+            var distinctUserIdHasOrders = userOrderIds.Distinct().ToList();
+
+            // lấy all user từ list hợp nhất
+            var userCombines = await _humanRepository.Queryable
+                                                     .Include(x => x.User)
+                                                     .Include(x => x.Student)
+                                                     .ThenInclude(x => x!.ParentStudents)
+                                                     .ThenInclude(x => x.Parent)
+                                                     .ThenInclude(x => x!.Human)
+                                                     .Where(x => x.UserId.HasValue && distinctUserIdHasOrders.Contains(x.UserId.Value))
+                                                     .ToListAsync(cancellationToken);
 
             // lấy thông tin trường học
-            var schoolIds = users.Where(x => x.Student != null && x.Student.SchoolId.HasValue).Select(x => x.Student?.SchoolId ?? Guid.Empty).ToList();
+            var schoolIds = userCombines.Where(x => x.Student != null && x.Student.SchoolId.HasValue).Select(x => x.Student?.SchoolId ?? Guid.Empty).ToList();
             var school = await _systemService.GetSchoolByIds(schoolIds);
             var schoolResult = school.Content?.Result;
 
             // lấy lần đăng nhập cuối cùng
-            var featureAccessTime = await _systemService.GetFeatureAccessTimeByUserIds(distinctUserIds);
+            var featureAccessTime = await _systemService.GetFeatureAccessTimeByUserIds(distinctUserIdHasOrders);
             var featureAccessTimeResult = featureAccessTime.Content?.Result;
+
+            // lọc nhưng user đã có expired date
+
 
             #region SetData
             List<LeadsIntegrationModel> leadsIntegrations = new List<LeadsIntegrationModel>();
-            leadsIntegrations = _mapper.Map(users, leadsIntegrations);
+            leadsIntegrations = _mapper.Map(userCombines, leadsIntegrations);
 
             leadsIntegrations.ForEach(item =>
             {
                 var orderItems = orderResults.Where(x => x.UserId == item.UserId).ToList();
                 var ptTestResult = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId);
                 var unitResult = unitResults.FirstOrDefault(x => x.UserId == item.UserId);
-                var lessonResult = lessonResults.FirstOrDefault(x => x.UserId == item.UserId);
                 item.LastDate = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item.UserId)?.LastVisited;
                 item.AccessTime = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item.UserId)?.AccessTime;
                 item.Status = EnumIntegrationStatus.Register;
                 item.LongPathSchool = schoolResult?.FirstOrDefault(x => x.Id == item.SchoolId)?.LongPath;
                 item.LongPathLocation = schoolResult?.FirstOrDefault(x => x.Id == item.SchoolId)?.Location?.LongPath;
                 item.CurrentUnit = unitResult?.Name;
-                item.CurrentLesson = lessonResult?.CurrentLesson;
-                item.LessonCompleted = lessonResult?.LessonCompleted;
+                item.CurrentLesson = unitResult?.CurrentLesson;
+                item.LessonCompleted = unitResult?.LessonCompleted;
 
                 if (ptTestResult != null)
                 {
@@ -211,6 +205,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             #endregion
 
             leadsIntegrations = leadsIntegrations.OrderByDescending(x => x.Status).ToList();
+
             int totalItem = leadsIntegrations.Count;
             var lists = leadsIntegrations
                     .ApplySortAndPaging(request)

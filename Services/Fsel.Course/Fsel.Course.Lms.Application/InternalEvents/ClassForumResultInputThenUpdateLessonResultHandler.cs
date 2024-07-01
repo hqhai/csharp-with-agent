@@ -21,12 +21,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         INotificationHandler<EntityChangedEvent<ClassForumResult>>, INotificationHandler<EntityCreatedEvent<ClassForumResult>>
     {
         private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly IClassForumDetailResultRepository _classForumDetailResultRepository;
 
-        public ClassForumResultInputThenUpdateLessonResultHandler(ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, IClassForumDetailResultRepository classForumDetailResultRepository) : base(lessonResultRepository, systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService)
+        public ClassForumResultInputThenUpdateLessonResultHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, ILessonResultRepository lessonResultRepository, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, lessonResultRepository, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService)
         {
             _lessonResultRepository = lessonResultRepository;
-            _classForumDetailResultRepository = classForumDetailResultRepository;
         }
 
         public async Task Handle(EntityChangedEvent<ClassForumResult> notification, CancellationToken cancellationToken)
@@ -52,11 +50,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 return;
             }
 
-            var classForumDetailResults = await _classForumDetailResultRepository.Queryable.Where(x => x.ClassForumResultId == classForumResult.Id).ToListAsync(cancellationToken);
-            if (!classForumDetailResults.Any())
-            {
-                await UpdateHomeWorksAsync(classForumResult, cancellationToken);
-            }
+            await UpdateHomeWorksAsync(classForumResult, cancellationToken);
             await UpdateLessonResultAsync(lessonResult, cancellationToken).ConfigureAwait(false);
         }
 

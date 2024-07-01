@@ -64,20 +64,20 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                                               .ThenInclude(x => x!.Human)
                                               .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.StudentId, cancellationToken);
                 student = userView?.Human?.Student;
-                if (student?.SchoolId != null)
-                {
-                    var schoolResult = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
-                    {
-                        Filters = new List<GenericFilterModel>() { new GenericFilterModel { Property = "Id", Operator = Common.Enums.EnumFilterOperator.Equal, Value = student.SchoolId } },
-                        IncludePaths = new List<string>() { "School" }
-                    });
-                    if (!schoolResult.IsSuccessStatusCode || schoolResult.Content?.Result == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                        return methodResult;
-                    }
-                    student.School = schoolResult.Content?.Result?.FirstOrDefault()?.Name;
-                }
+                //if (student?.SchoolId != null)
+                //{
+                //    var schoolResult = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
+                //    {
+                //        Filters = new List<GenericFilterModel>() { new GenericFilterModel { Property = "Id", Operator = Common.Enums.EnumFilterOperator.Equal, Value = student.SchoolId } },
+                //        IncludePaths = new List<string>() { "School" }
+                //    });
+                //    if (!schoolResult.IsSuccessStatusCode || schoolResult.Content?.Result == null)
+                //    {
+                //        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                //        return methodResult;
+                //    }
+                //    student.School = schoolResult.Content?.Result?.FirstOrDefault()?.Name;
+                //}
                 parentStudent = student?.ParentStudents.FirstOrDefault();
             }
             var userModel = _mapper.Map<StudentModel>(userView);
@@ -93,13 +93,13 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             if (@class != null)
             {
                 userModel.CodeClass = classStudent?.Content?.Result?.Code;
-                var package = await _orderService.GetPackages();
-                if (package.IsSuccessStatusCode)
-                {
-                    userModel.Membership = package.Content?.Result?.FirstOrDefault(p => p.Id == @class.PackageId)?.Code;
-                }
             }
-
+            var packageResult = await _orderService.GetPackages();
+            var packages = packageResult?.Content?.Result;
+            if (packages != null && packages.Any())
+            {
+                userModel.Membership = packages.FirstOrDefault(p => p.Id == student?.PackageId)?.Code;
+            }
             methodResult.Result = userModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

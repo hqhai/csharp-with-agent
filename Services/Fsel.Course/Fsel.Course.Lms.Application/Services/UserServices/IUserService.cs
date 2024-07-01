@@ -76,6 +76,9 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Post("/v1/student/get-student-by-emails")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByEmailsAsync([FromBody] IList<string> emails);
 
+        [Put("/v1/student/update-course-to-student/{courseId}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> UpdateCourseToStudentAsync([FromRoute] Guid courseId);
+
         [Post("/v1/student/get-student-by-full-names")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByFullNamesAsync([FromBody] IList<string> fullNames);
 
@@ -87,5 +90,11 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Post("/v1/user-setting/users")]
         Task<IApiResponse<MethodResult<List<UserSettingModel>>>> GetListUserSetting([Body] UserSettingQuery query);
+
+        [Get("/v1/user-course-setting")]
+        Task<IApiResponse<MethodResult<IList<UserCourseSettingModel>>>> GetUserCourseSettingsAsync();
+
+        [Post("/v1/student/get-by-user-ids")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetUserByIds([FromBody] IList<Guid>? userIds);
     }
 }

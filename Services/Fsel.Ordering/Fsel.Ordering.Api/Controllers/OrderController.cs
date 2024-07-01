@@ -30,11 +30,11 @@ namespace Fsel.Ordering.Api.Controllers
         /// Generate Random Order
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<GenerateRamdomOrderModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GenerateRandomOrder([FromQuery] GenerateRamdomOrderQuery query)
+        public async Task<IActionResult> GenerateRandomOrder([FromQuery] GenerateRandomOrderQuery query)
         {
-            MethodResult<GenerateRamdomOrderModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -98,7 +98,6 @@ namespace Fsel.Ordering.Api.Controllers
             return commandResult.GetActionResult();
         }
 
-
         /// <summary>
         /// Check Current Status Of User
         /// </summary>
@@ -114,10 +113,10 @@ namespace Fsel.Ordering.Api.Controllers
         /// <summary>
         /// Search Course
         /// </summary>
-        [HttpGet("get-order-by-status")]
+        [HttpPost("get-order-by-status")]
         [ProducesResponseType(typeof(MethodResult<IList<OrderSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetOrderByStatus([FromQuery] GetOrderByStatusQuery query)
+        public async Task<IActionResult> GetOrderByStatus([FromBody] GetOrderByStatusQuery query)
         {
             MethodResult<IList<OrderSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
