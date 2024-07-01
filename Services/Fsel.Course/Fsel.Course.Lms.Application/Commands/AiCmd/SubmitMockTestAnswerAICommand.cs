@@ -165,7 +165,14 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             #region Retry
 
             //set up thời gian retry
-            if (mockTestAnswer.RetryTime > Max_Times_Retry)
+            if (mockTestAnswer != null && (taskResponse == null || coherence == null || lexicalResource == null || grammaticalRange == null) && mockTestAnswer.RetryTime <= Max_Times_Retry)
+            {
+                var model = _mapper.Map<SetTimeRetryMockTestModel>(request);
+                model.StartDate = DateTime.UtcNow;
+                await _setTimeRetryMockTestPublisher.Publish(model, cancellationToken);
+                mockTestAnswer.RetryTime += 1;
+            }
+            else if (mockTestAnswer.RetryTime > Max_Times_Retry)
             {
                 SendEmailCommandModel model = new SendEmailCommandModel
                 {
@@ -176,13 +183,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 };
 
                 await _senderService.SendEmailAsync(model);
-            }
-            else if (mockTestAnswer != null && (taskResponse == null || coherence == null || lexicalResource == null || grammaticalRange == null) && mockTestAnswer.RetryTime <= Max_Times_Retry)
-            {
-                var model = _mapper.Map<SetTimeRetryMockTestModel>(request);
-                model.StartDate = DateTime.UtcNow;
-                await _setTimeRetryMockTestPublisher.Publish(model, cancellationToken);
-                mockTestAnswer.RetryTime += 1;
             }
 
             // Nếu là last mocktest mà retry 3 lần gpt vẫn chưa cho về kết quả thì khóa luồng, không cho đi tiếp, còn nếu không thì luồng vẫn done và học sinh có thể tiếp tục
