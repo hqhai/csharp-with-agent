@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Commands.VideoResultCmd;
     using Fsel.Course.Lms.Application.Queries.VideoQuery;
     using Fsel.Course.Lms.Application.Queues.Publishers;
@@ -57,8 +58,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly ILogger<object> _logger;
         private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly ICourseResultRepository _courseResultRepository;
 
-        public CreateVideoTimeCodeAnswerByTimeCodeCommandHandler(QuestBoardPublisher questBoardPublisher, CourseDbContext dbContext, IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository, DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher, IVideoResultRepository videoResultRepository, IExerciseRepository exerciseRepository, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IVideoTimeCodeRepository videoTimeCodeRepository, VideoConverter videoConverter, IUserService userService, ISystemService systemService, AuthContext authContext, IMediator mediator, ICourseRepository courseRepository, ILessonResultRepository lessonResultRepository, IQuestionRepository questionRepository, QuestionConverter questionConverter, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILogger<object> logger)
+        public CreateVideoTimeCodeAnswerByTimeCodeCommandHandler(QuestBoardPublisher questBoardPublisher, ICourseResultRepository courseResultRepository, CourseDbContext dbContext, IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository, DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher, IVideoResultRepository videoResultRepository, IExerciseRepository exerciseRepository, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IVideoTimeCodeRepository videoTimeCodeRepository, VideoConverter videoConverter, IUserService userService, ISystemService systemService, AuthContext authContext, IMediator mediator, ICourseRepository courseRepository, ILessonResultRepository lessonResultRepository, IQuestionRepository questionRepository, QuestionConverter questionConverter, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILogger<object> logger)
         {
             _dbContext = dbContext;
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
@@ -79,6 +81,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
             _logger = logger;
             _questBoardPublisher = questBoardPublisher;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<VideoTimeCodeModel>> Handle(CreateVideoTimeCodeAnswerByTimeCodeCommand request, CancellationToken cancellationToken)
@@ -159,8 +162,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                         videoTimeCodeResult.HighestStreak = await _videoConverter.GetHighestStreak(videoTimeCodeResult);
                     }
                 }
-
-                await UpdateVideoTimeCodeResultAsync(videoTimeCode, videoResult, request.IsSubmit, course.CourseType, student, cancellationToken);
+                var courseResultId = _courseResultRepository.Queryable.FirstOrDefault(x => x.CourseId == lessonResult.CourseId && x.StudentId == lessonResult.StudentId)?.Id;
+                await UpdateVideoTimeCodeResultAsync(videoTimeCode, videoResult, courseResultId, request.IsSubmit, course.CourseType, student, cancellationToken);
                 _videoResultRepository.Update(videoResult);
                 await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -300,7 +303,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             return answer;
         }
 
-        private async Task UpdateVideoTimeCodeResultAsync(VideoTimeCode videoTimeCode, VideoResult videoResult, bool isSubmit, EnumCourseType courseType, StudentModel student, CancellationToken cancellationToken)
+        private async Task UpdateVideoTimeCodeResultAsync(VideoTimeCode videoTimeCode, VideoResult videoResult, Guid? courseResultId, bool isSubmit, EnumCourseType courseType, StudentModel student, CancellationToken cancellationToken)
         {
             var videoTimeCodeResult = _videoTimeCodeResultRepository.Queryable.First(x => x.VideoResultId == videoResult.Id && x.VideoTimeCodeId == videoTimeCode.Id);
             if (videoTimeCodeResult == null)
@@ -313,7 +316,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             {
                 var correctCount = await _videoConverter.UpdateVideoAnswers(videoTimeCode, videoTimeCodeResult, isDoneTimeCode);
                 videoTimeCodeResult = await GetTokenVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode, courseType, correctCount);
-                await SendTokenHistoryAsync(videoTimeCodeResult, student, cancellationToken).ConfigureAwait(false);
+                await SendTokenHistoryAsync(videoTimeCodeResult, courseResultId, student, cancellationToken).ConfigureAwait(false);
                 var (skillScoreUngradeds, skillScores, isDone) = await GetSkillScoresAsync(videoTimeCodeResult, cancellationToken);
                 if (skillScoreUngradeds != null && skillScoreUngradeds.Any())
                 {
@@ -336,7 +339,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task SendTokenHistoryAsync(VideoTimeCodeResult videoTimeCodeResult, StudentModel student, CancellationToken cancellationToken)
+        private async Task SendTokenHistoryAsync(VideoTimeCodeResult videoTimeCodeResult, Guid? courseResultId, StudentModel student, CancellationToken cancellationToken)
         {
             if (videoTimeCodeResult.Status != EnumResultStatus.Done)
             {
@@ -352,6 +355,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                         ObjectId = videoTimeCodeResult.Id,
                         VolatileToken = tokensAchieved,
                         Feature = EnumTokenFeature.Learn,
+                        CourseResultId =  courseResultId,
                         Mission = videoTimeCodeResult.Status == EnumResultStatus.New ? EnumTokenMission.TimeCodeFirstSubmit : EnumTokenMission.TimeCodeSecondSubmit,
                         Type = EnumTokenHistoryType.Recevived,
                         UserId = student.Human?.UserId ?? default,
