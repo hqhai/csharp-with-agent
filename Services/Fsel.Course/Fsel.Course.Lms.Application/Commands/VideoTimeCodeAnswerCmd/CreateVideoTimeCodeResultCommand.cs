@@ -68,11 +68,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoTimeCodeId == request.VideoTimeCodeId && x.VideoResultId == request.VideoResultId).FirstOrDefaultAsync();
             if (videoTimeCodeResult == null)
             {
-                _logger.LoggerRequest(new
-                {
-                    Timestamp = DateTimeOffset.UtcNow.ToString("o"),
-                    Request = ConvertHelper.Serialize(request)
-                });
+                _logger.LoggerRequest(request);
                 videoTimeCodeResult = new VideoTimeCodeResult
                 {
                     VideoResultId = request.VideoResultId,
