@@ -199,6 +199,11 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             });
             #endregion
 
+            if (request.UserId != null)
+            {
+                clientsIntegrations = clientsIntegrations.Where(x => x.UserId == request.UserId).ToList();
+            }
+
             int totalItem = clientsIntegrations.Count;
             var lists = clientsIntegrations
                     .ApplySortAndPaging(request)
