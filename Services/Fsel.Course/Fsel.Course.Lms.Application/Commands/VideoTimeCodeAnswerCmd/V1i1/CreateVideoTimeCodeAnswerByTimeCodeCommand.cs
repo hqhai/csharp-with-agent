@@ -18,7 +18,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Commands.VideoResultCmd;
     using Fsel.Course.Lms.Application.Queries.VideoQuery;
     using Fsel.Course.Lms.Application.Queues.Publishers;
@@ -85,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             _logger = logger;
             _questBoardPublisher = questBoardPublisher;
             _courseResultRepository = courseResultRepository;
-            IMapper mapper,
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<VideoTimeCodeModel>> Handle(CreateVideoTimeCodeAnswerByTimeCodeCommand request, CancellationToken cancellationToken)
