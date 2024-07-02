@@ -42,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         private readonly IMediator _mediator;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly ICourseRepository _courseRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ISystemService _systemService;
@@ -51,9 +52,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         private readonly ILogger<object> _logger;
         private readonly QuestBoardPublisher _questBoardPublisher;
 
-        public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository, QuestionConverter questionConverter, IHomeWorkAnswerRepository homeWorkAnswerRepository, IHomeWorkRepository homeWorkRepository, IMediator mediator, IUserService userService, AuthContext authContext, ICourseRepository courseRepository, ILessonResultRepository lessonResultRepository, ISystemService systemService, FinishOneHomeWorkPublisher finishOneHomeWorkPublisher, IQuestionRepository questionRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILogger<object> logger, QuestBoardPublisher questionBoardPublisher)
+        public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository, ICourseResultRepository courseResultRepository, QuestionConverter questionConverter, IHomeWorkAnswerRepository homeWorkAnswerRepository, IHomeWorkRepository homeWorkRepository, IMediator mediator, IUserService userService, AuthContext authContext, ICourseRepository courseRepository, ILessonResultRepository lessonResultRepository, ISystemService systemService, FinishOneHomeWorkPublisher finishOneHomeWorkPublisher, IQuestionRepository questionRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILogger<object> logger, QuestBoardPublisher questionBoardPublisher)
         {
             _homeWorkResultRepository = homeWorkResultRepository;
+            _courseResultRepository = courseResultRepository;
             _questionConverter = questionConverter;
             _homeWorkAnswerRepository = homeWorkAnswerRepository;
             _homeWorkRepository = homeWorkRepository;
@@ -130,7 +132,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 return methodResult;
             }
 
-            var methodHomeWork = await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, course.CourseType, student, cancellationToken);
+            var methodHomeWork = await UpdateHomeWorkResult(homeWorkResult, lessonResult, request.IsSubmit, course.CourseType, student, cancellationToken);
             if (!methodHomeWork.IsOK)
             {
                 methodResult.AddErrorBadRequest(methodHomeWork.ErrorMessages);
@@ -216,7 +218,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             return homeWorkAnswer;
         }
 
-        private async Task<MethodResult<bool>> UpdateHomeWorkResult(HomeWorkResult? homeWorkResult, bool isSubmit, EnumCourseType courseType, StudentModel student, CancellationToken cancellationToken)
+        private async Task<MethodResult<bool>> UpdateHomeWorkResult(HomeWorkResult? homeWorkResult, LessonResult lessonResult, bool isSubmit, EnumCourseType courseType, StudentModel student, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(homeWorkResult);
             var methodResult = new MethodResult<bool>();
@@ -258,6 +260,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                             {
                                 ObjectId = homeWorkResult.Id,
                                 VolatileToken = tokensAchieved,
+                                CourseResultId = _courseResultRepository.Queryable.FirstOrDefault(x => x.CourseId == lessonResult.CourseId && x.StudentId == lessonResult.StudentId)?.Id,
                                 Feature = EnumTokenFeature.Learn,
                                 Mission = homeWorkResult.SubmissionCount == EnumSubmissionCount.FirstSubmit ? EnumTokenMission.HomeworkFirstSubmit : EnumTokenMission.HomeworkSecondSubmit,
                                 Type = EnumTokenHistoryType.Recevived,
