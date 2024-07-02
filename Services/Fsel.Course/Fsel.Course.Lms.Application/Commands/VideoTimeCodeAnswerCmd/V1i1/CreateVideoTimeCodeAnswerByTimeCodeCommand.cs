@@ -314,7 +314,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 VideoTimeCodeResult = videoTimeCodeResult,
                 VideoTimeCode = videoTimeCode
             };
-            _logger.LogError("Log VideoTimeCodeResult : " + ConvertHelper.Serialize(requestInfo));
+            _logger.LogError("Log_CreateVideoTimeCodeAnswerByTimeCodeCommand_Handle_UpdateVideoTimeCodeResultAsync : " + ConvertHelper.Serialize(requestInfo));
 
             var isDoneTimeCode = videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone || videoTimeCodeResult.Status == EnumResultStatus.Process;
             if (isSubmit)
@@ -346,7 +346,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 _videoTimeCodeResultRepository.Update(videoTimeCodeResult, false, x => x.RetryWorkingTime, x => x.WorkingTime);
             }
 
-            _logger.LogError("Log VideoTimeCodeResult To Update : " + ConvertHelper.Serialize(requestInfo));
+            _logger.LogError("Log_CreateVideoTimeCodeAnswerByTimeCodeCommand_Handle_UpdateVideoTimeCodeResultAsync_Update : " + ConvertHelper.Serialize(requestInfo));
             await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
