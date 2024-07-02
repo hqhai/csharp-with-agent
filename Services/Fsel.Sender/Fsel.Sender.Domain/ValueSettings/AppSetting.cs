@@ -8,7 +8,13 @@ namespace Fsel.Sender.Domain.ValueSettings
     {
         public Smtp? Smtp { get; set; }
         public SmtpGoogle? SmtpGoogle { get; set; }
+        public EmailConfig? EmailConfig { get; set; }
         public new Services? Services { get; set; }
+    }
+
+    public class EmailConfig
+    {
+        public ICollection<string>? BCCEmail { get; set; }
     }
 
     public class Smtp

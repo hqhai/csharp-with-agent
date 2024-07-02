@@ -7,6 +7,8 @@ namespace Fsel.Identity.Domain.Models.QueryModels.Integration
     public class IntegrationQueryModel : BaseQueryModel
     {
         public DateTime StartDate { get; set; }
+
         public DateTime EndDate { get; set; }
+
     }
 }
