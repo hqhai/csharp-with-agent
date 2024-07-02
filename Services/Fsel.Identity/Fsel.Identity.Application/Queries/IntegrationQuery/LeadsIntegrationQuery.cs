@@ -17,12 +17,13 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels.IntegrationModel;
+    using Fsel.Identity.Domain.Models.QueryModels.Integration;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class LeadsIntegrationQuery : Domain.Models.QueryModels.Integration.IntegrationQueryModel, IRequest<MethodResult<PagingItemsModel<LeadsIntegrationModel>>>
+    public class LeadsIntegrationQuery : IntegrationQueryModel, IRequest<MethodResult<PagingItemsModel<LeadsIntegrationModel>>>
     {
     }
 
@@ -241,11 +242,6 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             #endregion
 
             leadsIntegrations = leadsIntegrations.OrderByDescending(x => x.Status).ToList();
-
-            if (request.UserId != null)
-            {
-                leadsIntegrations = leadsIntegrations.Where(x => x.UserId == request.UserId).ToList();
-            }
 
             int totalItem = leadsIntegrations.Count;
             var lists = leadsIntegrations.ApplySortAndPaging(request).ToList();

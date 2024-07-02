@@ -23,7 +23,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ClientIntegrationQuery : Domain.Models.QueryModels.Integration.IntegrationQueryModel, IRequest<MethodResult<PagingItemsModel<ClientsIntegrationModel>>>
+    public class ClientIntegrationQuery : IntegrationQueryModel, IRequest<MethodResult<PagingItemsModel<ClientsIntegrationModel>>>
     {
     }
 
@@ -198,11 +198,6 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 item.OrderIntegration = orderIntegrations;
             });
             #endregion
-
-            if (request.UserId != null)
-            {
-                clientsIntegrations = clientsIntegrations.Where(x => x.UserId == request.UserId).ToList();
-            }
 
             int totalItem = clientsIntegrations.Count;
             var lists = clientsIntegrations
