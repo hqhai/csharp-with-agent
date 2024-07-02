@@ -6,6 +6,8 @@ using Fsel.Realtime.Application.Trackers;
 using Fsel.Shared.Models.ShareModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
+using static Sentry.MeasurementUnit;
 
 // Đảm bảo rằng bạn đã thêm namespace của ConnectionTracker
 
@@ -16,27 +18,34 @@ namespace Fsel.Realtime.Application.Hubs
     {
         private readonly FeatureAccessTimePublisher _accessTimePublisher;
         private readonly AuthContext _authContext;
+        private readonly ILogger<FeatureAccessTimeHub> _logger;
 
-        public FeatureAccessTimeHub(FeatureAccessTimePublisher accessTimePublisher, AuthContext authContext, IIpApiService ipApiService) : base(authContext, ipApiService)
+        public FeatureAccessTimeHub(FeatureAccessTimePublisher accessTimePublisher, AuthContext authContext, IIpApiService ipApiService, ILogger<FeatureAccessTimeHub> logger) : base(authContext, ipApiService)
         {
             _accessTimePublisher = accessTimePublisher;
             _authContext = authContext;
+            _logger = logger;
         }
 
         public override async Task OnConnectedHubAsync()
         {
             await Groups.AddGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
             ConnectionTracker.Instance.RecordConnectionStart(Context.ConnectionId);
+            _logger.LogInformation($"Connected FeatureAccessTime Socket: {Context.ConnectionId}, DateTime: {DateTime.UtcNow}");
         }
         public async Task AccessFeature(TrackingTimeModel model)
         {
             var trackingModel = ConnectionTracker.Instance.GetModel(Context.ConnectionId);
+
+            _logger.LogInformation($"Invoke FeatureAccessTime Socket: {Context.ConnectionId}, invokeModek: {trackingModel}");
 
             if (trackingModel != null)
             {
                 var duration = ConnectionTracker.Instance.RecordConnectionEnd(Context.ConnectionId);
                 trackingModel.AccessTime = duration;
                 await _accessTimePublisher.Publish(trackingModel, CancellationToken.None);
+             _logger.LogInformation($"Invoke FeatureAccessTime Socket: {Context.ConnectionId},  duration : {duration}");
+
             }
 
             ConnectionTracker.Instance.RecordConnectionStart(Context.ConnectionId, model);
@@ -49,6 +58,7 @@ namespace Fsel.Realtime.Application.Hubs
 
             var trackingModel = ConnectionTracker.Instance.GetModel(Context.ConnectionId);
 
+            _logger.LogInformation($"Disconect FeatureAccessTime Socket: {Context.ConnectionId},  duration : {duration}");
             if (trackingModel != null)
             {
                 trackingModel.AccessTime = duration;
