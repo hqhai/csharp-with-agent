@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
@@ -307,6 +308,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             {
                 return;
             }
+            var requestInfo = new
+            {
+                IsSubmit = isSubmit,
+                VideoTimeCodeResult = videoTimeCodeResult,
+                VideoTimeCode = videoTimeCode
+            };
+            _logger.LogError("Log_CreateVideoTimeCodeAnswerByTimeCodeCommand_Handle_UpdateVideoTimeCodeResultAsync : " + ConvertHelper.Serialize(requestInfo));
 
             var isDoneTimeCode = videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone || videoTimeCodeResult.Status == EnumResultStatus.Process;
             if (isSubmit)
@@ -326,13 +334,19 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 videoTimeCodeResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
                 videoTimeCodeResult.SkillScores = skillScores;
                 videoTimeCodeResult.SkillScoreUngraded = skillScoreUngradeds;
+                videoTimeCodeResult.IsWorking = false;
+
+                _videoTimeCodeResultRepository.Update(videoTimeCodeResult, false, x => x.RetryWorkingTime, x => x.WorkingTime);
             }
-            else if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
+            else if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone && videoTimeCodeResult.Status == EnumResultStatus.New)
             {
                 videoTimeCodeResult.Status = EnumResultStatus.Process;
+                videoTimeCodeResult.IsWorking = false;
+
+                _videoTimeCodeResultRepository.Update(videoTimeCodeResult, false, x => x.RetryWorkingTime, x => x.WorkingTime);
             }
-            videoTimeCodeResult.IsWorking = false;
-            _videoTimeCodeResultRepository.Update(videoTimeCodeResult, false, x => x.RetryWorkingTime, x => x.WorkingTime);
+
+            _logger.LogError("Log_CreateVideoTimeCodeAnswerByTimeCodeCommand_Handle_UpdateVideoTimeCodeResultAsync_Update : " + ConvertHelper.Serialize(requestInfo));
             await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
