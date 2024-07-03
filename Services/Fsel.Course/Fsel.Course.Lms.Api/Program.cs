@@ -131,6 +131,8 @@ builder.Services.AddScoped<SectionGroupManagerConverter>();
 builder.Services.AddScoped<LinQHelper>();
 builder.Services.AddScoped<LinQAnswerHelper>();
 builder.Services.AddScoped<ChangeCourseHelper>();
+builder.Services.AddScoped<ManagerProgressHelper>();
+
 // Publisher
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SaveUserCourseSettingPublisher>();

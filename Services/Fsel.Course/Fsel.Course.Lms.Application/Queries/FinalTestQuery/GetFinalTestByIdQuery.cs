@@ -103,6 +103,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                                     .Include(x => x!.SectionGroupResults.Where(x => x.FinalTestResultId == finalTestResult.Id))
                                     .Where(x => x.FinalTestSections.Any(x => x.FinalTestId == finalTestResult.FinalTestId))
                                     .OrderBy(x => x.CourseSkill)
+                                    .AsNoTracking()
                                     .ToListAsync(cancellationToken);
         }
 
