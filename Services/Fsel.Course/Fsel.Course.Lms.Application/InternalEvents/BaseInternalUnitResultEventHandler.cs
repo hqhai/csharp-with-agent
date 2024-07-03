@@ -316,7 +316,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.IELTDescription);
                 var iELTDescriptions = ConvertHelper.DeserializeFromFilePath<IList<IELTDescription>>(path);
 
-                var bandScore = NumberHelper.RoundNumberDouble(mockTestResult.SkillScores!.Average(x => x.Scores), false);
+                var bandScore = NumberHelper.RoundNumberDouble(mockTestResult.SkillScores!.Average(x => x.Scores));
 
                 model.BandScore = bandScore == 0 ? "0" : bandScore.ToString("0.0", CultureInfo.CurrentCulture);
 
