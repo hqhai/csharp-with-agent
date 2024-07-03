@@ -11,7 +11,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.Helpers;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
-    using Fsel.Ordering.Application.Services.InAppPurchase;
+    using Fsel.Ordering.Application.Services.InAppPurchase.IOS;
     using Fsel.Ordering.Application.Services.SystemService;
     using Fsel.Ordering.Application.Services.SystemService.Models;
     using Fsel.Ordering.Application.Services.TrainingService;

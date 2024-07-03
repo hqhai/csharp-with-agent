@@ -8,8 +8,8 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
     using Fsel.Common.Constants;
     using Fsel.Ordering.Application.Commands.OrderCmds.v1i1;
     using Fsel.Ordering.Application.Queries.OrderQuery;
-    using Fsel.Ordering.Application.Services.InAppPurchase;
-    using Fsel.Ordering.Application.Services.InAppPurchase.Models;
+    using Fsel.Ordering.Application.Services.InAppPurchase.IOS;
+    using Fsel.Ordering.Application.Services.InAppPurchase.IOS.Models;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
