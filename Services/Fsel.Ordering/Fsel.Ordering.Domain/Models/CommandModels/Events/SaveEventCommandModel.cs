@@ -25,7 +25,7 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Events
         public decimal PriceMonth { get; set; }
         public int DayBonus { get; set; }
         public int MonthBonus { get; set; }
-        public EnumPackageSuggest? Suggest { get; set; }
+        public IList<EnumPackageSuggest>? Suggests { get; set; }
     }
 
     public class SaveEventTranslationCommandModel

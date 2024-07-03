@@ -23,7 +23,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ClientIntegrationQuery : Domain.Models.QueryModels.Integration.IntegrationQueryModel, IRequest<MethodResult<PagingItemsModel<ClientsIntegrationModel>>>
+    public class ClientIntegrationQuery : IntegrationQueryModel, IRequest<MethodResult<PagingItemsModel<ClientsIntegrationModel>>>
     {
     }
 

@@ -7,9 +7,8 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
     using System.Text;
     using Fsel.Common.Helpers;
     using Fsel.Ordering.Application.Commands.OrderCmds.v1i1;
-    using Fsel.Ordering.Application.Services.InAppPurchase.Models;
-    using Fsel.Ordering.Domain.Entities;
-    using Fsel.Shared.Enums;
+    using Fsel.Ordering.Application.Services.InAppPurchase.IOS;
+    using Fsel.Ordering.Application.Services.InAppPurchase.IOS.Models;
     using MediatR;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.Extensions.Logging;

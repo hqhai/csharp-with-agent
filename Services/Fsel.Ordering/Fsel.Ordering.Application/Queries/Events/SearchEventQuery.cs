@@ -35,7 +35,7 @@ namespace Fsel.Ordering.Application.Queries.Events
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<EventModel>>();
 
-            var query = _eventRepository.Queryable.OrderBy(p => p.Status).Select(x => new EventModel
+            var query = _eventRepository.Queryable.OrderByDescending(p => p.IsDefault).ThenBy(p => p.Status).Select(x => new EventModel
             {
                 Id = x.Id,
                 Code = x.Code,

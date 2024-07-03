@@ -1,8 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Application.Services.InAppPurchase
+namespace Fsel.Ordering.Application.Services.InAppPurchase.IOS
 {
-    using Fsel.Ordering.Application.Services.InAppPurchase.Models;
+    using Fsel.Ordering.Application.Services.InAppPurchase.IOS.Models;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
