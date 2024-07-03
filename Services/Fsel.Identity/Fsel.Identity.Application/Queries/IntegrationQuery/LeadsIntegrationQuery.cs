@@ -17,12 +17,13 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels.IntegrationModel;
+    using Fsel.Identity.Domain.Models.QueryModels.Integration;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class LeadsIntegrationQuery : Domain.Models.QueryModels.Integration.IntegrationQueryModel, IRequest<MethodResult<PagingItemsModel<LeadsIntegrationModel>>>
+    public class LeadsIntegrationQuery : IntegrationQueryModel, IRequest<MethodResult<PagingItemsModel<LeadsIntegrationModel>>>
     {
     }
 
@@ -133,11 +134,13 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             var userOrderIds = orderResults.Select(x => x.UserId).ToList();
             var distinctUserIdHasOrders = userOrderIds.Distinct().ToList();
 
+            var distinctFinalUserIds = distinctUserIds.Concat(distinctUserIdHasOrders).Distinct().ToList();
+
             var courseIntegrationQueryModel = new CourseIntegrationQueryModel
             {
                 StartDate = null,
                 EndDate = null,
-                UserIds = distinctUserIdHasOrders
+                UserIds = distinctFinalUserIds
             };
 
             // lấy Pt
@@ -175,7 +178,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                                      .ThenInclude(x => x!.ParentStudents)
                                                      .ThenInclude(x => x.Parent)
                                                      .ThenInclude(x => x!.Human)
-                                                     .Where(x => x.UserId.HasValue && distinctUserIdHasOrders.Contains(x.UserId.Value))
+                                                     .Where(x => x.UserId.HasValue && distinctFinalUserIds.Contains(x.UserId.Value))
                                                      .ToListAsync(cancellationToken);
 
             // lấy thông tin trường học
@@ -184,7 +187,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             var schoolResult = school.Content?.Result;
 
             // lấy lần đăng nhập cuối cùng
-            var featureAccessTime = await _systemService.GetFeatureAccessTimeByUserIds(distinctUserIdHasOrders);
+            var featureAccessTime = await _systemService.GetFeatureAccessTimeByUserIds(distinctFinalUserIds);
             var featureAccessTimeResult = featureAccessTime.Content?.Result;
 
             #region SetData
@@ -227,12 +230,13 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                         item.Status = EnumIntegrationStatus.Trial;
                         item.StartTrial = orderItem.CreatedDate ?? null;
                         item.ExpireDate = orderItem.ExpireDate ?? null;
-                        item.CourseLevel = orderItem.CourseName.ToString() ?? string.Empty;
                     }
-                    else
+
+                    if (orderItem.ExpireDate != null && !orderItem.IsTrial && orderItem.ExpireDate < DateTime.UtcNow)
                     {
-                        item.CourseLevel = orderItem.CourseName.ToString() ?? string.Empty;
+                        item.Status = EnumIntegrationStatus.Expired;
                     }
+                    item.CourseLevel = orderItem.CourseName.ToString() ?? string.Empty;
                 }
             });
             #endregion
@@ -240,9 +244,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             leadsIntegrations = leadsIntegrations.OrderByDescending(x => x.Status).ToList();
 
             int totalItem = leadsIntegrations.Count;
-            var lists = leadsIntegrations
-                    .ApplySortAndPaging(request)
-                    .ToList();
+            var lists = leadsIntegrations.ApplySortAndPaging(request).ToList();
 
             methodResult.Result = new PagingItemsModel<LeadsIntegrationModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
