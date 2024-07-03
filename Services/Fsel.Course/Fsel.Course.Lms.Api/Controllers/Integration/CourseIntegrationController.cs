@@ -27,10 +27,10 @@ namespace Fsel.Course.Lms.Api.Controllers.Integration
         /// <summary>
         /// Integration Placement Test Result
         /// </summary>
-        [HttpGet("integration-placement-test-results")]
+        [HttpPost("integration-placement-test-results")]
         [ProducesResponseType(typeof(MethodResult<IList<object>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetIntegrationPlacementTestResult([FromQuery] IntegrationPlacementTestResultsQuery query)
+        public async Task<IActionResult> GetIntegrationPlacementTestResult([FromBody] IntegrationPlacementTestResultsQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -39,10 +39,10 @@ namespace Fsel.Course.Lms.Api.Controllers.Integration
         /// <summary>
         /// Integration Unit
         /// </summary>
-        [HttpGet("integration-unit-results")]
+        [HttpPost("integration-unit-results")]
         [ProducesResponseType(typeof(MethodResult<IList<object>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetIntegrationUnitResults([FromQuery] IntegrationUnitResultsQuery query)
+        public async Task<IActionResult> GetIntegrationUnitResults([FromBody] IntegrationUnitResultsQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

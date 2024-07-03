@@ -9,5 +9,6 @@ namespace Fsel.Identity.Domain.Models.QueryModels.Integration
         public DateTime StartDate { get; set; }
 
         public DateTime EndDate { get; set; }
+
     }
 }

@@ -59,39 +59,41 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 return methodResult;
             }
 
-            // lấy pt
-            var queryPtTest = new GetPTTestModel
+            var courseIntegrationHasTimeQueryModel = new CourseIntegrationQueryModel
             {
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
+                UserIds = null
             };
-            var ptTest = await _lmsCourseService.GetPalcementTestResults(queryPtTest);
-            if (!ptTest.IsSuccessStatusCode)
-            {
-                methodResult.AddError(ptTest.Error);
-                return methodResult;
-            }
-            var ptTestResults = ptTest.Content?.Result;
-            if (ptTestResults == null)
-            {
-                methodResult.AddError(ptTest.Error);
-                return methodResult;
-            }
-            var userPtTestIds = ptTestResults.Select(x => x.UserId).ToList();
 
-            // lấy user
+            // lấy Pt có thay đổi trong khoảng thời gian
+            var ptTestHasTimes = await _lmsCourseService.GetPalcementTestResults(courseIntegrationHasTimeQueryModel);
+            if (!ptTestHasTimes.IsSuccessStatusCode)
+            {
+                methodResult.AddError(ptTestHasTimes.Error);
+                return methodResult;
+            }
+            var ptTestResultHasTimes = ptTestHasTimes.Content?.Result;
+            if (ptTestResultHasTimes == null)
+            {
+                methodResult.AddError(ptTestHasTimes.Error);
+                return methodResult;
+            }
+            var userPtTestHasTimeIds = ptTestResultHasTimes.Select(x => x.UserId).ToList();
+
+            //lấy User đăng ký trong khoảng thời gian
             var users = await _humanRepository.Queryable
-                                              .Where(x => x.UpdatedDate == null ? (x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date) : (x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date))
+                                              .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate))
                                               .ToListAsync(cancellationToken);
             if (users == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(users));
                 return methodResult;
             }
-            var userIdentityIds = users.Select(x => x.UserId ?? Guid.Empty).ToList();
+            var userIdentityHasTimeIds = users.Select(x => x.UserId ?? Guid.Empty).ToList();
 
-            // Hợp nhất UserId chưa có order
-            var userIds = userIdentityIds.Concat(userPtTestIds).ToList();
+            // hợp nhất UserId chưa có order
+            var userIds = userIdentityHasTimeIds.Concat(userPtTestHasTimeIds).ToList();
             var distinctUserIds = userIds.Distinct().ToList();
 
             // lấy order
@@ -117,6 +119,27 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             var userOrderIds = orderResults.Select(x => x.UserId).ToList();
             var distinctUserIdHasOrders = userOrderIds.Distinct().ToList();
+
+            // lấy Pt
+            var courseIntegrationQueryModel = new CourseIntegrationQueryModel
+            {
+                StartDate = null,
+                EndDate = null,
+                UserIds = distinctUserIdHasOrders
+            };
+
+            var ptTests = await _lmsCourseService.GetPalcementTestResults(courseIntegrationQueryModel);
+            if (!ptTestHasTimes.IsSuccessStatusCode)
+            {
+                methodResult.AddError(ptTests.Error);
+                return methodResult;
+            }
+            var ptTestResults = ptTests.Content?.Result;
+            if (ptTestResults == null)
+            {
+                methodResult.AddError(ptTestHasTimes.Error);
+                return methodResult;
+            }
 
             // lấy all user từ list hợp nhất
             var userCombines = await _humanRepository.Queryable
