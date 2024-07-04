@@ -7,17 +7,16 @@ namespace Fsel.Ordering.Api.Controllers.Admin
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Ordering.Application.Commands.PackageCmds;
+    using Fsel.Shared.Bases.V1;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/package")]
     [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     [ApiController]
-    public class PackageController : ControllerBase
+    public class PackageController : BaseController
     {
         private readonly IMediator _mediator;
 

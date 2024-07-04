@@ -11,17 +11,16 @@ namespace Fsel.Ordering.Api.Controllers.Admin
     using Fsel.Ordering.Application.Commands.OrderCmds.v1i1;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Bases.V1;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/order")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
-    public class OrderController : ControllerBase
+    public class OrderController : BaseController
     {
         private readonly IMediator _mediator;
 

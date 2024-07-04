@@ -11,16 +11,16 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
     using Fsel.Ordering.Application.Services.InAppPurchase;
     using Fsel.Ordering.Application.Services.InAppPurchase.Models;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Bases.V1i1;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
-    public class OrderController : ControllerBase
+    public class OrderController : BaseController
     {
         private readonly IMediator _mediator;
         private readonly INotificationProcessor _notificationProcessor;
