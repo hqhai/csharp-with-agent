@@ -11,12 +11,12 @@ namespace Fsel.Ordering.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Bases.V1;
     using Fsel.Common.Attributes;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/package")]
     [ApiController]
-    public class PackageController : ControllerBase
+    public class PackageController : BaseController
     {
         private readonly IMediator _mediator;
 
