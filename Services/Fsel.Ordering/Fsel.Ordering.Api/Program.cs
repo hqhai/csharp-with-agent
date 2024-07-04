@@ -5,6 +5,7 @@ using Fsel.Ordering.Application.Queues.Consumers;
 using Fsel.Ordering.Application.Queues.Publishers;
 using Fsel.Ordering.Application.Services.CourseService;
 using Fsel.Ordering.Application.Services.InAppPurchase;
+using Fsel.Ordering.Application.Services.InAppPurchase.Android;
 using Fsel.Ordering.Application.Services.InAppPurchase.IOS;
 using Fsel.Ordering.Application.Services.PayooService;
 using Fsel.Ordering.Application.Services.SenderService;
@@ -42,6 +43,7 @@ builder.Services.AddScoped<IOrderTransactionRepository, OrderTransactionReposito
 builder.Services.AddScoped<INotificationProcessor, NotificationProcessor>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IPackageEventRepository, PackageEventRepository>();
+builder.Services.AddScoped<IGooglePlayBillingService, GooglePlayBillingService>();
 builder.Services.AddScoped<VnPayLibrary>();
 
 // Publisher
