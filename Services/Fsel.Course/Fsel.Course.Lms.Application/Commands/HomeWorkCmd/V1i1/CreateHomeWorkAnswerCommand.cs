@@ -118,21 +118,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 return methodResult;
             }
 
-            var lessonResult = await _lessonResultRepository.GetByIdAsync(homeWorkResult.LessonResultId);
-            if (lessonResult == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
-                return methodResult;
-            }
-
-            var course = await _courseRepository.GetByIdAsync(lessonResult.CourseId);
-            if (course == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
-                return methodResult;
-            }
-
-            var methodHomeWork = await UpdateHomeWorkResult(homeWorkResult, lessonResult, request.IsSubmit, course.CourseType, student, cancellationToken);
+            var methodHomeWork = await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, student, cancellationToken);
             if (!methodHomeWork.IsOK)
             {
                 methodResult.AddErrorBadRequest(methodHomeWork.ErrorMessages);
@@ -218,10 +204,23 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             return homeWorkAnswer;
         }
 
-        private async Task<MethodResult<bool>> UpdateHomeWorkResult(HomeWorkResult? homeWorkResult, LessonResult lessonResult, bool isSubmit, EnumCourseType courseType, StudentModel student, CancellationToken cancellationToken)
+        private async Task<MethodResult<bool>> UpdateHomeWorkResult(HomeWorkResult? homeWorkResult, bool isSubmit, StudentModel student, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(homeWorkResult);
             var methodResult = new MethodResult<bool>();
+            if (homeWorkResult.LessonResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkResult.LessonResult));
+                return methodResult;
+            }
+
+            var course = await _courseRepository.GetByIdAsync(homeWorkResult.LessonResult.CourseId);
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                return methodResult;
+            }
+
             var homeWorkQuestionCount = await _homeWorkResultRepository.Queryable.Where(x => x.Id == homeWorkResult.Id).Select(x => new
             {
                 CourseSkill = x.HomeWork!.CourseSkill,
@@ -232,49 +231,53 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 TotalAnswer = x.HomeWorkAnswers.Count,
             }).FirstOrDefaultAsync(cancellationToken);
 
-            if (homeWorkQuestionCount != null)
+            if (homeWorkQuestionCount == null)
+            {
+                return methodResult;
+            }
+
+            if (homeWorkResult.Status == EnumResultStatus.New)
             {
                 homeWorkResult.Status = EnumResultStatus.Process;
-                if (isSubmit)
-                {
-                    var token = await GetToken(homeWorkResult.SubmissionCount, courseType);
-
-                    var isHomeWorkDone = homeWorkQuestionCount.CorrectCount == homeWorkQuestionCount.CorrectTotal || homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit;
-                    if (homeWorkQuestionCount.TotalAnswer > homeWorkQuestionCount.TotalQuestion)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumAnswerErrorCode.DuplicateAnswers));
-                        return methodResult;
-                    }
-                    if (homeWorkQuestionCount.TotalAnswer < homeWorkQuestionCount.TotalQuestion)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumAnswerErrorCode.NotAnsweredEnough));
-                        return methodResult;
-                    }
-
-                    var tokensAchieved = await UpdateHomeWorkAnswers(homeWorkResult, isHomeWorkDone) * token;
-                    if (tokensAchieved > 0)
-                    {
-                        var tokenHistorys = new List<TokenHistoryQueueModel>
-                        {
-                            new TokenHistoryQueueModel
-                            {
-                                ObjectId = homeWorkResult.Id,
-                                VolatileToken = tokensAchieved,
-                                CourseResultId = _courseResultRepository.Queryable.FirstOrDefault(x => x.CourseId == lessonResult.CourseId && x.StudentId == lessonResult.StudentId)?.Id,
-                                Feature = EnumTokenFeature.Learn,
-                                Mission = homeWorkResult.SubmissionCount == EnumSubmissionCount.FirstSubmit ? EnumTokenMission.HomeworkFirstSubmit : EnumTokenMission.HomeworkSecondSubmit,
-                                Type = EnumTokenHistoryType.Recevived,
-                                UserId = student.Human?.UserId ?? default,
-                            }
-                        };
-                        await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
-                    }
-
-                    homeWorkResult = await GetHomeWorkResult(homeWorkResult, homeWorkQuestionCount, isHomeWorkDone, (int)tokensAchieved);
-                }
-                _homeWorkResultRepository.Update(homeWorkResult);
-                await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
+            if (isSubmit)
+            {
+                var token = await GetToken(homeWorkResult.SubmissionCount, course.CourseType);
+
+                var isHomeWorkDone = homeWorkQuestionCount.CorrectCount == homeWorkQuestionCount.CorrectTotal || homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit;
+                if (homeWorkQuestionCount.TotalAnswer > homeWorkQuestionCount.TotalQuestion)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAnswerErrorCode.DuplicateAnswers));
+                    return methodResult;
+                }
+                if (homeWorkQuestionCount.TotalAnswer < homeWorkQuestionCount.TotalQuestion)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAnswerErrorCode.NotAnsweredEnough));
+                    return methodResult;
+                }
+
+                var tokensAchieved = await UpdateHomeWorkAnswers(homeWorkResult, isHomeWorkDone) * token;
+                if (tokensAchieved > 0)
+                {
+                    var tokenHistorys = new List<TokenHistoryQueueModel>
+                    {
+                        new TokenHistoryQueueModel
+                        {
+                            ObjectId = homeWorkResult.Id,
+                            VolatileToken = tokensAchieved,
+                            CourseResultId = _courseResultRepository.Queryable.FirstOrDefault(x => x.CourseId == course.Id && x.StudentId == student.Id)?.Id,
+                            Feature = EnumTokenFeature.Learn,
+                            Mission = homeWorkResult.SubmissionCount == EnumSubmissionCount.FirstSubmit ? EnumTokenMission.HomeworkFirstSubmit : EnumTokenMission.HomeworkSecondSubmit,
+                            Type = EnumTokenHistoryType.Recevived,
+                            UserId = student.Human?.UserId ?? default,
+                        }
+                    };
+                    await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
+                }
+                homeWorkResult = await GetHomeWorkResult(homeWorkResult, homeWorkQuestionCount, isHomeWorkDone, (int)tokensAchieved);
+            }
+            _homeWorkResultRepository.Update(homeWorkResult);
+            await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             methodResult.Result = true;
             return methodResult;
         }
@@ -341,7 +344,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             ArgumentNullException.ThrowIfNull(request.Answers);
             var methodResult = new MethodResult<(IList<Question>, HomeWorkResult)>();
 
-            var homeWorkResult = await _homeWorkResultRepository.GetByIdAsync(request.HomeWorkResultId);
+            var homeWorkResult = await _homeWorkResultRepository.Queryable.Include(x => x.LessonResult).FirstOrDefaultAsync(x => x.Id == request.HomeWorkResultId);
             if (homeWorkResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkResult));
