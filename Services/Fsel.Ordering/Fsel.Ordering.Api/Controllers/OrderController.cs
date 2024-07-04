@@ -9,15 +9,15 @@ namespace Fsel.Ordering.Api.Controllers
     using Fsel.Ordering.Application.Commands.OrderCmds;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Bases.V1;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
-    public class OrderController : ControllerBase
+    public class OrderController : BaseController
     {
         private readonly IMediator _mediator;
 
@@ -97,7 +97,6 @@ namespace Fsel.Ordering.Api.Controllers
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
 
         /// <summary>
         /// Check Current Status Of User
