@@ -3,24 +3,21 @@
 namespace Fsel.Ordering.Api.Controllers.Admin
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Ordering.Application.Commands.Events;
     using Fsel.Ordering.Application.Queries.Events;
     using Fsel.Ordering.Domain.Models.EntityModels;
-    using Fsel.Shared.Constants;
+    using Fsel.Shared.Bases.V1;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/event")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
-    public class EventController : ControllerBase
+    public class EventController : BaseController
     {
         private readonly IMediator _mediator;
 

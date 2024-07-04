@@ -14,11 +14,11 @@ namespace Fsel.Ordering.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Bases.V1;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/voucher")]
     [ApiController]
-    public class VoucherController : ControllerBase
+    public class VoucherController : BaseController
     {
         private readonly IMediator _mediator;
 

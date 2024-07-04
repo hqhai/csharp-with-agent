@@ -11,15 +11,14 @@ namespace Fsel.Ordering.Api.Controllers
     using Fsel.Ordering.Application.Queries.UrBoxQuery;
     using Fsel.Ordering.Application.Services.UrBoxService.Models.Request;
     using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
+    using Fsel.Shared.Bases.V1;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/urbox")]
     [ApiController]
-    public class UrBoxController : ControllerBase
+    public class UrBoxController : BaseController
     {
         private readonly IMediator _mediator;
 
