@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
@@ -14,7 +15,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class GetStudentProgressCoursesQuery : IRequest<MethodResult<IList<CourseStudentProgressModel>>>
     {
@@ -24,15 +24,17 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     public class GetStudentProgressCoursesQueryHandler : IRequestHandler<GetStudentProgressCoursesQuery, MethodResult<IList<CourseStudentProgressModel>>>
     {
         private readonly IUserService _userService;
+        private readonly ManagerProgressHelper _managerProgressHelper;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ISystemService _systemService;
         private readonly IOrderService _orderService;
         private readonly ICourseRepository _courseRepository;
         private readonly ITrainingService _trainingService;
 
-        public GetStudentProgressCoursesQueryHandler(IUserService userService, ICourseResultRepository courseResultRepository, ISystemService systemService, IOrderService orderService, ICourseRepository courseRepository, ITrainingService trainingService)
+        public GetStudentProgressCoursesQueryHandler(IUserService userService, ManagerProgressHelper managerProgressHelper, ICourseResultRepository courseResultRepository, ISystemService systemService, IOrderService orderService, ICourseRepository courseRepository, ITrainingService trainingService)
         {
             _userService = userService;
+            _managerProgressHelper = managerProgressHelper;
             _courseResultRepository = courseResultRepository;
             _systemService = systemService;
             _orderService = orderService;
@@ -58,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
 
-            var userId = student.Human?.UserId;
+            var userId = student.Human?.UserId ?? default;
             var packageResults = await _orderService.GetPackages();
             if (!packageResults.IsSuccessStatusCode)
             {
@@ -73,70 +75,60 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
             var @classes = @classResults.Content?.Result;
-            if (@classes != null && @classes.Any())
+            if (@classes == null || !@classes.Any())
             {
-                var courseIds = @classes.OrderBy(x => x.CreatedDate).Select(x => x.CourseId).ToList();
-                var courses = await _courseRepository.GetByIdsAsync(courseIds);
-                if (courses == null || !courses.Any())
-                {
-                    methodResult.StatusCode = StatusCodes.Status200OK;
-                    return methodResult;
-                }
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@classes));
+                return methodResult;
+            }
 
-                var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
+            var courseIds = @classes.OrderBy(x => x.CreatedDate).Select(x => x.CourseId).ToList();
+            var courses = await _courseRepository.GetByIdsAsync(courseIds);
+            if (courses == null || !courses.Any())
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
+            {
+                FeatureAccessTimes = courseIds.Select(x => new FeatureAccessTimeQueryModel
                 {
-                    FeatureAccessTimes = courseIds.Select(x => new FeatureAccessTimeQueryModel
-                    {
-                        CourseId = x,
-                        UserId = userId ?? default
-                    }).ToList(),
-                    UserId = userId ?? default
-                });
-                if (!featureAccessTimeResults.IsSuccessStatusCode)
+                    CourseId = x,
+                    UserId = userId
+                }).ToList(),
+                UserId = userId
+            });
+            if (!featureAccessTimeResults.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(featureAccessTimeResults));
+                return methodResult;
+            }
+            var featureAccessTimes = featureAccessTimeResults.Content?.Result?.ToList();
+            foreach (var item in courses)
+            {
+                var courseStudentProgress = await _managerProgressHelper.GetCourseManagerAsync(item.Id, student.Id, cancellationToken);
+                if (courseStudentProgress == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(featureAccessTimeResults));
-                    return methodResult;
+                    continue;
                 }
-                var featureAccessTimes = featureAccessTimeResults.Content?.Result?.ToList();
-                foreach (var item in courses)
+                if (featureAccessTimes != null)
                 {
-                    var courseResult = await _courseResultRepository.Queryable.Include(x => x.Course).FirstOrDefaultAsync(x => x.StudentId == request.StudentId && x.CourseId == item.Id, cancellationToken);
-                    CourseStudentProgressModel courseStudentProgress = new CourseStudentProgressModel();
-                    if (courseResult != null)
-                    {
-                        var courseResultModel = new CourseResultModel
-                        {
-                            CourseType = courseResult.Course?.CourseType,
-                            CourseId = courseResult.CourseId,
-                            StudentId = courseResult.StudentId
-                        };
-                        var (currentProgress, progress) = await _courseRepository.GetContentComplete(courseResultModel);
-                        courseStudentProgress.ContentCompleted = string.Format("{0} / {1}", currentProgress, progress);
-                    }
-                    courseStudentProgress.CourseName = item.Code;
-                    courseStudentProgress.CourseId = item.Id;
-                    if (featureAccessTimes != null)
-                    {
-                        var featureAccessTime = featureAccessTimes.FirstOrDefault(x => x.CourseId == item.Id);
-                        courseStudentProgress.TimeSpent = featureAccessTime?.AccessTime ?? default;
-                        courseStudentProgress.Visit = featureAccessTime?.Visit ?? default;
-                    }
-                    var package = packages?.FirstOrDefault(x => x.Id == student.PackageId);
-                    if (package != null)
-                    {
-                        courseStudentProgress.PackageId = package.Id;
-                        courseStudentProgress.PackageCode = package.Code;
-                    }
-                    var @class = @classes.FirstOrDefault(x => x.CourseId == item.Id);
-                    if (@class != null)
-                    {
-                        courseStudentProgress.ClassId = @class.Id;
-                        courseStudentProgress.CodeClass = @class.Code;
-                        courseStudentProgress.StartDate = @class.StartDate;
-                        courseStudentProgress.EndDate = @class.EndDate;
-                    }
-                    courseProgress.Add(courseStudentProgress);
+                    var featureAccessTime = featureAccessTimes.FirstOrDefault(x => x.CourseId == item.Id);
+                    courseStudentProgress.TimeSpent = featureAccessTime?.AccessTime ?? default;
+                    courseStudentProgress.Visit = featureAccessTime?.Visit ?? default;
                 }
+                var package = packages?.FirstOrDefault(x => x.Id == student.PackageId);
+                if (package != null)
+                {
+                    courseStudentProgress.PackageId = package.Id;
+                    courseStudentProgress.PackageCode = package.Code;
+                }
+                var @class = @classes.FirstOrDefault(x => x.CourseId == item.Id);
+                if (@class != null)
+                {
+                    courseStudentProgress.ClassId = @class.Id;
+                    courseStudentProgress.CodeClass = @class.Code;
+                }
+                courseProgress.Add(courseStudentProgress);
             }
             methodResult.Result = courseProgress;
             methodResult.StatusCode = StatusCodes.Status200OK;

@@ -215,7 +215,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 {
                     lessonIds = units.SelectMany(x => x.UnitLessons).Select(x => x.LessonId).ToList();
                     var mockTestIds = units.SelectMany(x => x.UnitSkillMockTests).Select(x => x.MockTestId).ToList();
-                    var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.UnitId != null && x.CourseId == courseResult.CourseId).ToListAsync();
+                    var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.UnitId.HasValue && x.CourseId == courseResult.CourseId).ToListAsync();
                     countTests.Add((mockTestResults.Where(x => x.Status == EnumResultStatus.Done).Count(), mockTestIds?.Count ?? default));
                 }
             }
