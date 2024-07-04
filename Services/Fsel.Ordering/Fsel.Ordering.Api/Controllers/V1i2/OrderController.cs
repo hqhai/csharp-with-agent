@@ -49,5 +49,17 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// verify data from android app
+        /// </summary>
+        [HttpPost("verify-data-from-android-app")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> VerifyDataFromAndroidApp([FromBody] VerifyDataFromAndroidAppCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

@@ -1,7 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
+namespace Fsel.Ordering.Application.Services.InAppPurchase.IOS.Models
 {
+    using Fsel.Ordering.Application.Services.InAppPurchase.IOS.Enums;
+    using Fsel.Ordering.Application.Services.InAppPurchase.IOS.Models;
+
     public class AppStoreResponseModel
     {
         public EnumNotificationType? NotificationType { get; set; }

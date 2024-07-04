@@ -256,7 +256,7 @@ namespace Fsel.Ordering.Application.Commands.Events
             packageEvent.PriceMonth = request.PriceMonth;
             packageEvent.DayBonus = request.DayBonus;
             packageEvent.MonthBonus = request.MonthBonus;
-            packageEvent.Suggest = request.Suggest;
+            packageEvent.Suggests = request.Suggests;
         }
     }
 }

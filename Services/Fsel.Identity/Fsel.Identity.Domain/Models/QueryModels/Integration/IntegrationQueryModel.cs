@@ -10,6 +10,5 @@ namespace Fsel.Identity.Domain.Models.QueryModels.Integration
 
         public DateTime EndDate { get; set; }
 
-        public Guid? UserId { get; set; }
     }
 }

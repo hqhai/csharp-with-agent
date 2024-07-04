@@ -22,11 +22,6 @@ namespace Fsel.Ordering.Infrastructure.Configs
                   .WithMany(b => b.PackageEvents)
                   .HasForeignKey(b => b.EventId)
                   .OnDelete(DeleteBehavior.Cascade);
-            builder.Property(e => e.Suggest)
-               .HasMaxLength(100)
-               .HasConversion(
-                   v => v == null ? null : v.ToString(),
-                   v => string.IsNullOrEmpty(v) ? null : v.EnumParse<EnumPackageSuggest>());
         }
     }
 }

@@ -65,7 +65,7 @@ namespace Fsel.Realtime.Application.Hubs
                 trackingModel.AccessTime = duration;
                 await _accessTimePublisher.Publish(trackingModel, CancellationToken.None);
             }
-            else if (type == null)
+            else
             {
 
                 Guid userId = _authContext.CurrentUserId;
