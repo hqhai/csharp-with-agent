@@ -1,3 +1,4 @@
+using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Core.Extensions;
 using Fsel.Core.Services.IpApiServices;
@@ -37,14 +38,14 @@ namespace Fsel.Realtime.Application.Hubs
         {
             var trackingModel = ConnectionTracker.Instance.GetModel(Context.ConnectionId);
 
-            _logger.LogInformation($"Invoke FeatureAccessTime Socket: {Context.ConnectionId}, invokeModek: {trackingModel}");
+            _logger.LogInformation($"TrackingModelt: {Context.ConnectionId}, type: {model.EnumFeature}, lessonId : {model.LessonId},Objectd: {model.ObjectId}, courseId: {model.CourseId}");
 
             if (trackingModel != null)
             {
                 var duration = ConnectionTracker.Instance.RecordConnectionEnd(Context.ConnectionId);
                 trackingModel.AccessTime = duration;
                 await _accessTimePublisher.Publish(trackingModel, CancellationToken.None);
-             _logger.LogInformation($"Invoke FeatureAccessTime Socket: {Context.ConnectionId},  duration : {duration}");
+                _logger.LogInformation($"Invoke FeatureAccessTime Socket: {Context.ConnectionId},type: {trackingModel.EnumFeature}, duration : {duration}, model :{ConvertHelper.Serialize(trackingModel)}");
 
             }
 
@@ -58,7 +59,7 @@ namespace Fsel.Realtime.Application.Hubs
 
             var trackingModel = ConnectionTracker.Instance.GetModel(Context.ConnectionId);
 
-            _logger.LogInformation($"Disconect FeatureAccessTime Socket: {Context.ConnectionId},  duration : {duration}");
+            _logger.LogInformation($"Disconect FeatureAccessTime Socket: {Context.ConnectionId},  duration : {duration}, type : {type}");
             if (trackingModel != null)
             {
                 trackingModel.AccessTime = duration;
