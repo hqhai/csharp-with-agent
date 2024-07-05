@@ -3,20 +3,21 @@
 namespace Fsel.Ordering.Api.Controllers.Admin
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Ordering.Application.Commands.OrderCmds;
     using Fsel.Ordering.Application.Commands.OrderCmds.v1i1;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Domain.Models.EntityModels;
-    using Fsel.Shared.Bases.V1;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/admin/order")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]

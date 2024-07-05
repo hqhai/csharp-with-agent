@@ -3,16 +3,17 @@
 namespace Fsel.Ordering.Api.Controllers
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Commands.Payoo;
     using Fsel.Ordering.Application.Services.PayooService.Models;
-    using Fsel.Shared.Bases.V1;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/payoo")]
     [ApiController]
     public class PayooController : BaseController
