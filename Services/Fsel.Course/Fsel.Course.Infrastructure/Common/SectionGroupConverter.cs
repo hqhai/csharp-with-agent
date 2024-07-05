@@ -397,6 +397,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 var index = sectionGroups.IndexOf(x);
                 var sectionGroup = _mapper.Map<SectionGroupModel>(x);
+                sectionGroup.TotalQuestion = GetTotalQuestion(x);
                 sectionGroup.Status = GetResultStatus(indexProcess, index);
                 var sectionGroupResult = x.SectionGroupResults.FirstOrDefault();
                 if (sectionGroupResult != null)

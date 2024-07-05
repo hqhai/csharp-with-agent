@@ -5,13 +5,16 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Commands.OrderCmds.V1i2;
     using Fsel.Ordering.Domain.Models.EntityModels;
-    using Fsel.Shared.Bases.V1i2;
+    using Fsel.Shared.Attributes;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
+    [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
