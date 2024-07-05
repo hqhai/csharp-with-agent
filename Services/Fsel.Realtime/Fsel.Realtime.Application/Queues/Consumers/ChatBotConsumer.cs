@@ -12,7 +12,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
     {
         private readonly IHubContext<ChatBotHub> _chatBotHubContext;
 
-        public ChatBotConsumer(IHubContext<ChatBotHub> chatBotHubContext, AuthContext authContext) : base(authContext)
+        public ChatBotConsumer(IHubContext<ChatBotHub> chatBotHubContext, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _chatBotHubContext = chatBotHubContext;
         }

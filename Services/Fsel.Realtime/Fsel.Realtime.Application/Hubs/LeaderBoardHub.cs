@@ -5,11 +5,12 @@ namespace Fsel.Realtime.Application.Hubs
     using Fsel.Core.Base;
     using Fsel.Core.Extensions;
     using Fsel.Core.Services.IpApiServices;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.SignalR;
 
     public class LeaderBoardHub : BaseHub
     {
-        public LeaderBoardHub(AuthContext authContext, IIpApiService ipApiService) : base(authContext, ipApiService)
+        public LeaderBoardHub(AuthContext authContext, IIpApiService ipApiService, IHttpContextAccessor httpContextAccessor) : base(authContext, ipApiService, httpContextAccessor)
         {
         }
 
