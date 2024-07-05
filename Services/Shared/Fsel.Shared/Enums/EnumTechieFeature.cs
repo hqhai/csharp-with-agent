@@ -4,5 +4,8 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumTechieFeature
     {
+        Greeting,
+        Notice,
+        Cheer
     }
 }

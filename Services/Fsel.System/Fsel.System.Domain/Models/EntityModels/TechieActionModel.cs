@@ -1,13 +1,14 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Entities
+namespace Fsel.System.Domain.Models.EntityModels
 {
     using Fsel.Common.Helpers;
-    using Fsel.Core.Entities;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
+    using Fsel.System.Domain.Entities;
     using global::System.ComponentModel.DataAnnotations.Schema;
 
-    public class TechieAction : Entity
+    public class TechieActionModel : BaseModel
     {
         public string? ConfigStr { get; set; }
 
