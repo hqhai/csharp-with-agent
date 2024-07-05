@@ -3435,6 +3435,9 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<string>("ConfigStr")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("CourseResultId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);

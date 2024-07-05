@@ -3,21 +3,22 @@
 namespace Fsel.Ordering.Api.Controllers.V1i2
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Commands.OrderCmds.V1i2;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1i2)]
+    [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
-    public class OrderController : ControllerBase
+    public class OrderController : BaseController
     {
         private readonly IMediator _mediator;
 
@@ -45,6 +46,18 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateOrderTrialCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// verify data from android app
+        /// </summary>
+        [HttpPost("verify-data-from-android-app")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> VerifyDataFromAndroidApp([FromBody] VerifyDataFromAndroidAppCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

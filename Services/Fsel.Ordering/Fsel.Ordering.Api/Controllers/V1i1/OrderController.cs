@@ -3,24 +3,25 @@
 namespace Fsel.Ordering.Api.Controllers.V1i1
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Commands.OrderCmds.v1i1;
     using Fsel.Ordering.Application.Queries.OrderQuery;
-    using Fsel.Ordering.Application.Services.InAppPurchase;
-    using Fsel.Ordering.Application.Services.InAppPurchase.Models;
+    using Fsel.Ordering.Application.Services.InAppPurchase.IOS;
+    using Fsel.Ordering.Application.Services.InAppPurchase.IOS.Models;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
-    public class OrderController : ControllerBase
+    public class OrderController : BaseController
     {
         private readonly IMediator _mediator;
         private readonly INotificationProcessor _notificationProcessor;

@@ -1,7 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
+namespace Fsel.Ordering.Application.Services.InAppPurchase.IOS.Models
 {
+    using Fsel.Ordering.Application.Services.InAppPurchase.IOS.Enums;
     using Newtonsoft.Json;
 
     public class NotificationV2Data

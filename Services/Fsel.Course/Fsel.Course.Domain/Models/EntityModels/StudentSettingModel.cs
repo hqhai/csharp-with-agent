@@ -14,6 +14,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int ModuleNumber { get; set; }
         public bool IsLockPT { get; set; }
         public EnumTrialRegistrationStatus? Status { get; set; }
+        public DateTime? ExpiredDate { get; set; }
         public StudentBeginnerGuideModel? BeginnerGuide { get; set; }
         public double NumberOfToken { get; set; }
         public CourseModel? Course { get; set; }

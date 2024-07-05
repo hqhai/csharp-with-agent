@@ -30,7 +30,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public int DayBonus { get; set; }
         public int MonthBonus { get; set; }
         public int Month { get; set; }
-        public EnumPackageSuggest? Suggest { get; set; }
+        public IList<EnumPackageSuggest>? Suggests { get; set; }
     }
 
     public class EventTranslationModel : BaseModel

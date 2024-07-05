@@ -66,6 +66,7 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
                 packageModel.DayBonus = item.DayBonus;
                 packageModel.ImagePaths = eventModel.ImagePaths;
                 packageModel.EventDescription = eventModel.Description;
+                packageModel.Suggests = item.Suggests;
                 packageModels.Add(packageModel);
             }
 

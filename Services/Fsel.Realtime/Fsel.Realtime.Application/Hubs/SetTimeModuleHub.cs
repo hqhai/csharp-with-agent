@@ -10,6 +10,7 @@ namespace Fsel.Realtime.Application.Hubs
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.SignalR;
     using Microsoft.Extensions.Logging;
 
@@ -21,7 +22,7 @@ namespace Fsel.Realtime.Application.Hubs
         private readonly IHubContext<SetTimeModuleHub> _setTimeModuleHubContext;
         private readonly AuthContext _authContext;
 
-        public SetTimeModuleHub(SetTimeModulePublisher setTimeModulePublisher, ILogger<SetTimeModuleHub> logger, GetTimeModulePublisher getTimeModulePublisher, IHubContext<SetTimeModuleHub> setTimeModuleHubContext, AuthContext authContext, IIpApiService ipApiService) : base(authContext, ipApiService)
+        public SetTimeModuleHub(SetTimeModulePublisher setTimeModulePublisher, ILogger<SetTimeModuleHub> logger, GetTimeModulePublisher getTimeModulePublisher, IHubContext<SetTimeModuleHub> setTimeModuleHubContext, AuthContext authContext, IIpApiService ipApiService, IHttpContextAccessor httpContextAccessor) : base(authContext, ipApiService, httpContextAccessor)
         {
             _setTimeModulePublisher = setTimeModulePublisher;
             _logger = logger;

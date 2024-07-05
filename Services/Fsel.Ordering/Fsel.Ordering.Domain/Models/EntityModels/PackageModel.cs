@@ -18,6 +18,6 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public IList<string>? ImagePaths { get; set; }
         public string? EventDescription { get; set; }
         public string? IncentivesWhenPurchasing { get; set; }
-        public EnumPackageSuggest? Suggest { get; set; }
+        public IList<EnumPackageSuggest>? Suggests { get; set; }
     }
 }
