@@ -3,21 +3,22 @@
 namespace Fsel.Ordering.Api.Controllers.V1i1
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Commands.OrderCmds.v1i1;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Application.Services.InAppPurchase;
     using Fsel.Ordering.Application.Services.InAppPurchase.Models;
     using Fsel.Ordering.Domain.Models.EntityModels;
-    using Fsel.Shared.Bases.V1i1;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
+    [ApiVersions(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
     public class OrderController : BaseController
