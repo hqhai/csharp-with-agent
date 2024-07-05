@@ -65,7 +65,9 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             }
             var studentId = student.Id;
 
-            var mockTest = await _mockTestRepository.GetByIdAsync(request.MockTestId);
+            var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestSections)
+                                                            .ThenInclude(x => x.SectionGroup)
+                                                            .FirstOrDefaultAsync(x => x.Id == request.MockTestId, cancellationToken);
             if (mockTest == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTest));
