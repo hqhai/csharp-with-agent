@@ -9,7 +9,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
     public class SpeakingAIEvaluationConsumer : BaseConsumer<SpeakingAIEvaluationModel>
     {
         private readonly ISpeakingAIService _speakingAIService;
-        public SpeakingAIEvaluationConsumer(AuthContext authContext, ISpeakingAIService speakingAIService) : base(authContext)
+        public SpeakingAIEvaluationConsumer(AuthContext authContext, ISpeakingAIService speakingAIService, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _speakingAIService = speakingAIService;
         }
