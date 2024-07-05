@@ -3,19 +3,20 @@
 namespace Fsel.Ordering.Api.Controllers
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Ordering.Application.Commands.UrBoxs;
     using Fsel.Ordering.Application.Queries.UrBoxQuery;
     using Fsel.Ordering.Application.Services.UrBoxService.Models.Request;
     using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
-    using Fsel.Shared.Bases.V1;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/urbox")]
     [ApiController]
     public class UrBoxController : BaseController

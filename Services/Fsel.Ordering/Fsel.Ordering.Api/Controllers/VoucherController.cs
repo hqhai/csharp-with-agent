@@ -5,17 +5,18 @@ namespace Fsel.Ordering.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Ordering.Application.Commands.VoucherCmds;
     using Fsel.Ordering.Application.Queries.UserVoucher;
     using Fsel.Ordering.Application.Queries.VoucherQuery;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Attributes;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
-    using Fsel.Shared.Bases.V1;
 
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/voucher")]
     [ApiController]
     public class VoucherController : BaseController
