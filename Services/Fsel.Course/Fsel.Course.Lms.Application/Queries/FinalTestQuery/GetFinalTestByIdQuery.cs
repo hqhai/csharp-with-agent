@@ -72,6 +72,8 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             }
 
             var finalTest = await _finalTestRepository.Queryable.Include(x => x.FinalTestResults.Where(x => x.CourseId == courseResult.CourseId && x.StudentId == studentId))
+                                                                .Include(x => x.FinalTestSections.Where(n => !n.IsDeleted))
+                                                                .ThenInclude(x => x.SectionGroup)
                                                                 .FirstOrDefaultAsync(x => x.Id == request.FinalTestId, cancellationToken);
             if (finalTest == null)
             {
