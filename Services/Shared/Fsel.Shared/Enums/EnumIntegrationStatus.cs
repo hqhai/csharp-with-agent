@@ -9,6 +9,9 @@ namespace Fsel.Shared.Enums
         Trial,
         Miss,
         Payment,
-        Expired
+        Expired,
+        Fail,
+        New,
+        Reject
     }
 }
