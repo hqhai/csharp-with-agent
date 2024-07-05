@@ -6,6 +6,7 @@ using Fsel.Realtime.Application.Queues.Publishers;
 using Fsel.Realtime.Application.Trackers;
 using Fsel.Shared.Models.ShareModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using static Sentry.MeasurementUnit;
@@ -21,7 +22,7 @@ namespace Fsel.Realtime.Application.Hubs
         private readonly AuthContext _authContext;
         private readonly ILogger<FeatureAccessTimeHub> _logger;
 
-        public FeatureAccessTimeHub(FeatureAccessTimePublisher accessTimePublisher, AuthContext authContext, IIpApiService ipApiService, ILogger<FeatureAccessTimeHub> logger) : base(authContext, ipApiService)
+        public FeatureAccessTimeHub(FeatureAccessTimePublisher accessTimePublisher, AuthContext authContext, IIpApiService ipApiService, IHttpContextAccessor httpContextAccessor, ILogger<FeatureAccessTimeHub> logger) : base(authContext, ipApiService, httpContextAccessor)
         {
             _accessTimePublisher = accessTimePublisher;
             _authContext = authContext;
