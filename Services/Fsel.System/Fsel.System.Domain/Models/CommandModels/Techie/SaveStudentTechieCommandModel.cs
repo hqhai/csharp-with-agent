@@ -3,7 +3,7 @@
 namespace Fsel.System.Domain.Models.CommandModels.Techie
 {
     using Fsel.Shared.Enums;
-    using Fsel.System.Domain.Entities;
+    using Fsel.Shared.Models.ShareModels;
 
     public class SaveStudentTechieCommandModel
     {

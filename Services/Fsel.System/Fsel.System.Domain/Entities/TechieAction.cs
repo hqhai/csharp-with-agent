@@ -5,6 +5,7 @@ namespace Fsel.System.Domain.Entities
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using global::System.ComponentModel.DataAnnotations.Schema;
 
     public class TechieAction : Entity

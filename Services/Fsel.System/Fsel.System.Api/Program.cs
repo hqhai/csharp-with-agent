@@ -60,6 +60,7 @@ builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<ChatBotPublisher>();
+builder.Services.AddScoped<TechieSendMessagePublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
@@ -84,7 +85,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.FeatureAccessTime, typeof(FeatureAccessTimeConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.ChatBot, typeof(ChatBotConsumer) },
     { QueueSettings.LmsQueue.NameQueue.DoQuestBoard, typeof(CreateTokenHistoryConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.QuestBoard, typeof(DoQuestBoardConsumer) }
+    { QueueSettings.SystemQueue.NameQueue.QuestBoard, typeof(DoQuestBoardConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.TechieAction, typeof(TechieConsumer) }
 });
 
 var app = builder.Build();

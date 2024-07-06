@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -31,7 +31,6 @@ namespace Fsel.System.Infrastructure.Migrations
                     Icon = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Image = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
-
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Techie", x => x.Id);
@@ -52,7 +51,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    Config = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConfigStr = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TemplateMessage = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Priority = table.Column<int>(type: "int", nullable: false),
                     Icon = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -87,7 +86,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    Config = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConfigStr = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TechieActionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     StudentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)

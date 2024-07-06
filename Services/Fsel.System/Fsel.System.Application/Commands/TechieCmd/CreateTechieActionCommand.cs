@@ -6,55 +6,39 @@ namespace Fsel.System.Application.Commands.TechieCmd
     using Fsel.Common.ActionResults;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
-    using Fsel.System.Domain.Models.CommandModels.TeachingCosts;
+    using Fsel.System.Domain.Models.CommandModels.Techie;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class CreateTechieActionCommand : SaveTeachingCostCommandModel, IRequest<MethodResult<TeachingCostModel>>
+    public class CreateTechieActionCommand : SaveTechieActionCommandModel, IRequest<MethodResult<TechieActionModel>>
     {
     }
 
-    public class CreateTechieActionCommandHandler : IRequestHandler<CreateTechieActionCommand, MethodResult<TeachingCostModel>>
+    public class CreateTechieActionCommandHandler : IRequestHandler<CreateTechieActionCommand, MethodResult<TechieActionModel>>
     {
         private readonly IMapper _mapper;
-        private readonly ITeachingCostRepository _teachingCostRepository;
+        private readonly ITechieActionRepository _techieActionRepository;
 
-        public CreateTechieActionCommandHandler(IMapper mapper, ITeachingCostRepository teachingCostRepository)
+        public CreateTechieActionCommandHandler(IMapper mapper, ITechieActionRepository techieActionRepository)
         {
             _mapper = mapper;
-            _teachingCostRepository = teachingCostRepository;
+            _techieActionRepository = techieActionRepository;
         }
 
-        public async Task<MethodResult<TeachingCostModel>> Handle(CreateTechieActionCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<TechieActionModel>> Handle(CreateTechieActionCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<TeachingCostModel>();
+            var methodResult = new MethodResult<TechieActionModel>();
 
-            await _teachingCostRepository.ExecuteTransactionAsync(async () =>
+            var techieAction = _mapper.Map<TechieAction>(request);
+            await _techieActionRepository.ExecuteTransactionAsync(async () =>
             {
-                var teachingCost = await _teachingCostRepository.GetByIdAsync(request.Id ?? default);
-
-                if (teachingCost != null)
-                {
-                    _mapper.Map(request, teachingCost);
-                    teachingCost = _teachingCostRepository.Update(teachingCost);
-                }
-                else
-                {
-                    teachingCost = _mapper.Map<TeachingCost>(request);
-                    teachingCost = _teachingCostRepository.Add(teachingCost);
-                }
-                if (!teachingCost.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(teachingCost.ErrorMessages);
-                    return methodResult;
-                }
-
-                await _teachingCostRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                _techieActionRepository.Add(techieAction);
+                await _techieActionRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<TeachingCostModel>(teachingCost);
+                methodResult.Result = _mapper.Map<TechieActionModel>(techieAction);
                 return methodResult;
             });
 
