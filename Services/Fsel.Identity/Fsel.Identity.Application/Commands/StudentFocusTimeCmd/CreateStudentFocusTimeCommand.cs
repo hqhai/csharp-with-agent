@@ -83,7 +83,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 else
                 {
                     // Set targetTime
-                    bool confitionChangeTarget = !studentFocusTime!.IsEstablished && request.TargetTime != studentFocusTime.TargetTime;
+                    bool confitionChangeTarget = !studentFocusTime!.IsEstablished && request.TargetTime != studentFocusTime.TargetTime && request.TargetTime != 0;
                     if (confitionChangeTarget)
                     {
                         studentFocusTime.TargetTime = request.TargetTime;
