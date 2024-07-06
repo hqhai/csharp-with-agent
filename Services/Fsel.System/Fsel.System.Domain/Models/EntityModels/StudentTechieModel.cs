@@ -4,6 +4,7 @@ namespace Fsel.System.Domain.Models.EntityModels
 {
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Domain.Entities;
     using global::System.ComponentModel.DataAnnotations.Schema;
 

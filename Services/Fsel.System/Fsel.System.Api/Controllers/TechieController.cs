@@ -10,6 +10,7 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
     using Fsel.System.Application.Commands.Chatbots;
+    using Fsel.System.Application.Commands.TechieCmd;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
@@ -46,17 +47,26 @@ namespace Fsel.System.Api.Controllers
         }
 
 
+        [HttpPost("student-techies")]
+        [ProducesResponseType(typeof(MethodResult<StudentTechieModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SaveStudentTechie([FromBody] CreateStudentTechieCommand cmd)
+        {
+            MethodResult<StudentTechieModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
         /// <summary>
-        /// Lưu ChatbotConfig
+        /// Lưu action của techie
         /// </summary>
         /// <param name="cmd"></param>
         /// <returns></returns>
-        [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<ChatbotConfigModel>), (int)HttpStatusCode.OK)]
+        [HttpPost("techie-action")]
+        [ProducesResponseType(typeof(MethodResult<TechieActionModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SaveChatBotConfig([FromBody] SaveChatbotConfigCommand cmd)
+        public async Task<IActionResult> SaveTechieAction([FromBody] CreateTechieActionCommand cmd)
         {
-            MethodResult<ChatbotConfigModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            MethodResult<TechieActionModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
