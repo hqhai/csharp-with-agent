@@ -255,7 +255,7 @@ namespace Fsel.System.Application.Commands.Chatbots
 
             // Sử dụng regex để tìm và lấy nội dung trong dấu ngoặc nhọn {}
             Match match = Regex.Match(text, @"Click to listen:\s*.*?\s*{\s*(.*?)\s*}");
-            logger.LogInformation("regex: Click to listen:\\s*.*?\\s*{\\s*(.*?)\\s*}")
+            logger.LogInformation("regex: Click to listen:\\s*.*?\\s*{\\s*(.*?)\\s*}");
             if (match.Success)
             {
                 // Lấy nội dung trong dấu ngoặc nhọn
