@@ -47,8 +47,6 @@ namespace Fsel.Shared.Constants
                 public const string GetTimeModule = $"{KeyQueue}_GetTimeModule";
                 public const string MockTestWriting = $"{KeyQueue}_MockTestWriting";
                 public const string MockTestSpeaking = $"{KeyQueue}_MockTestSpeaking";
-                public const string TechieAction = $"{KeyQueue}_TechieAction";
-               
             }
         }
 
@@ -124,7 +122,6 @@ namespace Fsel.Shared.Constants
                 public const string SetCompleteApprovalPostTimeOut = $"{KeyQueue}_SetCompleteApprovalPostTimeOut";
                 public const string ReviewFsel = $"{KeyQueue}_ReviewFsel";
                 public const string NoticeAccessTime = $"{KeyQueue}_NoticeAccessTime";
-                public const string Techie = $"{KeyQueue}_Techie";
             }
         }
 

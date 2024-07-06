@@ -18,9 +18,7 @@ builder.Services.AddScoped<FeatureAccessTimePublisher>();
 builder.Services.AddScoped<SetTimeModulePublisher>();
 builder.Services.AddScoped<GetTimeModulePublisher>();
 builder.Services.AddScoped<ChatBotPublisher>();
-builder.Services.AddScoped<TechieActionPublisher>();
 builder.Services.AddScoped<SetTimeModuleHub>();
-builder.Services.AddScoped<TechieHub>();
 
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
@@ -34,7 +32,6 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.DisconnectSocketCalculateTime, typeof(DisconnectSocketCalculateTimeConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.MockTestSpeaking, typeof(MockTestAISpeakingConsumer) },
     { QueueSettings.LmsQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.Techie, typeof(StudentTechieConsumer) },
 });
 
 var app = builder.Build();
@@ -49,5 +46,4 @@ app.UseHubs<MockTestSpeakingHub>(RealtimeSettings.MockTestSpeakingAIFeedBackHub.
 app.UseHubs<FeatureAccessTimeHub>(RealtimeSettings.FeatureAccessTimeHub.Pattern);
 app.UseHubs<SetTimeModuleHub>(RealtimeSettings.SetTimeModuleHub.Pattern);
 app.UseHubs<ChatBotHub>(RealtimeSettings.ChatBotHub.Pattern);
-app.UseHubs<TechieHub>(RealtimeSettings.TechieHub.Pattern);
 app.Run();
