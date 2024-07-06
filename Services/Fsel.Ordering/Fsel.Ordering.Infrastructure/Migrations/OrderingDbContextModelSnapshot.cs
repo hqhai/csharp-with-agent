@@ -636,9 +636,9 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<decimal>("PriceMonth")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Suggest")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<string>("SuggestStr")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -674,7 +674,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             MonthBonus = 0,
                             PackageId = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"),
                             Price = 500000m,
-                            PriceMonth = 500000m
+                            PriceMonth = 500000m,
+                            SuggestStr = "null"
                         },
                         new
                         {
@@ -689,7 +690,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             PackageId = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"),
                             Price = 2400000m,
                             PriceMonth = 320000m,
-                            Suggest = "BestSeller"
+                            SuggestStr = "[\"BestSeller\"]"
                         },
                         new
                         {
@@ -704,7 +705,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             PackageId = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"),
                             Price = 3600000m,
                             PriceMonth = 240000m,
-                            Suggest = "Recommend"
+                            SuggestStr = "[\"Recommend\"]"
                         });
                 });
 

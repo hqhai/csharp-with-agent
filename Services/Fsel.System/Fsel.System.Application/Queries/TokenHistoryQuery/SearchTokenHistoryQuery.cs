@@ -69,7 +69,7 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
                 tokenHistorys = tokenHistorys.Where(x => x.Type == request.Type);
             }
 
-            var tokenHistoryQuery = tokenHistorys.Where(x => x.UserId == userId)
+            var tokenHistoryQuery = tokenHistorys.Where(x => x.UserId == userId && (!request.CourseResultId.HasValue || x.CourseResultId == request.CourseResultId))
                             .GroupBy(x => x.CreatedDate.Date)
                             .OrderByDescending(x => x.Key)
                             .Select(x => new TokenHistoryListModel

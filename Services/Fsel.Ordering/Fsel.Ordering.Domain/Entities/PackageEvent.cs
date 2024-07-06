@@ -6,6 +6,8 @@ namespace Fsel.Ordering.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
+    using Fsel.Common.Helpers;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     public class PackageEvent : Entity
     {
@@ -36,7 +38,15 @@ namespace Fsel.Ordering.Domain.Entities
         /// <summary>
         /// Gợi ý
         /// </summary>
-        public EnumPackageSuggest? Suggest { get; set; }
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? SuggestStr { get; set; }
+
+        [NotMapped]
+        public IList<EnumPackageSuggest>? Suggests
+        {
+            get { return ConvertHelper.Deserialize<IList<EnumPackageSuggest>?>(SuggestStr); }
+            set { SuggestStr = ConvertHelper.Serialize(value); }
+        }
 
         public Guid PackageId { get; set; }
         public Guid EventId { get; set; }

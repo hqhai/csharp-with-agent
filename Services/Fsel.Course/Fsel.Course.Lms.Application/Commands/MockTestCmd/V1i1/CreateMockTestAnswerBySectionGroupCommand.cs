@@ -425,13 +425,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     if (mockTestAnswer == null)
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, null, sectionTimeCode.Id);
-                        double pronScore = await _evaluationAIService.EvaluationSpeaking(sectionTimeCode.Name ?? string.Empty, request.Answers.FirstOrDefault()?.Answer?.ToString() ?? default);
-                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, request.Answers.Select(x => x.Answer).FirstOrDefault(), request.Answers.Select(x => x.SpeechTextAnswer).FirstOrDefault(), pronScore));
+                        double pronScore = await _evaluationAIService.EvaluationSpeaking(sectionTimeCode.Name, item?.Answer?.ToString() ?? default);
+                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, item?.Answer, item?.SpeechTextAnswer, pronScore));
                     }
                     else
                     {
-                        double pronScore = await _evaluationAIService.EvaluationSpeaking(sectionTimeCode.Name ?? string.Empty, request.Answers.FirstOrDefault()?.Answer?.ToString() ?? default);
-                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, request.Answers.Select(x => x.Answer).FirstOrDefault(), request.Answers.Select(x => x.SpeechTextAnswer).FirstOrDefault(), pronScore));
+                        double pronScore = await _evaluationAIService.EvaluationSpeaking(sectionTimeCode.Name, item?.Answer?.ToString() ?? default);
+                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, item?.Answer, item?.SpeechTextAnswer, pronScore));
                     }
                 }
             }
@@ -479,7 +479,5 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             mockTestAnswer.CorrectCount = correctCount;
             return mockTestAnswer;
         }
-
-
     }
 }

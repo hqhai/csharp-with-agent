@@ -3,23 +3,23 @@
 namespace Fsel.Ordering.Application.Queues.Consumers
 {
     using System.Threading.Tasks;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Ordering.Application.Commands.Events;
     using MassTransit;
     using MediatR;
 
-    public class JobActiveEventConsumer : IConsumer<BaseQueueModel>
+    public class JobActiveEventConsumer : BaseConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public JobActiveEventConsumer(IMediator mediator)
+        public JobActiveEventConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueModel> context)
+        public async Task ConsumeQueue(BaseQueueModel message)
         {
-            var message = context?.Message;
             if (message == null)
             {
                 return;

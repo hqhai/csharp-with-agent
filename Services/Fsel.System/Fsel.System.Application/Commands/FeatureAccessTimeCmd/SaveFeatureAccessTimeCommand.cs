@@ -57,7 +57,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
             EnumFeature featureType = ConvertType(request.Type!);
 
-            var featureAccessTimeCheck = await _featureAccessTimeRepository.Queryable.OrderByDescending(x => x.LastVisited).FirstOrDefaultAsync(x => x.CreatedUserId == request.UserId && (x.ObjectId == request.ObjectId || x.EnumFeature == EnumFeature.Other) && x.EnumFeature == featureType, cancellationToken);
+            var featureAccessTimeCheck = await _featureAccessTimeRepository.Queryable.OrderByDescending(x => x.LastVisited).FirstOrDefaultAsync(x => x.CreatedUserId == _authContext.CurrentUserId && (x.ObjectId == request.ObjectId || x.EnumFeature == EnumFeature.Other) && x.EnumFeature == featureType, cancellationToken);
 
             bool isActiveToday = (featureAccessTimeCheck != null && featureAccessTimeCheck.EnumFeature != EnumFeature.Other) || (featureType != EnumFeature.Other && featureAccessTimeCheck == null);
             //focus mode

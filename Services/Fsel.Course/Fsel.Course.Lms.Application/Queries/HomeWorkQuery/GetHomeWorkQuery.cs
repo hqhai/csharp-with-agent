@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
 {
     using System;
     using System.Linq;
+    using System.Text.Json.Serialization;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -25,6 +26,8 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     {
         public Guid HomeWorkId { get; set; }
         public Guid LessonResultId { get; set; }
+
+        [JsonIgnore]
         public bool IsShowSubStatus { get; set; }
     }
 
