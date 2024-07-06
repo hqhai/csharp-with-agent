@@ -3,6 +3,7 @@
 namespace Fsel.Ordering.Api.Controllers.V1i1
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
@@ -36,6 +37,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         /// Create Order
         /// </summary>
         [HttpPost]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
