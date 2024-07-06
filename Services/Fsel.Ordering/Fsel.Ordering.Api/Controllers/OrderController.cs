@@ -3,6 +3,7 @@
 namespace Fsel.Ordering.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
@@ -31,6 +32,7 @@ namespace Fsel.Ordering.Api.Controllers
         /// Generate Random Order
         /// </summary>
         [HttpGet]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<GenerateRamdomOrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GenerateRandomOrder([FromQuery] GenerateRamdomOrderQuery query)
@@ -67,6 +69,7 @@ namespace Fsel.Ordering.Api.Controllers
         /// Create Order
         /// </summary>
         [HttpPost]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateOrderCommand command)
@@ -114,7 +117,8 @@ namespace Fsel.Ordering.Api.Controllers
         /// <summary>
         /// Search Course
         /// </summary>
-        [HttpGet("get-order-by-status")]
+        [HttpPost("get-order-by-status")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<IList<OrderSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetOrderByStatus([FromQuery] GetOrderByStatusQuery query)
