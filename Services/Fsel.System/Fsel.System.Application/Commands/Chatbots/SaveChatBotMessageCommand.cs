@@ -183,7 +183,7 @@ namespace Fsel.System.Application.Commands.Chatbots
         /// <param name="script"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        private async Task<string> TextToSpeech(EnumCourseSkill skill, bool isContainAudioScript, string? script, ILogger<object> logger)
+        private async Task<string> TextToSpeech(EnumCourseSkill skill, bool isContainAudioScript, string? script)
         {
             string filePath = string.Empty;
             if (skill == EnumCourseSkill.Listening && isContainAudioScript)
@@ -244,7 +244,7 @@ namespace Fsel.System.Application.Commands.Chatbots
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public static string ExtractTranscript(string? text,ILogger<object> logger)
+        public static string ExtractTranscript(string? text)
         {
             if (string.IsNullOrEmpty(text))
             {
