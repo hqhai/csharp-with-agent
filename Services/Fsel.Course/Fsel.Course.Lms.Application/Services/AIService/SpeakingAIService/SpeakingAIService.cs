@@ -166,7 +166,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 }
             }
 
-            double averagePronScore = NumberHelper.RoundNumberDouble(count > 0 ? (double)pronScore / count : 0);
+            double averagePronScore = Math.Round(count > 0 ? (double)pronScore / count : 0);
             return (questionArray, answerArray, averagePronScore, count);
         }
 
