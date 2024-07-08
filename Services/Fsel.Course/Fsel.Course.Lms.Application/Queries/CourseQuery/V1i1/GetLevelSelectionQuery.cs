@@ -31,6 +31,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private const int MinLearnAgain = 0;
+        private const int MaxAgeIELST = 14;
 
         public GetLevelSelectionQueryHandler(ICourseResultRepository courseResultRepository, ChangeCourseHelper changeCourseHelper, AuthContext authContext, IUserService userService)
         {
@@ -75,6 +76,14 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.BaseCourseLevel));
                 return methodResult;
             }
+
+            int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
+            if (request.CourseType == EnumCourseType.Ielts && age < MaxAgeIELST)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+
             var isChangeLevelStudent = await _changeCourseHelper.CheckChangeLevelAllCourseAsync(student.Id);
             if (isChangeLevelStudent)
             {
