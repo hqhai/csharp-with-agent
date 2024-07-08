@@ -187,9 +187,17 @@ namespace Fsel.Shared.Helpers
             }
             else
             {
+                var courseLevelIELSTs = new List<EnumCourseLevel>();
                 var listCourselevel = relevantLevels.Select(x => x.Value).ToList();
-                var courseLevelIELSTs = s_levelMapping.Where(x => listCourselevel.Contains(x.Key)).Select(x => x.Value).ToHashSet();
 
+                if (courseLevel.GetEnumCourseType() == EnumCourseType.Academic)
+                {
+                    courseLevelIELSTs = s_levelMapping.Where(x => listCourselevel.Contains(x.Value)).Select(x => x.Value).ToList();
+                }
+                else
+                {
+                    courseLevelIELSTs = listCourselevel;
+                }
                 var ieltsLevels = s_courseTypeLevel
                     .Where(x => x.Key == courseType && courseLevelIELSTs.Contains(x.Value))
                     .Select(x => new
