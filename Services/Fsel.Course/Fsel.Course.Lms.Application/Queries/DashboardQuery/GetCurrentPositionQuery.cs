@@ -77,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 
             var leaderBoardsToAdd = student!.Select(student =>
             {
-                var unitResultCaculate = _unitResultRepository.Queryable.Where(x => x.StudentId == student.Id && x.Status != EnumResultStatus.Unfinished);
+                var unitResultCaculate = _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == student.Id && x.Status != EnumResultStatus.Unfinished && x.Unit!.CourseLevel == student.CourseLevel);
                 double totalQuestion = unitResultCaculate.Sum(x => x.CorrectTotal);
                 var scores = unitResultCaculate.Sum(x => x.CorrectCount);
                 return new LeaderBoardModel
