@@ -110,9 +110,8 @@ namespace Fsel.System.Application.Commands.Chatbots
             string tokenInUse = chatGptResponse?.Content?.Usage?.ToString() ?? string.Empty;
             var totalTokenUse = ConvertHelper.Deserialize<TokenAIModel>(tokenInUse);
             bool isContainAudioScript = response.Contains("Click to listen", StringComparison.OrdinalIgnoreCase);
-            string filePath = await TextToSpeech(request.Skill, isContainAudioScript, response, _logger);
+            string filePath = await TextToSpeech(chatbotMessage.Skill, isContainAudioScript, response);
 
-            _logger.LogInformation($"filePath:{filePath}, response: {response}, checkValue : {isContainAudioScript}");
             // Bổ sung câu trả lời của GPT vào đoạn hội thoại
             var chatBotResponse = _mapper.Map<List<ChatbotResponseModel>>(chatBotMessageModel);
             ChatbotResponseModel newMessage = CompletionElement("system", response, filePath);
@@ -136,7 +135,7 @@ namespace Fsel.System.Application.Commands.Chatbots
                 int tokenCount = matches.Count + (totalTokenUse?.Completion_Tokens ?? default);
                 chatbotMessage.RemainToken = chatbotMessage.RemainToken > tokenCount ? chatbotMessage.RemainToken - tokenCount : 0;
 
-                if(chatbotMessage.RemainToken == 0)
+                if (chatbotMessage.RemainToken == 0)
                 {
                     chatbotMessage.Status = EnumChatBotStatus.Done;
                 }
@@ -189,8 +188,7 @@ namespace Fsel.System.Application.Commands.Chatbots
             string filePath = string.Empty;
             if (skill == EnumCourseSkill.Listening && isContainAudioScript)
             {
-                string scriptListening = ExtractTranscript(script, logger);
-                logger.LogInformation(scriptListening);
+                string scriptListening = ExtractTranscript(script);
                 var audioResult = await _storageService.TextToSpeech(new CreateChatbotAudioModel
                 {
                     Text = scriptListening,
@@ -210,7 +208,7 @@ namespace Fsel.System.Application.Commands.Chatbots
         /// <param name="filePath"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        private async Task PushToWebSocket(Guid? chatBotId, string? message, string? filePath,double tokenRation, CancellationToken cancellationToken)
+        private async Task PushToWebSocket(Guid? chatBotId, string? message, string? filePath, double tokenRation, CancellationToken cancellationToken)
         {
             ChatBotSendingMessageModel model = new ChatBotSendingMessageModel
             {
@@ -255,7 +253,6 @@ namespace Fsel.System.Application.Commands.Chatbots
 
             // Sử dụng regex để tìm và lấy nội dung trong dấu ngoặc nhọn {}
             Match match = Regex.Match(text, @"Click to listen:\s*.*?\s*{\s*(.*?)\s*}");
-            logger.LogInformation("regex: Click to listen:\\s*.*?\\s*{\\s*(.*?)\\s*}");
             if (match.Success)
             {
                 // Lấy nội dung trong dấu ngoặc nhọn
