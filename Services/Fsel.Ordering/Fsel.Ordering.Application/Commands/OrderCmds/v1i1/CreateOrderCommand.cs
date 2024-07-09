@@ -83,13 +83,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             Guid? courseId = null;
             if (request.CourseLevel == null)
             {
-                var orderPayment = await _orderRepository.Queryable.Where(p => p.Status == EnumOrderStatus.Payment && p.UserId == _authContext.CurrentUserId).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+                var orderPayment = await _orderRepository.Queryable.Where(p => (p.Status == EnumOrderStatus.Payment || p.Status == EnumOrderStatus.New) && p.UserId == _authContext.CurrentUserId).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
                 courseId = orderPayment?.CourseId;
             }
-
-            if (courseId == null)
+            else
             {
-                request.CourseLevel = student?.CourseLevel;
+                //request.CourseLevel = student?.CourseLevel;
                 var courseResult = await _courseService.GetCourseByLevel(new BaseQueryModel()
                 {
                     Filters = new List<GenericFilterModel>()
