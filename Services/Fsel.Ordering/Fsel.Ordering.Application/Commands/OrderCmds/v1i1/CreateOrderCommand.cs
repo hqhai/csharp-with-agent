@@ -156,7 +156,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(code));
+                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.TryAgainInOneMinute), nameof(code));
                 return methodResult;
             }
 
