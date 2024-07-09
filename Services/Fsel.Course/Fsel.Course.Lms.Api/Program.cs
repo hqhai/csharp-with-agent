@@ -131,6 +131,8 @@ builder.Services.AddScoped<SectionGroupManagerConverter>();
 builder.Services.AddScoped<LinQHelper>();
 builder.Services.AddScoped<LinQAnswerHelper>();
 builder.Services.AddScoped<ChangeCourseHelper>();
+builder.Services.AddScoped<ManagerProgressHelper>();
+
 // Publisher
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SaveUserCourseSettingPublisher>();
@@ -153,6 +155,7 @@ builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<DisconnectSocketCalculateTimePublisher>();
 builder.Services.AddScoped<SubmitAiSpeakingAnswerPublisher>();
 builder.Services.AddScoped<GetTimeModulePublisher>();
+builder.Services.AddScoped<SubmitSpeakingAIPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -186,6 +189,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.RetryMockTestAction, typeof(RetryMockTestWhenScoreZeroConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
     { QueueSettings.LmsQueue.NameQueue.RetryClassForumAction, typeof(RetryClassForumConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.SpeakingAI, typeof(SpeakingAIEvaluationConsumer) },
 });
 
 var app = builder.Build();

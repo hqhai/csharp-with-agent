@@ -76,7 +76,12 @@ namespace Fsel.Ordering.Application.Commands.Events
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.PackageIdIsWrong), EnumEventErrorCode.PackageIdIsWrong.GetDescription());
                 return;
             }
-            if (request.StartDate.Date > request.EndDate.Date)
+            if (!request.StartDate.HasValue || !request.EndDate.HasValue)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return;
+            }
+            if (request.StartDate.Value.Date > request.EndDate.Value.Date)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.StartDateIsGreaterThanEndDate), EnumEventErrorCode.StartDateIsGreaterThanEndDate.GetDescription());
                 return;
@@ -97,6 +102,22 @@ namespace Fsel.Ordering.Application.Commands.Events
                 {
                     methodResult.AddError(@event.ErrorMessages);
                     return methodResult;
+                }
+                foreach (var item in @event.Translations)
+                {
+                    if (!item.IsValid())
+                    {
+                        methodResult.AddError(item.ErrorMessages);
+                        return methodResult;
+                    }
+                }
+                foreach (var item in @event.PackageEvents)
+                {
+                    if (!item.IsValid())
+                    {
+                        methodResult.AddError(item.ErrorMessages);
+                        return methodResult;
+                    }
                 }
                 @event = _eventRepository.Add(@event);
                 await _eventRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -136,18 +157,26 @@ namespace Fsel.Ordering.Application.Commands.Events
                 return;
             }
 
-            if (request.StartDate.Date > request.EndDate.Date)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.StartDateIsGreaterThanEndDate), EnumEventErrorCode.StartDateIsGreaterThanEndDate.GetDescription());
-                return;
-            }
-
             var @event = await _eventRepository.Queryable.Include(p => p.Translations).Include(p => p.PackageEvents).FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
             if (@event == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return;
+            }
+
+            if (!@event.IsDefault)
+            {
+                if (!request.StartDate.HasValue || !request.EndDate.HasValue)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                    return;
+                }
+                if (request.StartDate.Value.Date > request.EndDate.Value.Date)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.StartDateIsGreaterThanEndDate), EnumEventErrorCode.StartDateIsGreaterThanEndDate.GetDescription());
+                    return;
+                }
             }
 
             var existEventDate = await _eventRepository.Queryable.AnyAsync(p => p.Id != @event.Id && ((p.StartDate <= request.StartDate && p.EndDate >= request.StartDate) || (p.StartDate <= request.EndDate && p.EndDate >= request.EndDate)), cancellationToken);
@@ -168,6 +197,11 @@ namespace Fsel.Ordering.Application.Commands.Events
                         return methodResult;
                     }
                     UpdateTranslation(translation, item);
+                    if (!item.IsValid())
+                    {
+                        methodResult.AddError(item.ErrorMessages);
+                        return methodResult;
+                    }
                 }
                 foreach (var item in @event.PackageEvents)
                 {
@@ -178,8 +212,18 @@ namespace Fsel.Ordering.Application.Commands.Events
                         return methodResult;
                     }
                     UpdatePackageEvent(packageEvent, item);
+                    if (!item.IsValid())
+                    {
+                        methodResult.AddError(item.ErrorMessages);
+                        return methodResult;
+                    }
                 }
                 UpdateEvent(request, @event);
+                if (!@event.IsValid())
+                {
+                    methodResult.AddError(@event.ErrorMessages);
+                    return methodResult;
+                }
                 @event = _eventRepository.Update(@event);
                 await _eventRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -212,7 +256,7 @@ namespace Fsel.Ordering.Application.Commands.Events
             packageEvent.PriceMonth = request.PriceMonth;
             packageEvent.DayBonus = request.DayBonus;
             packageEvent.MonthBonus = request.MonthBonus;
-            packageEvent.Suggest = request.Suggest;
+            packageEvent.Suggests = request.Suggests;
         }
     }
 }

@@ -115,18 +115,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             classForumStudentProgress.ClassForumId = classForum.Id;
             if (videoResult.Status == EnumResultStatus.Done)
             {
-                classForumStudentProgress.Status = EnumResultStatus.New;
-                if (classForumResult != null)
-                {
-                    if (classForumResult.Status == EnumClassForumResultStatus.Graded)
-                    {
-                        classForumStudentProgress.Status = EnumResultStatus.Done;
-                    }
-                    else
-                    {
-                        classForumStudentProgress.Status = EnumResultStatus.Process;
-                    }
-                }
+                classForumStudentProgress.Status = classForumResult != null ? classForumResult.Status.HasValue ? EnumResultStatus.Done : EnumResultStatus.Process
+                                                                            : EnumResultStatus.New;
             }
             else
             {

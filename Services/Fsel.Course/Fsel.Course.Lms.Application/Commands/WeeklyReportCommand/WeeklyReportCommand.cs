@@ -63,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            _logger.LogWarning("Call WeeklyReportCommand - body: " + Fsel.Common.Helpers.ConvertHelper.Serialize(request));
+            _logger.LogWarning($"Call WeeklyReportCommand - {DateTime.UtcNow} - body: " + Common.Helpers.ConvertHelper.Serialize(request));
 
             return methodResult;
 

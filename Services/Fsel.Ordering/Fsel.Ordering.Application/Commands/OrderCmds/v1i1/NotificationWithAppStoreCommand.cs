@@ -6,19 +6,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Application.Services.CourseService;
-    using Fsel.Ordering.Application.Services.InAppPurchase.Models;
+    using Fsel.Ordering.Application.Services.InAppPurchase.IOS.Enums;
+    using Fsel.Ordering.Application.Services.InAppPurchase.IOS.Models;
     using Fsel.Ordering.Application.Services.TrainingService;
-    using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
-    using MassTransit.Mediator;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -147,9 +143,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             return methodResult;
         }
 
-        public bool IsPaymentSuccess(Application.Services.InAppPurchase.Models.EnumNotificationType notificationType, EnumNotificationSubtype notificationSubtype)
+        public bool IsPaymentSuccess(Application.Services.InAppPurchase.IOS.Enums.EnumNotificationType notificationType, EnumNotificationSubtype notificationSubtype)
         {
-            if (notificationType == Application.Services.InAppPurchase.Models.EnumNotificationType.DID_RENEW && notificationSubtype == EnumNotificationSubtype.BILLING_RECOVERY)
+            if (notificationType == Application.Services.InAppPurchase.IOS.Enums.EnumNotificationType.DID_RENEW && notificationSubtype == EnumNotificationSubtype.BILLING_RECOVERY)
             {
                 return true;
             }

@@ -14,8 +14,10 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string? Description { get; set; }
+        public bool IsDefault { get; set; }
         public IList<string>? ImagePaths { get; set; }
         public EnumEventPackageStatus Status { get; set; }
+        public bool EventStatus { get; set; }
         public IList<PackageEventModel>? PackageEvents { get; set; }
         public IList<EventTranslationModel>? Translations { get; set; }
     }
@@ -28,7 +30,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public int DayBonus { get; set; }
         public int MonthBonus { get; set; }
         public int Month { get; set; }
-        public EnumPackageSuggest? Suggest { get; set; }
+        public IList<EnumPackageSuggest>? Suggests { get; set; }
     }
 
     public class EventTranslationModel : BaseModel

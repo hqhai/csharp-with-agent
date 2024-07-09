@@ -116,11 +116,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId && x.StudentId == studentId).FirstOrDefaultAsync();
             if (sectionGroupResult == null)
             {
-                _logger.LoggerRequest(new
-                {
-                    Timestamp = DateTimeOffset.UtcNow.ToString("o"),
-                    Request = ConvertHelper.Serialize(request)
-                });
+                _logger.LoggerRequest(request);
                 sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, MockTestResultId = request.MockTestResultId, Status = EnumResultStatus.New });
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }

@@ -6,18 +6,20 @@ namespace Fsel.Ordering.Api.Controllers
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Commands.OrderCmds;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
-    public class OrderController : ControllerBase
+    public class OrderController : BaseController
     {
         private readonly IMediator _mediator;
 
@@ -30,6 +32,7 @@ namespace Fsel.Ordering.Api.Controllers
         /// Generate Random Order
         /// </summary>
         [HttpGet]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GenerateRandomOrder([FromQuery] GenerateRandomOrderQuery query)
@@ -66,6 +69,7 @@ namespace Fsel.Ordering.Api.Controllers
         /// Create Order
         /// </summary>
         [HttpPost]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateOrderCommand command)
@@ -113,10 +117,11 @@ namespace Fsel.Ordering.Api.Controllers
         /// <summary>
         /// Search Course
         /// </summary>
-        [HttpGet("get-order-by-status")]
+        [HttpPost("get-order-by-status")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<IList<OrderSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetOrderByStatus([FromQuery] GetOrderByStatusQuery query)
+        public async Task<IActionResult> GetOrderByStatus([FromBody] GetOrderByStatusQuery query)
         {
             MethodResult<IList<OrderSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

@@ -59,6 +59,8 @@ namespace Fsel.Ordering.Application.Queries.Events
                     }
                     item.Month = package.MonthNumber;
                 }
+
+                @eventModel.PackageEvents = @eventModel.PackageEvents.OrderBy(pe => pe.Month).ToList();
             }
 
             methodResult.Result = @eventModel;

@@ -11,7 +11,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.Helpers;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
-    using Fsel.Ordering.Application.Services.InAppPurchase;
+    using Fsel.Ordering.Application.Services.InAppPurchase.IOS;
     using Fsel.Ordering.Application.Services.SystemService;
     using Fsel.Ordering.Application.Services.SystemService.Models;
     using Fsel.Ordering.Application.Services.TrainingService;
@@ -188,36 +188,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
-                var packageEvent = await _packageEventRepository.Queryable.FirstOrDefaultAsync(p => p.PackageId == package.Id && p.EventId == order.EventId, cancellationToken);
-
-                if (packageEvent == null)
+                var changeStatusResult = _mediator.Send(new ChangeStatusOrderCommand()
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventNotExist), nameof(packageEvent));
-                    return methodResult;
-                }
-
-                var updateNextUnitResult = await _courseService.UpdateNextUnit(order.UserId);
-                if (!updateNextUnitResult.IsSuccessStatusCode)
-                {
-                    _logger.LogError(updateNextUnitResult.Error.Content);
-                    methodResult.AddError(updateNextUnitResult.Error);
-                    return methodResult;
-                }
-
-                order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber + packageEvent.MonthBonus);
-                order.ExpireDate = order.ExpireDate.Value.AddDays(packageEvent.DayBonus);
-
-                order.Status = EnumOrderStatus.Payment;
-
-                order.OrderTransactions.Add(new OrderTransaction()
-                {
-                    ResponseBody = transactionInfo,
-                    Type = EnumOrderTransactionType.AppStore,
-                    Status = EnumOrderTransactionStatus.Success
+                    OrderId = order.Id,
+                    OrderStatus = EnumOrderStatus.Payment,
+                    Receipt = transactionInfo.Serialize(),
+                    Type = EnumOrderTransactionType.AppStore
                 });
-
-                order = _orderRepository.Update(order);
-                await _orderRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var studentResult = await _userService.GetStudentByUserIdAsync(order.UserId);
                 if (!studentResult.IsSuccessStatusCode)
@@ -226,13 +203,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     return methodResult;
                 }
                 var student = studentResult.Content?.Result;
-
-                await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
-                {
-                    StudentId = student!.Id,
-                    Month = package.MonthNumber + packageEvent.MonthBonus,
-                    Day = packageEvent.DayBonus
-                }, cancellationToken);
 
                 if (order.IsInvoice)
                 {

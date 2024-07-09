@@ -9,8 +9,8 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Events
         public Guid? Id { get; set; }
         public string? Code { get; set; }
         public string? Name { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public string? Description { get; set; }
         public IList<string>? ImagePaths { get; set; }
         public IList<SavePackageEventCommandModel>? PackageEvents { get; set; }
@@ -25,7 +25,7 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Events
         public decimal PriceMonth { get; set; }
         public int DayBonus { get; set; }
         public int MonthBonus { get; set; }
-        public EnumPackageSuggest? Suggest { get; set; }
+        public IList<EnumPackageSuggest>? Suggests { get; set; }
     }
 
     public class SaveEventTranslationCommandModel

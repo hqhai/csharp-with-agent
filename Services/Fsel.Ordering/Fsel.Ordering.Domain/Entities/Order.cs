@@ -98,15 +98,22 @@ namespace Fsel.Ordering.Domain.Entities
 
         public Package? Package { get; set; }
 
+        /// <summary>
+        /// Id Package
+        /// </summary>
         public Guid? PackageId { get; set; }
+
         public Event? Event { get; set; }
 
+        /// <summary>
+        /// Id Sự kiện
+        /// </summary>
         public Guid? EventId { get; set; }
 
         public Guid UserId { get; set; }
 
         /// <summary>
-        /// Học thử
+        /// Mã giới thiệu
         /// </summary>
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? ReferralCode { get; set; }

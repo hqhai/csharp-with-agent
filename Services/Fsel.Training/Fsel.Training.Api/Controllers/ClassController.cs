@@ -6,6 +6,7 @@ namespace Fsel.Training.Api.Controllers
     using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;

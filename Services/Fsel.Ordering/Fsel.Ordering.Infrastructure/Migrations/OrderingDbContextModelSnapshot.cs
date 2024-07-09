@@ -504,9 +504,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<double>("MonthBonusNumber")
-                        .HasColumnType("float");
-
                     b.Property<int>("MonthNumber")
                         .HasColumnType("int");
 
@@ -520,10 +517,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.Property<decimal>("PriceMonth")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Suggest")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -552,7 +545,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IncentivesWhenPurchasing = "Tặng phí bản quyền của NXB Đại học Cambridge",
                             IsDeleted = false,
-                            MonthBonusNumber = 0.0,
                             MonthNumber = 1,
                             Name = "Fsel_1_Month",
                             Price = 500000m,
@@ -567,12 +559,10 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IncentivesWhenPurchasing = "Tặng phí bản quyền của NXB Đại học Cambridge",
                             IsDeleted = false,
-                            MonthBonusNumber = 1.5,
                             MonthNumber = 6,
                             Name = "Fsel_6_Months",
                             Price = 2400000m,
-                            PriceMonth = 320000m,
-                            Suggest = "BestSeller"
+                            PriceMonth = 320000m
                         },
                         new
                         {
@@ -583,12 +573,139 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IncentivesWhenPurchasing = "Tặng phí bản quyền của NXB Đại học Cambridge",
                             IsDeleted = false,
-                            MonthBonusNumber = 3.0,
                             MonthNumber = 12,
                             Name = "Fsel_12_Months",
                             Price = 3600000m,
+                            PriceMonth = 240000m
+                        });
+                });
+
+            modelBuilder.Entity("Fsel.Ordering.Domain.Entities.PackageEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<int>("DayBonus")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<int>("MonthBonus")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("PackageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PriceMonth")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("SuggestStr")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId");
+
+                    b.HasIndex("PackageId");
+
+                    b.ToTable("PackageEvents");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("7ec4ded7-afd4-4c84-8b71-12c8d89afabd"),
+                            CreatedDate = new DateTime(2024, 6, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DayBonus = 0,
+                            EventId = new Guid("2371c9af-01a6-489b-8399-0e2a13db0646"),
+                            IsDeleted = false,
+                            MonthBonus = 0,
+                            PackageId = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"),
+                            Price = 500000m,
+                            PriceMonth = 500000m,
+                            SuggestStr = "null"
+                        },
+                        new
+                        {
+                            Id = new Guid("2496f21a-7e62-41a3-a294-89674a411e03"),
+                            CreatedDate = new DateTime(2024, 6, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DayBonus = 15,
+                            EventId = new Guid("2371c9af-01a6-489b-8399-0e2a13db0646"),
+                            IsDeleted = false,
+                            MonthBonus = 1,
+                            PackageId = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"),
+                            Price = 2400000m,
+                            PriceMonth = 320000m,
+                            SuggestStr = "[\"BestSeller\"]"
+                        },
+                        new
+                        {
+                            Id = new Guid("ebe09800-afd8-4621-a490-7f1fecf0e54c"),
+                            CreatedDate = new DateTime(2024, 6, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DayBonus = 0,
+                            EventId = new Guid("2371c9af-01a6-489b-8399-0e2a13db0646"),
+                            IsDeleted = false,
+                            MonthBonus = 3,
+                            PackageId = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"),
+                            Price = 3600000m,
                             PriceMonth = 240000m,
-                            Suggest = "Recommend"
+                            SuggestStr = "[\"Recommend\"]"
                         });
                 });
 
@@ -758,134 +875,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "fr-FR",
                             PackageId = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb")
-                        });
-                });
-
-            modelBuilder.Entity("Fsel.Ordering.Domain.Entities.PackageEvent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(0);
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
-
-                    b.Property<string>("CreatedFullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
-
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
-
-                    b.Property<int>("DayBonus")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
-
-                    b.Property<Guid>("EventId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
-
-                    b.Property<int>("MonthBonus")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("PackageId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("PriceMonth")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Suggest")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EventId");
-
-                    b.HasIndex("PackageId");
-
-                    b.ToTable("PackageEvents");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("7ec4ded7-afd4-4c84-8b71-12c8d89afabd"),
-                            CreatedDate = new DateTime(2024, 6, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DayBonus = 0,
-                            EventId = new Guid("2371c9af-01a6-489b-8399-0e2a13db0646"),
-                            IsDeleted = false,
-                            MonthBonus = 0,
-                            PackageId = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"),
-                            Price = 500000m,
-                            PriceMonth = 500000m
-                        },
-                        new
-                        {
-                            Id = new Guid("2496f21a-7e62-41a3-a294-89674a411e03"),
-                            CreatedDate = new DateTime(2024, 6, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DayBonus = 15,
-                            EventId = new Guid("2371c9af-01a6-489b-8399-0e2a13db0646"),
-                            IsDeleted = false,
-                            MonthBonus = 1,
-                            PackageId = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"),
-                            Price = 2400000m,
-                            PriceMonth = 320000m,
-                            Suggest = "BestSeller"
-                        },
-                        new
-                        {
-                            Id = new Guid("ebe09800-afd8-4621-a490-7f1fecf0e54c"),
-                            CreatedDate = new DateTime(2024, 6, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DayBonus = 0,
-                            EventId = new Guid("2371c9af-01a6-489b-8399-0e2a13db0646"),
-                            IsDeleted = false,
-                            MonthBonus = 3,
-                            PackageId = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"),
-                            Price = 3600000m,
-                            PriceMonth = 240000m,
-                            Suggest = "Recommend"
                         });
                 });
 
@@ -1290,9 +1279,9 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 {
                     b.Navigation("Orders");
 
-                    b.Navigation("Translations");
-
                     b.Navigation("PackageEvents");
+
+                    b.Navigation("Translations");
 
                     b.Navigation("VoucherPackages");
                 });

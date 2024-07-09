@@ -3,23 +3,22 @@
 namespace Fsel.Identity.Application.Queues.Consumers
 {
     using System.Threading.Tasks;
+    using Fsel.Core.Base;
     using Fsel.Identity.Application.Commands.StudentCmd;
     using Fsel.Shared.Models.ShareModels;
-    using MassTransit;
     using MediatR;
 
-    public class AddExpiredDateForStudentConsumer : IConsumer<AddExpiredDateForStudentQueueModel>
+    public class AddExpiredDateForStudentConsumer : BaseConsumer<AddExpiredDateForStudentQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public AddExpiredDateForStudentConsumer(IMediator mediator)
+        public AddExpiredDateForStudentConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<AddExpiredDateForStudentQueueModel> context)
+        public override async Task ConsumeQueue(AddExpiredDateForStudentQueueModel? message)
         {
-            var message = context?.Message;
             if (message == null)
             {
                 return;

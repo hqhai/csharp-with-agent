@@ -10,7 +10,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
-    using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1;
+    using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i2;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -82,12 +82,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
             order.PackageId = request.Package?.Id;
-            order.IsInvoice = request.IsInvoice;
-            order.CompanyName = request.CompanyName;
-            order.CompanyAddress = request.CompanyAddress;
-            order.CompanyTaxCode = request.CompanyTaxCode;
-            order.ReferralCode = request.ReferralCode;
-            order.EventId = request.EventId;
         }
     }
 }

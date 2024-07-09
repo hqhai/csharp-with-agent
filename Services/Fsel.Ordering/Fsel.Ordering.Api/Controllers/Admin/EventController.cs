@@ -3,23 +3,24 @@
 namespace Fsel.Ordering.Api.Controllers.Admin
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Ordering.Application.Commands.Events;
     using Fsel.Ordering.Application.Queries.Events;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/event")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
-    public class EventController : ControllerBase
+    public class EventController : BaseController
     {
         private readonly IMediator _mediator;
 
@@ -61,6 +62,18 @@ namespace Fsel.Ordering.Api.Controllers.Admin
         public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
             var commandResult = await _mediator.Send(new GetEventByIdQuery() { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search event
+        /// </summary>
+        [HttpGet("search")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<EventModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchEvent([FromQuery] SearchEventQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

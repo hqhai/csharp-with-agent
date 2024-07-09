@@ -215,7 +215,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 {
                     lessonIds = units.SelectMany(x => x.UnitLessons).Select(x => x.LessonId).ToList();
                     var mockTestIds = units.SelectMany(x => x.UnitSkillMockTests).Select(x => x.MockTestId).ToList();
-                    var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.UnitId != null && x.CourseId == courseResult.CourseId).ToListAsync();
+                    var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.UnitId.HasValue && x.CourseId == courseResult.CourseId).ToListAsync();
                     countTests.Add((mockTestResults.Where(x => x.Status == EnumResultStatus.Done).Count(), mockTestIds?.Count ?? default));
                 }
             }
@@ -225,7 +225,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
                 counts.Add(lessonResults.Select(x => x.VideoResult).Where(x => x != null && x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).Count());
-                counts.Add(lessonResults.SelectMany(x => x.ClassForumResults).Where(x => x != null && (x.Status == EnumClassForumResultStatus.Graded || x.Status == EnumClassForumResultStatus.Denied) && lessonResultIds.Contains(x.LessonResultId)).Count());
+                counts.Add(lessonResults.SelectMany(x => x.ClassForumResults).Where(x => x != null && x.Status.HasValue && lessonResultIds.Contains(x.LessonResultId)).Count());
                 counts.Add(lessonResults.Select(x =>
                 {
                     return x.HomeWorkResults.Any() && x.HomeWorkResults.All(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == courseResult.StudentId) ? 1 : 0;

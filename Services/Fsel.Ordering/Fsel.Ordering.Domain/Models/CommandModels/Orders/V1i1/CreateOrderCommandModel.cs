@@ -2,6 +2,7 @@
 
 namespace Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1
 {
+    using System;
     using Fsel.Shared.Enums;
 
     public class CreateOrderCommandModel
@@ -10,7 +11,7 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
         public EnumPaymentMethodStatus PaymentMethod { get; set; }
-        public Guid PackageId { get; set; }
+        public Guid? PackageId { get; set; }
         public Guid EventId { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
@@ -20,5 +21,7 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1
         public string? CompanyAddress { get; set; }
         public string? CompanyTaxCode { get; set; }
         public string? ReferralCode { get; set; }
+        public bool IsTrial { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
     }
 }

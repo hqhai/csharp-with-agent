@@ -11,6 +11,6 @@ namespace Fsel.Course.Domain.IRepositories
 
         Task<List<Unit>?> GetListAsync(IList<Guid>? ids, Guid? studentId);
 
-        Task<Unit?> GetIncludeAsync(Guid? id, Guid? studentId);
+        Task<Unit?> GetIncludeAsync(Guid? id, Guid courseId, Guid? studentId);
     }
 }
