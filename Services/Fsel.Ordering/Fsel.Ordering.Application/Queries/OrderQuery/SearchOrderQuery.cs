@@ -64,7 +64,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 query = query.Where(p => request.Status == false ? p.Status == EnumOrderStatus.New : p.Status != EnumOrderStatus.New);
                 if (!request.Status.Value)
                 {
-                    query = query.Where(p => p.PaymentMethod == EnumPaymentMethodStatus.BankTransfer);
+                    query = query.Where(p => p.PaymentMethod == EnumPaymentMethodStatus.BankTransfer || p.PaymentMethod == EnumPaymentMethodStatus.Card);
                 }
             }
 

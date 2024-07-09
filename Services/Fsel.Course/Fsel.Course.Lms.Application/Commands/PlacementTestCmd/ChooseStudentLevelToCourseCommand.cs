@@ -86,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 CourseId = course.Id,
                 CourseLevel = request.Level,
                 FullName = student?.Human?.FullName,
-                PaymentMethod = EnumPaymentMethodStatus.Card,
+                PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
                 CodeCourse = course.Code,
                 UserId = _authContext.CurrentUserId
             });

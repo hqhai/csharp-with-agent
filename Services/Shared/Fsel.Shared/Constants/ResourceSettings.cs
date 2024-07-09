@@ -43,8 +43,8 @@ namespace Fsel.Shared.Constants
         public const string IELTDescription = "Resources//IELTDescription.json";
 
         public const string ChatbotUnitInfo = "Resources//Chatbots//UnitInfo.xml";
-        public const string AppStore = "Resources//AppStore//PrivateKey.txt";
-        public const string AndroidPrivateKey = "Resources//AppStore//PrivateKey.txt";
+        public const string AppStore = "Resources//InAppPurchase//AppStore//PrivateKey.txt";
+        public const string AndroidPrivateKey = "Resources//InAppPurchase//GooglePlay//GooglePlayConfig-Testing.json";
 
         public const string GrammarInstruction = "Resources//Chatbots//Instruction//GrammarInstruction.txt";
         public const string VocabularyInstruction = "Resources//Chatbots//Instruction//VocabularyInstruction.txt";

@@ -49,6 +49,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
+            var subscriptionPurchaseStr = subscriptionPurchase.Serialize();
+            _logger.LogError(subscriptionPurchaseStr);
             if (!subscriptionPurchase.PaymentState.HasValue || subscriptionPurchase.PaymentState != 1)
             {
                 _logger.LogError($"subscriptionPurchase.PaymentState is null or != 1");
