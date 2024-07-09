@@ -166,19 +166,28 @@ namespace Fsel.Shared.Helpers
         public static object? GetListCourseLevels(this EnumCourseType courseType, EnumCourseLevel courseLevel, bool? isCourseDoneAndAchieveGrade = null)
         {
             int index = (int)s_courseTypeLevel.FirstOrDefault(x => x.Key == courseLevel.GetEnumCourseType() && x.Value == courseLevel).Value;
-
             var relevantLevels = s_courseTypeLevel
                 .Where((x, i) => isCourseDoneAndAchieveGrade.HasValue ? isCourseDoneAndAchieveGrade.Value ? (i >= index && i <= index + 2) : (i >= index && i <= index + 1) : (i >= index - 1 && i <= index + 1))
                 .Where(x => x.Key == courseLevel.GetEnumCourseType())
                 .ToList();
-
             if (relevantLevels == null || !relevantLevels.Any())
             {
                 return default;
             }
-
             if (courseType == EnumCourseType.Academic)
             {
+                if (courseLevel.GetEnumCourseType() != EnumCourseType.Academic)
+                {
+                    var listCourselevel = relevantLevels.Select(x => x.Value).ToList();
+                    var courseLevelAcas = s_levelMapping.Where(x => listCourselevel.Contains(x.Value)).Select(x => x.Key).ToList();
+                    return s_courseTypeLevel
+                    .Where(x => x.Key == courseType && courseLevelAcas.Contains(x.Value))
+                    .Select(x => new
+                    {
+                        CourseLevel = x.Value,
+                        LevelName = x.Value.GetDescription()
+                    }).ToList();
+                }
                 return relevantLevels.Select(x => new
                 {
                     CourseLevel = x.Value,
@@ -192,59 +201,19 @@ namespace Fsel.Shared.Helpers
 
                 if (courseLevel.GetEnumCourseType() == EnumCourseType.Academic)
                 {
-                    courseLevelIELSTs = s_levelMapping.Where(x => listCourselevel.Contains(x.Value)).Select(x => x.Value).ToList();
+                    courseLevelIELSTs = s_levelMapping.Where(x => listCourselevel.Contains(x.Key)).Select(x => x.Value).ToList();
                 }
                 else
                 {
                     courseLevelIELSTs = listCourselevel;
                 }
-                var ieltsLevels = s_courseTypeLevel
+                return s_courseTypeLevel
                     .Where(x => x.Key == courseType && courseLevelIELSTs.Contains(x.Value))
                     .Select(x => new
                     {
                         CourseLevel = x.Value,
                         LevelName = x.Value.GetDescription()
                     }).ToList();
-
-                return ieltsLevels;
-            }
-        }
-
-        public static object? GetListCourseLevels(this EnumCourseType? courseType, EnumCourseLevel courseLevel, bool isCourseDone = false)
-        {
-            int index = (int)s_courseTypeLevel.FirstOrDefault(x => x.Key == courseLevel.GetEnumCourseType() && x.Value == courseLevel).Value;
-
-            var relevantLevels = s_courseTypeLevel
-                .Where((x, i) => isCourseDone ? (i <= index + 2) : (i >= index - 1 && i <= index + 1) && x.Key == courseLevel.GetEnumCourseType())
-                .ToList();
-
-            if (relevantLevels == null || !relevantLevels.Any())
-            {
-                return default;
-            }
-
-            if (courseType == EnumCourseType.Academic)
-            {
-                return relevantLevels.Select(x => new
-                {
-                    CourseLevel = x.Value,
-                    LevelName = x.Value.GetDescription()
-                }).ToList();
-            }
-            else
-            {
-                var listCourselevel = relevantLevels.Select(x => x.Value).ToList();
-                var courseLevelIELSTs = s_levelMapping.Where(x => listCourselevel.Contains(x.Key)).Select(x => x.Value).ToHashSet();
-
-                var ieltsLevels = s_courseTypeLevel
-                    .Where(x => x.Key == courseType && courseLevelIELSTs.Contains(x.Value))
-                    .Select(x => new
-                    {
-                        CourseLevel = x.Value,
-                        LevelName = x.Value.GetDescription()
-                    }).ToList();
-
-                return ieltsLevels;
             }
         }
 
