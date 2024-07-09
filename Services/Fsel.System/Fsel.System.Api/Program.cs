@@ -86,7 +86,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.ChatBot, typeof(ChatBotConsumer) },
     { QueueSettings.LmsQueue.NameQueue.DoQuestBoard, typeof(CreateTokenHistoryConsumer) },
     { QueueSettings.SystemQueue.NameQueue.QuestBoard, typeof(DoQuestBoardConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.TechieAction, typeof(TechieConsumer) }
+    { QueueSettings.RealtimeQueue.NameQueue.TechieAction, typeof(TechieConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.Techie, typeof(TechieConsumer) }
 });
 
 var app = builder.Build();
