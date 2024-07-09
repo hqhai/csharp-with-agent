@@ -58,6 +58,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 ExpireDate = x.ExpireDate,
                 Email = x.Email,
             });
+
             if (request.Status.HasValue)
             {
                 query = query.Where(p => request.Status == false ? p.Status == EnumOrderStatus.New : p.Status != EnumOrderStatus.New);

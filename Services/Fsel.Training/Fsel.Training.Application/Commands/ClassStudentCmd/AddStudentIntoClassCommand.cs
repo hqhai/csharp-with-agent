@@ -7,11 +7,13 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.Entities;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.Classes;
     using MediatR;
@@ -63,6 +65,11 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                return methodResult;
+            }
+            if (!course.CourseLevel.IsCheckCourseLevel(student.BaseCourseLevel ?? default))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.YouChoseTheWrongLevel), nameof(course.CourseLevel));
                 return methodResult;
             }
             var @class = await _classRepository.Queryable.Include(x => x.ClassStudents).FirstOrDefaultAsync(p => p.CourseId == request.CourseId, cancellationToken);
