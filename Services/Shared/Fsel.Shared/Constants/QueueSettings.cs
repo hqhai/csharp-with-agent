@@ -109,6 +109,7 @@ namespace Fsel.Shared.Constants
                 public const string GetTimeModule = $"{KeyQueue}_GetTimeModule";
                 public const string SaveUserCourseSetting = $"{KeyQueue}_SaveUserCourseSetting";
                 public const string SpeakingAI = $"{KeyQueue}_SpeakingAI";
+                public const string Techie = $"{KeyQueue}_Techie";
             }
         }
 

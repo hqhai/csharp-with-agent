@@ -5,6 +5,7 @@ namespace Fsel.System.Application.Commands.TechieCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Application.Queues.Publisher;
     using Fsel.System.Application.Services.UserServices;
@@ -74,7 +75,7 @@ namespace Fsel.System.Application.Commands.TechieCmd
             #region Validate
             bool isExistsTechieGreeting = _studentTechieRepository.Queryable.Any(x => x.TechieActionId == techieActionFilter.Id && x.TechieAction!.Feature == request!.TechieFeature && x.TechieAction.Action == request.Actions && x.CreatedUserId == _authContext.CurrentUserId);
 
-            if (isExistsTechieGreeting)
+            if (isExistsTechieGreeting && request!.TechieFeature == EnumTechieFeature.Greeting)
             {
                 return methodResult;
             }
