@@ -80,32 +80,33 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             }
             var student = studentResult.Content?.Result;
 
-            Guid? courseId;
+            Guid? courseId = null;
             if (request.CourseLevel == null)
             {
                 var orderPayment = await _orderRepository.Queryable.Where(p => p.Status == EnumOrderStatus.Payment && p.UserId == _authContext.CurrentUserId).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
                 courseId = orderPayment?.CourseId;
-                request.CourseLevel = student?.CourseLevel;
             }
-            else
+
+            if (courseId == null)
             {
+                request.CourseLevel = student?.CourseLevel;
                 var courseResult = await _courseService.GetCourseByLevel(new BaseQueryModel()
                 {
                     Filters = new List<GenericFilterModel>()
-                {
-                    new GenericFilterModel()
                     {
-                        Property = "Status",
-                        Operator = EnumFilterOperator.Equal,
-                        Value = "Active"
-                    },
-                    new GenericFilterModel()
-                    {
-                        Property = "CourseLevel",
-                        Operator = EnumFilterOperator.Equal,
-                        Value = request.CourseLevel.ToString()
+                        new GenericFilterModel()
+                        {
+                            Property = "Status",
+                            Operator = EnumFilterOperator.Equal,
+                            Value = "Active"
+                        },
+                        new GenericFilterModel()
+                        {
+                            Property = "CourseLevel",
+                            Operator = EnumFilterOperator.Equal,
+                            Value = request.CourseLevel.ToString()
+                        }
                     }
-                }
                 });
 
                 if (!courseResult.IsSuccessStatusCode)
