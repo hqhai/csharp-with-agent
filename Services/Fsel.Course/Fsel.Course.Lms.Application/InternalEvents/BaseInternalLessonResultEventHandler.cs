@@ -21,10 +21,28 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentOccupyHomeWork = 30;
         private const int PercentOccupyVideo = 40;
         private const int PercentOccupyClassForum = 30;
+
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly QuestBoardPublisher _questBoardPublisher;
 
-        public BaseInternalLessonResultEventHandler(ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService)
+        public BaseInternalLessonResultEventHandler(ISystemService systemService,
+            AppSetting appSetting,
+            ICourseUnitMockTestRepository courseUnitMockTestRepository,
+            IMediator mediator,
+            IUserService userService,
+            ILessonResultRepository lessonResultRepository,
+            SaveUserCourseSettingPublisher saveUserCourseSettingPublisher,
+            IVideoResultRepository videoResultRepository,
+            IClassForumResultRepository classForumResultRepository,
+            IUnitResultRepository unitResultRepository,
+            ICourseResultRepository courseResultRepository,
+            ICourseRepository courseRepository,
+            IUnitRepository unitRepository,
+            IFinalTestResultRepository finalTestResultRepository,
+            IMockTestResultRepository mockTestResultRepository,
+            IHomeWorkResultRepository homeWorkResultRepository,
+            QuestBoardPublisher questBoardPublisher,
+            IOrderService orderService) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService)
         {
             _lessonResultRepository = lessonResultRepository;
         }
@@ -36,7 +54,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var isClassForumDone = lessonResult.ClassForumResults.Any() && lessonResult.ClassForumResults.Any(x => x.Status != EnumClassForumResultStatus.Draft);
             if (isClassForumDone && isHomeWorksDone && lessonResult.Status != EnumResultStatus.Done)
             {
-                //làm nhiệm vụ
                 var courseId = lessonResult.CourseId;
                 var userId = lessonResult.CreatedUserId;
                 // await DoQuestBoard(userId, courseId, cancellationToken);

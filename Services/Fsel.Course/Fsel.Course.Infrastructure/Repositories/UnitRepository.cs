@@ -37,14 +37,14 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
         }
 
-        public async Task<Unit?> GetIncludeAsync(Guid? id, Guid? studentId)
+        public async Task<Unit?> GetIncludeAsync(Guid? id, Guid courseId, Guid? studentId)
         {
             try
             {
                 return await Queryable.Include(x => x.UnitSkillMockTests)
-                                    .Include(x => x.MockTestResults.Where(x => x.StudentId == studentId))
+                                    .Include(x => x.MockTestResults.Where(x => x.StudentId == studentId && x.CourseId == courseId))
                                     .Include(x => x.UnitLessons)
-                                    .Include(x => x.LessonResults.Where(x => x.StudentId == studentId))
+                                    .Include(x => x.LessonResults.Where(x => x.StudentId == studentId && x.CourseId == courseId))
                                     .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)

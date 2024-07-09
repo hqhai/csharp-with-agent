@@ -11,7 +11,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
     {
         private readonly SetTimeModuleHub _timeModuleHub;
 
-        public DisconnectSocketCalculateTimeConsumer(SetTimeModuleHub timeModuleHub, AuthContext authContext) : base(authContext)
+        public DisconnectSocketCalculateTimeConsumer(SetTimeModuleHub timeModuleHub, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _timeModuleHub = timeModuleHub;
         }

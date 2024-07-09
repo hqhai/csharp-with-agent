@@ -53,8 +53,15 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
                 return methodResult;
             }
+
             var student = studentResult?.Content?.Result;
-            var isCheckLevel = request.Level.IsCheckCourseLevel(student?.CourseLevel ?? default);
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+
+            var isCheckLevel = student.BaseCourseLevel.HasValue && request.Level.IsCheckCourseLevel(student.BaseCourseLevel.Value);
             if (!isCheckLevel)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.YouChoseTheWrongLevel), nameof(isCheckLevel));
