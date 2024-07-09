@@ -88,7 +88,8 @@ namespace Fsel.System.Application.Commands.TechieCmd
                     Message = studentTechie.Message,
                     StudentId = studentTechie.StudentId,
                     Feature = techieActionFilter.Feature,
-                    Action = techieActionFilter.Action
+                    Action = techieActionFilter.Action,
+                    Priority = techieActionFilter.Priority,
 
                 };
                 await _techieSendMessagePublisher.Publish(socketModel, cancellationToken);
