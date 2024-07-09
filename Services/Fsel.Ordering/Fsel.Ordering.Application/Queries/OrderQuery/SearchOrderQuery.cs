@@ -58,9 +58,14 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 ExpireDate = x.ExpireDate,
                 Email = x.Email,
             });
+
             if (request.Status.HasValue)
             {
                 query = query.Where(p => request.Status == false ? p.Status == EnumOrderStatus.New : p.Status != EnumOrderStatus.New);
+                if (!request.Status.Value)
+                {
+                    query = query.Where(p => p.PaymentMethod == EnumPaymentMethodStatus.BankTransfer);
+                }
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))
