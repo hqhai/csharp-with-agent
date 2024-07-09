@@ -85,6 +85,27 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             {
                 var orderPayment = await _orderRepository.Queryable.Where(p => (p.Status == EnumOrderStatus.Payment || p.Status == EnumOrderStatus.New) && p.UserId == _authContext.CurrentUserId).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
                 courseId = orderPayment?.CourseId;
+
+                //request.CourseLevel = student?.CourseLevel;
+                var courseResult = await _courseService.GetCourseByLevel(new BaseQueryModel()
+                {
+                    Filters = new List<GenericFilterModel>()
+                    {
+                        new GenericFilterModel()
+                        {
+                            Property = "Id",
+                            Operator = EnumFilterOperator.Equal,
+                            Value = courseId
+                        }
+                    }
+                });
+
+                if (!courseResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(courseResult.Error);
+                    return methodResult;
+                }
+                request.CourseLevel = courseResult?.Content?.Result?.CourseLevel;
             }
             else
             {
