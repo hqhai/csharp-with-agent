@@ -6,6 +6,7 @@ using Fsel.Realtime.Application.Queues.Publishers;
 using Fsel.Shared.Models.ShareModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
 // Đảm bảo rằng bạn đã thêm namespace của ConnectionTracker
 
@@ -15,18 +16,18 @@ namespace Fsel.Realtime.Application.Hubs
     {
         private readonly AuthContext _authContext;
         private readonly TechieActionPublisher _actionPublisher;
+        private readonly ILogger<object> _logger;
 
-        public TechieHub(AuthContext authContext, IIpApiService ipApiService, IHttpContextAccessor httpContextAccessor, TechieActionPublisher actionPublisher) : base(authContext, ipApiService, httpContextAccessor)
+        public TechieHub(AuthContext authContext, IIpApiService ipApiService, IHttpContextAccessor httpContextAccessor, TechieActionPublisher actionPublisher, ILogger<object> logger) : base(authContext, ipApiService, httpContextAccessor)
         {
             _authContext = authContext;
             _actionPublisher = actionPublisher;
+            _logger = logger;
         }
 
         public override async Task OnConnectedHubAsync()
         {
-            string studentId = Context.GetHttpContext()?.Request.Query["StudentId"].ToString()!;
-
-            await Groups.AddGroupAsync(Context.ConnectionId, studentId);
+            await Groups.AddGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
         }
 
         public class Config
@@ -39,19 +40,14 @@ namespace Fsel.Realtime.Application.Hubs
 
         public async Task TechieSendAction(string modelStr)
         {
+            _logger.LogInformation($"Start Invoke!: {modelStr}");
             var model = ConvertHelper.Deserialize<StudentTechieActionModel>(modelStr);
-            Console.WriteLine("Test");
             await _actionPublisher.Publish(model, CancellationToken.None);
         }
 
         public override async Task OnDisconnectedHubAsync(Exception? exception)
         {
-            string chatBotId = Context.GetHttpContext()?.Request.Query["StudentId"].ToString()!;
-
-            if (!string.IsNullOrEmpty(chatBotId))
-            {
-                await Groups.RemoveGroupAsync(Context.ConnectionId, chatBotId);
-            }
+            await Groups.RemoveGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
         }
     }
 }

@@ -15,6 +15,7 @@ namespace Fsel.System.Application.Commands.TechieCmd
     using global::System.Globalization;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
 
     public class CreateStudentTechieCommand : SaveStudentTechieCommandModel, IRequest<MethodResult<StudentTechieModel>>
     {
@@ -28,9 +29,10 @@ namespace Fsel.System.Application.Commands.TechieCmd
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
         private readonly TechieSendMessagePublisher _techieSendMessagePublisher;
+        private readonly ILogger<object> _logger;
 
 
-        public CreateStudentTechieCommandHandler(IMapper mapper, ITechieActionRepository techieActionRepository, IStudentTechieRepository studentTechieRepository, IUserService userService, AuthContext authContext, TechieSendMessagePublisher techieSendMessagePublisher)
+        public CreateStudentTechieCommandHandler(IMapper mapper, ITechieActionRepository techieActionRepository, IStudentTechieRepository studentTechieRepository, IUserService userService, AuthContext authContext, TechieSendMessagePublisher techieSendMessagePublisher, ILogger<object> logger)
         {
             _mapper = mapper;
             _techieActionRepository = techieActionRepository;
@@ -38,6 +40,7 @@ namespace Fsel.System.Application.Commands.TechieCmd
             _userService = userService;
             _authContext = authContext;
             _techieSendMessagePublisher = techieSendMessagePublisher;
+            _logger = logger;
         }
 
         public async Task<MethodResult<StudentTechieModel>> Handle(CreateStudentTechieCommand request, CancellationToken cancellationToken)
@@ -69,7 +72,7 @@ namespace Fsel.System.Application.Commands.TechieCmd
             };
 
             #region Validate
-            bool isExistsTechieGreeting = _studentTechieRepository.Queryable.Any(x => x.TechieActionId == techieActionFilter.Id && x.TechieAction!.Feature == request!.TechieFeature && x.TechieAction.Action == request.Actions);
+            bool isExistsTechieGreeting = _studentTechieRepository.Queryable.Any(x => x.TechieActionId == techieActionFilter.Id && x.TechieAction!.Feature == request!.TechieFeature && x.TechieAction.Action == request.Actions && x.CreatedUserId == _authContext.CurrentUserId);
 
             if (isExistsTechieGreeting)
             {
@@ -92,6 +95,8 @@ namespace Fsel.System.Application.Commands.TechieCmd
                     Priority = techieActionFilter.Priority,
 
                 };
+
+                _logger.LogInformation("Send Techie To Socket");
                 await _techieSendMessagePublisher.Publish(socketModel, cancellationToken);
                 return methodResult;
             });
