@@ -5,24 +5,30 @@ using Fsel.Shared.Constants;
 using Fsel.Shared.Models.ShareModels;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
 namespace Fsel.Realtime.Application.Queues.Consumers
 {
     public class StudentTechieConsumer : BaseConsumer<StudentTechieMessageModel>
     {
         private readonly IHubContext<TechieHub> _techieHub;
+        private readonly AuthContext _authContext;
+        private readonly ILogger<object> _logger;
 
-        public StudentTechieConsumer(IHubContext<TechieHub> techieHub, AuthContext authContext) : base(authContext)
+        public StudentTechieConsumer(IHubContext<TechieHub> techieHub, AuthContext authContext, ILogger<object> logger) : base(authContext)
         {
             _techieHub = techieHub;
+            _authContext = authContext;
+            _logger = logger;
         }
 
         public override async Task ConsumeQueue(StudentTechieMessageModel? message)
         {
+            _logger.LogInformation($"Start Send WS:{message.Message}");
             if (message != null)
             {
-                var mockTestResultId = message.StudentId.ToString();
-                await _techieHub.GetGroup(mockTestResultId!).SendAsync(RealtimeSettings.TechieHub.Methods.Techie, message);
+                await _techieHub.GetGroup(_authContext.CurrentUserId.ToString()).SendAsync(RealtimeSettings.TechieHub.Methods.Techie, message);
+                _logger.LogInformation($"Send Successfully !:{message.Message}");
             }
         }
     }
