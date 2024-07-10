@@ -11,7 +11,10 @@ namespace Fsel.System.Application.Services.GoogleSheetServices.Models
                 this[languageCode] = new Dictionary<string, string>();
             }
 
-            this[languageCode].Add(key, value);
+            if (!this[languageCode].ContainsKey(key))
+            {
+                this[languageCode].Add(key, value);
+            }
         }
     }
 }
