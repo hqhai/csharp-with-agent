@@ -132,14 +132,20 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
         private static EnumTechieAction NumberOfCorrectTimeCode(int correctCount)
         {
-            switch (correctCount)
+            return correctCount switch
             {
-                case 5:
-                    return EnumTechieAction.StreakFiveTimeCode;
-                default:
-                    return EnumTechieAction.StreakFiveTimeCode;
-
-            }
+                ValueSettings.TimeCodeStreak.StreakFiveTimeCode => EnumTechieAction.StreakFiveTimeCode,
+                ValueSettings.TimeCodeStreak.StreakTenTimeCode => EnumTechieAction.StreakTenTimeCode,
+                ValueSettings.TimeCodeStreak.StreakFifTeenTimeCode => EnumTechieAction.StreakFifTeenTimeCode,
+                ValueSettings.TimeCodeStreak.StreakTwentyTimeCode => EnumTechieAction.StreakTwentyTimeCode,
+                ValueSettings.TimeCodeStreak.StreakTwentyFiveTimeCode => EnumTechieAction.StreakTwentyFiveTimeCode,
+                ValueSettings.TimeCodeStreak.StreakThirtyTimeCode => EnumTechieAction.StreakThirtyTimeCode,
+                ValueSettings.TimeCodeStreak.StreakThirtyFiveTimeCode => EnumTechieAction.StreakThirtyFiveTimeCode,
+                ValueSettings.TimeCodeStreak.StreakFourtyTimeCode => EnumTechieAction.StreakFourtyTimeCode,
+                ValueSettings.TimeCodeStreak.StreakFourtyFiveTimeCode => EnumTechieAction.StreakFourtyFiveTimeCode,
+                ValueSettings.TimeCodeStreak.StreakFiftyTimeCode => EnumTechieAction.StreakFiftyTimeCode,
+                _ => EnumTechieAction.StreakFiveTimeCode
+            };
         }
     }
 }
