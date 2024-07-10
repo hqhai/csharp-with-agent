@@ -245,7 +245,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 {
                     return;
                 }
-                courseManager.DisplayOrder = unit.CourseUnitMockTests.Max(x => x.Number);
+                courseManager.DisplayOrder = unit.CourseUnitMockTests.Max(x => x.DisplayOrder);
                 courseManager.Type = nameof(Unit);
                 courseManager.ObjectId = unitResult.UnitId;
 
