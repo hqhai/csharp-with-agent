@@ -376,9 +376,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         public async Task<bool> CheckCourseIELTSDoneAsync(Guid studentId, Guid courseId, CancellationToken cancellationToken)
         {
-            var isUnitDone = await _unitResultRepository.Queryable.Where(x => x.StudentId == studentId && x.CourseId == courseId && x.Status == EnumResultStatus.Done)
+            var isUnitDone = await _unitResultRepository.Queryable.Where(x => x.StudentId == studentId && x.CourseId == courseId)
                 .Select(x => x.Status).AllAsync(x => x == EnumResultStatus.Done, cancellationToken);
-            var isMockTestDone = await _mockTestResultRepository.Queryable.Where(x => x.StudentId == studentId && x.CourseId == courseId && x.Status == EnumResultStatus.Done)
+            var isMockTestDone = await _mockTestResultRepository.Queryable.Where(x => x.StudentId == studentId && x.CourseId == courseId)
                  .Select(x => x.Status).AllAsync(x => x == EnumResultStatus.Done, cancellationToken);
             return isUnitDone && isMockTestDone;
         }
