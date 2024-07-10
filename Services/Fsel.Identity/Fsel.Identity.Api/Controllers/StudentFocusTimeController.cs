@@ -41,7 +41,6 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         [HttpGet]
-        [ServerCache(CacheSettings.TimeCache.TwoMinutes)]
         [ProducesResponseType(typeof(MethodResult<StudentFocusTimeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetStudentFocusTime()
