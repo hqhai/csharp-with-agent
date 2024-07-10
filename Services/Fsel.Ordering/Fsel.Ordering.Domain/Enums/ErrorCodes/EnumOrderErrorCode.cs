@@ -17,6 +17,11 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         /// <summary>
         /// You Chose The Wrong Level
         /// </summary>
-        YouChoseTheWrongLevel
+        YouChoseTheWrongLevel,
+
+        /// <summary>
+        /// Try again in 1 minute
+        /// </summary>
+        TryAgainInOneMinute
     }
 }

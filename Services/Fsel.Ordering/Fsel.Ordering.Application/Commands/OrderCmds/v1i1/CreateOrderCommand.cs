@@ -79,32 +79,53 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             }
             var student = studentResult.Content?.Result;
 
-            Guid? courseId;
+            Guid? courseId = null;
             if (request.CourseLevel == null)
             {
-                var orderPayment = await _orderRepository.Queryable.Where(p => p.Status == EnumOrderStatus.Payment && p.UserId == _authContext.CurrentUserId).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+                var orderPayment = await _orderRepository.Queryable.Where(p => (p.Status == EnumOrderStatus.Payment || p.Status == EnumOrderStatus.New) && p.UserId == _authContext.CurrentUserId).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
                 courseId = orderPayment?.CourseId;
-                request.CourseLevel = student?.CourseLevel;
-            }
-            else
-            {
+
+                //request.CourseLevel = student?.CourseLevel;
                 var courseResult = await _courseService.GetCourseByLevel(new BaseQueryModel()
                 {
                     Filters = new List<GenericFilterModel>()
-                {
-                    new GenericFilterModel()
                     {
-                        Property = "Status",
-                        Operator = EnumFilterOperator.Equal,
-                        Value = "Active"
-                    },
-                    new GenericFilterModel()
-                    {
-                        Property = "CourseLevel",
-                        Operator = EnumFilterOperator.Equal,
-                        Value = request.CourseLevel.ToString()
+                        new GenericFilterModel()
+                        {
+                            Property = "Id",
+                            Operator = EnumFilterOperator.Equal,
+                            Value = courseId
+                        }
                     }
+                });
+
+                if (!courseResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(courseResult.Error);
+                    return methodResult;
                 }
+                request.CourseLevel = courseResult?.Content?.Result?.CourseLevel;
+            }
+            else
+            {
+                //request.CourseLevel = student?.CourseLevel;
+                var courseResult = await _courseService.GetCourseByLevel(new BaseQueryModel()
+                {
+                    Filters = new List<GenericFilterModel>()
+                    {
+                        new GenericFilterModel()
+                        {
+                            Property = "Status",
+                            Operator = EnumFilterOperator.Equal,
+                            Value = "Active"
+                        },
+                        new GenericFilterModel()
+                        {
+                            Property = "CourseLevel",
+                            Operator = EnumFilterOperator.Equal,
+                            Value = request.CourseLevel.ToString()
+                        }
+                    }
                 });
 
                 if (!courseResult.IsSuccessStatusCode)
@@ -154,7 +175,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(code));
+                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.TryAgainInOneMinute), nameof(code));
                 return methodResult;
             }
 

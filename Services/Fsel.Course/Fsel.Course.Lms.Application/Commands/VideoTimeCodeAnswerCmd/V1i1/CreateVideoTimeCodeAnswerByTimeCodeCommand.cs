@@ -356,8 +356,16 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 VideoTimeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode)
             }.Serialize();
 
-            _logger.LogError($"Log_CreateVideoTimeCodeAnswerByTimeCodeCommand_Handle_UpdateVideoTimeCodeResultAsync_Update : {requestInfoUpdate}");
+            _logger.LogError($"Log_CreateVideoTimeCodeAnswerByTimeCodeCommand_Handle_UpdateVideoTimeCodeResultAsync_Update_1 : {requestInfoUpdate}");
             await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            var requestInfoUpdate2 = new
+            {
+                IsSubmit = isSubmit,
+                VideoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult),
+                VideoTimeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode)
+            }.Serialize();
+            _logger.LogError($"Log_CreateVideoTimeCodeAnswerByTimeCodeCommand_Handle_UpdateVideoTimeCodeResultAsync_Update_2 : {requestInfoUpdate2}");
         }
 
         private async Task SendTokenHistoryAsync(VideoTimeCodeResult videoTimeCodeResult, Guid? courseResultId, StudentModel student, CancellationToken cancellationToken)
