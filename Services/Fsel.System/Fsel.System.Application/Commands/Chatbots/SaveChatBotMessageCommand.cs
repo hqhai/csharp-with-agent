@@ -113,7 +113,8 @@ namespace Fsel.System.Application.Commands.Chatbots
             string filePath = await TextToSpeech(chatbotMessage.Skill, isContainAudioScript, response);
 
             // Bổ sung câu trả lời của GPT vào đoạn hội thoại
-            var chatBotResponse = _mapper.Map<List<ChatbotResponseModel>>(chatBotMessageModel);
+            var chatBotResponse = _mapper.Map<List<ChatbotResponseModel>>(chatbotMessage.Conversations);
+            chatBotResponse.Add(newQuestion);
             ChatbotResponseModel newMessage = CompletionElement("system", response, filePath);
             chatBotResponse.Add(newMessage);
 
