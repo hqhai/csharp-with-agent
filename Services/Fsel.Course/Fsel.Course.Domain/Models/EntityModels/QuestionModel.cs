@@ -14,6 +14,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public object? Config { get; set; }
         public EnumCorrectStatus? CorrectStatus { get; set; }
         public AnswerModel? ResultAnswer { get; set; }
+        public IList<ExplanationTranslationModel>? Explanations { get; set; }
         public Guid? SectionId { get; set; }
     }
 }

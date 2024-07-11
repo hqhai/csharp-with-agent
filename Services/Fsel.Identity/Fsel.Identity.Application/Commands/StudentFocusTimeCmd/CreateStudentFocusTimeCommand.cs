@@ -100,22 +100,10 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 await _studentFocusTimeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<StudentFocusTimeModel>(studentFocusTime);
-                await DoQuestBoard(studentFocusTime.StudentId, cancellationToken);
                 return methodResult;
             });
 
             return methodResult;
-        }
-
-        private async Task DoQuestBoard(Guid studentId, CancellationToken cancellationToken)
-        {
-            await _questBoardPublisher.Publish(new QuestBoardQueueModel()
-            {
-                StudentID = studentId,
-                Type = EnumQuestBoardType.BeginnerQuests,
-                Category = EnumQuestBoardCategory.CompleteFocusModeFirst,
-                Value = 1
-            }, cancellationToken);
         }
     }
 }

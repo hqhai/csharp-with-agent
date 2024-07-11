@@ -24,11 +24,11 @@ namespace Fsel.Realtime.Application.Queues.Consumers
 
         public override async Task ConsumeQueue(StudentTechieMessageModel? message)
         {
-            _logger.LogInformation($"Start Send WS:{message.Message}");
+            _logger.LogInformation($"Consumer Receive Techie Message:{message.Message}");
             if (message != null)
             {
                 await _techieHub.GetGroup(_authContext.CurrentUserId.ToString()).SendAsync(RealtimeSettings.TechieHub.Methods.Techie, message);
-                _logger.LogInformation($"Send Successfully !:{message.Message}");
+                _logger.LogInformation($"Send TechieHub Successfully !:{message.Message}");
             }
         }
     }
