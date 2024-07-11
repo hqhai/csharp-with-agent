@@ -24,11 +24,11 @@ namespace Fsel.Realtime.Application.Queues.Consumers
 
         public override async Task ConsumeQueue(ChatBotSendingMessageModel? message)
         {
-            _logger.LogInformation($"Consumer Receive Chatbot Message:{ConvertHelper.Serialize(message)}");
+            _logger.LogInformation($"Consumer Receive Chatbot Message:{ConvertHelper.Serialize(message)}, Environment.MachineName: {Environment.MachineName}");
             if (message != null)
             {
                 var chatBotId = message.ChatbotId.ToString();
-                _logger.LogInformation($"Consumer Send to ChatBotHub:{message.ChatbotId}");
+                _logger.LogInformation($"Consumer Send to ChatBotHub:{message.ChatbotId}, Environment.MachineName: {Environment.MachineName}");
                 await _chatBotHubContext.GetGroup(chatBotId!).SendAsync(RealtimeSettings.ChatBotHub.Methods.ChatBot, message);
             }
         }
