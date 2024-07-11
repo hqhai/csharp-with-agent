@@ -45,6 +45,7 @@ namespace Fsel.System.Application.Commands.GoogleSheets
             var credentialsPath = ResourceSettings.I18NCredentialsFilePath;
 
             var birthday = request.Birthday.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture);
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture);
 
             var data = new List<IList<object>>()
         {
@@ -54,7 +55,8 @@ namespace Fsel.System.Application.Commands.GoogleSheets
                 request.LastName?? string.Empty,
                 request.Email ?? string.Empty,
                 request.PhoneNumber ?? string.Empty,
-                birthday
+                birthday,
+                currentDate
             }
         };
 
