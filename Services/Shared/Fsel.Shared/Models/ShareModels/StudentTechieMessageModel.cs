@@ -14,6 +14,8 @@ namespace Fsel.Shared.Models.ShareModels
 
         public EnumTechieAction Action { get; set; }
 
+        public int Priority { get; set; }
+
     }
 
     public class StudentTechieActionModel
