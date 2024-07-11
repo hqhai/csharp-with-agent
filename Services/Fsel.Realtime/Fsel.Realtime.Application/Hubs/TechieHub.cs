@@ -40,7 +40,7 @@ namespace Fsel.Realtime.Application.Hubs
 
         public async Task TechieSendAction(string modelStr)
         {
-            _logger.LogInformation($"Start Invoke!: {modelStr}");
+            _logger.LogInformation($"Start Invoke Techie!: {modelStr}");
             var model = ConvertHelper.Deserialize<StudentTechieActionModel>(modelStr);
             await _actionPublisher.Publish(model, CancellationToken.None);
         }
