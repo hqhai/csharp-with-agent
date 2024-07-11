@@ -108,17 +108,21 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
                 if (count >= 5)
                 {
+                    (EnumTechieAction action, int countStreak) = NumberOfCorrectTimeCode(count);
                     StudentTechieActionModel model = new StudentTechieActionModel()
                     {
                         Config = new TechieConfig
                         {
-                            Value = count.ToString(CultureInfo.InvariantCulture)
+                            Value = countStreak.ToString(CultureInfo.InvariantCulture)
                         },
                         Feature = EnumTechieFeature.Cheer,
-                        Action = NumberOfCorrectTimeCode(count)
+                        Action = action
                     };
 
-                    await _techieActionPublisher.Publish(model, cancellation);
+                    if (count == countStreak)
+                    {
+                        await _techieActionPublisher.Publish(model, cancellation);
+                    }
                 }
             }
         }
@@ -131,21 +135,21 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             await _videoResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        private static EnumTechieAction NumberOfCorrectTimeCode(int correctCount)
+        private static (EnumTechieAction action, int count) NumberOfCorrectTimeCode(int correctCount)
         {
             return correctCount switch
             {
-                ValueSettings.TimeCodeStreak.StreakFiveTimeCode => EnumTechieAction.StreakFiveTimeCode,
-                ValueSettings.TimeCodeStreak.StreakTenTimeCode => EnumTechieAction.StreakTenTimeCode,
-                ValueSettings.TimeCodeStreak.StreakFifTeenTimeCode => EnumTechieAction.StreakFifTeenTimeCode,
-                ValueSettings.TimeCodeStreak.StreakTwentyTimeCode => EnumTechieAction.StreakTwentyTimeCode,
-                ValueSettings.TimeCodeStreak.StreakTwentyFiveTimeCode => EnumTechieAction.StreakTwentyFiveTimeCode,
-                ValueSettings.TimeCodeStreak.StreakThirtyTimeCode => EnumTechieAction.StreakThirtyTimeCode,
-                ValueSettings.TimeCodeStreak.StreakThirtyFiveTimeCode => EnumTechieAction.StreakThirtyFiveTimeCode,
-                ValueSettings.TimeCodeStreak.StreakFourtyTimeCode => EnumTechieAction.StreakFourtyTimeCode,
-                ValueSettings.TimeCodeStreak.StreakFourtyFiveTimeCode => EnumTechieAction.StreakFourtyFiveTimeCode,
-                ValueSettings.TimeCodeStreak.StreakFiftyTimeCode => EnumTechieAction.StreakFiftyTimeCode,
-                _ => EnumTechieAction.StreakFiveTimeCode
+                ValueSettings.TimeCodeStreak.StreakFiveTimeCode => (EnumTechieAction.StreakFiveTimeCode, ValueSettings.TimeCodeStreak.StreakFiveTimeCode),
+                ValueSettings.TimeCodeStreak.StreakTenTimeCode => (EnumTechieAction.StreakTenTimeCode, ValueSettings.TimeCodeStreak.StreakTenTimeCode),
+                ValueSettings.TimeCodeStreak.StreakFifTeenTimeCode => (EnumTechieAction.StreakFifTeenTimeCode, ValueSettings.TimeCodeStreak.StreakFifTeenTimeCode),
+                ValueSettings.TimeCodeStreak.StreakTwentyTimeCode => (EnumTechieAction.StreakTwentyTimeCode, ValueSettings.TimeCodeStreak.StreakTwentyTimeCode),
+                ValueSettings.TimeCodeStreak.StreakTwentyFiveTimeCode => (EnumTechieAction.StreakTwentyFiveTimeCode, ValueSettings.TimeCodeStreak.StreakTwentyFiveTimeCode),
+                ValueSettings.TimeCodeStreak.StreakThirtyTimeCode => (EnumTechieAction.StreakThirtyTimeCode, ValueSettings.TimeCodeStreak.StreakThirtyTimeCode),
+                ValueSettings.TimeCodeStreak.StreakThirtyFiveTimeCode => (EnumTechieAction.StreakThirtyFiveTimeCode, ValueSettings.TimeCodeStreak.StreakThirtyFiveTimeCode),
+                ValueSettings.TimeCodeStreak.StreakFourtyTimeCode => (EnumTechieAction.StreakFourtyTimeCode, ValueSettings.TimeCodeStreak.StreakFourtyTimeCode),
+                ValueSettings.TimeCodeStreak.StreakFourtyFiveTimeCode => (EnumTechieAction.StreakFourtyFiveTimeCode, ValueSettings.TimeCodeStreak.StreakFourtyFiveTimeCode),
+                ValueSettings.TimeCodeStreak.StreakFiftyTimeCode => (EnumTechieAction.StreakFiftyTimeCode, ValueSettings.TimeCodeStreak.StreakFiftyTimeCode),
+                _ => (EnumTechieAction.StreakFiveTimeCode, ValueSettings.TimeCodeStreak.StreakFiveTimeCode)
             };
         }
     }
