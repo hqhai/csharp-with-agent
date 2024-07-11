@@ -31,7 +31,13 @@ namespace Fsel.Course.Domain.Entities
         public IList<ExplanationTranslationModel>? Explanations
         {
             get { return ConvertHelper.Deserialize<IList<ExplanationTranslationModel>>(Explanation); }
-            set { Explanation = ConvertHelper.Serialize(value); }
+            set
+            {
+                if (value != null)
+                {
+                    Explanation = ConvertHelper.Serialize(value);
+                }
+            }
         }
 
         /// <summary>
