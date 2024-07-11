@@ -217,7 +217,7 @@ namespace Fsel.System.Application.Commands.Chatbots
                 FilePath = filePath,
                 TokenRatio = tokenRation
             };
-
+            _logger.LogInformation($"Feature Send to ChatbotPublisher:{ConvertHelper.Serialize(model)}");
             await _chatBotPublisher.Publish(model, cancellationToken);
         }
 
