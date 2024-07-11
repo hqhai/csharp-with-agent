@@ -277,7 +277,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
 
-        
             return methodResult;
         }
 
@@ -379,21 +378,20 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 return;
             }
             var listToken = new List<TokenHistoryQueueModel>
+            {
+                new TokenHistoryQueueModel
                 {
-                    new TokenHistoryQueueModel
-                    {
-                        ObjectId = videoTimeCodeResult.Id,
-                        VolatileToken = tokensAchieved,
-                        Feature = EnumTokenFeature.Learn,
-                        CourseResultId =  courseResultId,
-                        Mission = videoTimeCodeResult.Status == EnumResultStatus.New ? EnumTokenMission.TimeCodeFirstSubmit : EnumTokenMission.TimeCodeSecondSubmit,
-                        Type = EnumTokenHistoryType.Recevived,
-                        UserId = student.Human?.UserId ?? default,
-                    }
-                };
+                    ObjectId = videoTimeCodeResult.Id,
+                    VolatileToken = tokensAchieved,
+                    Feature = EnumTokenFeature.Learn,
+                    CourseResultId =  courseResultId,
+                    Mission = videoTimeCodeResult.Status == EnumResultStatus.New ? EnumTokenMission.TimeCodeFirstSubmit : EnumTokenMission.TimeCodeSecondSubmit,
+                    Type = EnumTokenHistoryType.Recevived,
+                    UserId = student.Human?.UserId ?? default,
+                }
+            };
 
-                await _createTokenHistoryPublisher.Publish(listToken, cancellationToken).ConfigureAwait(false);
-            }
+            await _createTokenHistoryPublisher.Publish(listToken, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
