@@ -13,6 +13,12 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public new Services? Services { get; set; }
 
         public OpenAiConfig? OpenAiConfig { get; set; }
+        public ConnectionStrings? ConnectionStrings { get; set; }
+    }
+
+    public class ConnectionStrings
+    {
+        public string? CrmConnection { get; set; }
     }
 
     public class OpenAiConfig

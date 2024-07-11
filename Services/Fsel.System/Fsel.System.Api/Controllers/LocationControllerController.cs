@@ -9,6 +9,7 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
     using Fsel.System.Application.Queries.LocationQuery;
+    using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
@@ -34,6 +35,18 @@ namespace Fsel.System.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<LocationModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetLocationsQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get locations
+        /// </summary>
+        [HttpGet("get-locations-from-crm")]
+        [ProducesResponseType(typeof(MethodResult<IList<CrmLocation>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetLocationFromCrm([FromQuery] GetLocationFromCrmQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
