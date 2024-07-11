@@ -2,9 +2,11 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class ExplanationTranslationModel
+    using Fsel.Core.Base.Interfaces;
+
+    public class ExplanationTranslationModel : ITranslationObject
     {
-        public IList<string>? Vn { get; set; }
-        public IList<string>? En { get; set; }
+        public string? Language { get; set; }
+        public IList<string>? Contents { get; set; }
     }
 }

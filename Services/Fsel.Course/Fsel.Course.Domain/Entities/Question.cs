@@ -28,9 +28,9 @@ namespace Fsel.Course.Domain.Entities
         public string? Explanation { get; set; }
 
         [NotMapped]
-        public ExplanationTranslationModel? ExplanationConfig
+        public IList<ExplanationTranslationModel>? Explanations
         {
-            get { return ConvertHelper.Deserialize<ExplanationTranslationModel>(Explanation); }
+            get { return ConvertHelper.Deserialize<IList<ExplanationTranslationModel>>(Explanation); }
             set { Explanation = ConvertHelper.Serialize(value); }
         }
 
