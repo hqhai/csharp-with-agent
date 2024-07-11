@@ -24,7 +24,7 @@ namespace Fsel.System.Application.Queues.Publisher
             {
                 return;
             }
-            _logger.LogInformation($"Publisher Send ChatbotWS:{ConvertHelper.Serialize(request)}", Environment.MachineName: { Environment.MachineName});
+            _logger.LogInformation($"Publisher Send ChatbotWS:{ConvertHelper.Serialize(request)}, Environment.MachineName: {Environment.MachineName}");
             await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.ChatBotRealTime, request, cancellationToken);
         }
     }
