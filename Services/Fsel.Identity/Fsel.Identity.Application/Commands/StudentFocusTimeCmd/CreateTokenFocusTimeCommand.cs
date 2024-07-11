@@ -158,17 +158,17 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
                 #region Do QuestBoard
 
-                await DoQuestBoard(studentFocusTime.StudentId, EnumQuestBoardCategory.CompleteMissionDay, cancellationToken);
-
                 var days = DateTimeHelper.GetWeekDays(DateTime.UtcNow);
                 var monDay = days.First();
                 var sunDay = days.Last();
 
                 var studentFocusTimes = await _studentFocusTimeRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId && p.CreatedDate.Date >= monDay.Date && p.CreatedDate.Date <= sunDay.Date && p.IsReceivedToken).ToListAsync();
-                if (studentFocusTimes.Count >= 7)
+                if (studentFocusTimes.Count < 7)
                 {
-                    await DoQuestBoard(studentFocusTime.StudentId, EnumQuestBoardCategory.InfinityFocusMode, cancellationToken);
+                    await DoQuestBoard(studentFocusTime.StudentId, EnumQuestBoardType.LearningQuests, EnumQuestBoardCategory.InfinityFocusMode, cancellationToken);
                 }
+
+                await DoQuestBoard(studentFocusTime.StudentId, EnumQuestBoardType.BeginnerQuests, EnumQuestBoardCategory.CompleteFocusModeFirst, cancellationToken);
 
                 #endregion Do QuestBoard
 
@@ -178,12 +178,12 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             return methodResult;
         }
 
-        private async Task DoQuestBoard(Guid studentId, EnumQuestBoardCategory category, CancellationToken cancellationToken)
+        private async Task DoQuestBoard(Guid studentId, EnumQuestBoardType questBoardType, EnumQuestBoardCategory category, CancellationToken cancellationToken)
         {
             await _questBoardPublisher.Publish(new QuestBoardQueueModel()
             {
                 StudentID = studentId,
-                Type = EnumQuestBoardType.LearningQuests,
+                Type = questBoardType,
                 Category = category,
                 Value = 1
             }, cancellationToken);
