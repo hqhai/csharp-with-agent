@@ -40,7 +40,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// client
         /// </summary>
-        [HttpGet("client")]
+        [HttpGet("clients")]
         [ProducesResponseType(typeof(MethodResult<ClientsIntegrationModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> ClientsIntegration([FromQuery] ClientIntegrationQuery query)

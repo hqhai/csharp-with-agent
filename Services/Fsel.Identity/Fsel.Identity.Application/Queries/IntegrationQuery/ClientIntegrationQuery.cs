@@ -141,6 +141,20 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 return methodResult;
             }
 
+            // lấy unit lesson
+            var units = await _lmsCourseService.GetUnitResults(courseIntegrationQueryModel);
+            if (!units.IsSuccessStatusCode)
+            {
+                methodResult.AddError(units.Error);
+                return methodResult;
+            }
+            var unitResults = units.Content?.Result;
+            if (unitResults == null)
+            {
+                methodResult.AddError(units.Error);
+                return methodResult;
+            }
+
             // lấy all user từ list hợp nhất
             var userCombines = await _humanRepository.Queryable
                                                      .Include(x => x.User)
@@ -166,10 +180,28 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             clientsIntegrations.ForEach(item =>
             {
+                var ptTestResult = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId);
+                var unitResult = unitResults.FirstOrDefault(x => x.UserId == item.UserId);
                 item.LongPathSchool = schoolResult?.FirstOrDefault(x => x.Id == item.SchoolId)?.LongPath;
                 item.LongPathLocation = schoolResult?.FirstOrDefault(x => x.Id == item.SchoolId)?.Location?.LongPath;
                 item.LastDate = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item.UserId)?.LastVisited;
                 item.PTLevel = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId)?.Level;
+                item.PTLevel = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId)?.Level;
+                var dateOrder = orderResults.Where(x => x.UserId == item.UserId).Max(c => c.CreatedDate > c.UpdatedDate ? c.CreatedDate : c.UpdatedDate);
+                item.DateEdit = dateOrder > ptTestResult?.DateEdit ? dateOrder : ptTestResult?.DateEdit ?? null;
+                item.CourseLevel = unitResult?.CourseLevel;
+                item.StartCourse = unitResult?.StartCourse;
+                item.EndCourse = unitResult?.EndCourse;
+
+                if (ptTestResult != null)
+                {
+                    item.PTLevel = ptTestResult.Level;
+                    item.PlacementTestResults = ptTestResult.PlacementTestResults;
+                }
+
+                item.CurrentUnit = unitResult?.Name;
+                item.CurrentLesson = unitResult?.CurrentLesson;
+                item.LessonCompleted = unitResult?.LessonCompleted;
 
                 List<OrderIntegrationModel> orderIntegrations = new List<OrderIntegrationModel>();
                 foreach (var order in orderResults.Where(x => x.UserId == item.UserId).ToList())
