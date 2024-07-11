@@ -5,6 +5,7 @@ using Fsel.Realtime.Application.Queues.Publishers;
 using Fsel.Shared.Models.ShareModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
 // Đảm bảo rằng bạn đã thêm namespace của ConnectionTracker
 
@@ -14,11 +15,13 @@ namespace Fsel.Realtime.Application.Hubs
     {
         private readonly AuthContext _authContext;
         private readonly ChatBotPublisher _botPublisher;
+        private readonly ILogger<ChatBotHub> _logger;
 
-        public ChatBotHub(AuthContext authContext, IIpApiService ipApiService, IHttpContextAccessor httpContextAccessor, ChatBotPublisher botPublisher) : base(authContext, ipApiService, httpContextAccessor)
+        public ChatBotHub(AuthContext authContext, IIpApiService ipApiService, IHttpContextAccessor httpContextAccessor, ChatBotPublisher botPublisher, ILogger<ChatBotHub> logger) : base(authContext, ipApiService, httpContextAccessor)
         {
             _authContext = authContext;
             _botPublisher = botPublisher;
+            _logger = logger;
         }
 
         public override async Task OnConnectedHubAsync()
@@ -43,7 +46,7 @@ namespace Fsel.Realtime.Application.Hubs
                 ChatbotId = config?.ChatBotId,
                 Content = config?.Content ?? string.Empty,
             };
-
+            _logger.LogInformation($"Start Invoke ChatBot: Content : {config.Content}, ChatbotId: {config.ChatBotId}");
             await _botPublisher.Publish(model, CancellationToken.None);
         }
 
