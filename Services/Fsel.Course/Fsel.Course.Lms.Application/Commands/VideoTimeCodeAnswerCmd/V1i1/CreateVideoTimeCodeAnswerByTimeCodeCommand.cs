@@ -399,8 +399,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 }
             };
 
-            await _createTokenHistoryPublisher.Publish(listToken, cancellationToken).ConfigureAwait(false);
-        }
+                await _createTokenHistoryPublisher.Publish(listToken, cancellationToken).ConfigureAwait(false);
+            }
+        
 
         /// <summary>
         /// Show Techies khi học sinh học bài xong
@@ -419,7 +420,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 int indexOfCurrent = videoTimeCodeResults.IndexOf(currentVideoTimeCodeResults);
 
 
-                int count = videoTimeCodeResults.Take(indexOfCurrent + 1).Count(x => x.CorrectCount == x.CorrectTotal);
+                int count = videoTimeCodeResults.Take(indexOfCurrent + 1).Count(x => x.CorrectCount == x.CorrectTotal && x.CorrectCount != 0 && x.Status == EnumResultStatus.Done);
 
                 if (count >= 5)
                 {
