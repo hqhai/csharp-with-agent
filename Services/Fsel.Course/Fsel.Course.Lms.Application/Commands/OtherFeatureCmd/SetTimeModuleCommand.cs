@@ -96,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             }.Serialize();
             _logger.LogError($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync_1 : {requestInfoUpdate}");
 
-            _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
+            _videoTimeCodeResultRepository.Update(videoTimeCodeResult, true, x => x.WorkingTime, x => x.RetryWorkingTime);
             await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
             var requestInfoUpdate2 = new
@@ -127,7 +127,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 }.Serialize();
                 _logger.LogError($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync_1 : {requestInfoUpdate}");
 
-                _sectionGroupResultRepository.Update(sectionGroupResult);
+                _sectionGroupResultRepository.Update(sectionGroupResult, true, x => x.WorkingTime);
                 await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var requestInfoUpdate2 = new
