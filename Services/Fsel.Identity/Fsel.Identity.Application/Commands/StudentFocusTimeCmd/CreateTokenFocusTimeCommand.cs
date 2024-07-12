@@ -15,11 +15,9 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Identity.Application.Services.TrainingService;
-    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -74,17 +72,13 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentFocusTime));
                 return methodResult;
             }
-            if (!studentFocusTime.IsEstablished)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.UserNotEstablished), nameof(studentFocusTime));
-                return methodResult;
-            }
 
             if (studentFocusTime.IsReceivedToken)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.UserReceivedTokens), nameof(studentFocusTime.IsReceivedToken));
                 return methodResult;
             }
+
             var systemConfig = await _systemService.GetFocusTimeConfig();
             if (!systemConfig.IsSuccessStatusCode)
             {
@@ -98,17 +92,25 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
+
+            if (studentFocusTime.TargetTime == default && !studentFocusTime.IsEstablished)
+            {
+                var studentFocusTimeOld = await _studentFocusTimeRepository.Queryable.Where(x => x.StudentId == student.Id && x.TargetTime > 0).OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+                studentFocusTime.TargetTime = studentFocusTimeOld?.TargetTime ?? default;
+            }
+
             var systemConfigMap = systemConfigResult.FirstOrDefault(x => x.TargetTime == studentFocusTime.TargetTime);
-            if (systemConfigMap != null && studentFocusTime.ExecuteTime < systemConfigMap!.TargetTime)
+            if (systemConfigMap != null && studentFocusTime.ExecuteTime < systemConfigMap.TargetTime)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.UserNotEnoughTime), nameof(studentFocusTime.ExecuteTime));
                 return methodResult;
             }
+
             double? numberOfToken = default;
             //Thực hiện các hành động lưu xuống database , gửi lên websocket
             await _studentFocusTimeRepository.ExecuteTransactionAsync(async () =>
             {
-                if (systemConfigMap != null && studentFocusTime.ExecuteTime >= systemConfigMap!.TargetTime && studentFocusTime.IsEstablished)
+                if (systemConfigMap != null && studentFocusTime.ExecuteTime >= systemConfigMap.TargetTime)
                 {
                     // làm nhiệm vụ
                     // await DoQuestBoard(student, request.ExecuteTime, studentFocusTime.TargetTime, cancellationToken);
