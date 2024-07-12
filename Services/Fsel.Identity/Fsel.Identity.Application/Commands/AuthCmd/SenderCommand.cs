@@ -17,6 +17,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         public string? Content { get; set; }
         public string? Subject { get; set; }
         public object? Params { get; set; }
+        public bool? IsCCEmailDefault { get; set; }
         public EnumSenderTemplate? Template { get; set; }
     }
 
@@ -42,6 +43,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     Subject = request.Subject,
                     Params = request.Params,
                     Template = request.Template,
+                    IsCCEmailDefault = request.IsCCEmailDefault,
                     ToEmails = new List<string> { $"{request.Email}" }
                 };
 
