@@ -37,7 +37,7 @@ namespace Fsel.Course.Infrastructure.Common
             if (courseResult != null && courseResult.Status == EnumResultStatus.Done)
             {
                 isStudentsAchieveScores = courseResult.Percent > MaxPercent;
-                if (isStudentsAchieveScores.HasValue && courseResult.Course != null && courseResult.Course.CourseType == EnumCourseType.Ielts)
+                if (isStudentsAchieveScores.HasValue && !isStudentsAchieveScores.Value && courseResult.Course != null && courseResult.Course.CourseType == EnumCourseType.Ielts)
                 {
                     isStudentsAchieveScores = await CheckScoreFullMockTestTwoAsync(courseResult);
                 }
