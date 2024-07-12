@@ -96,7 +96,12 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             }.Serialize();
             _logger.LogError($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync_1 : {requestInfoUpdate}");
 
-            _videoTimeCodeResultRepository.Update(videoTimeCodeResult, true, x => x.WorkingTime, x => x.RetryWorkingTime);
+            _videoTimeCodeResultRepository.Update(videoTimeCodeResult, false
+                , x => x.SkillScoresStr, x => x.SkillScoreUngradedStr
+                , x => x.CorrectCount, x => x.CorrectTotal
+                , x => x.CorrectCountUngraded, x => x.CorrectTotalUngraded
+                , x => x.TokenFirstTime, x => x.TokenLastTime, x => x.Status, x => x.HighestStreak
+                , x => x.Percent, x => x.IsWorking);
             await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
             var requestInfoUpdate2 = new
@@ -127,7 +132,10 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 }.Serialize();
                 _logger.LogError($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync_1 : {requestInfoUpdate}");
 
-                _sectionGroupResultRepository.Update(sectionGroupResult, true, x => x.WorkingTime);
+                _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.CurrentSectionTimeCodeId
+                , x => x.CorrectCount, x => x.CorrectTotal, x => x.SkillScoresStr
+                , x => x.TokenFirstTime, x => x.TokenLastTime, x => x.Status, x => x.HighestStreak
+                , x => x.Percent);
                 await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var requestInfoUpdate2 = new
