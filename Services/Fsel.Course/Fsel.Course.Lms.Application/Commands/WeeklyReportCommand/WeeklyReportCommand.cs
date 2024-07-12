@@ -454,7 +454,8 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 Params = model,
                 Template = model.SenderTemplate,
                 CcEmail = parentEmail,
-                IsCCEmail = true
+                IsCCEmail = true,
+                IsCCEmailDefault = true,
             }, cancellationToken).ConfigureAwait(false);
         }
 
