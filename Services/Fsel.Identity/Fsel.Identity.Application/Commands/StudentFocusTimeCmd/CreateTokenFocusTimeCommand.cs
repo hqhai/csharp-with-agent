@@ -153,9 +153,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 var studentFocusTimeModel = _mapper.Map<StudentFocusTimeModel>(studentFocusTime);
                 studentFocusTimeModel.NumberOfToken = numberOfToken;
 
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<StudentFocusTimeModel>(studentFocusTime);
-
                 #region Do QuestBoard
 
                 var days = DateTimeHelper.GetWeekDays(DateTime.UtcNow);
@@ -172,6 +169,8 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
                 #endregion Do QuestBoard
 
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = studentFocusTimeModel;
                 return methodResult;
             });
 
