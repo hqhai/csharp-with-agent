@@ -33,8 +33,7 @@ namespace Fsel.Realtime.Application.Hubs
         {
             string type = (Context.GetHttpContext()?.Request.Query["Type"].ToString()!);
             string objectId = Context.GetHttpContext()?.Request.Query["ObjectId"].ToString()!;
-            await Groups.AddGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString())
-                ;
+            await Groups.AddGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
             _logger.LogInformation($"Connected Socket SetTimeModule ConnectId : {Context.ConnectionId}, Type : {type}, ObjectId : {objectId}, DateTime: {DateTime.UtcNow}");
         }
 
