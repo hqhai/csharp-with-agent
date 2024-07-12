@@ -283,7 +283,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
 
-        
+
             return methodResult;
         }
 
@@ -386,7 +386,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 int indexOfCurrent = videoTimeCodeResults.IndexOf(currentVideoTimeCodeResults);
 
 
-                int count = videoTimeCodeResults.Take(indexOfCurrent + 1).Count(x => x.CorrectCount == x.CorrectTotal);
+                int count = videoTimeCodeResults.Take(indexOfCurrent + 1).Count(x => x.CorrectCount == x.CorrectTotal && x.CorrectCount != 0 && x.Status == EnumResultStatus.Done);
 
                 if (count >= 5)
                 {
