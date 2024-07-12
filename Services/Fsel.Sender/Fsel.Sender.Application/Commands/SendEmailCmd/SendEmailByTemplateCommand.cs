@@ -50,18 +50,6 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
                 body = body.Replace($"[{item.Key}]", item.Value, StringComparison.CurrentCultureIgnoreCase);
             });
 
-            if (request.Template == EnumSenderTemplate.SendOtp)
-            {
-                var bccEmail = _appSetting.EmailConfig?.BCCEmail;
-                if (bccEmail != null && bccEmail.Count > 0)
-                {
-                    bccEmail.ForEach(email =>
-                    {
-                        request.BccEmails.Add(email);
-                    });
-                }
-            }
-
             methodResult = await _mediator.Send(new SendEmailCommand
             {
                 Subject = request.Subject,
@@ -70,6 +58,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
                 CcEmails = request.CcEmails,
                 Content = body,
                 IsCCEmail = request.IsCCEmail,
+                IsCCEmailDefault = request.IsCCEmailDefault,
             }, cancellationToken);
 
             #endregion Validation
