@@ -207,6 +207,8 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 item.CurrentUnit = unitResult?.Name;
                 item.CurrentLesson = unitResult?.CurrentLesson;
                 item.LessonCompleted = unitResult?.LessonCompleted;
+                var dateOrder = orderItem?.UpdatedDate != null ? orderItem.UpdatedDate : orderItem?.CreatedDate ?? null;
+                item.DateEdit = dateOrder > ptTestResult?.DateEdit ? dateOrder : ptTestResult?.DateEdit ?? null;
 
                 if (ptTestResult != null)
                 {
