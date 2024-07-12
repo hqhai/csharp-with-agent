@@ -184,7 +184,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             ArgumentNullException.ThrowIfNull(request);
                             if (!string.IsNullOrEmpty(request.Email))
                             {
-                                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
+                                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, IsCCEmailDefault = true, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
                             }
                             else if (!string.IsNullOrEmpty(request.PhoneNumber))
                             {
