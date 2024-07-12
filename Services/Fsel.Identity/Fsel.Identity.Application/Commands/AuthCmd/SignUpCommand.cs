@@ -152,6 +152,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                                 #endregion Add Platform to User
 
+                                #region add user setting
+
+                                user.UserSettings = new List<UserSetting>()
+                                    {
+                                        new UserSetting(true)
+                                    };
+
+                                #endregion add user setting
+
                                 result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
                                 if (!result.Succeeded)
                                 {
