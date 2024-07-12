@@ -10,7 +10,7 @@ namespace Fsel.System.Domain.Entities
         public Guid GlobalId { get; set; }
         public string? Name { get; set; }
         public string? Description { get; set; }
-        public string? TypeName { get; set; }
+        public EnumCrmLocationTypeName? TypeName { get; set; }
         public string? LocalIdPath { get; set; }
         public string? IdPath { get; set; }
         public string? LongPath { get; set; }
@@ -18,10 +18,16 @@ namespace Fsel.System.Domain.Entities
         public int? Level { get; set; }
         public int? ParentID { get; set; }
         public string? LocalId { get; set; }
-        public EnumTypeLevel? TypeLevel { get; set; }
+        public EnumCrmLocationTypeLevel? TypeLevel { get; set; }
     }
 
-    public enum EnumTypeLevel
+    public enum EnumCrmLocationTypeName
+    {
+        Site,
+        School
+    }
+
+    public enum EnumCrmLocationTypeLevel
     {
         /// <summary>
         /// Primary Schools - Tiểu học

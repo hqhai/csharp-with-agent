@@ -3,7 +3,8 @@
 namespace Fsel.System.Infrastructure
 {
     using Fsel.System.Domain.Entities;
-    using Fsel.System.Infrastructure.ValueSettings;
+    using Fsel.System.Infrastructure.Configs;
+    using Fsel.System.Infrastructure.Configs.Crm;
     using Microsoft.EntityFrameworkCore;
 
     public class CrmDbContext : DbContext
@@ -13,13 +14,13 @@ namespace Fsel.System.Infrastructure
         {
         }
 
-        protected CrmDbContext()
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            ArgumentNullException.ThrowIfNull(modelBuilder);
+            modelBuilder.ApplyConfiguration(new CrmLocationEntityTypeConfigConfiguration());
+            base.OnModelCreating(modelBuilder);
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer(@"Data Source=10.0.0.28;Initial Catalog=Web_CRM_Rs_Formation_Data;User Id=sa;Password=Fsela@2023!@#$;TrustServerCertificate=true;");
-        }
+        public DbSet<CrmLocation> Locations { get; set; }
     }
 }

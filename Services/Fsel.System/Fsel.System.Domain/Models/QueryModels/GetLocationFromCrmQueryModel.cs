@@ -9,6 +9,6 @@ namespace Fsel.System.Domain.Models.QueryModels
     {
         public int Level { get; set; }
         public int? ParentID { get; set; }
-        public EnumTypeLevel? TypeLevel { get; set; }
+        public EnumCrmLocationTypeLevel? TypeLevel { get; set; }
     }
 }

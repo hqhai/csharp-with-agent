@@ -39,9 +39,9 @@ namespace Fsel.System.Application.Queries.LocationQuery
 
             if (request.TypeLevel.HasValue)
             {
-                if (request.TypeLevel == EnumTypeLevel.PrimarySchools)
+                if (request.TypeLevel == EnumCrmLocationTypeLevel.PrimarySchools)
                 {
-                    locations = locations.Where(p => p.TypeLevel == EnumTypeLevel.PrimarySchools || p.TypeLevel == EnumTypeLevel.PrimarySchoolsType0 || !p.TypeLevel.HasValue);
+                    locations = locations.Where(p => p.TypeLevel == EnumCrmLocationTypeLevel.PrimarySchools || p.TypeLevel == EnumCrmLocationTypeLevel.PrimarySchoolsType0 || !p.TypeLevel.HasValue);
                 }
                 else
                 {
