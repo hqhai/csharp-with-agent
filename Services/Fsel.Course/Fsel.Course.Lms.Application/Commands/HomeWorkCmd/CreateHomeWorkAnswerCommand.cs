@@ -15,11 +15,9 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -109,10 +107,11 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkQuestion));
                     return methodResult;
                 }
+                correctTotal += correctCount;
+
                 var homeWorkAnswer = await _homeWorkAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.HomeWorkQuestionId == homeWorkQuestion.Id && x.HomeWorkResultId == request.HomeWorkResultId, cancellationToken);
                 if (homeWorkAnswer == null)
                 {
-                    correctTotal += correctCount;
                     homeWorkAnswers.Add(new HomeWorkAnswer
                     {
                         Answer = answerConfig,
@@ -124,7 +123,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                 }
                 else
                 {
-                    correctTotal += correctCount;
                     homeWorkAnswer.Answer = answerConfig;
                     homeWorkAnswer.CorrectCount = correctCount;
                     homeWorkAnswer.IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null;

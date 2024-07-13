@@ -43,6 +43,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
         private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IFinalTestAnswerRepository _finalTestAnswerRepository;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
@@ -51,9 +52,10 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
         private readonly IMapper _mapper;
         private readonly ILogger<object> _logger;
 
-        public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, AuthContext authContext, QuestionConverter questionConverter, SectionGroupConverter sectionGroupConverter, IUserService userService, ISystemService systemService, IFinalTestResultRepository finalTestResultRepository, IFinalTestAnswerRepository finalTestAnswerRepository, ISectionGroupResultRepository sectionGroupResultRepository, ISectionGroupRepository sectionGroupRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper, ILogger<object> logger)
+        public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, ICourseResultRepository courseResultRepository, AuthContext authContext, QuestionConverter questionConverter, SectionGroupConverter sectionGroupConverter, IUserService userService, ISystemService systemService, IFinalTestResultRepository finalTestResultRepository, IFinalTestAnswerRepository finalTestAnswerRepository, ISectionGroupResultRepository sectionGroupResultRepository, ISectionGroupRepository sectionGroupRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper, ILogger<object> logger)
         {
             _questionRepository = questionRepository;
+            _courseResultRepository = courseResultRepository;
             _authContext = authContext;
             _questionConverter = questionConverter;
             _sectionGroupConverter = sectionGroupConverter;
@@ -80,13 +82,13 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             StudentModel? student;
             if (request.StudentId.HasValue)
             {
-                var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId.Value });
-                if (!studentResults.IsSuccessStatusCode)
+                var studentResult = await _userService.GetUserByStudentId(request.StudentId.Value);
+                if (!studentResult.IsSuccessStatusCode)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
                     return methodResult;
                 }
-                student = studentResults.Content?.Result?.FirstOrDefault();
+                student = studentResult.Content?.Result;
             }
             else
             {
@@ -179,6 +181,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                         {
                             ObjectId = finalTestResult.Id,
                             VolatileToken = token,
+                            CourseResultId = _courseResultRepository.Queryable.FirstOrDefault(x => x.CourseId == finalTestResult.CourseId && x.StudentId == finalTestResult.StudentId)?.Id,
                             Type = EnumTokenHistoryType.Recevived,
                             Feature = EnumTokenFeature.Test,
                             Mission = EnumTokenMission.FinalTest,

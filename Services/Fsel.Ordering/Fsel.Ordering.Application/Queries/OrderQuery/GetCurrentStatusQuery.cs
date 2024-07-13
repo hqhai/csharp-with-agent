@@ -3,10 +3,12 @@
 namespace Fsel.Ordering.Application.Queries.OrderQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetCurrentStatusQuery : IRequest<MethodResult<EnumTrialRegistrationStatus?>>
     {
@@ -16,10 +18,12 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     public class GetCurrentStatusQueryHandler : IRequestHandler<GetCurrentStatusQuery, MethodResult<EnumTrialRegistrationStatus?>>
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly IUserService _userService;
 
-        public GetCurrentStatusQueryHandler(IOrderRepository orderRepository)
+        public GetCurrentStatusQueryHandler(IOrderRepository orderRepository, IUserService userService)
         {
             _orderRepository = orderRepository;
+            _userService = userService;
         }
 
         public async Task<MethodResult<EnumTrialRegistrationStatus?>> Handle(GetCurrentStatusQuery request, CancellationToken cancellationToken)
@@ -36,19 +40,41 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 return methodResult;
             }
 
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(studentResult.Error);
+                return methodResult;
+            }
+            var student = studentResult.Content?.Result;
+
+            if (student == null)
+            {
+                methodResult.Result = currentStatus;
+                return methodResult;
+            }
+
             DateTime currentDate = DateTime.UtcNow;
-            var currentExpireDate = query.ExpireDate;
+            var currentExpireDate = student.ExpiredDate ?? query.ExpireDate;
             var checkTrial = query.IsTrial;
 
-            if (currentDate.Date > currentExpireDate?.Date && currentDate.Month >= currentExpireDate?.Month && currentDate.Year >= currentExpireDate?.Year)
+            if (!currentExpireDate.HasValue)
+            {
+                currentStatus = EnumTrialRegistrationStatus.New;
+            }
+            else if (currentExpireDate.Value.Date < currentDate.Date)
             {
                 currentStatus = EnumTrialRegistrationStatus.Expired;
+            }
+            else if (await _orderRepository.Queryable.AnyAsync(p => p.UserId == request.UserId && !p.IsTrial && p.Status == EnumOrderStatus.Payment, cancellationToken))
+            {
+                currentStatus = EnumTrialRegistrationStatus.Payment;
             }
             else if (checkTrial)
             {
                 currentStatus = EnumTrialRegistrationStatus.Trial;
             }
-            else if (!checkTrial && query.Status == EnumOrderStatus.Payment)
+            else
             {
                 currentStatus = EnumTrialRegistrationStatus.Payment;
             }

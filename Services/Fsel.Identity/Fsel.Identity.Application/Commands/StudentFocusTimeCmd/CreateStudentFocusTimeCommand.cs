@@ -58,6 +58,8 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             }
             var studentFocusTime = _studentFocusTimeRepository.Queryable.FirstOrDefault(x => x.StudentId == student.Id && x.CreatedDate.Date == DateTime.UtcNow.Date);
 
+            var studentFocusTimeNeareast = _studentFocusTimeRepository.Queryable.FirstOrDefault(x => x.StudentId == student.Id && x.CreatedDate.Date == DateTime.UtcNow.Date.AddDays(-1));
+
             var systemConfig = await _systemService.GetFocusTimeConfig();
             var systemConfigResult = systemConfig?.Content?.Result;
             if (systemConfigResult == null)
@@ -72,7 +74,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 if (studentFocusTime == null)
                 {
                     studentFocusTime = _mapper.Map<StudentFocusTime>(request);
-                    studentFocusTime.TargetTime = request.TargetTime;
+                    studentFocusTime.TargetTime = studentFocusTimeNeareast != null ? studentFocusTimeNeareast.TargetTime : request.TargetTime;
                     studentFocusTime.StudentId = student.Id;
                     studentFocusTime.IsEstablished = false;
 
@@ -81,8 +83,8 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 else
                 {
                     // Set targetTime
-                    bool confitionChangeTarget = studentFocusTime.TargetTime == 0 && request.TargetTime != 0;
-                    if (!studentFocusTime.IsEstablished && confitionChangeTarget)
+                    bool confitionChangeTarget = !studentFocusTime!.IsEstablished && request.TargetTime != studentFocusTime.TargetTime && request.TargetTime != 0;
+                    if (confitionChangeTarget)
                     {
                         studentFocusTime.TargetTime = request.TargetTime;
                         studentFocusTime.IsEstablished = confitionChangeTarget;
@@ -90,7 +92,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
                     // Set AccessTime And NumberOfToken
                     var systemConfigMap = systemConfigResult!.FirstOrDefault(x => x.TargetTime == studentFocusTime.TargetTime);
-                    studentFocusTime.ExecuteTime = request.ExecuteTime;
+                    studentFocusTime.ExecuteTime += request.ExecuteTime;
 
                     _studentFocusTimeRepository.Update(studentFocusTime);
                 }
@@ -98,22 +100,10 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 await _studentFocusTimeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<StudentFocusTimeModel>(studentFocusTime);
-                await DoQuestBoard(studentFocusTime.StudentId, cancellationToken);
                 return methodResult;
             });
 
             return methodResult;
-        }
-
-        private async Task DoQuestBoard(Guid studentId, CancellationToken cancellationToken)
-        {
-            await _questBoardPublisher.Publish(new QuestBoardQueueModel()
-            {
-                StudentID = studentId,
-                Type = EnumQuestBoardType.BeginnerQuests,
-                Category = EnumQuestBoardCategory.CompleteFocusModeFirst,
-                Value = 1
-            }, cancellationToken);
         }
     }
 }

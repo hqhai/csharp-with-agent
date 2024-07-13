@@ -11,6 +11,7 @@ namespace Fsel.Training.Application.Services.UserServices.Models
         public Guid StudentId { get; set; }
         public Guid? PackageId { get; set; }
         public int NumberOfShield { get; set; }
+        public Guid CourseId { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
     }
 }
