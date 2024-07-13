@@ -83,7 +83,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            if (request.CourseLevel == student.CourseLevel)
+            if (request.CourseLevel != student.CourseLevel)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.RetakeNotSameLevel), nameof(request.CourseLevel));
                 return methodResult;

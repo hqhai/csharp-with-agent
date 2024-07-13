@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.TrainingServices.CommandModels;
     using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
+    using Fsel.Course.Lms.Application.Services.TrainingServices.QueryModels;
     using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -36,5 +37,8 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
 
         [Get("/v1/class/get-classes-by-csoId/{csoId}")]
         Task<IApiResponse<MethodResult<IList<ClassModel>>>> GetClassesByCsoIdAsync([FromRoute] Guid csoId);
+
+        [Get("/v1/class/gets-by-course-ids")]
+        Task<IApiResponse<MethodResult<IList<ClassModel>>>> GetsByCourseIdsAsync([FromQuery] GetsByCourseIdsQueryModel query);
     }
 }
