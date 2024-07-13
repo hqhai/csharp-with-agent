@@ -5,24 +5,20 @@ namespace Fsel.Realtime.Application.Hubs
     using Fsel.Core.Base;
     using Fsel.Core.Extensions;
     using Fsel.Core.Services.IpApiServices;
-    using Microsoft.AspNetCore.SignalR;
+    using Microsoft.AspNetCore.Http;
 
     public class PaymentSuccessHub : BaseHub
     {
         private readonly AuthContext _authContext;
 
-        public PaymentSuccessHub(AuthContext authContext, IIpApiService ipApiService) : base(authContext, ipApiService)
+        public PaymentSuccessHub(AuthContext authContext, IIpApiService ipApiService, IHttpContextAccessor httpContextAccessor) : base(authContext, ipApiService, httpContextAccessor)
         {
             _authContext = authContext;
         }
 
         public override async Task OnConnectedHubAsync()
         {
-            string userId = Context.GetHttpContext()?.Request.Query["UserId"].ToString()!;
-            if (!string.IsNullOrEmpty(userId))
-            {
-                await Groups.AddGroupAsync(Context.ConnectionId, userId);
-            }
+            await Groups.AddGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
         }
     }
 }
