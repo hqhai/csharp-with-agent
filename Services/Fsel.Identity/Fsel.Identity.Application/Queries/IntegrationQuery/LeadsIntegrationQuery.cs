@@ -196,7 +196,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             leadsIntegrations.ForEach(item =>
             {
-                var orderItems = orderResults.Where(x => x.UserId == item.UserId).ToList();
+                var orderItem = orderResults.Where(x => x.UserId == item.UserId).OrderByDescending(x => x.UpdatedDate != null ? x.UpdatedDate : x.CreatedDate).FirstOrDefault();
                 var ptTestResult = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId);
                 var unitResult = unitResults.FirstOrDefault(x => x.UserId == item.UserId);
                 item.LastDate = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item.UserId)?.LastVisited;
@@ -207,6 +207,8 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 item.CurrentUnit = unitResult?.Name;
                 item.CurrentLesson = unitResult?.CurrentLesson;
                 item.LessonCompleted = unitResult?.LessonCompleted;
+                var dateOrder = orderItem?.UpdatedDate != null ? orderItem.UpdatedDate : orderItem?.CreatedDate ?? null;
+                item.DateEdit = dateOrder > ptTestResult?.DateEdit ? dateOrder : ptTestResult?.DateEdit ?? null;
 
                 if (ptTestResult != null)
                 {
@@ -223,7 +225,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                     }
                 }
 
-                foreach (var orderItem in orderItems)
+                if (orderItem != null)
                 {
                     if (orderItem.IsTrial)
                     {
@@ -231,13 +233,26 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                         item.StartTrial = orderItem.CreatedDate ?? null;
                         item.ExpireDate = orderItem.ExpireDate ?? null;
                     }
-
-                    if (orderItem.ExpireDate != null && !orderItem.IsTrial && orderItem.ExpireDate < DateTime.UtcNow)
+                    else if (orderItem.ExpireDate != null && !orderItem.IsTrial && orderItem.ExpireDate < DateTime.UtcNow)
                     {
                         item.Status = EnumIntegrationStatus.Expired;
                     }
+                    else if (orderItem.Status == EnumOrderStatus.Fail)
+                    {
+                        item.Status = EnumIntegrationStatus.Fail;
+                    }
+                    else if (orderItem.Status == EnumOrderStatus.New)
+                    {
+                        item.Status = EnumIntegrationStatus.New;
+                    }
+                    else if (orderItem.Status == EnumOrderStatus.Reject)
+                    {
+                        item.Status = EnumIntegrationStatus.Reject;
+                    }
+
                     item.CourseLevel = orderItem.CourseName.ToString() ?? string.Empty;
                 }
+
             });
             #endregion
 

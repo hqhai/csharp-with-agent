@@ -25,6 +25,7 @@ namespace Fsel.Course.Lms.Application.Services.SenderService
         public string? Subject { get; set; }
         public string? Content { get; set; }
         public bool? IsCCEmail { get; set; }
+        public bool? IsCCEmailDefault { get; set; }
     }
 
     public class SendEmailByTemplateCommandModel : SendEmailCommandModel

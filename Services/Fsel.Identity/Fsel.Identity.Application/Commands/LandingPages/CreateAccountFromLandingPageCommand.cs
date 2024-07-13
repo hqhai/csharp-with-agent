@@ -108,7 +108,11 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     {
                         PlatformId = platform.Id
                     }
-                }
+                },
+                UserSettings = new List<UserSetting>()
+                    {
+                       new UserSetting(true)
+                    }
             };
 
             if (!user.IsValid())

@@ -2,14 +2,18 @@
 
 namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 {
+    using AutoMapper;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class SetTimeModuleCommand : SetTimeModuleModel, IRequest<bool>
     {
@@ -18,12 +22,16 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
     public class SetTimeModuleCommandHandler : IRequestHandler<SetTimeModuleCommand, bool>
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
+        private readonly IMapper _mapper;
+        private readonly ILogger<object> _logger;
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
 
-        public SetTimeModuleCommandHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, DateTimeConverter dateTimeConverter, ISectionGroupResultRepository sectionGroupResultRepository)
+        public SetTimeModuleCommandHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, ILogger<object> logger, DateTimeConverter dateTimeConverter, ISectionGroupResultRepository sectionGroupResultRepository)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
+            _mapper = mapper;
+            _logger = logger;
             _dateTimeConverter = dateTimeConverter;
             _sectionGroupResultRepository = sectionGroupResultRepository;
         }
@@ -54,10 +62,18 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
         {
             var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoTimeCode).FirstOrDefaultAsync(x => x.Id == request.ObjectId);
             var videoTimeCode = videoTimeCodeResult?.VideoTimeCode;
+
             if (videoTimeCodeResult == null || videoTimeCode == null)
             {
                 return;
             }
+            var requestInfo = new
+            {
+                VideoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult),
+                VideoTimeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode)
+            }.Serialize();
+            _logger.LogError($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync : {requestInfo}");
+
             if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
             {
                 videoTimeCodeResult.WorkingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.WorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
@@ -73,19 +89,60 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                     videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.RetryWorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
                 }
             }
+            var requestInfoUpdate = new
+            {
+                VideoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult),
+                VideoTimeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode)
+            }.Serialize();
+            _logger.LogError($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync_1 : {requestInfoUpdate}");
 
-            _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
+            _videoTimeCodeResultRepository.Update(videoTimeCodeResult, false
+                , x => x.SkillScoresStr, x => x.SkillScoreUngradedStr
+                , x => x.CorrectCount, x => x.CorrectTotal
+                , x => x.CorrectCountUngraded, x => x.CorrectTotalUngraded
+                , x => x.TokenFirstTime, x => x.TokenLastTime, x => x.Status, x => x.HighestStreak
+                , x => x.Percent, x => x.IsWorking);
             await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+            var requestInfoUpdate2 = new
+            {
+                VideoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult),
+                VideoTimeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode)
+            }.Serialize();
+            _logger.LogError($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync_2 : {requestInfoUpdate2}");
         }
 
         private async Task UpdateSectionGroupResultAsync(SetTimeModuleCommand request)
         {
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == request.ObjectId);
+
+            var requestInfo = new
+            {
+                sectionGroupResult = _mapper.Map<SectionGroupResultModel>(sectionGroupResult),
+            }.Serialize();
+            _logger.LogError($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync: {requestInfo}");
+
             if (sectionGroupResult != null && sectionGroupResult.SectionGroup != null)
             {
                 sectionGroupResult.WorkingTime = _dateTimeConverter.SetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, sectionGroupResult.SectionGroup.ExecutionTime);
-                _sectionGroupResultRepository.Update(sectionGroupResult);
+
+                var requestInfoUpdate = new
+                {
+                    sectionGroupResult = _mapper.Map<SectionGroupResultModel>(sectionGroupResult),
+                }.Serialize();
+                _logger.LogError($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync_1 : {requestInfoUpdate}");
+
+                _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.CurrentSectionTimeCodeId
+                , x => x.CorrectCount, x => x.CorrectTotal, x => x.SkillScoresStr
+                , x => x.TokenFirstTime, x => x.TokenLastTime, x => x.Status, x => x.HighestStreak
+                , x => x.Percent);
                 await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+                var requestInfoUpdate2 = new
+                {
+                    sectionGroupResult = _mapper.Map<SectionGroupResultModel>(sectionGroupResult),
+                }.Serialize();
+                _logger.LogError($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync_2 : {requestInfoUpdate2}");
             }
         }
     }

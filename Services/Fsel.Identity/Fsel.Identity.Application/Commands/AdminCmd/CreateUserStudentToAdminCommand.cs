@@ -127,6 +127,10 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     user.Email = request.Email;
                     user.FullName = request.Email;
                     user.EmailConfirmed = true;
+                    user.UserSettings = new List<UserSetting>()
+                        {
+                            new UserSetting(true)
+                        };
                     user = CreateHumanToUser(user);
                     await UpdatePlatformToUserAsync(user, cancellationToken);
 

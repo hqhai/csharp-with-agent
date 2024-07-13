@@ -152,6 +152,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                                 #endregion Add Platform to User
 
+                                #region add user setting
+
+                                user.UserSettings = new List<UserSetting>()
+                                    {
+                                        new UserSetting(true)
+                                    };
+
+                                #endregion add user setting
+
                                 result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
                                 if (!result.Succeeded)
                                 {
@@ -184,7 +193,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             ArgumentNullException.ThrowIfNull(request);
                             if (!string.IsNullOrEmpty(request.Email))
                             {
-                                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
+                                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, IsCCEmailDefault = true, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
                             }
                             else if (!string.IsNullOrEmpty(request.PhoneNumber))
                             {
