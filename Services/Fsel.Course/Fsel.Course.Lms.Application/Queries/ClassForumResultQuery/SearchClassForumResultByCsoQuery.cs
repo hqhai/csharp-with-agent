@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumResults;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
+    using Fsel.Course.Lms.Application.Services.TrainingServices.QueryModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -55,9 +56,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
             var csoId = csoResults.Content?.Result?.Id;
 
-            var studentsResult = await _trainingService.GetClassesByCsoIdAsync(csoId ?? default);
-            var students = studentsResult.Content?.Result;
-            var studentIds = students?.SelectMany(x => x.ClassStudents!).Select(x => x.StudentId).ToList();
+            var classResults = await _trainingService.GetClassesByCsoIdAsync(csoId ?? default);
+            var classModels = classResults.Content?.Result;
+            var studentIds = classModels?.SelectMany(x => x.ClassStudents!).Select(x => x.StudentId).ToList();
 
             var classForumResultQuery = _classForumResultRepository.Queryable
                                    .Include(x => x.LessonResult)
@@ -122,18 +123,17 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
+
+            var classToCourseResult = await _trainingService.GetsByCourseIdsAsync(new GetsByCourseIdsQueryModel { CourseIdStr = string.Join(",", lists.Select(x => x.CourseId).Distinct().ToList()) });
+            var classResultModel = classToCourseResult.Content?.Result;
             foreach (var item in lists)
             {
-                var userId = item.CreatedUserId;
-                var studentResult = await _userService.GetStudentByUserIdAsync(userId);
-                var studentId = studentResult.Content?.Result?.Id;
-
-                var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
-                if (classResult.Content?.Result != null)
+                var classModel = classResultModel?.FirstOrDefault(x => x.CourseId == item.CourseId);
+                if (classModel != null)
                 {
-                    item.ClassCode = classResult.Content.Result.Code;
-                    item.PostArea = "L" + item.LessonDisplayOrder + "_" + "U" + item.UnitDisplayOrder + "_" + item.CourseCode;
+                    item.ClassCode = classModel.Code;
                 }
+                item.PostArea = "L" + item.LessonDisplayOrder + "_" + "U" + item.UnitDisplayOrder + "_" + item.CourseCode;
             }
 
             methodResult.Result = new PagingItemsModel<ClassForumResultSearchModel>(lists, request, totalItem);

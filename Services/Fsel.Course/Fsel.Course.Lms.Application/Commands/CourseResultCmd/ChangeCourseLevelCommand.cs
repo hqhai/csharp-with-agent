@@ -82,7 +82,11 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-
+            if (student.CourseLevel == request.CourseLevel)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.DoNotChangeCurrentKey), nameof(request.CourseLevel));
+                return methodResult;
+            }
             var isChangeLevelStudent = await _changeCourseHelper.CheckChangeLevelAllCourseAsync(student.Id);
             if (isChangeLevelStudent)
             {
