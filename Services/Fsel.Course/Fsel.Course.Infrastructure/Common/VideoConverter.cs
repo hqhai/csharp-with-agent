@@ -489,8 +489,7 @@ namespace Fsel.Course.Infrastructure.Common
             var videoTimeCodeAnswer = question.VideoTimeCodeAnswers.FirstOrDefault();
             var isCheck = videoTimeCodeAnswer?.Status == EnumAnswerStatus.Done;
             var questionModel = _mapper.Map<QuestionModel>(question);
-
-            if (status != EnumResultStatus.Done)
+            if (!isCheck)
             {
                 questionModel.Explanations = null;
                 questionModel.Explanation = null;
