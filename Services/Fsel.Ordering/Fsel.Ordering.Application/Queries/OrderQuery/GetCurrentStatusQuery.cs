@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetCurrentStatusQuery : IRequest<MethodResult<EnumTrialRegistrationStatus?>>
     {
@@ -64,6 +65,10 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             else if (currentExpireDate.Value.Date < currentDate.Date)
             {
                 currentStatus = EnumTrialRegistrationStatus.Expired;
+            }
+            else if (await _orderRepository.Queryable.AnyAsync(p => p.UserId == request.UserId && !p.IsTrial && p.Status == EnumOrderStatus.Payment, cancellationToken))
+            {
+                currentStatus = EnumTrialRegistrationStatus.Payment;
             }
             else if (checkTrial)
             {
