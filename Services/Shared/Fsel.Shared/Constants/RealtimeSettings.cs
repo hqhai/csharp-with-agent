@@ -93,6 +93,7 @@ namespace Fsel.Shared.Constants
                 public const string ChatBot = $"ChatBot";
             }
         }
+
         public static class TechieHub
         {
             public const string Pattern = $"/techie";
@@ -103,5 +104,14 @@ namespace Fsel.Shared.Constants
             }
         }
 
+        public static class PaymentSuccessHub
+        {
+            public const string Pattern = $"/payment-success";
+
+            public static class Methods
+            {
+                public const string PaymentSuccess = $"PaymentSuccess";
+            }
+        }
     }
 }

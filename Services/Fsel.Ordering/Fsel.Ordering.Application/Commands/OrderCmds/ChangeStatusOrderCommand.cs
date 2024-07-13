@@ -40,6 +40,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IPackageRepository _packageRepository;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private readonly PaymentSuccessPublisher _paymentSuccessPublisher;
         private readonly AuthContext _authContext;
         private readonly ILmsCourseService _courseService;
         private readonly ISenderServices _senderServices;
@@ -62,7 +63,8 @@ AppSetting appSetting,
 AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher,
 ISystemService systemService,
 IMediator mediator,
-IPackageEventRepository packageEventRepository)
+IPackageEventRepository packageEventRepository,
+PaymentSuccessPublisher paymentSuccessPublisher)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
@@ -74,6 +76,7 @@ IPackageEventRepository packageEventRepository)
             _courseService = courseService;
             _senderServices = senderServices;
             _appSetting = appSetting;
+            _paymentSuccessPublisher = paymentSuccessPublisher;
             _addExpiredDateForStudentPublisher = addExpiredDateForStudentPublisher;
             _systemService = systemService;
             _mediator = mediator;
@@ -174,6 +177,13 @@ IPackageEventRepository packageEventRepository)
                             CompanyName = order.CompanyName,
                         });
                     }
+
+                    await _paymentSuccessPublisher.Publish(new OrderQueueModel()
+                    {
+                        OrderId = order.Id,
+                        UserId = order.UserId,
+                        Status = EnumOrderStatus.Payment
+                    }, cancellationToken);
 
                     await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
                     {
