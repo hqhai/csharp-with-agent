@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using System.Linq.Dynamic.Core;
     using System.Threading;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -60,16 +61,20 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<LessonStudentProgressModel>> methodResult = new MethodResult<IList<LessonStudentProgressModel>>();
             IList<LessonStudentProgressModel> listLessonProgress = new List<LessonStudentProgressModel>();
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId });
+            var studentResults = await _userService.GetUserByStudentId(request.StudentId);
             if (!studentResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
                 return methodResult;
             }
-
-            var student = studentResults?.Content?.Result?.FirstOrDefault();
-            var studentId = student?.Id;
-            var userId = student?.Human?.UserId;
+            var student = studentResults?.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+            var studentId = student.Id;
+            var userId = student.Human?.UserId;
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {

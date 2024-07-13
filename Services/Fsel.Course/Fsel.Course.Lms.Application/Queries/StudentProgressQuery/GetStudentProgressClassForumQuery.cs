@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -48,15 +49,20 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassForumStudentProgressModel> methodResult = new MethodResult<ClassForumStudentProgressModel>();
             ClassForumStudentProgressModel classForumStudentProgress = new ClassForumStudentProgressModel();
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId });
-            if (!studentResults.IsSuccessStatusCode)
+            var studentResult = await _userService.GetUserByStudentId(request.StudentId);
+            if (!studentResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                return methodResult;
+            }
+            var student = studentResult.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
 
-            var student = studentResults?.Content?.Result?.FirstOrDefault();
-            var userId = student?.Human?.UserId ?? default;
+            var userId = student.Human?.UserId ?? default;
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.LessonId == request.LessonId && x.StudentId == request.StudentId, cancellationToken);
             if (lessonResult == null || lessonResult.Status == EnumResultStatus.Unfinished)
             {

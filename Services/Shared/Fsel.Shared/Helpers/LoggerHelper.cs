@@ -14,7 +14,7 @@ namespace Fsel.Shared.Helpers
                 Timestamp = DateTimeOffset.UtcNow.ToString("o"),
                 Request = request
             };
-            _logger.LogError(ConvertHelper.Serialize(requestInfo));
+            _logger.LogInformation(ConvertHelper.Serialize(requestInfo));
         }
     }
 }

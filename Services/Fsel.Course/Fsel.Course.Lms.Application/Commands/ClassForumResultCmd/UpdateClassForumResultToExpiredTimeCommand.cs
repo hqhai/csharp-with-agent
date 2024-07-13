@@ -131,7 +131,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         {
             ArgumentNullException.ThrowIfNull(classForumDetailResult);
             ArgumentNullException.ThrowIfNull(classForumResult);
-            var targetScore = GetTargetCount(classForumDetailResult, classForumResult);
+
             var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(classForumDetailResult.GradingAlFeedback);
 
             classForumResult.Status = EnumClassForumResultStatus.Pending;
@@ -140,32 +140,34 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             classForumResult.Content = classForumDetailResult.Content;
             classForumResult.SubmissionCount = classForumDetailResult.SubmissionCount;
             classForumResult.GradingAlFeedback = classForumDetailResult.GradingAlFeedback;
-            if (classForumAIs != null && classForumAIs.Any() && classForumResult.CorrectCount == default)
+            classForumResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
+
+            classForumResult.CorrectCount = GetTargetCount(classForumDetailResult, classForumResult);
+            classForumResult.CorrectTotal = MaxTagetScore;
+            if (classForumAIs != null && classForumAIs.Any())
             {
-                var correctCount = classForumAIs.Sum(x => x.Score) + targetScore;
-                var correctTotal = classForumAIs.Count * MaxScoreClassForum + MaxTagetScore;
-                classForumResult.CorrectCount = correctCount;
-                classForumResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
-                classForumResult.CorrectTotal = correctTotal;
-                if (classForumResult.SkillScores != null && classForumResult.SkillScores.Any())
+                classForumResult.CorrectCount += classForumAIs.Sum(x => x.Score);
+                classForumResult.CorrectTotal += classForumAIs.Count * MaxScoreClassForum;
+            }
+
+            if (classForumResult.SkillScores != null && classForumResult.SkillScores.Any())
+            {
+                classForumResult.SkillScores.Single().CorrectCount = classForumResult.CorrectCount;
+                classForumResult.SkillScores.Single().TotalCount = classForumResult.CorrectTotal;
+            }
+            else
+            {
+                classForumResult.SkillScores = new List<SkillScores>
                 {
-                    classForumResult.SkillScores.Single().CorrectCount = correctCount;
-                    classForumResult.SkillScores.Single().TotalCount = correctTotal;
-                }
-                else
-                {
-                    classForumResult.SkillScores = new List<SkillScores>
+                    new SkillScores
                     {
-                        new SkillScores
-                        {
-                            CorrectCount = correctCount,
-                            TotalCount = correctTotal,
-                            CountQuestion = 1,
-                            TotalQuestion = 1,
-                            Skill = classForumResult.ClassForum?.CourseSkill ?? default
-                        }
-                    };
-                }
+                        CorrectCount = classForumResult.CorrectCount,
+                        TotalCount = classForumResult.CorrectTotal,
+                        CountQuestion = 1,
+                        TotalQuestion = 1,
+                        Skill = classForumResult.ClassForum?.CourseSkill ?? default
+                    }
+                };
             }
             _classForumResultRepository.Update(classForumResult);
             await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);

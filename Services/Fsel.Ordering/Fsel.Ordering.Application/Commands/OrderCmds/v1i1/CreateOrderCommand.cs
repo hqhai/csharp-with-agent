@@ -8,7 +8,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Common.Models;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
@@ -174,9 +173,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
 
-            var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel!.Value, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
+            var codeSend = await _mediator.Send(new GenerateRandomOrderQuery { StudentCode = student.Human.Code }, cancellationToken).ConfigureAwait(false);
 
-            string code = codeSend.Result?.Code ?? string.Empty;
+            string code = codeSend.Result ?? string.Empty;
 
             if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken))
             {
@@ -192,7 +191,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 {
                     Order = order,
                     Package = package,
-                    CourseId = courseId ?? default,
                     Code = code,
                     FullName = student?.Human?.FullName,
                     PhoneNumber = request.PhoneNumber,
@@ -236,7 +234,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
                 await _userService.CreateStudentTrialRegistration();
                 var numberOfShield = package.Code.HasValue ? (int)package.Code.Value : default;
-                var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = _authContext.CurrentUserId, CourseId = newOrder.CourseId, PackageId = newOrder.PackageId ?? default, NumberOfShield = numberOfShield });
+                var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = _authContext.CurrentUserId, CourseId = newOrder.CourseId ?? default, PackageId = newOrder.PackageId ?? default, NumberOfShield = numberOfShield });
                 if (!addStudentIntoClassResult.IsSuccessStatusCode)
                 {
                     methodResult.AddError(addStudentIntoClassResult.Error);
@@ -260,7 +258,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
         {
             order.FullName = student.Human?.FullName;
             order.Email = student.Human?.Email;
-            order.Country = EnumCountryKey.Vietnam.ToString();
             order.Status = EnumOrderStatus.New;
             order.UserId = _authContext.CurrentUserId;
             order.Code = code;

@@ -56,18 +56,19 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 return methodResult;
             }
 
-            var orderResult = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, UserId = request.CurrentUserId });
+            var orderResult = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { UserId = request.CurrentUserId });
             if (!orderResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError));
                 return methodResult;
             }
-            var status = orderResult?.Content?.Result ?? default;
-            if (status != EnumOrderStatus.Payment)
+            var status = orderResult?.Content?.Result;
+            if (!status.HasValue || status.Value != EnumOrderStatus.Payment)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(status));
                 return methodResult;
             }
+
             var course = await _courseRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == request.StudentId))
                                                         .Include(x => x.CourseResults.Where(x => x.StudentId == request.StudentId && x.CourseId == @class.CourseId))
                                                         .Include(x => x.CourseUnitMockTests)
