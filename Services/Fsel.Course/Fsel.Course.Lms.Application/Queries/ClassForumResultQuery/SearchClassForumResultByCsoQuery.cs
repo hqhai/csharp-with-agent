@@ -124,7 +124,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var classToCourseResult = await _trainingService.GetsByCourseIdsAsync(new GetsByCourseIdsQueryModel { CourseIdStr = string.Join(",", lists.Select(x => x.CourseId).ToList()) });
+            var classToCourseResult = await _trainingService.GetsByCourseIdsAsync(new GetsByCourseIdsQueryModel { CourseIdStr = string.Join(",", lists.Select(x => x.CourseId).Distinct().ToList()) });
             var classResultModel = classToCourseResult.Content?.Result;
             foreach (var item in lists)
             {

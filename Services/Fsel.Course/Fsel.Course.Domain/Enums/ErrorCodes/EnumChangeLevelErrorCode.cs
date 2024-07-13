@@ -28,5 +28,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// level is incorrect
         /// </summary>
         LevelIsIncorrect,
+
+        /// <summary>
+        /// Do not change the current key
+        /// </summary>
+        DoNotChangeCurrentKey
     }
 }
