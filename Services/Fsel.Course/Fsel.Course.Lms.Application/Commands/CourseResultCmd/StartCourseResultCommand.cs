@@ -11,9 +11,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Queues.Publishers;
-    using Fsel.Shared.Enums;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -25,17 +22,14 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
     public class StartCourseResultCommandHandler : IRequestHandler<StartCourseResultCommand, MethodResult<CourseResultModel>>
     {
         private readonly IMapper _mapper;
-        private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         private readonly AuthContext _authContext;
         private readonly ICourseResultRepository _courseResultRepository;
 
         public StartCourseResultCommandHandler(IMapper mapper
-            , SaveUserCourseSettingPublisher saveUserCourseSettingPublisher
             , AuthContext authContext
             , ICourseResultRepository courseResultRepository)
         {
             _mapper = mapper;
-            _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _authContext = authContext;
             _courseResultRepository = courseResultRepository;
         }
@@ -59,14 +53,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             }
             if (courseResult.Status == EnumResultStatus.New)
             {
-                await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
-                {
-                    CourseLevel = courseResult.Course.CourseLevel,
-                    IsDeduction = true,
-                    Type = EnumUserCourseType.ResetAndLearnAgain,
-                    UserId = _authContext.CurrentUserId
-                }, cancellationToken).ConfigureAwait(false);
-
                 courseResult.ProcessDate = DateTime.UtcNow;
                 courseResult.Status = EnumResultStatus.Process;
                 _courseResultRepository.Update(courseResult);
