@@ -38,7 +38,7 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
         [Get("/v1/class/get-classes-by-csoId/{csoId}")]
         Task<IApiResponse<MethodResult<IList<ClassModel>>>> GetClassesByCsoIdAsync([FromRoute] Guid csoId);
 
-        [Get("/v1/cso/class/gets-by-course-ids")]
+        [Get("/v1/class/gets-by-course-ids")]
         Task<IApiResponse<MethodResult<IList<ClassModel>>>> GetsByCourseIdsAsync([FromQuery] GetsByCourseIdsQueryModel query);
     }
 }

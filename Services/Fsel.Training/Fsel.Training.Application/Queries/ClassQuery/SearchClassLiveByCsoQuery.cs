@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Queries.ClassQuery.Cso
+namespace Fsel.Training.Application.Queries.ClassQuery
 {
     using System;
     using System.Collections.Generic;
