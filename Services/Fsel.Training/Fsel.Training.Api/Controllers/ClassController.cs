@@ -212,5 +212,17 @@ namespace Fsel.Training.Api.Controllers
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get List Classes To Course Ids
+        /// </summary>
+        [HttpGet("gets-by-course-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetsByCourseIds([FromQuery] GetListClassByCourseIdsQuery query)
+        {
+            MethodResult<IList<ClassModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

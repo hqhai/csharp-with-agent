@@ -9,7 +9,7 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
     using Fsel.Training.Application.Commands.ClassCmd;
-    using Fsel.Training.Application.Queries.ClassQuery.Cso;
+    using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
