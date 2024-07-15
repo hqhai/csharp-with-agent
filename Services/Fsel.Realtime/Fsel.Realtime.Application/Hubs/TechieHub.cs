@@ -17,12 +17,14 @@ namespace Fsel.Realtime.Application.Hubs
         private readonly AuthContext _authContext;
         private readonly TechieActionPublisher _actionPublisher;
         private readonly ILogger<object> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public TechieHub(AuthContext authContext, IIpApiService ipApiService, IHttpContextAccessor httpContextAccessor, TechieActionPublisher actionPublisher, ILogger<object> logger) : base(authContext, ipApiService, httpContextAccessor)
         {
             _authContext = authContext;
             _actionPublisher = actionPublisher;
             _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public override async Task OnConnectedHubAsync()
@@ -43,6 +45,14 @@ namespace Fsel.Realtime.Application.Hubs
             _logger.LogInformation($"Start Invoke Techie!: {modelStr}");
             var model = ConvertHelper.Deserialize<StudentTechieActionModel>(modelStr);
             await _actionPublisher.Publish(model, CancellationToken.None);
+        }
+
+        public void ChangeLanguage(string languageCode)
+        {
+            if (!string.IsNullOrEmpty(languageCode))
+            {
+                _httpContextAccessor.HttpContext!.Request.Headers.AcceptLanguage = languageCode;
+            }
         }
 
         public override async Task OnDisconnectedHubAsync(Exception? exception)
