@@ -4,7 +4,7 @@ using Fsel.Core.Extensions;
 using Fsel.Core.Services.IpApiServices;
 using Fsel.Realtime.Application.Queues.Publishers;
 using Fsel.Shared.Models.ShareModels;
-using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 // Đảm bảo rằng bạn đã thêm namespace của ConnectionTracker
@@ -17,7 +17,7 @@ namespace Fsel.Realtime.Application.Hubs
         private readonly TechieActionPublisher _actionPublisher;
         private readonly ILogger<object> _logger;
 
-        public TechieHub(AuthContext authContext, IIpApiService ipApiService, TechieActionPublisher actionPublisher, ILogger<object> logger) : base(authContext, ipApiService)
+        public TechieHub(AuthContext authContext, IIpApiService ipApiService, TechieActionPublisher actionPublisher, ILogger<object> logger, IHttpContextAccessor httpContextAccessor) : base(authContext, ipApiService, httpContextAccessor)
         {
             _authContext = authContext;
             _actionPublisher = actionPublisher;
