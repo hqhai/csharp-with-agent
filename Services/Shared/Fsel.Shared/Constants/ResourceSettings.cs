@@ -21,6 +21,9 @@ namespace Fsel.Shared.Constants
         public const string RoleFileName = "Resources//Role.json";
 
         public const string PackageFileName = "Resources//Packages.json";
+        public const string TechieActionFileName = "Resources//TechieAction.json";
+        public const string TechieFileName = "Resources//Techie.json";
+
         public const string EventFileName = "Resources//Events.json";
         public const string WheelOfBuffType = "Resources//WheelOfBuffConfig.json";
 
