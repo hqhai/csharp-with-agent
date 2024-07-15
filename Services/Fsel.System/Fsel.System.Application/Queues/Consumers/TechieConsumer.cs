@@ -2,6 +2,7 @@ using Fsel.Core.Base;
 using Fsel.Shared.Models.ShareModels;
 using Fsel.System.Application.Commands.TechieCmd;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 
 namespace Fsel.System.Application.Queues.Consumers
 {
@@ -9,7 +10,7 @@ namespace Fsel.System.Application.Queues.Consumers
     {
         private readonly IMediator _mediator;
 
-        public TechieConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
+        public TechieConsumer(IMediator mediator, AuthContext authContext, IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }

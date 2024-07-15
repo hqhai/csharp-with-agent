@@ -4,6 +4,7 @@ using Fsel.Realtime.Application.Hubs;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Models.ShareModels;
 using MassTransit;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
@@ -15,7 +16,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
         private readonly AuthContext _authContext;
         private readonly ILogger<object> _logger;
 
-        public StudentTechieConsumer(IHubContext<TechieHub> techieHub, AuthContext authContext, ILogger<object> logger) : base(authContext)
+        public StudentTechieConsumer(IHubContext<TechieHub> techieHub, AuthContext authContext, ILogger<object> logger, IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _techieHub = techieHub;
             _authContext = authContext;
