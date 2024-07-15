@@ -8,11 +8,18 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
 
     public class StudentModel : BaseModel
     {
+        private EnumCourseLevel? _courseLevel { get; set; }
         public string? Membership { get; set; }
         public string? Occupation { get; set; }
         public string? School { get; set; }
         public string? ParentEmail { get; set; }
-        public EnumCourseLevel? CourseLevel { get; set; }
+
+        public EnumCourseLevel? CourseLevel
+        {
+            get { return _courseLevel ?? EnumCourseLevel.B1; }
+            set { _courseLevel = value; }
+        }
+
         public EnumCourseLevel? BaseCourseLevel { get; set; }
         public Guid? PackageId { get; set; }
         public Guid? ClassId { get; set; }
