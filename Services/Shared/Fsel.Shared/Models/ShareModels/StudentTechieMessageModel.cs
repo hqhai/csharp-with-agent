@@ -2,6 +2,7 @@
 
 namespace Fsel.Shared.Models.ShareModels
 {
+    using System.Text.Json.Serialization;
     using Fsel.Shared.Enums;
 
     public class StudentTechieMessageModel
@@ -10,8 +11,10 @@ namespace Fsel.Shared.Models.ShareModels
 
         public string? Message { get; set; }
 
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public EnumTechieFeature Feature { get; set; }
 
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public EnumTechieAction Action { get; set; }
 
         public int Priority { get; set; }

@@ -8,6 +8,16 @@ namespace Fsel.Shared.Enums
         GoodMorning,
         GoodAfternoon,
         GoodEvening,
-        GoodLateNight
+        GoodLateNight,
+        StreakFiveTimeCode,
+        StreakTenTimeCode,
+        StreakFifTeenTimeCode,
+        StreakTwentyTimeCode,
+        StreakTwentyFiveTimeCode,
+        StreakThirtyTimeCode,
+        StreakThirtyFiveTimeCode,
+        StreakFourtyTimeCode,
+        StreakFourtyFiveTimeCode,
+        StreakFiftyTimeCode,
     }
 }

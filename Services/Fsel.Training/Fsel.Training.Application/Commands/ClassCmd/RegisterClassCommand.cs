@@ -153,13 +153,16 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
         private async Task InActiveClassStudent(Class classToUpdate, Guid studentId)
         {
-            var classStudent = await _classStudentRepository.Queryable.Where(x => x.StudentId == studentId && x.IsActive && x.ClassId != classToUpdate.Id)
-                                                            .FirstOrDefaultAsync();
-            if (classStudent == null)
+            var classStudents = await _classStudentRepository.Queryable.Where(x => x.StudentId == studentId && x.IsActive && x.ClassId != classToUpdate.Id)
+                                                            .ToListAsync();
+            if (classStudents == null || !classStudents.Any())
             {
                 return;
             }
-            await UpdateActiveClassStudentAsync(classStudent, false);
+            foreach (var classStudent in classStudents)
+            {
+                await UpdateActiveClassStudentAsync(classStudent, false);
+            }
         }
 
         private async Task UpdateActiveClassStudentAsync(ClassStudent classStudent, bool isActive = true)
