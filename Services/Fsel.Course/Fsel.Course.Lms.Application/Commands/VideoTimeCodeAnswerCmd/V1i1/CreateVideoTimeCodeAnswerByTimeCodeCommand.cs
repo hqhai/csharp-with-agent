@@ -152,7 +152,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 await UpdateVideoTimeCodeResultAsync(videoTimeCode, videoResult, request.IsSubmit, course.CourseType, student, cancellationToken);
                 if (request.IsSubmit)
                 {
-                    await SetHighestStreak(videoResult);
+                    videoResult.TimeCodeHighestStreak = await GetHighestStreak(videoResult);
                 }
                 _videoResultRepository.Update(videoResult);
                 await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -191,11 +191,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             return methodResult;
         }
 
-        private async Task SetHighestStreak(VideoResult videoResult)
+        private async Task<int> GetHighestStreak(VideoResult videoResult)
         {
             var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoResultId == videoResult.Id && x.Status == EnumResultStatus.Done)
                                                                                      .OrderBy(x => x.CreatedDate).ToListAsync();
             var highestStreak = 0;
+            var maxHighestStreak = 0;
             foreach (var videoTimeCodeResult in videoTimeCodeResults)
             {
                 var isCheckScore = videoTimeCodeResult.CorrectCount == videoTimeCodeResult.CorrectTotal;
@@ -204,16 +205,17 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 if ((isCheckScoreUng.HasValue && isCheckScoreUng.Value) || isCheckScore)
                 {
                     highestStreak++;
+                    if (maxHighestStreak < highestStreak)
+                    {
+                        maxHighestStreak = highestStreak;
+                    }
                 }
                 else
                 {
-                    if (videoResult.TimeCodeHighestStreak < highestStreak)
-                    {
-                        videoResult.TimeCodeHighestStreak = highestStreak;
-                    }
                     highestStreak = 0;
                 }
             }
+            return maxHighestStreak;
         }
 
         private async Task DoQuestBoard(Guid studentId, EnumQuestBoardCategory category, int value, CancellationToken cancellationToken)
