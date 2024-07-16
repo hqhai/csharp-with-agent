@@ -1,8 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Domain.Models.CommandModels.Users
+namespace Fsel.Course.Lms.Application.Services.UserServices.CommandModels
 {
-    using System;
     using Fsel.Shared.Enums;
 
     public class UpdateCodeStudentCommandModel
