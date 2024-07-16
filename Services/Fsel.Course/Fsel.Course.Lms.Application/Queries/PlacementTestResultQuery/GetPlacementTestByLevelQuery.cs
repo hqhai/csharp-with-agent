@@ -81,20 +81,16 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 return methodResult;
             }
 
-            if (!student.CourseLevel.HasValue)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.CourseLevel));
-                return methodResult;
-            }
-
             await UpdateSurveyCompleteAsync(student);
             int age = DateTimeHelper.GetYearOld(student.Human.Birthday);
-
+            if (!student.CourseLevel.HasValue)
+            {
+                student.CourseLevel = age >= ValueSettings.AgeMilestone.StudentAge ? EnumCourseLevel.B1 : EnumCourseLevel.A2;
+            }
             var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
                                                                           .OrderByDescending(x => x.CreatedDate)
                                                                           .FirstOrDefaultAsync(cancellationToken);
             var placementTestResultInitial = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == student.Id).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-
             if (placementTestResultDone != null)
             {
                 var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age));
