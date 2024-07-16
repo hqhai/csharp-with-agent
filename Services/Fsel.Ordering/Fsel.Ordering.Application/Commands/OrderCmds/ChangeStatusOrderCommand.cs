@@ -40,6 +40,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IPackageRepository _packageRepository;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private readonly ChangeStatusOrderPublisher _changeStatusOrderPublisher;
         private readonly AuthContext _authContext;
         private readonly ILmsCourseService _courseService;
         private readonly ISenderServices _senderServices;
@@ -62,7 +63,8 @@ AppSetting appSetting,
 AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher,
 ISystemService systemService,
 IMediator mediator,
-IPackageEventRepository packageEventRepository)
+IPackageEventRepository packageEventRepository,
+ChangeStatusOrderPublisher changeStatusOrderPublisher)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
@@ -74,6 +76,7 @@ IPackageEventRepository packageEventRepository)
             _courseService = courseService;
             _senderServices = senderServices;
             _appSetting = appSetting;
+            _changeStatusOrderPublisher = changeStatusOrderPublisher;
             _addExpiredDateForStudentPublisher = addExpiredDateForStudentPublisher;
             _systemService = systemService;
             _mediator = mediator;
@@ -205,6 +208,17 @@ IPackageEventRepository packageEventRepository)
                 }
 
                 #endregion Gửi mail thanh toán
+
+                #region bắn socket thanh toán
+
+                await _changeStatusOrderPublisher.Publish(new OrderQueueModel()
+                {
+                    OrderId = order.Id,
+                    UserId = order.UserId,
+                    Status = order.Status,
+                }, cancellationToken);
+
+                #endregion bắn socket thanh toán
 
                 // Mở Unit tiếp theo.
 
