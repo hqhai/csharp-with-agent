@@ -194,6 +194,7 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                 });
 
                 order.Status = request.OrderStatus;
+                order.RevenueType = request.RevenueType;
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
