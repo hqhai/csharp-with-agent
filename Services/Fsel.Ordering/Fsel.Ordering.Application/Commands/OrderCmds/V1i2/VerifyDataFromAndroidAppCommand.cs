@@ -65,7 +65,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             }
             var subscriptionPurchaseJson = subscriptionPurchase.Serialize();
             _logger.LogError(subscriptionPurchaseJson);
-            await _mediator.Send(new ChangeStatusOrderCommand()
+            await _mediator.Send(new OrderCmds.ChangeStatusOrderCommand()
             {
                 OrderId = new Guid(subscriptionPurchase.OrderId),
                 OrderStatus = EnumOrderStatus.Payment,
