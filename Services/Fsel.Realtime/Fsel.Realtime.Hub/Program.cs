@@ -35,6 +35,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.MockTestSpeaking, typeof(MockTestAISpeakingConsumer) },
     { QueueSettings.LmsQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
     { QueueSettings.SystemQueue.NameQueue.Techie, typeof(StudentTechieConsumer) },
+    { QueueSettings.OrderingQueue.NameQueue.ChangeStatusOrder, typeof(ChangeStatusOrderConsumer) },
 });
 
 var app = builder.Build();
@@ -42,7 +43,6 @@ app.UseServices();
 app.UseHubs<DiscussionBoardHub>(RealtimeSettings.DiscussionBoardHub.Pattern);
 app.UseHubs<NotificationHub>(RealtimeSettings.NotificationHub.Pattern);
 app.UseHubs<LeaderBoardHub>(RealtimeSettings.LeaderBoardHub.Pattern);
-
 app.UseHubs<ClassForumAIFeedBackHub>(RealtimeSettings.ClassForumAIFeedBackHub.Pattern);
 app.UseHubs<MockTestWritingHub>(RealtimeSettings.MockTestWritingAIFeedBackHub.Pattern);
 app.UseHubs<MockTestSpeakingHub>(RealtimeSettings.MockTestSpeakingAIFeedBackHub.Pattern);
@@ -50,4 +50,6 @@ app.UseHubs<FeatureAccessTimeHub>(RealtimeSettings.FeatureAccessTimeHub.Pattern)
 app.UseHubs<SetTimeModuleHub>(RealtimeSettings.SetTimeModuleHub.Pattern);
 app.UseHubs<ChatBotHub>(RealtimeSettings.ChatBotHub.Pattern);
 app.UseHubs<TechieHub>(RealtimeSettings.TechieHub.Pattern);
+app.UseHubs<PaymentHub>(RealtimeSettings.PaymentHub.Pattern);
+
 app.Run();
