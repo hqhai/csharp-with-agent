@@ -48,7 +48,6 @@ namespace Fsel.Shared.Constants
                 public const string MockTestWriting = $"{KeyQueue}_MockTestWriting";
                 public const string MockTestSpeaking = $"{KeyQueue}_MockTestSpeaking";
                 public const string TechieAction = $"{KeyQueue}_TechieAction";
-               
             }
         }
 
@@ -149,7 +148,7 @@ namespace Fsel.Shared.Constants
                 public const string FinishSubmission = $"{KeyQueue}_FinishSubmission";
                 public const string NoticePayment = $"{KeyQueue}_NoticePayment";
                 public const string JobActiveEvent = $"{KeyQueue}_JobActiveEvent";
-                public const string PaymentSuccess = $"{KeyQueue}_PaymentSuccess";
+                public const string ChangeStatusOrder = $"{KeyQueue}_ChangeStatusOrder";
             }
         }
 

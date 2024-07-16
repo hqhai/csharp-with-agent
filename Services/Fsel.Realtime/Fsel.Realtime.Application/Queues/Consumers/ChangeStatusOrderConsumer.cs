@@ -9,11 +9,11 @@ namespace Fsel.Realtime.Application.Queues.Consumers
     using Fsel.Shared.Models.ShareModels;
     using Microsoft.AspNetCore.SignalR;
 
-    public class PaymentSuccessConsumer : BaseConsumer<OrderQueueModel>
+    public class ChangeStatusOrderConsumer : BaseConsumer<OrderQueueModel>
     {
-        private readonly IHubContext<PaymentSuccessHub> _paymentSuccessHub;
+        private readonly IHubContext<PaymentHub> _paymentSuccessHub;
 
-        public PaymentSuccessConsumer(AuthContext authContext, IHubContext<PaymentSuccessHub> paymentSuccessHub) : base(authContext)
+        public ChangeStatusOrderConsumer(AuthContext authContext, IHubContext<PaymentHub> paymentSuccessHub) : base(authContext)
         {
             _paymentSuccessHub = paymentSuccessHub;
         }
@@ -22,7 +22,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
         {
             if (message != null)
             {
-                await _paymentSuccessHub.GetGroup(message.UserId.ToString()).SendAsync(RealtimeSettings.PaymentSuccessHub.Methods.PaymentSuccess, message);
+                await _paymentSuccessHub.GetGroup(message.UserId.ToString()).SendAsync(RealtimeSettings.PaymentHub.Methods.Payment, message);
             }
         }
     }

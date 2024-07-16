@@ -104,13 +104,13 @@ namespace Fsel.Shared.Constants
             }
         }
 
-        public static class PaymentSuccessHub
+        public static class PaymentHub
         {
-            public const string Pattern = $"/payment-success";
+            public const string Pattern = $"/payment";
 
             public static class Methods
             {
-                public const string PaymentSuccess = $"PaymentSuccess";
+                public const string Payment = $"Payment";
             }
         }
     }

@@ -6,11 +6,11 @@ namespace Fsel.Ordering.Application.Queues.Publishers
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels;
 
-    public class PaymentSuccessPublisher
+    public class ChangeStatusOrderPublisher
     {
         private readonly IQueueProvider _queueProvider;
 
-        public PaymentSuccessPublisher(IQueueProvider queueProvider)
+        public ChangeStatusOrderPublisher(IQueueProvider queueProvider)
         {
             _queueProvider = queueProvider;
         }
@@ -22,7 +22,7 @@ namespace Fsel.Ordering.Application.Queues.Publishers
                 return;
             }
 
-            await _queueProvider.Publish(QueueSettings.OrderingQueue.NameQueue.PaymentSuccess, order, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.OrderingQueue.NameQueue.ChangeStatusOrder, order, cancellationToken);
         }
     }
 }

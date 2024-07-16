@@ -40,7 +40,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IPackageRepository _packageRepository;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
-        private readonly PaymentSuccessPublisher _paymentSuccessPublisher;
+        private readonly ChangeStatusOrderPublisher _changeStatusOrderPublisher;
         private readonly AuthContext _authContext;
         private readonly ILmsCourseService _courseService;
         private readonly ISenderServices _senderServices;
@@ -64,7 +64,7 @@ AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher,
 ISystemService systemService,
 IMediator mediator,
 IPackageEventRepository packageEventRepository,
-PaymentSuccessPublisher paymentSuccessPublisher)
+ChangeStatusOrderPublisher changeStatusOrderPublisher)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
@@ -76,7 +76,7 @@ PaymentSuccessPublisher paymentSuccessPublisher)
             _courseService = courseService;
             _senderServices = senderServices;
             _appSetting = appSetting;
-            _paymentSuccessPublisher = paymentSuccessPublisher;
+            _changeStatusOrderPublisher = changeStatusOrderPublisher;
             _addExpiredDateForStudentPublisher = addExpiredDateForStudentPublisher;
             _systemService = systemService;
             _mediator = mediator;
@@ -178,13 +178,6 @@ PaymentSuccessPublisher paymentSuccessPublisher)
                         });
                     }
 
-                    await _paymentSuccessPublisher.Publish(new OrderQueueModel()
-                    {
-                        OrderId = order.Id,
-                        UserId = order.UserId,
-                        Status = EnumOrderStatus.Payment
-                    }, cancellationToken);
-
                     await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
                     {
                         UserIds = new List<Guid>() { order.UserId },
@@ -215,6 +208,17 @@ PaymentSuccessPublisher paymentSuccessPublisher)
                 }
 
                 #endregion Gửi mail thanh toán
+
+                #region bắn socket thanh toán
+
+                await _changeStatusOrderPublisher.Publish(new OrderQueueModel()
+                {
+                    OrderId = order.Id,
+                    UserId = order.UserId,
+                    Status = order.Status,
+                }, cancellationToken);
+
+                #endregion bắn socket thanh toán
 
                 // Mở Unit tiếp theo.
 

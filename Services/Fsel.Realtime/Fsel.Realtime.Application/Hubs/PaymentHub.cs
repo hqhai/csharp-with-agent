@@ -7,11 +7,11 @@ namespace Fsel.Realtime.Application.Hubs
     using Fsel.Core.Services.IpApiServices;
     using Microsoft.AspNetCore.Http;
 
-    public class PaymentSuccessHub : BaseHub
+    public class PaymentHub : BaseHub
     {
         private readonly AuthContext _authContext;
 
-        public PaymentSuccessHub(AuthContext authContext, IIpApiService ipApiService, IHttpContextAccessor httpContextAccessor) : base(authContext, ipApiService, httpContextAccessor)
+        public PaymentHub(AuthContext authContext, IIpApiService ipApiService, IHttpContextAccessor httpContextAccessor) : base(authContext, ipApiService, httpContextAccessor)
         {
             _authContext = authContext;
         }
