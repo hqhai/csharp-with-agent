@@ -156,7 +156,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                         videoTimeCodeResult.HighestStreak = await _videoConverter.GetHighestStreak(videoTimeCodeResult);
                     }
                 }
-                await UpdateVideoTimeCodeResultAsync(videoTimeCode, videoResult, request.IsSubmit, course.CourseType, student, cancellationToken);
+                await UpdateVideoTimeCodeResultAsync(videoTimeCode, videoResult, request.IsSubmit, student, cancellationToken);
                 if (request.IsSubmit)
                 {
                     videoResult.TimeCodeHighestStreak = await GetHighestStreak(videoResult);
@@ -429,7 +429,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             await _createTokenHistoryPublisher.Publish(listToken, cancellationToken).ConfigureAwait(false);
         }
 
-
         /// <summary>
         /// Show Techies khi học sinh học bài xong
         /// </summary>
@@ -441,7 +440,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             var videoTimeCodeResults = _videoTimeCodeResultRepository.Queryable.OrderBy(x => x.CreatedDate).Where(x => x.VideoResultId == request.VideoResultId).ToList();
 
             var currentVideoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoTimeCodeId == request.VideoTimeCodeId && x.VideoResultId == request.VideoResultId).FirstOrDefaultAsync(cancellation);
-
 
             if (currentVideoTimeCodeResults != null && currentVideoTimeCodeResults.CorrectCount == currentVideoTimeCodeResults.CorrectTotal && currentVideoTimeCodeResults.Status == EnumResultStatus.Done)
             {
