@@ -2,12 +2,10 @@
 
 namespace Fsel.Shared.Models.ShareModels
 {
-    using Fsel.Shared.Enums;
-
     public class OrderQueueModel
     {
         public Guid OrderId { get; set; }
         public Guid UserId { get; set; }
-        public EnumOrderStatus Status { get; set; }
+        public string? Status { get; set; }
     }
 }
