@@ -152,9 +152,16 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {
-                if (request.IsSubmit && videoTimeCodeResult.Status == EnumResultStatus.New && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
+                if (request.IsSubmit)
                 {
-                    videoResult.HighestStreak = await _videoConverter.GetHighestStreak(videoResult);
+                    if (videoTimeCodeResult.Status == EnumResultStatus.New && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
+                    {
+                        videoResult.HighestStreak = await _videoConverter.GetHighestStreak(videoResult);
+                    }
+                    else if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
+                    {
+                        videoTimeCodeResult.HighestStreak = await _videoConverter.GetHighestStreak(videoTimeCodeResult);
+                    }
                 }
                 await UpdateVideoTimeCodeResultAsync(videoTimeCode, videoResult, request.IsSubmit, course.CourseType, student, cancellationToken);
                 if (request.IsSubmit)
@@ -203,16 +210,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             var maxHighestStreak = 0;
             foreach (var videoTimeCodeResult in videoTimeCodeResults)
             {
-                var isCheckScore = videoTimeCodeResult.CorrectCount == videoTimeCodeResult.CorrectTotal;
-                bool? isCheckScoreUng = videoTimeCodeResult.CorrectCountUngraded.HasValue && videoTimeCodeResult.CorrectTotalUngraded.HasValue ?
-                    videoTimeCodeResult.CorrectCountUngraded.Value == videoTimeCodeResult.CorrectTotalUngraded.Value : null;
-                if ((isCheckScoreUng.HasValue && isCheckScoreUng.Value) || isCheckScore)
+                var isCheckScore = !videoTimeCodeResult.CorrectCountUngraded.HasValue && videoTimeCodeResult.CorrectCount == videoTimeCodeResult.CorrectTotal;
+                bool isCheckScoreUng = videoTimeCodeResult.CorrectCountUngraded.HasValue && videoTimeCodeResult.CorrectTotalUngraded.HasValue
+                                       && videoTimeCodeResult.CorrectCountUngraded.Value == videoTimeCodeResult.CorrectTotalUngraded.Value;
+                if (isCheckScoreUng || isCheckScore)
                 {
                     highestStreak++;
-                    if (maxHighestStreak < highestStreak)
-                    {
-                        maxHighestStreak = highestStreak;
-                    }
+                    maxHighestStreak = Math.Max(maxHighestStreak, highestStreak);
                 }
                 else
                 {
@@ -346,11 +350,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             var isDoneTimeCode = videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone || videoTimeCodeResult.Status == EnumResultStatus.Process;
             if (isSubmit)
             {
-                if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
-                {
-                    videoTimeCodeResult.HighestStreak = await _videoConverter.GetHighestStreak(videoTimeCodeResult);
-                }
-
                 var correctCount = await _videoConverter.UpdateVideoAnswers(videoTimeCode, videoTimeCodeResult, isDoneTimeCode);
                 videoTimeCodeResult = await GetTokenVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode, courseType, correctCount);
                 await SendTokenHistoryAsync(videoTimeCodeResult, student, cancellationToken).ConfigureAwait(false);
