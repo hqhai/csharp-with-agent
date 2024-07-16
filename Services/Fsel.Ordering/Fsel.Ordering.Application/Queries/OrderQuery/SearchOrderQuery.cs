@@ -37,62 +37,64 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<OrderSearchModel>>();
 
-            if (request.PageSize > 100)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                return methodResult;
-            }
             var query = _orderRepository.Queryable.Include(p => p.Package).Select(x => new OrderSearchModel
             {
                 Id = x.Id,
-                UserId = x.UserId,
                 Code = x.Code,
+                FullName = x.FullName,
+                Email = x.Email,
+                UserId = x.UserId,
                 CreatedDate = x.CreatedDate,
+                UpdatedDate = x.UpdatedDate,
                 CreatedFullName = x.CreatedFullName,
-                PackageName = x.Package!.Code.ToString(),
                 Status = x.Status,
                 PaymentMethod = x.PaymentMethod,
-                PackageId = x.PackageId ?? default,
-                FullName = x.FullName,
-                IsTrial = x.IsTrial,
-                ExpireDate = x.ExpireDate,
-                Email = x.Email,
+                PackageId = x.PackageId,
+                MonthNumber = x.Package == null ? null : x.Package.MonthNumber,
+                RevenueType = x.RevenueType,
             });
 
             if (request.Status.HasValue)
             {
-                query = query.Where(p => request.Status == false ? p.Status == EnumOrderStatus.New : p.Status != EnumOrderStatus.New);
-                if (!request.Status.Value)
-                {
-                    query = query.Where(p => p.PaymentMethod == EnumPaymentMethodStatus.BankTransfer || p.PaymentMethod == EnumPaymentMethodStatus.Card);
-                }
+                query = query.Where(p => p.Status == request.Status);
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 if (request.Keyword.IsValidEmail())
                 {
-                    query = query.Where(x => x.Email != null).Where(m => (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
+                    query = query.Where(p => !string.IsNullOrEmpty(p.Email) && p.Email.Contains(request.Keyword));
                 }
                 else
                 {
-                    query = query.Where(x => x.Code != null).Where(m => (m.Code ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
+                    query = query.Where(p => (!string.IsNullOrEmpty(p.Code) && p.Code.Contains(request.Keyword)) || (!string.IsNullOrEmpty(p.FullName) && p.FullName.Contains(request.Keyword)));
                 }
             }
+
+            if (request.PackageIds != null && request.PackageIds.Count > 0)
+            {
+                query = query.Where(p => p.PackageId.HasValue && request.PackageIds.Contains(p.PackageId.Value));
+            }
+
+            if (request.StartDate.HasValue && request.EndDate.HasValue)
+            {
+                query = query.Where(p => p.CreatedDate.HasValue && request.StartDate.Value.Date <= p.CreatedDate.Value.Date && request.EndDate.Value.Date >= p.CreatedDate.Value.Date);
+            }
+            else if (request.StartDate.HasValue)
+            {
+                query = query.Where(p => p.CreatedDate.HasValue && request.StartDate.Value.Date <= p.CreatedDate.Value.Date);
+            }
+            else if (request.EndDate.HasValue)
+            {
+                query = query.Where(p => p.CreatedDate.HasValue && request.EndDate.Value.Date >= p.CreatedDate.Value.Date);
+            }
+
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            //var courses = await _lmsCourseService.GetCoursesByIdsAsync(lists.Select(p => p.CourseId).ToList()!);
-            //if (courses.IsSuccessStatusCode)
-            //{
-            //    foreach (var item in lists)
-            //    {
-            //        item.CourseName = courses.Content?.Result?.FirstOrDefault(x => item.CourseId == x.Id)?.CourseLevel;
-            //    }
-            //}
 
             methodResult.Result = new PagingItemsModel<OrderSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
