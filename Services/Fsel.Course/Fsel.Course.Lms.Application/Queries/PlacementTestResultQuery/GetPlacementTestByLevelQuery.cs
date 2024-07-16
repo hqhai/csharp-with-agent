@@ -86,12 +86,10 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.CourseLevel));
                 return methodResult;
             }
+
             await UpdateSurveyCompleteAsync(student);
-            if (student.Human.Birthday == null)
-            {
-                student.Human.Birthday = new DateTime(DateTime.Now.Year - ValueSettings.AgeMilestone.StudentAge, DateTime.Now.Month, DateTime.Now.Day);
-            }
-            int age = DateTimeHelper.GetYearOld(student.Human.Birthday);
+            int age = student.Human.Birthday.HasValue ? DateTimeHelper.GetYearOld(student.Human.Birthday) : ValueSettings.AgeMilestone.StudentAge;
+
             var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
                                                                           .OrderByDescending(x => x.CreatedDate)
                                                                           .FirstOrDefaultAsync(cancellationToken);
