@@ -18,6 +18,12 @@ namespace Fsel.Shared.Constants
         public const int DelayWorkerSecond = 60;
         public const int AmountTrialDays = 14;
 
+        public static class AgeMilestone
+        {
+            public const int ChildrenAge = 13;
+            public const int StudentAge = 14;
+        }
+
         public static class CreateAction
         {
             public const string TwoPeopleLike = "{0},{1}";
