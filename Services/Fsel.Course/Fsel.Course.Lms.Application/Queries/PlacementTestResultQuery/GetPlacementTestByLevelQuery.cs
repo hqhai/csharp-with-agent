@@ -88,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             }
 
             await UpdateSurveyCompleteAsync(student);
-            int age = student.Human.Birthday.HasValue ? DateTimeHelper.GetYearOld(student.Human.Birthday) : ValueSettings.AgeMilestone.StudentAge;
+            int age = DateTimeHelper.GetYearOld(student.Human.Birthday);
 
             var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
                                                                           .OrderByDescending(x => x.CreatedDate)
@@ -123,11 +123,12 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             {
                 return;
             }
-            if (string.IsNullOrEmpty(student.Human?.Code))
+            if (student.Human != null && string.IsNullOrEmpty(student.Human.Code))
             {
+                student.Human.Birthday = new DateTime(DateTime.Now.Year - ValueSettings.AgeMilestone.StudentAge, DateTime.Now.Month, DateTime.Now.Day);
                 await _userService.UpdateCodeStudentAsync(new UpdateCodeStudentCommandModel
                 {
-                    Birthday = new DateTime(DateTime.Now.Year - ValueSettings.AgeMilestone.StudentAge, DateTime.Now.Month, DateTime.Now.Day),
+                    Birthday = student.Human.Birthday,
                     UserId = _authContext.CurrentUserId,
                     Gender = EnumGender.Male
                 }).ConfigureAwait(false);
