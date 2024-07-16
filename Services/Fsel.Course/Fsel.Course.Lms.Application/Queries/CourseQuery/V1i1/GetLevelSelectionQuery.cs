@@ -80,6 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
             int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
             if (request.CourseType == EnumCourseType.Ielts && age < MaxAgeIELST)
             {
+                methodResult.Result = new List<LevelDtoModel>();
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -113,7 +114,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 }
             }
 
-            methodResult.Result = levelDtos;
+            methodResult.Result = levelDtos ?? new();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -180,7 +180,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 courseManager.IsCheckPercentColor = await IsColorToPercentAsync(courseResult);
                 courseManagers.Add(courseManager);
             }
-            methodResult.Result = courseManagers;
+            methodResult.Result = courseManagers ?? new();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
