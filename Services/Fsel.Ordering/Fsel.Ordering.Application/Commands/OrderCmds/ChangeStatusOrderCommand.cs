@@ -215,7 +215,7 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                 {
                     OrderId = order.Id,
                     UserId = order.UserId,
-                    Status = order.Status.ToString(),
+                    Status = order.Status,
                 }, cancellationToken);
 
                 #endregion bắn socket thanh toán
