@@ -15,6 +15,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid LessonResultId { get; set; }
         public Guid VideoId { get; set; }
         public Guid? CurrentVideoTimeCodeId { get; set; }
+        public int? TimeCodeHighestStreak { get; set; }
         public IList<VideoSkillScores>? VideoSkillScores { get; set; }
     }
 }
