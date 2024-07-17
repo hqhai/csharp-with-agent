@@ -90,10 +90,9 @@ namespace Fsel.Course.Lms.Application.Queries.SectionGroupResultQuery
         private BandScoresReport GetBandScoresReport(SectionGroupResult sectionGroupResult, double scores)
         {
             var bandScores = GetBandScores(sectionGroupResult);
-            var bandScoreStudent = bandScores?.FirstOrDefault(x => x.Scores == scores);
             var bandScore = GetBandScore(bandScores, scores);
-
             var bandScoreReport = _mapper.Map<BandScoresReport>(bandScore);
+            var bandScoreStudent = bandScores?.FirstOrDefault(x => x.Scores == scores);
             if (bandScoreStudent != null)
             {
                 bandScoreReport.ScoresStudent = bandScoreStudent.Scores;
@@ -110,24 +109,9 @@ namespace Fsel.Course.Lms.Application.Queries.SectionGroupResultQuery
             return bandScores;
         }
 
-        private BandScores? GetBandScore(IList<BandScores>? bandScores, double scores)
+        private static BandScores? GetBandScore(IList<BandScores>? bandScores, double scores)
         {
-            var bandScore = new BandScores();
-            if (IsFraction(scores))
-            {
-                bandScore = bandScores?.FirstOrDefault(x => x.Scores <= scores);
-            }
-            else
-            {
-                bandScore = bandScores?.FirstOrDefault(x => x.Scores < scores);
-            }
-
-            return bandScore;
-        }
-
-        public bool IsFraction(double value)
-        {
-            return value % 1 == 0;
+            return bandScores?.FirstOrDefault(x => x.Scores <= scores);
         }
     }
 }
