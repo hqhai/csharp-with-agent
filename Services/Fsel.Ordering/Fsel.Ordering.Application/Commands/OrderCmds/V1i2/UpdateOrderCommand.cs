@@ -72,6 +72,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
         private static void AddDataIntoOrder(Order order, string? code, decimal price, UpdateOrderCommandModel request)
         {
             order.Status = EnumOrderStatus.New;
+            order.PaymentMethod = request.PaymentMethod;
             order.FullName = request.FullName;
             order.PhoneNumber = request.PhoneNumber;
             order.Email = request.Email;
