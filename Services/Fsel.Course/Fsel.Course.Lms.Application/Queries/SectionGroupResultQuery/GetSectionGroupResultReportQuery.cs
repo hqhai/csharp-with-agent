@@ -89,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.SectionGroupResultQuery
 
         private BandScoresReport GetBandScoresReport(SectionGroupResult sectionGroupResult, double scores)
         {
-            var bandScores = GetBandScores(sectionGroupResult);
+            var bandScores = GetBandScoreConfigs(sectionGroupResult);
             var bandScore = GetBandScore(bandScores, scores);
             var bandScoreReport = _mapper.Map<BandScoresReport>(bandScore);
             var bandScoreStudent = bandScores?.FirstOrDefault(x => x.Scores == scores);
@@ -101,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Queries.SectionGroupResultQuery
             return bandScoreReport;
         }
 
-        private static IList<BandScores>? GetBandScores(SectionGroupResult sectionGroupResult)
+        private static IList<BandScores>? GetBandScoreConfigs(SectionGroupResult sectionGroupResult)
         {
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.BandScoreFileName);
             var bandScores = ConvertHelper.DeserializeFromFilePath<IList<BandScores>>(path);
@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Queries.SectionGroupResultQuery
 
         private static BandScores? GetBandScore(IList<BandScores>? bandScores, double scores)
         {
-            return bandScores?.FirstOrDefault(x => x.Scores <= scores);
+            return bandScores?.FirstOrDefault(x => x.Scores < scores);
         }
     }
 }

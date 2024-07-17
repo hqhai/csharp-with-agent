@@ -10,7 +10,7 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public OtherProfile()
         {
-            CreateMap<BandScores, BandScoresReport>().ForMember(m => m.Scores, p => p.MapFrom(o => o.Scores - 0.5)).IgnoreAllNonExisting();
+            CreateMap<BandScores, BandScoresReport>().IgnoreAllNonExisting();
         }
     }
 }
