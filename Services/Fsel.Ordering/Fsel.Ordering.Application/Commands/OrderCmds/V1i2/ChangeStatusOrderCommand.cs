@@ -53,21 +53,21 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             }
 
-            orders.ForEach(async order =>
+            foreach (var item in orders)
             {
                 var result = await _mediator.Send(new OrderCmds.ChangeStatusOrderCommand()
                 {
-                    OrderId = order.Id,
-                    OrderStatus = order.Status,
-                    RevenueType = order.RevenueType,
+                    OrderId = item.Id,
+                    OrderStatus = item.Status,
+                    RevenueType = item.RevenueType,
                     Receipt = request.Serialize()
-                }
-                );
+                }, cancellationToken);
                 if (!result.IsOK)
                 {
                     methodResult.AddError(result.ErrorMessages);
+                    return methodResult;
                 }
-            });
+            }
             return methodResult;
         }
     }
