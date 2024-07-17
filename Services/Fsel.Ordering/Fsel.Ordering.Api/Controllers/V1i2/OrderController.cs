@@ -6,8 +6,11 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Ordering.Application.Commands.OrderCmds.V1i2;
+    using Fsel.Ordering.Application.Queries.OrderQuery.V1i2;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Ordering.Domain.Models.EntityModels.V1i2;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -61,6 +64,18 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get by id
+        /// </summary>
+        [HttpGet("get-by-id/{id}")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<SearchOrderModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Search([FromRoute] Guid id)
+        {
+            var queryResult = await _mediator.Send(new GetOrderByIdQuery() { Id = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>
