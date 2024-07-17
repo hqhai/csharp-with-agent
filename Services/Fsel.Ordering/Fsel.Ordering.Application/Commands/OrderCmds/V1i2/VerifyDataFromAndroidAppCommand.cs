@@ -70,7 +70,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 OrderId = new Guid(subscriptionPurchase.OrderId),
                 OrderStatus = EnumOrderStatus.Payment,
                 Type = EnumOrderTransactionType.GooglePlay,
-                Receipt = subscriptionPurchaseJson
+                Receipt = subscriptionPurchaseJson,
+                RevenueType = EnumPaymentRevenueType.Revenue
             }, cancellationToken);
             methodResult.Result = subscriptionPurchase;
             return methodResult;
