@@ -50,6 +50,10 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<StudentFocusTimeModel> methodResult = new MethodResult<StudentFocusTimeModel>();
 
+            if (_authContext.CurrentUserId == Guid.Empty)
+            {
+                _authContext.CurrentUserId = request.UserId;
+            }
             var student = _studentRepository.Queryable.Include(x => x.Human).FirstOrDefault(x => x.Human!.UserId == _authContext.CurrentUserId);
             if (student == null)
             {
