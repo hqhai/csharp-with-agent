@@ -17,5 +17,6 @@ namespace Fsel.Ordering.Domain.Models.EntityModels.V1i2
         public Guid UserId { get; set; }
         public Guid? PackageId { get; set; }
         public EnumPaymentRevenueType? RevenueType { get; set; }
+        public decimal TotalPrice { get; set; }
     }
 }
