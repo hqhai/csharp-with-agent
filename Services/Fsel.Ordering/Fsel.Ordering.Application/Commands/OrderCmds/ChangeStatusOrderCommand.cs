@@ -129,6 +129,8 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                 }
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
+                    order.RevenueType = request.RevenueType;
+
                     allowOpenNextUnit = true;
 
                     var packageEvent = await _packageEventRepository.Queryable.FirstOrDefaultAsync(p => p.PackageId == package.Id && p.EventId == order.EventId, cancellationToken);
@@ -194,7 +196,6 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                 });
 
                 order.Status = request.OrderStatus;
-                order.RevenueType = request.RevenueType;
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
