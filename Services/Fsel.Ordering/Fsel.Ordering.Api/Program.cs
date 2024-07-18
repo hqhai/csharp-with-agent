@@ -50,6 +50,7 @@ builder.Services.AddScoped<VnPayLibrary>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<AddExpiredDateForStudentPublisher>();
+builder.Services.AddScoped<ChangeStatusOrderPublisher>();
 
 //Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);

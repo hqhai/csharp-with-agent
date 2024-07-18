@@ -15,7 +15,12 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Services.InteractionService;
+    using Fsel.Course.Lms.Application.Services.InteractionService.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.CommandModels;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -34,6 +39,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly IInteractionService _interactionService;
         private readonly IPlacementTestRepository _placementTestRepository;
 
         public GetPlacementTestByLevelQueryHandler(AuthContext authContext
@@ -41,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             , IPlacementTestResultRepository placementTestResultRepository
             , IUserService userService
             , IMapper mapper
+            , IInteractionService interactionService
             , IPlacementTestRepository placementTestRepository)
         {
             _authContext = authContext;
@@ -48,6 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             _placementTestResultRepository = placementTestResultRepository;
             _userService = userService;
             _mapper = mapper;
+            _interactionService = interactionService;
             _placementTestRepository = placementTestRepository;
         }
 
@@ -67,17 +75,22 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            if (!student.CourseLevel.HasValue)
+            if (student.Human == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.CourseLevel));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            int age = DateTimeHelper.GetYearOld(student.Human?.Birthday);
+
+            await UpdateSurveyCompleteAsync(student);
+            int age = DateTimeHelper.GetYearOld(student.Human.Birthday);
+            if (!student.CourseLevel.HasValue)
+            {
+                student.CourseLevel = age >= ValueSettings.AgeMilestone.StudentAge ? EnumCourseLevel.B1 : EnumCourseLevel.A2;
+            }
             var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
                                                                           .OrderByDescending(x => x.CreatedDate)
                                                                           .FirstOrDefaultAsync(cancellationToken);
             var placementTestResultInitial = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == student.Id).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-
             if (placementTestResultDone != null)
             {
                 var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age));
@@ -96,6 +109,42 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = await GetPlacmentTestAsync(placementTest, placementTestResult);
             return methodResult;
+        }
+
+        private async Task UpdateSurveyCompleteAsync(StudentModel student)
+        {
+            var isSurveyResult = await _interactionService.IsSurveyCompleted(_authContext.CurrentUserId);
+            var isSurvey = isSurveyResult.Content?.Result;
+            if (!isSurveyResult.IsSuccessStatusCode || !isSurvey.HasValue || isSurvey.Value)
+            {
+                return;
+            }
+            if (student.Human != null && string.IsNullOrEmpty(student.Human.Code))
+            {
+                student.Human.Birthday = new DateTime(DateTime.Now.Year - ValueSettings.AgeMilestone.StudentAge, DateTime.Now.Month, DateTime.Now.Day);
+                await _userService.UpdateCodeStudentAsync(new UpdateCodeStudentCommandModel
+                {
+                    Birthday = student.Human.Birthday,
+                    UserId = _authContext.CurrentUserId,
+                    Gender = EnumGender.Male
+                }).ConfigureAwait(false);
+            }
+            else
+            {
+                await _interactionService.CreateSurveyAsync(new CreateCustomerSurveyCommandModel
+                {
+                    Email = student.Human?.Email,
+                    UserId = _authContext.CurrentUserId,
+                    Answers = new List<CreateSurveyCommandModel>
+                    {
+                        new CreateSurveyCommandModel
+                        {
+                            Id = Guid.Parse("492D8BB9-CDBE-42E7-AA16-35A1915C3621"),
+                            Answer = new { Id = 1,Content = "Google",Image = "gmail-icon.svg"},
+                        }
+                    }
+                }).ConfigureAwait(false);
+            }
         }
 
         private async Task<PlacementTestDtoModel> GetPlacmentTestAsync(PlacementTest placementTest, PlacementTestResult placementTestResult)

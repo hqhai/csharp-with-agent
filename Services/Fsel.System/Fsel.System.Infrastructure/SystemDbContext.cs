@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base;
@@ -11,6 +13,8 @@ using Fsel.System.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Fsel.System.Infrastructure
 {
@@ -28,6 +32,8 @@ namespace Fsel.System.Infrastructure
             SeedFocusTimeConfig(modelBuilder);
             SeedApprovalTimeConfig(modelBuilder);
             SeedTokenConfig(modelBuilder);
+            SeedTechieConfig(modelBuilder);
+            SeedTechieActionsConfig(modelBuilder);
             modelBuilder.ApplyConfiguration(new TeachingCostEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ReferralDiscountConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardConfigConfiguration());
@@ -135,6 +141,14 @@ namespace Fsel.System.Infrastructure
             builder.Entity<TokenConfig>().HasData(tokenConfigs);
         }
 
+        private static void SeedTechieConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TechieFileName);
+            var techies = ConvertHelper.DeserializeFromFilePath<IList<Techie>>(path);
+            ArgumentNullException.ThrowIfNull(techies);
+            builder.Entity<Techie>().HasData(techies);
+        }
+
         private static void SeedApprovalTimeConfig(ModelBuilder builder)
         {
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.ApprovalTimeFileName);
@@ -142,5 +156,49 @@ namespace Fsel.System.Infrastructure
             ArgumentNullException.ThrowIfNull(approvalTimeConfigs);
             builder.Entity<ApprovalTimeConfig>().HasData(approvalTimeConfigs);
         }
+
+        private static void SeedTechieActionsConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TechieActionFileName);
+            var techieActions = ConvertHelper.DeserializeFromFilePath<IList<TechieAction>>(path);
+            ArgumentNullException.ThrowIfNull(techieActions);
+
+            var packageTranslations = techieActions.SelectMany(x => x.Translations).ToList();
+            techieActions.ForEach(x => x.Translations.Clear());
+
+            builder.Entity<TechieAction>().HasData(techieActions);
+            builder.Entity<TechieActionTranslation>().HasData(packageTranslations);
+        }
+
+        //private static void SeedTechieActionsConfig(ModelBuilder builder)
+        //{
+        //    try
+        //    {
+        //        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TechieActionFileName);
+        //        using StreamReader streamReader = new StreamReader(path);
+        //        var a = streamReader.ReadToEnd();
+        //        var techieActions = JsonSerializer.Deserialize<IList<TechieAction>>(a, new JsonSerializerOptions
+        //        {
+        //            Converters = { (JsonConverter)new JsonStringEnumConverter() },
+        //            PropertyNameCaseInsensitive = true,
+        //            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        //        });
+        //        ArgumentNullException.ThrowIfNull(techieActions);
+
+        //        //Console.WriteLine("Tesst Errro: techieActions" + techieActions.Serialize());
+        //        var techieActionTranslations = techieActions.SelectMany(x => x.Translations).ToList();
+        //        techieActions.ForEach(x => x.Translations.Clear());
+
+        //        builder.Entity<TechieAction>().HasData(techieActions);
+        //        builder.Entity<TechieActionTranslation>().HasData(techieActionTranslations);
+
+        //        var b= techieActionTranslations.GroupBy(x => x.Id).Where(x => x.Count() > 1).Select(x => x.Key).ToList();
+        //        Console.WriteLine("Tesst Errro: b" + b.Serialize());
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine("Tesst Errro: " + (ex).ToString());
+        //    }
+        //}
     }
 }

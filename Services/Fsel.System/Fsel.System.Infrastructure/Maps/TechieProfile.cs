@@ -14,6 +14,10 @@ namespace Fsel.System.Infrastructure.Maps
         {
             CreateMap<SaveTechieActionCommandModel, TechieAction>().IgnoreAllNonExisting();
             CreateMap<TechieAction, TechieActionModel>().IgnoreAllNonExisting();
+
+            CreateMap<TechieActionTranslation, TechieAction>().IgnoreEntity()?.ReverseMap();
+            CreateMap<TechieActionTranslation, TechieActionTranslation>().IgnoreAllNonExisting()?.ReverseMap();
+            CreateMap<TechieAction, TechieActionModel>().IgnoreAllNonExisting()?.MapTranslations<TechieAction, TechieActionModel, TechieActionTranslation>();
         }
     }
 }

@@ -66,7 +66,8 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
                 StudentFocusTimeCommandModel cmd = new StudentFocusTimeCommandModel
                 {
                     ExecuteTime = (long)request.AccessTime!,
-                    TargetTime = 0
+                    TargetTime = 0,
+                    UserId = _authContext.CurrentUserId,
                 };
                 await _userService.SaveFocusTime(cmd).ConfigureAwait(false);
             }
@@ -79,10 +80,9 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
                 StudentDailyStreakCommandModel cmdDaily = new StudentDailyStreakCommandModel
                 {
                     StudentId = student?.Id ?? default,
-
                     IsUseShield = false,
-
                     DailyDate = DateTime.UtcNow,
+                    UserId = _authContext.CurrentUserId,
                 };
                 await _userService.SaveDailyStreak(cmdDaily);
             }
