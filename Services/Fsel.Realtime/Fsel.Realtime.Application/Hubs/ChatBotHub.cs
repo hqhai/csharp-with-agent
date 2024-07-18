@@ -26,28 +26,32 @@ namespace Fsel.Realtime.Application.Hubs
 
         public override async Task OnConnectedHubAsync()
         {
-            string chatBotId = Context.GetHttpContext()?.Request.Query["ChatBotId"].ToString()!;
+            //string chatBotId = Context.GetHttpContext()?.Request.Query["ChatBotId"].ToString()!;
 
-            await Groups.AddGroupAsync(Context.ConnectionId, chatBotId);
+            //await Groups.AddGroupAsync(Context.ConnectionId, chatBotId);
         }
 
         public class Config
         {
             public string? Role { get; set; }
             public string? Content { get; set; }
-
             public Guid? ChatBotId { get; set; }
         }
 
-        public async Task SendMessage(Config config, string customValue)
+        public async Task SendMessage(Config config, string? customValue)
         {
-            ChatBotSendingMessageModel model = new ChatBotSendingMessageModel
+            if (config != null && config.ChatBotId.HasValue)
             {
-                ChatbotId = config?.ChatBotId,
-                Content = config?.Content ?? string.Empty,
-            };
-            _logger.LogInformation($"Start Invoke ChatBot: Content : {config.Content}, ChatbotId: {config.ChatBotId}, Environment.MachineName: {Environment.MachineName}");
-            await _botPublisher.Publish(model, CancellationToken.None);
+                await Groups.AddGroupAsync(Context.ConnectionId, config.ChatBotId.ToString() ?? string.Empty);
+
+                ChatBotSendingMessageModel model = new ChatBotSendingMessageModel
+                {
+                    ChatbotId = config.ChatBotId,
+                    Content = config.Content ?? string.Empty,
+                };
+                _logger.LogInformation($"Start Invoke ChatBot: Content : {config.Content}, ChatbotId: {config.ChatBotId}, Environment.MachineName: {Environment.MachineName}");
+                await _botPublisher.Publish(model, CancellationToken.None);
+            }
         }
 
         public override async Task OnDisconnectedHubAsync(Exception? exception)
