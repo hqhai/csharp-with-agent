@@ -79,7 +79,7 @@ namespace Fsel.System.Application.Commands.Chatbots
                 return methodResult;
             }
 
-            double tokenRatio = (float)chatbotMessage.RemainToken / GetSkillToken(chatbotMessage.Skill, chatbotConfig);
+            double tokenRatio = CalculateTokenRatio(chatbotMessage.RemainToken, chatbotMessage.Skill, chatbotConfig);
 
 
             // Khi token còn dưới 20% so với số lượng token ban đầu
@@ -118,6 +118,14 @@ namespace Fsel.System.Application.Commands.Chatbots
             ChatbotResponseModel newMessage = CompletionElement("system", response, filePath);
             chatBotResponse.Add(newMessage);
 
+            //Tính toán số token đã sử dụng
+            chatbotMessage.Conversations = _mapper.Map<List<ChatBotMessage>>(chatBotResponse);
+            chatbotMessage.LastestAnswer = _mapper.Map<ChatBotMessage>(newMessage);
+            MatchCollection matches = Regex.Matches(response ?? string.Empty, @"\b\w+\b");
+
+            int tokenCount = matches.Count + (totalTokenUse?.Completion_Tokens ?? default);
+            chatbotMessage.RemainToken = chatbotMessage.RemainToken > tokenCount ? chatbotMessage.RemainToken - tokenCount : 0;
+            tokenRatio = CalculateTokenRatio(chatbotMessage.RemainToken, chatbotMessage.Skill, chatbotConfig);
 
             // Push to Socket
             await PushToWebSocket(request.ChatBotId, newMessage.Content, newMessage.FilePath, tokenRatio, cancellationToken);
@@ -126,21 +134,11 @@ namespace Fsel.System.Application.Commands.Chatbots
             ChatBot chatBot = new ChatBot();
             await _chatBotRepository.ExecuteTransactionAsync(async () =>
             {
-                chatbotMessage.Conversations = _mapper.Map<List<ChatBotMessage>>(chatBotResponse);
-                chatbotMessage.LastestAnswer = _mapper.Map<ChatBotMessage>(newMessage);
-
-                // Sử dụng regex để tìm các từ và dấu câu
-                MatchCollection matches = Regex.Matches(response ?? string.Empty, @"\b\w+\b");
-
-                // Đếm số token
-                int tokenCount = matches.Count + (totalTokenUse?.Completion_Tokens ?? default);
-                chatbotMessage.RemainToken = chatbotMessage.RemainToken > tokenCount ? chatbotMessage.RemainToken - tokenCount : 0;
 
                 if (chatbotMessage.RemainToken == 0)
                 {
                     chatbotMessage.Status = EnumChatBotStatus.Done;
                 }
-
                 //Câp nhật xuống database
                 _chatBotRepository.Update(chatbotMessage);
                 await _chatBotRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -174,6 +172,18 @@ namespace Fsel.System.Application.Commands.Chatbots
                 // Danh sách rỗng, trả về danh sách rỗng
                 return new List<T>();
             }
+        }
+
+        /// <summary>
+        /// Tính toán số lượng token còn lại
+        /// </summary>
+        /// <param name="remainToken"></param>
+        /// <param name="skill"></param>
+        /// <param name="chatbotConfig"></param>
+        /// <returns></returns>
+        private static double CalculateTokenRatio(double remainToken, EnumCourseSkill skill, ChatbotConfig chatbotConfig)
+        {
+            return (double)remainToken / GetSkillToken(skill, chatbotConfig);
         }
 
         /// <summary>
