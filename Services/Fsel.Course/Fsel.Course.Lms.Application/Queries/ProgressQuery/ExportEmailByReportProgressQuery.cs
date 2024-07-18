@@ -108,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                         SchoolName = student?.School
                     };
                     (reportProgress.PTStatus, reportProgress.PTLevel) = await GetStatusPTAsync(student, courseResult != null, cancellationToken);
-                    var orderResult = await _orderService.GetOrderAsync(userId);
+                    var orderResult = await _orderService.GetOrderTrialAsync(userId);
                     if (orderResult.IsSuccessStatusCode)
                     {
                         var order = orderResult.Content?.Result;
@@ -117,6 +117,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                             reportProgress.StartTrial = order.UpdatedDate ?? order.CreatedDate;
                             reportProgress.EndTrial = order.ExpireDate;
                         }
+                    }
+                    var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { UserId = student?.Human?.UserId ?? default });
+                    if (featureAccessTimeResult.IsSuccessStatusCode)
+                    {
+                        reportProgress.LastEntry = featureAccessTimeResult.Content?.Result?.LastVisited;
                     }
                     await SetProgressStudentAsync(reportProgress, courseResult, cancellationToken);
                     if (courseResult != null)
@@ -141,7 +146,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                             {
                                 reportProgress.TotalAccess = featureAccessTime.Visit;
                                 reportProgress.TotalTime = featureAccessTime.AccessTime;
-                                reportProgress.UpdatedDate = featureAccessTime.LastVisited;
+                                reportProgress.FinalStudyPeriod = featureAccessTime.LastVisited;
                             }
                             var courseResultModel = new CourseResultModel
                             {
