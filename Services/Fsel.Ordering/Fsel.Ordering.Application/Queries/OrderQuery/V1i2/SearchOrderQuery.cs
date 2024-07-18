@@ -95,6 +95,11 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 query = query.Where(p => p.CreatedDate.HasValue && request.EndDate.Value.Date >= p.CreatedDate.Value.Date);
             }
 
+            if (request.RevenueType.HasValue)
+            {
+                query = query.Where(p => p.RevenueType == request.RevenueType);
+            }
+
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
                     .ApplySortAndPaging(request)
