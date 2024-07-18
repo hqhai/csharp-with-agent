@@ -53,6 +53,7 @@ builder.Services.AddScoped<IChatbotConfigRepository, ChatbotConfigRepository>();
 builder.Services.AddScoped<IErrorReportRepository, ErrorReportRepository>();
 builder.Services.AddScoped<ITokenHistoryRepository, TokenHistoryRepository>();
 builder.Services.AddScoped<IChatBotRepository, ChatBotRepository>();
+builder.Services.AddScoped<IUserConfigRepository, UserConfigRepository>();
 builder.Services.AddScoped<ITechieRepository, TechieRepository>();
 builder.Services.AddScoped<ITechieActionRepository, TechieActionRepository>();
 builder.Services.AddScoped<IStudentTechieRepository, StudentTechieRepository>();
