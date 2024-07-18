@@ -13,8 +13,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Course.Lms.Application.Services.UserServices.Models;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -90,8 +88,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             if (students != null && students.Any())
             {
                 var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId)).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
-                var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => studentIds.Contains(x.StudentId) && x.Status != EnumResultStatus.Unfinished)
-                                                                                            .OrderByDescending(x => x.CreatedDate).ToListAsync(cancellationToken);
 
                 foreach (var student in students)
                 {
@@ -103,7 +99,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                         Email = student?.Human?.Email,
                         CourseName = courseResult?.Course?.Name,
                     };
-                    reportProgress.CourseLevel = await GetModulePTAsync(student, cancellationToken);
                     var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { UserId = student?.Human?.UserId ?? default });
                     if (featureAccessTimeResult.IsSuccessStatusCode)
                     {
@@ -112,12 +107,14 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     if (courseResult != null)
                     {
                         var courseType = courseResult.Course?.CourseType;
-                        var unitResult = unitResults.Where(x => x.StudentId == courseResult.StudentId).OrderByDescending(x => x.CreatedDate).FirstOrDefault();
+                        var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit)
+                                                                            .Where(x => x.StudentId == courseResult.StudentId && x.Status != EnumResultStatus.Unfinished)
+                                                                            .OrderByDescending(x => x.CreatedDate)
+                                                                            .FirstOrDefaultAsync(cancellationToken);
                         if (unitResult != null)
                         {
                             reportProgress.UnitName = unitResult.Unit?.Name;
                             reportProgress.UnitStatus = unitResult.Status;
-
                             var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.Lesson)
                                                         .Where(x => x.StudentId == courseResult.StudentId && x.Status != EnumResultStatus.Unfinished)
                                                         .Where(x => x.CourseId == courseResult.CourseId && x.UnitId == unitResult.UnitId)
@@ -128,6 +125,10 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                                 reportProgress.LessonStatus = lessonResult.Status;
                                 reportProgress.FinalStudyPeriod = lessonResult.UpdatedDate ?? lessonResult.CreatedDate;
                                 await SetReportProgress(lessonResult, reportProgress);
+                                if (lessonResult.Status == EnumResultStatus.Done)
+                                {
+                                    reportProgress.FinalStudyPeriod = courseResult.UpdatedDate;
+                                }
                             }
                         }
                     }
@@ -150,23 +151,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             reportProgressStudentExport.ClassForumStatus = classForumResult?.Status;
             reportProgressStudentExport.HomeWorkStatus = classForumResult != null && classForumResult.Status != EnumClassForumResultStatus.Draft ? EnumResultStatus.Process : null;
             return reportProgressStudentExport;
-        }
-
-        private async Task<EnumCourseLevel?> GetModulePTAsync(StudentModel? student, CancellationToken cancellationToken)
-        {
-            if (student == null)
-            {
-                return null;
-            }
-            int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
-            var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
-                                                                          .OrderByDescending(x => x.CreatedDate)
-                                                                          .FirstOrDefaultAsync(cancellationToken);
-            if (placementTestResultDone == null)
-            {
-                return null;
-            }
-            return placementTestResultDone.Level.GetCourseLevelByPlacementTestLevel();
         }
     }
 }
