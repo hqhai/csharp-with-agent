@@ -50,12 +50,13 @@ namespace Fsel.System.Application.Commands.TechieCmd
             var methodResult = new MethodResult<StudentTechieModel>();
 
 
-            var techieAction = _techieActionRepository.Queryable.Where(x => x.Action == request.Actions && x.Feature == request.TechieFeature).ToList();
+            var techieActions = _techieActionRepository.Queryable.Where(x => x.Action == request.Actions && x.Feature == request.TechieFeature).ToList();
 
 
-            var techieActionFilter = techieAction.FirstOrDefault(x => x.Config!.StartTime <= request!.Config!.StartTime && x.Config.EndTime >= request.Config.EndTime);
+            var techieActionFilter = techieActions.FirstOrDefault(x => x.Config!.StartTime <= request!.Config!.StartTime && x.Config.EndTime >= request.Config.EndTime);
+            var techieActionModel = _mapper.Map<TechieActionModel>(techieActionFilter);
 
-            if (techieAction == null || techieActionFilter == null)
+            if (techieActions == null || techieActionModel == null)
             {
                 return methodResult;
             }
@@ -65,15 +66,14 @@ namespace Fsel.System.Application.Commands.TechieCmd
 
             StudentTechie studentTechie = new StudentTechie
             {
-                Message = string.Format(CultureInfo.InvariantCulture, techieActionFilter!.TemplateMessage!, request?.Config?.Value ?? default),
+                Message = string.Format(CultureInfo.InvariantCulture, techieActionModel!.TemplateMessage!, request?.Config?.Value ?? default),
                 StudentId = (Guid)studentId!,
                 Config = request?.Config ?? default,
-                TechieActionId = techieActionFilter.Id,
-                TechieAction = techieActionFilter,
+                TechieActionId = techieActionModel.Id,
             };
 
             #region Validate
-            bool isExistsTechieGreeting = _studentTechieRepository.Queryable.Any(x => x.TechieActionId == techieActionFilter.Id && x.TechieAction!.Feature == request!.TechieFeature && x.TechieAction.Action == request.Actions && x.CreatedUserId == _authContext.CurrentUserId);
+            bool isExistsTechieGreeting = _studentTechieRepository.Queryable.Any(x => x.TechieActionId == techieActionModel.Id && x.TechieAction!.Feature == request!.TechieFeature && x.TechieAction.Action == request.Actions && x.CreatedUserId == _authContext.CurrentUserId);
 
             if (isExistsTechieGreeting && request!.TechieFeature == EnumTechieFeature.Greeting)
             {
@@ -91,9 +91,9 @@ namespace Fsel.System.Application.Commands.TechieCmd
                 {
                     Message = studentTechie.Message,
                     StudentId = studentTechie.StudentId,
-                    Feature = techieActionFilter.Feature,
-                    Action = techieActionFilter.Action,
-                    Priority = techieActionFilter.Priority,
+                    Feature = techieActionModel.Feature,
+                    Action = techieActionModel.Action,
+                    Priority = techieActionModel.Priority,
 
                 };
 
