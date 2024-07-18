@@ -4,8 +4,8 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumPaymentMethodStatus
     {
-        Card,
         BankTransfer,
+        Card,
         Payoo,
         AppStore,
         CHPlay
