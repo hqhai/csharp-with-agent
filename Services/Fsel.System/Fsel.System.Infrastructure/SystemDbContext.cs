@@ -79,6 +79,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<ChatbotSkillConfig> ChatbotSkillConfigs { get; set; }
         public DbSet<ChatbotTokenConfigs> ChatbotTokenConfigs { get; set; }
         public DbSet<ChatBot> ChatBots { get; set; }
+        public DbSet<UserConfig> UserConfigs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
