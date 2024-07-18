@@ -1,0 +1,66 @@
+[
+  {
+    "schoolCode": "A001",
+    "weekEvents": [
+      {
+        "title": "Cơ cấu giải thưởng",
+        "rules": [
+          {
+            "prizeQuantity": "Top 10 học sinh nhất bảng",
+            "detail": "Được nhận ngay 1 Cốc giữ nhiệt FSEL",
+            "rewardImage": "",
+            "rank": 1,
+            "rule": "Lưu ý:\nTrong trường hợp có nhiều thí sinh bằng điểm nhau thì thí sinh có chỉ số Active time onsite (Thời lượng có hoạt động trên nền tảng FSEL) cao hơn sẽ là thí sinh đạt được vị trí cao hơn.\nGiải thưởng hiện vật được tính theo giá trị quy đổi tương đương cho mỗi giải;\nGiải thưởng không được quy đổi bằng tiền mặt dưới mọi hình thức;\nTrong Học kỳ trải nghiệm, FSEL có quyền thay đổi luật, thời gian & cách tính điểm dưới mọi hình thức với bất cứ lý do nào. FSEL sẽ thông báo chính thức bằng văn bản tới Phụ huynh & Học sinh nắm thông tin về bất cứ sự thay đổi nào nếu có.\nĐiểm và Semester-X Champions không đồng nhất với điểm được hiển thị trên LMS."
+          }
+        ],
+        "weekNumber": 1,
+        "startDate": "2024-07-15T0:00:00Z",
+        "endDate": "2024-07-21T23:59:99Z"
+      },
+      {
+        "title": "Cơ cấu giải thưởng",
+        "rules": [
+          {
+            "prizeQuantity": "Top 10 học sinh nhất bảng",
+            "detail": "Được nhận ngay 1 Cốc giữ nhiệt FSEL",
+            "rewardImage": "",
+            "rank": 1,
+            "rule": "Lưu ý:\nTrong trường hợp có nhiều thí sinh bằng điểm nhau thì thí sinh có chỉ số Active time onsite (Thời lượng có hoạt động trên nền tảng FSEL) cao hơn sẽ là thí sinh đạt được vị trí cao hơn.\nGiải thưởng hiện vật được tính theo giá trị quy đổi tương đương cho mỗi giải;\nGiải thưởng không được quy đổi bằng tiền mặt dưới mọi hình thức;\nTrong Học kỳ trải nghiệm, FSEL có quyền thay đổi luật, thời gian & cách tính điểm dưới mọi hình thức với bất cứ lý do nào. FSEL sẽ thông báo chính thức bằng văn bản tới Phụ huynh & Học sinh nắm thông tin về bất cứ sự thay đổi nào nếu có.\nĐiểm và Semester-X Champions không đồng nhất với điểm được hiển thị trên LMS."
+          }
+        ],
+        "weekNumber": 2,
+        "startDate": "2024-07-22T:00:00Z",
+        "endDate": "2024-07-28T23:59:99Z"
+      },
+      {
+        "title": "Cơ cấu giải thưởng",
+        "rules": [
+          {
+            "prizeQuantity": "Giải nhất: 1 giải",
+            "detail": "Học bổng FSEL 01 năm & Bộ quà tặng Chuột & Tai nghe máy tính",
+            "rewardImage": "",
+            "rank": 1,
+            "rule": "Lưu ý:\nTrong trường hợp có nhiều thí sinh bằng điểm nhau thì thí sinh có chỉ số Active time onsite (Thời lượng có hoạt động trên nền tảng FSEL) cao hơn sẽ là thí sinh đạt được vị trí cao hơn.\nGiải thưởng hiện vật được tính theo giá trị quy đổi tương đương cho mỗi giải;\nGiải thưởng không được quy đổi bằng tiền mặt dưới mọi hình thức;\nTrong Học kỳ trải nghiệm, FSEL có quyền thay đổi luật, thời gian & cách tính điểm dưới mọi hình thức với bất cứ lý do nào. FSEL sẽ thông báo chính thức bằng văn bản tới Phụ huynh & Học sinh nắm thông tin về bất cứ sự thay đổi nào nếu có.\nĐiểm và Semester-X Champions không đồng nhất với điểm được hiển thị trên LMS."
+          },
+          {
+            "prizeQuantity": "Giải nhì: 2 giải",
+            "detail": "Học bổng FSEL 06 tháng & Bộ quà tặng Tai nghe máy tính.",
+            "rewardImage": "",
+            "rank": 2,
+            "rule": "Lưu ý:\nTrong trường hợp có nhiều thí sinh bằng điểm nhau thì thí sinh có chỉ số Active time onsite (Thời lượng có hoạt động trên nền tảng FSEL) cao hơn sẽ là thí sinh đạt được vị trí cao hơn.\nGiải thưởng hiện vật được tính theo giá trị quy đổi tương đương cho mỗi giải;\nGiải thưởng không được quy đổi bằng tiền mặt dưới mọi hình thức;\nTrong Học kỳ trải nghiệm, FSEL có quyền thay đổi luật, thời gian & cách tính điểm dưới mọi hình thức với bất cứ lý do nào. FSEL sẽ thông báo chính thức bằng văn bản tới Phụ huynh & Học sinh nắm thông tin về bất cứ sự thay đổi nào nếu có.\nĐiểm và Semester-X Champions không đồng nhất với điểm được hiển thị trên LMS."
+          },
+          {
+            "prizeQuantity": "Giải ba: 3 giải",
+            "detail": "Học bổng FSEL 03 tháng & Bộ quà tặng Tai nghe máy tính.",
+            "rewardImage": "",
+            "rank": 3,
+            "rule": "Lưu ý:\nTrong trường hợp có nhiều thí sinh bằng điểm nhau thì thí sinh có chỉ số Active time onsite (Thời lượng có hoạt động trên nền tảng FSEL) cao hơn sẽ là thí sinh đạt được vị trí cao hơn.\nGiải thưởng hiện vật được tính theo giá trị quy đổi tương đương cho mỗi giải;\nGiải thưởng không được quy đổi bằng tiền mặt dưới mọi hình thức;\nTrong Học kỳ trải nghiệm, FSEL có quyền thay đổi luật, thời gian & cách tính điểm dưới mọi hình thức với bất cứ lý do nào. FSEL sẽ thông báo chính thức bằng văn bản tới Phụ huynh & Học sinh nắm thông tin về bất cứ sự thay đổi nào nếu có.\nĐiểm và Semester-X Champions không đồng nhất với điểm được hiển thị trên LMS."
+          }
+        ],
+        "weekNumber": 3,
+        "startDate": "2024-07-29T0:00:00Z",
+        "endDate": "2024-08-04T23:59:99Z"
+      }
+    ]
+  }
+]
