@@ -26,6 +26,7 @@ builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<UserDbContext>();
 
 builder.AddIdentity<User, Role, UserDbContext>();
+builder.AddAuthenticationIdentity();
 
 //Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
