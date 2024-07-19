@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -76,6 +77,11 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             }
             var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId);
             methodResult.Result = await _sectionGroupConverter.GetSectionGroupDto(sectionGroup, sectionGroupResult);
+
+            if (sectionGroupResult.Status == EnumResultStatus.Done)
+            {
+                _logger.LogInformation($"Logger PT Done : {methodResult.Result.Serialize()}");
+            }
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
