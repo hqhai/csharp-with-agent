@@ -1,5 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Common.Helpers;
+
 namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
 {
     using System;
@@ -22,6 +24,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class GetPlacementTestByLevelQuery : IRequest<MethodResult<PlacementTestDtoModel>>
     {
@@ -34,6 +37,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly ILogger<object> _logger;
         private readonly IPlacementTestRepository _placementTestRepository;
 
         public GetPlacementTestByLevelQueryHandler(AuthContext authContext
@@ -41,6 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             , IPlacementTestResultRepository placementTestResultRepository
             , IUserService userService
             , IMapper mapper
+            , ILogger<object> logger
             , IPlacementTestRepository placementTestRepository)
         {
             _authContext = authContext;
@@ -48,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             _placementTestResultRepository = placementTestResultRepository;
             _userService = userService;
             _mapper = mapper;
+            _logger = logger;
             _placementTestRepository = placementTestRepository;
         }
 
@@ -84,8 +90,13 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
+
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = await GetPlacmentTestAsync(placementTest, placementTestResult);
+            if (placementTestResult.Status == EnumResultStatus.Done)
+            {
+                _logger.LogInformation($"Logger PT Done : {methodResult.Result.Serialize()}");
+            }
             return methodResult;
         }
 
