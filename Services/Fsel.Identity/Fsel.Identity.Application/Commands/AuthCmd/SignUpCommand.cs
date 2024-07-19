@@ -119,7 +119,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             {
                                 _mapper.Map(request, user);
 
-                                var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password ?? string.Empty);
+                                var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password);
                                 if (!validPassword.Succeeded)
                                 {
                                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIsNotValid));
@@ -173,7 +173,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     };
 
                                 #endregion add user setting
-                                var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password ?? string.Empty);
+                                var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password);
                                 if (!validPassword.Succeeded)
                                 {
                                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIsNotValid));
