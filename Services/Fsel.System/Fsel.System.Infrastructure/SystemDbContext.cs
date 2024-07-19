@@ -91,6 +91,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<Techie> Techie { get; set; }
         public DbSet<TechieAction> TechieActions { get; set; }
         public DbSet<StudentTechie> StudentTechies { get; set; }
+        public DbSet<UserConfig> UserConfigs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
