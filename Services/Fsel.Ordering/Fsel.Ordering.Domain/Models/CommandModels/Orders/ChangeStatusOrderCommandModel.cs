@@ -9,6 +9,7 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders
     {
         public Guid OrderId { get; set; }
         public EnumOrderStatus OrderStatus { get; set; }
+        public EnumPaymentRevenueType? RevenueType { get; set; }
         public EnumOrderTransactionType? Type { get; set; }
         public string? Receipt { get; set; }
     }
