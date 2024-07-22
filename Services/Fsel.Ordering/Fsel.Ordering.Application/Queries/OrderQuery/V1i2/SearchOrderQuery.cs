@@ -6,13 +6,13 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
-    using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Domain.IRepositories;
-    using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Ordering.Domain.Models.EntityModels.V1i2;
     using Fsel.Ordering.Domain.Models.QueryModels.Oders.V1i2;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -24,12 +24,12 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
     public class SearchOrderQueryHandler : IRequestHandler<SearchOrderQuery, MethodResult<PagingItemsModel<SearchOrderModel>>>
     {
         private readonly IOrderRepository _orderRepository;
-        private readonly ILmsCourseService _lmsCourseService;
+        private readonly AuthContext _authContext;
 
-        public SearchOrderQueryHandler(IOrderRepository orderRepository, ILmsCourseService lmsCourseService)
+        public SearchOrderQueryHandler(IOrderRepository orderRepository, AuthContext authContext)
         {
             _orderRepository = orderRepository;
-            _lmsCourseService = lmsCourseService;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<PagingItemsModel<SearchOrderModel>>> Handle(SearchOrderQuery request, CancellationToken cancellationToken)
@@ -52,11 +52,17 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 PackageId = x.PackageId,
                 MonthNumber = x.Package == null ? null : x.Package.MonthNumber,
                 RevenueType = x.RevenueType,
+                TotalPrice = x.TotalPrice,
             });
 
             if (request.Status.HasValue)
             {
                 query = query.Where(p => p.Status == request.Status);
+            }
+
+            if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
+            {
+                query = query.Where(p => p.UserId == _authContext.CurrentUserId);
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -87,6 +93,11 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
             else if (request.EndDate.HasValue)
             {
                 query = query.Where(p => p.CreatedDate.HasValue && request.EndDate.Value.Date >= p.CreatedDate.Value.Date);
+            }
+
+            if (request.RevenueType.HasValue)
+            {
+                query = query.Where(p => p.RevenueType == request.RevenueType);
             }
 
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
