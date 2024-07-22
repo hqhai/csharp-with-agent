@@ -13,5 +13,6 @@ namespace Fsel.Ordering.Domain.Models.QueryModels.Oders.V1i2
         public IList<Guid>? PackageIds { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public EnumPaymentRevenueType? RevenueType { get; set; }
     }
 }
