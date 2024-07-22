@@ -111,7 +111,11 @@ namespace Fsel.Course.Lms.Application.Queries.SectionGroupResultQuery
 
         private static BandScores? GetBandScore(IList<BandScores>? bandScores, double scores)
         {
-            return bandScores?.FirstOrDefault(x => x.Scores < scores);
+            if (scores > 0)
+            {
+                return bandScores?.FirstOrDefault(x => x.Scores < scores);
+            }
+            return bandScores?.FirstOrDefault(x => x.Scores == scores);
         }
     }
 }
