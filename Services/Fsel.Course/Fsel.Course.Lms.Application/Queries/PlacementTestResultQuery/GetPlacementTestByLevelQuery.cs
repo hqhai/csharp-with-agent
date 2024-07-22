@@ -27,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class GetPlacementTestByLevelQuery : IRequest<MethodResult<PlacementTestDtoModel>>
     {
@@ -39,6 +40,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly ILogger<GetPlacementTestByLevelQuery> _logger;
         private readonly IInteractionService _interactionService;
         private readonly IPlacementTestRepository _placementTestRepository;
 
@@ -47,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             , IPlacementTestResultRepository placementTestResultRepository
             , IUserService userService
             , IMapper mapper
+            , ILogger<GetPlacementTestByLevelQuery> logger
             , IInteractionService interactionService
             , IPlacementTestRepository placementTestRepository)
         {
@@ -55,6 +58,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             _placementTestResultRepository = placementTestResultRepository;
             _userService = userService;
             _mapper = mapper;
+            _logger = logger;
             _interactionService = interactionService;
             _placementTestRepository = placementTestRepository;
         }
@@ -178,7 +182,15 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 {
                     placementTestResult = new PlacementTestResult { Level = placementTest.Level, PlacementTestId = placementTest.Id, StudentId = studentId };
                     _placementTestResultRepository.Add(placementTestResult);
-                    await _placementTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                    try
+                    {
+                        await _placementTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"Log Duplicate PlacementTestResult : {ex.Message}");
+                    }
                 }
             }
             else
