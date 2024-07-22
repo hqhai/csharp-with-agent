@@ -62,6 +62,11 @@ namespace Fsel.Ordering.Domain.Entities
         ///</summary>
         public EnumPaymentMethodStatus? PaymentMethod { get; set; }
 
+        ///<summary>
+        /// Loại thanh toán
+        ///</summary>
+        public EnumPaymentRevenueType? RevenueType { get; set; }
+
         /// <summary>
         /// Giá Khóa Học
         /// </summary>

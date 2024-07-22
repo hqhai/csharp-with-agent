@@ -142,6 +142,8 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                 }
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
+                    order.RevenueType = request.RevenueType;
+
                     allowOpenNextUnit = true;
 
                     var packageEvent = await _packageEventRepository.Queryable.FirstOrDefaultAsync(p => p.PackageId == package.Id && p.EventId == order.EventId, cancellationToken);
@@ -193,7 +195,7 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                 {
                     Status = request.OrderStatus == EnumOrderStatus.Payment ? EnumOrderTransactionStatus.Success : EnumOrderTransactionStatus.Fail,
                     ResponseBody = request.Receipt,
-                    Type = request.Type == EnumOrderTransactionType.AppStore ? EnumOrderTransactionType.AppStore : (request.Type == EnumOrderTransactionType.GooglePlay ? EnumOrderTransactionType.GooglePlay : EnumOrderTransactionType.BankTransfer)
+                    Type = request.Type ?? EnumOrderTransactionType.BankTransfer
                 });
 
                 order.Status = request.OrderStatus;

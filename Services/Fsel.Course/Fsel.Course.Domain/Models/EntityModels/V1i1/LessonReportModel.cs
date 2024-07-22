@@ -11,5 +11,6 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
         public double Percent { get; set; }
         public double AnswerTime { get; set; }
         public int? HighestStreak { get; set; }
+        public int? TimeCodeHighestStreak { get; set; }
     }
 }
