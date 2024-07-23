@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -32,9 +33,9 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly ISectionGroupRepository _sectionGroupRepository;
-        private readonly ILogger<object> _logger;
+        private readonly ILogger<GetSectionBySectionGroupIdQuery> _logger;
 
-        public GetSectionBySectionGroupIdQueryHandler(IPlacementTestResultRepository placementTestResultRepository, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, AuthContext authContext, IUserService userService, ISectionGroupRepository sectionGroupRepository, ILogger<object> logger)
+        public GetSectionBySectionGroupIdQueryHandler(IPlacementTestResultRepository placementTestResultRepository, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, AuthContext authContext, IUserService userService, ISectionGroupRepository sectionGroupRepository, ILogger<GetSectionBySectionGroupIdQuery> logger)
         {
             _placementTestResultRepository = placementTestResultRepository;
             _sectionGroupConverter = sectionGroupConverter;
@@ -76,6 +77,11 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             }
             var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId);
             methodResult.Result = await _sectionGroupConverter.GetSectionGroupDto(sectionGroup, sectionGroupResult);
+
+            if (sectionGroupResult.Status == EnumResultStatus.Done)
+            {
+                _logger.LogInformation($"Logger PT Done : {methodResult.Result.Serialize()}");
+            }
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
