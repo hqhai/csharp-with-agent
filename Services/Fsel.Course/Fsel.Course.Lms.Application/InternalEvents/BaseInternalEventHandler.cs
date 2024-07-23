@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.InternalEvents
 {
+    using System.Drawing;
     using System.Globalization;
     using System.Linq;
     using System.Threading;
@@ -13,12 +14,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
-    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
@@ -27,6 +28,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Nest;
+    using DateTimeHelper = Shared.Helpers.DateTimeHelper;
 
     public class BaseInternalEventHandler
     {
@@ -45,6 +48,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         protected readonly AppSetting _appSetting;
         protected readonly ISystemService _systemService;
         protected readonly IOrderService _orderService;
+        private readonly ILessonNoteRepository _lessonNoteRepository;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private const int TotalScoreClassForum = 36;
         private const int PercentClassForumAcademic = 20;
@@ -73,7 +77,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             IHomeWorkResultRepository homeWorkResultRepository,
             QuestBoardPublisher questBoardPublisher,
             IOrderService orderService
-            )
+, ILessonNoteRepository lessonNoteRepository)
         {
             _videoResultRepository = videoResultRepository;
             _classForumResultRepository = classForumResultRepository;
@@ -91,6 +95,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _systemService = systemService;
             _questBoardPublisher = questBoardPublisher;
             _orderService = orderService;
+            _lessonNoteRepository = lessonNoteRepository;
         }
 
         private async Task<(List<SkillScores>, double)> GetCourseResult(IList<Guid> unitIds, Guid studentId, EnumCourseType type, Guid? finalTestId)
@@ -470,7 +475,19 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var studentResult = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { studentId });
             var student = studentResult.Content?.Result?.FirstOrDefault();
 
-            var course = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests).FirstOrDefaultAsync(p => p.Id == courseId, cancellationToken);
+            if (student == null || student.Human == null)
+            {
+                return;
+            }
+
+            var course = await _courseRepository.Queryable
+                .Include(p => p.CourseUnitMockTests).ThenInclude(p => p.Unit).ThenInclude(p => p.UnitLessons).ThenInclude(p => p.Lesson)
+                .FirstOrDefaultAsync(p => p.Id == courseId, cancellationToken);
+
+            if (course == null)
+            {
+                return;
+            }
 
             var featureAccessTimeResults = await _systemService.GetListFeatureAccessTime(new BaseQueryModel()
             {
@@ -479,7 +496,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     {
                         Property = "CreatedUserId",
                         Operator = EnumFilterOperator.Equal,
-                        Value = student?.Human?.UserId
+                        Value = student.Human.UserId
                     },
                     new GenericFilterModel()
                     {
@@ -489,25 +506,240 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     }
                 }
             });
+
             var featureAccessTimes = featureAccessTimeResults.Content?.Result;
 
             CultureInfo cultureInfo = CultureInfo.InvariantCulture;
 
+            var units = course.CourseUnitMockTests.Where(p => p.UnitId.HasValue).OrderBy(p => p.DisplayOrder).ToList();
+
+            var skillHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.CourseSkill, cancellationToken);
+            var unitsNumberHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.UnitNumber, cancellationToken);
+            var unitsChartHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Chart, cancellationToken);
+
+            string skillScore = string.Empty;
+            string unitsNumber = string.Empty;
+            string unitsChart = string.Empty;
+
+            if (courseResult.SkillScores != null)
+            {
+                foreach (var item in courseResult.SkillScores)
+                {
+                    var (color, skillName, icon) = SendMailHelper.ConvertEnum(item.Skill);
+
+                    var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, color, item.Percent, item.Percent);
+
+                    skillScore += html;
+                }
+            }
+
+            var unitsAccessTime = new List<UnitAccessTime>();
+
+            for (var i = 0; i < units.Count; i++)
+            {
+                unitsAccessTime.Add(new UnitAccessTime()
+                {
+                    Unit = units[0].Unit,
+                    Time = featureAccessTimes?.Where(p => p.UnitId == units[0].UnitId).Sum(p => p.AccessTime) ?? 0,
+                    DisplayOrder = i + 1,
+                });
+            }
+
+            long maxValue = unitsAccessTime.Max(p => p.Time);
+
+            // Tạo một mảng chứa 5 mốc
+            long[] milestones = new long[3];
+
+            // Tính các mốc và lưu vào mảng
+            for (int i = 1; i < 4; i++)
+            {
+                milestones[i] = (maxValue * i) / 4;
+            }
+
+            foreach (var item in unitsAccessTime)
+            {
+                var unitNumber = string.Format(CultureInfo.InvariantCulture, unitsNumber, item.DisplayOrder);
+                var percentChart = (int)((item.Time / maxValue) * 100);
+                var unitChart = string.Format(CultureInfo.InvariantCulture, unitsChart, percentChart);
+                unitsNumber += unitNumber;
+                unitsChart += unitChart;
+            }
+
+            var average = NumberHelper.CalculateAverage(unitsAccessTime.Select(p => p.Time).ToList());
+
+            var totalLearn = featureAccessTimes?.Where(p => p.EnumFeature != EnumFeature.ClassForum && p.EnumFeature != EnumFeature.Other && p.EnumFeature != EnumFeature.DiscussionBoard).Sum(p => p.AccessTime) ?? 0;
+
+            var totalClassForum = featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.ClassForum || p.EnumFeature == EnumFeature.DiscussionBoard).Sum(p => p.AccessTime) ?? 0;
+
+            var totalOther = featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.Other).Sum(p => p.AccessTime) ?? 0;
+
+            var studentDailyStreakResults = await _userService.StudentDailyStreakExecuteQuery(new BaseQueryModel()
+            {
+                Filters = new List<GenericFilterModel>() {
+                    new GenericFilterModel()
+                    {
+                        Property = "StudentId",
+                        Operator = EnumFilterOperator.Equal,
+                        Value = student.Id
+                    }
+                }
+            });
+
+            var studentDailyStreaks = studentDailyStreakResults.Content?.Result;
+
+            var totalLesson = course.CourseUnitMockTests.Select(p => p.Unit).SelectMany(p => p.UnitLessons).Count();
+
+            var totalNote = await _lessonNoteRepository.Queryable.Include(p => p.LessonResult).Where(p => p.LessonResult != null && p.LessonResult.CourseId == course.Id && p.CreatedUserId == student.Human.UserId).CountAsync(cancellationToken);
+
+            var totalPlanet = course.CourseUnitMockTests.Count;
+
+            var conquer = string.Empty;
+            var discover = string.Empty;
+            var display = string.Empty;
+            var @continue = string.Empty;
+            var mockTestMidCourseScore = string.Empty;
+            var mockTestEndCourseScore = string.Empty;
+            var mockTestSkills = string.Empty;
+            var level = string.Empty;
+            var bandScore = string.Empty;
+            var review = string.Empty;
+
+            if (course.CourseType == EnumCourseType.Academic)
+            {
+                if (course.CourseLevel == EnumCourseLevel.C1)
+                {
+                    conquer = SendMailSetting.ConquerC1;
+                    discover = SendMailSetting.DiscoverC1;
+                }
+                else
+                {
+                    conquer = string.Format(CultureInfo.InvariantCulture, SendMailSetting.Conquer, course.CourseUnitMockTests.Count, course.CourseLevel.GetDescription());
+                    discover = SendMailSetting.Discover;
+                    display = SendMailSetting.Display;
+                }
+            }
+            else
+            {
+                if (course.CourseLevel == EnumCourseLevel.MS3)
+                {
+                    conquer = SendMailSetting.ConquerIELTS;
+                    discover = SendMailSetting.DiscoverIELTS;
+                    @continue = "Ôn tập lại";
+                }
+                else
+                {
+                    conquer = string.Format(CultureInfo.InvariantCulture, SendMailSetting.Conquer, course.CourseUnitMockTests.Count, course.CourseLevel.GetDescription());
+                    discover = SendMailSetting.Discover;
+                    @continue = "Tiếp tục học";
+                }
+
+                var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.IELTDescription);
+                var iELTDescriptions = ConvertHelper.DeserializeFromFilePath<IList<IELTDescription>>(path);
+
+                var mockTestHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.MockTestSkill, cancellationToken);
+
+                var mockTestResults = await _mockTestResultRepository.Queryable.Where(p => p.StudentId == studentId && p.CourseId == course.Id).OrderBy(p => p.CreatedDate).ToListAsync(cancellationToken);
+
+                if (mockTestResults == null || mockTestResults.Count != 2)
+                {
+                    return;
+                }
+
+                var mockTestMidCourse = mockTestResults.First();
+                var mockTestEndCourse = mockTestResults.Last();
+
+                double averageScoreMid = default;
+                double averageScoreEnd = default;
+
+                var courseSkills = new List<EnumCourseSkill>();
+
+                if (mockTestMidCourse.SkillScores != null)
+                {
+                    averageScoreMid = mockTestMidCourse.SkillScores.Select(p => p.Scores).Average();
+                    mockTestMidCourseScore = NumberHelper.RoundNumberDouble(averageScoreMid).ToString(cultureInfo);
+                    mockTestMidCourse.SkillScores.ForEach(p => courseSkills.Add(p.Skill));
+                }
+
+                if (mockTestEndCourse.SkillScores != null)
+                {
+                    averageScoreEnd = mockTestEndCourse.SkillScores.Select(p => p.Scores).Average();
+                    mockTestEndCourseScore = NumberHelper.RoundNumberDouble(averageScoreEnd).ToString(cultureInfo);
+                    mockTestEndCourse.SkillScores.ForEach(p => courseSkills.Add(p.Skill));
+                }
+
+                courseSkills = courseSkills.Distinct().OrderBy(p => p).ToList();
+
+                foreach (var item in courseSkills)
+                {
+                    var (color, skillName, icon) = SendMailHelper.ConvertEnum(item);
+                    var scoreMid = mockTestMidCourse.SkillScores?.FirstOrDefault(p => p.Skill == item)?.Scores;
+                    var scoreEnd = mockTestEndCourse.SkillScores?.FirstOrDefault(p => p.Skill == item)?.Scores;
+                    var mockTestSkill = string.Format(CultureInfo.InvariantCulture, mockTestHtml, icon, scoreMid, scoreEnd);
+                    mockTestSkills += mockTestSkill;
+                }
+
+                var maxAverageScore = averageScoreMid >= averageScoreEnd ? averageScoreMid : averageScoreEnd;
+                maxAverageScore = NumberHelper.RoundNumberDouble(maxAverageScore);
+                var iELTDescription = iELTDescriptions?.FirstOrDefault(p => p.Band == (int)maxAverageScore);
+                if (iELTDescription == null)
+                {
+                    return;
+                }
+                level = iELTDescription.Level;
+                bandScore = maxAverageScore.ToString(cultureInfo);
+                review = iELTDescription.Description ?? string.Empty;
+            }
+
             var sendStudentCompleteCourseModel = new SendStudentCompleteCourseModel
             {
-                CourseLevel = course?.CourseLevel.GetDescription(),
+                CourseLevel = course.CourseLevel.GetDescription(),
                 Percent = courseResult.Percent.ToString(cultureInfo),
                 StartDate = courseResult.CreatedDate.ToString("dd-MM-yyyy", cultureInfo),
                 EndDate = DateTime.UtcNow.ToString("dd-MM-yyyy", cultureInfo),
+                UnitStart = units.First().Unit?.Name,
+                UnitEnd = units.Last().Unit?.Name,
+                SkillScore = skillScore,
+                HourColumnChart1 = DateTimeHelper.ConvertSecondsToHours(milestones[0]) + "h",
+                HourColumnChart2 = DateTimeHelper.ConvertSecondsToHours(milestones[1]) + "h",
+                HourColumnChart3 = DateTimeHelper.ConvertSecondsToHours(milestones[2]) + "h",
+                HourColumnChart4 = DateTimeHelper.ConvertSecondsToHoursRoundUp(maxValue) + "h",
+                Charts = unitsChart,
+                UnitNumber = unitsNumber,
+                TotalStudyTime = DateTimeHelper.ConvertSecondsToHoursAndMinutes(unitsAccessTime.Sum(p => p.Time)).ToString(cultureInfo),
+                AverageTimeCompleteUnit = DateTimeHelper.ConvertSecondsToHoursAndMinutes(average).ToString(cultureInfo),
+                TotalLearn = DateTimeHelper.ConvertSecondsToTimeString(totalLearn),
+                TotalClassForum = DateTimeHelper.ConvertSecondsToTimeString(totalClassForum),
+                TotalOther = DateTimeHelper.ConvertSecondsToTimeString(totalOther),
+                TotalLesson = totalLesson.ToString(cultureInfo),
+                TotalLogin = studentDailyStreaks?.Count.ToString(cultureInfo),
+                TotalNote = totalNote.ToString(cultureInfo),
+                FullName = student.Human.FullName,
+                Review1 = conquer,
+                Review2 = discover,
+                Display = display,
+                Continue = @continue,
+                MockTestMidCourse = mockTestMidCourseScore,
+                MockTestEndCourse = mockTestEndCourseScore,
+                MockTestSkills = mockTestSkills,
+                Level = level,
+                BandScore = bandScore,
+                Review = review,
             };
 
             var sendResult = await _mediator.Send(new SenderCommand
             {
-                Email = student?.Human?.Email,
-                Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendStudentCompleteCourse, course?.Name, student?.Human?.FullName),
+                Email = "nguyenhuukhoa5462@gmail.com",
+                Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendStudentCompleteCourse, course.Name, student.Human.FullName),
                 Params = sendStudentCompleteCourseModel,
-                Template = course?.CourseType == EnumCourseType.Academic ? EnumSenderTemplate.SendStudentCompleteCourseAcademic : EnumSenderTemplate.SendStudentCompleteCourseIetls
+                Template = course.CourseType == EnumCourseType.Academic ? EnumSenderTemplate.SendStudentCompleteCourseAcademic : EnumSenderTemplate.SendStudentCompleteCourseIetls
             }, cancellationToken).ConfigureAwait(false);
+        }
+
+        private class UnitAccessTime
+        {
+            public Domain.Entities.Unit? Unit { get; set; }
+            public long Time { get; set; }
+            public int DisplayOrder { get; set; }
         }
 
         private async Task UpdateStudentTrialRegistration(EnumTrialRegistrationStatus status, Guid userId)

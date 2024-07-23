@@ -90,5 +90,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Post("/v1/student/get-by-user-ids")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetUserByIds([FromBody] IList<Guid>? userIds);
+
+        [Get("/v1/student-daily-streak/execute-list-query")]
+        Task<IApiResponse<MethodResult<IList<StudentConsecutiveDayModel>>>> StudentDailyStreakExecuteQuery([Query] BaseQueryModel baseQuery);
     }
 }
