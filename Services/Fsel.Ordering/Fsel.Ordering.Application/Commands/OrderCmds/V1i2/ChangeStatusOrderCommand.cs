@@ -58,8 +58,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 var result = await _mediator.Send(new OrderCmds.ChangeStatusOrderCommand()
                 {
                     OrderId = item.Id,
-                    OrderStatus = item.Status,
-                    RevenueType = item.RevenueType,
+                    OrderStatus = request.Status,
+                    RevenueType = request.RevenueType,
                     Receipt = request.Serialize()
                 }, cancellationToken);
                 if (!result.IsOK)
