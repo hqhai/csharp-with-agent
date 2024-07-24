@@ -26,14 +26,16 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     public class GetStudentProgressUnitsQueryHandler : IRequestHandler<GetStudentProgressUnitsQuery, MethodResult<IList<UnitStudentProgressModel>>>
     {
         private readonly ICourseRepository _courseRepository;
+        private readonly IUnitRepository _unitRepository;
         private readonly ManagerProgressHelper _managerProgressHelper;
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
-        public GetStudentProgressUnitsQueryHandler(ICourseRepository courseRepository, ManagerProgressHelper managerProgressHelper, IUserService userService, ISystemService systemService, ICourseUnitMockTestRepository courseUnitMockTestRepository)
+        public GetStudentProgressUnitsQueryHandler(ICourseRepository courseRepository, IUnitRepository unitRepository, ManagerProgressHelper managerProgressHelper, IUserService userService, ISystemService systemService, ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _courseRepository = courseRepository;
+            _unitRepository = unitRepository;
             _managerProgressHelper = managerProgressHelper;
             _userService = userService;
             _systemService = systemService;
@@ -58,22 +60,16 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
             var userId = student.Human?.UserId ?? default;
-            var course = await _courseRepository.GetByIdAsync(request.CourseId);
+            var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).FirstOrDefaultAsync(x => x.Id == request.CourseId, cancellationToken);
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            var courseUnitMockTests = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == request.CourseId).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken);
-            if (courseUnitMockTests == null || !courseUnitMockTests.Any())
-            {
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
-
+            var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ToList();
             var featureAccessTimeTest = new List<FeatureAccessTimeModel>();
             var unitIds = courseUnitMockTests.Where(x => x.UnitId.HasValue).Select(x => x.UnitId!.Value).ToList();
-            var unitResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
+            var featureAccessTimes = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
             {
                 UserId = userId,
                 FeatureAccessTimes = unitIds.Select(x => new FeatureAccessTimeQueryModel
@@ -83,14 +79,22 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     CourseId = course.Id
                 }).ToList(),
             });
-            var featureAccessTimeUnit = unitResults?.Content?.Result;
+            var featureAccessTimeUnit = featureAccessTimes?.Content?.Result;
+
+            var units = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.CourseId == course.Id && x.StudentId == student.Id))
+                                                       .Where(x => unitIds.Contains(x.Id)).ToListAsync(cancellationToken);
             foreach (var courseUnit in courseUnitMockTests)
             {
                 if (!courseUnit.UnitId.HasValue)
                 {
                     continue;
                 }
-                var unitProgress = await _managerProgressHelper.GetUnitManager(courseUnit.CourseId, courseUnit.UnitId.Value, request.StudentId);
+                var unit = units.FirstOrDefault(x => x.Id == courseUnit.UnitId.Value);
+                if (unit == null)
+                {
+                    continue;
+                }
+                var unitProgress = await _managerProgressHelper.GetUnitManager(unit.UnitResults.FirstOrDefault(), courseUnit.UnitId.Value, course.Id);
                 if (unitProgress == null)
                 {
                     continue;

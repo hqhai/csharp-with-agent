@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.StudentProgress;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -22,14 +23,17 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     {
         private readonly ICourseRepository _courseRepository;
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly ManagerProgressHelper _managerProgressHelper;
         private readonly IUserService _userService;
 
         public SearchStudentProgressQueryHandler(ICourseRepository courseRepository,
             ICourseResultRepository courseResultRepository,
+            ManagerProgressHelper managerProgressHelper,
             IUserService userService)
         {
             _courseRepository = courseRepository;
             _courseResultRepository = courseResultRepository;
+            _managerProgressHelper = managerProgressHelper;
             _userService = userService;
         }
 
@@ -97,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 var courseResult = courseResults.FirstOrDefault(x => x.CourseId == item.CourseId && x.StudentId == item.StudentId);
                 if (courseResult != null)
                 {
-                    var (currentProgress, progress) = await _courseRepository.GetContentComplete(courseResult);
+                    var (currentProgress, progress) = await _managerProgressHelper.GetContentComplete(courseResult);
                     var (displayOrderUnit, displayOrderLesson) = await _courseRepository.GetDisplayOrder(courseResult);
                     item.DisplayOrderLesson = displayOrderLesson;
                     item.DisplayOrderUnit = displayOrderUnit;

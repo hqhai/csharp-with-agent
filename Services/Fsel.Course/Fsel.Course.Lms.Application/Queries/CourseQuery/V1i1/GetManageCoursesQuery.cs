@@ -32,6 +32,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
     public class GetManageCoursesQueryHandler : IRequestHandler<GetManageCoursesQuery, MethodResult<IList<CourseManagerModel>>>
     {
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly ManagerProgressHelper _managerProgressHelper;
         private readonly ChangeCourseHelper _changeCourseHelper;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
@@ -47,9 +48,10 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
         private readonly ISystemService _systemService;
         private const int MaxPercentOverall = 67;
 
-        public GetManageCoursesQueryHandler(ICourseResultRepository courseResultRepository, ChangeCourseHelper changeCourseHelper, ICourseUnitMockTestRepository courseUnitMockTestRepository, ISectionGroupRepository sectionGroupRepository, IUnitRepository unitRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository, IMockTestResultRepository mockTestResultRepository, IFinalTestResultRepository finalTestResultRepository, ICourseRepository courseRepository, AuthContext authContext, IMapper mapper, IUserService userService, ISystemService systemService)
+        public GetManageCoursesQueryHandler(ICourseResultRepository courseResultRepository, ManagerProgressHelper managerProgressHelper, ChangeCourseHelper changeCourseHelper, ICourseUnitMockTestRepository courseUnitMockTestRepository, ISectionGroupRepository sectionGroupRepository, IUnitRepository unitRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository, IMockTestResultRepository mockTestResultRepository, IFinalTestResultRepository finalTestResultRepository, ICourseRepository courseRepository, AuthContext authContext, IMapper mapper, IUserService userService, ISystemService systemService)
         {
             _courseResultRepository = courseResultRepository;
+            _managerProgressHelper = managerProgressHelper;
             _changeCourseHelper = changeCourseHelper;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
             _sectionGroupRepository = sectionGroupRepository;
@@ -132,8 +134,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                     CourseId = courseResult.CourseId,
                     StudentId = courseResult.StudentId
                 };
-                var (currentProgress, progress) = await _courseRepository.GetContentComplete(courseResultModel);
-
+                var (currentProgress, progress) = await _managerProgressHelper.GetContentComplete(courseResultModel);
                 var courseManager = new CourseManagerModel
                 {
                     CourseResultId = courseResult.Id,

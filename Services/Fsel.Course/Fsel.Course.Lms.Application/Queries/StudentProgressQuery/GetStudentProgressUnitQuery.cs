@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetStudentProgressUnitQuery : IRequest<MethodResult<UnitStudentProgressModel>>
     {
@@ -61,13 +62,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var unit = await _unitRepository.GetByIdAsync(request.UnitId);
+            var unit = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.CourseId == course.Id && x.StudentId == student.Id)).FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
             if (unit == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var unitProgress = await _managerProgressHelper.GetUnitManager(course.Id, unit.Id, student.Id);
+            var unitProgress = await _managerProgressHelper.GetUnitManager(unit.UnitResults.FirstOrDefault(), unit.Id, course.Id);
             if (unitProgress == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
