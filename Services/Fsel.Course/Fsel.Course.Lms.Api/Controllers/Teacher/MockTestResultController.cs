@@ -11,12 +11,11 @@ namespace Fsel.Course.Lms.Api.Controllers.Teacher
     using Fsel.Course.Lms.Application.Queries.MockTestResultQuery;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Asp.Versioning;
     using Fsel.Shared.Constants;
     using Microsoft.AspNetCore.Mvc;
+    using Fsel.Shared.Attributes;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/teacher/mock-test-result")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Teacher))]
