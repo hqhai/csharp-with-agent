@@ -32,6 +32,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get Home Work
         /// </summary>
         [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<HomeWorkModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]

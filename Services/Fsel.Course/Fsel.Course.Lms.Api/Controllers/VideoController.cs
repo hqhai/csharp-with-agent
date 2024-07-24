@@ -55,10 +55,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get Video Time Code Detail
         /// </summary>
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [HttpGet("time-code-detail")]
         [ProducesResponseType(typeof(MethodResult<VideoTimeCodeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [MapToApiVersion(ApiSettings.APIVersion1)]
         public async Task<IActionResult> GetTimeCodeDetail([FromQuery] GetTimeCodeDetailQuery query)
         {
             MethodResult<VideoTimeCodeModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
