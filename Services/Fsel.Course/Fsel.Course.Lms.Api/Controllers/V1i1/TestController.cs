@@ -4,16 +4,14 @@ using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Core.Base.Interfaces;
-using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
 using Fsel.Shared.Constants;
-using Fsel.Shared.Models.ShareModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Asp.Versioning;
+using Fsel.Shared.Attributes;
 
 namespace Fsel.Course.Lms.Api.Controllers.V1i1
 {
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/test")]
     [ApiController]
     public class TestController : ControllerBase
