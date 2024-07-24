@@ -731,7 +731,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             var sendResult = await _mediator.Send(new SenderCommand
             {
-                Email = "nguyenhuukhoa5462@gmail.com",
+                Email = student.Human.Email,
                 Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendStudentCompleteCourse, course.Name, student.Human.FullName),
                 Params = sendStudentCompleteCourseModel,
                 Template = course.CourseType == EnumCourseType.Academic ? EnumSenderTemplate.SendStudentCompleteCourseAcademic : EnumSenderTemplate.SendStudentCompleteCourseIetls
