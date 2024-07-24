@@ -79,6 +79,8 @@ namespace Fsel.Shared.Constants
         public const string MS1Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/MS1Photo_1713325276.png";
         public const string MS2Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/MS2Photo_1713325287.png";
         public const string MS3Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/MS3Photo_1713325299.png";
+        public const string BackgroundVerticalGreen = "https://s3-sgn10.fptcloud.com/fsel/Files/Result_Round_7_9903_1721731832148.png";
+        public const string BackgroundVerticalOrange = "https://s3-sgn10.fptcloud.com/fsel/Files/Result_Round_5_3096_1721731831875.png";
 
         public const string Conquer = "Bạn đã chinh phục toàn bộ <span style=\"color: #809fe5\">{0} hành tinh</span> của khóa học <span style=\"color: #809fe5\">{1}</span>";
         public const string ConquerC1 = "Bạn đã chinh phục khóa học <span style=\"color: #809fe5\">C1</span> thành công!";

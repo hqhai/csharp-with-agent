@@ -470,7 +470,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-        private async Task SendStudentCompleteCourse(Guid studentId, Guid courseId, CourseResult courseResult, CancellationToken cancellationToken)
+        public async Task SendStudentCompleteCourse(Guid studentId, Guid courseId, CourseResult courseResult, CancellationToken cancellationToken)
         {
             var studentResult = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { studentId });
             var student = studentResult.Content?.Result?.FirstOrDefault();
@@ -539,8 +539,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 unitsAccessTime.Add(new UnitAccessTime()
                 {
-                    Unit = units[0].Unit,
-                    Time = featureAccessTimes?.Where(p => p.UnitId == units[0].UnitId).Sum(p => p.AccessTime) ?? 0,
+                    Unit = units[i].Unit,
+                    Time = featureAccessTimes?.Where(p => p.UnitId == units[i].UnitId).Sum(p => p.AccessTime) ?? 0,
                     DisplayOrder = i + 1,
                 });
             }
@@ -553,14 +553,15 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             // Tính các mốc và lưu vào mảng
             for (int i = 1; i < 4; i++)
             {
-                milestones[i] = (maxValue * i) / 4;
+                milestones[i - 1] = (maxValue * i) / 4;
             }
 
             foreach (var item in unitsAccessTime)
             {
-                var unitNumber = string.Format(CultureInfo.InvariantCulture, unitsNumber, item.DisplayOrder);
-                var percentChart = (int)((item.Time / maxValue) * 100);
-                var unitChart = string.Format(CultureInfo.InvariantCulture, unitsChart, percentChart);
+                var unitNumber = string.Format(CultureInfo.InvariantCulture, unitsNumberHtml, item.DisplayOrder);
+                var percentChart = (double)item.Time / maxValue;
+                percentChart = percentChart * 100;
+                var unitChart = string.Format(CultureInfo.InvariantCulture, unitsChartHtml, (int)percentChart);
                 unitsNumber += unitNumber;
                 unitsChart += unitChart;
             }
@@ -587,7 +588,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             var studentDailyStreaks = studentDailyStreakResults.Content?.Result;
 
-            var totalLesson = course.CourseUnitMockTests.Select(p => p.Unit).SelectMany(p => p.UnitLessons).Count();
+            var totalLesson = course.CourseUnitMockTests.Where(p => p.Unit != null).Select(p => p.Unit).Where(p => p.UnitLessons != null && p.UnitLessons.Count > 0).SelectMany(p => p.UnitLessons).ToList().Count;
 
             var totalNote = await _lessonNoteRepository.Queryable.Include(p => p.LessonResult).Where(p => p.LessonResult != null && p.LessonResult.CourseId == course.Id && p.CreatedUserId == student.Human.UserId).CountAsync(cancellationToken);
 
@@ -697,7 +698,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 StartDate = courseResult.CreatedDate.ToString("dd-MM-yyyy", cultureInfo),
                 EndDate = DateTime.UtcNow.ToString("dd-MM-yyyy", cultureInfo),
                 UnitStart = units.First().Unit?.Name,
-                UnitEnd = units.Last().Unit?.Name,
+                UnitFinish = units.Last().Unit?.Name,
                 SkillScore = skillScore,
                 HourColumnChart1 = DateTimeHelper.ConvertSecondsToHours(milestones[0]) + "h",
                 HourColumnChart2 = DateTimeHelper.ConvertSecondsToHours(milestones[1]) + "h",
@@ -724,6 +725,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 Level = level,
                 BandScore = bandScore,
                 Review = review,
+                BackgroundVertical = courseResult.Percent >= 67 ? SendMailSetting.BackgroundVerticalGreen : SendMailSetting.BackgroundVerticalOrange
             };
 
             var sendResult = await _mediator.Send(new SenderCommand

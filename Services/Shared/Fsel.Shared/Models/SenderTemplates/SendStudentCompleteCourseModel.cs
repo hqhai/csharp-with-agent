@@ -13,7 +13,7 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? BandScore { get; set; }
         public string? Review { get; set; }
         public string? UnitStart { get; set; }
-        public string? UnitEnd { get; set; }
+        public string? UnitFinish { get; set; }
         public string? StartDate { get; set; }
         public string? EndDate { get; set; }
         public string? SkillScore { get; set; }
@@ -37,5 +37,6 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? Continue { get; set; }
         public string? ContinueLearn { get; set; }
         public string? Display { get; set; }
+        public string? BackgroundVertical { get; set; }
     }
 }
