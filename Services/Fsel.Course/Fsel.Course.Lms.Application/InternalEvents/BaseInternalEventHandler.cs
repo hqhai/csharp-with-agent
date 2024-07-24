@@ -679,7 +679,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                 var mockTestHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.MockTestSkill, cancellationToken);
 
-                var mockTestResults = await _mockTestResultRepository.Queryable.Where(p => p.StudentId == studentId && p.CourseId == course.Id).OrderBy(p => p.CreatedDate).ToListAsync(cancellationToken);
+                var mockTestResults = await _mockTestResultRepository.Queryable.Where(p => p.StudentId == studentId && p.CourseId == course.Id && !p.UnitId.HasValue).OrderBy(p => p.CreatedDate).ToListAsync(cancellationToken);
 
                 if (mockTestResults == null || mockTestResults.Count != 2)
                 {
