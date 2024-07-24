@@ -27,7 +27,6 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly IUnitRepository _unitRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private const int NumberModuleLesson = 3;
-        private const int NumberModuleSkillMockTest = 1;
         private const int NumberDefaultComplete = 1;
         private const int NumberDefault = 0;
 
@@ -48,23 +47,21 @@ namespace Fsel.Course.Infrastructure.Common
         public async Task<UnitStudentProgressModel?> GetUnitManager(Guid courseId, Guid unitId, Guid? studentId)
         {
             var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == unitId && x.CourseId == courseId && x.StudentId == studentId);
-            var unit = await _unitRepository.Queryable
-                                            .Include(x => x.UnitLessons)
+            var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons)
                                             .Include(x => x.UnitSkillMockTests)
                                             .Include(x => x.CourseUnitMockTests.Where(c => c.CourseId == courseId))
                                             .FirstOrDefaultAsync(x => x.Id == unitId);
-
             if (unit == null)
             {
                 return default;
             }
-            var (currentProgress, progress) = await GetContentComplete(unitResult, unit);
+            var (currentProgress, progress) = await GetUnitCompleteAsync(unit, unitResult);
             var unitProgress = new UnitStudentProgressModel
             {
                 Type = nameof(CourseUnitMockTest.Unit),
                 ObjectId = unit.Id,
                 Name = unit.Name,
-                DisplayOrder = unit.CourseUnitMockTests.Max(x => x.DisplayOrder),
+                DisplayOrder = unit.CourseUnitMockTests.Where(c => c.CourseId == courseId).Max(x => x.DisplayOrder),
                 Status = unitResult?.Status ?? EnumResultStatus.Unfinished,
                 CorrectPercent = unitResult?.Percent ?? default,
                 ContentProgress = $"{currentProgress} / {progress}",
@@ -98,47 +95,6 @@ namespace Fsel.Course.Infrastructure.Common
             return courseProgress;
         }
 
-        public async Task<(int, int)> GetContentComplete(UnitResult? unitResult, Unit unit)
-        {
-            ArgumentNullException.ThrowIfNull(unit);
-            var lessonIds = unit.UnitLessons.Select(x => x.LessonId).ToList();
-            var mockTestId = unit.UnitSkillMockTests.FirstOrDefault()?.MockTestId;
-
-            var counts = new List<int>();
-            var totalModules = new List<int>();
-            if (lessonIds != null && lessonIds.Any())
-            {
-                if (unitResult != null)
-                {
-                    var totalModuleLesson = await _lessonResultRepository.Queryable
-                                                .Include(x => x.ClassForumResults)
-                                                .Include(x => x.VideoResult)
-                                                .Include(x => x.HomeWorkResults)
-                                                .Where(x => x.UnitId == unitResult.UnitId && x.CourseId == unitResult.CourseId)
-                                                .Where(x => lessonIds.Contains(x.LessonId) && x.StudentId == unitResult.StudentId)
-                                                .Select(x => new
-                                                {
-                                                    CountVideo = x.VideoResult != null && x.VideoResult.Status == EnumResultStatus.Done ? NumberDefaultComplete : NumberDefault,
-                                                    CountClassForum = x.ClassForumResults.Where(x => x.Status.HasValue).Count(),
-                                                    CountHomeWork = x.HomeWorkResults.Any() && x.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done) ? NumberDefaultComplete : NumberDefault,
-                                                })
-                                                .ToListAsync();
-                    counts.AddRange(new List<int> { totalModuleLesson.Sum(x => x.CountVideo), totalModuleLesson.Sum(x => x.CountClassForum), totalModuleLesson.Sum(x => x.CountHomeWork) });
-                }
-                totalModules.Add(lessonIds.Count * NumberModuleLesson);
-            }
-            if (mockTestId.HasValue)
-            {
-                if (unitResult != null)
-                {
-                    var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.CourseId == unitResult.CourseId && x.UnitId == unitResult.UnitId).FirstOrDefaultAsync(x => x.StudentId == unitResult.StudentId && x.MockTestId == mockTestId.Value);
-                    counts.Add(mockTestResult?.Status == EnumResultStatus.Done ? NumberModuleSkillMockTest : NumberDefault);
-                }
-                totalModules.Add(NumberModuleSkillMockTest);
-            }
-            return (counts.Sum(), totalModules.Sum());
-        }
-
         private async Task<int> GetContentCompleteLesson(IList<Guid> lessonResultIds)
         {
             var completeVideo = await _videoResultRepository.Queryable.Where(x => lessonResultIds.Contains(x.LessonResultId) && x.Status == EnumResultStatus.Done).CountAsync();
@@ -148,6 +104,37 @@ namespace Fsel.Course.Infrastructure.Common
                                     .Select(x => x.Any() && x.All(x => x.Status == EnumResultStatus.Done) ? NumberDefaultComplete : NumberDefault)
                                     .SumAsync();
             return new List<int> { completeClassFourm, completeHomeWord, completeVideo }.Sum();
+        }
+
+        public async Task<(int, int)> GetUnitCompleteAsync(Unit unit, UnitResult? unitResult)
+        {
+            ArgumentNullException.ThrowIfNull(unit);
+            var lessonIds = unit.UnitLessons.Select(x => x.LessonId).ToList();
+            var mockTestIds = unit.UnitSkillMockTests.Select(x => x.MockTestId).ToList();
+            var counts = new List<int>();
+            var totalModules = new List<int>();
+            if (lessonIds != null && lessonIds.Any())
+            {
+                if (unitResult != null)
+                {
+                    var lessonResultIds = await _lessonResultRepository.Queryable.Where(x => lessonIds.Contains(x.LessonId) && x.CourseId == unitResult.CourseId && x.StudentId == unitResult.StudentId)
+                                       .Select(x => x.Id).ToListAsync();
+                    counts.Add(await GetContentCompleteLesson(lessonResultIds));
+                }
+
+                totalModules.Add(lessonIds.Count * NumberModuleLesson);
+            }
+            if (mockTestIds != null && mockTestIds.Any())
+            {
+                if (unitResult != null)
+                {
+                    var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.CourseId == unitResult.CourseId && mockTestIds.Contains(x.MockTestId))
+                    .Where(x => x.StudentId == unitResult.StudentId && x.Status == EnumResultStatus.Done).ToListAsync();
+                    counts.Add(mockTestResults.Count);
+                }
+                totalModules.Add(mockTestIds.Count);
+            }
+            return (counts.Sum(), totalModules.Sum());
         }
 
         public async Task<(int, int)> GetUnitCompletes(IList<Guid> unitIds, CourseResultModel courseResult)
