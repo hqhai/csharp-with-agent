@@ -151,7 +151,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             {
                 var lesson = lessonResult.Lesson;
                 counts.Add(lessonResult.VideoResult?.Status == EnumResultStatus.Done ? 1 : 0);
-                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && (x.Status == EnumClassForumResultStatus.Denied || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == request.StudentId).Count());
+                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && x.Status.HasValue && x.StudentId == request.StudentId).Count());
                 counts.Add(lessonResult.HomeWorkResults.Any() && lessonResult.HomeWorkResults.All(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == request.StudentId) ? 1 : 0);
                 if (lesson != null)
                 {
