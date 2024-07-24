@@ -80,21 +80,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 }).ToList(),
             });
             var featureAccessTimeUnit = featureAccessTimes?.Content?.Result;
-
-            var units = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.CourseId == course.Id && x.StudentId == student.Id))
-                                                       .Where(x => unitIds.Contains(x.Id)).ToListAsync(cancellationToken);
             foreach (var courseUnit in courseUnitMockTests)
             {
                 if (!courseUnit.UnitId.HasValue)
                 {
                     continue;
                 }
-                var unit = units.FirstOrDefault(x => x.Id == courseUnit.UnitId.Value);
-                if (unit == null)
-                {
-                    continue;
-                }
-                var unitProgress = await _managerProgressHelper.GetUnitManager(unit.UnitResults.FirstOrDefault(), courseUnit.UnitId.Value, course.Id);
+                var unitProgress = await _managerProgressHelper.GetUnitManager(courseUnit.UnitId.Value, course.Id, student.Id);
                 if (unitProgress == null)
                 {
                     continue;

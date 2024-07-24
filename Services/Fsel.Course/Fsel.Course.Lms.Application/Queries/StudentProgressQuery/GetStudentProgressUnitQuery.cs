@@ -62,13 +62,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var unit = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.CourseId == course.Id && x.StudentId == student.Id)).FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
+            var unit = await _unitRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
             if (unit == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var unitProgress = await _managerProgressHelper.GetUnitManager(unit.UnitResults.FirstOrDefault(), unit.Id, course.Id);
+            var unitProgress = await _managerProgressHelper.GetUnitManager(unit.Id, course.Id, student.Id);
             if (unitProgress == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
