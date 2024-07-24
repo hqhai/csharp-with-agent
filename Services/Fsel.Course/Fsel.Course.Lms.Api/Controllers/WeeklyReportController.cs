@@ -8,12 +8,12 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Course.Lms.Application.Commands.WeeklyReportCommand;
     using Fsel.Course.Lms.Application.Queries.WeeklyReportQuery;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1i1)]
-    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/weekly-report")]
     [ApiController]
     public class WeeklyReportController : ControllerBase

@@ -1,22 +1,23 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Api.Controllers.V1i1
+namespace Fsel.Course.Lms.Api.Controllers.V1i2
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1;
+    using Fsel.Course.Lms.Application.Queries.VideoQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersions(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/video")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+    [Permission(role: nameof(EnumRole.Student))]
     public class VideoController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -27,14 +28,15 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         }
 
         /// <summary>
-        /// Create video time code answer
+        /// Get Video Time Code Detail
         /// </summary>
-        [HttpPost("create-video-time-code-answer")]
+        [EncryptResponse]
+        [HttpGet("time-code-detail")]
         [ProducesResponseType(typeof(MethodResult<VideoTimeCodeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateAnswer([FromBody] CreateVideoTimeCodeAnswerByTimeCodeCommand query)
+        public async Task<IActionResult> GetTimeCodeDetail([FromQuery] GetTimeCodeDetailQuery query)
         {
-            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<VideoTimeCodeModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
