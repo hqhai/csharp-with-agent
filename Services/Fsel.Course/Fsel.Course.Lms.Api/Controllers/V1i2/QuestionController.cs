@@ -1,7 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Api.Controllers
+namespace Fsel.Course.Lms.Api.Controllers.V1i2
 {
     using System.Net;
     using Fsel.Common.ActionResults;
@@ -12,14 +12,13 @@ namespace Fsel.Course.Lms.Api.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Attributes;
-    using Asp.Versioning;
     using Fsel.Common.Attributes;
+    using Fsel.Shared.Attributes;
 
-    [ApiVersions(ApiSettings.APIVersion1)]
-    [ApiController]
+    [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/question")]
     [Permission(role: nameof(EnumRole.Student))]
+    [ApiController]
     public class QuestionController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -32,7 +31,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get Question
         /// </summary>
-        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [EncryptResponse]
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<QuestionModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
