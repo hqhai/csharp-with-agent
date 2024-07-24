@@ -725,7 +725,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 Level = level,
                 BandScore = bandScore,
                 Review = review,
-                BackgroundVertical = courseResult.Percent >= 67 ? SendMailSetting.BackgroundVerticalGreen : SendMailSetting.BackgroundVerticalOrange
+                BackgroundVertical = courseResult.Percent >= 67 ? SendMailSetting.BackgroundVerticalGreen : SendMailSetting.BackgroundVerticalOrange,
+                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
             };
 
             var sendResult = await _mediator.Send(new SenderCommand
