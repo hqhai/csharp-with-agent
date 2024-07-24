@@ -86,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 {
                     continue;
                 }
-                var unitProgress = await _managerProgressHelper.GetUnitManager(courseUnit.UnitId.Value, course.Id, student.Id);
+                var unitProgress = await _managerProgressHelper.GetUnitManager(course.Id, courseUnit.UnitId.Value, student.Id);
                 if (unitProgress == null)
                 {
                     continue;

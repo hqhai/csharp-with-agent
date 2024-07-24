@@ -45,7 +45,7 @@ namespace Fsel.Course.Infrastructure.Common
             _mockTestResultRepository = mockTestResultRepository;
         }
 
-        public async Task<UnitStudentProgressModel?> GetUnitManager(Guid unitId, Guid courseId, Guid? studentId)
+        public async Task<UnitStudentProgressModel?> GetUnitManager(Guid courseId, Guid unitId, Guid? studentId)
         {
             var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == unitId && x.CourseId == courseId && x.StudentId == studentId);
             var unit = await _unitRepository.Queryable
