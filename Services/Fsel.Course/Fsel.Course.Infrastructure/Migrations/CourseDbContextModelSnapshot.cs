@@ -4238,9 +4238,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("PlacementTestResultId");
 
-                    b.HasIndex("SectionGroupId", "MockTestResultId")
+                    b.HasIndex("SectionGroupId", "MockTestResultId", "FinalTestResultId", "PlacementTestResultId")
                         .IsUnique()
-                        .HasFilter("[MockTestResultId] IS NOT NULL");
+                        .HasFilter("[MockTestResultId] IS NOT NULL AND [FinalTestResultId] IS NOT NULL AND [PlacementTestResultId] IS NOT NULL");
 
                     b.ToTable("SectionGroupResults");
                 });

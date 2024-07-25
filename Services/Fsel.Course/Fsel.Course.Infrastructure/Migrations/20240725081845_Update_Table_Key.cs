@@ -5,7 +5,7 @@
 namespace Fsel.Course.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Update_Table_Keys : Migration
+    public partial class Update_Table_Key : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -90,11 +90,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_SectionGroupResults_SectionGroupId_MockTestResultId",
+                name: "IX_SectionGroupResults_SectionGroupId_MockTestResultId_FinalTestResultId_PlacementTestResultId",
                 table: "SectionGroupResults",
-                columns: new[] { "SectionGroupId", "MockTestResultId" },
+                columns: new[] { "SectionGroupId", "MockTestResultId", "FinalTestResultId", "PlacementTestResultId" },
                 unique: true,
-                filter: "[MockTestResultId] IS NOT NULL");
+                filter: "[MockTestResultId] IS NOT NULL AND [FinalTestResultId] IS NOT NULL AND [PlacementTestResultId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlacementTestResults_PlacementTestId_StudentId",
@@ -198,7 +198,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                 table: "VideoResults");
 
             migrationBuilder.DropIndex(
-                name: "IX_SectionGroupResults_SectionGroupId_MockTestResultId",
+                name: "IX_SectionGroupResults_SectionGroupId_MockTestResultId_FinalTestResultId_PlacementTestResultId",
                 table: "SectionGroupResults");
 
             migrationBuilder.DropIndex(

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20240722065050_Update_Table_Keys")]
-    partial class Update_Table_Keys
+    [Migration("20240725081845_Update_Table_Key")]
+    partial class Update_Table_Key
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -4241,9 +4241,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("PlacementTestResultId");
 
-                    b.HasIndex("SectionGroupId", "MockTestResultId")
+                    b.HasIndex("SectionGroupId", "MockTestResultId", "FinalTestResultId", "PlacementTestResultId")
                         .IsUnique()
-                        .HasFilter("[MockTestResultId] IS NOT NULL");
+                        .HasFilter("[MockTestResultId] IS NOT NULL AND [FinalTestResultId] IS NOT NULL AND [PlacementTestResultId] IS NOT NULL");
 
                     b.ToTable("SectionGroupResults");
                 });
