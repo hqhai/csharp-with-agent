@@ -42,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly ILogger<GetPlacementTestByLevelQuery> _logger;
         private readonly IInteractionService _interactionService;
         private readonly ILogger<GetPlacementTestByLevelQuery> _logger;
         private readonly IPlacementTestRepository _placementTestRepository;
@@ -51,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             , IPlacementTestResultRepository placementTestResultRepository
             , IUserService userService
             , IMapper mapper
+            , ILogger<GetPlacementTestByLevelQuery> logger
             , IInteractionService interactionService
             , ILogger<GetPlacementTestByLevelQuery> logger
             , IPlacementTestRepository placementTestRepository)
@@ -60,6 +62,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             _placementTestResultRepository = placementTestResultRepository;
             _userService = userService;
             _mapper = mapper;
+            _logger = logger;
             _interactionService = interactionService;
             _logger = logger;
             _placementTestRepository = placementTestRepository;
@@ -189,7 +192,15 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 {
                     placementTestResult = new PlacementTestResult { Level = placementTest.Level, PlacementTestId = placementTest.Id, StudentId = studentId };
                     _placementTestResultRepository.Add(placementTestResult);
-                    await _placementTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                    try
+                    {
+                        await _placementTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"Log Duplicate PlacementTestResult : {ex.Message}");
+                    }
                 }
             }
             else
