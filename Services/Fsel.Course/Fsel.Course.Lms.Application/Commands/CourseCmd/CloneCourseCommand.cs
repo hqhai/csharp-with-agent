@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
     using EntityCourse = Domain.Entities.Course;
 
     public class CloneCourseCommand : IRequest<MethodResult<CourseModel>>
@@ -22,12 +23,15 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
     public class CloneCourseCommandHandler : IRequestHandler<CloneCourseCommand, MethodResult<CourseModel>>
     {
         private readonly ICourseRepository _courseRepository;
+        private readonly ILogger<CloneCourseCommand> _logger;
         private readonly IMapper _mapper;
 
         public CloneCourseCommandHandler(ICourseRepository courseRepository
+            , ILogger<CloneCourseCommand> logger
             , IMapper mapper)
         {
             _courseRepository = courseRepository;
+            _logger = logger;
             _mapper = mapper;
         }
 
@@ -77,7 +81,16 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
                 courseClone = _courseRepository.Add(courseClone);
-                await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Log Duplicate Course : {ex.Message}");
+                    courseClone = await _courseRepository.Queryable.Where(x => x.ParentCourseId.HasValue && x.ParentCourseId == course.Id && x.Priority == priority)
+                                                                   .FirstOrDefaultAsync(cancellationToken);
+                }
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<CourseModel>(courseClone);

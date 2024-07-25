@@ -23,11 +23,11 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IMapper _mapper;
-        private readonly ILogger<object> _logger;
+        private readonly ILogger<SetTimeModuleCommand> _logger;
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
 
-        public SetTimeModuleCommandHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, ILogger<object> logger, DateTimeConverter dateTimeConverter, ISectionGroupResultRepository sectionGroupResultRepository)
+        public SetTimeModuleCommandHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, ILogger<SetTimeModuleCommand> logger, DateTimeConverter dateTimeConverter, ISectionGroupResultRepository sectionGroupResultRepository)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _mapper = mapper;
