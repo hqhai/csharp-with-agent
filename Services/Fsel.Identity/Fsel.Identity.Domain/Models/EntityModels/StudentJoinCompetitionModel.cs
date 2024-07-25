@@ -17,5 +17,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public string? Email { get; set; }
 
+        public string? ParentEmail { get; set; }
+
     }
 }
