@@ -147,7 +147,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             if (finalTestResult.Status != EnumResultStatus.Done)
             {
                 var sectionGroups = await GetSectionGroupsAsync(finalTestResult, cancellationToken);
-                finalStudentProgress.SkillScores = finalTest.FinalTestSections.Select(x => x.SectionGroup).Select(x =>
+                finalStudentProgress.SkillScores = sectionGroups.Select(x =>
                 {
                     var sectionQuestions = x!.Sections.SelectMany(x => x.SectionQuestions).ToList();
                     var correctTotal = sectionQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal);
