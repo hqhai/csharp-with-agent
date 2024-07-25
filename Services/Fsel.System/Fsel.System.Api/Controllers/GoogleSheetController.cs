@@ -38,20 +38,6 @@ namespace Fsel.System.Api.Controllers
             return commandResult.GetActionResult();
         }
 
-
-        /// <summary>
-        /// Get data from file i18n
-        /// </summary>
-        [HttpGet("school-student/{studentCode}")]
-        [ProducesResponseType(typeof(MethodResult<I18NModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetListSchoolStudent([FromRoute] string? studentCode)
-        {
-            ArgumentNullException.ThrowIfNull(studentCode);
-            var commandResult = await _mediator.Send(new GetListStudentSchoolQuery { SchoolCode = studentCode }).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
         /// <summary>
         /// Get data from file i18n
         /// </summary>
