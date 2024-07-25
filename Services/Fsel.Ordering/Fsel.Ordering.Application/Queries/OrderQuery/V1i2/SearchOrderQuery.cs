@@ -55,9 +55,13 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 TotalPrice = x.TotalPrice,
             });
 
-            if (request.Status.HasValue)
+            if (request.IsNew.HasValue && request.IsNew == true)
             {
-                query = query.Where(p => p.Status == request.Status);
+                query = query.Where(p => p.Status == EnumOrderStatus.New && (p.PaymentMethod == EnumPaymentMethodStatus.BankTransfer || p.PaymentMethod == EnumPaymentMethodStatus.Card));
+            }
+            else if (request.IsNew.HasValue && request.IsNew == false)
+            {
+                query = query.Where(p => p.Status != EnumOrderStatus.New);
             }
 
             if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
