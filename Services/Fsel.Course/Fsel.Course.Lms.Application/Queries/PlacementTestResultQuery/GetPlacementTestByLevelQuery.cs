@@ -44,7 +44,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
         private readonly IMapper _mapper;
         private readonly ILogger<GetPlacementTestByLevelQuery> _logger;
         private readonly IInteractionService _interactionService;
-        private readonly ILogger<GetPlacementTestByLevelQuery> _logger;
         private readonly IPlacementTestRepository _placementTestRepository;
 
         public GetPlacementTestByLevelQueryHandler(AuthContext authContext
@@ -54,7 +53,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             , IMapper mapper
             , ILogger<GetPlacementTestByLevelQuery> logger
             , IInteractionService interactionService
-            , ILogger<GetPlacementTestByLevelQuery> logger
             , IPlacementTestRepository placementTestRepository)
         {
             _authContext = authContext;
