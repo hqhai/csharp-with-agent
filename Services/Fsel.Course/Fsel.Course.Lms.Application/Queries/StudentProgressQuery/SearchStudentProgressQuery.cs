@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 .OrderByDescending(x => x.CreatedDate)
                 .ToListAsync(cancellationToken);
 
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(courseResults.Select(x => x.StudentId).ToList());
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(courseResults.Select(x => x.StudentId).Distinct().ToList());
             var students = studentResults.Content?.Result;
             var studentProgress = new List<StudentProgressModel>();
             foreach (var courseResult in courseResults)
@@ -93,9 +93,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             {
                 studentProgress = studentProgress.Where(m => m.Level == request.Level).ToList();
             }
-
             int totalItem = studentProgress.Count;
             var lists = studentProgress.ApplySortAndPaging(request).ToList();
+
             foreach (var item in lists)
             {
                 var courseResult = courseResults.FirstOrDefault(x => x.CourseId == item.CourseId && x.StudentId == item.StudentId);

@@ -180,7 +180,16 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             {
                 return lessonProgress;
             }
-            var completeLesson = await _managerProgressHelper.GetContentCompleteLesson(new List<Guid> { lessonResult.Id });
+            var query = await _lessonResultRepository.Queryable.Include(x => x.VideoResult).Include(x => x.ClassForumResults).Include(x => x.HomeWorkResults)
+                                 .Where(x => x.Id == lessonResult.Id)
+                                 .Select(x => new
+                                 {
+                                     CountVideo = x.VideoResult != null && x.VideoResult.Status == EnumResultStatus.Done ? 1 : 0,
+                                     CountClassForum = x.ClassForumResults.All(x => x.Status.HasValue) ? 1 : 0,
+                                     CountHomeWork = x.HomeWorkResults.Any() && x.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done) ? 1 : 0
+                                 }).ToListAsync();
+            var completeLesson = query.Sum(x => x.CountVideo + x.CountClassForum + x.CountHomeWork);
+
             lessonProgress.Status = lessonResult.Status;
             lessonProgress.Percent = NumberHelper.GetPercent(completeLesson, MaxModuleLesson);
             lessonProgress.ContentCompleted = string.Format("{0} / {1}", completeLesson, MaxModuleLesson);
@@ -215,7 +224,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         from mrGroup in mrGroupG.DefaultIfEmpty()
                         join ms in _mockTestScoreRepository.Queryable on mrGroup.Id equals ms.MockTestResultId into msGroupG
                         from msGroup in msGroupG.DefaultIfEmpty()
-                        where baseQ.Id == mockTestResult.MockTestId && mrGroup.StudentId == mockTestResult.StudentId
+                        where baseQ.Id == mockTestResult.MockTestId && mrGroup.Id == mockTestResult.Id
                         group new { sg, mrGroup, msGroup } by new { sg.CourseSkill } into g
                         select new
                         {
