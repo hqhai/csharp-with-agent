@@ -308,7 +308,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 CourseType = course.CourseType,
                 Percent = percentUnit.ToString(CultureInfo.CurrentCulture),
                 ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
-                LinkReport = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkFullMockTestReport!, course.Id, mockTestId)
+                LinkReport = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkFullMockTestReport!, course.Id, mockTestId, userId)
             };
 
             if (course.CourseType == EnumCourseType.Ielts && mockTestResult != null)
@@ -488,7 +488,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var linkReport = string.Empty;
             if (skillMockTestResult != null)
             {
-                linkReport = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkMockTestReport ?? string.Empty, course.Id, unit.Id, skillMockTestResult.Id, skillMockTestResult.SectionGroupResults.FirstOrDefault()?.SectionGroupId);
+                linkReport = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkMockTestReport ?? string.Empty, course.Id, unit.Id, skillMockTestResult.Id, skillMockTestResult.SectionGroupResults.FirstOrDefault()?.SectionGroupId, userId);
                 parameter.LinkReport = linkReport;
             }
             if (numberUnit == 1)
