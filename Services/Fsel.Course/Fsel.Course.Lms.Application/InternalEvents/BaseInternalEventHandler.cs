@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Lms.Application.InternalEvents
 {
-    using System.Drawing;
     using System.Globalization;
     using System.Linq;
     using System.Threading;
@@ -28,7 +27,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
-    using Nest;
     using DateTimeHelper = Shared.Helpers.DateTimeHelper;
 
     public class BaseInternalEventHandler
@@ -49,6 +47,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         protected readonly ISystemService _systemService;
         protected readonly IOrderService _orderService;
         private readonly ILessonNoteRepository _lessonNoteRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private const int TotalScoreClassForum = 36;
         private const int PercentClassForumAcademic = 20;
@@ -77,7 +76,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             IHomeWorkResultRepository homeWorkResultRepository,
             QuestBoardPublisher questBoardPublisher,
             IOrderService orderService
-, ILessonNoteRepository lessonNoteRepository)
+, ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository)
         {
             _videoResultRepository = videoResultRepository;
             _classForumResultRepository = classForumResultRepository;
@@ -96,6 +95,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _questBoardPublisher = questBoardPublisher;
             _orderService = orderService;
             _lessonNoteRepository = lessonNoteRepository;
+            _lessonResultRepository = lessonResultRepository;
         }
 
         private async Task<(List<SkillScores>, double)> GetCourseResult(IList<Guid> unitIds, Guid studentId, EnumCourseType type, Guid? finalTestId)
@@ -590,6 +590,21 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             var totalLesson = course.CourseUnitMockTests.Where(p => p.Unit != null).Select(p => p.Unit).Where(p => p.UnitLessons != null && p.UnitLessons.Count > 0).SelectMany(p => p.UnitLessons).ToList().Count;
 
+            var lessonIds = course.CourseUnitMockTests.Where(p => p.Unit != null).Select(p => p.Unit).Where(p => p.UnitLessons != null && p.UnitLessons.Count > 0).SelectMany(p => p.UnitLessons).Select(p => p.LessonId).ToList();
+
+            var lessonResultIds = await _lessonResultRepository.Queryable.Where(p => lessonIds != null && lessonIds.Contains(p.LessonId) && p.StudentId == studentId && p.Status == EnumResultStatus.Done).Select(p => p.Id).ToListAsync(cancellationToken);
+
+            if (lessonResultIds == null || lessonResultIds.Count == 0 || lessonResultIds.Count != lessonIds.Count)
+            {
+                return;
+            }
+
+            var classForumResults = await _classForumResultRepository.Queryable.Where(p => lessonResultIds.Contains(p.LessonResultId) && p.StudentId == studentId && p.Status == EnumClassForumResultStatus.Graded).ToListAsync(cancellationToken);
+            if (classForumResults.Count != lessonResultIds.Count)
+            {
+                return;
+            }
+
             var totalNote = await _lessonNoteRepository.Queryable.Include(p => p.LessonResult).Where(p => p.LessonResult != null && p.LessonResult.CourseId == course.Id && p.CreatedUserId == student.Human.UserId).CountAsync(cancellationToken);
 
             var totalPlanet = course.CourseUnitMockTests.Count;
@@ -618,6 +633,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     discover = SendMailSetting.Discover;
                     display = SendMailSetting.Display;
                 }
+
+                review = courseResult.Percent >= 67 ? SendMailSetting.ReviewGood : SendMailSetting.ReviewBad;
             }
             else
             {
@@ -731,7 +748,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             var sendResult = await _mediator.Send(new SenderCommand
             {
-                Email = student.Human.Email,
+                Email = "nguyenhuukhoa5462@gmail.com",
                 Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendStudentCompleteCourse, course.Name, student.Human.FullName),
                 Params = sendStudentCompleteCourseModel,
                 Template = course.CourseType == EnumCourseType.Academic ? EnumSenderTemplate.SendStudentCompleteCourseAcademic : EnumSenderTemplate.SendStudentCompleteCourseIetls
