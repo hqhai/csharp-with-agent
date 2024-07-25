@@ -45,5 +45,6 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? TotalHourPrevious { get; set; }
         public string? UnitDisplay { get; set; }
         public string? SkillDisplay { get; set; }
+        public string? LinkReport { get; set; }
     }
 }
