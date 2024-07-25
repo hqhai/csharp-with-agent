@@ -46,6 +46,8 @@ builder.Services.AddScoped<IUserPlatformRepository, UserPlatformRepository>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeRepository>();
 builder.Services.AddScoped<IStudentTrialRegistrationRepository, StudentTrialRegistrationRepository>();
+builder.Services.AddScoped<IStudentCompetitionSnapShotRepository, StudentCompetitionSnapShotRepository>();
+
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();

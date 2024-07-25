@@ -15,8 +15,8 @@ namespace Fsel.Shared.Models.ShareModels
 
         public IList<WeekRule>? Rules { get; set; }
 
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
         public int WeekNumber { get; set; }
     }
 
