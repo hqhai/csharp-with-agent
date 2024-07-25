@@ -37,7 +37,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<SearchOrderModel>>();
 
-            var query = _orderRepository.Queryable.Include(p => p.Package).Select(x => new SearchOrderModel
+            var query = _orderRepository.Queryable.Include(p => p.Package).Where(p => !p.IsTrial).Select(x => new SearchOrderModel
             {
                 Id = x.Id,
                 Code = x.Code,
