@@ -51,8 +51,8 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             , IPlacementTestResultRepository placementTestResultRepository
             , IUserService userService
             , IMapper mapper
-            , ILogger<GetPlacementTestByLevelQuery> logger
             , IInteractionService interactionService
+            , ILogger<GetPlacementTestByLevelQuery> logger
             , IPlacementTestRepository placementTestRepository)
         {
             _authContext = authContext;

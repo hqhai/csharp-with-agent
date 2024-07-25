@@ -3,6 +3,7 @@
 namespace Fsel.Ordering.Api.Controllers.Admin
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
@@ -34,6 +35,7 @@ namespace Fsel.Ordering.Api.Controllers.Admin
         /// Search Course
         /// </summary>
         [HttpGet("search-order")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<OrderSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchOrderQuery query)
@@ -43,9 +45,10 @@ namespace Fsel.Ordering.Api.Controllers.Admin
         }
 
         /// <summary>
-        /// Search Course
+        /// change status order
         /// </summary>
         [HttpPut("change-status-order")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ChangeStatusOrder([FromBody] ChangeStatusOrderCommand query)
