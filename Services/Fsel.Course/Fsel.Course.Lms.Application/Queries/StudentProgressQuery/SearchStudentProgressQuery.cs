@@ -101,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 var courseResult = courseResults.FirstOrDefault(x => x.CourseId == item.CourseId && x.StudentId == item.StudentId);
                 if (courseResult != null)
                 {
-                    var (currentProgress, progress) = await _managerProgressHelper.GetContentComplete(courseResult);
+                    var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResult);
                     var (displayOrderUnit, displayOrderLesson) = await _courseRepository.GetDisplayOrder(courseResult);
                     item.DisplayOrderLesson = displayOrderLesson;
                     item.DisplayOrderUnit = displayOrderUnit;

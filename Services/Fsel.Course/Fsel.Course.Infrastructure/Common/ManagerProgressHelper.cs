@@ -78,7 +78,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return default;
             }
-            var (currentProgress, progress) = await GetContentComplete(new CourseResultModel
+            var (currentProgress, progress) = await GetCompleteCourseAsync(new CourseResultModel
             {
                 CourseType = courseResult.Course?.CourseType,
                 CourseId = courseResult.CourseId,
@@ -95,8 +95,12 @@ namespace Fsel.Course.Infrastructure.Common
             return courseProgress;
         }
 
-        private async Task<int> GetContentCompleteLesson(IList<Guid> lessonResultIds)
+        public async Task<int> GetContentCompleteLesson(IList<Guid>? lessonResultIds)
         {
+            if (lessonResultIds == null || !lessonResultIds.Any())
+            {
+                return default;
+            }
             var completeVideo = await _videoResultRepository.Queryable.Where(x => lessonResultIds.Contains(x.LessonResultId) && x.Status == EnumResultStatus.Done).CountAsync();
             var completeClassFourm = await _classForumResultRepository.Queryable.Where(x => lessonResultIds.Contains(x.LessonResultId) && x.Status.HasValue).CountAsync();
             var completeHomeWord = await _homeWorkResultRepository.Queryable.Where(x => lessonResultIds.Contains(x.LessonResultId))
@@ -121,7 +125,6 @@ namespace Fsel.Course.Infrastructure.Common
                                        .Select(x => x.Id).ToListAsync();
                     counts.Add(await GetContentCompleteLesson(lessonResultIds));
                 }
-
                 totalModules.Add(lessonIds.Count * NumberModuleLesson);
             }
             if (mockTestIds != null && mockTestIds.Any())
@@ -161,11 +164,9 @@ namespace Fsel.Course.Infrastructure.Common
             return (counts.Sum(), totalModules.Sum());
         }
 
-        public async Task<(int, int)> GetContentComplete(CourseResultModel courseResult)
+        public async Task<(int, int)> GetCompleteCourseAsync(CourseResultModel courseResult)
         {
             ArgumentNullException.ThrowIfNull(courseResult);
-            var lessonIds = new List<Guid>();
-            var counts = new List<int>();
             var countTests = new List<(int, int)>();
             var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).FirstOrDefaultAsync(x => x.Id == courseResult.CourseId);
             var unitIds = course?.CourseUnitMockTests.Where(x => x.UnitId != null).Select(x => x.UnitId ?? default).ToList();

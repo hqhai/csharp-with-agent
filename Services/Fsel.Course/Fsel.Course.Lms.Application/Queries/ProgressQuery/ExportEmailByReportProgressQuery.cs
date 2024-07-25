@@ -153,7 +153,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                                 CourseId = courseResult.CourseId,
                                 StudentId = courseResult.StudentId
                             };
-                            var (currentProgress, progress) = await _managerProgressHelper.GetContentComplete(courseResultModel);
+                            var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResultModel);
                             reportProgress.LessonCompleted = string.Format("{0} / {1}", currentProgress, progress);
                         }
                     }

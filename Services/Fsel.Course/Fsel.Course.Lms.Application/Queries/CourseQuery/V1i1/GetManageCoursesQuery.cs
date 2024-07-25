@@ -134,7 +134,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                     CourseId = courseResult.CourseId,
                     StudentId = courseResult.StudentId
                 };
-                var (currentProgress, progress) = await _managerProgressHelper.GetContentComplete(courseResultModel);
+                var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResultModel);
                 var courseManager = new CourseManagerModel
                 {
                     CourseResultId = courseResult.Id,

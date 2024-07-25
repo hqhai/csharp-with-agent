@@ -113,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         CourseId = courseResult.CourseId,
                         StudentId = studentId
                     };
-                    var (currentProgress, progress) = await _managerProgressHelper.GetContentComplete(courseResultModel);
+                    var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResultModel);
 
                     double progressPercentage = ((float)currentProgress / TotalProcessIelsts) * 100;
                     // Update số lượng process do trên dữ liệu chưa nhập đủ
