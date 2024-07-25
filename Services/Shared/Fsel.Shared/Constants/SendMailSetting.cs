@@ -88,5 +88,7 @@ namespace Fsel.Shared.Constants
         public const string Discover = "Vẫn còn rất nhiều hành tinh mới chờ bạn khám phá. Cùng FSEL tiếp tục hành trình nào!";
         public const string DiscoverIELTS = "Với trình độ hiện tại của bạn, bạn đã sẵn sàng để tham dự kỳ thi cấp chứng chỉ quốc tế, hoặc bạn có thể ôn lại khoá học để củng cố kiến thức của mình.";
         public const string DiscoverC1 = "Bạn có thể tiếp tục nâng cao kiến thức với giáo trình IELTS của Fsel nhé.";
+        public const string ReviewGood = "Kết quả thể hiện sự nỗ lực của bạn. Hãy duy trì và cố gắng hơn trong chặng đường sắp tới nhé!";
+        public const string ReviewBad = "Kết quả thể hiện sự nỗ lực của bạn. Hãy cố gắng đạt mục tiêu trong chặng đường sắp tới nhé!";
     }
 }
