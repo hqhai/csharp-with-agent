@@ -12,7 +12,7 @@ namespace Fsel.Identity.Application.Queues.Consumers
     {
         private readonly IMediator _mediator;
 
-        public UpdateTrialStudentStatusConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
+        public UpdateTrialStudentStatusConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }

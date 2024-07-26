@@ -28,6 +28,10 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
         public async Task<double> EvaluationSpeaking(string? question, string url)
         {
+            if (string.IsNullOrEmpty(url))
+            {
+                return 0;
+            }
             // Creates an instance of a speech config with specified subscription key and service region.
             var config = SpeechConfig.FromSubscription(_appSetting.AzureAiConfig?.SecondApiKey, _appSetting.AzureAiConfig?.Location);
 

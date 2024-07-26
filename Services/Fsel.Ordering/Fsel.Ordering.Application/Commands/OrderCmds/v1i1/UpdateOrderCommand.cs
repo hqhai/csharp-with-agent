@@ -10,7 +10,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
-    using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1;
+    using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i2;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -49,7 +49,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
 
-            AddDataIntoOrder(request.Order, request.Code, request.Package.Price, request.CourseId, request);
+            AddDataIntoOrder(request.Order, request.Code, request.Package.Price, request);
 
             if (!request.Order.IsValid())
             {
@@ -69,7 +69,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             return methodResult;
         }
 
-        private static void AddDataIntoOrder(Order order, string? code, decimal price, Guid courseId, UpdateOrderCommandModel request)
+        private static void AddDataIntoOrder(Order order, string? code, decimal price, UpdateOrderCommandModel request)
         {
             order.Status = EnumOrderStatus.New;
             order.FullName = request.FullName;
@@ -81,7 +81,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             order.DiscountPercent = 0;
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
-            order.CourseId = courseId;
             order.PackageId = request.Package?.Id;
         }
     }

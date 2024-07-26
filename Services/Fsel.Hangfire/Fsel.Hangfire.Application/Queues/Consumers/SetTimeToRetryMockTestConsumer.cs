@@ -10,7 +10,7 @@ namespace Fsel.Hangfire.Application.Queues.Consumers
 
     public class SetTimeToRetryMockTestConsumer : BaseConsumer<SetTimeRetryMockTestModel>
     {
-        public SetTimeToRetryMockTestConsumer(AuthContext authContext) : base(authContext)
+        public SetTimeToRetryMockTestConsumer(AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
         }
 

@@ -19,7 +19,6 @@ using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Models.SenderTemplates;
-using Fsel.Shared.Models.ShareModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -114,10 +113,19 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 await _roleManager.CreateAsync(role);
                             }
 
+                            var passwordValidator = new Microsoft.AspNetCore.Identity.PasswordValidator<User>();
                             Microsoft.AspNetCore.Identity.IdentityResult result;
                             if (user != null)
                             {
                                 _mapper.Map(request, user);
+
+                                var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password);
+                                if (!validPassword.Succeeded)
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIsNotValid));
+                                    return methodResult;
+                                }
+
                                 user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, request.Password ?? string.Empty);
                                 user.UserName = request.Email;
                                 if (!user.IsValid())
@@ -126,6 +134,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     return methodResult;
                                 }
                                 result = await _userManager.UpdateAsync(user);
+                                if (!result.Succeeded)
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
+                                    return methodResult;
+                                }
                             }
                             else
                             {
@@ -160,6 +173,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     };
 
                                 #endregion add user setting
+                                var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password);
+                                if (!validPassword.Succeeded)
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIsNotValid));
+                                    return methodResult;
+                                }
 
                                 result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
                                 if (!result.Succeeded)
