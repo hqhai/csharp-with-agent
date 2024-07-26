@@ -11,11 +11,9 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTests
     public class UpdateMockTestCommandModel : BaseCommandModel
     {
         public string? Name { get; set; }
-
+        public double Version { get; set; }
         public EnumCourseType CourseType { get; set; }
-
         public EnumMockTestType MockTestType { get; set; }
-
         public IList<CreateSectionGroupCommandModel>? SectionGroups { get; set; }
     }
 }

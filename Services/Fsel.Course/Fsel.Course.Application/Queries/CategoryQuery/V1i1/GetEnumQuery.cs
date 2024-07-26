@@ -8,7 +8,7 @@ using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace Fsel.Course.Application.Queries.CategoryQuery
+namespace Fsel.Course.Application.Queries.CategoryQuery.V1i1
 {
     public class GetEnumQuery : IRequest<MethodResult<IList<EnumModel>>>
     {
@@ -49,13 +49,7 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                     break;
 
                 case EnumCourseSourceData.QuestionType:
-                    var data = ConvertHelper.EnumToList<EnumQuestionType>().Where(x => (int)x >= (int)EnumQuestionType.MultichoiceV1).ToList();
-                    methodResult.Result = (from x in data
-                                           select new EnumModel
-                                           {
-                                               Name = x.GetDescription(),
-                                               Value = x.ToString()
-                                           }).ToList();
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumQuestionType>();
                     break;
 
                 case EnumCourseSourceData.TimeCodeType:
