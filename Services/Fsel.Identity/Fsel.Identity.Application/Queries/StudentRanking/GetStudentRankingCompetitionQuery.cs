@@ -3,173 +3,131 @@
 namespace Fsel.Identity.Application.Queries.StudentRanking
 
 {
-    using System.Collections.Generic;
     using System.Linq.Dynamic.Core;
-    using AutoMapper;
+
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
-    using Fsel.Identity.Application.Commands.StudentCompetitionSnapShotCmd;
-    using Fsel.Identity.Application.Queries.GoogleSheetQuery;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.LmsCourseService.Model;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Identity.Domain.Models.CommandModels.StudentCompetitionSnapShot;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Newtonsoft.Json;
+    using Microsoft.Extensions.Hosting;
 
-    public class GetStudentRankingCompetitionQuery : BaseQueryModel, IRequest<MethodResult<PagingItemStudentRankingModel>>
+    public class GetStudentRankingCompetitionQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<StudentRankingModel>>>
     {
         public EnumCourseType CourseType { get; set; }
-
-        public string? SchoolCode { get; set; }
-
-        public int WeekNumber { get; set; }
     }
 
-    public class GetStudentRankingCompetitionQueryHandler : IRequestHandler<GetStudentRankingCompetitionQuery, MethodResult<PagingItemStudentRankingModel>>
+    public class GetStudentRankingCompetitionQueryHandler : IRequestHandler<GetStudentRankingCompetitionQuery, MethodResult<PagingItemsModel<StudentRankingModel>>>
     {
         private readonly ILmsCourseService _lmsCourseService;
+        private readonly IHostEnvironment _environment;
         private readonly IStudentRepository _studentRepository;
         private const double Process_Ratio = 0.75;
         private const double Overall_Ratio = 0.25;
-        private readonly IMediator _mediator;
-        private readonly IStudentCompetitionSnapShotRepository _studentCompetitionSnapShotRepository;
-        private readonly IMapper _mapper;
+        private DateTime _expiredCompetition = new DateTime(2024, 6, 14, 16, 59, 0); // thời điểm khóa leaderboard
 
-        public GetStudentRankingCompetitionQueryHandler(ILmsCourseService lmsCourseService, IStudentRepository studentRepository, IMediator mediator, IStudentCompetitionSnapShotRepository studentCompetitionSnapShotRepository, IMapper mapper)
+        public GetStudentRankingCompetitionQueryHandler(ILmsCourseService lmsCourseService, IHostEnvironment environment, IStudentRepository studentRepository)
         {
             _lmsCourseService = lmsCourseService;
+            _environment = environment;
             _studentRepository = studentRepository;
-            _mediator = mediator;
-            _studentCompetitionSnapShotRepository = studentCompetitionSnapShotRepository;
-            _mapper = mapper;
         }
 
-        public async Task<MethodResult<PagingItemStudentRankingModel>> Handle(GetStudentRankingCompetitionQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<StudentRankingModel>>> Handle(GetStudentRankingCompetitionQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<PagingItemStudentRankingModel> methodResult = new MethodResult<PagingItemStudentRankingModel>();
-
-            var listStudentCompetitionResult = await _mediator.Send(new GetListStudentSchoolQuery { SchoolCode = request.SchoolCode }, cancellationToken);
-            var listStudentCompetition = listStudentCompetitionResult?.Result;
+            MethodResult<PagingItemsModel<StudentRankingModel>> methodResult = new MethodResult<PagingItemsModel<StudentRankingModel>>();
 
 
 
-            // Đọc Data Week Events
-            string competitionConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.SchoolEventRules);
-            string jsonData = File.ReadAllText(competitionConfigPath);
-            var listSchoolEventRules = JsonConvert.DeserializeObject<IList<SchoolEventRule>>(jsonData);
-            if (listSchoolEventRules == null || listSchoolEventRules.FirstOrDefault() == null || listSchoolEventRules.FirstOrDefault()!.WeekEvents == null)
+            if (DateTime.UtcNow > _expiredCompetition)
             {
+                string fileResult = request.CourseType == EnumCourseType.Academic ? ResourceSettings.AcademicStudentsResult : ResourceSettings.IeltsStudentResult;
+                string pathResult = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileResult);
+                var finalResult = ConvertHelper.DeserializeFromFilePath<List<StudentRankingModel>>(pathResult);
+
+                int totalResult = finalResult.Count();
+                var listsResult = finalResult.ApplyPaging(request).ToList();
+                methodResult.Result = new PagingItemsModel<StudentRankingModel>(listsResult, request, totalResult);
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var weekEventRules = listSchoolEventRules!.FirstOrDefault(x => x.SchoolCode == request.SchoolCode)!.WeekEvents!.FirstOrDefault(x => x.WeekNumber == request.WeekNumber);
 
-
-            var resultSnapShot = _studentCompetitionSnapShotRepository.Queryable.FirstOrDefault(x => x.SchoolCode == request.SchoolCode && x.WeekNumber == request.WeekNumber && x.StartDate == weekEventRules!.StartDate && x.EndDate == weekEventRules!.EndDate);
-
-
-            IList<StudentRankingModel> studentRanking = new List<StudentRankingModel>();
-
-            if (resultSnapShot == null)
+            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsName);
+            if (_environment.IsProduction() && request.CourseType == EnumCourseType.Academic)
             {
-                // Lọc dữ liệu học sinh
-                List<Guid> competitionStudentIds = listStudentCompetition!.Select(x => x.StudentId).ToList();
-                var listStudentCompetion = listStudentCompetition!.ToList();
-                var studentProgressAndOverall = await _lmsCourseService.GetStudentProgress(new StudentCompetitionStatQueryModel
-                {
-                    StudentIds = competitionStudentIds,
-                    CourseType = request.CourseType,
-                });
-                var studentResults = studentProgressAndOverall?.Content?.Result;
-
-                if (studentResults == null)
-                {
-                    studentResults = new List<CompetitionStudentProgressModel>();
-                }
-                var studentInfos = _studentRepository.Queryable.Include(x => x.Human).Where(x => competitionStudentIds.Contains(x.Id)).ToList();
-
-                studentRanking = (from studentFile in listStudentCompetion
-                                  where studentFile != null
-                                  join studentResult in studentResults on studentFile.StudentId equals studentResult.StudentId into resultGroup
-                                  from studentResult in resultGroup.DefaultIfEmpty()
-                                  join studentInfo in studentInfos on studentFile.StudentId equals studentInfo.Id into infoGroup
-                                  from studentInfo in infoGroup.DefaultIfEmpty()
-                                  select new StudentRankingModel
-                                  {
-                                      StudentId = studentFile.StudentId,
-                                      SchoolName = studentFile.SchoolName,
-                                      Grade = studentFile.Grade,
-                                      Process = studentResult?.ContentCompleted ?? 0, // Thêm kiểm tra null và mặc định giá trị nếu null
-                                      OverallScore = studentResult?.TotalScore ?? 0, // Thêm kiểm tra null và mặc định giá trị nếu null
-                                      CompetitionEndDate = weekEventRules!.EndDate,
-                                      FullName = studentFile.FullName,
-                                      AvatarPath = studentInfo?.Human?.AvatarPath ?? string.Empty, // Thêm kiểm tra null và mặc định giá trị nếu null
-                                      UserId = studentFile.UserId,
-                                      RankingScore = Process_Ratio * (studentResult?.ContentCompleted ?? 0) + Overall_Ratio * (studentResult?.TotalScore ?? 0),
-                                  }).OrderByDescending(x => (Process_Ratio * x.Process + Overall_Ratio * x.OverallScore)).ToList();
+                path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsName);
             }
-            else
+            else if (_environment.IsStaging() && request.CourseType == EnumCourseType.Academic)
             {
-                studentRanking = ConvertHelper.Deserialize<IList<StudentRankingModel>>(resultSnapShot.WeekCompetitionData)!.ToList();
+                path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsStagingName);
+
+            }
+            else if (_environment.IsProduction() && request.CourseType == EnumCourseType.Ielts)
+            {
+                path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.IeltsStudentsName);
+            }
+            else if (_environment.IsStaging() && request.CourseType == EnumCourseType.Ielts)
+            {
+                path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.IeltsStudentsStagingName);
+
             }
 
+            var listStudentCompetition = ConvertHelper.DeserializeFromFilePath<IList<StudentJoinCompetitionModel>>(path);
+            List<Guid> competitionStudentIds = listStudentCompetition!.Select(x => x.StudentId).ToList();
+            var listStudentCompetion = listStudentCompetition!.ToList();
 
-            var lists = studentRanking.ApplyPaging(request).ToList();
-            int totalItem = studentRanking.Count;
-            var resultPaging = new PagingItemsModel<StudentRankingModel>(lists, request, totalItem);
 
-
-            methodResult.Result = new PagingItemStudentRankingModel
+            var studentProgressAndOverall = await _lmsCourseService.GetStudentProgress(new StudentCompetitionStatQueryModel
             {
-                Items = resultPaging.Items,
-                PagingInfo = resultPaging.PagingInfo,
-                WeekEvent = weekEventRules
-            };
-            TimeSpan timeWeek = new TimeSpan(weekEventRules!.EndDate.Hour, weekEventRules.EndDate.Minute, 0);
-            TimeSpan timeNow = new TimeSpan(DateTime.UtcNow.Hour + 7, DateTime.UtcNow.Minute, 0);
+                StudentIds = competitionStudentIds,
+                CourseType = request.CourseType,
+            });
+            var studentResults = studentProgressAndOverall?.Content?.Result;
 
-            // Lưu Snapshot theo tuần.
-            if (weekEventRules!.EndDate.Date == DateTime.UtcNow.Date && timeWeek == timeNow && resultSnapShot == null)
+            if (studentResults == null)
             {
-                StudentCompetitionSnapShotModel snapshotModel = new StudentCompetitionSnapShotModel
-                {
-                    SchoolCode = request.SchoolCode,
-                    WeekCompetitionData = ConvertHelper.Serialize(lists),
-                    StartDate = weekEventRules!.StartDate,
-                    EndDate = weekEventRules!.EndDate,
-                    WeekNumber = request.WeekNumber,
-
-                };
-                await UpdateSnapShot(snapshotModel, cancellationToken);
+                studentResults = new List<CompetitionStudentProgressModel>();
             }
 
+            var studentInfos = _studentRepository.Queryable.Include(x => x.Human).Where(x => competitionStudentIds.Contains(x.Id)).ToList();
+
+            var result = from studentFile in listStudentCompetion
+                         where studentFile != null
+                         join studentResult in studentResults! on studentFile.StudentId equals studentResult.StudentId into resultGroup
+                         from studentResult in resultGroup.DefaultIfEmpty()
+                         join studentInfo in studentInfos on studentFile.StudentId equals studentInfo.Id into infoGroup
+                         from studentInfo in infoGroup.DefaultIfEmpty()
+                         where studentInfo != null
+                         select new StudentRankingModel
+                         {
+                             StudentId = studentFile.StudentId,
+                             SchoolName = studentFile.SchoolName,
+                             Grade = studentFile.Grade,
+                             Process = studentResult?.ContentCompleted ?? 0, // Thêm kiểm tra null và mặc định giá trị nếu null
+                             OverallScore = studentResult?.TotalScore ?? 0, // Thêm kiểm tra null và mặc định giá trị nếu null
+                             CompetitionEndDate = new DateTime(2024, 6, 15),
+                             FullName = studentFile.FullName,
+                             AvatarPath = studentInfo?.Human?.AvatarPath ?? string.Empty, // Thêm kiểm tra null và mặc định giá trị nếu null
+                             UserId = studentFile.UserId,
+                             RankingScore = Process_Ratio * studentResult?.ContentCompleted + Overall_Ratio * studentResult?.TotalScore
+                         };
+
+            result = result.OrderByDescending(x => (Process_Ratio * x.Process + Overall_Ratio * x.OverallScore));
+            int totalItem = result.Count();
+            var lists = result.ApplyPaging(request).ToList();
+            methodResult.Result = new PagingItemsModel<StudentRankingModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
 
             return methodResult;
-        }
-
-        private async Task UpdateSnapShot(StudentCompetitionSnapShotModel model, CancellationToken cancellationToken)
-        {
-            var modelCommand = _mapper.Map<CreateStudentCompetitionSnapShotModel>(model);
-
-            CreateSnapShotResultCommand cmd = new CreateSnapShotResultCommand
-            {
-                WeekNumber = modelCommand.WeekNumber,
-                EndDate = modelCommand.EndDate,
-                StartDate = modelCommand.StartDate,
-                WeekCompetitionData = modelCommand.WeekCompetitionData,
-                SchoolCode = modelCommand.SchoolCode
-            };
-            await _mediator.Send(cmd, cancellationToken);
         }
     }
 }
