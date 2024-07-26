@@ -58,6 +58,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemStudentRankingModel> methodResult = new MethodResult<PagingItemStudentRankingModel>();
 
+            var timeNowVI = DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam);
             var listStudentCompetitionResult = await _mediator.Send(new GetListStudentSchoolQuery { SchoolCode = request.SchoolCode }, cancellationToken);
             var listStudentCompetition = listStudentCompetitionResult?.Result;
 
@@ -134,11 +135,12 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 PagingInfo = resultPaging.PagingInfo,
                 WeekEvent = weekEventRules
             };
+
             TimeSpan timeWeek = new TimeSpan(weekEventRules!.EndDate.Hour, weekEventRules.EndDate.Minute, 0);
-            TimeSpan timeNow = new TimeSpan(DateTime.UtcNow.Hour + 7, DateTime.UtcNow.Minute, 0);
+            TimeSpan timeNow = new TimeSpan(timeNowVI.Hour, timeNowVI.Minute, 0);
 
             // Lưu Snapshot theo tuần.
-            if (weekEventRules!.EndDate.Date == DateTime.UtcNow.Date && timeWeek == timeNow && resultSnapShot == null)
+            if (weekEventRules!.EndDate.Date == timeNowVI && resultSnapShot == null)
             {
                 StudentCompetitionSnapShotModel snapshotModel = new StudentCompetitionSnapShotModel
                 {
