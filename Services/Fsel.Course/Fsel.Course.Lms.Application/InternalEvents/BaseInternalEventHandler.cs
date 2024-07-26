@@ -599,7 +599,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 return;
             }
 
-            var classForumResults = await _classForumResultRepository.Queryable.Where(p => lessonResultIds.Contains(p.LessonResultId) && p.StudentId == studentId && p.Status == EnumClassForumResultStatus.Graded).ToListAsync(cancellationToken);
+            var classForumResults = await _classForumResultRepository.Queryable.Where(p => lessonResultIds.Contains(p.LessonResultId) && p.StudentId == studentId && p.Status.HasValue).ToListAsync(cancellationToken);
             if (classForumResults.Count != lessonResultIds.Count)
             {
                 return;
