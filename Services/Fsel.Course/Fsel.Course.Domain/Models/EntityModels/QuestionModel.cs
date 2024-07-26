@@ -12,6 +12,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public bool Ungraded { get; set; }
         public string? Explanation { get; set; }
         public object? Config { get; set; }
+        public IList<int>? SubQuestionIndexs { get; set; }
+        public int SubQuestionNumber { get; set; }
         public EnumCorrectStatus? CorrectStatus { get; set; }
         public AnswerModel? ResultAnswer { get; set; }
         public Guid? SectionId { get; set; }
