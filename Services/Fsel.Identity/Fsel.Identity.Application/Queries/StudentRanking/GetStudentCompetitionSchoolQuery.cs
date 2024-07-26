@@ -134,8 +134,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 PagingInfo = resultPaging.PagingInfo,
                 WeekEvent = weekEventRules
             };
-            TimeSpan timeWeek = new TimeSpan(weekEventRules!.EndDate.Hour, weekEventRules.EndDate.Minute, 0);
-            TimeSpan timeNow = new TimeSpan(DateTime.UtcNow.Hour + 7, DateTime.UtcNow.Minute, 0);
+            TimeSpan timeWeek = new TimeSpan(weekEventRules!.EndDate.Hour, 0, 0);
+            TimeSpan timeNow = new TimeSpan(DateTime.UtcNow.Hour + 7, 0, 0);
 
             // Lưu Snapshot theo tuần.
             if (weekEventRules!.EndDate.Date == DateTime.UtcNow.Date && timeWeek == timeNow && resultSnapShot == null)
