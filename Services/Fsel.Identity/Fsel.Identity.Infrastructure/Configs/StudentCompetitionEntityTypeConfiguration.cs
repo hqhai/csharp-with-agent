@@ -9,11 +9,16 @@ namespace Fsel.Identity.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class StudentCompetitionEntityTypeConfiguration : IEntityTypeConfiguration<StudentCompetitionSnapShot>
+    public class StudenrRankingEntityTypeConfiguration : IEntityTypeConfiguration<StudentRanking>
     {
-        public void Configure(EntityTypeBuilder<StudentCompetitionSnapShot> builder)
+        public void Configure(EntityTypeBuilder<StudentRanking> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+            builder.Property(e => e.CourseLevel)
+                   .HasMaxLength(100)
+                   .HasConversion(
+                        v => v.ToString(),
+                        v => v.EnumParse<EnumCourseLevel>());
         }
     }
 }

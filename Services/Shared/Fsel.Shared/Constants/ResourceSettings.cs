@@ -35,6 +35,7 @@ namespace Fsel.Shared.Constants
         public const string PrivateKeyDevUrBox = "Resources//UrBox//Development//private_key_rsa";
         public const string PrivateKeyProdUrBox = "Resources//UrBox//Production//private_key_rsa";
         public const string I18NCredentialsFilePath = "Resources//file-i18n.json";
+        public const string StudentCredentialsFilePath = "Resources//file-student-credential.json";
 
         public const string BandScoreFileName = "Resources//BandScores.json";
         public const string LeaderBoardPercentFileName = "Resources//LeaderBoardScorePercentage.json";
@@ -73,5 +74,7 @@ namespace Fsel.Shared.Constants
 
         public const string IeltsStudentResult = "Resources//IeltsStudentsResult.json";
         public const string AcademicStudentsResult = "Resources//AcademicStudentsResult.json";
+        public const string SchoolEventRules = "Resources//SchoolEventRules.json";
+
     }
 }
