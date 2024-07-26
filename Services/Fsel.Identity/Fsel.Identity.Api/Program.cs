@@ -66,6 +66,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.UserQueue.NameQueue.SyncStudentShieldEveryDay, typeof(SyncStudentShieldForDailyStreakEveryDayConsumer) },
     { QueueSettings.UserQueue.NameQueue.UpdateStudentsDailyStreak, typeof(SyncStudentShieldForDailyStreakEveryDayConsumer) },
     { QueueSettings.UserQueue.NameQueue.LeaderBoard, typeof(LeaderBoardConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.WeeklySnapShotLeaderBoard, typeof(LeaderBoardForSchoolConsumer) },
     { QueueSettings.PlantDefenderQueue.NameQueue.DeleteGuestStudent, typeof(DeleteGuestStudentConsumer) },
     { QueueSettings.UserQueue.NameQueue.UpdateStatusTrialStudent, typeof(UpdateTrialStudentStatusConsumer) }
 });
