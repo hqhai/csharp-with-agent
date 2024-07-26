@@ -9,7 +9,7 @@ namespace Fsel.Ordering.Domain.Models.QueryModels.Oders.V1i2
 
     public class SearchOrderQueryModel : BaseQueryModel
     {
-        public EnumOrderStatus? Status { get; set; }
+        public bool? IsNew { get; set; }
         public IList<Guid>? PackageIds { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }

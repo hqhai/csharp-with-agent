@@ -17,7 +17,5 @@ namespace Fsel.Course.Domain.IRepositories
         Task<CourseModel?> GetIncludeCourseResult(Guid id, Guid? studentId, string? classCode);
 
         Task<(int, int)> GetDisplayOrder(CourseResultModel courseResult);
-
-        Task<(int, int)> GetContentComplete(CourseResultModel courseResult);
     }
 }
