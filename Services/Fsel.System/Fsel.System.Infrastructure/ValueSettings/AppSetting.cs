@@ -42,7 +42,6 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public string? CCEmailSpreadSheetId { get; set; }
         public string? CCEmailSheet { get; set; }
         public string? OrderInfoSpreadSheetId { get; set; }
-        public string? OrderInfoSheet { get; set; }
     }
 
     public class Services : BaseServices
