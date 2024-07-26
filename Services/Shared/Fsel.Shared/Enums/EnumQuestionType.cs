@@ -57,7 +57,7 @@ namespace Fsel.Shared.Enums
         [Description("Exercise preparation")]
         ExercisePreparation,
 
-        // Dang Cau hỏi mới
+        // Dạng hỏi mới
 
         [Description("Multiple Choice")]
         MultichoiceV1,
