@@ -41,10 +41,10 @@ builder.Services.AddScoped<IUserPlatformRepository, UserPlatformRepository>();
 builder.Services.AddScoped<IStudentDailyStreakRepository, StudentDailyStreakRepository>();
 builder.Services.AddScoped<IStudentRankingRepository, StudentRankingRepository>();
 builder.Services.AddScoped<IStudentTrialRegistrationRepository, StudentTrialRegistrationRepository>();
-builder.Services.AddScoped<IStudentCompetitionSnapShotRepository, StudentCompetitionSnapShotRepository>();
 builder.Services.AddScoped<IUserCourseSettingRepository, UserCourseSettingRepository>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeRepository>();
+builder.Services.AddScoped<IStudentCompetitionSnapShotRepository, StudentCompetitionSnapShotRepository>();
 
 // Queue
 builder.Services.AddScoped<LeaderBoardPublisher>();
