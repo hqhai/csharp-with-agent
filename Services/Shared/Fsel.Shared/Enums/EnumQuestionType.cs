@@ -81,7 +81,7 @@ namespace Fsel.Shared.Enums
         MatchingHeading,
 
         [Description("Check list")]
-        CheckList,
+        CheckListV1,
 
         [Description("Summary completion (Gap fill)")]
         SummaryCompletionGapFill,

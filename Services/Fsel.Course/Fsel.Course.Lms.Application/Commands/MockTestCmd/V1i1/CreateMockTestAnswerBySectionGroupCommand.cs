@@ -187,7 +187,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 else if (request.Answers == null || request.Answers.Count == 0)
                 {
                     var mockTestAnswers = _mockTestAnswerRepository.Queryable.Where(x => x.MockTestResultId == mockTestResult.Id && x.SectionGroupResultId == sectionGroupResult.Id).ToList();
-
                     foreach (var item in mockTestAnswers)
                     {
                         await SendToChatGpt(item.SectionId ?? default, sectionGroupId, mockTestResult.Id, item.AnswerStr, cancellationToken);
@@ -469,7 +468,5 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             mockTestAnswer.CorrectCount = correctCount;
             return mockTestAnswer;
         }
-
-
     }
 }

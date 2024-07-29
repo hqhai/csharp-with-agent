@@ -162,7 +162,7 @@ namespace Fsel.Course.Infrastructure.Common
             };
         }
 
-        public async Task<IList<Section>> GetSectionsAsync(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
+        public async Task<IList<Section>> GetSectionsAsync(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, double version = (int)EnumVersion.V1)
         {
             ArgumentNullException.ThrowIfNull(sectionGroup);
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
@@ -171,7 +171,14 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 if (sectionGroup.CourseSkill == EnumCourseSkill.Reading || sectionGroup.CourseSkill == EnumCourseSkill.Listening)
                 {
-                    query = query.Include(x => x.SectionParts).ThenInclude(x => x.SectionQuestions).ThenInclude(x => x.MockTestAnswers.Where(x => x.SectionGroupResultId == sectionGroupResult.Id));
+                    if (version == (int)EnumVersion.V1)
+                    {
+                        query = query.Include(x => x.SectionParts).ThenInclude(x => x.SectionQuestions).ThenInclude(x => x.MockTestAnswers.Where(x => x.SectionGroupResultId == sectionGroupResult.Id));
+                    }
+                    else
+                    {
+                        query = query.Include(x => x.SectionQuestions).ThenInclude(x => x.MockTestAnswers.Where(x => x.SectionGroupResultId == sectionGroupResult.Id));
+                    }
                 }
                 else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing)
                 {
@@ -193,9 +200,9 @@ namespace Fsel.Course.Infrastructure.Common
             return await query.Where(x => x.SectionGroupId == sectionGroup.Id).OrderBy(x => x.DisplayOrder).ToListAsync();
         }
 
-        public async Task<(IList<Section>, long)> GetSectionsAndTotalQuestionAsync(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
+        public async Task<(IList<Section>, long)> GetSectionsAndTotalQuestionAsync(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, double version = (int)EnumVersion.V1)
         {
-            var sections = await GetSectionsAsync(sectionGroup, sectionGroupResult);
+            var sections = await GetSectionsAsync(sectionGroup, sectionGroupResult, version);
             return (sections, GetTotalQuestion(sections, sectionGroup.CourseSkill));
         }
 
@@ -451,7 +458,7 @@ namespace Fsel.Course.Infrastructure.Common
             return sectionGroupResultDto;
         }
 
-        public async Task<SectionGroupDtoModel> GetSectionGroupDto(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
+        public async Task<SectionGroupDtoModel> GetSectionGroupDto(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, double version = (int)EnumVersion.V1)
         {
             ArgumentNullException.ThrowIfNull(sectionGroup);
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
@@ -568,9 +575,18 @@ namespace Fsel.Course.Infrastructure.Common
         private SectionModel GetSection(Section section, bool isDisableAnswers = false)
         {
             var sectionDto = _mapper.Map<SectionModel>(section);
-            sectionDto.SectionParts = GetSectionPartDtos(section.SectionParts.ToList(), isDisableAnswers);
-            sectionDto.Questions = GetQuestionDtos(section.SectionQuestions.ToList(), isDisableAnswers);
-            sectionDto.SectionTimeCodes = GetSectionTimeCodeDtos(section.SectionTimeCodes.ToList());
+            if (section.SectionParts.Any())
+            {
+                sectionDto.SectionParts = GetSectionPartDtos(section.SectionParts.ToList(), isDisableAnswers);
+            }
+            if (section.SectionQuestions.Any())
+            {
+                sectionDto.Questions = GetQuestionDtos(section.SectionQuestions.ToList(), isDisableAnswers);
+            }
+            if (section.SectionTimeCodes.Any())
+            {
+                sectionDto.SectionTimeCodes = GetSectionTimeCodeDtos(section.SectionTimeCodes.ToList());
+            }
             sectionDto.MockTestAnswer = _mapper.Map<MockTestAnswerModel>(section.MockTestAnswers.FirstOrDefault());
             return sectionDto;
         }

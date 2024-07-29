@@ -146,7 +146,7 @@ namespace Fsel.Course.Infrastructure.Common
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multichoiceV1) : default;
                     break;
 
-                case EnumQuestionType.CheckList:
+                case EnumQuestionType.CheckListV1:
                     var checkList = HandleQuestion(config.Deserialize<CheckListQuestionV1>());
                     result = isDisableAnswers ? ClearAnswers(checkList) : checkList;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(checkList) : default;
@@ -210,7 +210,7 @@ namespace Fsel.Course.Infrastructure.Common
                     isError = ValidateMatchingTask(matchingHeading);
                     break;
 
-                case EnumQuestionType.CheckList:
+                case EnumQuestionType.CheckListV1:
                     var checkList = config.Deserialize<CheckListQuestionV1>();
                     isError = ValidateCheckList(checkList);
                     break;
