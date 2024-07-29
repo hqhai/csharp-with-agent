@@ -46,6 +46,8 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new StudentFocusTimeEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentTrialRegistrationEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentCompetitionEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentRankingEventsEntityTypeConfiguration());
+            builder.ApplyConfiguration(new CompetitionEventsEntityTypeConfiguration());
             base.OnModelCreating(builder);
         }
 
@@ -69,6 +71,8 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<StudentFocusTime> StudentFocusTimes { get; set; }
         public DbSet<StudentTrialRegistration> StudentTrialRegistrations { get; set; }
         public DbSet<StudentCompetitionSnapShot> StudentCompetitionSnapShots { get; set; }
+        public DbSet<StudentRankingEvents> StudentRankingEvents { get; set; }
+        public DbSet<CompetitionEvents> CompetitionEvents { get; set; }
 
         #endregion Db Set
 
