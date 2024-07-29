@@ -12,10 +12,6 @@ namespace Fsel.Identity.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<CompetitionEvents> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.HasOne(x => x.StudentRankingEvents)
-               .WithOne(b => b.CompetitionEvents)
-               .HasForeignKey<StudentRankingEvents>(b => b.StudentId)
-               .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

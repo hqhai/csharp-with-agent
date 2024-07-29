@@ -13,10 +13,10 @@ namespace Fsel.Identity.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            builder.HasOne(x => x.CompetitionEvents)
-               .WithOne(b => b.StudentRankingEvents)
-               .HasForeignKey<CompetitionEvents>(b => b.Id)
-               .OnDelete(DeleteBehavior.Cascade);
+            builder.HasOne(a => a.CompetitionEvents)
+                .WithMany(b => b.StudentRankingEvents)
+                .HasForeignKey(p => p.CompetitionRankingId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

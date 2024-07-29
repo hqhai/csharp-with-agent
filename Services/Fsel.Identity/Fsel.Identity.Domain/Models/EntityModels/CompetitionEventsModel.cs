@@ -11,11 +11,11 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public string? EventContentStr { get; set; }
 
-        public IList<WeekEvent>? EventContent
+        public IList<SchoolEventRule>? EventContent
         {
             get
             {
-                return Common.Helpers.ConvertHelper.Deserialize<IList<WeekEvent>>(EventContentStr);
+                return Common.Helpers.ConvertHelper.Deserialize<IList<SchoolEventRule>>(EventContentStr);
             }
             set { EventContentStr = Common.Helpers.ConvertHelper.Serialize(value); }
         }

@@ -13,6 +13,7 @@ using Asp.Versioning;
 using Fsel.Shared.Constants;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Application.Commands.CompetitionEventsCmd;
+using Fsel.Identity.Application.Commands.StudentRankingEvents;
 
 namespace Fsel.Identity.Api.Controllers
 {
@@ -94,6 +95,19 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> CreateCompetitionEvents([FromBody] CreateCompetitionEventsCommand cmd)
         {
             MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+
+        /// <summary>
+        /// Lưu dữ liệu sự kiện
+        /// </summary>
+        [HttpPost("student-ranking-events")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentRankingEventsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateStudentRankingEvents([FromBody] CreateStudentRankingEventsCommand cmd)
+        {
+            MethodResult<IList<StudentRankingEventsModel>> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
