@@ -75,8 +75,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery.V1i2
                 return methodResult;
             }
 
-            var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestSections).ThenInclude(x => x.SectionGroup)
-                                                             .FirstOrDefaultAsync(x => x.Id == request.MockTestId, cancellationToken);
+            var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestSections).ThenInclude(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == request.MockTestId, cancellationToken);
             if (mockTest == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTest));

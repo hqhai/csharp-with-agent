@@ -460,41 +460,34 @@ namespace Fsel.Course.Infrastructure.Common
             var sectonGroupDetail = _mapper.Map<SectionGroupDtoModel>(sectionGroup);
             sectonGroupDetail.TotalQuestion = totalCount;
             sectonGroupDetail.SectionGroupResult = await GetSectionGroupResult(sectionGroupResult);
-            if (sectionGroupResult.MockTestResultId.HasValue)
-            {
-                sectonGroupDetail.Sections = sections.Select(x => GetSectionByMockTest(x, sectionGroup.CourseSkill, isSectionGroupResultDone)).ToList();
-            }
-            else
-            {
-                sectonGroupDetail.Sections = sections.Select(x => GetSectionDto(x, isSectionGroupResultDone)).ToList();
-            }
+            sectonGroupDetail.Sections = sections.Select(x => GetSectionDto(x, isSectionGroupResultDone)).ToList();
             return sectonGroupDetail;
         }
 
         private SectionDtoModel GetSectionDto(Section section, bool isDone)
         {
             var sectionDto = _mapper.Map<SectionDtoModel>(section);
-            sectionDto.QuestionTests = section.SectionQuestions.OrderBy(x => x.CreatedDate)
-                                            .Select(x => new QuestionCorrectStatusModel
-                                            {
-                                                QuestionId = x.QuestionId ?? default,
-                                                Status = GetStatus(x, isDone)
-                                            }).ToList();
+            if (section.SectionTimeCodes.Any())
+            {
+                sectionDto.SectionTimeCodes = section.SectionTimeCodes.Select(x => GetSectionTimeCodeDto(x)).OrderBy(x => x.DisplayTime).ToList();
+            }
+            else
+            {
+                if (sectionDto.SectionParts != null && sectionDto.SectionParts.Any())
+                {
+                    sectionDto.SectionParts = section.SectionParts.OrderBy(x => x.CreatedDate).Select(x => GetSectionPartMockTest(x, isDone)).ToList();
+                }
+                else
+                {
+                    sectionDto.QuestionTests = section.SectionQuestions.OrderBy(x => x.CreatedDate)
+                                                   .Select(x => new QuestionCorrectStatusModel
+                                                   {
+                                                       QuestionId = x.QuestionId ?? default,
+                                                       Status = GetStatus(x, isDone)
+                                                   }).ToList();
+                }
+            }
             return sectionDto;
-        }
-
-        private SectionDtoModel GetSectionByMockTest(Section section, EnumCourseSkill skill, bool isDone)
-        {
-            var sectionDetail = _mapper.Map<SectionDtoModel>(section);
-            if (skill == EnumCourseSkill.Reading || skill == EnumCourseSkill.Listening)
-            {
-                sectionDetail.SectionParts = section.SectionParts.OrderBy(x => x.CreatedDate).Select(x => GetSectionPartMockTest(x, isDone)).ToList();
-            }
-            else if (skill == EnumCourseSkill.Speaking)
-            {
-                sectionDetail.SectionTimeCodes = section.SectionTimeCodes.Select(x => GetSectionTimeCodeDto(x)).OrderBy(x => x.DisplayTime).ToList();
-            }
-            return sectionDetail;
         }
 
         private SectionTimeCodeDtoModel GetSectionTimeCodeDto(SectionTimeCode sectionTimeCode)
