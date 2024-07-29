@@ -1,0 +1,143 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+using Microsoft.EntityFrameworkCore;
+
+namespace Fsel.Course.Lms.Application.Queries.MockTestQuery.V1i2
+{
+    using System.Threading;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
+    using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
+
+    public class GetSectionBySectionGroupIdQuery : IRequest<MethodResult<SectionGroupDtoModel>>
+    {
+        public Guid SectionGroupId { get; set; }
+        public Guid MockTestResultId { get; set; }
+    }
+
+    public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupDtoModel>>
+    {
+        private readonly SectionGroupConverter _sectionGroupConverter;
+        private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
+        private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly AuthContext _authContext;
+        private readonly IUserService _userService;
+        private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly ILogger<object> _logger;
+        private readonly QuestBoardPublisher _questBoardPublisher;
+
+        public GetSectionBySectionGroupIdQueryHandler(SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, ISectionGroupRepository sectionGroupRepository, ILogger<object> logger, QuestBoardPublisher questBoardPublisher)
+        {
+            _sectionGroupConverter = sectionGroupConverter;
+            _sectionGroupResultRepository = sectionGroupResultRepository;
+            _mockTestResultRepository = mockTestResultRepository;
+            _authContext = authContext;
+            _userService = userService;
+            _sectionGroupRepository = sectionGroupRepository;
+            _logger = logger;
+            _questBoardPublisher = questBoardPublisher;
+        }
+
+        public async Task<MethodResult<SectionGroupDtoModel>> Handle(GetSectionBySectionGroupIdQuery request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<SectionGroupDtoModel>();
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                return methodResult;
+            }
+            var student = studentResult?.Content?.Result;
+            var studentId = student?.Id ?? default;
+
+            var mockTestResult = await _mockTestResultRepository.GetByIdAsync(request.MockTestResultId);
+            if (mockTestResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
+                return methodResult;
+            }
+            else if (mockTestResult.Status == EnumResultStatus.Unfinished)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished), nameof(mockTestResult));
+                return methodResult;
+            }
+            if (mockTestResult.Status == EnumResultStatus.New)
+            {
+                await UpdateMockTestResult(mockTestResult);
+            }
+            var sectionGroup = await _sectionGroupRepository.GetByIdAsync(request.SectionGroupId);
+            if (sectionGroup == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
+                return methodResult;
+            }
+            var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId);
+            methodResult.Result = await _sectionGroupConverter.GetSectionGroupDto(sectionGroup, sectionGroupResult);
+
+            #region Do QuestBoard
+
+            var gradingAlFeedback = methodResult.Result.Sections?.FirstOrDefault()?.MockTestAnswer?.GradingAlFeedback;
+            if (!string.IsNullOrEmpty(gradingAlFeedback))
+            {
+                await DoQuestBoard(studentId, EnumQuestBoardCategory.MessagesFromAI, cancellationToken);
+            }
+
+            #endregion Do QuestBoard
+
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+
+        private async Task UpdateMockTestResult(MockTestResult mockTestResult)
+        {
+            mockTestResult.Status = EnumResultStatus.Process;
+            _mockTestResultRepository.Update(mockTestResult);
+            await _mockTestResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        private async Task<SectionGroupResult> GetAndAddSectionGroupResult(GetSectionBySectionGroupIdQuery request, Guid studentId)
+        {
+            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId && x.StudentId == studentId).FirstOrDefaultAsync();
+            if (sectionGroupResult == null)
+            {
+                _logger.LoggerRequest(request);
+                sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, MockTestResultId = request.MockTestResultId, Status = EnumResultStatus.New });
+                await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+            }
+            else if (sectionGroupResult.Status != EnumResultStatus.Done)
+            {
+                sectionGroupResult.Status = EnumResultStatus.Process;
+                sectionGroupResult = _sectionGroupResultRepository.Update(sectionGroupResult);
+                await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+            }
+            return sectionGroupResult;
+        }
+
+        private async Task DoQuestBoard(Guid studentId, EnumQuestBoardCategory category, CancellationToken cancellationToken)
+        {
+            await _questBoardPublisher.Publish(new QuestBoardQueueModel()
+            {
+                StudentID = studentId,
+                Type = EnumQuestBoardType.LearningQuests,
+                Category = category,
+                Value = 1
+            }, cancellationToken);
+        }
+    }
+}

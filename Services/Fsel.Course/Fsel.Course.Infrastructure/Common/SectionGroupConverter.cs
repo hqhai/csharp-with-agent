@@ -196,7 +196,7 @@ namespace Fsel.Course.Infrastructure.Common
         public async Task<(IList<Section>, long)> GetSectionsAndTotalQuestionAsync(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
         {
             var sections = await GetSectionsAsync(sectionGroup, sectionGroupResult);
-            return (sections, sections?.Select(x => GetTotalQuestion(x, sectionGroup.CourseSkill)).Sum() ?? default);
+            return (sections, GetTotalQuestion(sections, sectionGroup.CourseSkill));
         }
 
         private static long GetTotalQuestion(Section section, EnumCourseSkill courseSkill)
@@ -204,7 +204,7 @@ namespace Fsel.Course.Infrastructure.Common
             ArgumentNullException.ThrowIfNull(section);
             if (courseSkill == EnumCourseSkill.Speaking)
             {
-                return section.SectionTimeCodes.Any() ? section.SectionTimeCodes.Count : default;
+                return section.SectionTimeCodes.Count;
             }
             else if (courseSkill == EnumCourseSkill.Writing)
             {
@@ -218,7 +218,16 @@ namespace Fsel.Course.Infrastructure.Common
             ArgumentNullException.ThrowIfNull(sections);
             if (sectionGroup.CourseSkill == EnumCourseSkill.Reading || sectionGroup.CourseSkill == EnumCourseSkill.Listening)
             {
-                var sectionQuestions = sections.SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions);
+                var sectionQuestions = new List<SectionQuestion>();
+                var sectionParts = sections.SelectMany(x => x.SectionParts);
+                if (sectionParts.Any())
+                {
+                    sectionQuestions = sections.SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).ToList();
+                }
+                else
+                {
+                    sectionQuestions = sections.SelectMany(x => x.SectionQuestions).ToList();
+                }
                 var sectionQuestionCompleteIds = sectionQuestions.SelectMany(x => x.MockTestAnswers).Where(x => x.SectionQuestionId.HasValue).Select(x => x.SectionQuestionId!.Value).ToList();
                 return sectionQuestions.Select(x => x.Id).Except(sectionQuestionCompleteIds).ToList();
             }
@@ -559,21 +568,8 @@ namespace Fsel.Course.Infrastructure.Common
         public long GetTotalQuestion(SectionGroup? sectionGroup)
         {
             ArgumentNullException.ThrowIfNull(sectionGroup);
-            var sections = sectionGroup.Sections;
-            if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
-            {
-                var sectionTimeCode = sections.SelectMany(x => x.SectionTimeCodes);
-                return sectionTimeCode.Any() ? sectionTimeCode.Count() : default;
-            }
-            else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing)
-            {
-                return sections.Any() ? sections.Count : default;
-            }
-            else
-            {
-                var sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
-                return sectionParts.Any() ? sectionParts.SelectMany(x => x.SectionQuestions).Count() : sections.SelectMany(x => x.SectionQuestions).Count();
-            }
+            var sections = sectionGroup.Sections.ToList();
+            return GetTotalQuestion(sections, sectionGroup.CourseSkill);
         }
 
         private SectionModel GetSection(Section section, bool isDisableAnswers = false)
