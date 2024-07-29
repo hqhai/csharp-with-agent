@@ -6,6 +6,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Questions;
     using Fsel.Course.Domain.Models.CommandModels.Sections;
@@ -98,6 +99,7 @@ namespace Fsel.Course.Infrastructure.Common
                     //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section));
                     //    return methodResult;
                     //}
+                    var index = sectionModels.IndexOf(section) + 1;
                     if (section != null)
                     {
                         Section newSection = sections.ElementAt(sectionModels.IndexOf(section));
@@ -154,6 +156,13 @@ namespace Fsel.Course.Infrastructure.Common
                                 if (!method.IsOK)
                                 {
                                     methodResult.AddErrorBadRequest(method.ErrorMessages);
+                                    return methodResult;
+                                }
+
+                                var correctCount = newSection.SectionQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                                if (!SectionValidation.IsCheckSection(sectionGroup.CourseSkill, index, correctCount))
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.ExceededValidScore), nameof(index), index);
                                     return methodResult;
                                 }
                             }

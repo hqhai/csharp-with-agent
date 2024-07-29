@@ -78,6 +78,15 @@ namespace Fsel.Shared.Enums
         MatchingParagraphInfo,
 
         [Description("Matching heading")]
-        MatchingHeading
+        MatchingHeading,
+
+        [Description("Check list")]
+        CheckList,
+
+        [Description("Summary completion (Gap fill)")]
+        SummaryCompletionGapFill,
+
+        [Description("Completion Diagrams")]
+        CompletionDiagrams,
     }
 }

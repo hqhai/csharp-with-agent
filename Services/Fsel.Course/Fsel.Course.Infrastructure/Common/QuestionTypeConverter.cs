@@ -146,6 +146,24 @@ namespace Fsel.Course.Infrastructure.Common
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multichoiceV1) : default;
                     break;
 
+                case EnumQuestionType.CheckList:
+                    var checkList = HandleQuestion(config.Deserialize<CheckListQuestionV1>());
+                    result = isDisableAnswers ? ClearAnswers(checkList) : checkList;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(checkList) : default;
+                    break;
+
+                case EnumQuestionType.SummaryCompletionGapFill:
+                    var summaryCompletionGapFill = HandleQuestion(config.Deserialize<CheckListQuestionV1>());
+                    result = isDisableAnswers ? ClearAnswers(summaryCompletionGapFill) : summaryCompletionGapFill;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(summaryCompletionGapFill) : default;
+                    break;
+
+                case EnumQuestionType.CompletionDiagrams:
+                    var completionDiagrams = HandleQuestion(config.Deserialize<CheckListQuestionV1>());
+                    result = isDisableAnswers ? ClearAnswers(completionDiagrams) : completionDiagrams;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(completionDiagrams) : default;
+                    break;
+
                 default:
                     throw new ArgumentException("Invalid question type");
             }
@@ -179,7 +197,7 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.SummaryCompletionDropDown:
                     var summaryCompletionDropDown = config.Deserialize<MatchingTaskQuestion>();
-                    isError = ValidateMatchingTaskContent(summaryCompletionDropDown);
+                    isError = ValidateMatchingTask(summaryCompletionDropDown) || string.IsNullOrEmpty(summaryCompletionDropDown?.Content);
                     break;
 
                 case EnumQuestionType.MatchingParagraphInfo:
@@ -192,10 +210,38 @@ namespace Fsel.Course.Infrastructure.Common
                     isError = ValidateMatchingTask(matchingHeading);
                     break;
 
+                case EnumQuestionType.CheckList:
+                    var checkList = config.Deserialize<CheckListQuestionV1>();
+                    isError = ValidateCheckList(checkList);
+                    break;
+
+                case EnumQuestionType.SummaryCompletionGapFill:
+                    var summaryCompletionGapFill = config.Deserialize<CheckListQuestionV1>();
+                    isError = ValidateCheckList(summaryCompletionGapFill) || string.IsNullOrEmpty(summaryCompletionGapFill?.Content);
+                    break;
+
+                case EnumQuestionType.CompletionDiagrams:
+                    var completionDiagrams = config.Deserialize<CheckListQuestionV1>();
+                    isError = ValidateCheckList(completionDiagrams);
+                    break;
+
                 default:
                     break;
             }
             return isError;
+        }
+
+        private static bool ValidateCheckList(CheckListQuestionV1? data)
+        {
+            if (data == null || !data.Answers.Any())
+            {
+                return true;
+            }
+            if (HasInvalidKeysOrContent(data.Answers))
+            {
+                return true;
+            }
+            return false;
         }
 
         private static bool ValidateMultichoiceV1(MultipleChoiceQuestionV1? data)
@@ -220,23 +266,6 @@ namespace Fsel.Course.Infrastructure.Common
             return false;
         }
 
-        private static bool ValidateMatchingTaskContent(MatchingTaskQuestion? data)
-        {
-            if (data == null || string.IsNullOrEmpty(data.Content) || !data.Answers.Any())
-            {
-                return true;
-            }
-            if (HasInvalidKeysOrContent(data.Answers) || HasInvalidKeysOrContent(data.Placeholders))
-            {
-                return true;
-            }
-            if (data.Placeholders.GroupBy(x => x.Key).Select(x => x.Count()).Any(x => x > 1))
-            {
-                return true;
-            }
-            return false;
-        }
-
         private static bool ValidateMatchingTask(MatchingTaskQuestion? data)
         {
             if (data == null || !data.Answers.Any() || !data.Placeholders.Any())
@@ -256,8 +285,10 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static bool HasInvalidKeysOrContent(IEnumerable<dynamic> items)
         {
-            // Kiểm tra key không được rỗng
-            if (items.Any(x => string.IsNullOrEmpty((string)x.Key)))
+            // Kiểm tra sự đồng nhất của Key
+            bool hasEmptyKey = items.Any(x => string.IsNullOrEmpty((string)x.Key));
+            bool hasNonEmptyKey = items.Any(x => !string.IsNullOrEmpty((string)x.Key));
+            if (hasEmptyKey && hasNonEmptyKey)
             {
                 return true;
             }
@@ -271,19 +302,47 @@ namespace Fsel.Course.Infrastructure.Common
             return false;
         }
 
-        private static MatchingTaskQuestion? HandleQuestion(MatchingTaskQuestion? data)
+        private static CheckListQuestionV1? HandleQuestion(CheckListQuestionV1? data)
         {
-            if (data == null)
+            if (data == null || string.IsNullOrEmpty(data.Content))
             {
                 return data;
             }
-            if (!string.IsNullOrEmpty(data.Content) && !data.Answers.Any())
+            MatchCollection matches = Regex.Matches(data.Content, @"\{(.*?)\}");
+            Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+            foreach (Match match in matches)
             {
-                MatchCollection matches = Regex.Matches(data.Content, @"\{(.*?)\}");
-                Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
-                foreach (Match match in matches)
+                string id = match.Groups[1].Value;
+                if (!Guid.TryParse(id, out _))
                 {
-                    string id = match.Groups[1].Value;
+                    var config = new ConfigQuestionV1
+                    {
+                        Content = match.Groups[1].Value
+                    };
+                    data.Answers.Add(config);
+                    replacements[id] = config.Id;
+                }
+            }
+            foreach (var pair in replacements)
+            {
+                data.Content = data.Content.Replace("{" + pair.Key + "}", "{" + pair.Value.ToString() + "}", StringComparison.CurrentCulture);
+            }
+            return data;
+        }
+
+        private static MatchingTaskQuestion? HandleQuestion(MatchingTaskQuestion? data)
+        {
+            if (data == null || string.IsNullOrEmpty(data.Content))
+            {
+                return data;
+            }
+            MatchCollection matches = Regex.Matches(data.Content, @"\{(.*?)\}");
+            Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+            foreach (Match match in matches)
+            {
+                string id = match.Groups[1].Value;
+                if (!Guid.TryParse(id, out _))
+                {
                     var config = new ConfigQuestionV1
                     {
                         Key = match.Groups[1].Value
@@ -291,10 +350,10 @@ namespace Fsel.Course.Infrastructure.Common
                     data.Answers.Add(config);
                     replacements[id] = config.Id;
                 }
-                foreach (var pair in replacements)
-                {
-                    data.Content = data.Content.Replace("{" + pair.Key + "}", "{" + pair.Value.ToString() + "}", StringComparison.CurrentCulture);
-                }
+            }
+            foreach (var pair in replacements)
+            {
+                data.Content = data.Content.Replace("{" + pair.Key + "}", "{" + pair.Value.ToString() + "}", StringComparison.CurrentCulture);
             }
             return data;
         }
@@ -311,6 +370,25 @@ namespace Fsel.Course.Infrastructure.Common
                         {
                             x.IsCorrect = null;
                         });
+                    }
+                }
+            }
+            return data;
+        }
+
+        private static object? ClearAnswers(CheckListQuestionV1? data)
+        {
+            if (data != null && data.Answers != null)
+            {
+                foreach (var item in data.Answers)
+                {
+                    if (item.IsCorrect.HasValue)
+                    {
+                        item.IsCorrect = null;
+                    }
+                    else
+                    {
+                        item.Content = null;
                     }
                 }
             }
@@ -404,6 +482,19 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             return data;
+        }
+
+        private static int GetTotalCorrect(CheckListQuestionV1? data)
+        {
+            if (data != null && data.Answers != null && data.Answers.Any())
+            {
+                if (data.Answers.Any(x => x.IsCorrect.HasValue))
+                {
+                    return data.Answers.Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value);
+                }
+                return data.Answers.Count;
+            }
+            return default;
         }
 
         private static int GetTotalCorrect(MultipleOptionSentenceCompletionQuestion? data)
