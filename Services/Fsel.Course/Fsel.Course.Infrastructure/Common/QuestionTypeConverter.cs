@@ -319,13 +319,20 @@ namespace Fsel.Course.Infrastructure.Common
                     {
                         Content = match.Groups[1].Value
                     };
-                    data.Answers.Add(config);
+                    data.Answers.Insert(replacements.Count, config);
                     replacements[id] = config.Id;
+                }
+                else
+                {
+                    replacements[id] = new Guid(id);
                 }
             }
             foreach (var pair in replacements)
             {
-                data.Content = data.Content.Replace("{" + pair.Key + "}", "{" + pair.Value.ToString() + "}", StringComparison.CurrentCulture);
+                if (!Guid.TryParse(pair.Key, out _))
+                {
+                    data.Content = data.Content.Replace("{" + pair.Key + "}", "{" + pair.Value.ToString() + "}", StringComparison.CurrentCulture);
+                }
             }
             return data;
         }
@@ -347,13 +354,20 @@ namespace Fsel.Course.Infrastructure.Common
                     {
                         Key = match.Groups[1].Value
                     };
-                    data.Answers.Add(config);
+                    data.Answers.Insert(replacements.Count, config);
                     replacements[id] = config.Id;
+                }
+                else
+                {
+                    replacements[id] = new Guid(id);
                 }
             }
             foreach (var pair in replacements)
             {
-                data.Content = data.Content.Replace("{" + pair.Key + "}", "{" + pair.Value.ToString() + "}", StringComparison.CurrentCulture);
+                if (!Guid.TryParse(pair.Key, out _))
+                {
+                    data.Content = data.Content.Replace("{" + pair.Key + "}", "{" + pair.Value.ToString() + "}", StringComparison.CurrentCulture);
+                }
             }
             return data;
         }
