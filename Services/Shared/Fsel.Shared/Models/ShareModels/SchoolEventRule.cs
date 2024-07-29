@@ -5,8 +5,8 @@ namespace Fsel.Shared.Models.ShareModels
     public class SchoolEventRule
     {
         public string? SchoolCode { get; set; }
+        public bool LuckySpin { get; set; }
         public IList<WeekEvent>? WeekEvents { get; set; }
-
     }
 
     public class WeekEvent

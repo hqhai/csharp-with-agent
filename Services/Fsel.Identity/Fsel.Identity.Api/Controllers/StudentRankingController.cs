@@ -11,6 +11,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Asp.Versioning;
 using Fsel.Shared.Constants;
+using Fsel.Identity.Application.Queries.GoogleSheetQuery;
 
 namespace Fsel.Identity.Api.Controllers
 {
@@ -79,6 +80,18 @@ namespace Fsel.Identity.Api.Controllers
         {
             ArgumentNullException.ThrowIfNull(query);
             MethodResult<PagingItemStudentRankingModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Lấy ra danh sách schoolCode quay ticket
+        /// </summary>
+        [HttpGet("get-school-code-lucky-spin")]
+        [ProducesResponseType(typeof(MethodResult<IList<string>?>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSchoolCodeLuckySpin()
+        {
+            var queryResult = await _mediator.Send(new GetListSchoolLuckySpinQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
