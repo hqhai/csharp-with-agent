@@ -11,6 +11,8 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Asp.Versioning;
 using Fsel.Shared.Constants;
+using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Application.Commands.CompetitionEventsCmd;
 using Fsel.Identity.Application.Queries.GoogleSheetQuery;
 
 namespace Fsel.Identity.Api.Controllers
@@ -81,6 +83,19 @@ namespace Fsel.Identity.Api.Controllers
             ArgumentNullException.ThrowIfNull(query);
             MethodResult<PagingItemStudentRankingModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+
+        /// <summary>
+        /// Lưu dữ liệu sự kiện
+        /// </summary>
+        [HttpPost("competition-events")]
+        [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateCompetitionEvents([FromBody] CreateCompetitionEventsCommand cmd)
+        {
+            MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
