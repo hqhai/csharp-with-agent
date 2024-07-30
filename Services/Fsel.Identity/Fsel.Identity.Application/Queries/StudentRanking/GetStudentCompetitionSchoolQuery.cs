@@ -68,7 +68,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
             // Đọc Data Week Events
             var competitionEvents = _competitionEventsRepository.Queryable
-                                    .FirstOrDefault(x => x.EventContent != null && x.EventCode == request.SchoolCode);
+                                    .FirstOrDefault(x => !string.IsNullOrEmpty(x.EventContentStr) && x.EventCode == request.SchoolCode);
 
 
             if (competitionEvents == null)
