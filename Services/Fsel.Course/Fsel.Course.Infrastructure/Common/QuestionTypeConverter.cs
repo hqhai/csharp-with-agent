@@ -387,13 +387,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in data.Answers)
                 {
-                    if (item != null)
-                    {
-                        item.Answers.ForEach(x =>
-                        {
-                            x.IsCorrect = null;
-                        });
-                    }
+                    item.Key = null;
                 }
             }
             return data;
@@ -422,7 +416,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (data != null && data.Answers != null)
             {
-                foreach (var item in data.Answers)
+                foreach (var item in data.Answers.SelectMany(x => x.Answers))
                 {
                     item.IsCorrect = null;
                 }

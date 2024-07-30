@@ -129,6 +129,27 @@ namespace Fsel.Course.Infrastructure.Common
             return (configAnswer, totalCorrect, isAnswerMissing, isAnswered);
         }
 
+        public int GetTotalCorrectByAnswerType(Question? question, object? configAnswer)
+        {
+            switch (question?.QuestionType)
+            {
+                case EnumQuestionType.MultichoiceV1:
+                case EnumQuestionType.CheckListV1:
+                case EnumQuestionType.SummaryCompletionGapFill:
+                case EnumQuestionType.CompletionDiagrams:
+                case EnumQuestionType.YesNoNotGivenDropDown:
+                case EnumQuestionType.TrueFalseNotGivenDropDown:
+                case EnumQuestionType.MapLabelingDropDown:
+                case EnumQuestionType.SummaryCompletionDropDown:
+                case EnumQuestionType.MatchingParagraphInfo:
+                case EnumQuestionType.MatchingHeading:
+                    return configAnswer.Deserialize<MultipleChoiceAnswerV1>()?.Answers.Count ?? default;
+
+                default:
+                    return default;
+            }
+        }
+
         public object? AnswerTypeConverterObject(object? configAnswer, EnumQuestionType type, bool isShowSubStatus, EnumResultStatus status, bool isDisableAnswer = true)
         {
             object? result;
@@ -186,6 +207,22 @@ namespace Fsel.Course.Infrastructure.Common
                     result = exercisePreparation;
                     break;
 
+                //V1
+
+                case EnumQuestionType.MultichoiceV1:
+                case EnumQuestionType.CheckListV1:
+                case EnumQuestionType.SummaryCompletionGapFill:
+                case EnumQuestionType.CompletionDiagrams:
+                case EnumQuestionType.YesNoNotGivenDropDown:
+                case EnumQuestionType.TrueFalseNotGivenDropDown:
+                case EnumQuestionType.MapLabelingDropDown:
+                case EnumQuestionType.SummaryCompletionDropDown:
+                case EnumQuestionType.MatchingParagraphInfo:
+                case EnumQuestionType.MatchingHeading:
+                    var matchingTaskQuestion = configAnswer.Deserialize<MultipleChoiceAnswerV1>();
+                    result = GetAnswer(matchingTaskQuestion, isShowSubStatus, status, isDisableAnswer);
+                    break;
+
                 default:
                     throw new ArgumentException("Invalid question type");
             }
@@ -199,6 +236,18 @@ namespace Fsel.Course.Infrastructure.Common
         }
 
         private static object? GetAnswer(MultipleOptionSentenceCompletionAnswer? data, bool isShowSubStatus, EnumResultStatus status, bool isDisableAnswer)
+        {
+            if (data != null && data.Answers != null && status != EnumResultStatus.Done)
+            {
+                foreach (var item in data.Answers)
+                {
+                    item.IsExact = IsDisableAnswers(status, item.IsFirstSubmit, item.IsExact, isShowSubStatus, isDisableAnswer);
+                }
+            }
+            return data;
+        }
+
+        private static object? GetAnswer(MultipleChoiceAnswerV1? data, bool isShowSubStatus, EnumResultStatus status, bool isDisableAnswer)
         {
             if (data != null && data.Answers != null && status != EnumResultStatus.Done)
             {
@@ -325,6 +374,18 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
                     return _linQAnswerHelper.IsNullOrEmptyData(dataAnswer, nameof(MultipleOptionSentenceCompletionAnswers.AnswerId));
+
+                case EnumQuestionType.MultichoiceV1:
+                case EnumQuestionType.CheckListV1:
+                case EnumQuestionType.SummaryCompletionGapFill:
+                case EnumQuestionType.CompletionDiagrams:
+                case EnumQuestionType.YesNoNotGivenDropDown:
+                case EnumQuestionType.TrueFalseNotGivenDropDown:
+                case EnumQuestionType.MapLabelingDropDown:
+                case EnumQuestionType.SummaryCompletionDropDown:
+                case EnumQuestionType.MatchingParagraphInfo:
+                case EnumQuestionType.MatchingHeading:
+                    return _linQAnswerHelper.IsDuplicateAnswerId(dataAnswer, nameof(ConfigAnswer.Id));
 
                 default:
                     return default;
@@ -710,6 +771,10 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return (default, isAnswerMissing, false);
             }
+            if (dataAnswer.Answers.GroupBy(x => x.Id).Any(x => x.Count() > 1))
+            {
+                return (default, isAnswerMissing, false);
+            }
             foreach (var item in dataAnswer.Answers)
             {
                 var question = dataQuestion?.Answers.FirstOrDefault(x => x.Id == item.Id);
@@ -752,6 +817,10 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return (default, isAnswerMissing, false);
             }
+            if (dataAnswer.Answers.Count > dataQuestion?.Answers.Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value))
+            {
+                return (default, isAnswerMissing, false);
+            }
             foreach (var item in dataAnswer.Answers)
             {
                 var answerQuestion = dataQuestion?.Answers.FirstOrDefault(x => x.Id == item.Id);
@@ -768,6 +837,7 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                 }
                 else
+
                 {
                     item.IsExact = default;
                 }
@@ -949,6 +1019,18 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.ExercisePreparation:
                     return default;
+
+                case EnumQuestionType.MultichoiceV1:
+                case EnumQuestionType.CheckListV1:
+                case EnumQuestionType.SummaryCompletionGapFill:
+                case EnumQuestionType.CompletionDiagrams:
+                case EnumQuestionType.YesNoNotGivenDropDown:
+                case EnumQuestionType.TrueFalseNotGivenDropDown:
+                case EnumQuestionType.MapLabelingDropDown:
+                case EnumQuestionType.SummaryCompletionDropDown:
+                case EnumQuestionType.MatchingParagraphInfo:
+                case EnumQuestionType.MatchingHeading:
+                    return new MultipleChoiceAnswerV1();
 
                 default:
                     return default;

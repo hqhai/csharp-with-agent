@@ -46,6 +46,20 @@ namespace Fsel.Course.Infrastructure.Common
             return !string.IsNullOrEmpty(data?.ToString());
         }
 
+        public bool IsDuplicateAnswerId(object? data, string? nameProperty = default)
+        {
+            if (data is IList list)
+            {
+                var objects = list.Cast<object>().ToList();
+                if (objects != null && objects.Any())
+                {
+                    return objects.GroupBy(x => x.GetPropValue(nameProperty)).Any(x => x.Count() > 1);
+                }
+                return false;
+            }
+            return !string.IsNullOrEmpty(data?.ToString());
+        }
+
         public bool CheckAnswerCount(object? answer, object? question)
         {
             if (answer is IList listAnswer && question is IList listQuestion)

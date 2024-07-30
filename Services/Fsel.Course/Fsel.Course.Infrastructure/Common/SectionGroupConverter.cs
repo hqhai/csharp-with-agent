@@ -131,8 +131,20 @@ namespace Fsel.Course.Infrastructure.Common
             var maxTotalCorrect = 36;
             int totalQuestion = default;
 
-            var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id).ToListAsync();
-            var skillScore = GetSkillScore(sectionGroup, new List<BaseAnswer>(mockTestAnswers));
+            var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Include(x => x.SectionQuestion)
+                .ThenInclude(x => x.Question)
+                .Where(x => x.SectionGroupResultId == sectionGroupResult.Id).ToListAsync();
+            var skillScore = GetSkillScore(sectionGroup, new List<BaseAnswer>(mockTestAnswers), version);
+            if (version != (int)EnumVersion.V1)
+            {
+                var countQuestion = 0;
+                foreach (var item in mockTestAnswers)
+                {
+                    var question = item.SectionQuestion?.Question;
+                    countQuestion += _answerTypeConverter.GetTotalCorrectByAnswerType(question, item.Answer);
+                }
+                skillScore.CountQuestion = countQuestion;
+            }
 
             if (sectionGroup.CourseSkill == EnumCourseSkill.Listening || sectionGroup.CourseSkill == EnumCourseSkill.Reading)
             {
@@ -154,7 +166,7 @@ namespace Fsel.Course.Infrastructure.Common
             return skillScore;
         }
 
-        public SkillScores GetSkillScore(SectionGroup sectionGroup, IList<BaseAnswer>? baseAnswers)
+        public SkillScores GetSkillScore(SectionGroup sectionGroup, IList<BaseAnswer>? baseAnswers, double version = (int)EnumVersion.V1)
         {
             ArgumentNullException.ThrowIfNull(sectionGroup);
             return new SkillScores
@@ -257,11 +269,11 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
-        private async Task<IList<Guid>?> GetUnansweredQuestionIds(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
+        private async Task<IList<Guid>?> GetUnansweredQuestionIds(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, double version = (int)EnumVersion.V1)
         {
             ArgumentNullException.ThrowIfNull(sectionGroup);
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
-            var sections = await GetSectionsAsync(sectionGroup, sectionGroupResult);
+            var sections = await GetSectionsAsync(sectionGroup, sectionGroupResult, version);
             if (sectionGroupResult.MockTestResultId.HasValue)
             {
                 return GetUnansweredMockTests(sections, sectionGroup);
@@ -282,9 +294,9 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
-        public async Task UpdateUnansweredQuestions(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
+        public async Task UpdateUnansweredQuestions(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, double version = (int)EnumVersion.V1)
         {
-            var questionIds = await GetUnansweredQuestionIds(sectionGroup, sectionGroupResult);
+            var questionIds = await GetUnansweredQuestionIds(sectionGroup, sectionGroupResult, version);
             if (questionIds == null || !questionIds.Any())
             {
                 return;
@@ -424,7 +436,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (isSubmit && sectionGroupResult != null)
             {
-                await UpdateUnansweredQuestions(sectionGroup, sectionGroupResult);
+                await UpdateUnansweredQuestions(sectionGroup, sectionGroupResult, version);
                 await UpdateAnswerProcessByTest(sectionGroupResult).ConfigureAwait(false);
                 return await UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, version);
             }
