@@ -15,5 +15,8 @@ namespace Fsel.Shared.Models.ShareModels
 
         [JsonIgnore]
         public DateTime? DailyDate { get; set; }
+
+        public Guid UserId { get; set; }
     }
 }
+

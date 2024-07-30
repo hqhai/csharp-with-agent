@@ -40,6 +40,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly ICourseRepository _courseRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IClassForumRepository _classForumRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
@@ -53,10 +54,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         public const int DisplayOrderFirst = 0;
         public const int DisplayOrderSecond = 1;
 
-        public CreateClassForumResultCommandHandler(IMapper mapper, CreateTokenHistoryPublisher createTokenHistoryPublisher, ICourseRepository courseRepository, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, SubmitClassForumGradingPublisher submitClassForumGradingPublisher, ISystemService systemService, IClassForumDetailResultRepository classForumDetailResultRepository, SetTimeClassForumDonePublisher setTimeClassForumDonePublisher, QuestBoardPublisher questBoardPublisher, IHostEnvironment environment)
+        public CreateClassForumResultCommandHandler(IMapper mapper, ICourseResultRepository courseResultRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, ICourseRepository courseRepository, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, SubmitClassForumGradingPublisher submitClassForumGradingPublisher, ISystemService systemService, IClassForumDetailResultRepository classForumDetailResultRepository, SetTimeClassForumDonePublisher setTimeClassForumDonePublisher, QuestBoardPublisher questBoardPublisher, IHostEnvironment environment)
         {
             _mapper = mapper;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
+            _courseResultRepository = courseResultRepository;
             _courseRepository = courseRepository;
             _authContext = authContext;
             _userService = userService;
@@ -173,8 +175,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 return methodResult;
             });
 
-            var countClassForumDetailResults = await _classForumDetailResultRepository.Queryable.Where(x => classForumResult != null && x.ClassForumResultId == classForumResult.Id).CountAsync(cancellationToken);
-            if (classForumResult != null && classForumDetailResultAttemp1?.Status == EnumClassForumResultStatus.Pending && countClassForumDetailResults == 1)
+            var classForumDetailResults = await _classForumDetailResultRepository.Queryable.Where(x => classForumResult != null && x.ClassForumResultId == classForumResult.Id).ToListAsync(cancellationToken);
+            if (classForumResult != null && classForumDetailResults.Any(x => x.Status == EnumClassForumResultStatus.Pending) && classForumDetailResults.Count == (int)EnumSubmissionCount.FirstSubmit)
             {
                 var tokenHistorys = new List<TokenHistoryQueueModel>
                 {
@@ -183,6 +185,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         ObjectId = classForumResult.Id,
                         VolatileToken = classForumResult.TokenFirstTime.HasValue ? classForumResult.TokenFirstTime.Value : default,
                         Feature = EnumTokenFeature.Learn,
+                        CourseResultId = _courseResultRepository.Queryable.FirstOrDefault(x=>x.CourseId == course.Id && x.StudentId == studentId)?.Id,
                         Mission = GetTokenMission(classForum,classForumResult),
                         Type = EnumTokenHistoryType.Recevived,
                         UserId = student.Human?.UserId ?? default,

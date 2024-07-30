@@ -62,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             }
             var student = studentResult?.Content?.Result;
             int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
-
+            settingStudentModel.ExpiredDate = student?.ExpiredDate;
             if (student != null)
             {
                 settingStudentModel.NumberOfToken = student.NumberOfToken;
@@ -81,6 +81,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 settingStudentModel.BeginnerGuide = student.BeginnerGuide;
                 settingStudentModel.ModuleNumber = placementTestResults.Count + 1;
                 settingStudentModel.Level = student.CourseLevel;
+                settingStudentModel.BaseCourseLevel = student.BaseCourseLevel;
                 settingStudentModel.IsPlacementTest = placementTestResultLast != null;
                 settingStudentModel.ClassId = student.ClassId;
                 settingStudentModel.PTLevel = placementTestResultLast?.Level;

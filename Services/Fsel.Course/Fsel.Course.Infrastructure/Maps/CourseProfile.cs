@@ -14,9 +14,17 @@ namespace Fsel.Course.Infrastructure.Maps
         public CourseProfile()
         {
             CreateMap<EntityCourse, CourseModel>().IgnoreAllNonExisting();
+            CreateMap<EntityCourse, EntityCourse>()
+                .ForMember(m => m.CourseUnitMockTests, opt => opt.Ignore())
+                .ForMember(m => m.Id, opt => opt.Ignore())
+                .ForMember(m => m.CourseTeachers, opt => opt.Ignore())
+                .ForMember(m => m.CourseResults, opt => opt.Ignore())
+                .IgnoreAllNonExisting();
+
             CreateMap<CreateCourseCommandModel, EntityCourse>().IgnoreAllNonExisting();
-            CreateMap<UpdateCourseCommandModel, EntityCourse>().IgnoreAllNonExisting();
+            CreateMap<UpdateCourseCommandModel, EntityCourse>().ForMember(m => m.Priority, opt => opt.Ignore()).IgnoreAllNonExisting();
             CreateMap<CourseResult, CourseResultModel>().IgnoreAllNonExisting();
+            CreateMap<CourseResult, CourseManagerModel>().IgnoreAllNonExisting();
         }
     }
 }

@@ -22,9 +22,9 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
     {
         private readonly IUrBoxService _urBoxService;
         private readonly AppSetting _appSetting;
-        private readonly LanguageContext _languageContext;
+        private readonly AuthContext _languageContext;
 
-        public GetTheGiftQueryHandler(IUrBoxService urBoxService, AppSetting appSetting, LanguageContext languageContext)
+        public GetTheGiftQueryHandler(IUrBoxService urBoxService, AppSetting appSetting, AuthContext languageContext)
         {
             _urBoxService = urBoxService;
             _appSetting = appSetting;

@@ -121,10 +121,10 @@ namespace Fsel.System.Application.Commands.Chatbots
                     filePath = instruction == null ? ResourceSettings.GrammarRole : ResourceSettings.GrammarInstruction;
                     break;
                 case (EnumCourseSkill.Reading):
-                    filePath = instruction == null ? ResourceSettings.GrammarRole : ResourceSettings.GrammarInstruction;
+                    filePath = instruction == null ? ResourceSettings.ReadingRole : ResourceSettings.ReadingInstruction;
                     break;
                 case (EnumCourseSkill.Speaking):
-                    filePath = instruction == null ? ResourceSettings.ReadingRole : ResourceSettings.ReadingInstruction;
+                    filePath = instruction == null ? ResourceSettings.SpeakingRole : ResourceSettings.SpeakingInstruction;
                     break;
                 case (EnumCourseSkill.Writing):
                     filePath = instruction == null ? ResourceSettings.WritingRole : ResourceSettings.WritingInstruction;

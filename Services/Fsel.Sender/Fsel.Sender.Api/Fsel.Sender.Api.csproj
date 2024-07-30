@@ -25,6 +25,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Resources\MailPaymentForCustomer.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\MailPaymentForStudent.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\MailFromLandingPage.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

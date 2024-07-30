@@ -7,7 +7,6 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
 
     public class OrderModel : BaseModel
     {
-        public Guid Id { get; set; }
         public string? Code { get; set; }
         public string? FullName { get; set; }
         public string? Country { get; set; }
@@ -27,5 +26,6 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public PackageModel? Package { get; set; }
         public Guid UserId { get; set; }
         public DateTime? ExpireDate { get; set; }
+        public Guid? EventId { get; set; }
     }
 }
