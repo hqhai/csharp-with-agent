@@ -78,44 +78,17 @@ namespace Fsel.System.Application.Commands.LuckyTickets
                 return methodResult;
             }
 
-            var schoolCodeResults = await _userService.GetSchoolCodeLuckySpin();
-            if (!schoolCodeResults.IsSuccessStatusCode)
+            var checkLuckySpinResults = await _userService.CheckLuckySpin(student.Id);
+            if (!checkLuckySpinResults.IsSuccessStatusCode)
             {
-                methodResult.AddError(schoolCodeResults.Error);
+                methodResult.AddError(checkLuckySpinResults.Error);
                 return methodResult;
             }
 
-            var schoolCodes = schoolCodeResults.Content?.Result;
-            if (schoolCodes == null || schoolCodes.Count == 0)
+            var checkLuckySpin = checkLuckySpinResults.Content?.Result;
+            if (!checkLuckySpin.HasValue || checkLuckySpin == false)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                return methodResult;
-            }
-
-            var emails = new List<string>();
-
-            foreach (var item in schoolCodes)
-            {
-                try
-                {
-                    IList<IList<object>> dataVN = _googleSheetService.ReadDataFromSheet(spreadSheetId, item);
-                    foreach (var dataItem in dataVN)
-                    {
-                        var email = dataItem[1]?.ToString();
-                        if (!string.IsNullOrEmpty(email))
-                        {
-                            emails.Add(email);
-                        }
-                    }
-                }
-                catch
-                {
-                    continue;
-                }
-            }
-
-            if (string.IsNullOrEmpty(_authContext.CurrentEmail) || !emails.Contains(_authContext.CurrentEmail))
-            {
                 return methodResult;
             }
 

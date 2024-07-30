@@ -86,7 +86,6 @@ namespace Fsel.Identity.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-
         /// <summary>
         /// Lưu dữ liệu sự kiện
         /// </summary>
@@ -100,17 +99,16 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Lấy ra danh sách schoolCode quay ticket
+        /// check lucky spin by student
         /// </summary>
-        [HttpGet("get-school-code-lucky-spin")]
-        [ProducesResponseType(typeof(MethodResult<IList<string?>>), (int)HttpStatusCode.OK)]
+        [HttpGet("check-lucky-spin/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetSchoolCodeLuckySpin()
+        public async Task<IActionResult> GetSchoolCodeLuckySpin([FromRoute] Guid studentId)
         {
-            var queryResult = await _mediator.Send(new GetListSchoolLuckySpinQuery()).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(new CheckLuckySpinByStudentIdQuery() { StudentId = studentId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-
 
         /// <summary>
         /// Lưu dữ liệu sự kiện
