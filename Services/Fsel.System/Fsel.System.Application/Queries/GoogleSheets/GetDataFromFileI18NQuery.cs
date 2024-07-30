@@ -78,6 +78,26 @@ namespace Fsel.System.Application.Queries.GoogleSheets
                 return methodResult;
             }
 
+            try
+            {
+                IList<IList<object>> dataEN = _googleSheetService.ReadDataFromSheet(i18nSpreadSheetId, _appSetting.GoogleSheetConfig?.I18NSheetFR ?? string.Empty);
+
+                foreach (var dataItem in dataEN)
+                {
+                    var firstValue = dataItem.FirstOrDefault()?.ToString();
+                    var lastValue = dataItem.LastOrDefault()?.ToString();
+                    if (!string.IsNullOrEmpty(firstValue) && !string.IsNullOrEmpty(lastValue))
+                    {
+                        i18n.AddLanguage("fr", firstValue, lastValue);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                methodResult.AddErrorBadRequest(ex.Message);
+                return methodResult;
+            }
+
             methodResult.Result = i18n;
             return methodResult;
         }

@@ -33,6 +33,10 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
+            if (_authContext.CurrentUserId == Guid.Empty)
+            {
+                _authContext.CurrentUserId = request.UserId;
+            }
             var student = await _studentRepository.Queryable.Include(x => x.StudentDailyStreaks)
                                                   .FirstOrDefaultAsync(x => x.UserId == _authContext.CurrentUserId, cancellationToken: cancellationToken);
             if (request.StudentId.HasValue)

@@ -15,6 +15,10 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public bool IsEstablished { get; set; }
 
+        public bool IsReceivedToken { get; set; }
+
+        public double? NumberOfToken { get; set; }
+
         public bool IsWeekStreak { get; set; }
 
         public double NearestTargetTime { get; set; }

@@ -6,6 +6,7 @@ namespace Fsel.Training.Api.Controllers
     using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
@@ -210,6 +211,30 @@ namespace Fsel.Training.Api.Controllers
         public async Task<IActionResult> AddStudentIntoClass([FromBody] AddStudentIntoClassCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Add student into class
+        /// </summary>
+        [HttpPost("choose-level-by-student")]
+        [ProducesResponseType(typeof(MethodResult<Guid>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ChooseLevelByStudent([FromBody] ChooseLevelByStudentCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get List Classes To Course Ids
+        /// </summary>
+        [HttpGet("gets-by-course-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetsByCourseIds([FromQuery] GetListClassByCourseIdsQuery query)
+        {
+            MethodResult<IList<ClassModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

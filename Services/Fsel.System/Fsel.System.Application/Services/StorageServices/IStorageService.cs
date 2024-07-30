@@ -10,7 +10,7 @@ namespace Fsel.System.Application.Services.StorageServices
 
     public interface IStorageService
     {
-        [Post("/v1/transcript/chatbot-speech")]
+        [Post("/v1/transcript/text-to-speech")]
         Task<IApiResponse<MethodResult<string>>> TextToSpeech([Body] CreateChatbotAudioModel command);
 
         [Multipart]

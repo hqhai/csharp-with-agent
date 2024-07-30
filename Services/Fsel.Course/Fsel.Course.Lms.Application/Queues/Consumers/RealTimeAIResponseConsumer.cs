@@ -11,7 +11,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
     {
         private readonly IMediator _mediator;
 
-        public RealTimeAIResponseConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
+        public RealTimeAIResponseConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }
@@ -23,7 +23,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
                 return;
             }
 
-            await _mediator.Send(new SubmitClassforumAICommand
+            await _mediator.Send(new SubmitClassForumAICommand
             {
                 UserAIConfig = message.UserAIConfig,
                 ClassForumResultId = message.ClassForumResultId,

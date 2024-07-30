@@ -9,8 +9,10 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Services.InteractionService;
+    using Fsel.Identity.Application.Services.InteractionService.Models;
+    using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -29,15 +31,20 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private readonly UserManager<User> _userManager;
         private readonly AuthContext _authContext;
         private readonly IStudentRepository _studentRepository;
+        private readonly ISystemService _systemService;
         private readonly IMapper _mapper;
+        private readonly IInteractionService _interactionService;
 
         public UpdateCodeStudentCommandHandler(UserManager<User> userManager, AuthContext authContext, IStudentRepository studentRepository,
-            IMapper mapper)
+            ISystemService systemService,
+            IMapper mapper, IInteractionService interactionService)
         {
             _userManager = userManager;
             _authContext = authContext;
             _studentRepository = studentRepository;
+            _systemService = systemService;
             _mapper = mapper;
+            _interactionService = interactionService;
         }
 
         public async Task<MethodResult<UserModel>> Handle(UpdateCodeStudentCommand request, CancellationToken cancellationToken)
@@ -50,49 +57,81 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
-            if (user.Student == null)
+            if (user == null || user.Student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user.Student));
                 return methodResult;
             }
+            if (request.Birthday == null && request.YearBirthday == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Birthday));
+                return methodResult;
+            }
 
-            //if (request.Birthday == null && request.YearBirthday == null)
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Birthday));
-            //    return methodResult;
-            //}
+            if (request.Birthday == null && request.YearBirthday != null)
+            {
+                request.Birthday = new DateTime(request.YearBirthday.Value, 1, 1);
+            }
 
-            //if (request.Birthday == null && request.YearBirthday != null)
-            //{
-            //    request.Birthday = new DateTime(request.YearBirthday.Value, 1, 1);
-            //}
-
-            //var stt = await _studentRepository.Queryable.CountAsync(cancellationToken);
-            //var currentDate = DateTime.UtcNow;
-            //var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
-            //var lastDigitOfYear = currentDate.Year % 10;
-            //var lastOfBirthDay = request.Birthday!.Value.Year % 100;
-            //var number = request.Gender == EnumGender.Male ? 0 : request.Gender == EnumGender.Female ? 1 : 2;
-            //var code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfBirthDay}{stt:000}";
-            //if (await _studentRepository.Queryable.Include(x => x.User).AnyAsync(x => x!.User!.Code == code, cancellationToken))
-            //{
-            //    code = $"HN_{weekNumber}{lastDigitOfYear}{number}{2}{lastOfBirthDay}{stt:000}";
-            //}
-            //user.Code = code;
-            //int age = DateTimeHelper.GetYearOld(request.Birthday);
-            //if (age <= 13)
-            //{
-            //    user.Student.CourseLevel = EnumCourseLevel.A2;
-            //}
-            //else if (age >= 14)
-            //{
-            //    user.Student.CourseLevel = EnumCourseLevel.B1;
-            //}
+            var stt = await _studentRepository.Queryable.CountAsync(cancellationToken);
+            var currentDate = DateTime.UtcNow;
+            var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
+            var lastDigitOfYear = currentDate.Year % 10;
+            var lastOfBirthDay = request.Birthday!.Value.Year % 100;
+            var number = request.Gender == EnumGender.Male ? 0 : request.Gender == EnumGender.Female ? 1 : 2;
+            var code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfBirthDay}{stt:000}";
+            if (await _studentRepository.Queryable.Include(x => x.User).AnyAsync(x => x.User != null && x.User.Code == code, cancellationToken))
+            {
+                code = $"HN_{weekNumber}{lastDigitOfYear}{number}{2}{lastOfBirthDay}{stt:000}";
+            }
+            user.Code = code;
+            int age = DateTimeHelper.GetYearOld(request.Birthday);
+            if (age <= 13)
+            {
+                user.Student.CourseLevel = EnumCourseLevel.A2;
+            }
+            else if (age >= 14)
+            {
+                user.Student.CourseLevel = EnumCourseLevel.B1;
+            }
 
             user.Student.ProvinceId = request.ProvinceId;
             user.Student.DistrictId = request.DistrictId;
             user.Student.SchoolId = request.SchoolId;
+            if (request.SchoolId.HasValue)
+            {
+                var schoolResults = await _systemService.GetSchoolsAsync(new List<Guid> { request.SchoolId.Value });
+                if (schoolResults.IsSuccessStatusCode)
+                {
+                    user.Student.School = schoolResults.Content?.Result?.FirstOrDefault()?.Name;
+                }
+            }
+            else
+            {
+                user.Student.School = request.SchoolName;
+            }
+
+            _mapper.Map(request, user);
             await _userManager.UpdateAsync(user);
+
+            var isSurveyResult = await _interactionService.IsSurveyCompleted(user.Id);
+            var isSurvey = isSurveyResult.Content?.Result;
+            if (isSurveyResult.IsSuccessStatusCode && isSurvey.HasValue && isSurvey == false)
+            {
+                var createSurveyResult = await _interactionService.CreateSurvey(new CreateCustomerSurveyCommandModel
+                {
+                    Email = user.Email,
+                    UserId = user.Id,
+                    Answers = new List<CreateSurveyCommandModel>
+                {
+                    new CreateSurveyCommandModel
+                    {
+                        Id = Guid.Parse("492D8BB9-CDBE-42E7-AA16-35A1915C3621"),
+                        Answer = new { Id = 1,Content = "Google",Image = "gmail-icon.svg"},
+                    }
+                }
+                });
+            }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);

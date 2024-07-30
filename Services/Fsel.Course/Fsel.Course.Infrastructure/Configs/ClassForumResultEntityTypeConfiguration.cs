@@ -36,6 +36,8 @@ namespace Fsel.Course.Infrastructure.Configs
                  .WithMany(b => b.ClassForumResults)
                  .HasForeignKey(p => p.LessonResultId)
                  .OnDelete(DeleteBehavior.ClientSetNull);
+
+            builder.HasIndex(c => new { c.LessonResultId, c.ClassForumId, c.StudentId }).IsUnique();
         }
     }
 }

@@ -12,11 +12,21 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public ResourceContent? ResourceContent { get; set; }
         public OpenAiConfig? OpenAiConfig { get; set; }
         public new Services? Services { get; set; }
+        public AzureAiConfig? AzureAiConfig { get; set; }
+
+        public CustomerSupportConfig? CustomerSupportConfig { get; set; }
     }
 
     public class ConstantUrl
     {
+        public string? LinkFullMockTestReport { get; set; }
         public string? LinkMockTestReport { get; set; }
+    }
+
+    public class CustomerSupportConfig
+    {
+        public string? Email { get; set; }
+        public IList<string> CCEmail { get; set; } = new List<string>();
     }
 
     public class ResourceContent
@@ -29,6 +39,13 @@ namespace Fsel.Course.Infrastructure.ValueSettings
     {
         public string? Uri { get; set; }
         public string? ApiKey { get; set; }
+    }
+
+    public class AzureAiConfig
+    {
+        public string? FirstApiKey { get; set; }
+        public string? SecondApiKey { get; set; }
+        public string? Location { get; set; }
     }
 
     public class Services : BaseServices

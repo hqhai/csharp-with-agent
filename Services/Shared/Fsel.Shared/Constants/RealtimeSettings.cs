@@ -54,6 +54,16 @@ namespace Fsel.Shared.Constants
             }
         }
 
+        public static class MockTestSpeakingAIFeedBackHub
+        {
+            public const string Pattern = $"/mock-test-speaking";
+
+            public static class Methods
+            {
+                public const string MockTestSpeakingAIFeedBack = $"MockTestSpeakingAIFeedBack";
+            }
+        }
+
         public static class SetTimeModuleHub
         {
             public const string Pattern = $"/set-time-module";
@@ -81,6 +91,26 @@ namespace Fsel.Shared.Constants
             public static class Methods
             {
                 public const string ChatBot = $"ChatBot";
+            }
+        }
+
+        public static class TechieHub
+        {
+            public const string Pattern = $"/techie";
+
+            public static class Methods
+            {
+                public const string Techie = $"TechieHub";
+            }
+        }
+
+        public static class PaymentHub
+        {
+            public const string Pattern = $"/payment";
+
+            public static class Methods
+            {
+                public const string Payment = $"Payment";
             }
         }
     }

@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Services.SystemService
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Services.SystemService.Model;
+    using Fsel.Identity.Domain.Models.CommandModels.LandingPages;
     using Fsel.Shared.Models.ShareModels;
     using Microsoft.AspNetCore.Mvc;
     //using Fsel.Identity.Application.Services.SystemService.Model;
@@ -17,6 +18,7 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Get("/v1/token-config/get-token")]
         Task<IApiResponse<MethodResult<TokenConfigModel>>> GetTokenConfigAsync([Query] GetTokenQueryModel query);
+
         [Delete("/v1/admin/student/delete-student/{id}")]
         Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
 
@@ -28,6 +30,12 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Post("/v1/feature-access-time/get-feature-access-time-by-userIds")]
         Task<IApiResponse<MethodResult<IList<GetFeatureAccessTimeQueryModel>>>> GetFeatureAccessTimeByUserIds([FromBody] IList<Guid> userIds);
+
+        [Post("/v1/google-sheet/add-contact-info-from-landing-page")]
+        Task<IApiResponse<MethodResult<bool>>> AddContactInfoToGoogleSheet([Body] ReceiveDataFromLandingPageCommandModel model);
+
+        [Post("/v1/school/get-by-ids")]
+        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolsAsync([Body] IList<Guid>? ids);
 
         [Post("/v1/location/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<LocationModel>>>> ExecuteLocationQuery([Body] BaseQueryModel query);

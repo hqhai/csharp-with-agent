@@ -19,8 +19,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
@@ -28,6 +30,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.SenderTemplates;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -52,9 +55,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
         private readonly IPlacementTestRepository _placementTestRepository;
         private readonly IMapper _mapper;
         private readonly AppSetting _appSetting;
-        private readonly ILogger<object> _logger;
+        private readonly ILogger<CreatePlacementTestAnswerBySectionGroupCommand> _logger;
+        private readonly QuestBoardPublisher _questBoardPublisher;
 
-        public CreatePlacementTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, AuthContext authContext, QuestionConverter questionConverter, SectionGroupConverter sectionGroupConverter, IUserService userService, IMediator mediator, IPlacementTestResultRepository placementTestResultRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, ISectionGroupResultRepository sectionGroupResultRepository, ISectionGroupRepository sectionGroupRepository, IPlacementTestRepository placementTestRepository, IMapper mapper, ICourseRepository courseRepository, AppSetting appSetting, ILogger<object> logger)
+        public CreatePlacementTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, AuthContext authContext, QuestionConverter questionConverter, SectionGroupConverter sectionGroupConverter, IUserService userService, IMediator mediator, IPlacementTestResultRepository placementTestResultRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, ISectionGroupResultRepository sectionGroupResultRepository, ISectionGroupRepository sectionGroupRepository, IPlacementTestRepository placementTestRepository, IMapper mapper, ICourseRepository courseRepository, AppSetting appSetting, ILogger<CreatePlacementTestAnswerBySectionGroupCommand> logger, QuestBoardPublisher questBoardPublisher)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -70,6 +74,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             _mapper = mapper;
             _appSetting = appSetting;
             _logger = logger;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<PlacementTestResultModel>> Handle(CreatePlacementTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -82,13 +87,13 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             StudentModel? student;
             if (request.StudentId.HasValue)
             {
-                var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId.Value });
-                if (!studentResults.IsSuccessStatusCode)
+                var studentResult = await _userService.GetUserByStudentId(request.StudentId.Value);
+                if (!studentResult.IsSuccessStatusCode)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
                     return methodResult;
                 }
-                student = studentResults.Content?.Result?.FirstOrDefault();
+                student = studentResult.Content?.Result;
             }
             else
             {
@@ -130,7 +135,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                 return methodResult;
             }
-            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(x => x.StudentId == student.Id && x.SectionGroupId == request.SectionGroupId && x.PlacementTestResultId == placementTestResult.Id).FirstOrDefaultAsync(cancellationToken);
+            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.StudentId == student.Id && x.SectionGroupId == request.SectionGroupId && x.PlacementTestResultId == placementTestResult.Id).FirstOrDefaultAsync(cancellationToken);
             if (sectionGroupResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroupResult));
@@ -179,11 +184,11 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             if (student != null)
             {
                 var numberOfDone = 4;
-                var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(s => s.PlacementTestResultId == placementTestResult.Id).ToListAsync(cancellationToken);
+                var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.PlacementTestResultId == placementTestResult.Id).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
                 if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
                 {
                     int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.User?.Birthday);
-                    placementTestResult = GetPlacementTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), placementTestResult);
+                    placementTestResult = GetPlacementTestResult(sectionGroupResults.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).ToList(), placementTestResult);
 
                     var placementTestResultInitial = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == placementTestResult.StudentId)
                                                                           .OrderBy(x => x.CreatedDate)
@@ -194,20 +199,34 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                     {
                         await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel
                         {
-                            Id = student.UserId,
-                            Level = currentLevel.Value
+                            Id = student.UserId == Guid.Empty ? _authContext.CurrentUserId : student.UserId,
+                            CourseLevel = currentLevel.Value,
+                            BaseCourseLevel = currentLevel.Value
                         }).ConfigureAwait(false);
                     }
                     _placementTestResultRepository.Update(placementTestResult);
-                    await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
+                    await _placementTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     if (isLockPT)
                     {
-                        await SendStudentPlacementTest(currentLevel ?? default, student, age, cancellationToken);
+                        await DoQuestBoard(student.Id, cancellationToken);
+                        await SendStudentPlacementTest(currentLevel ?? default, student, age, cancellationToken).ConfigureAwait(false);
+                        ;
                     }
                     return isLockPT;
                 }
             }
             return default;
+        }
+
+        private async Task DoQuestBoard(Guid studentId, CancellationToken cancellationToken)
+        {
+            await _questBoardPublisher.Publish(new QuestBoardQueueModel()
+            {
+                StudentID = studentId,
+                Type = EnumQuestBoardType.BeginnerQuests,
+                Category = EnumQuestBoardCategory.CompleteTheFirstTest,
+                Value = 1
+            }, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task SendStudentPlacementTest(EnumCourseLevel courseLevel, StudentModel student, int age, CancellationToken cancellationToken)
@@ -273,7 +292,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             var sendResult = new MethodResult<bool>();
             if (!string.IsNullOrEmpty(student.User?.Email))
             {
-                sendResult = await _mediator.Send(new SenderCommand { Email = student.User.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.StudentCompletePT }, cancellationToken).ConfigureAwait(false);
+                sendResult = await _mediator.Send(new SenderCommand { Email = student.User.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.StudentCompletePT, IsCCEmail = true }, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -283,7 +302,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             placementTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
             placementTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             placementTestResult.Status = EnumResultStatus.Done;
-            placementTestResult.SkillScores = skillScores;
+            placementTestResult.SkillScores = skillScores.OrderBy(x => x.Skill).ToList();
             return placementTestResult;
         }
 
@@ -308,12 +327,18 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             if (createPlacementTestAnswers != null && createPlacementTestAnswers.Any())
             {
                 await _placementTestAnswerRepository.AddList(createPlacementTestAnswers);
-                await _placementTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
             if (updatePlacementTestAnswers != null && updatePlacementTestAnswers.Any())
             {
                 _placementTestAnswerRepository.UpdateList(updatePlacementTestAnswers);
+            }
+            try
+            {
                 await _placementTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Duplicate PlacementTestAnswer : {ex.Message}");
             }
             return methodResult;
         }

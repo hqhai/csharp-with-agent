@@ -63,5 +63,15 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Class Forum result Status not pendding For Grading or Graded
         /// </summary>
         ClassForumDetailHaveMoreThan2,
+
+        /// <summary>
+        /// Time's up for the ClassForum.
+        /// </summary>
+        TimeUpPostClassForum,
+
+        /// <summary>
+        /// Base64 In Text
+        /// </summary>
+        Base64InText
     }
 }

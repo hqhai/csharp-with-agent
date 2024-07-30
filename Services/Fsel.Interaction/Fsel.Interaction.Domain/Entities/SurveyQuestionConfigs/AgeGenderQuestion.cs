@@ -2,7 +2,7 @@
 
 namespace Fsel.Interaction.Domain.Entities.SurveyQuestionConfigs
 {
-    using Fsel.Interaction.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class AgeGenderQuestion
     {

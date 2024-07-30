@@ -11,17 +11,20 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public ConstantUrl? ConstantUrl { get; set; }
         public ResourceContent? ResourceContent { get; set; }
         public new Services? Services { get; set; }
-    }
 
-    public class ConstantUrl
-    {
-        public string? ConfirmOtpUrl { get; set; }
+        public GoogleSheetConfig? GoogleSheetConfig { get; set; }
     }
 
     public class ResourceContent
     {
         public string? LmsWebsiteUrl { get; set; }
         public string? HotLine { get; set; }
+    }
+
+    public class ConstantUrl
+    {
+        public string? ConfirmOtpUrl { get; set; }
+        public string? RegisterUrl { get; set; }
     }
 
     public class Services : BaseServices
@@ -47,5 +50,10 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public int Port { get; set; }
         public string? Username { get; set; }
         public string? Password { get; set; }
+    }
+
+    public class GoogleSheetConfig
+    {
+        public string? SchoolStudentSheetId { get; set; }
     }
 }

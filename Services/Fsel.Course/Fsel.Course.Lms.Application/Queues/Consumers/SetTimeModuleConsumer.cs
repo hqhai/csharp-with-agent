@@ -11,7 +11,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
     {
         private readonly IMediator _mediator;
 
-        public SetTimeModuleConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
+        public SetTimeModuleConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }
@@ -23,7 +23,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
                 return;
             }
 
-            await _mediator.Send(new SetTimeModuleCommand { AccessTime = message.AccessTime, ObjectId = message.ObjectId, Type = message.Type }).ConfigureAwait(false);
+            await _mediator.Send(new SetTimeModuleCommand { AccessTime = message.AccessTime, ObjectId = message.ObjectId, Type = message.Type, SubmissionCount = message.SubmissionCount }).ConfigureAwait(false);
         }
     }
 }

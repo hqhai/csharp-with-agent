@@ -336,7 +336,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     EmailConfirmed = !string.IsNullOrEmpty(parentEmail),
                     PhoneNumber = parentPhoneNumber,
                     PhoneNumberConfirmed = !string.IsNullOrEmpty(parentPhoneNumber),
-                    Gender = isFather ? Domain.Enums.EnumGender.Male : Domain.Enums.EnumGender.Female,
+                    Gender = isFather ? EnumGender.Male : EnumGender.Female,
                     Parent = new Parent()
                     {
                         Occupation = "Parent",

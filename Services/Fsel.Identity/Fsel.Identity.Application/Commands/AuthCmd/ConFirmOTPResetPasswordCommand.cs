@@ -5,6 +5,7 @@ using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.UserOtpCmd;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Shared.Enums;
@@ -72,6 +73,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     return methodResult;
                 }
                 await _userManager.UpdateAsync(user);
+            }
+
+            var passwordValidator = new Microsoft.AspNetCore.Identity.PasswordValidator<User>();
+            var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.NewPassword);
+            if (!validPassword.Succeeded)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIsNotValid));
+                return methodResult;
             }
 
             var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.NewPassword);
