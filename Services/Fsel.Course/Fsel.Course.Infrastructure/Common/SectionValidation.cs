@@ -10,11 +10,11 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (courseSkill == EnumCourseSkill.Reading)
             {
-                return ((index == 1 || index == 3) && correctTotal == 13) || (index == 2 && correctTotal == 14);
+                return ((index == 1 || index == 3) && correctTotal <= 13) || (index == 2 && correctTotal <= 14);
             }
             else if (courseSkill == EnumCourseSkill.Listening)
             {
-                return correctTotal == 10;
+                return correctTotal <= 10;
             }
             return false;
         }
