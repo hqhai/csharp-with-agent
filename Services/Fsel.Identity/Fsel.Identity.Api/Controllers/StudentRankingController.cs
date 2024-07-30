@@ -11,6 +11,10 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Asp.Versioning;
 using Fsel.Shared.Constants;
+using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Application.Commands.CompetitionEventsCmd;
+using Fsel.Identity.Application.Commands.StudentRankingEvents;
+using Fsel.Identity.Application.Queries.GoogleSheetQuery;
 
 namespace Fsel.Identity.Api.Controllers
 {
@@ -80,6 +84,54 @@ namespace Fsel.Identity.Api.Controllers
             ArgumentNullException.ThrowIfNull(query);
             MethodResult<PagingItemStudentRankingModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Lưu dữ liệu sự kiện
+        /// </summary>
+        [HttpPost("competition-events")]
+        [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateCompetitionEvents([FromBody] CreateCompetitionEventsCommand cmd)
+        {
+            MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// check lucky spin by student
+        /// </summary>
+        [HttpGet("check-lucky-spin/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSchoolCodeLuckySpin([FromRoute] Guid studentId)
+        {
+            var queryResult = await _mediator.Send(new CheckLuckySpinByStudentIdQuery() { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Lưu dữ liệu sự kiện
+        /// </summary>
+        [HttpPost("student-ranking-events")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentRankingEventsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateStudentRankingEvents([FromBody] CreateStudentRankingEventsCommand cmd)
+        {
+            MethodResult<IList<StudentRankingEventsModel>> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Check dữ liệu học sinh có lucky spin không ?
+        /// </summary>
+        [HttpPost("check-luky-spin")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckLuckySpin()
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new CheckStudentLuckySpinCmd()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

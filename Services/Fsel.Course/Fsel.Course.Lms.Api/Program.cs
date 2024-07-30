@@ -115,6 +115,7 @@ builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<SetTimeRetryMockTestPublisher>();
 builder.Services.AddScoped<SetTimeRetryClassForumPublisher>();
+builder.Services.AddScoped<CreateLuckyTicketPublisher>();
 builder.Services.AddScoped<TechieActionPublisher>();
 
 // Converter
