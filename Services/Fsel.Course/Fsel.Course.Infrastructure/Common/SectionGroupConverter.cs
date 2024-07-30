@@ -390,13 +390,14 @@ namespace Fsel.Course.Infrastructure.Common
         public async Task<IList<SectionGroupModel>> GetSectionGroupsAsync(IList<SectionGroup>? sectionGroups, Guid objectResultId, string? objectResultType)
         {
             ArgumentNullException.ThrowIfNull(sectionGroups);
+            sectionGroups = sectionGroups.OrderBy(x => x.CourseSkill).ToList();
             var indexProcess = GetIndexProcess(sectionGroups, objectResultId, objectResultType);
             var sectionGroupModels = new List<SectionGroupModel>();
-            sectionGroups = sectionGroups.OrderBy(x => x.CourseSkill).ToList();
             foreach (var x in sectionGroups)
             {
                 var index = sectionGroups.IndexOf(x);
                 var sectionGroup = _mapper.Map<SectionGroupModel>(x);
+                sectionGroup.TotalQuestion = GetTotalQuestion(x);
                 sectionGroup.Status = GetResultStatus(indexProcess, index);
                 var sectionGroupResult = x.SectionGroupResults.FirstOrDefault();
                 if (sectionGroupResult != null)

@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
     using OfficeOpenXml.Attributes;
 
     public class ReportProgressStudentExportModel
@@ -40,7 +41,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
         [EpplusTableColumn(Header = "HomeWork Status")]
         public EnumResultStatus? HomeWorkStatus { get; set; }
 
+        [EpplusTableColumn(Header = "Final study period", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
+        public DateTime? FinalStudyPeriod { get; set; }
+
         [EpplusTableColumn(Header = "Last entry", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
-        public DateTime? UpdatedDate { get; set; }
+        public DateTime? LastEntry { get; set; }
     }
 }

@@ -4,7 +4,7 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumSubmissionCount
     {
-        FirstSubmit,
+        FirstSubmit = 1,
         SecondSubmit
     }
 }

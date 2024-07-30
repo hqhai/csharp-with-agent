@@ -7,14 +7,17 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
     public class PackageModel
     {
         public Guid Id { get; set; }
+        public Guid EventId { get; set; }
         public EnumPackageCode? Code { get; set; }
         public string? Name { get; set; }
         public decimal Price { get; set; }
         public decimal PriceMonth { get; set; }
         public int MonthNumber { get; set; }
-        public double MonthBonusNumber { get; set; }
+        public int MonthBonus { get; set; }
+        public int DayBonus { get; set; }
+        public IList<string>? ImagePaths { get; set; }
+        public string? EventDescription { get; set; }
         public string? IncentivesWhenPurchasing { get; set; }
-        public EnumPackageSuggest? Suggest { get; set; }
-        //public IList<PackageTranslationModel>? Translations { get; set; }
+        public IList<EnumPackageSuggest>? Suggests { get; set; }
     }
 }
