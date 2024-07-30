@@ -123,5 +123,17 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<IList<StudentRankingEventsModel>> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Check dữ liệu học sinh có lucky spin không ?
+        /// </summary>
+        [HttpPost("check-luky-spin")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckLuckySpin()
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new CheckStudentLuckySpinCmd()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
