@@ -59,6 +59,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new TechieEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TechieActionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentTechieEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LuckyTicketEntityTypeConfigConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -88,6 +89,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<ChatbotSkillConfig> ChatbotSkillConfigs { get; set; }
         public DbSet<ChatbotTokenConfigs> ChatbotTokenConfigs { get; set; }
         public DbSet<ChatBot> ChatBots { get; set; }
+        public DbSet<LuckyTicket> LuckyTickets { get; set; }
         public DbSet<Techie> Techie { get; set; }
         public DbSet<TechieAction> TechieActions { get; set; }
         public DbSet<StudentTechie> StudentTechies { get; set; }
