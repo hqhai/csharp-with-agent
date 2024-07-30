@@ -103,7 +103,7 @@ namespace Fsel.Identity.Api.Controllers
         /// Lấy ra danh sách schoolCode quay ticket
         /// </summary>
         [HttpGet("get-school-code-lucky-spin")]
-        [ProducesResponseType(typeof(MethodResult<IList<string>?>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<string?>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetSchoolCodeLuckySpin()
         {
