@@ -15,7 +15,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.OrderServices;
-    using Fsel.Course.Lms.Application.Services.OrderServices.Model;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -173,20 +172,11 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-
-            var orderResult = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { UserId = userId });
-            if (!orderResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError));
-                return methodResult;
-            }
-            var status = orderResult?.Content?.Result;
-            if (!status.HasValue || status.Value != EnumOrderStatus.Payment)
+            if (!student.ExpiredDate.HasValue || student.ExpiredDate.Value.Date < DateTime.UtcNow.Date)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-
             methodResult.Result = (student, @class);
             return methodResult;
         }
