@@ -1220,8 +1220,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StudentId")
-                        .IsUnique();
+                    b.HasIndex("CompetitionRankingId");
 
                     b.ToTable("StudentRankingEvents");
                 });
@@ -1985,8 +1984,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentRankingEvents", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.CompetitionEvents", "CompetitionEvents")
-                        .WithOne("StudentRankingEvents")
-                        .HasForeignKey("Fsel.Identity.Domain.Entities.StudentRankingEvents", "StudentId")
+                        .WithMany("StudentRankingEvents")
+                        .HasForeignKey("CompetitionRankingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

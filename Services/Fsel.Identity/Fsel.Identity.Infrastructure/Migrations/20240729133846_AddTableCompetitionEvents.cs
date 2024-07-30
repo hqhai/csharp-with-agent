@@ -56,18 +56,17 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_StudentRankingEvents", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StudentRankingEvents_CompetitionEvents_StudentId",
-                        column: x => x.StudentId,
+                        name: "FK_StudentRankingEvents_CompetitionEvents_CompetitionRankingId",
+                        column: x => x.CompetitionRankingId,
                         principalTable: "CompetitionEvents",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_StudentRankingEvents_StudentId",
+                name: "IX_StudentRankingEvents_CompetitionRankingId",
                 table: "StudentRankingEvents",
-                column: "StudentId",
-                unique: true);
+                column: "CompetitionRankingId");
         }
 
         /// <inheritdoc />

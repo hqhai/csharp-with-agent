@@ -12,6 +12,7 @@ namespace Fsel.Identity.Infrastructure.Maps
         public StudentRankingEventsProfile()
         {
             CreateMap<CompetitionEvents, CompetitionEventsModel>().IgnoreAllNonExisting();
+            CreateMap<StudentRankingEvents, StudentRankingEventsModel>().IgnoreAllNonExisting();
         }
     }
 }

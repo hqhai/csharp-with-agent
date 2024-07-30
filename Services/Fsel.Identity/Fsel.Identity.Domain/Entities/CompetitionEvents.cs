@@ -13,15 +13,16 @@ namespace Fsel.Identity.Domain.Entities
         public string? EventContentStr { get; set; }
 
         [NotMapped]
-        public IList<SchoolEventRule>? EventContent
+        public SchoolEventRule? EventContent
         {
             get
             {
-                return Common.Helpers.ConvertHelper.Deserialize<IList<SchoolEventRule>>(EventContentStr);
+                return Common.Helpers.ConvertHelper.Deserialize<SchoolEventRule>(EventContentStr);
             }
             set { EventContentStr = Common.Helpers.ConvertHelper.Serialize(value); }
         }
 
-        public StudentRankingEvents? StudentRankingEvents { get; set; }
+        public IList<StudentRankingEvents>? StudentRankingEvents { get; set; }
+
     }
 }

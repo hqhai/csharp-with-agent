@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20240729115651_AddTableCompetitionEvents")]
+    [Migration("20240729133846_AddTableCompetitionEvents")]
     partial class AddTableCompetitionEvents
     {
         /// <inheritdoc />
@@ -1223,8 +1223,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StudentId")
-                        .IsUnique();
+                    b.HasIndex("CompetitionRankingId");
 
                     b.ToTable("StudentRankingEvents");
                 });
@@ -1988,8 +1987,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentRankingEvents", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.CompetitionEvents", "CompetitionEvents")
-                        .WithOne("StudentRankingEvents")
-                        .HasForeignKey("Fsel.Identity.Domain.Entities.StudentRankingEvents", "StudentId")
+                        .WithMany("StudentRankingEvents")
+                        .HasForeignKey("CompetitionRankingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
