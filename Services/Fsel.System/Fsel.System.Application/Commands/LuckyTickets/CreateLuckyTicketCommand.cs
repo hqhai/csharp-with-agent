@@ -51,6 +51,25 @@ namespace Fsel.System.Application.Commands.LuckyTickets
                 return methodResult;
             }
 
+            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentsResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(studentsResult.Error);
+                return methodResult;
+            }
+
+            var student = studentsResult.Content?.Result;
+
+            if (student == null)
+            {
+                return methodResult;
+            }
+
+            if (await _luckyTicketRepository.Queryable.AnyAsync(p => p.LessonResultId == request.LessonResultId && p.StudentId == student.Id, cancellationToken))
+            {
+                return methodResult;
+            }
+
             var spreadSheetId = _appSetting.GoogleSheetConfig?.SchoolStudentSheetId;
 
             if (string.IsNullOrEmpty(spreadSheetId))
@@ -107,25 +126,6 @@ namespace Fsel.System.Application.Commands.LuckyTickets
             {
                 luckyTicket = Shared.Helpers.NumberHelper.GenerateCodeNumber(6);
             } while (luckyTickets.Contains(luckyTicket));
-
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!studentsResult.IsSuccessStatusCode)
-            {
-                methodResult.AddError(studentsResult.Error);
-                return methodResult;
-            }
-
-            var student = studentsResult.Content?.Result;
-
-            if (student == null)
-            {
-                return methodResult;
-            }
-
-            if (await _luckyTicketRepository.Queryable.AnyAsync(p => p.LessonResultId == request.LessonResultId && p.StudentId == student.Id, cancellationToken))
-            {
-                return methodResult;
-            }
 
             await _luckyTicketRepository.ExecuteTransactionAsync(async () =>
             {
