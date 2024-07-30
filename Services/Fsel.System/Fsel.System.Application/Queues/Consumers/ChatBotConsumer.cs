@@ -9,7 +9,7 @@ namespace Fsel.System.Application.Queues.Consumers
     {
         private readonly IMediator _mediator;
 
-        public ChatBotConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
+        public ChatBotConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }
@@ -20,7 +20,7 @@ namespace Fsel.System.Application.Queues.Consumers
             {
                 await _mediator.Send(new SaveChatBotMessageCommand
                 {
-                    Content = message.Message,
+                    Content = message.Content,
                     ChatBotId = message.ChatbotId
                 }).ConfigureAwait(false);
             }

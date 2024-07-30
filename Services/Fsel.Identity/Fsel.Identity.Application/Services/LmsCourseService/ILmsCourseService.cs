@@ -42,7 +42,14 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Post("/v1/placement-test/admin/save-done")]
         Task<IApiResponse<MethodResult<bool>>> SavePlacementTestDoneAsync([FromBody] SavePlacementTestDoneCommandModel command);
-        [Get("/v1/placement-test-result/integration-placement-test-results")]
-        Task<IApiResponse<MethodResult<IList<PlacementTestResultModel>>>> GetPalcementTestResults([FromQuery] GetPTTestModel query);
+
+        [Post("/v1/course-integration/integration-placement-test-results")]
+        Task<IApiResponse<MethodResult<IList<PlacementTestResultModel>>>> GetPalcementTestResults([FromBody] CourseIntegrationQueryModel query);
+
+        [Post("/v1/course-integration/integration-unit-results")]
+        Task<IApiResponse<MethodResult<IList<UnitResultModel>>>> GetUnitResults([FromBody] CourseIntegrationQueryModel query);
+
+        [Get("/v1/course-integration/integration-lesson-results")]
+        Task<IApiResponse<MethodResult<IList<LessonResultModel>>>> GetLessonResults([FromQuery] CourseIntegrationQueryModel query);
     }
 }

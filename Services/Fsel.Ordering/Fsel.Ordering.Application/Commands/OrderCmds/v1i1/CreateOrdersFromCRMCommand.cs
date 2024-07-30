@@ -77,7 +77,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             var order = new Order();
             order.FullName = userInfo.FullName;
             order.Email = userInfo.Email;
-            order.Country = EnumCountryKey.Vietnam.ToString();
             order.Status = EnumOrderStatus.Payment;
             order.UserId = userInfo.UserId;
             order.Code = RandomCodeOrder(package, userInfo.StudentCode);
@@ -85,7 +84,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             order.DiscountPercent = (int)(userInfo.DiscountPercent.HasValue ? userInfo.DiscountPercent : 0);
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
-            order.PaymentMethod = EnumPaymentMethodStatus.Card;
+            order.PaymentMethod = EnumPaymentMethodStatus.BankTransfer;
             order.ExpireDate = isAddExpireDate ? DateTime.UtcNow.AddMonths(package.MonthNumber) : null;
             order.OrderTransactions = new List<OrderTransaction>()
             {

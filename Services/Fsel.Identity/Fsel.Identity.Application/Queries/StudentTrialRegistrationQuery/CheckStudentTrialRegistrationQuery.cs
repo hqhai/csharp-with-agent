@@ -1,15 +1,14 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Identity.Application.Queries.StudentTrialRegistrationQuery
-
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Shared.Enums;
 
     public class CheckStudentTrialRegistrationQuery : IRequest<MethodResult<bool>>
     {

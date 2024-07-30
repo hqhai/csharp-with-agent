@@ -8,6 +8,22 @@ namespace Fsel.Identity.Domain.Entities
 
     public class UserSetting : Entity
     {
+        public UserSetting()
+        { }
+
+        public UserSetting(bool setDefaultValue)
+        {
+            if (setDefaultValue)
+            {
+                NotifiGame = true;
+                NotifiFeedBack = true;
+                NotifiLesson = true;
+                NotifiForum = true;
+                NotifiEmail = true;
+                Language = "vn";
+            }
+        }
+
         public Guid? UserId { get; set; }
 
         public bool NotifiGame { get; set; }

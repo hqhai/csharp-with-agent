@@ -213,6 +213,40 @@ namespace Fsel.Shared.Helpers
             return Regex.Replace(word ?? string.Empty, pattern, replacement);
         }
 
+        public static bool IsBase64Image(string? inputString)
+        {
+            if (string.IsNullOrEmpty(inputString))
+            {
+                return false;
+            }
+            string base64Pattern = @"data:image\/(jpeg|jpg|png|gif|bmp|tiff);base64,[A-Za-z0-9+/]+={0,2}";
+
+            var match = Regex.Match(inputString, base64Pattern);
+            if (!match.Success)
+            {
+                return false;
+            }
+
+            // Extract the Base64 content after the matched prefix
+            string base64Content = match.Value.Substring(match.Value.IndexOf(",") + 1);
+
+            // Simple Base64 content pattern to validate
+            string simpleBase64Pattern = @"^[A-Za-z0-9+/]+={0,2}$";
+            Regex simpleBase64Regex = new Regex(simpleBase64Pattern, RegexOptions.Compiled);
+
+            return simpleBase64Regex.IsMatch(base64Content);
+        }
+
+        public static bool ContainsSpecialCharacter(string input)
+        {
+            // Định nghĩa biểu thức chính quy cho các ký tự đặc biệt
+            string pattern = @"[^a-zA-Z0-9]";
+            Regex regex = new Regex(pattern);
+
+            // Kiểm tra xem chuỗi có chứa ký tự đặc biệt không
+            return regex.IsMatch(input);
+        }
+
         public static (string?, string?) ParseFullName(string? fullName)
         {
             if (string.IsNullOrEmpty(fullName))

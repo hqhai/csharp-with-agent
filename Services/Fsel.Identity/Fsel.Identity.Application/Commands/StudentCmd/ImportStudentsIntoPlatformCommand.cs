@@ -13,7 +13,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Services.InteractionService;
-    using Fsel.Identity.Application.Services.InteractionService.Models;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
@@ -135,7 +134,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                                 {
                                                     PlatformId = platform.Id
                                                 }
-                                            }
+                                            },
+                        UserSettings = new List<UserSetting>()
+                            {
+                                new UserSetting(true)
+                            }
                     };
 
                     identityStudentResult = await _userManager.CreateAsync(user, DefaultPassword);
@@ -194,20 +197,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         methodResult.AddErrorBadRequest(updateCode.ErrorMessages);
                         return methodResult;
                     }
-
-                    var createSurveyResult = await _interactionService.CreateSurvey(new CreateCustomerSurveyCommandModel
-                    {
-                        Email = user.Email,
-                        UserId = user.Id,
-                        Answers = new List<CreateSurveyCommandModel>
-                {
-                    new CreateSurveyCommandModel
-                    {
-                        Id = Guid.Parse("492D8BB9-CDBE-42E7-AA16-35A1915C3621"),
-                        Answer = new { Id = 1,Content = "Google",Image = "gmail-icon.svg"},
-                    }
-                }
-                    });
                 }
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;

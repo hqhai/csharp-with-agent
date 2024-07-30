@@ -88,6 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                             Name = student.User?.FullName,
                             Birthday = student.User?.Birthday,
                             Email = student.User?.Email,
+                            CourseLevel = item.Level.GetCourseLevelByPlacementTestLevel(),
                             CurrentLevel = student.CourseLevel,
                             LevelCompleted = levelCompleted,
                             Percent = item.Percent,

@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -48,20 +49,19 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<HomeWorkStudentProgressModel> methodResult = new MethodResult<HomeWorkStudentProgressModel>();
             HomeWorkStudentProgressModel homeWorkStudentProgress = new HomeWorkStudentProgressModel();
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId });
+            var studentResults = await _userService.GetUserByStudentId(request.StudentId);
             if (!studentResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
                 return methodResult;
             }
-
-            var student = studentResults?.Content?.Result?.FirstOrDefault();
+            var student = studentResults?.Content?.Result;
             if (student == null)
             {
-                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            var userId = student.UserId;
+            var userId = student?.UserId ?? default;
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.LessonId == request.LessonId && x.StudentId == request.StudentId, cancellationToken);
             if (lessonResult == null || lessonResult.Status == EnumResultStatus.Unfinished)
             {

@@ -35,7 +35,8 @@ builder.Services.AddScoped<ITeachingCostRepository, TeachingCostRepository>();
 builder.Services.AddScoped<IReferralDiscountConfigRepository, ReferralDiscountConfigRepository>();
 builder.Services.AddScoped<ILogActionRepository, LogActionRepository>();
 builder.Services.AddScoped<IQuestBoardRepository, QuestBoardRepository>();
-builder.Services.AddScoped<IQuestBoardConfigRepository, QuestBoardConfigRepository>();
+builder.Services.AddScoped<IQuestBoardOverallRepository, QuestBoardOverallRepository>();
+builder.Services.AddScoped<IQuestBoardOverallStudentRepository, QuestBoardOverallStudentRepository>();
 builder.Services.AddScoped<IFeatureAccessTimeRepository, FeatureAccessTimeRepository>();
 builder.Services.AddScoped<IQuestBoardStudentRepository, QuestBoardStudentRepository>();
 builder.Services.AddScoped<IGameTopicRepository, GameTopicRepository>();
@@ -52,10 +53,15 @@ builder.Services.AddScoped<IChatbotConfigRepository, ChatbotConfigRepository>();
 builder.Services.AddScoped<IErrorReportRepository, ErrorReportRepository>();
 builder.Services.AddScoped<ITokenHistoryRepository, TokenHistoryRepository>();
 builder.Services.AddScoped<IChatBotRepository, ChatBotRepository>();
+builder.Services.AddScoped<IUserConfigRepository, UserConfigRepository>();
+builder.Services.AddScoped<ITechieRepository, TechieRepository>();
+builder.Services.AddScoped<ITechieActionRepository, TechieActionRepository>();
+builder.Services.AddScoped<IStudentTechieRepository, StudentTechieRepository>();
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<ChatBotPublisher>();
+builder.Services.AddScoped<TechieSendMessagePublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
@@ -74,13 +80,15 @@ builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.LmsQueue.NameQueue.QuestBoardMainFinish, typeof(QuestBoardFinishConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.QuestBoard, typeof(QuestBoardConsumer) },
     { QueueSettings.SystemQueue.NameQueue.CompleteApprovalPostTimeOut, typeof(CompleteApprovalConsumer) },
     { QueueSettings.LmsQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
     { QueueSettings.UserQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.FeatureAccessTime, typeof(FeatureAccessTimeConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.ChatBot, typeof(ChatBotConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.DoQuestBoard, typeof(CreateTokenHistoryConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.QuestBoard, typeof(DoQuestBoardConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.TechieAction, typeof(TechieConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.Techie, typeof(TechieConsumer) }
 });
 
 var app = builder.Build();

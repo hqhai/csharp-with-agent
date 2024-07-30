@@ -8,6 +8,13 @@ namespace Fsel.Sender.Domain.ValueSettings
     {
         public Smtp? Smtp { get; set; }
         public SmtpGoogle? SmtpGoogle { get; set; }
+        public EmailConfig? EmailConfig { get; set; }
+        public new Services? Services { get; set; }
+    }
+
+    public class EmailConfig
+    {
+        public ICollection<string>? BCCEmail { get; set; }
     }
 
     public class Smtp
@@ -28,5 +35,10 @@ namespace Fsel.Sender.Domain.ValueSettings
         public int Port { get; set; }
         public string? Username { get; set; }
         public string? Password { get; set; }
+    }
+
+    public class Services : BaseServices
+    {
+        public string? SystemApiUrl { get; set; }
     }
 }

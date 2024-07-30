@@ -12,11 +12,13 @@ namespace Fsel.Ordering.Infrastructure.Maps
     {
         public OrderProfile()
         {
-            CreateMap<Order, GenerateRamdomOrderModel>().IgnoreAllNonExisting();
             CreateMap<Order, OrderModel>().IgnoreAllNonExisting();
             CreateMap<Domain.Models.CommandModels.Orders.CreateOrderCommandModel, Order>().IgnoreAllNonExisting();
             CreateMap<CreateOrderCommandModel, Order>().IgnoreAllNonExisting();
+            CreateMap<Domain.Models.CommandModels.Orders.V1i2.CreateOrderCommandModel, Order>().IgnoreAllNonExisting();
             CreateMap<CreateOrderToUserIdCommandModel, Order>().IgnoreAllNonExisting();
+            CreateMap<Order, OrderSearchModel>().ForMember(x => x.PackageName, a => a.MapFrom(src => src.Package != null ? src.Package.Code : null))
+                                                .ForMember(x => x.MonthNumber, a => a.MapFrom(src => src.Package!.MonthNumber));
         }
     }
 }

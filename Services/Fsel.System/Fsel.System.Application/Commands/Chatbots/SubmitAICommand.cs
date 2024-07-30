@@ -29,7 +29,7 @@ namespace Fsel.System.Application.Commands.Chatbots
 
             var response = await _openAIService.SubmitAICompletionsAsync(new RequestAIModel
             {
-                Model = "gpt-4-1106-preview",
+                Model = "gpt-4o",
                 Messages = request.ChatBotMessages,
                 Temperature = 0,
                 MaxTokens = request.MaxToken,

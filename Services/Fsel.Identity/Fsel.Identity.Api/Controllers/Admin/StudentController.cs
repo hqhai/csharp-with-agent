@@ -3,19 +3,19 @@
 namespace Fsel.Identity.Api.Controllers.Admin
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.AdminCmd;
+    using Fsel.Identity.Application.Commands.StudentCmd;
     using Fsel.Identity.Application.Queries.AdminQuery;
     using Fsel.Identity.Application.Queries.StudentQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
-    using Fsel.Identity.Application.Commands.StudentCmd;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -126,6 +126,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> DeleteStudentFromClass([FromRoute] Guid id)
         {
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteListDataStudentCommand { UserId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Student by UserId
+        /// </summary>
+        [HttpGet("get-by-user-id/{id}")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetByUserId([FromRoute] Guid id)
+        {
+            MethodResult<StudentModel> commandResult = await _mediator.Send(new GetStudentByUserIdQuery { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

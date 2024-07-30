@@ -8,7 +8,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Common.Models;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
@@ -31,6 +30,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Fsel.Common.Helpers;
 
     public class CreateOrderCommand : CreateOrderCommandModel, IRequest<MethodResult<OrderModel>>
     {
@@ -66,6 +66,16 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OrderModel>();
 
+            if (await _orderRepository.Queryable.AnyAsync(x =>
+            x.Status == EnumOrderStatus.Payment &&
+            ((x.IsTrial && request.IsTrial) ||
+            (!x.IsTrial && x.ExpireDate > DateTime.UtcNow)) &&
+            x.UserId == _authContext.CurrentUserId, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.IsTrial));
+                return methodResult;
+            }
+
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -74,31 +84,53 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             }
             var student = studentResult.Content?.Result;
 
-            Guid? courseId;
+            Guid? courseId = null;
             if (request.CourseLevel == null)
             {
-                var orderPayment = await _orderRepository.Queryable.Where(p => p.Status == EnumOrderStatus.Payment && p.UserId == _authContext.CurrentUserId).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+                var orderPayment = await _orderRepository.Queryable.Where(p => (p.Status == EnumOrderStatus.Payment || p.Status == EnumOrderStatus.New) && p.UserId == _authContext.CurrentUserId).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
                 courseId = orderPayment?.CourseId;
-            }
-            else
-            {
+
+                //request.CourseLevel = student?.CourseLevel;
                 var courseResult = await _courseService.GetCourseByLevel(new BaseQueryModel()
                 {
                     Filters = new List<GenericFilterModel>()
-                {
-                    new GenericFilterModel()
                     {
-                        Property = "Status",
-                        Operator = EnumFilterOperator.Equal,
-                        Value = "Active"
-                    },
-                    new GenericFilterModel()
-                    {
-                        Property = "CourseLevel",
-                        Operator = EnumFilterOperator.Equal,
-                        Value = request.CourseLevel.ToString()
+                        new GenericFilterModel()
+                        {
+                            Property = "Id",
+                            Operator = EnumFilterOperator.Equal,
+                            Value = courseId
+                        }
                     }
+                });
+
+                if (!courseResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(courseResult.Error);
+                    return methodResult;
                 }
+                request.CourseLevel = courseResult?.Content?.Result?.CourseLevel;
+            }
+            else
+            {
+                //request.CourseLevel = student?.CourseLevel;
+                var courseResult = await _courseService.GetCourseByLevel(new BaseQueryModel()
+                {
+                    Filters = new List<GenericFilterModel>()
+                    {
+                        new GenericFilterModel()
+                        {
+                            Property = "Status",
+                            Operator = EnumFilterOperator.Equal,
+                            Value = "Active"
+                        },
+                        new GenericFilterModel()
+                        {
+                            Property = "CourseLevel",
+                            Operator = EnumFilterOperator.Equal,
+                            Value = request.CourseLevel.ToString()
+                        }
+                    }
                 });
 
                 if (!courseResult.IsSuccessStatusCode)
@@ -142,17 +174,17 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
 
-            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == _authContext.CurrentUserId && (p.Status == EnumOrderStatus.New), cancellationToken);
+            var codeSend = await _mediator.Send(new GenerateRandomOrderQuery { StudentCode = student.User.Code }, cancellationToken).ConfigureAwait(false);
 
-            var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel ?? student.CourseLevel, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
+            string code = codeSend.Result ?? string.Empty;
 
-            string code = codeSend.Result?.Code ?? string.Empty;
-
-            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken) && order != null && order.Code != code)
+            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(code));
+                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.TryAgainInOneMinute), nameof(code));
                 return methodResult;
             }
+
+            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == _authContext.CurrentUserId && p.Status == EnumOrderStatus.New && !p.IsTrial, cancellationToken);
 
             if (order != null)
             {
@@ -160,7 +192,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 {
                     Order = order,
                     Package = package,
-                    CourseId = courseId ?? default,
                     Code = code,
                     FullName = student?.User?.FullName,
                     PhoneNumber = request.PhoneNumber,
@@ -204,7 +235,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
                 await _userService.CreateStudentTrialRegistration();
                 var numberOfShield = package.Code.HasValue ? (int)package.Code.Value : default;
-                var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = _authContext.CurrentUserId, CourseId = newOrder.CourseId, PackageId = newOrder.PackageId ?? default, NumberOfShield = numberOfShield });
+                var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = _authContext.CurrentUserId, CourseId = newOrder.CourseId ?? default, PackageId = newOrder.PackageId ?? default, NumberOfShield = numberOfShield });
                 if (!addStudentIntoClassResult.IsSuccessStatusCode)
                 {
                     methodResult.AddError(addStudentIntoClassResult.Error);
@@ -228,7 +259,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
         {
             order.FullName = student?.User?.FullName;
             order.Email = student?.User?.Email;
-            order.Country = EnumCountryKey.Vietnam.ToString();
             order.Status = EnumOrderStatus.New;
             order.UserId = _authContext.CurrentUserId;
             order.Code = code;
