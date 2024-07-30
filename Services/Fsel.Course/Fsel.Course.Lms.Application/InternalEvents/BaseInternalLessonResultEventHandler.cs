@@ -57,7 +57,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 // var courseId = lessonResult.CourseId;
                 // var userId = lessonResult.CreatedUserId;
-                // await DoQuestBoard(userId, courseId, cancellationToken);
+                // await DoQuestBoard(userId, courseId, cancellationToken); 
 
                 lessonResult.Status = EnumResultStatus.Done;
                 await UpdateAsync(lessonResult, cancellationToken).ConfigureAwait(false);
