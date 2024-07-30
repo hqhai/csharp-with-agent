@@ -319,7 +319,15 @@ namespace Fsel.Course.Infrastructure.Common
                     {
                         Content = match.Groups[1].Value
                     };
-                    data.Answers.Insert(replacements.Count, config);
+                    if (data.Answers.Any() && data.Answers.Count >= replacements.Count)
+                    {
+                        data.Answers.Insert(replacements.Count, config);
+                    }
+                    else
+                    {
+                        data.Answers.Add(config);
+                    }
+
                     replacements[id] = config.Id;
                 }
                 else
@@ -327,6 +335,7 @@ namespace Fsel.Course.Infrastructure.Common
                     replacements[id] = new Guid(id);
                 }
             }
+
             foreach (var pair in replacements)
             {
                 if (!Guid.TryParse(pair.Key, out _))
