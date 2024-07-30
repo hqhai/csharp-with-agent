@@ -185,8 +185,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 return methodResult;
             });
 
-            var countClassForumDetailResults = await _classForumDetailResultRepository.Queryable.Where(x => classForumResult != null && x.ClassForumResultId == classForumResult.Id).CountAsync(cancellationToken);
-            if (classForumResult != null && classForumDetailResultAttemp1?.Status == EnumClassForumResultStatus.Pending && countClassForumDetailResults == 1)
+            var classForumDetailResults = await _classForumDetailResultRepository.Queryable.Where(x => classForumResult != null && x.ClassForumResultId == classForumResult.Id).ToListAsync(cancellationToken);
+            if (classForumResult != null && classForumDetailResults.Any(x => x.Status == EnumClassForumResultStatus.Pending) && classForumDetailResults.Count == (int)EnumSubmissionCount.FirstSubmit)
             {
                 var tokenHistorys = new List<TokenHistoryQueueModel>
                 {

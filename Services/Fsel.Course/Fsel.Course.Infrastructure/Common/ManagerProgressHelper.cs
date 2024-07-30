@@ -105,7 +105,7 @@ namespace Fsel.Course.Infrastructure.Common
                                    .Select(x => new
                                    {
                                        CountVideo = x.VideoResult != null && x.VideoResult.Status == EnumResultStatus.Done ? 1 : 0,
-                                       CountClassForum = x.ClassForumResults.All(x => x.Status.HasValue) ? 1 : 0,
+                                       CountClassForum = x.ClassForumResults.Any() && x.ClassForumResults.All(x => x.Status.HasValue) ? 1 : 0,
                                        CountHomeWork = x.HomeWorkResults.Any() && x.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done) ? 1 : 0
                                    }).ToListAsync();
                     counts.Add(query.Sum(x => x.CountVideo + x.CountClassForum + x.CountHomeWork));
