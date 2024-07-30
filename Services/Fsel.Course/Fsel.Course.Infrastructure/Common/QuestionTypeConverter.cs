@@ -146,7 +146,7 @@ namespace Fsel.Course.Infrastructure.Common
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multichoiceV1) : default;
                     break;
 
-                case EnumQuestionType.CheckList:
+                case EnumQuestionType.CheckListV1:
                     var checkList = HandleQuestion(config.Deserialize<CheckListQuestionV1>());
                     result = isDisableAnswers ? ClearAnswers(checkList) : checkList;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(checkList) : default;
@@ -210,7 +210,7 @@ namespace Fsel.Course.Infrastructure.Common
                     isError = ValidateMatchingTask(matchingHeading);
                     break;
 
-                case EnumQuestionType.CheckList:
+                case EnumQuestionType.CheckListV1:
                     var checkList = config.Deserialize<CheckListQuestionV1>();
                     isError = ValidateCheckList(checkList);
                     break;
@@ -319,7 +319,15 @@ namespace Fsel.Course.Infrastructure.Common
                     {
                         Content = match.Groups[1].Value
                     };
-                    data.Answers.Insert(replacements.Count, config);
+                    if (data.Answers.Any() && data.Answers.Count >= replacements.Count)
+                    {
+                        data.Answers.Insert(replacements.Count, config);
+                    }
+                    else
+                    {
+                        data.Answers.Add(config);
+                    }
+
                     replacements[id] = config.Id;
                 }
                 else
@@ -327,6 +335,7 @@ namespace Fsel.Course.Infrastructure.Common
                     replacements[id] = new Guid(id);
                 }
             }
+
             foreach (var pair in replacements)
             {
                 if (!Guid.TryParse(pair.Key, out _))
@@ -378,13 +387,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in data.Answers)
                 {
-                    if (item != null)
-                    {
-                        item.Answers.ForEach(x =>
-                        {
-                            x.IsCorrect = null;
-                        });
-                    }
+                    item.Key = null;
                 }
             }
             return data;
@@ -413,7 +416,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (data != null && data.Answers != null)
             {
-                foreach (var item in data.Answers)
+                foreach (var item in data.Answers.SelectMany(x => x.Answers))
                 {
                     item.IsCorrect = null;
                 }
