@@ -65,7 +65,7 @@ namespace Fsel.System.Application.Services.UserServices
         [Post("/v1/student/get-student-by-emails")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByEmails([Body] IList<string> emails);
 
-        [Get("/v1/student-ranking/get-school-code-lucky-spin")]
-        Task<IApiResponse<MethodResult<IList<string>?>>> GetSchoolCodeLuckySpin();
+        [Get("/v1/student-ranking/check-lucky-spin/{studentId}")]
+        Task<IApiResponse<MethodResult<bool>>> CheckLuckySpin([FromRoute] Guid studentId);
     }
 }
