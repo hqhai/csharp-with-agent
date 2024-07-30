@@ -40,34 +40,41 @@ namespace Fsel.System.Application.Queries.LuckyTickets
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<StudentLuckyTicketModel>>();
 
-            var spreadSheetId = _appSetting.GoogleSheetConfig?.SchoolStudentSheetId;
-            var sheet = request.Sheet;
-
-            if (string.IsNullOrEmpty(spreadSheetId) || string.IsNullOrEmpty(sheet))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                return methodResult;
-            }
-
             var emails = new List<string>();
 
-            try
+            if (string.IsNullOrEmpty(request.Keyword))
             {
-                IList<IList<object>> dataVN = _googleSheetService.ReadDataFromSheet(spreadSheetId, sheet);
-                dataVN.RemoveAt(0);
-                foreach (var dataItem in dataVN)
+                var spreadSheetId = _appSetting.GoogleSheetConfig?.SchoolStudentSheetId;
+                var sheet = request.Sheet;
+
+                if (string.IsNullOrEmpty(spreadSheetId) || string.IsNullOrEmpty(sheet))
                 {
-                    var email = dataItem[1]?.ToString();
-                    if (!string.IsNullOrEmpty(email))
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                    return methodResult;
+                }
+
+                try
+                {
+                    IList<IList<object>> dataVN = _googleSheetService.ReadDataFromSheet(spreadSheetId, sheet);
+                    dataVN.RemoveAt(0);
+                    foreach (var dataItem in dataVN)
                     {
-                        emails.Add(email);
+                        var email = dataItem[1]?.ToString();
+                        if (!string.IsNullOrEmpty(email))
+                        {
+                            emails.Add(email);
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
+                    methodResult.AddErrorBadRequest(ex.Message);
+                    return methodResult;
+                }
             }
-            catch (Exception ex)
+            else
             {
-                methodResult.AddErrorBadRequest(ex.Message);
-                return methodResult;
+                emails.Add(request.Keyword);
             }
 
             var studentResults = await _userService.GetStudentsByEmails(emails);
