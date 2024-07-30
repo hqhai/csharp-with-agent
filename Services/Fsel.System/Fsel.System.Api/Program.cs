@@ -53,6 +53,7 @@ builder.Services.AddScoped<IChatbotConfigRepository, ChatbotConfigRepository>();
 builder.Services.AddScoped<IErrorReportRepository, ErrorReportRepository>();
 builder.Services.AddScoped<ITokenHistoryRepository, TokenHistoryRepository>();
 builder.Services.AddScoped<IChatBotRepository, ChatBotRepository>();
+builder.Services.AddScoped<ILuckyTicketRepository, LuckyTicketRepository>();
 builder.Services.AddScoped<IUserConfigRepository, UserConfigRepository>();
 builder.Services.AddScoped<ITechieRepository, TechieRepository>();
 builder.Services.AddScoped<ITechieActionRepository, TechieActionRepository>();
@@ -87,6 +88,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.ChatBot, typeof(ChatBotConsumer) },
     { QueueSettings.LmsQueue.NameQueue.DoQuestBoard, typeof(CreateTokenHistoryConsumer) },
     { QueueSettings.SystemQueue.NameQueue.QuestBoard, typeof(DoQuestBoardConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.CreateLuckyTicket, typeof(CreateLuckyTicketConsumer) }
     { QueueSettings.RealtimeQueue.NameQueue.TechieAction, typeof(TechieConsumer) },
     { QueueSettings.LmsQueue.NameQueue.Techie, typeof(TechieConsumer) }
 });

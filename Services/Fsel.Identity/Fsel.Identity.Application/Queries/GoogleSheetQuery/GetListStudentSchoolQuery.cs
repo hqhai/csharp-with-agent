@@ -65,17 +65,17 @@ namespace Fsel.Identity.Application.Queries.GoogleSheetQuery
                 for (int i = 1; i < dataStudent.Count; i++)
                 {
                     var row = dataStudent[i];
-                    if (row.Count != headers.Count)
-                    {
-                        continue; // Bỏ qua dòng nếu số cột không khớp
-                    }
-
+                    //if (row.Count != headers.Count)
+                    //{
+                    //    continue; // Bỏ qua dòng nếu số cột không khớp
+                    //}
+                    var a = headers.IndexOf("SchoolName");
                     var student = new StudentJoinCompetitionModel
                     {
                         FullName = row[headers.IndexOf("FullName")].ToString(),
-                        Email = row[headers.IndexOf("Email")].ToString(),
-                        Grade = double.TryParse(row[headers.IndexOf("Grade")].ToString(), out double grade) ? grade : 0,
-                        SchoolName = row[headers.IndexOf("SchoolName")].ToString()
+                        Email = row.Count > 1 ? row[headers.IndexOf("Email")].ToString() : string.Empty,
+                        Grade = row.Count > 2 ? (double.TryParse(row[headers.IndexOf("Grade")].ToString(), out double grade) ? grade : 0) : 0,
+                        SchoolName = row.Count > 3 ? row[headers.IndexOf("SchoolName")].ToString() : string.Empty
                     };
 
                     students.Add(student);

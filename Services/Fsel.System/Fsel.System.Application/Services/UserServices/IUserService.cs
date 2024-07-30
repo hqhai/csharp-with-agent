@@ -59,9 +59,14 @@ namespace Fsel.System.Application.Services.UserServices
         [Post("/v1/platform/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<PlatformModel>>>> GetPlatformsQueryAsync([Body] BaseQueryModel query);
 
-
         [Get("/v1/user/get-users-by-role")]
         Task<IApiResponse<MethodResult<IList<UserModel>>>> GetUserByRoleAsync([Query] GetUsersByRoleQueryModel query);
+
+        [Post("/v1/student/get-student-by-emails")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByEmails([Body] IList<string> emails);
+
+        [Get("/v1/student-ranking/check-lucky-spin/{studentId}")]
+        Task<IApiResponse<MethodResult<bool>>> CheckLuckySpin([FromRoute] Guid studentId);
 
 
         [Post("/v1/student-focus-time")]

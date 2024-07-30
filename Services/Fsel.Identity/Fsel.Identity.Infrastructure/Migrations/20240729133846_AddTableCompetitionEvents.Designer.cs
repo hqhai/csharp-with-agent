@@ -4,6 +4,7 @@ using Fsel.Identity.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240729133846_AddTableCompetitionEvents")]
+    partial class AddTableCompetitionEvents
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -767,20 +770,14 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<string>("BaseCourseLevel")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("BeginnerGuideStr")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("ClassId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("CourseId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("CourseLevel")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -816,9 +813,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.Property<Guid?>("DistrictId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("ExpiredDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("HumanId")
                         .HasColumnType("uniqueidentifier");
@@ -1579,79 +1573,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserCourseSetting", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(0);
-
-                    b.Property<string>("CourseLevel")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
-
-                    b.Property<string>("CreatedFullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
-
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Value")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserCourseSettings");
-                });
-
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserOtpCode", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2096,17 +2017,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("Teacher");
                 });
 
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserCourseSetting", b =>
-                {
-                    b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
-                        .WithMany("UserCourseSettings")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserOtpCode", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
@@ -2195,8 +2105,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.User", b =>
                 {
                     b.Navigation("Human");
-
-                    b.Navigation("UserCourseSettings");
 
                     b.Navigation("UserOtpCodes");
 
