@@ -2,8 +2,10 @@
 
 namespace Fsel.Course.Infrastructure.Common
 {
+    using System.Text.RegularExpressions;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions;
+    using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions.V1i1;
     using Fsel.Shared.Enums;
 
     public class QuestionTypeConverter
@@ -101,12 +103,322 @@ namespace Fsel.Course.Infrastructure.Common
                     result = config.Deserialize<ExercisePreparationQuestion>();
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
                     break;
+                // Dạng câu hỏi mới
+                case EnumQuestionType.MatchingParagraphInfo:
+                    var matchingParagraphInfo = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
+                    result = isDisableAnswers ? ClearAnswers(matchingParagraphInfo) : matchingParagraphInfo;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(matchingParagraphInfo) : default;
+                    break;
+
+                case EnumQuestionType.MatchingHeading:
+                    var matchingHeading = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
+                    result = isDisableAnswers ? ClearAnswers(matchingHeading) : matchingHeading;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(matchingHeading) : default;
+                    break;
+
+                case EnumQuestionType.YesNoNotGivenDropDown:
+                    var yesNoNotGivenDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
+                    result = isDisableAnswers ? ClearAnswers(yesNoNotGivenDropDown) : yesNoNotGivenDropDown;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(yesNoNotGivenDropDown) : default;
+                    break;
+
+                case EnumQuestionType.TrueFalseNotGivenDropDown:
+                    var trueFalseNotGivenDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
+                    result = isDisableAnswers ? ClearAnswers(trueFalseNotGivenDropDown) : trueFalseNotGivenDropDown;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(trueFalseNotGivenDropDown) : default;
+                    break;
+
+                case EnumQuestionType.MapLabelingDropDown:
+                    var mapLabelingDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
+                    result = isDisableAnswers ? ClearAnswers(mapLabelingDropDown) : mapLabelingDropDown;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(mapLabelingDropDown) : default;
+                    break;
+
+                case EnumQuestionType.SummaryCompletionDropDown:
+                    var summaryCompletionDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
+                    result = isDisableAnswers ? ClearAnswers(summaryCompletionDropDown) : summaryCompletionDropDown;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(summaryCompletionDropDown) : default;
+                    break;
+
+                case EnumQuestionType.MultichoiceV1:
+                    var multichoiceV1 = config.Deserialize<MultipleChoiceQuestionV1>();
+                    result = isDisableAnswers ? ClearAnswers(multichoiceV1) : multichoiceV1;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multichoiceV1) : default;
+                    break;
+
+                case EnumQuestionType.CheckList:
+                    var checkList = HandleQuestion(config.Deserialize<CheckListQuestionV1>());
+                    result = isDisableAnswers ? ClearAnswers(checkList) : checkList;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(checkList) : default;
+                    break;
+
+                case EnumQuestionType.SummaryCompletionGapFill:
+                    var summaryCompletionGapFill = HandleQuestion(config.Deserialize<CheckListQuestionV1>());
+                    result = isDisableAnswers ? ClearAnswers(summaryCompletionGapFill) : summaryCompletionGapFill;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(summaryCompletionGapFill) : default;
+                    break;
+
+                case EnumQuestionType.CompletionDiagrams:
+                    var completionDiagrams = HandleQuestion(config.Deserialize<CheckListQuestionV1>());
+                    result = isDisableAnswers ? ClearAnswers(completionDiagrams) : completionDiagrams;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(completionDiagrams) : default;
+                    break;
 
                 default:
                     throw new ArgumentException("Invalid question type");
             }
-
             return (result, totalCorrect);
+        }
+
+        public bool ValidateQuestion(object? config, EnumQuestionType questionType)
+        {
+            var isError = false;
+            switch (questionType)
+            {
+                case EnumQuestionType.MultichoiceV1:
+                    var multichoiceV1 = config.Deserialize<MultipleChoiceQuestionV1>();
+                    isError = ValidateMultichoiceV1(multichoiceV1);
+                    break;
+
+                case EnumQuestionType.YesNoNotGivenDropDown:
+                    var yesNoNotGivenDropDown = config.Deserialize<MatchingTaskQuestion>();
+                    isError = ValidateMatchingTask(yesNoNotGivenDropDown);
+                    break;
+
+                case EnumQuestionType.TrueFalseNotGivenDropDown:
+                    var trueFalseNotGivenDropDown = config.Deserialize<MatchingTaskQuestion>();
+                    isError = ValidateMatchingTask(trueFalseNotGivenDropDown);
+                    break;
+
+                case EnumQuestionType.MapLabelingDropDown:
+                    var mapLabelingDropDown = config.Deserialize<MatchingTaskQuestion>();
+                    isError = ValidateMatchingTask(mapLabelingDropDown);
+                    break;
+
+                case EnumQuestionType.SummaryCompletionDropDown:
+                    var summaryCompletionDropDown = config.Deserialize<MatchingTaskQuestion>();
+                    isError = ValidateMatchingTask(summaryCompletionDropDown) || string.IsNullOrEmpty(summaryCompletionDropDown?.Content);
+                    break;
+
+                case EnumQuestionType.MatchingParagraphInfo:
+                    var matchingTask = config.Deserialize<MatchingTaskQuestion>();
+                    isError = ValidateMatchingTask(matchingTask);
+                    break;
+
+                case EnumQuestionType.MatchingHeading:
+                    var matchingHeading = config.Deserialize<MatchingTaskQuestion>();
+                    isError = ValidateMatchingTask(matchingHeading);
+                    break;
+
+                case EnumQuestionType.CheckList:
+                    var checkList = config.Deserialize<CheckListQuestionV1>();
+                    isError = ValidateCheckList(checkList);
+                    break;
+
+                case EnumQuestionType.SummaryCompletionGapFill:
+                    var summaryCompletionGapFill = config.Deserialize<CheckListQuestionV1>();
+                    isError = ValidateCheckList(summaryCompletionGapFill) || string.IsNullOrEmpty(summaryCompletionGapFill?.Content);
+                    break;
+
+                case EnumQuestionType.CompletionDiagrams:
+                    var completionDiagrams = config.Deserialize<CheckListQuestionV1>();
+                    isError = ValidateCheckList(completionDiagrams);
+                    break;
+
+                default:
+                    break;
+            }
+            return isError;
+        }
+
+        private static bool ValidateCheckList(CheckListQuestionV1? data)
+        {
+            if (data == null || !data.Answers.Any())
+            {
+                return true;
+            }
+            if (HasInvalidKeysOrContent(data.Answers))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private static bool ValidateMultichoiceV1(MultipleChoiceQuestionV1? data)
+        {
+            var isError = true;
+            if (data == null || !data.Answers.Any())
+            {
+                return isError;
+            }
+
+            foreach (var item in data.Answers)
+            {
+                if (string.IsNullOrEmpty(item.Content) || !item.Answers.Any())
+                {
+                    return isError;
+                }
+                if (HasInvalidKeysOrContent(item.Answers))
+                {
+                    return isError;
+                }
+            }
+            return false;
+        }
+
+        private static bool ValidateMatchingTask(MatchingTaskQuestion? data)
+        {
+            if (data == null || !data.Answers.Any() || !data.Placeholders.Any())
+            {
+                return true;
+            }
+            if (HasInvalidKeysOrContent(data.Answers) || HasInvalidKeysOrContent(data.Placeholders))
+            {
+                return true;
+            }
+            if (data.Placeholders.GroupBy(x => x.Key).Select(x => x.Count()).Any(x => x > 1))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private static bool HasInvalidKeysOrContent(IEnumerable<dynamic> items)
+        {
+            // Kiểm tra sự đồng nhất của Key
+            bool hasEmptyKey = items.Any(x => string.IsNullOrEmpty((string)x.Key));
+            bool hasNonEmptyKey = items.Any(x => !string.IsNullOrEmpty((string)x.Key));
+            if (hasEmptyKey && hasNonEmptyKey)
+            {
+                return true;
+            }
+            // Kiểm tra sự đồng nhất của Content
+            bool hasEmptyContent = items.Any(x => string.IsNullOrEmpty((string)x.Content));
+            bool hasNonEmptyContent = items.Any(x => !string.IsNullOrEmpty((string)x.Content));
+            if (hasEmptyContent && hasNonEmptyContent)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private static CheckListQuestionV1? HandleQuestion(CheckListQuestionV1? data)
+        {
+            if (data == null || string.IsNullOrEmpty(data.Content))
+            {
+                return data;
+            }
+            MatchCollection matches = Regex.Matches(data.Content, @"\{(.*?)\}");
+            Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+            foreach (Match match in matches)
+            {
+                string id = match.Groups[1].Value;
+                if (!Guid.TryParse(id, out _))
+                {
+                    var config = new ConfigQuestionV1
+                    {
+                        Content = match.Groups[1].Value
+                    };
+                    data.Answers.Insert(replacements.Count, config);
+                    replacements[id] = config.Id;
+                }
+                else
+                {
+                    replacements[id] = new Guid(id);
+                }
+            }
+            foreach (var pair in replacements)
+            {
+                if (!Guid.TryParse(pair.Key, out _))
+                {
+                    data.Content = data.Content.Replace("{" + pair.Key + "}", "{" + pair.Value.ToString() + "}", StringComparison.CurrentCulture);
+                }
+            }
+            return data;
+        }
+
+        private static MatchingTaskQuestion? HandleQuestion(MatchingTaskQuestion? data)
+        {
+            if (data == null || string.IsNullOrEmpty(data.Content))
+            {
+                return data;
+            }
+            MatchCollection matches = Regex.Matches(data.Content, @"\{(.*?)\}");
+            Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+            foreach (Match match in matches)
+            {
+                string id = match.Groups[1].Value;
+                if (!Guid.TryParse(id, out _))
+                {
+                    var config = new ConfigQuestionV1
+                    {
+                        Key = match.Groups[1].Value
+                    };
+                    data.Answers.Insert(replacements.Count, config);
+                    replacements[id] = config.Id;
+                }
+                else
+                {
+                    replacements[id] = new Guid(id);
+                }
+            }
+            foreach (var pair in replacements)
+            {
+                if (!Guid.TryParse(pair.Key, out _))
+                {
+                    data.Content = data.Content.Replace("{" + pair.Key + "}", "{" + pair.Value.ToString() + "}", StringComparison.CurrentCulture);
+                }
+            }
+            return data;
+        }
+
+        private static object? ClearAnswers(MatchingTaskQuestion? data)
+        {
+            if (data != null && data.Answers != null)
+            {
+                foreach (var item in data.Answers)
+                {
+                    if (item != null)
+                    {
+                        item.Answers.ForEach(x =>
+                        {
+                            x.IsCorrect = null;
+                        });
+                    }
+                }
+            }
+            return data;
+        }
+
+        private static object? ClearAnswers(CheckListQuestionV1? data)
+        {
+            if (data != null && data.Answers != null)
+            {
+                foreach (var item in data.Answers)
+                {
+                    if (item.IsCorrect.HasValue)
+                    {
+                        item.IsCorrect = null;
+                    }
+                    else
+                    {
+                        item.Content = null;
+                    }
+                }
+            }
+            return data;
+        }
+
+        private static object? ClearAnswers(MultipleChoiceQuestionV1? data)
+        {
+            if (data != null && data.Answers != null)
+            {
+                foreach (var item in data.Answers)
+                {
+                    item.IsCorrect = null;
+                }
+            }
+            return data;
         }
 
         private static object? ClearAnswers(MultipleOptionSentenceCompletionQuestion? data)
@@ -191,6 +503,19 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
+        private static int GetTotalCorrect(CheckListQuestionV1? data)
+        {
+            if (data != null && data.Answers != null && data.Answers.Any())
+            {
+                if (data.Answers.Any(x => x.IsCorrect.HasValue))
+                {
+                    return data.Answers.Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value);
+                }
+                return data.Answers.Count;
+            }
+            return default;
+        }
+
         private static int GetTotalCorrect(MultipleOptionSentenceCompletionQuestion? data)
         {
             if (data != null && data.Contents != null)
@@ -220,6 +545,24 @@ namespace Fsel.Course.Infrastructure.Common
         private static int GetTotalCorrect()
         {
             return 1;
+        }
+
+        private static int GetTotalCorrect(MatchingTaskQuestion? data)
+        {
+            if (data != null && data.Answers != null)
+            {
+                return data.Answers.Count;
+            }
+            return default;
+        }
+
+        private static int GetTotalCorrect(MultipleChoiceQuestionV1? data)
+        {
+            if (data != null && data.Answers != null)
+            {
+                return data.Answers.Where(x => x.Answers != null && x.Answers.Any()).SelectMany(x => x.Answers!).Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value);
+            }
+            return default;
         }
 
         private static int GetTotalCorrect(MatchingTypeQuestion? data)
