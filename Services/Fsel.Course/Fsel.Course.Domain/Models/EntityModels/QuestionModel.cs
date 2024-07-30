@@ -13,7 +13,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? Explanation { get; set; }
         public object? Config { get; set; }
-
+        public IList<int>? SubQuestionIndexs { get; set; }
+        public int SubQuestionNumber { get; set; }
         public EnumCorrectStatus? CorrectStatus { get; set; }
         public AnswerModel? ResultAnswer { get; set; }
         public IList<ExplanationTranslationModel>? Explanations { get; set; }

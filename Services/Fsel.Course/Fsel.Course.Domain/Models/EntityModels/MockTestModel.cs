@@ -8,6 +8,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class MockTestModel : BaseModel
     {
+        public double Vertion { get; set; }
         public string? Name { get; set; }
         public bool IsActive { get; set; }
         public EnumMockTestType MockTestType { get; set; }
@@ -26,6 +27,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         }
 
         public string? PostArea { get; set; }
-
     }
 }
