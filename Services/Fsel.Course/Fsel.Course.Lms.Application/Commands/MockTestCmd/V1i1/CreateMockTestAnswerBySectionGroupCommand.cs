@@ -161,8 +161,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     }
                     sectionGroupResult = answerResult.Result;
                 }
-                sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit);
-
+                sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit, mockTestResult.MockTest?.Version ?? (int)EnumVersion.V1);
                 return methodResult;
             });
             if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && sectionGroup.Sections.Any() && request.IsSubmit)
