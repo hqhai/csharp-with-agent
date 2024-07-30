@@ -197,6 +197,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                     }
                     catch (Exception ex)
                     {
+                        placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == studentId && x.Level == level).FirstOrDefaultAsync(cancellationToken);
                         _logger.LogWarning($"Log Duplicate PlacementTestResult : {ex.Message}");
                     }
                 }
