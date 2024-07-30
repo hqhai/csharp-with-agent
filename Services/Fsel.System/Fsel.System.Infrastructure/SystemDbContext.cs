@@ -50,6 +50,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new ErrorReportEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TokenHistoryEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ChatBotEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LuckyTicketEntityTypeConfigConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -79,6 +80,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<ChatbotSkillConfig> ChatbotSkillConfigs { get; set; }
         public DbSet<ChatbotTokenConfigs> ChatbotTokenConfigs { get; set; }
         public DbSet<ChatBot> ChatBots { get; set; }
+        public DbSet<LuckyTicket> LuckyTickets { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

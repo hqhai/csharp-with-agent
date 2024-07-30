@@ -120,6 +120,7 @@ namespace Fsel.Shared.Constants
                 public const string SetCompleteApprovalPostTimeOut = $"{KeyQueue}_SetCompleteApprovalPostTimeOut";
                 public const string ReviewFsel = $"{KeyQueue}_ReviewFsel";
                 public const string NoticeAccessTime = $"{KeyQueue}_NoticeAccessTime";
+                public const string CreateLuckyTicket = $"{KeyQueue}_CreateLuckyTicket";
             }
         }
 
