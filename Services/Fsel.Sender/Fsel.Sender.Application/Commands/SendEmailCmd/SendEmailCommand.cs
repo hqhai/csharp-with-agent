@@ -35,10 +35,10 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var bccEmail = _appSetting.EmailConfig?.BCCEmail;
-            if (bccEmail != null && bccEmail.Count > 0)
+            var ccEmailDefault = _appSetting.EmailConfig?.BCCEmail;
+            if (ccEmailDefault != null && ccEmailDefault.Count > 0)
             {
-                bccEmail.ForEach(request.BccEmails.Add);
+                ccEmailDefault.ForEach(request.CcEmails.Add);
             }
 
             #region Get CC Email
