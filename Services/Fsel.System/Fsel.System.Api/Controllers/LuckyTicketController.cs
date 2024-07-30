@@ -44,7 +44,7 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// get all lucky ticket
         /// </summary>
-        [HttpGet("get--all-lucky-ticket")]
+        [HttpGet("get-all-lucky-ticket")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentLuckyTicketModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetAll([FromQuery] GetAllLuckyTicketQuery query)
