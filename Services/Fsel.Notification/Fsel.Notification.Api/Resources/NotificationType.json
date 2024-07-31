@@ -145,7 +145,7 @@
     "content": "AIFeedBack",
     "icon": "",
     "priority": 1,
-    "templateMessage": "Bài viết của bạn đã được hệ thống AI ChatGPT nhận xét. Nhấn để xem chi tiết",
+    "templateMessage": "Bài đăng của bạn đã được chấm bởi hệ thống AI của FSEL. Nhấn để xem chi tiết",
     "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}?type=aiFeedback",
     "createdDate": "2023-08-28"
   },
