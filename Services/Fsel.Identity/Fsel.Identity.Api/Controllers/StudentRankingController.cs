@@ -138,7 +138,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Check dữ liệu học sinh có lucky spin không ?
         /// </summary>
-        [HttpPost("check-luky-spin")]
+        [HttpGet("check-lucky-spin")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CheckLuckySpin()
