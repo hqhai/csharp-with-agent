@@ -7,6 +7,7 @@ namespace Fsel.System.Application.Queries.LuckyTickets
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using Fsel.System.Application.Services.GoogleSheetServices;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.IRepositories;
@@ -17,7 +18,9 @@ namespace Fsel.System.Application.Queries.LuckyTickets
 
     public class GetAllLuckyTicketQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<StudentLuckyTicketModel>>>
     {
-        public string? Sheet { get; set; }
+        public string? SchoolCode { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 
     public class GetAllLuckyTicketQueryHandler : IRequestHandler<GetAllLuckyTicketQuery, MethodResult<PagingItemsModel<StudentLuckyTicketModel>>>
@@ -45,7 +48,7 @@ namespace Fsel.System.Application.Queries.LuckyTickets
             if (string.IsNullOrEmpty(request.Keyword))
             {
                 var spreadSheetId = _appSetting.GoogleSheetConfig?.SchoolStudentSheetId;
-                var sheet = request.Sheet;
+                var sheet = request.SchoolCode;
 
                 if (string.IsNullOrEmpty(spreadSheetId) || string.IsNullOrEmpty(sheet))
                 {
@@ -83,7 +86,12 @@ namespace Fsel.System.Application.Queries.LuckyTickets
 
             var studentLuckyTickets = new List<StudentLuckyTicketModel>();
 
-            var luckyTickets = await _luckyTicketRepository.Queryable.Where(p => studentIds != null && studentIds.Contains(p.StudentId)).ToListAsync(cancellationToken);
+            var luckyTickets = await _luckyTicketRepository.Queryable.Where(p => studentIds != null && studentIds.Contains(p.StudentId) && p.Status == EnumLuckyTicketStatus.NotWon).ToListAsync(cancellationToken);
+
+            if (request.StartDate.HasValue && request.EndDate.HasValue)
+            {
+                luckyTickets = luckyTickets.Where(p => p.CreatedDate.Date >= request.StartDate.Value.Date && p.CreatedDate.Date <= request.EndDate.Value.Date).ToList();
+            }
 
             foreach (var item in luckyTickets)
             {
