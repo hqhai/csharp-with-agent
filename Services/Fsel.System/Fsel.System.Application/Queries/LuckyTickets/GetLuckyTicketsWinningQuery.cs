@@ -19,8 +19,9 @@ namespace Fsel.System.Application.Queries.LuckyTickets
 
     public class GetLuckyTicketsWinningQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<StudentLuckyTicketModel>>>
     {
-        public string? Sheet { get; set; }
-        public DateTime? Day { get; set; }
+        public string? SchoolCode { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
     }
 
     public class GetLuckyTicketsWinningQueryHandler : IRequestHandler<GetLuckyTicketsWinningQuery, MethodResult<PagingItemsModel<StudentLuckyTicketModel>>>
@@ -48,7 +49,7 @@ namespace Fsel.System.Application.Queries.LuckyTickets
             if (string.IsNullOrEmpty(request.Keyword))
             {
                 var spreadSheetId = _appSetting.GoogleSheetConfig?.SchoolStudentSheetId;
-                var sheet = request.Sheet;
+                var sheet = request.SchoolCode;
 
                 if (string.IsNullOrEmpty(spreadSheetId) || string.IsNullOrEmpty(sheet))
                 {
@@ -86,14 +87,9 @@ namespace Fsel.System.Application.Queries.LuckyTickets
 
             var studentLuckyTickets = new List<StudentLuckyTicketModel>();
 
-            var @day = request.Day ?? DateTime.UtcNow;
+            var luckyTickets = await _luckyTicketRepository.Queryable.Where(p => studentIds != null && studentIds.Contains(p.StudentId) && p.Status == EnumLuckyTicketStatus.Won).ToListAsync(cancellationToken);
 
-            var days = DateTimeHelper.GetMondayAndSunday(@day);
-
-            var monday = days.Monday;
-            var sunday = days.Sunday;
-
-            var luckyTickets = await _luckyTicketRepository.Queryable.Where(p => studentIds != null && studentIds.Contains(p.StudentId) && p.Status == EnumLuckyTicketStatus.Won && p.WinningDate.HasValue && p.WinningDate.Value.Date >= monday.Date && p.WinningDate.Value.Date <= sunday.Date).ToListAsync(cancellationToken);
+            luckyTickets = luckyTickets.Where(p => p.CreatedDate.Date >= request.StartDate.Date && p.CreatedDate.Date <= request.EndDate.Date).ToList();
 
             foreach (var item in luckyTickets)
             {
