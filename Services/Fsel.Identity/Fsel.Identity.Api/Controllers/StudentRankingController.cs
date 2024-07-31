@@ -15,6 +15,7 @@ using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Application.Commands.CompetitionEventsCmd;
 using Fsel.Identity.Application.Commands.StudentRankingEvents;
 using Fsel.Identity.Application.Queries.GoogleSheetQuery;
+using Fsel.Identity.Application.Queries.CompetitionEventsQuery;
 
 namespace Fsel.Identity.Api.Controllers
 {
@@ -87,7 +88,7 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Lưu dữ liệu sự kiện
+        /// Tạo dữ liệu sự kiện
         /// </summary>
         [HttpPost("competition-events")]
         [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
@@ -95,6 +96,18 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> CreateCompetitionEvents([FromBody] CreateCompetitionEventsCommand cmd)
         {
             MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Lấy liệu sự kiện
+        /// </summary>
+        [HttpGet("competition-events/{eventCode}")]
+        [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCompetitionEvents([FromRoute] string? eventCode)
+        {
+            MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(new GetCompetitionEventsQuery { EventCode = eventCode}).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
