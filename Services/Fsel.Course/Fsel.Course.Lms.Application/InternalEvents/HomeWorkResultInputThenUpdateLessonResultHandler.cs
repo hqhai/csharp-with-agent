@@ -15,14 +15,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class HomeWorkResultInputThenUpdateLessonResultHandler : BaseInternalLessonResultEventHandler,
         INotificationHandler<EntityChangedEvent<HomeWorkResult>>
     {
+        private readonly ILogger<HomeWorkResultInputThenUpdateLessonResultHandler> _logger2;
         private readonly ILessonResultRepository _lessonResultRepository;
 
-        public HomeWorkResultInputThenUpdateLessonResultHandler(ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonNoteRepository noteRepository, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher) : base(lessonResultRepository, systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, noteRepository, saveUserCourseSettingPublisher)
+        public HomeWorkResultInputThenUpdateLessonResultHandler(ISystemService systemService, ILogger<HomeWorkResultInputThenUpdateLessonResultHandler> logger2, AppSetting appSetting, ILogger<BaseInternalLessonResultEventHandler> logger1, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, ILogger<BaseInternalEventHandler> logger, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository) : base(systemService, appSetting, logger1, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository)
         {
+            _logger2 = logger2;
             _lessonResultRepository = lessonResultRepository;
         }
 
@@ -30,16 +33,26 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(notification);
             var homeWorkResult = notification.Data;
-            var isHomeWorkOtherDone = await _homeWorkResultRepository.Queryable.AnyAsync(x => x.LessonResultId == homeWorkResult.LessonResultId && x.Status != EnumResultStatus.Done, cancellationToken);
-            if (!isHomeWorkOtherDone)
+
+            try
             {
-                var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.HomeWorkResults.Where(x => x.LessonResultId == homeWorkResult.LessonResultId))
-                                                                     .Include(x => x.ClassForumResults.Where(x => x.LessonResultId == homeWorkResult.LessonResultId))
-                                                                     .FirstOrDefaultAsync(x => x.Id == homeWorkResult.LessonResultId, cancellationToken);
-                if (lessonResult != null)
+                var isHomeWorkOtherDone = await _homeWorkResultRepository.Queryable.AnyAsync(x => x.LessonResultId == homeWorkResult.LessonResultId && x.Status != EnumResultStatus.Done, cancellationToken);
+                if (isHomeWorkOtherDone)
                 {
-                    await UpdateLessonResultAsync(lessonResult, cancellationToken).ConfigureAwait(false);
+                    return;
                 }
+                var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.HomeWorkResults.Where(x => x.LessonResultId == homeWorkResult.LessonResultId))
+                                                                         .Include(x => x.ClassForumResults.Where(x => x.LessonResultId == homeWorkResult.LessonResultId))
+                                                                         .FirstOrDefaultAsync(x => x.Id == homeWorkResult.LessonResultId, cancellationToken);
+                if (lessonResult == null)
+                {
+                    return;
+                }
+                await UpdateLessonResultAsync(lessonResult, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger2.LogWarning($"Log Trigger HomeWorkResult : {ex.Message} ");
             }
         }
     }
