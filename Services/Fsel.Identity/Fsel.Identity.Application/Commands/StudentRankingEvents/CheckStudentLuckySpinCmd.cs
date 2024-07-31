@@ -19,6 +19,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingEvents
         private readonly AuthContext _authContext;
         private readonly IStudentRankingEventsRepository _studentRankingEventsRepository;
         private readonly IStudentRepository _studentRepository;
+
         public CheckStudentLuckySpinCmdHandler(AuthContext authContext, IStudentRankingEventsRepository studentRankingEventsRepository, IStudentRepository studentRepository)
         {
             _authContext = authContext;
@@ -31,8 +32,8 @@ namespace Fsel.Identity.Application.Commands.StudentRankingEvents
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var student = _studentRepository.Queryable.FirstOrDefault(x => x.Human != null && x.Human.UserId == _authContext.CurrentUserId);
-            var studentRankingEvents = _studentRankingEventsRepository.Queryable.Include(x => x.CompetitionEvents).Where(x => student != null && x.StudentId == student.Id).ToList();
+            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(x => x.Human != null && x.Human.UserId == _authContext.CurrentUserId, cancellationToken);
+            var studentRankingEvents = await _studentRankingEventsRepository.Queryable.Include(x => x.CompetitionEvents).Where(x => student != null && x.StudentId == student.Id).ToListAsync(cancellationToken);
 
             bool checkLuckySpin = studentRankingEvents.Any(x => x.CompetitionEvents != null && x.CompetitionEvents.EventContent != null && x.CompetitionEvents.EventContent.LuckySpin);
 
