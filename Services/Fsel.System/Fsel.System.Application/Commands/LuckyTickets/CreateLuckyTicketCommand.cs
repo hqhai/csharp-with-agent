@@ -78,7 +78,7 @@ namespace Fsel.System.Application.Commands.LuckyTickets
                 return methodResult;
             }
 
-            var checkLuckySpinResults = await _userService.CheckLuckySpin(student.Id);
+            var checkLuckySpinResults = await _userService.CheckLuckySpin();
             if (!checkLuckySpinResults.IsSuccessStatusCode)
             {
                 methodResult.AddError(checkLuckySpinResults.Error);
