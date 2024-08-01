@@ -112,18 +112,6 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// check lucky spin by student
-        /// </summary>
-        [HttpGet("check-lucky-spin")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetSchoolCodeLuckySpin()
-        {
-            var queryResult = await _mediator.Send(new CheckLuckySpinByStudentIdQuery()).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Lưu dữ liệu sự kiện
         /// </summary>
         [HttpPost("student-ranking-events")]
