@@ -126,6 +126,7 @@ namespace Fsel.Shared.Constants
                 public const string ReviewFsel = $"{KeyQueue}_ReviewFsel";
                 public const string NoticeAccessTime = $"{KeyQueue}_NoticeAccessTime";
                 public const string Techie = $"{KeyQueue}_Techie";
+                public const string CreateLuckyTicket = $"{KeyQueue}_CreateLuckyTicket";
             }
         }
 

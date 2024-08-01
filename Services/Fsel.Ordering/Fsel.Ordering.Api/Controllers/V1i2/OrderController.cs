@@ -62,5 +62,17 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Create Order for student
+        /// </summary>
+        [HttpPost("create-order-for-student-leader-board")]
+        [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateOrderForStudentLeaderBoard([FromBody] CreateOrderForUserFromLeaderBoardCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

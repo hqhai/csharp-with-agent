@@ -13,6 +13,9 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.CourseServices;
+    using Fsel.Training.Application.Services.OrderServices;
+    using Fsel.Training.Application.Services.OrderServices.Model;
+    using Fsel.Training.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -26,12 +29,16 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
         private readonly ICourseService _courseService;
         private readonly AuthContext _authContext;
         private readonly IMediator _mediator;
+        private readonly IUserService _userService;
+        private readonly IOrderService _orderService;
 
-        public ChooseLevelByStudentCommandHandler(ICourseService courseService, AuthContext authContext, IMediator mediator)
+        public ChooseLevelByStudentCommandHandler(ICourseService courseService, AuthContext authContext, IMediator mediator, IUserService userService, IOrderService orderService)
         {
             _courseService = courseService;
             _authContext = authContext;
             _mediator = mediator;
+            _userService = userService;
+            _orderService = orderService;
         }
 
         public async Task<MethodResult<bool>> Handle(ChooseLevelByStudentCommand request, CancellationToken cancellationToken)
@@ -79,6 +86,30 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 methodResult.AddError(addStudentIntoClass.ErrorMessages);
                 return methodResult;
             }
+
+            var checkIsLuckySpinResult = await _userService.CheckLuckySpin();
+
+            if (checkIsLuckySpinResult.IsSuccessStatusCode && checkIsLuckySpinResult.Content?.Result == true)
+            {
+                var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+                if (!studentResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(studentResult.Error);
+                    return methodResult;
+                }
+                var student = studentResult.Content?.Result;
+
+                await _orderService.CreateOrderForUserLeaderBoard(new CreateOrderForUserFromLeaderBoardCommandModel()
+                {
+                    UserId = _authContext.CurrentUserId,
+                    FullName = student?.Human?.FullName,
+                    Email = student?.Human?.Email,
+                    PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
+                    PackageId = default,
+                    EventId = default
+                });
+            }
+
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

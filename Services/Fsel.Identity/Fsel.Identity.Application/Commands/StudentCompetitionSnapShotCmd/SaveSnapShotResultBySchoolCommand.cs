@@ -11,6 +11,7 @@ namespace Fsel.Identity.Application.Commands.StudentCompetitionSnapShotCmd
     using Newtonsoft.Json;
     using Fsel.Identity.Application.Queries.StudentRanking;
     using Fsel.Shared.Enums;
+    using Fsel.Identity.Domain.IRepositories;
 
     public class SaveSnapShotResultBySchoolCommand : BaseQueryModel, IRequest<MethodResult<bool>>
     {
@@ -19,9 +20,11 @@ namespace Fsel.Identity.Application.Commands.StudentCompetitionSnapShotCmd
     public class SaveSnapShotResultBySchoolCommandHandler : IRequestHandler<SaveSnapShotResultBySchoolCommand, MethodResult<bool>>
     {
         private readonly IMediator _mediator;
-        public SaveSnapShotResultBySchoolCommandHandler(IMediator mediator)
+        private readonly ICompetitionEventsRepository _competitionEventsRepository;
+        public SaveSnapShotResultBySchoolCommandHandler(IMediator mediator, ICompetitionEventsRepository competitionEventsRepository)
         {
             _mediator = mediator;
+            _competitionEventsRepository = competitionEventsRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(SaveSnapShotResultBySchoolCommand request, CancellationToken cancellationToken)
@@ -30,15 +33,15 @@ namespace Fsel.Identity.Application.Commands.StudentCompetitionSnapShotCmd
             var methodResult = new MethodResult<bool>();
             string competitionConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.SchoolEventRules);
             string jsonData = File.ReadAllText(competitionConfigPath);
-            var listSchoolEventRules = JsonConvert.DeserializeObject<IList<SchoolEventRule>>(jsonData);
+            var listSchoolEventRules = _competitionEventsRepository.Queryable.ToList();
 
             foreach (var item in listSchoolEventRules!)
             {
                 await _mediator.Send(new GetStudentCompetitionSchoolQuery
                 {
                     CourseType = EnumCourseType.Academic,
-                    SchoolCode = item.SchoolCode,
-                    WeekNumber = item.WeekEvents!.FirstOrDefault(x => DateTime.UtcNow.Date == x.EndDate.Date)?.WeekNumber ?? 1 // mặc định tuần 1
+                    SchoolCode = item.EventCode,
+                    WeekNumber = item.EventContent?.WeekEvents?.FirstOrDefault(x => DateTime.UtcNow.Date == x.EndDate.Date)?.WeekNumber ?? 1 // mặc định tuần 1
                 }, cancellationToken);
             }
 
