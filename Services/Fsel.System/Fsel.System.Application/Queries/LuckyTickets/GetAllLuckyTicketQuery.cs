@@ -16,6 +16,12 @@ namespace Fsel.System.Application.Queries.LuckyTickets
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
+    public class StudentLeaderBoard
+    {
+        public string? FullName { get; set; }
+        public string? Email { get; set; }
+    }
+
     public class GetAllLuckyTicketQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<StudentLuckyTicketModel>>>
     {
         public string? SchoolCode { get; set; }
@@ -43,42 +49,47 @@ namespace Fsel.System.Application.Queries.LuckyTickets
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<StudentLuckyTicketModel>>();
 
-            var emails = new List<string>();
+            var studentsLeaderBoard = new List<StudentLeaderBoard>();
 
-            if (string.IsNullOrEmpty(request.Keyword))
+            var spreadSheetId = _appSetting.GoogleSheetConfig?.SchoolStudentSheetId;
+            var sheet = request.SchoolCode;
+
+            if (string.IsNullOrEmpty(spreadSheetId) || string.IsNullOrEmpty(sheet))
             {
-                var spreadSheetId = _appSetting.GoogleSheetConfig?.SchoolStudentSheetId;
-                var sheet = request.SchoolCode;
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
 
-                if (string.IsNullOrEmpty(spreadSheetId) || string.IsNullOrEmpty(sheet))
+            try
+            {
+                IList<IList<object>> dataVN = _googleSheetService.ReadDataFromSheet(spreadSheetId, sheet);
+                dataVN.RemoveAt(0);
+                foreach (var dataItem in dataVN)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                    return methodResult;
-                }
-
-                try
-                {
-                    IList<IList<object>> dataVN = _googleSheetService.ReadDataFromSheet(spreadSheetId, sheet);
-                    dataVN.RemoveAt(0);
-                    foreach (var dataItem in dataVN)
+                    var fullName = dataItem[0]?.ToString();
+                    var email = dataItem[1]?.ToString();
+                    if (!string.IsNullOrEmpty(fullName) && !string.IsNullOrEmpty(email))
                     {
-                        var email = dataItem[1]?.ToString();
-                        if (!string.IsNullOrEmpty(email))
+                        studentsLeaderBoard.Add(new StudentLeaderBoard
                         {
-                            emails.Add(email);
-                        }
+                            FullName = fullName,
+                            Email = email
+                        });
                     }
                 }
-                catch (Exception ex)
-                {
-                    methodResult.AddErrorBadRequest(ex.Message);
-                    return methodResult;
-                }
             }
-            else
+            catch (Exception ex)
             {
-                emails.Add(request.Keyword);
+                methodResult.AddErrorBadRequest(ex.Message);
+                return methodResult;
             }
+
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                studentsLeaderBoard = studentsLeaderBoard.Where(p => p.FullName.ToLower().Contains(request.Keyword.ToLower()) || p.Email.ToLower().Contains(request.Keyword.ToLower())).ToList();
+            }
+
+            var emails = studentsLeaderBoard.Select(p => p.Email!).ToList();
 
             var studentResults = await _userService.GetStudentsByEmails(emails);
             var students = studentResults.Content?.Result;
