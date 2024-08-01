@@ -28,11 +28,13 @@ namespace Fsel.Ordering.Domain.Entities
         /// <summary>
         /// Phần trăm giảm
         /// </summary>
+        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int Percent { get; set; }
 
         /// <summary>
         /// Số lượng tối đa
         /// </summary>
+        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int Quantity { get; set; }
 
         /// <summary>
@@ -58,5 +60,6 @@ namespace Fsel.Ordering.Domain.Entities
         public ICollection<VoucherPackage> VoucherPackages { get; set; } = new List<VoucherPackage>();
 
         public ICollection<UserVoucher> UserVouchers { get; set; } = new List<UserVoucher>();
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }
