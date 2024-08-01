@@ -43,14 +43,16 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
         private readonly IMediator _mediator;
         private readonly IStudentCompetitionSnapShotRepository _studentCompetitionSnapShotRepository;
         private readonly IMapper _mapper;
+        private readonly ICompetitionEventsRepository _competitionEventsRepository;
 
-        public GetStudentCompetitionSchoolQueryHandler(ILmsCourseService lmsCourseService, IStudentRepository studentRepository, IMediator mediator, IStudentCompetitionSnapShotRepository studentCompetitionSnapShotRepository, IMapper mapper)
+        public GetStudentCompetitionSchoolQueryHandler(ILmsCourseService lmsCourseService, IStudentRepository studentRepository, IMediator mediator, IStudentCompetitionSnapShotRepository studentCompetitionSnapShotRepository, IMapper mapper, ICompetitionEventsRepository competitionEventsRepository)
         {
             _lmsCourseService = lmsCourseService;
             _studentRepository = studentRepository;
             _mediator = mediator;
             _studentCompetitionSnapShotRepository = studentCompetitionSnapShotRepository;
             _mapper = mapper;
+            _competitionEventsRepository = competitionEventsRepository;
         }
 
         public async Task<MethodResult<PagingItemStudentRankingModel>> Handle(GetStudentCompetitionSchoolQuery request, CancellationToken cancellationToken)
@@ -65,17 +67,23 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
 
             // Đọc Data Week Events
-            string competitionConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.SchoolEventRules);
-            string jsonData = File.ReadAllText(competitionConfigPath);
-            var listSchoolEventRules = JsonConvert.DeserializeObject<IList<SchoolEventRule>>(jsonData);
-            if (listSchoolEventRules == null || listSchoolEventRules.FirstOrDefault() == null || listSchoolEventRules.FirstOrDefault()!.WeekEvents == null)
+            var competitionEvents = _competitionEventsRepository.Queryable
+                                    .FirstOrDefault(x => !string.IsNullOrEmpty(x.EventContentStr) && x.EventCode == request.SchoolCode);
+
+
+            if (competitionEvents == null)
             {
                 return methodResult;
             }
-            var weekEventRules = listSchoolEventRules!.FirstOrDefault(x => x.SchoolCode == request.SchoolCode)!.WeekEvents!.FirstOrDefault(x => x.WeekNumber == request.WeekNumber);
 
+            if (competitionEvents.EventContent == null || competitionEvents.EventContent.WeekEvents == null)
+            {
+                return methodResult;
+            }
 
-            var resultSnapShot = _studentCompetitionSnapShotRepository.Queryable.FirstOrDefault(x => x.SchoolCode == request.SchoolCode && x.WeekNumber == request.WeekNumber && x.StartDate == weekEventRules!.StartDate && x.EndDate == weekEventRules!.EndDate);
+            var weekEventRules = competitionEvents.EventContent.WeekEvents.FirstOrDefault(x => x.WeekNumber == request.WeekNumber);
+
+            var resultSnapShot = _studentCompetitionSnapShotRepository.Queryable.FirstOrDefault(x => x.SchoolCode == request.SchoolCode && x.StartDate == weekEventRules!.StartDate && x.EndDate == weekEventRules!.EndDate);
 
 
             IList<StudentRankingModel> studentRanking = new List<StudentRankingModel>();

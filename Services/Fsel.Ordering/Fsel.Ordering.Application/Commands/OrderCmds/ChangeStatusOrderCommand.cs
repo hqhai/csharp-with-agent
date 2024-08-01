@@ -109,19 +109,6 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
             }
             var student = studentResult.Content?.Result;
 
-            var courseResults = await _lmsCourseService.GetCoursesByIdsAsync(new List<Guid> { student?.CourseId ?? order.CourseId ?? default });
-            if (!courseResults.IsSuccessStatusCode)
-            {
-                methodResult.AddError(courseResults.Error);
-                return methodResult;
-            }
-            var course = courseResults.Content?.Result?.FirstOrDefault();
-            if (course == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
-                return methodResult;
-            }
-
             var package = await _packageRepository.GetByIdAsync(order.PackageId ?? default);
             if (package == null)
             {
@@ -178,16 +165,26 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                         });
                     }
 
-                    await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
+                    var courseResults = await _lmsCourseService.GetCoursesByIdsAsync(new List<Guid> { student?.CourseId ?? order.CourseId ?? default });
+                    if (!courseResults.IsSuccessStatusCode)
                     {
-                        UserIds = new List<Guid>() { order.UserId },
-                        ObjectId = order.Id,
-                        ParamsMessage = new List<object> { course.Name ?? string.Empty },
-                        Type = EnumNotificationType.Text,
-                        Content = EnumNotificationContent.OrderChangeStatus,
-                        SenderId = _authContext.CurrentUserId,
-                        PlatformCode = EnumPlatformCode.LMS
-                    }, cancellationToken);
+                        methodResult.AddError(courseResults.Error);
+                        return methodResult;
+                    }
+                    var course = courseResults.Content?.Result?.FirstOrDefault();
+                    if (course != null)
+                    {
+                        await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
+                        {
+                            UserIds = new List<Guid>() { order.UserId },
+                            ObjectId = order.Id,
+                            ParamsMessage = new List<object> { course.Name ?? string.Empty },
+                            Type = EnumNotificationType.Text,
+                            Content = EnumNotificationContent.OrderChangeStatus,
+                            SenderId = _authContext.CurrentUserId,
+                            PlatformCode = EnumPlatformCode.LMS
+                        }, cancellationToken);
+                    }
                 }
                 order.OrderTransactions.Add(new OrderTransaction()
                 {

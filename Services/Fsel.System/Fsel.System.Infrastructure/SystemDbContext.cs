@@ -59,6 +59,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new TechieEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TechieActionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentTechieEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LuckyTicketEntityTypeConfigConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -92,6 +93,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<TechieAction> TechieActions { get; set; }
         public DbSet<StudentTechie> StudentTechies { get; set; }
         public DbSet<UserConfig> UserConfigs { get; set; }
+        public DbSet<LuckyTicket> LuckyTickets { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

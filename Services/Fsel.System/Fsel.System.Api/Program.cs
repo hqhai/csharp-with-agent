@@ -57,6 +57,7 @@ builder.Services.AddScoped<IUserConfigRepository, UserConfigRepository>();
 builder.Services.AddScoped<ITechieRepository, TechieRepository>();
 builder.Services.AddScoped<ITechieActionRepository, TechieActionRepository>();
 builder.Services.AddScoped<IStudentTechieRepository, StudentTechieRepository>();
+builder.Services.AddScoped<ILuckyTicketRepository, LuckyTicketRepository>();
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
@@ -88,7 +89,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.DoQuestBoard, typeof(CreateTokenHistoryConsumer) },
     { QueueSettings.SystemQueue.NameQueue.QuestBoard, typeof(DoQuestBoardConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.TechieAction, typeof(TechieConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.Techie, typeof(TechieConsumer) }
+    { QueueSettings.LmsQueue.NameQueue.Techie, typeof(TechieConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.CreateLuckyTicket, typeof(CreateLuckyTicketConsumer) }
 });
 
 var app = builder.Build();

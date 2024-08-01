@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.ValueSettings;
+    using Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
@@ -54,12 +55,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var isClassForumDone = lessonResult.ClassForumResults.Any() && lessonResult.ClassForumResults.Any(x => x.Status != EnumClassForumResultStatus.Draft);
             if (isClassForumDone && isHomeWorksDone && lessonResult.Status != EnumResultStatus.Done)
             {
-                var courseId = lessonResult.CourseId;
-                var userId = lessonResult.CreatedUserId;
-                // await DoQuestBoard(userId, courseId, cancellationToken);
+                // var courseId = lessonResult.CourseId;
+                // var userId = lessonResult.CreatedUserId;
+                // await DoQuestBoard(userId, courseId, cancellationToken); 
 
                 lessonResult.Status = EnumResultStatus.Done;
                 await UpdateAsync(lessonResult, cancellationToken).ConfigureAwait(false);
+                await _mediator.Send(new CreateLuckyTicketCommand() { LessonResultId = lessonResult.Id }, cancellationToken).ConfigureAwait(false);
             }
             else if (lessonResult.Status == EnumResultStatus.Done)
             {

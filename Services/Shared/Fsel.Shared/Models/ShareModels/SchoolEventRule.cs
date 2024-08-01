@@ -4,9 +4,8 @@ namespace Fsel.Shared.Models.ShareModels
 {
     public class SchoolEventRule
     {
-        public string? SchoolCode { get; set; }
+        public bool LuckySpin { get; set; }
         public IList<WeekEvent>? WeekEvents { get; set; }
-
     }
 
     public class WeekEvent
@@ -19,6 +18,8 @@ namespace Fsel.Shared.Models.ShareModels
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int WeekNumber { get; set; }
+        public string? Rule { get; set; }
+
     }
 
     public class WeekRule
@@ -28,6 +29,5 @@ namespace Fsel.Shared.Models.ShareModels
         public string? Detail { get; set; }
         public string? RewardImagine { get; set; }
         public int Rank { get; set; }
-        public string? Rule { get; set; }
     }
 }
