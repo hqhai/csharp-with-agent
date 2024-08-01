@@ -131,7 +131,10 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 studentRanking = ConvertHelper.Deserialize<IList<StudentRankingModel>>(resultSnapShot.WeekCompetitionData)!.ToList();
             }
 
-
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                studentRanking = studentRanking.Where(x => x.FullName != null && x.FullName.Contains(request.Keyword)).ToList();
+            }
             var lists = studentRanking.ApplyPaging(request).ToList();
             int totalItem = studentRanking.Count;
             var resultPaging = new PagingItemsModel<StudentRankingModel>(lists, request, totalItem);
