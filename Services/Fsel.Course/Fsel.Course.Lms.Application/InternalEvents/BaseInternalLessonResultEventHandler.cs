@@ -23,6 +23,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentOccupyVideo = 40;
         private const int PercentOccupyClassForum = 30;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly ILogger<BaseInternalLessonResultEventHandler> _logger1;
 
         public BaseInternalLessonResultEventHandler(ISystemService systemService, AppSetting appSetting, ILogger<BaseInternalLessonResultEventHandler> logger1, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, ILogger<BaseInternalEventHandler> logger, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository)
@@ -40,12 +41,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var isClassForumDone = lessonResult.ClassForumResults.Any() && lessonResult.ClassForumResults.Any(x => x.Status != EnumClassForumResultStatus.Draft);
                 if (isClassForumDone && isHomeWorksDone && lessonResult.Status != EnumResultStatus.Done)
                 {
-                    var courseId = lessonResult.CourseId;
-                    var userId = lessonResult.CreatedUserId;
-                    // await DoQuestBoard(userId, courseId, cancellationToken);
+                    // var courseId = lessonResult.CourseId;
+                    // var userId = lessonResult.CreatedUserId;
+                    // await DoQuestBoard(userId, courseId, cancellationToken); 
 
                     lessonResult.Status = EnumResultStatus.Done;
                     await UpdateAsync(lessonResult, cancellationToken).ConfigureAwait(false);
+                    await _mediator.Send(new CreateLuckyTicketCommand() { LessonResultId = lessonResult.Id }, cancellationToken).ConfigureAwait(false);
                 }
                 else if (lessonResult.Status == EnumResultStatus.Done)
                 {
