@@ -36,7 +36,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
 
-            var course = await _courseRepository.Queryable.Include(x => x.CourseTeachers).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var course = await _courseRepository.Queryable.Include(x => x.CourseTeachers).Where(x => !x.ParentCourseId.HasValue).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));

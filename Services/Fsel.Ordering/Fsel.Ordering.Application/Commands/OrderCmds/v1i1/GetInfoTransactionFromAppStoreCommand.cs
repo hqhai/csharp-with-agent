@@ -2,23 +2,27 @@
 
 namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 {
+    using System.Globalization;
     using System.Security.Cryptography;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Constants;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
-    using Fsel.Ordering.Application.Services.InAppPurchase;
-    using Fsel.Ordering.Application.Services.InAppPurchase.Models;
+    using Fsel.Ordering.Application.Services.InAppPurchase.IOS;
+    using Fsel.Ordering.Application.Services.SystemService;
+    using Fsel.Ordering.Application.Services.SystemService.Models;
     using Fsel.Ordering.Application.Services.TrainingService;
-    using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
+    using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
+    using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using JWT.Algorithms;
     using JWT.Builder;
     using MediatR;
@@ -42,8 +46,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
         private readonly IPackageRepository _packageRepository;
         private readonly ITrainingService _trainingService;
         private readonly ILmsCourseService _courseService;
+        private readonly AddExpiredDateForStudentPublisher _addExpiredDateForStudentPublisher;
+        private readonly IUserService _userService;
+        private readonly ISystemService _systemService;
+        private readonly IMediator _mediator;
+        private readonly IPackageEventRepository _packageEventRepository;
 
-        public GetInfoTransactionFromAppStoreCommandHandler(IOrderRepository orderRepository, IAppStoreService appStoreService, AppSetting appSetting, INotificationProcessor notificationProcessor, ILogger<GetInfoTransactionFromAppStoreCommand> logger, IHostEnvironment hostEnvironment, IPackageRepository packageRepository, ITrainingService trainingService, ILmsCourseService courseService)
+        public GetInfoTransactionFromAppStoreCommandHandler(IOrderRepository orderRepository, IAppStoreService appStoreService, AppSetting appSetting, INotificationProcessor notificationProcessor, ILogger<GetInfoTransactionFromAppStoreCommand> logger, IHostEnvironment hostEnvironment, IPackageRepository packageRepository, ITrainingService trainingService, ILmsCourseService courseService, AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher, IUserService userService, ISystemService systemService, IMediator mediator, IPackageEventRepository packageEventRepository)
         {
             _orderRepository = orderRepository;
             _appStoreService = appStoreService;
@@ -54,6 +63,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             _packageRepository = packageRepository;
             _trainingService = trainingService;
             _courseService = courseService;
+            _addExpiredDateForStudentPublisher = addExpiredDateForStudentPublisher;
+            _userService = userService;
+            _systemService = systemService;
+            _mediator = mediator;
+            _packageEventRepository = packageEventRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(GetInfoTransactionFromAppStoreCommand request, CancellationToken cancellationToken)
@@ -174,37 +188,46 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
-                var numberOfShield = (package != null && package.Code.HasValue) ? (int)package.Code.Value : default;
-
-                var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.CreatedUserId, CourseId = order.CourseId, PackageId = order.PackageId ?? default, NumberOfShield = numberOfShield });
-
-                if (!addStudentIntoClassResult.IsSuccessStatusCode)
+                var changeStatusResult = _mediator.Send(new ChangeStatusOrderCommand()
                 {
-                    _logger.LogError(addStudentIntoClassResult.Error.Content);
-                    methodResult.AddError(addStudentIntoClassResult.Error);
-                    return methodResult;
-                }
-
-                var updateNextUnitResult = await _courseService.UpdateNextUnit(order.UserId);
-                if (!updateNextUnitResult.IsSuccessStatusCode)
-                {
-                    _logger.LogError(addStudentIntoClassResult.Error.Content);
-                    methodResult.AddError(updateNextUnitResult.Error);
-                    return methodResult;
-                }
-
-                order.ExpireDate = DateTime.UtcNow.AddMonths(package!.MonthNumber);
-                order.Status = EnumOrderStatus.Payment;
-
-                order.OrderTransactions.Add(new OrderTransaction()
-                {
-                    ResponseBody = transactionInfo,
-                    Type = EnumOrderTransactionType.AppStore,
-                    Status = EnumOrderTransactionStatus.Success
+                    OrderId = order.Id,
+                    OrderStatus = EnumOrderStatus.Payment,
+                    Receipt = transactionInfo.Serialize(),
+                    Type = EnumOrderTransactionType.AppStore
                 });
-                order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber);
-                order = _orderRepository.Update(order);
-                await _orderRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+                var studentResult = await _userService.GetStudentByUserIdAsync(order.UserId);
+                if (!studentResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(studentResult.Error);
+                    return methodResult;
+                }
+                var student = studentResult.Content?.Result;
+
+                if (order.IsInvoice)
+                {
+                    await _systemService.AddPaymentInfoToGoogleSheet(new AddPaymentInfoToGoogleSheetModel()
+                    {
+                        Code = order.Code,
+                        CreatedDate = order.CreatedDate.ToString("dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture),
+                        Price = order.Price.ToString(CultureInfo.InvariantCulture),
+                        FullName = order.FullName,
+                        StudentEmail = student?.Human?.Email,
+                        BillingEmail = order.Email,
+                        CompanyTaxCode = order.CompanyTaxCode,
+                        CompanyAddress = order.CompanyAddress,
+                        CompanyName = order.CompanyName,
+                    });
+                }
+
+                #region Gửi mail thanh toán
+
+                if (order.Status == EnumOrderStatus.Payment)
+                {
+                    await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
+                }
+
+                #endregion Gửi mail thanh toán
 
                 methodResult.Result = true;
                 return methodResult;

@@ -8,6 +8,7 @@ namespace Fsel.Identity.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Identity.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class Human : Entity
     {

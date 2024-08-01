@@ -3,21 +3,25 @@
 namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 {
     using System.Linq;
+    using System.Linq.Dynamic.Core;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.OrderServices;
-    using Fsel.Course.Lms.Application.Services.OrderServices.Model;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
+    using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -31,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IUserService _userService;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly IMapper _mapper;
         private readonly IUnitRepository _unitRepository;
         private readonly IMockTestRepository _mockTestRepository;
@@ -40,6 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         private readonly IOrderService _orderService;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
 
         public GetCourseQueryHandler(
@@ -47,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             IOrderService orderService,
             ICourseRepository courseRepository,
             IUserService userService,
+            ICourseResultRepository courseResultRepository,
             IMapper mapper,
             IUnitRepository unitRepository,
             IMockTestRepository mockTestRepository,
@@ -54,10 +61,12 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             ITrainingService trainingService,
             IUnitResultRepository unitResultRepository,
             IMockTestResultRepository mockTestResultRepository,
+            SaveUserCourseSettingPublisher saveUserCourseSettingPublisher,
             IFinalTestResultRepository finalTestResultRepository)
         {
             _courseRepository = courseRepository;
             _userService = userService;
+            _courseResultRepository = courseResultRepository;
             _mapper = mapper;
             _unitRepository = unitRepository;
             _mockTestRepository = mockTestRepository;
@@ -67,6 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             _orderService = orderService;
             _unitResultRepository = unitResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
+            _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _finalTestResultRepository = finalTestResultRepository;
         }
 
@@ -74,56 +84,44 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<CourseModel>();
-            var userId = request.UserId ?? _authContext.CurrentUserId;
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(userId);
-            if (!studentResult.IsSuccessStatusCode)
+            var method = await Validate(request);
+            if (!method.IsOK)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
-            var student = studentResult?.Content?.Result;
-            var studentId = student?.Id;
 
-            var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
-            if (!classResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));
-                return methodResult;
-            }
-            var @class = classResult?.Content?.Result;
+            var (student, @class) = method.Result;
             if (@class == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
 
-            var orderResult = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, UserId = userId });
-            if (!orderResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError));
-                return methodResult;
-            }
-            var status = orderResult?.Content?.Result ?? default;
-            if (status != EnumOrderStatus.Payment)
-            {
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
+            var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id && x.WorkingStatus == EnumWorkingStatus.Active, cancellationToken);
             var course = await _courseRepository.Queryable
-                             .Include(x => x.CourseResults.Where(x => x.StudentId == studentId))
-                             .Include(x => x.CourseUnitMockTests)
-                             .FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
+                 .Include(x => x.CourseResults.Where(x => courseResult != null && x.Id == courseResult.Id))
+                 .Include(x => x.CourseUnitMockTests)
+                 .FirstOrDefaultAsync(x => courseResult != null && x.Id == courseResult.CourseId, cancellationToken);
+
+            if (course == null)
+            {
+                course = await _courseRepository.Queryable
+                         .Include(x => x.CourseResults.Where(x => x.StudentId == student.Id && x.CourseId == @class.CourseId))
+                         .Include(x => x.CourseUnitMockTests)
+                         .FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
+            }
 
             if (course == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
+            await SaveCourseSettingAsync(course, request.UserId ?? _authContext.CurrentUserId, cancellationToken);
+            await UpdateCourse(course, student.Id, cancellationToken);
 
-            await UpdateCourse(course, studentId, cancellationToken);
-
-            var courseModel = await GetCourseAsync(course.Id, studentId, @class.Code);
+            var courseModel = await GetCourseAsync(course.Id, student.Id, @class.Code);
             if (courseModel == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -143,6 +141,64 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             methodResult.Result = courseModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task<MethodResult<(StudentModel, ClassModel)>> Validate(GetCourseQuery request)
+        {
+            var methodResult = new MethodResult<(StudentModel, ClassModel)>();
+            var userId = request.UserId ?? _authContext.CurrentUserId;
+
+            var studentResult = await _userService.GetStudentByUserIdAsync(userId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                return methodResult;
+            }
+            var student = studentResult?.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
+                return methodResult;
+            }
+            var classResult = await _trainingService.GetClassByStudentId(student.Id);
+            if (!classResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));
+                return methodResult;
+            }
+            var @class = classResult?.Content?.Result;
+            if (@class == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            if (!student.ExpiredDate.HasValue || student.ExpiredDate.Value.Date < DateTime.UtcNow.Date)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            methodResult.Result = (student, @class);
+            return methodResult;
+        }
+
+        private async Task SaveCourseSettingAsync(Course course, Guid? userId, CancellationToken cancellationToken)
+        {
+            var userCourseSettingResults = await _userService.GetUserCourseSettingsAsync();
+            if (!userCourseSettingResults.IsSuccessStatusCode)
+            {
+                return;
+            }
+            var userCourseSetting = userCourseSettingResults.Content?.Result?.FirstOrDefault(x => x.CourseLevel == course.CourseLevel);
+            if (userCourseSetting != null)
+            {
+                return;
+            }
+            await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
+            {
+                CourseLevel = course.CourseLevel,
+                Type = EnumUserCourseType.ResetAndLearnAgain,
+                UserId = userId ?? _authContext.CurrentUserId
+            }, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<CourseModel?> GetCourseAsync(Guid id, Guid? studentId, string? classCode)

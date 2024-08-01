@@ -6,12 +6,13 @@ namespace Fsel.Realtime.Application.Hubs
     using Fsel.Core.Extensions;
     using Fsel.Core.Services.IpApiServices;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.SignalR;
 
     [Authorize]
     public class ClassForumAIFeedBackHub : BaseHub
     {
-        public ClassForumAIFeedBackHub(AuthContext authContext, IIpApiService ipApiService) : base(authContext, ipApiService)
+        public ClassForumAIFeedBackHub(AuthContext authContext, IHttpContextAccessor httpContextAccessor, IIpApiService ipApiService) : base(authContext, ipApiService, httpContextAccessor)
         {
         }
 

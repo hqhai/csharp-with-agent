@@ -13,6 +13,7 @@ namespace Fsel.Course.Infrastructure.Maps
         public CourseTeacherProfile()
         {
             CreateMap<CourseTeacher, CourseTeacherModel>().IgnoreAllNonExisting();
+            CreateMap<CourseTeacher, CourseTeacher>().ForMember(m => m.Id, opt => opt.Ignore()).IgnoreAllNonExisting();
             CreateMap<CreateCourseTeacherCommandModel, CourseTeacher>().IgnoreAllNonExisting();
         }
     }

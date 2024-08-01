@@ -17,13 +17,16 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Email { get; set; }
 
         [EpplusTableColumn(Header = "Level students choose")]
-        public EnumCourseLevel CurrentLevel { get; set; }
+        public EnumCourseLevel? CurrentLevel { get; set; }
 
         [EpplusTableColumn(Header = "Course")]
         public string? CourseName { get; set; }
 
         [EpplusTableColumn(Header = "The student's student level achieved")]
         public EnumCourseLevel? LevelCompleted { get; set; }
+
+        [EpplusTableColumn(Header = "LastModulePT")]
+        public EnumCourseLevel? CourseLevel { get; set; }
 
         [EpplusTableColumn(Header = "Percentage of final PT")]
         public double Percent { get; set; }

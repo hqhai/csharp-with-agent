@@ -62,6 +62,13 @@ namespace Fsel.System.Application.Services.UserServices
         [Get("/v1/user/get-users-by-role")]
         Task<IApiResponse<MethodResult<IList<UserModel>>>> GetUserByRoleAsync([Query] GetUsersByRoleQueryModel query);
 
+
+        [Post("/v1/student-focus-time")]
+        Task<IApiResponse<MethodResult<IList<StudentFocusTimeModel>>>> SaveFocusTime([Body] StudentFocusTimeCommandModel cmd);
+
+        [Post("/v1/student-daily-streak")]
+        Task<IApiResponse<MethodResult<bool>>> SaveDailyStreak([Body] StudentDailyStreakCommandModel cmd);
+
         [Post("/v1/student/get-student-by-emails")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByEmails([Body] IList<string> emails);
 
