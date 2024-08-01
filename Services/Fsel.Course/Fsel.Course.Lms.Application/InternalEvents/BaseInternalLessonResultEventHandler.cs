@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.ValueSettings;
+    using Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
@@ -43,7 +44,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 {
                     // var courseId = lessonResult.CourseId;
                     // var userId = lessonResult.CreatedUserId;
-                    // await DoQuestBoard(userId, courseId, cancellationToken); 
+                    // await DoQuestBoard(userId, courseId, cancellationToken);
 
                     lessonResult.Status = EnumResultStatus.Done;
                     await UpdateAsync(lessonResult, cancellationToken).ConfigureAwait(false);
