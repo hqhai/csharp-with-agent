@@ -89,11 +89,11 @@ namespace Fsel.System.Infrastructure
         public DbSet<ChatbotSkillConfig> ChatbotSkillConfigs { get; set; }
         public DbSet<ChatbotTokenConfigs> ChatbotTokenConfigs { get; set; }
         public DbSet<ChatBot> ChatBots { get; set; }
-        public DbSet<LuckyTicket> LuckyTickets { get; set; }
         public DbSet<Techie> Techie { get; set; }
         public DbSet<TechieAction> TechieActions { get; set; }
         public DbSet<StudentTechie> StudentTechies { get; set; }
         public DbSet<UserConfig> UserConfigs { get; set; }
+        public DbSet<LuckyTicket> LuckyTickets { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
