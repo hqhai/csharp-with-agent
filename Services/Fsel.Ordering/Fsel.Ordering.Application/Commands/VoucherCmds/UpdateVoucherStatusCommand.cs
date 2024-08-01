@@ -49,7 +49,6 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 voucher.IsActive = request.IsActive;
                 voucher = _voucherRepository.Update(voucher);
                 await _voucherRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
                 return methodResult;

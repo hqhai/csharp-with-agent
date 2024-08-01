@@ -33,7 +33,8 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
             var voucher = await _voucherRepository.Queryable
-                                    .Include(e => e.VoucherPackages.Where(n => !n.IsDeleted))
+                                    .Include(e => e.VoucherPackages)
+                                    .Include(e => e.UserVouchers)
                                     .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (voucher == null)
             {
@@ -45,7 +46,6 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             {
                 var result = await _voucherRepository.DeleteAsync(voucher);
                 await _voucherRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = result;
                 return methodResult;
