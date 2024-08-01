@@ -139,9 +139,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
 
                 await _mediator.Send(new ChangeStatusOrderCommand()
                 {
-                    OrderIds = new List<Guid>() { order.Id },
-                    Status = EnumOrderStatus.Payment,
-                    RevenueType = EnumPaymentRevenueType.NotRevenue
+                    OrderId = order.Id,
+                    OrderStatus = EnumOrderStatus.Payment,
                 }, cancellationToken);
 
                 return methodResult;
@@ -174,9 +173,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
 
             await _mediator.Send(new ChangeStatusOrderCommand()
             {
-                OrderIds = new List<Guid>() { newOrder.Id },
-                Status = EnumOrderStatus.Payment,
-                RevenueType = EnumPaymentRevenueType.NotRevenue
+                OrderId = newOrder.Id,
+                OrderStatus = EnumOrderStatus.Payment,
             }, cancellationToken);
 
             return methodResult;
