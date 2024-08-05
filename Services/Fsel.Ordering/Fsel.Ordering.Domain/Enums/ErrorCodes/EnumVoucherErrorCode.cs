@@ -9,6 +9,10 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         /// </summary>
         VoucherStartTimeMustSoonerThanEndTime,
 
-        VoucherIsUsed
+        VoucherIsUsed,
+        VoucherNotExist,
+        VoucherNotActive,
+        VoucherHasExpired,
+        VoucherOutOfQuantity,
     }
 }

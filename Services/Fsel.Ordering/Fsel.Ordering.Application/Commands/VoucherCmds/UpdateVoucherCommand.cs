@@ -65,13 +65,13 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
             #endregion Validation
 
-            var voucher = await _voucherRepository.Queryable.Include(p => p.UserVouchers).FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
+            var voucher = await _voucherRepository.Queryable.Include(p => p.UserVouchers).Include(p => p.Orders).FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
             if (voucher == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucher));
                 return methodResult;
             }
-            if (voucher.UserVouchers.Any())
+            if (voucher.Orders.Any())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherIsUsed), nameof(voucher));
                 return methodResult;
