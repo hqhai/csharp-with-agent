@@ -45,7 +45,7 @@ build-dev-auth:
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
-    DOCKERFILE: "./Environments/Testing/Auth.Development.Dockerfile"
+    DOCKERFILE: "./Environments/Development/Auth.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
