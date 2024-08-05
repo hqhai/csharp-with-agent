@@ -23,6 +23,7 @@ namespace Fsel.Hangfire.Host.Jobs
             JobExtensions.SetRecurringJob<WeeklyReportWorker>(WorkerSettings.JobName.WeeklyReport, Cron.Weekly(DayOfWeek.Monday, 2, 0));
             JobExtensions.SetRecurringJob<JobActiveEventWorker>(WorkerSettings.JobName.ActiveEvent, Cron.Daily(17, 0));
             JobExtensions.SetRecurringJob<WeeklySnapShotLeaderBoardWorker>(WorkerSettings.JobName.WeeklySnapShot, Cron.Weekly(DayOfWeek.Sunday, 23, 30), EnumCountryKey.Vietnam.FindSystemTimeZoneInfo());
+            JobExtensions.SetRecurringJob<JobUpdateVouchersStatusWorker>(WorkerSettings.JobName.ActiveEvent, Cron.Daily(17, 0));
             //JobExtensions.SetRecurringJob<TestWorker>(WorkerSettings.JobName.TestWorkerJob, Cron.Daily);
         }
     }
