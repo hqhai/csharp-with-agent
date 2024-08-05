@@ -69,7 +69,7 @@ namespace Fsel.Identity.Application.Queries.GoogleSheetQuery
                     //{
                     //    continue; // Bỏ qua dòng nếu số cột không khớp
                     //}
-                    var a = headers.IndexOf("SchoolName");
+                    //var a = headers.IndexOf("SchoolName");
                     var student = new StudentJoinCompetitionModel
                     {
                         FullName = row[headers.IndexOf("FullName")].ToString(),
@@ -78,7 +78,10 @@ namespace Fsel.Identity.Application.Queries.GoogleSheetQuery
                         SchoolName = row.Count > 3 ? row[headers.IndexOf("SchoolName")].ToString() : string.Empty
                     };
 
-                    students.Add(student);
+                    if (!students.Any(x => x.Email == student.Email))
+                    {
+                        students.Add(student);
+                    }
                 }
 
                 var existsStudent = _studentRepository.Queryable.Include(x => x.Human).ThenInclude(x => x.User)
@@ -100,9 +103,6 @@ namespace Fsel.Identity.Application.Queries.GoogleSheetQuery
                         student.UserId = match.UserId;
                     }
                 });
-
-
-
             }
             catch (Exception ex)
             {
