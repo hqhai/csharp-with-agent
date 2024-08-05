@@ -88,5 +88,11 @@ namespace Fsel.Shared.Enums
 
         [Description("Completion Diagrams")]
         CompletionDiagrams,
+
+        [Description("Table Completion")]
+        TableCompletion,
+
+        [Description("Flow chart completion")]
+        FlowChartCompletion,
     }
 }

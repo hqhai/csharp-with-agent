@@ -69,7 +69,7 @@ namespace Fsel.Course.Infrastructure.Common
             return true;
         }
 
-        public bool? CheckAnswer(IList<string>? words, string? word, int index)
+        public bool? CheckAnswer(IList<string>? words, string? word, int index = default)
         {
             if (words != null && words.Any() && !string.IsNullOrEmpty(word))
             {
@@ -88,6 +88,30 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     return true;
                 }
+            }
+            return false;
+        }
+
+        public bool CheckAnswer(string? content, string? word)
+        {
+            if (string.IsNullOrEmpty(content))
+            {
+                return false;
+            }
+            if (content.IndexOf('|', StringComparison.Ordinal) != -1)
+            {
+                string[] questionWords = content.Split('|');
+                foreach (var item in questionWords)
+                {
+                    if (word.ReplaceWord() == item.ReplaceWord())
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (content.ReplaceWord() == word.ReplaceWord())
+            {
+                return true;
             }
             return false;
         }

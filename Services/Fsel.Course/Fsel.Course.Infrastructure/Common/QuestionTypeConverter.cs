@@ -164,6 +164,18 @@ namespace Fsel.Course.Infrastructure.Common
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(completionDiagrams) : default;
                     break;
 
+                case EnumQuestionType.FlowChartCompletion:
+                    var flowChartCompletion = HandleQuestion(config.Deserialize<FlowChartCompletionQuestion>());
+                    result = isDisableAnswers ? ClearAnswers(flowChartCompletion) : flowChartCompletion;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(flowChartCompletion) : default;
+                    break;
+
+                case EnumQuestionType.TableCompletion:
+                    var tableCompletion = HandleQuestion(config.Deserialize<TableCompletionQuestion>());
+                    result = isDisableAnswers ? ClearAnswers(tableCompletion) : tableCompletion;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(tableCompletion) : default;
+                    break;
+
                 default:
                     throw new ArgumentException("Invalid question type");
             }
@@ -225,10 +237,54 @@ namespace Fsel.Course.Infrastructure.Common
                     isError = ValidateCheckList(completionDiagrams);
                     break;
 
+                case EnumQuestionType.TableCompletion:
+                    var tableCompletion = config.Deserialize<TableCompletionQuestion>();
+                    isError = ValidateTableCompletion(tableCompletion);
+                    break;
+
+                case EnumQuestionType.FlowChartCompletion:
+                    var flowChartCompletion = config.Deserialize<FlowChartCompletionQuestion>();
+                    isError = ValidatFlowChartCompletion(flowChartCompletion);
+                    break;
+
                 default:
                     break;
             }
             return isError;
+        }
+
+        private static bool ValidateTableCompletion(TableCompletionQuestion? data)
+        {
+            var isError = true;
+            if (data == null || !data.AnswerTables.Any())
+            {
+                return isError;
+            }
+            foreach (var item in data.AnswerTables)
+            {
+                if (string.IsNullOrEmpty(item.Content))
+                {
+                    return isError;
+                }
+            }
+            if (HasInvalidKeysOrContent(data.Rows))
+            {
+                return isError;
+            }
+            return false;
+        }
+
+        private static bool ValidatFlowChartCompletion(FlowChartCompletionQuestion? data)
+        {
+            if (data == null || !data.Answers.Any())
+            {
+                return true;
+            }
+            if (HasInvalidKeysOrContent(data.Answers))
+            {
+                return true;
+            }
+            return false;
         }
 
         private static bool ValidateCheckList(CheckListQuestionV1? data)
@@ -300,6 +356,116 @@ namespace Fsel.Course.Infrastructure.Common
                 return true;
             }
             return false;
+        }
+
+        private static TableCompletionQuestion? HandleQuestion(TableCompletionQuestion? data)
+        {
+            if (data == null || data.Rows == null || !data.Rows.Any())
+            {
+                return data;
+            }
+            foreach (var item in data.Rows)
+            {
+                if (string.IsNullOrEmpty(item.Content))
+                {
+                    continue;
+                }
+                MatchCollection matches = Regex.Matches(item.Content, @"\{(.*?)\}");
+                Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+
+                foreach (Match match in matches)
+                {
+                    string id = match.Groups[1].Value;
+                    if (!Guid.TryParse(id, out _))
+                    {
+                        var config = new AnswerTable
+                        {
+                            RowId = item.Id,
+                            Content = match.Groups[1].Value
+                        };
+                        if (data.AnswerTables.Any() && data.AnswerTables.Count >= replacements.Count)
+                        {
+                            data.AnswerTables.Insert(replacements.Count, config);
+                        }
+                        else
+                        {
+                            data.AnswerTables.Add(config);
+                        }
+
+                        replacements[id] = config.Id;
+                    }
+                    else
+                    {
+                        replacements[id] = new Guid(id);
+                    }
+                }
+
+                foreach (var pair in replacements)
+                {
+                    if (!Guid.TryParse(pair.Key, out _))
+                    {
+                        item.Content = item.Content.Replace("{" + pair.Key + "}", "{" + pair.Value.ToString() + "}", StringComparison.CurrentCulture);
+                    }
+                }
+            }
+
+            return data;
+        }
+
+        private static FlowChartCompletionQuestion? HandleQuestion(FlowChartCompletionQuestion? data)
+        {
+            if (data == null || data.Contents == null || !data.Contents.Any())
+            {
+                return data;
+            }
+            foreach (var item in data.Contents)
+            {
+                foreach (var item2 in item.Contents)
+                {
+                    if (string.IsNullOrEmpty(item2.Content))
+                    {
+                        continue;
+                    }
+                    MatchCollection matches = Regex.Matches(item2.Content, @"\{(.*?)\}");
+                    Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+
+                    foreach (Match match in matches)
+                    {
+                        string id = match.Groups[1].Value;
+                        if (!Guid.TryParse(id, out _))
+                        {
+                            var config = new ConfigQuestionV1
+                            {
+                                Content = match.Groups[1].Value
+                            };
+                            if (data.Answers.Any() && data.Answers.Count >= replacements.Count)
+                            {
+                                data.Answers.Insert(replacements.Count, config);
+                            }
+                            else
+                            {
+                                data.Answers.Add(config);
+                            }
+
+                            replacements[id] = config.Id;
+                        }
+                        else
+                        {
+                            replacements[id] = new Guid(id);
+                        }
+                    }
+
+                    foreach (var pair in replacements)
+                    {
+                        if (!Guid.TryParse(pair.Key, out _))
+                        {
+                            item2.Content = item2.Content.Replace("{" + pair.Key + "}", "{" + pair.Value.ToString() + "}", StringComparison.CurrentCulture);
+                        }
+                    }
+                }
+            }
+
+            return data;
         }
 
         private static CheckListQuestionV1? HandleQuestion(CheckListQuestionV1? data)
@@ -389,6 +555,24 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     item.Key = null;
                 }
+            }
+            return data;
+        }
+
+        private static object? ClearAnswers(TableCompletionQuestion? data)
+        {
+            if (data != null)
+            {
+                data.AnswerTables = new List<AnswerTable>();
+            }
+            return data;
+        }
+
+        private static object? ClearAnswers(FlowChartCompletionQuestion? data)
+        {
+            if (data != null)
+            {
+                data.Answers = new List<ConfigAnswerV1>();
             }
             return data;
         }
@@ -499,6 +683,24 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             return data;
+        }
+
+        private static int GetTotalCorrect(TableCompletionQuestion? data)
+        {
+            if (data != null && data.AnswerTables != null && data.AnswerTables.Any())
+            {
+                return data.AnswerTables.Count;
+            }
+            return default;
+        }
+
+        private static int GetTotalCorrect(FlowChartCompletionQuestion? data)
+        {
+            if (data != null && data.Answers != null && data.Answers.Any())
+            {
+                return data.Answers.Count;
+            }
+            return default;
         }
 
         private static int GetTotalCorrect(CheckListQuestionV1? data)
