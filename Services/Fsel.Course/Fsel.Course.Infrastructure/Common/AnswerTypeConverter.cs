@@ -92,35 +92,25 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case EnumQuestionType.SummaryCompletionGapFill:
+                case EnumQuestionType.CompletionDiagrams:
                     (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerSummaryCompletionGapFill(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<CheckListQuestionV1>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
-                case EnumQuestionType.CompletionDiagrams:
-                    (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerCompletionDiagrams(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<CheckListQuestionV1>(), isTryAgain, isSubmit, isMandatoryAnswer);
-                    break;
-
                 case EnumQuestionType.YesNoNotGivenDropDown:
-                    (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerMatchingTask(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<MatchingTaskQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
-                    break;
-
                 case EnumQuestionType.TrueFalseNotGivenDropDown:
-                    (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerMatchingTask(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<MatchingTaskQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
-                    break;
-
                 case EnumQuestionType.MapLabelingDropDown:
-                    (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerMatchingTask(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<MatchingTaskQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
-                    break;
-
                 case EnumQuestionType.SummaryCompletionDropDown:
-                    (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerMatchingTask(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<MatchingTaskQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
-                    break;
-
                 case EnumQuestionType.MatchingParagraphInfo:
-                    (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerMatchingTask(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<MatchingTaskQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
-                    break;
-
                 case EnumQuestionType.MatchingHeading:
                     (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerMatchingTask(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<MatchingTaskQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
+                    break;
+
+                case EnumQuestionType.FlowChartCompletion:
+                    (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerFlowChartCompletion(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<FlowChartCompletionQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
+                    break;
+
+                case EnumQuestionType.TableCompletion:
+                    (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerTableCompletion(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<TableCompletionQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 default:
@@ -143,6 +133,8 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.SummaryCompletionDropDown:
                 case EnumQuestionType.MatchingParagraphInfo:
                 case EnumQuestionType.MatchingHeading:
+                case EnumQuestionType.FlowChartCompletion:
+                case EnumQuestionType.TableCompletion:
                     return configAnswer.Deserialize<MultipleChoiceAnswerV1>()?.Answers.Count ?? default;
 
                 default:
@@ -224,6 +216,8 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.SummaryCompletionDropDown:
                 case EnumQuestionType.MatchingParagraphInfo:
                 case EnumQuestionType.MatchingHeading:
+                case EnumQuestionType.FlowChartCompletion:
+                case EnumQuestionType.TableCompletion:
                     var matchingTaskQuestion = configAnswer.Deserialize<MultipleChoiceAnswerV1>();
                     result = GetAnswer(matchingTaskQuestion, isShowSubStatus, status, isDisableAnswer);
                     break;
@@ -402,6 +396,8 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.SummaryCompletionDropDown:
                 case EnumQuestionType.MatchingParagraphInfo:
                 case EnumQuestionType.MatchingHeading:
+                case EnumQuestionType.FlowChartCompletion:
+                case EnumQuestionType.TableCompletion:
                     return _linQAnswerHelper.IsDuplicateAnswerId(dataAnswer, nameof(ConfigAnswer.Id));
 
                 default:
@@ -854,10 +850,10 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                 }
                 else
-
                 {
                     item.IsExact = default;
                 }
+
                 if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                 {
                     var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
@@ -885,7 +881,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var answerQuestion = dataQuestion?.Answers.FirstOrDefault(x => x.Id == item.Id);
                 if (answerQuestion != null)
                 {
-                    if (answerQuestion.Content?.Trim().ToLower() == item.Content?.Trim().ToLower())
+                    if (_linQAnswerHelper.CheckAnswer(answerQuestion.Content, item.Content))
                     {
                         number++;
                         item.IsExact = true;
@@ -912,11 +908,11 @@ namespace Fsel.Course.Infrastructure.Common
             return (number, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer.Answers, nameof(ConfigAnswerV1.Content)));
         }
 
-        private (int, bool, bool) HandleAnswerCompletionDiagrams(ref object? configAnswer, MultipleChoiceAnswerV1? dataOldAnswer, CheckListQuestionV1? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private (int, bool, bool) HandleAnswerFlowChartCompletion(ref object? configAnswer, MultipleChoiceAnswerV1? dataOldAnswer, FlowChartCompletionQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<MultipleChoiceAnswerV1>();
             int number = 0;
-            bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.Answers, EnumQuestionType.CompletionDiagrams, isSubmit, isMandatoryAnswer);
+            bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.Answers, EnumQuestionType.FlowChartCompletion, isSubmit, isMandatoryAnswer);
             if (((dataAnswer == null || dataAnswer.Answers == null) || !dataAnswer.Answers.Any()) || (isMandatoryAnswer && isAnswerMissing))
             {
                 return (default, isAnswerMissing, false);
@@ -926,7 +922,48 @@ namespace Fsel.Course.Infrastructure.Common
                 var answerQuestion = dataQuestion?.Answers.FirstOrDefault(x => x.Id == item.Id);
                 if (answerQuestion != null)
                 {
-                    if (answerQuestion.Content?.Trim().ToLower() == item.Content?.Trim().ToLower())
+                    if (_linQAnswerHelper.CheckAnswer(answerQuestion.Content, item.Content))
+                    {
+                        number++;
+                        item.IsExact = true;
+                    }
+                    else
+                    {
+                        item.IsExact = false;
+                    }
+                }
+                else
+                {
+                    item.IsExact = default;
+                }
+                if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
+                {
+                    var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
+                    if (!(answer != null && answer.IsExact == true && answer.IsFirstSubmit))
+                    {
+                        item.IsFirstSubmit = false;
+                    }
+                }
+            }
+            configAnswer = dataAnswer;
+            return (number, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer.Answers, nameof(ConfigAnswerV1.Content)));
+        }
+
+        private (int, bool, bool) HandleAnswerTableCompletion(ref object? configAnswer, MultipleChoiceAnswerV1? dataOldAnswer, TableCompletionQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        {
+            var dataAnswer = configAnswer.Deserialize<MultipleChoiceAnswerV1>();
+            int number = 0;
+            bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.AnswerTables, EnumQuestionType.TableCompletion, isSubmit, isMandatoryAnswer);
+            if (((dataAnswer == null || dataAnswer.Answers == null) || !dataAnswer.Answers.Any()) || (isMandatoryAnswer && isAnswerMissing))
+            {
+                return (default, isAnswerMissing, false);
+            }
+            foreach (var item in dataAnswer.Answers)
+            {
+                var answerQuestion = dataQuestion?.AnswerTables.FirstOrDefault(x => x.Id == item.Id);
+                if (answerQuestion != null)
+                {
+                    if (_linQAnswerHelper.CheckAnswer(answerQuestion.Content, item.Content))
                     {
                         number++;
                         item.IsExact = true;
@@ -1047,6 +1084,8 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.SummaryCompletionDropDown:
                 case EnumQuestionType.MatchingParagraphInfo:
                 case EnumQuestionType.MatchingHeading:
+                case EnumQuestionType.FlowChartCompletion:
+                case EnumQuestionType.TableCompletion:
                     return new MultipleChoiceAnswerV1();
 
                 default:

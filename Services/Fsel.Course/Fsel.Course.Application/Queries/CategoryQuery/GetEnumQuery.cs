@@ -49,7 +49,7 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                     break;
 
                 case EnumCourseSourceData.QuestionType:
-                    var data = ConvertHelper.EnumToList<EnumQuestionType>().Where(x => (int)x >= (int)EnumQuestionType.MultichoiceV1).ToList();
+                    var data = ConvertHelper.EnumToList<EnumQuestionType>().Where(x => (int)x < (int)EnumQuestionType.MultichoiceV1).ToList();
                     methodResult.Result = (from x in data
                                            select new EnumModel
                                            {
