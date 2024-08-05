@@ -25,11 +25,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
     {
         private readonly IMapper _mapper;
         private readonly IOrderRepository _orderRepository;
+        private readonly IVoucherRepository _voucherRepository;
 
-        public UpdateOrderCommandHandler(IMapper mapper, IOrderRepository orderRepository)
+        public UpdateOrderCommandHandler(IMapper mapper, IOrderRepository orderRepository, IVoucherRepository voucherRepository)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
+            _voucherRepository = voucherRepository;
         }
 
         public async Task<MethodResult<OrderModel>> Handle(UpdateOrderCommand request, CancellationToken cancellationToken)

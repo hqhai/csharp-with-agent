@@ -79,18 +79,6 @@ namespace Fsel.Ordering.Api.Controllers
         }
 
         /// <summary>
-        /// Delete a Lesson
-        /// </summary>
-        [HttpDelete("{id}")]
-        [ProducesResponseType(typeof(MethodResult<VoucherModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Delete([FromRoute] Guid id)
-        {
-            MethodResult<bool> commandResult = await _mediator.Send(new DeleteVoucherCommand { Id = id }).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Update voucher status
         /// </summary>
         [HttpPut("change-status/{id}")]
