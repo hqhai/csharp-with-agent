@@ -14,4 +14,9 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions.V1i1
     {
         public IList<ConfigAnswerV1> Answers { get; set; } = new List<ConfigAnswerV1>();
     }
+
+    public class ConfigContentQuestionV1 : ConfigAnswerV1
+    {
+        public IList<ConfigAnswerV1> Contents { get; set; } = new List<ConfigAnswerV1>();
+    }
 }
