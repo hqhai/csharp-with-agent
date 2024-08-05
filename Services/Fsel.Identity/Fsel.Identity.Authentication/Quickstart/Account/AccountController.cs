@@ -62,7 +62,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         private readonly IStudentRepository _studentRepository;
         private readonly IUserOtpRepository _userOtpRepository;
         private readonly IUserRepository _userRepository;
-        private readonly Fsel.Core.Base.LanguageContext _languageContext;
+        private readonly Core.Base.AuthContext _languageContext;
 
         public AccountController(
             IUserSession userSession,
@@ -80,7 +80,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             IStudentRepository studentRepository,
             IUserOtpRepository userOtpRepository,
             IUserRepository userRepository,
-            Fsel.Core.Base.LanguageContext languageContext)
+            Core.Base.AuthContext languageContext)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -460,7 +460,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             var vm = await BuildLoginViewModelAsync(returnUrl ?? string.Empty);
             if (!string.IsNullOrEmpty(vm.UiLocales))
             {
-                _languageContext.CurrentCountryInfo = RegionHelper.GetCountry(vm.UiLocales);
+                _languageContext.AcceptLanguage = vm.UiLocales;
             }
             HttpContext.SetCookie(Settings.RequestHeader.AcceptLanguage, _languageContext.CurrentCountryInfo?.CultureCode);
             HttpContext.SetCookie(Settings.RequestHeader.OSName, vm.OSName);

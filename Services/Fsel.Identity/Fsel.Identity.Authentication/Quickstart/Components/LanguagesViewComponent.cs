@@ -7,9 +7,9 @@ namespace Fsel.Identity.Authentication.Quickstart.Components
 
     public class LanguagesViewComponent : ViewComponent
     {
-        private readonly LanguageContext _languageContext;
+        private readonly AuthContext _languageContext;
 
-        public LanguagesViewComponent(LanguageContext languageContext)
+        public LanguagesViewComponent(AuthContext languageContext)
         {
             _languageContext = languageContext;
         }
