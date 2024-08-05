@@ -155,7 +155,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             }
 
             var newOrder = _mapper.Map<Order>(request);
+
             var discountPercent = 0;
+
             if (!string.IsNullOrEmpty(request.Voucher))
             {
                 var checkVoucher = await _mediator.Send(new CheckVoucherCommand()
@@ -175,6 +177,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                     return methodResult;
                 }
                 discountPercent = voucher.Percent;
+                newOrder.VoucherId = voucher.Id;
             }
 
             newOrder.Price = package.Price;
