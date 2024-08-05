@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1;
-    using Fsel.Course.Lms.Application.Queries.IntegrationQuery;
     using Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -86,17 +85,17 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Export PlacementTest
         /// </summary>
-        [HttpPost("import-export")]
+        [HttpPost("export-file-pts")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
-        public async Task<IActionResult> ImportAndExport([FromForm] ImportAndExportPlacementTestQuery query)
+        public async Task<IActionResult> Export([FromForm] ExportPlacementTestByStudentsQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             if (!commandResult.IsOK || commandResult.Result == null)
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result, Settings.Excels.ContentType, "placementTest_File_export.xlsx");
+            return File(commandResult.Result, Settings.Excels.ContentType, "Export_File_PlacementTests.xlsx");
         }
 
         /// <summary>
@@ -105,14 +104,14 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("export-placement-test")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
-        public async Task<IActionResult> Export([FromForm] ExportPlacementTestsToStudentQuery query)
+        public async Task<IActionResult> Export([FromForm] ExportModulePlacementTestsToStudentQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             if (!commandResult.IsOK || commandResult.Result == null)
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result, Settings.Excels.ContentType, "export_placementTest.xlsx");
+            return File(commandResult.Result, Settings.Excels.ContentType, "Export_Module_PlacementTests.xlsx");
         }
 
         /// <summary>
