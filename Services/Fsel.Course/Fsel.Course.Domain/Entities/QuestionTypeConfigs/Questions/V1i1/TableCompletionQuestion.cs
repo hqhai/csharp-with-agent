@@ -11,7 +11,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions.V1i1
 
     public class RowQuestion : ConfigAnswerV1
     {
-        public int ColumnKey { get; set; }
+        public string? ColumnKey { get; set; }
     }
 
     public class AnswerTable : ConfigAnswerV1

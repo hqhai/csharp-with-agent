@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Infrastructure.Common
 {
+    using System.Text.Json;
     using System.Text.RegularExpressions;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions;
