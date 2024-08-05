@@ -71,11 +71,6 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucher));
                 return methodResult;
             }
-            if (voucher.Orders.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherIsUsed), nameof(voucher));
-                return methodResult;
-            }
 
             await _voucherRepository.ExecuteTransactionAsync(async () =>
             {

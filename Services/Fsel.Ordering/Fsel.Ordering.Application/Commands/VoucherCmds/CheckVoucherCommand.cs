@@ -6,23 +6,30 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
     public class CheckVoucherCommand : IRequest<MethodResult<bool>>
     {
         public string? Code { get; set; }
+        public Guid PackageId { get; set; }
     }
 
     public class CheckVoucherCommandHandler : IRequestHandler<CheckVoucherCommand, MethodResult<bool>>
     {
         private readonly IVoucherRepository _voucherRepository;
+        private readonly AuthContext _authContext;
+        private readonly IOrderRepository _orderRepository;
 
-        public CheckVoucherCommandHandler(IVoucherRepository voucherRepository)
+        public CheckVoucherCommandHandler(IVoucherRepository voucherRepository, AuthContext authContext, IOrderRepository orderRepository)
         {
             _voucherRepository = voucherRepository;
+            _authContext = authContext;
+            _orderRepository = orderRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(CheckVoucherCommand request, CancellationToken cancellationToken)
@@ -36,7 +43,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 return methodResult;
             }
 
-            var voucher = await _voucherRepository.Queryable.Include(p => p.Orders).FirstOrDefaultAsync(p => p.Code.ToLower() == request.Code.ToLower(), cancellationToken);
+            var voucher = await _voucherRepository.Queryable.Include(p => p.Orders).Include(p => p.VoucherPackages).FirstOrDefaultAsync(p => p.Code.ToLower() == request.Code.ToLower(), cancellationToken);
             if (voucher == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist));
@@ -50,6 +57,12 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
             var currentDate = DateTime.UtcNow;
 
+            if (!voucher.VoucherPackages.Any(p => p.PackageId == request.PackageId))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherDoesNotApplyToThisPackage));
+                return methodResult;
+            }
+
             if (voucher.EndDate.HasValue && (voucher.StartDate.Date > currentDate.Date && voucher.EndDate.Value.Date < currentDate.Date))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherHasExpired));
@@ -61,10 +74,19 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 return methodResult;
             }
 
-            if (voucher.Orders.Count >= voucher.Quantity)
+            if (voucher.Orders.Where(p => p.Status == EnumOrderStatus.New || p.Status == EnumOrderStatus.Payment).Count() >= voucher.Quantity)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherOutOfQuantity));
                 return methodResult;
+            }
+
+            if (voucher.VoucherType == EnumVoucherType.NewSale)
+            {
+                if (await _orderRepository.Queryable.AnyAsync(p => p.Status == EnumOrderStatus.Payment && p.UserId == _authContext.CurrentUserId && !p.IsTrial, cancellationToken))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.NotSubjectToUse));
+                    return methodResult;
+                }
             }
 
             methodResult.Result = true;
