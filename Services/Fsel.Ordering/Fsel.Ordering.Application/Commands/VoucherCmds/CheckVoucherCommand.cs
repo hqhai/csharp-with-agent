@@ -13,13 +13,13 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class CheckVoucherCommand : IRequest<MethodResult<bool>>
+    public class CheckVoucherCommand : IRequest<MethodResult<Guid>>
     {
         public string? Code { get; set; }
         public Guid PackageId { get; set; }
     }
 
-    public class CheckVoucherCommandHandler : IRequestHandler<CheckVoucherCommand, MethodResult<bool>>
+    public class CheckVoucherCommandHandler : IRequestHandler<CheckVoucherCommand, MethodResult<Guid>>
     {
         private readonly IVoucherRepository _voucherRepository;
         private readonly AuthContext _authContext;
@@ -32,10 +32,10 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             _orderRepository = orderRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(CheckVoucherCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<Guid>> Handle(CheckVoucherCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<bool>();
+            var methodResult = new MethodResult<Guid>();
 
             if (string.IsNullOrEmpty(request.Code))
             {
@@ -89,7 +89,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 }
             }
 
-            methodResult.Result = true;
+            methodResult.Result = voucher.Id;
             return methodResult;
         }
     }
