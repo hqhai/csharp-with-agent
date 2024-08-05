@@ -12,6 +12,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingEvents
 
     public class CheckStudentLuckySpinCmd : IRequest<MethodResult<bool>>
     {
+        public Guid? UserId { get; set; }
     }
 
     public class CheckStudentLuckySpinCmdHandler : IRequestHandler<CheckStudentLuckySpinCmd, MethodResult<bool>>
@@ -32,7 +33,9 @@ namespace Fsel.Identity.Application.Commands.StudentRankingEvents
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(x => x.Human != null && x.Human.UserId == _authContext.CurrentUserId, cancellationToken);
+            var userId = request.UserId ?? _authContext.CurrentUserId;
+
+            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(x => x.Human != null && x.Human.UserId == userId, cancellationToken);
             var studentRankingEvents = await _studentRankingEventsRepository.Queryable.Include(x => x.CompetitionEvents).Where(x => student != null && x.StudentId == student.Id).ToListAsync(cancellationToken);
 
             bool checkLuckySpin = studentRankingEvents.Any(x => x.CompetitionEvents != null && x.CompetitionEvents.EventContent != null && x.CompetitionEvents.EventContent.LuckySpin);
