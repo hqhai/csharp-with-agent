@@ -268,5 +268,15 @@
     "templateMessage": "Yay! Bạn đã đổi trình độ sang khóa học {0} thành công! Hãy cùng Techie và Fsel bắt đầu hành trình học tập thú vị ngay thôi nào!",
     "templateLink": "",
     "createdDate": "2023-08-28"
+  },
+  {
+    "id": "2a138a4c-6b3c-4a86-bbc2-3aa845e70c21",
+    "type": "LinkPopup",
+    "content": "LuckyTicket",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bạn đã nhận được Mã đổi thưởng: {0}. Hãy truy cập leaderboard.fsel.vn để đổi thưởng ngay nào!",
+    "templateLink": "{0}",
+    "createdDate": "2024-08-05"
   }
 ]
