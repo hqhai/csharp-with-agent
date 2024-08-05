@@ -43,6 +43,8 @@ namespace Fsel.Course.Infrastructure.Configs
                        .WithMany(b => b.VideoTimeCodeAnswers)
                        .HasForeignKey(b => b.VideoTimeCodeResultId)
                        .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasIndex(c => new { c.VideoResultId, c.VideoTimeCodeId, c.ExerciseId, c.QuestionId, c.VideoTimeCodeResultId }).IsUnique();
         }
     }
 }

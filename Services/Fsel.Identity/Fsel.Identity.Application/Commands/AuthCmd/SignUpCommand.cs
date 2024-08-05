@@ -19,7 +19,6 @@ using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Models.SenderTemplates;
-using Fsel.Shared.Models.ShareModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -111,10 +110,19 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 await _roleManager.CreateAsync(role);
                             }
 
+                            var passwordValidator = new Microsoft.AspNetCore.Identity.PasswordValidator<User>();
                             Microsoft.AspNetCore.Identity.IdentityResult result;
                             if (user != null)
                             {
                                 _mapper.Map(request, user);
+
+                                var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password);
+                                if (!validPassword.Succeeded)
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIsNotValid));
+                                    return methodResult;
+                                }
+
                                 user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, request.Password ?? string.Empty);
                                 user.UserName = request.Email;
                                 if (!user.IsValid())
@@ -123,6 +131,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     return methodResult;
                                 }
                                 result = await _userManager.UpdateAsync(user);
+                                if (!result.Succeeded)
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
+                                    return methodResult;
+                                }
                             }
                             else
                             {
@@ -149,6 +162,21 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                                 #endregion Add Platform to User
 
+                                #region add user setting
+
+                                user.UserSettings = new List<UserSetting>()
+                                    {
+                                        new UserSetting(true)
+                                    };
+
+                                #endregion add user setting
+                                var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password);
+                                if (!validPassword.Succeeded)
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIsNotValid));
+                                    return methodResult;
+                                }
+
                                 result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
                                 if (!result.Succeeded)
                                 {
@@ -165,8 +193,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);
                                     return methodResult;
                                 }
-                                // làm nhiệm vụ
-                                // await DoQuestBoard(request.ReferralCode, cancellationToken);
                             }
 
                             #region Send Code OTP
@@ -183,7 +209,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             ArgumentNullException.ThrowIfNull(request);
                             if (!string.IsNullOrEmpty(request.Email))
                             {
-                                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
+                                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, IsCCEmailDefault = true, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
                             }
                             else if (!string.IsNullOrEmpty(request.PhoneNumber))
                             {
@@ -221,30 +247,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;
-        }
-
-        public async Task DoQuestBoard(string code, CancellationToken cancellationToken)
-        {
-            var user = await _userManager.Users.Include(x => x.Student).FirstOrDefaultAsync(x => x.Code == code, cancellationToken);
-            if (user != null && user.Student != null)
-            {
-                var studentId = user.Student.Id;
-                IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SuccessfulIntroduceCode };
-                var classModel = await _trainingService.GetClassByStudentId(studentId!);
-                var courseId = classModel.Content?.Result?.CourseId;
-
-                if (courseId.HasValue)
-                {
-                    QuestBoardQueueModel questBoardQueueModel = new QuestBoardQueueModel
-                    {
-                        StudentId = studentId,
-                        Categories = categories,
-                        AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
-                        CourseId = courseId.Value
-                    };
-                    await _questBoardPublisher.Publish(questBoardQueueModel, cancellationToken);
-                }
-            }
         }
     }
 }

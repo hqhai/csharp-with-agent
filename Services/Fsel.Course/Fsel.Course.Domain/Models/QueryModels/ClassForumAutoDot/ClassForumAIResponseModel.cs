@@ -8,14 +8,9 @@ namespace Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot
     public class ClassForumAIResponseModel : SubmitAICommandModel
     {
         public Guid ClassForumResultId { get; set; }
-
         public Guid ClassForumDetailResultId { get; set; }
-
         public string? WordContent { get; set; }
         public bool? IsRetry { get; set; } = false;
-
-        public int DisplayOrder { get; set; }
-
         public EnumSubmissionCount SubmissionCount { get; set; }
     }
 
@@ -25,6 +20,8 @@ namespace Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot
         public Guid SectionGroupId { get; set; }
         public string? WordContent { get; set; }
         public Guid MockTestResultId { get; set; }
+
+        public bool IsRetry { get; set; }
     }
 
     public class MockTestAIGradingModel

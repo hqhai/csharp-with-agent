@@ -6,6 +6,7 @@ using Fsel.Common.Constants;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Lms.Application.Commands.MockTestCmd;
 using Fsel.Course.Lms.Application.Queries.MockTestQuery;
+using Fsel.Shared.Attributes;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using MediatR;
@@ -13,8 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Course.Lms.Api.Controllers
 {
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/mock-test")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Student))]

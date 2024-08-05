@@ -1,0 +1,80 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+using System.Net;
+using Fsel.Common.ActionResults;
+using Fsel.Common.Attributes;
+using Fsel.Common.Constants;
+using Fsel.Core.Base;
+using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Lms.Application.Commands.CourseResultCmd;
+using Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1;
+using Fsel.Shared.Attributes;
+using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Fsel.Course.Lms.Api.Controllers.V1i1
+{
+    [ApiVersions(ApiSettings.APIVersion1i1)]
+    [Route(Settings.APIDefaultRoute + "/course")]
+    [ApiController]
+    [Permission(role: nameof(EnumRole.Student))]
+    public class CourseController : BaseController
+    {
+        private readonly IMediator _mediator;
+
+        public CourseController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        /// <summary>
+        /// Get Manage Courses
+        /// </summary>
+        [HttpGet("manager-course")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseManagerModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetManageCourses([FromQuery] GetManageCoursesQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Manage Courses
+        /// </summary>
+        [HttpGet("level-selection")]
+        [ProducesResponseType(typeof(MethodResult<IList<LevelDtoModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetLevelSelection([FromQuery] GetLevelSelectionQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Active Manage Courses
+        /// </summary>
+        [HttpPost("change-course-level")]
+        [ProducesResponseType(typeof(MethodResult<IList<LevelDtoModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ChangeCourseLevel([FromBody] ChangeCourseLevelCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Retake Manage Courses
+        /// </summary>
+        [HttpPost("retake-course")]
+        [ProducesResponseType(typeof(MethodResult<IList<LevelDtoModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RetakeCourse([FromBody] RetakeCourseResultCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+    }
+}

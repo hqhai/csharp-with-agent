@@ -63,12 +63,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
             get { return _avatarPath.AddS3BaseUrl(); }
         }
 
-        public EnumCourseLevel CourseLevel { get; set; }
-
+        public EnumCourseLevel? CourseLevel { get; set; }
         public Guid? CheckCsoId { get; set; }
-
         public DateTime? CheckStartDate { get; set; }
-
         public DateTime? GradingStartDate { get; set; }
         public bool IsAIFeedBack { get; set; }
         public bool IsTeacherFeedBack { get; set; }

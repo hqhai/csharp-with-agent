@@ -3,7 +3,7 @@
 namespace Fsel.Identity.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Identity.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class UserModel : BaseModel
     {

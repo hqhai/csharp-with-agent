@@ -5,6 +5,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Ordering.Application.Services.CourseService;
@@ -41,12 +42,11 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var orders = _orderRepository.Queryable.Include(p => p.Package).Select(x => new OrderSearchModel
+            var query = _orderRepository.Queryable.Include(p => p.Package).Select(x => new OrderSearchModel
             {
                 Id = x.Id,
                 UserId = x.UserId,
                 Code = x.Code,
-                CourseId = x.CourseId,
                 CreatedDate = x.CreatedDate,
                 CreatedFullName = x.CreatedFullName,
                 PackageName = x.Package!.Code.ToString(),
@@ -56,25 +56,43 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 FullName = x.FullName,
                 IsTrial = x.IsTrial,
                 ExpireDate = x.ExpireDate,
+                Email = x.Email,
             });
+
             if (request.Status.HasValue)
             {
-                orders = orders.Where(p => request.Status == false ? p.Status == EnumOrderStatus.New : p.Status != EnumOrderStatus.New);
+                query = query.Where(p => request.Status == false ? p.Status == EnumOrderStatus.New : p.Status != EnumOrderStatus.New);
+                if (!request.Status.Value)
+                {
+                    query = query.Where(p => p.PaymentMethod == EnumPaymentMethodStatus.BankTransfer || p.PaymentMethod == EnumPaymentMethodStatus.Card);
+                }
             }
-            int totalItem = await orders.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await orders
+
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                if (request.Keyword.IsValidEmail())
+                {
+                    query = query.Where(x => x.Email != null).Where(m => (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
+                }
+                else
+                {
+                    query = query.Where(x => x.Code != null).Where(m => (m.Code ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
+                }
+            }
+            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await query
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            var courses = await _lmsCourseService.GetCoursesByIdsAsync(lists.Select(p => p.CourseId).ToList()!);
-            if (courses.IsSuccessStatusCode)
-            {
-                foreach (var item in lists)
-                {
-                    item.CourseName = courses.Content?.Result?.FirstOrDefault(x => item.CourseId == x.Id)?.CourseLevel;
-                }
-            }
+            //var courses = await _lmsCourseService.GetCoursesByIdsAsync(lists.Select(p => p.CourseId).ToList()!);
+            //if (courses.IsSuccessStatusCode)
+            //{
+            //    foreach (var item in lists)
+            //    {
+            //        item.CourseName = courses.Content?.Result?.FirstOrDefault(x => item.CourseId == x.Id)?.CourseLevel;
+            //    }
+            //}
 
             methodResult.Result = new PagingItemsModel<OrderSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

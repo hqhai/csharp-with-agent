@@ -4,6 +4,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
@@ -34,35 +35,92 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
         private readonly UserManager<User> _userManager;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly ISystemService _systemService;
+        private readonly IMapper _mapper;
 
         public ClientIntegrationQueryHandler(IOrderService orderService,
                                             UserManager<User> userManager,
                                             ILmsCourseService lmsCourseService,
-                                            ISystemService systemService)
+                                            ISystemService systemService,
+                                            IMapper mapper)
         {
             _orderService = orderService;
             _userManager = userManager;
             _lmsCourseService = lmsCourseService;
             _systemService = systemService;
+            _mapper = mapper;
         }
         public async Task<MethodResult<PagingItemsModel<ClientsIntegrationModel>>> Handle(ClientIntegrationQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<ClientsIntegrationModel>>();
 
-            var check = request.EndDate.Date - request.StartDate.Date;
-            if (check.TotalDays > 7)
+            List<Guid> distinctUserIds = new List<Guid>();
+
+            if (string.IsNullOrEmpty(request.Email))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumIntegrationErrorCode.TotalDaysGreater7), nameof(check));
-                return methodResult;
+                var check = request.EndDate.Date - request.StartDate.Date;
+                if (check.TotalDays > 7)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumIntegrationErrorCode.TotalDaysGreater7), nameof(check));
+                    return methodResult;
+                }
+
+                var courseIntegrationHasTimeQueryModel = new CourseIntegrationQueryModel
+                {
+                    StartDate = request.StartDate,
+                    EndDate = request.EndDate,
+                    UserIds = null
+                };
+
+                // lấy Pt có thay đổi trong khoảng thời gian
+                var ptTestHasTimes = await _lmsCourseService.GetPalcementTestResults(courseIntegrationHasTimeQueryModel);
+                if (!ptTestHasTimes.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(ptTestHasTimes.Error);
+                    return methodResult;
+                }
+                var ptTestResultHasTimes = ptTestHasTimes.Content?.Result;
+                if (ptTestResultHasTimes == null)
+                {
+                    methodResult.AddError(ptTestHasTimes.Error);
+                    return methodResult;
+                }
+                var userPtTestHasTimeIds = ptTestResultHasTimes.Select(x => x.UserId).ToList();
+
+                //lấy User đăng ký trong khoảng thời gian
+                var users = await _userManager.Users
+                                                  .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate))
+                                                  .ToListAsync(cancellationToken);
+                if (users == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(users));
+                    return methodResult;
+                }
+                var userIdentityHasTimeIds = users.Select(x => x.Id).ToList();
+
+                // hợp nhất UserId chưa có order
+                var userIds = userIdentityHasTimeIds.Concat(userPtTestHasTimeIds).ToList();
+                distinctUserIds = userIds.Distinct().ToList();
+            }
+            else
+            {
+                var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email != null && x.Email.ToLower().Trim() == request.Email.ToLower().Trim(), cancellationToken);
+
+                if (user == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), $"{request.Email}");
+                    return methodResult;
+                }
+                distinctUserIds.Add(user.Id);
             }
 
-            #region Order
+            // lấy order
             var queryOrder = new GetOrderByStatusQueryModel
             {
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
-                Status = true
+                Status = true,
+                UserIds = distinctUserIds
             };
             var orders = await _orderService.GetOrderByStatusAsync(queryOrder);
             if (!orders.IsSuccessStatusCode)
@@ -76,123 +134,99 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 methodResult.AddError(orders.Error);
                 return methodResult;
             }
-            var userOrderIds = orderResults.Select(x => x.UserId).ToList();
-            #endregion
 
-            #region PTTestResult
-            var queryPtTest = new GetPTTestModel
+            var userOrderIds = orderResults.Select(x => x.UserId).ToList();
+            var distinctUserIdHasOrders = userOrderIds.Distinct().ToList();
+
+            // lấy Pt
+            var courseIntegrationQueryModel = new CourseIntegrationQueryModel
             {
-                StartDate = request.StartDate,
-                EndDate = request.EndDate,
+                StartDate = null,
+                EndDate = null,
+                UserIds = distinctUserIdHasOrders
             };
-            var ptTest = await _lmsCourseService.GetPalcementTestResults(queryPtTest);
-            if (!ptTest.IsSuccessStatusCode)
+
+            var ptTests = await _lmsCourseService.GetPalcementTestResults(courseIntegrationQueryModel);
+            if (!ptTests.IsSuccessStatusCode)
             {
-                methodResult.AddError(ptTest.Error);
+                methodResult.AddError(ptTests.Error);
                 return methodResult;
             }
-            var ptTestResults = ptTest.Content?.Result;
+            var ptTestResults = ptTests.Content?.Result;
             if (ptTestResults == null)
             {
-                methodResult.AddError(orders.Error);
+                methodResult.AddError(ptTests.Error);
                 return methodResult;
             }
-            var userPtTestIds = ptTestResults.Select(x => x.UserId).ToList();
-            #endregion
 
-            #region Identity
-            var users = await _userManager.Users
-                                              .Include(x => x.Student)
-                                              .ThenInclude(x => x!.ParentStudents)
-                                              .ThenInclude(x => x.Parent)
-                                              .Where(x => x.UpdatedDate == null ? (x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date) : (x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date))
-                                              .Select(x => new ClientsIntegrationModel
-                                              {
-                                                  UserId = x.Id,
-                                                  FullName = x.FullName,
-                                                  UserName = x!.UserName,
-                                                  StudentEmail = x.Email,
-                                                  StudentPhone = x.PhoneNumber,
-                                                  EnumGender = x.Gender,
-                                                  Birthday = x.Birthday,
-                                                  Address = x.Address,
-                                                  SchoolId = x.Student!.SchoolId,
-                                                  ParentName = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.User!.FullName,
-                                                  ParentPhone = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.User!.PhoneNumber,
-                                                  ParentEmail = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.User!.Email,
-                                                  ParentGender = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.User!.Gender
-                                              })
-                                              .ToListAsync(cancellationToken);
-            if (users == null)
+            // lấy unit lesson
+            var units = await _lmsCourseService.GetUnitResults(courseIntegrationQueryModel);
+            if (!units.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(users));
+                methodResult.AddError(units.Error);
                 return methodResult;
             }
-            var userIdentityIds = users.Select(x => x.UserId).ToList();
-            #endregion
+            var unitResults = units.Content?.Result;
+            if (unitResults == null)
+            {
+                methodResult.AddError(units.Error);
+                return methodResult;
+            }
 
-            #region SetData
-            // hợp list UserId và lấy ra UserId duy nhất
-            var listUserIds = userIdentityIds.Concat(userPtTestIds).Concat(userOrderIds).ToList();
-            var distinctUserIds = listUserIds.Distinct().ToList();
+            // lấy all user từ list hợp nhất
+            var userCombines = await _userManager.Users
+                                                     .Include(x => x.Student)
+                                                     .ThenInclude(x => x!.ParentStudents)
+                                                     .ThenInclude(x => x.Parent)
+                                                     .ThenInclude(x => x!.User)
+                                                     .Where(x => distinctUserIdHasOrders.Contains(x.Id))
+                                                     .ToListAsync(cancellationToken);
 
-            #region School
-            var schoolIds = users.Where(x => x.SchoolId.HasValue).Select(x => x.SchoolId!.Value).ToList();
+            // Thông tin trường học
+            var schoolIds = userCombines.Where(x => x.Student != null && x.Student.SchoolId.HasValue).Select(x => x.Student?.SchoolId ?? Guid.Empty).ToList();
             var school = await _systemService.GetSchoolByIds(schoolIds);
             var schoolResult = school.Content?.Result;
-            #endregion
 
-            #region LastTime
-            var featureAccessTime = await _systemService.GetFeatureAccessTimeByUserIds(distinctUserIds);
+            // Lấy ra lần đăng nhập cuối cùng
+            var featureAccessTime = await _systemService.GetFeatureAccessTimeByUserIds(distinctUserIdHasOrders);
             var featureAccessTimeResult = featureAccessTime.Content?.Result;
-            #endregion
 
-            // gán dữ liệu
-            List<ClientsIntegrationModel> leadsIntegrations = new List<ClientsIntegrationModel>();
-            foreach (var item in distinctUserIds)
+            #region Trả dữ liệu
+            List<ClientsIntegrationModel> clientsIntegrations = new List<ClientsIntegrationModel>();
+            clientsIntegrations = _mapper.Map<List<ClientsIntegrationModel>>(userCombines);
+
+            clientsIntegrations.ForEach(item =>
             {
-                var user = users.FirstOrDefault(x => x.UserId == item);
-                var ptTestResult = ptTestResults.FirstOrDefault(x => x.UserId == item);
-                var orderItems = orderResults.Where(x => x.UserId == item).ToList();
-                var locationId = schoolResult?.FirstOrDefault(x => x.Id == user?.SchoolId)?.LocationId;
-                var lastTime = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item)?.LastVisited;
-                if (user == null)
+                var ptTestResult = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId);
+                var unitResult = unitResults.FirstOrDefault(x => x.UserId == item.UserId);
+                item.LongPathSchool = schoolResult?.FirstOrDefault(x => x.Id == item.SchoolId)?.LongPath;
+                item.LongPathLocation = schoolResult?.FirstOrDefault(x => x.Id == item.SchoolId)?.Location?.LongPath;
+                item.LastDate = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item.UserId)?.LastVisited;
+                item.PTLevel = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId)?.Level;
+                item.PTLevel = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId)?.Level;
+                var dateOrder = orderResults.Where(x => x.UserId == item.UserId).Max(c => c.CreatedDate > c.UpdatedDate ? c.CreatedDate : c.UpdatedDate);
+                item.DateEdit = dateOrder > ptTestResult?.DateEdit ? dateOrder : ptTestResult?.DateEdit ?? null;
+                item.CourseLevel = unitResult?.CourseLevel;
+                item.StartCourse = unitResult?.StartCourse;
+                item.EndCourse = unitResult?.EndCourse;
+
+                if (ptTestResult != null)
                 {
-                    user = await _userManager.Users
-                                                 .Include(x => x.Student)
-                                                 .ThenInclude(x => x!.ParentStudents)
-                                                 .ThenInclude(x => x.Parent)
-                                                 .Where(x => x.Id == item)
-                                                 .Select(x =>
-                                                 new ClientsIntegrationModel
-                                                 {
-                                                     UserId = x.Id,
-                                                     FullName = x.FullName,
-                                                     UserName = x!.UserName,
-                                                     StudentEmail = x.Email,
-                                                     StudentPhone = x.PhoneNumber,
-                                                     EnumGender = x.Gender,
-                                                     Birthday = x.Birthday,
-                                                     Address = x.Address,
-                                                     SchoolId = x.Student!.SchoolId,
-                                                     ParentName = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.User!.FullName,
-                                                     ParentPhone = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.User!.PhoneNumber,
-                                                     ParentEmail = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.User!.Email,
-                                                     ParentGender = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.User!.Gender
-                                                 }).FirstOrDefaultAsync(cancellationToken);
+                    item.PTLevel = ptTestResult.Level;
+                    item.PlacementTestResults = ptTestResult.PlacementTestResults;
                 }
 
+                item.CurrentUnit = unitResult?.Name;
+                item.CurrentLesson = unitResult?.CurrentLesson;
+                item.LessonCompleted = unitResult?.LessonCompleted;
+
                 List<OrderIntegrationModel> orderIntegrations = new List<OrderIntegrationModel>();
-                foreach (var order in orderItems)
+                foreach (var order in orderResults.Where(x => x.UserId == item.UserId).ToList())
                 {
-                    var courseName = string.Empty;
+                    var courseName = EnumCourseType.Ielts.ToString();
                     if (order.CourseName != null && (int)order.CourseName <= 5)
                     {
                         courseName = EnumCourseType.Academic.ToString();
-                    }
-                    else
-                    {
-                        courseName = EnumCourseType.Ielts.ToString();
                     }
                     var orderIntegration = new OrderIntegrationModel
                     {
@@ -210,32 +244,12 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                     orderIntegrations.Add(orderIntegration);
                 }
 
-                var leadsIntegration = new ClientsIntegrationModel
-                {
-                    UserId = item,
-                    FullName = user?.FullName,
-                    UserName = user?.UserName,
-                    StudentEmail = user?.StudentEmail,
-                    StudentPhone = user?.StudentPhone,
-                    EnumGender = user?.EnumGender,
-                    Birthday = user?.Birthday,
-                    Address = user?.Address,
-                    ParentName = user?.ParentName,
-                    ParentPhone = user?.ParentPhone,
-                    ParentEmail = user?.ParentEmail,
-                    ParentGender = user?.ParentGender,
-                    LocationId = locationId,
-                    SchoolId = user?.SchoolId,
-                    PTLevel = ptTestResult?.Level,
-                    OrderIntegration = orderIntegrations,
-                    LastDate = lastTime
-                };
-                leadsIntegrations.Add(leadsIntegration);
-            }
-            #endregion 
+                item.OrderIntegration = orderIntegrations;
+            });
+            #endregion
 
-            int totalItem = leadsIntegrations.Count;
-            var lists = leadsIntegrations
+            int totalItem = clientsIntegrations.Count;
+            var lists = clientsIntegrations
                     .ApplySortAndPaging(request)
                     .ToList();
 

@@ -31,6 +31,7 @@ namespace Fsel.System.Application.Queries.SchoolQuery
             MethodResult<IList<object>> methodResult = new MethodResult<IList<object>>();
 
             var schools = await _schoolRepository.Queryable
+                                                 .Include(x => x.Location)
                                                  .Where(x => request.Ids.Contains(x.Id))
                                                  .ToListAsync(cancellationToken);
             if (schools == null)

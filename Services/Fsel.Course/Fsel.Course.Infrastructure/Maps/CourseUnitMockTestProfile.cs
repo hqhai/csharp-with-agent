@@ -14,6 +14,7 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<CreateCourseUnitMockTestCommandModel, CourseUnitMockTest>().IgnoreAllNonExisting();
             CreateMap<UpdateCourseUnitMockTestCommandModel, CourseUnitMockTest>().IgnoreAllNonExisting();
+            CreateMap<CourseUnitMockTest, CourseUnitMockTest>().ForMember(m => m.Id, opt => opt.Ignore()).IgnoreAllNonExisting();
             CreateMap<CourseUnitMockTest, CourseUnitMockTestModel>().IgnoreAllNonExisting();
         }
     }

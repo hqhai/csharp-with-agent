@@ -11,5 +11,6 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
         public string? Email { get; set; }
         public DateTime? Birthday { get; set; }
         public string? FullName { get; set; }
+        public string? PhoneNumber { get; set; }
     }
 }

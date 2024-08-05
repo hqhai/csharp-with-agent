@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Fsel.Shared.Constants;
@@ -34,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     public class GetStudentsProgressCoursesQueryHandler : IRequestHandler<GetStudentsProgressCoursesQuery, MethodResult<IList<CompetitionStudentProgressModel>>>
     {
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly ManagerProgressHelper _managerProgressHelper;
         private readonly ICourseRepository _courseRepository;
         private readonly ITrainingService _trainingService;
         private readonly IVideoResultRepository _videoResultRepository;
@@ -44,9 +46,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private const int TotalProcessIelsts = 106; // tổng số tiến trình hiện có của Ielts
         private const int ClassForumDominator = 36;
 
-        public GetStudentsProgressCoursesQueryHandler(ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, ITrainingService trainingService, IVideoResultRepository videoResultRepository, IHomeWorkResultRepository homeWorkResultRepository, IFinalTestResultRepository finalTestResultRepository, IClassForumResultRepository classForumResultRepository)
+        public GetStudentsProgressCoursesQueryHandler(ICourseResultRepository courseResultRepository, ManagerProgressHelper managerProgressHelper, ICourseRepository courseRepository, ITrainingService trainingService, IVideoResultRepository videoResultRepository, IHomeWorkResultRepository homeWorkResultRepository, IFinalTestResultRepository finalTestResultRepository, IClassForumResultRepository classForumResultRepository)
         {
             _courseResultRepository = courseResultRepository;
+            _managerProgressHelper = managerProgressHelper;
             _courseRepository = courseRepository;
             _trainingService = trainingService;
             _videoResultRepository = videoResultRepository;
@@ -110,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         CourseId = courseResult.CourseId,
                         StudentId = studentId
                     };
-                    var (currentProgress, progress) = await _courseRepository.GetContentComplete(courseResultModel);
+                    var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResultModel);
 
                     double progressPercentage = ((float)currentProgress / TotalProcessIelsts) * 100;
                     // Update số lượng process do trên dữ liệu chưa nhập đủ

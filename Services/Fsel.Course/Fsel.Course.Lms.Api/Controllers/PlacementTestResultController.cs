@@ -3,19 +3,18 @@
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1;
     using Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/placement-test-result")]
     [ApiController]
     public class PlacementTestResultController : ControllerBase
@@ -71,6 +70,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// </summary>
         [HttpGet("export")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> Export([FromQuery] ExportPlacementTestQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -82,22 +82,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Integration Placement Test Result
-        /// </summary>
-        [HttpGet("integration-placement-test-results")]
-        [ProducesResponseType(typeof(MethodResult<IList<object>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetIntegrationPlacementTestResult([FromQuery] IntegrationPlacementTestResultsQuery query)
-        {
-            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Export PlacementTest
         /// </summary>
         [HttpPost("import-export")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> ImportAndExport([FromForm] ImportAndExportPlacementTestQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -106,6 +95,22 @@ namespace Fsel.Course.Lms.Api.Controllers
                 return commandResult.GetActionResult();
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "placementTest_File_export.xlsx");
+        }
+
+        /// <summary>
+        /// Export PlacementTest
+        /// </summary>
+        [HttpPost("export-placement-test")]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> Export([FromForm] ExportPlacementTestsToStudentQuery query)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "export_placementTest.xlsx");
         }
 
         /// <summary>

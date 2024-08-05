@@ -12,5 +12,7 @@ namespace Fsel.Sender.Domain.Models.Commands
         public string? Subject { get; set; }
         public string? Content { get; set; }
         public IList<IFormFile>? Attachments { get; set; }
+        public bool? IsCCEmail { get; set; }
+        public bool? IsCCEmailDefault { get; set; }
     }
 }

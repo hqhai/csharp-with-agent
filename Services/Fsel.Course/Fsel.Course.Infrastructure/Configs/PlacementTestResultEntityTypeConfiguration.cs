@@ -31,6 +31,8 @@ namespace Fsel.Course.Infrastructure.Configs
               .WithMany(b => b.PlacementTestResults)
               .HasForeignKey(b => b.PlacementTestId)
               .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasIndex(c => new { c.PlacementTestId, c.StudentId }).IsUnique();
         }
     }
 }

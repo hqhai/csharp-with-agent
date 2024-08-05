@@ -6,6 +6,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
 
     public class StudentRankingModel : BaseModel
     {
@@ -44,6 +45,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public DateTime? CompetitionEndDate { get; set; }
 
         public double? RankingScore { get; set; }
+
+        public WeekEvent? WeekEvent { get; set; }
 
     }
 }

@@ -7,15 +7,19 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Logging;
@@ -34,9 +38,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly ISectionGroupRepository _sectionGroupRepository;
-        private readonly ILogger<object> _logger;
+        private readonly ILogger<GetSectionBySectionGroupIdQuery> _logger;
+        private readonly QuestBoardPublisher _questBoardPublisher;
 
-        public GetSectionBySectionGroupIdQueryHandler(SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, ISectionGroupRepository sectionGroupRepository, ILogger<object> logger)
+        public GetSectionBySectionGroupIdQueryHandler(SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, ISectionGroupRepository sectionGroupRepository, ILogger<GetSectionBySectionGroupIdQuery> logger, QuestBoardPublisher questBoardPublisher)
         {
             _sectionGroupConverter = sectionGroupConverter;
             _sectionGroupResultRepository = sectionGroupResultRepository;
@@ -45,6 +50,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             _userService = userService;
             _sectionGroupRepository = sectionGroupRepository;
             _logger = logger;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<SectionGroupDtoModel>> Handle(GetSectionBySectionGroupIdQuery request, CancellationToken cancellationToken)
@@ -83,6 +89,17 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             }
             var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId);
             methodResult.Result = await _sectionGroupConverter.GetSectionGroupDto(sectionGroup, sectionGroupResult);
+
+            #region Do QuestBoard
+
+            var gradingAlFeedback = methodResult.Result.Sections?.FirstOrDefault()?.MockTestAnswer?.GradingAlFeedback;
+            if (!string.IsNullOrEmpty(gradingAlFeedback))
+            {
+                await DoQuestBoard(studentId, EnumQuestBoardCategory.MessagesFromAI, cancellationToken);
+            }
+
+            #endregion Do QuestBoard
+
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
@@ -100,17 +117,35 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             if (sectionGroupResult == null)
             {
                 _logger.LoggerRequest(request);
-
                 sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, MockTestResultId = request.MockTestResultId, Status = EnumResultStatus.New });
-                await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+
+                try
+                {
+                    await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Log Duplicate SectionGroupResult MockTest : {ex.Message}");
+                }
             }
             else if (sectionGroupResult.Status != EnumResultStatus.Done)
             {
                 sectionGroupResult.Status = EnumResultStatus.Process;
                 sectionGroupResult = _sectionGroupResultRepository.Update(sectionGroupResult);
-                await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
             return sectionGroupResult;
+        }
+
+        private async Task DoQuestBoard(Guid studentId, EnumQuestBoardCategory category, CancellationToken cancellationToken)
+        {
+            await _questBoardPublisher.Publish(new QuestBoardQueueModel()
+            {
+                StudentID = studentId,
+                Type = EnumQuestBoardType.LearningQuests,
+                Category = category,
+                Value = 1
+            }, cancellationToken);
         }
     }
 }

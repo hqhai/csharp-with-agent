@@ -247,6 +247,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnOrder(0);
 
                     b.Property<string>("BusinessType")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 

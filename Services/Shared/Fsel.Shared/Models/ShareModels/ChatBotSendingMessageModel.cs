@@ -6,11 +6,14 @@ namespace Fsel.Shared.Models.ShareModels
 
     public class ChatBotSendingMessageModel
     {
-        public string? Message { get; set; }
+        public string? Content { get; set; }
 
         public Guid? ChatbotId { get; set; }
 
         public string? FilePath { get; set; }
+
+        public double TokenRatio { get; set; }
+
     }
 
     public class ChatBotRealTimeModel : ChatBotSendingMessageModel

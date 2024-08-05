@@ -5,6 +5,7 @@ namespace Fsel.Course.Infrastructure.Configs
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -19,12 +20,18 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumResultStatus>());
 
+            builder.Property(e => e.WorkingStatus)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumWorkingStatus>());
+
             builder.HasOne(a => a.Course)
                  .WithMany(b => b.CourseResults)
                  .HasForeignKey(p => p.CourseId)
                  .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasIndex(x => x.CourseId).IsUnique(false);
+            builder.HasIndex(c => new { c.CourseId, c.StudentId }).IsUnique();
         }
     }
 }

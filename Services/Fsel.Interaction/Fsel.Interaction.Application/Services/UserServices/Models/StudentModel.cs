@@ -10,6 +10,7 @@ namespace Fsel.Interaction.Application.Services.UserServices.Models
     {
         public string? Code { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
+        public EnumCourseLevel? BaseCourseLevel { get; set; }
         public string? FullName { get; set; }
         public string? AvatarPath { get; set; }
         public Guid? ClassId { get; set; }

@@ -3,7 +3,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Fsel.Core.Entities;
-using Fsel.Identity.Domain.Enums;
+using Fsel.Shared.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace Fsel.Identity.Domain.Entities
@@ -49,6 +49,8 @@ namespace Fsel.Identity.Domain.Entities
         public virtual ICollection<UserOtp> UserOtpCodes { get; set; } = new List<UserOtp>();
 
         public virtual ICollection<UserSetting> UserSettings { get; set; } = new List<UserSetting>();
+
+        public virtual ICollection<UserCourseSetting> UserCourseSettings { get; set; } = new List<UserCourseSetting>();
 
         public virtual ICollection<UserPlatform> UserPlatforms { get; set; } = new List<UserPlatform>();
 
