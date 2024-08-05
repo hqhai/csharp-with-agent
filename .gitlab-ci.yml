@@ -41,7 +41,7 @@ build-dev-auth:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$IMAGE_VALUES .
     - docker push $IMAGE_NAME:$TAG
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
@@ -129,7 +129,7 @@ build-dev-gateway:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$IMAGE_VALUES .
     - docker push $IMAGE_NAME:$TAG
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
@@ -217,7 +217,7 @@ build-dev-hangfire:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$IMAGE_VALUES .
     - docker push $IMAGE_NAME:$TAG
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
@@ -305,7 +305,7 @@ build-dev-interaction:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$IMAGE_VALUES .
     - docker push $IMAGE_NAME:$TAG
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
@@ -393,7 +393,7 @@ build-dev-lcmsapi:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$IMAGE_VALUES .
     - docker push $IMAGE_NAME:$TAG
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
@@ -481,7 +481,7 @@ build-dev-lmsapi:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$IMAGE_VALUES .
     - docker push $IMAGE_NAME:$TAG
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
@@ -569,7 +569,7 @@ build-dev-notification:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$IMAGE_VALUES .
     - docker push $IMAGE_NAME:$TAG
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
@@ -657,7 +657,7 @@ build-dev-ordering:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$IMAGE_VALUES .
     - docker push $IMAGE_NAME:$TAG
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
@@ -745,7 +745,7 @@ build-dev-realtime:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$IMAGE_VALUES .
     - docker push $IMAGE_NAME:$TAG
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
@@ -833,7 +833,7 @@ build-dev-sender:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$IMAGE_VALUES .
     - docker push $IMAGE_NAME:$TAG
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
@@ -921,7 +921,7 @@ build-dev-storage:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$IMAGE_VALUES .
     - docker push $IMAGE_NAME:$TAG
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
@@ -1009,7 +1009,7 @@ build-dev-system:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$IMAGE_VALUES .
     - docker push $IMAGE_NAME:$TAG
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
@@ -1097,7 +1097,7 @@ build-dev-training:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$IMAGE_VALUES .
     - docker push $IMAGE_NAME:$TAG
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
@@ -1185,7 +1185,7 @@ build-dev-identity:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$IMAGE_VALUES .
     - docker push $IMAGE_NAME:$TAG
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
@@ -1273,7 +1273,7 @@ build-dev-cms:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$IMAGE_VALUES .
     - docker push $IMAGE_NAME:$TAG
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
