@@ -28,6 +28,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
         private readonly UserManager<User> _userManager;
         private readonly IHostEnvironment _environment;
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
+        private readonly string _otpDefault = "123456";
 
         public CheckOtpCommandHandler(UserManager<User> userManager
             , IHostEnvironment environment
@@ -45,7 +46,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
 
             var user = await _userManager.Users.Include(x => x.UserOtpCodes)
                                .FirstOrDefaultAsync(x => x.UserOtpCodes.Any(x => x.Status == EnumOtpCodeStatus.New && x.OTPCode == request.Otp), cancellationToken);
-            if (!string.IsNullOrEmpty(request.Email) && (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)))
+            if (!string.IsNullOrEmpty(request.Email) && request.Otp == _otpDefault && (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)))
             {
                 if (!request.Email.IsValidEmail())
                 {
