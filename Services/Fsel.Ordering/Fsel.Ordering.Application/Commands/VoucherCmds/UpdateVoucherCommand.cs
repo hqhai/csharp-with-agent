@@ -65,21 +65,42 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
             #endregion Validation
 
-            var voucher = await _voucherRepository.Queryable.Include(p => p.UserVouchers).Include(p => p.Orders).FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
+            var voucher = await _voucherRepository.Queryable.Include(p => p.VoucherPackages).FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
             if (voucher == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucher));
                 return methodResult;
             }
 
+            var currentPackageIds = voucher.VoucherPackages.Select(p => p.PackageId).ToList();
+            var packageIds = request.PackageIds.Where(p => !currentPackageIds.Contains(p)).ToList();
+
             await _voucherRepository.ExecuteTransactionAsync(async () =>
             {
                 _mapper.Map(request, voucher);
+
+                foreach (var item in voucher.VoucherPackages.ToList())
+                {
+                    if (!request.PackageIds.Contains(item.PackageId))
+                    {
+                        voucher.VoucherPackages.Remove(item);
+                    };
+                }
+
+                foreach (var item in packageIds)
+                {
+                    voucher.VoucherPackages.Add(new VoucherPackage()
+                    {
+                        PackageId = item
+                    });
+                }
+
                 if (!voucher.IsValid())
                 {
                     methodResult.AddError(voucher.ErrorMessages);
                     return methodResult;
                 }
+
                 voucher = _voucherRepository.Update(voucher);
                 await _voucherRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
