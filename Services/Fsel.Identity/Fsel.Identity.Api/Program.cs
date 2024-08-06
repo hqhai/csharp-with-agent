@@ -51,7 +51,7 @@ builder.Services.AddScoped<IStudentTrialRegistrationRepository, StudentTrialRegi
 builder.Services.AddScoped<IStudentCompetitionSnapShotRepository, StudentCompetitionSnapShotRepository>();
 builder.Services.AddScoped<ICompetitionEventsRepository, CompetitionEventsRepository>();
 builder.Services.AddScoped<IStudentRankingEventsRepository, StudentRankingEventsRepository>();
-
+builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
 
 //Publisher
 builder.Services.AddScoped<QuestBoardPublisher>();
