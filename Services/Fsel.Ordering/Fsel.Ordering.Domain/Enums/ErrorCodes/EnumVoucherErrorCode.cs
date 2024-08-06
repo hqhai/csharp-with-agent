@@ -8,5 +8,13 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         /// Voucher Start Time Must be Sooner Than the End Time
         /// </summary>
         VoucherStartTimeMustSoonerThanEndTime,
+
+        VoucherIsUsed,
+        VoucherNotExist,
+        VoucherNotActive,
+        VoucherHasExpired,
+        VoucherOutOfQuantity,
+        NotSubjectToUse,
+        VoucherDoesNotApplyToThisPackage
     }
 }

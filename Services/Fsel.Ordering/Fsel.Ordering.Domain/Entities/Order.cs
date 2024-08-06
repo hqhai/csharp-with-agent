@@ -164,6 +164,9 @@ namespace Fsel.Ordering.Domain.Entities
 
         #endregion Không sử dụng
 
+        public Guid? VoucherId { get; set; }
+        public Voucher? Voucher { get; set; }
+
         public ICollection<OrderTransaction> OrderTransactions { get; set; } = new List<OrderTransaction>();
     }
 }
