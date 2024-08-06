@@ -820,7 +820,7 @@ namespace Fsel.Course.Infrastructure.Common
             foreach (var item in dataAnswer.Answers)
             {
                 var answerQuestion = dataQuestion?.Answers.FirstOrDefault(x => x.Id == item.Id);
-                if (!string.IsNullOrEmpty(item.Key) && answerQuestion != null)
+                if (answerQuestion != null)
                 {
                     if (answerQuestion.IsCorrect.HasValue && answerQuestion.IsCorrect.Value)
                     {
@@ -987,7 +987,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var answerQuestion = dataQuestion?.Answers.FirstOrDefault(x => x.Id == item.Id);
                 if (answerQuestion != null)
                 {
-                    if (answerQuestion.Key?.Trim().ToLower() == item.Key?.Trim().ToLower())
+                    if (_linQAnswerHelper.CheckAnswer(answerQuestion.Key, item.Key))
                     {
                         number++;
                         item.IsExact = true;
