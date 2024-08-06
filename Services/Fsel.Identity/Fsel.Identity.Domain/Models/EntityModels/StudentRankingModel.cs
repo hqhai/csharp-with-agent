@@ -31,6 +31,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public string? FullName { get; set; }
 
+        public string? Email { get; set; }
+
         public EnumCourseLevel Level { get; set; }
 
         //Tham gia cuộc thi
