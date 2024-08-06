@@ -26,7 +26,7 @@ namespace Fsel.Interaction.Application.Queries.CustomerSurveyQuery
         public async Task<MethodResult<bool>> Handle(GetIsSurveyByStudentIdQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<bool>();
-            var isSurveyQuestion = await _customerSurveyRepository.Queryable.AnyAsync(x => x.UserId == request.Id, cancellationToken);
+            var isSurveyQuestion = await _customerSurveyRepository.Queryable.AllAsync(x => x.UserId == request.Id && x.IsCompleted, cancellationToken);
             methodResult.Result = isSurveyQuestion;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
