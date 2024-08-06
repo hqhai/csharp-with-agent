@@ -26,6 +26,6 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
 
         public bool IsActive { get; set; }
 
-        public ICollection<VoucherPackage>? VoucherPackages { get; set; }
+        public ICollection<VoucherPackageModel>? VoucherPackages { get; set; }
     }
 }
