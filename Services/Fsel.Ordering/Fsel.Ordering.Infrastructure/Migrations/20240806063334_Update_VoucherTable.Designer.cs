@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingDbContext))]
-    [Migration("20240806021627_Update_VoucherTable")]
+    [Migration("20240806063334_Update_VoucherTable")]
     partial class Update_VoucherTable
     {
         /// <inheritdoc />
@@ -1065,9 +1065,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")

@@ -5,6 +5,7 @@ namespace Fsel.Ordering.Domain.Entities
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
@@ -55,7 +56,11 @@ namespace Fsel.Ordering.Domain.Entities
         /// <summary>
         /// Trạng thái
         /// </summary>
-        public bool IsActive { get; set; }
+        [NotMapped]
+        public bool IsActive
+        {
+            get { return Shared.Helpers.DateTimeHelper.IsCurrentDateInRange(StartDate, EndDate); }
+        }
 
         public ICollection<VoucherPackage> VoucherPackages { get; set; } = new List<VoucherPackage>();
 

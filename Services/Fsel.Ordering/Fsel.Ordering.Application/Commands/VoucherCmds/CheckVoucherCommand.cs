@@ -10,6 +10,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -55,20 +56,13 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 return methodResult;
             }
 
-            var currentDate = DateTime.UtcNow;
-
             if (!voucher.VoucherPackages.Any(p => p.PackageId == request.PackageId))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherDoesNotApplyToThisPackage));
                 return methodResult;
             }
 
-            if (voucher.EndDate.HasValue && (voucher.StartDate.Date > currentDate.Date && voucher.EndDate.Value.Date < currentDate.Date))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherHasExpired));
-                return methodResult;
-            }
-            else if (!voucher.EndDate.HasValue && voucher.StartDate.Date > currentDate.Date)
+            if (!DateTimeHelper.IsCurrentDateInRange(voucher.StartDate, voucher.EndDate))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherHasExpired));
                 return methodResult;

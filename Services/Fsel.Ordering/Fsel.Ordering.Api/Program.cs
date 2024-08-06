@@ -70,8 +70,7 @@ builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
     { QueueSettings.OrderingQueue.NameQueue.NoticePayment, typeof(NoticePaymentConsumer) },
-    { QueueSettings.OrderingQueue.NameQueue.JobActiveEvent, typeof(JobActiveEventConsumer) },
-    { QueueSettings.OrderingQueue.NameQueue.JobUpdateVouchersStatus, typeof(JobUpdateVouchersStatusConsumer) }
+    { QueueSettings.OrderingQueue.NameQueue.JobActiveEvent, typeof(JobActiveEventConsumer) }
 });
 //builder.AddMassTransit(appSetting,
 //queues: new Dictionary<string, Type>
