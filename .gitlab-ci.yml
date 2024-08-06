@@ -113,12 +113,14 @@ build-prod-auth:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
     DOCKERFILE: "./Environments/Production/Auth.Production.Dockerfile"
   extends: ".build-image-gitlab-registry"
-  only:
-    changes:
+  rules:
+  - changes:
     - Services/Fsel.Identity/**/*
     - Services/Shared/**/*
-    refs:
-    - main
+  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: always
+  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: never
 
 build-dev-gateway:
   stage: build-image
@@ -201,12 +203,14 @@ build-prod-gateway:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
     DOCKERFILE: "./Environments/Production/Gateway.Production.Dockerfile"
   extends: ".build-image-gitlab-registry"
-  only:
-    changes:
+  rules:
+  - changes:
     - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
     - Services/Shared/**/*
-    refs:
-    - main
+  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: always
+  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: never
 
 build-dev-hangfire:
   stage: build-image
@@ -289,12 +293,14 @@ build-prod-hangfire:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
     DOCKERFILE: "./Environments/Production/Hangfire.Production.Dockerfile"
   extends: ".build-image-gitlab-registry"
-  only:
-    changes:
+  rules:
+  - changes:
     - Services/Fsel.Hangfire/**/*
     - Services/Shared/**/*
-    refs:
-    - main
+  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: always
+  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: never
 
 build-dev-interaction:
   stage: build-image
@@ -377,12 +383,14 @@ build-prod-interaction:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
     DOCKERFILE: "./Environments/Production/Interaction.Production.Dockerfile"
   extends: ".build-image-gitlab-registry"
-  only:
-    changes:
+  rules:
+  - changes:
     - Services/Fsel.Interaction/**/*
     - Services/Shared/**/*
-    refs:
-    - main
+  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: always
+  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: never
 
 build-dev-lcmsapi:
   stage: build-image
@@ -465,12 +473,14 @@ build-prod-lcmsapi:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
     DOCKERFILE: "./Environments/Production/Lcms.Production.Dockerfile"
   extends: ".build-image-gitlab-registry"
-  only:
-    changes:
+  rules:
+  - changes:
     - Services/Fsel.Course/**/*
     - Services/Shared/**/*
-    refs:
-    - main
+  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: always
+  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: never
 
 build-dev-lmsapi:
   stage: build-image
@@ -553,12 +563,14 @@ build-prod-lmsapi:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
     DOCKERFILE: "./Environments/Production/Lms.Production.Dockerfile"
   extends: ".build-image-gitlab-registry"
-  only:
-    changes:
+  rules:
+  - changes:
     - Services/Fsel.Course/**/*
     - Services/Shared/**/*
-    refs:
-    - main
+  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: always
+  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: never
 
 build-dev-notification:
   stage: build-image
@@ -641,12 +653,14 @@ build-prod-notification:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
     DOCKERFILE: "./Environments/Production/Notification.Production.Dockerfile"
   extends: ".build-image-gitlab-registry"
-  only:
-    changes:
+  rules:
+  - changes:
     - Services/Fsel.Notification/**/*
     - Services/Shared/**/*
-    refs:
-    - main
+  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: always
+  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: never
 
 build-dev-ordering:
   stage: build-image
@@ -729,12 +743,14 @@ build-prod-ordering:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
     DOCKERFILE: "./Environments/Production/Ordering.Production.Dockerfile"
   extends: ".build-image-gitlab-registry"
-  only:
-    changes:
+  rules:
+  - changes:
     - Services/Fsel.Ordering/**/*
     - Services/Shared/**/*
-    refs:
-    - main
+  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: always
+  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: never
 
 build-dev-realtime:
   stage: build-image
@@ -817,12 +833,14 @@ build-prod-realtime:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
     DOCKERFILE: "./Environments/Production/Realtime.Production.Dockerfile"
   extends: ".build-image-gitlab-registry"
-  only:
-    changes:
+  rules:
+  - changes:
     - Services/Fsel.Realtime/**/*
     - Services/Shared/**/*
-    refs:
-    - main
+  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: always
+  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: never
 
 build-dev-sender:
   stage: build-image
@@ -905,12 +923,14 @@ build-prod-sender:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
     DOCKERFILE: "./Environments/Production/Sender.Production.Dockerfile"
   extends: ".build-image-gitlab-registry"
-  only:
-    changes:
+  rules:
+  - changes:
     - Services/Fsel.Sender/**/*
     - Services/Shared/**/*
-    refs:
-    - main
+  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: always
+  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: never
 
 build-dev-storage:
   stage: build-image
@@ -993,12 +1013,14 @@ build-prod-storage:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
     DOCKERFILE: "./Environments/Production/Storage.Production.Dockerfile"
   extends: ".build-image-gitlab-registry"
-  only:
-    changes:
+  rules:
+  - changes:
     - Services/Fsel.Storage/**/*
     - Services/Shared/**/*
-    refs:
-    - main
+  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: always
+  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: never
 
 build-dev-system:
   stage: build-image
@@ -1081,12 +1103,14 @@ build-prod-system:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
     DOCKERFILE: "./Environments/Production/System.Production.Dockerfile"
   extends: ".build-image-gitlab-registry"
-  only:
-    changes:
+  rules:
+  - changes:
     - Services/Fsel.System/**/*
     - Services/Shared/**/*
-    refs:
-    - main
+  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: always
+  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: never
 
 build-dev-training:
   stage: build-image
@@ -1169,12 +1193,14 @@ build-prod-training:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
     DOCKERFILE: "./Environments/Production/Training.Production.Dockerfile"
   extends: ".build-image-gitlab-registry"
-  only:
-    changes:
+  rules:
+  - changes:
     - Services/Fsel.Training/**/*
     - Services/Shared/**/*
-    refs:
-    - main
+  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: always
+  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: never
 
 build-dev-identity:
   stage: build-image
@@ -1257,12 +1283,14 @@ build-prod-identity:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
     DOCKERFILE: "./Environments/Production/User.Production.Dockerfile"
   extends: ".build-image-gitlab-registry"
-  only:
-    changes:
+  rules:
+  - changes:
     - Services/Fsel.Identity/**/*
     - Services/Shared/**/*
-    refs:
-    - main
+  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: always
+  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: never
 
 build-dev-cms-planetdefender:
   stage: build-image
@@ -1345,9 +1373,11 @@ build-prod-cms-planetdefender:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
     DOCKERFILE: "./Environments/Production/Cms.PlanetDefender.Production.Dockerfile"
   extends: ".build-image-gitlab-registry"
-  only:
-    changes:
+  rules:
+  - changes:
     - Services/Fsel.Cms.PlanetDefender/**/*
     - Services/Shared/**/*
-    refs:
-    - main
+  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: always
+  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    when: never
