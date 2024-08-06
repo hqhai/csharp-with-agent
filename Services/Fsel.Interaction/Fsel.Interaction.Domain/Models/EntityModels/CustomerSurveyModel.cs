@@ -2,6 +2,7 @@
 
 namespace Fsel.Interaction.Domain.Models.EntityModels
 {
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
 
     public class CustomerSurveyModel : BaseCommandModel
