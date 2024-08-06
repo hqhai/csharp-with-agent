@@ -148,7 +148,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             var listClassForumResult = await _classForumResultRepository.Queryable.Where(p => lessonResultIds.Contains(p.LessonResultId)).ToListAsync(cancellationToken);
 
-            var isSendEmail = lessonResultIds.Count == listClassForumResult.Count && !listClassForumResult.Any(p => p.Status != EnumClassForumResultStatus.Graded);
+            var isSendEmail = lessonResultIds.Count == listClassForumResult.Count && listClassForumResult.All(p => p.Status.HasValue);
             if (!isSendEmail)
                 return;
             MockTestResult? mockTestResult = default;
