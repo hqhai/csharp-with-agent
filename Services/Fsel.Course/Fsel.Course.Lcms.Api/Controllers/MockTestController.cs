@@ -8,6 +8,7 @@ using Fsel.Course.Application.Commands.MockTestCmd;
 using Fsel.Course.Application.Queries.MockTestQuery;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +18,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/mock-test")]
     [ApiController]
+    [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
     public class MockTestController : ControllerBase
     {
         private readonly IMediator _mediator;
