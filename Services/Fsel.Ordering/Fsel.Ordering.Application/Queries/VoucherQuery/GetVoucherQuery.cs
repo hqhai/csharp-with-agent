@@ -11,6 +11,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
     using Fsel.Ordering.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetVoucherQuery : IRequest<MethodResult<VoucherModel>>
     {
@@ -34,7 +35,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
 
             var methodResult = new MethodResult<VoucherModel>();
 
-            var voucher = await _voucherRepository.GetByIdAsync(request.Id);
+            var voucher = await _voucherRepository.Queryable.Include(p => p.VoucherPackages).FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
             if (voucher == null)
             {
