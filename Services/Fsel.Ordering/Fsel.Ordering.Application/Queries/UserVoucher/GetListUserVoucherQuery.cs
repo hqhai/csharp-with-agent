@@ -58,9 +58,7 @@ namespace Fsel.Ordering.Application.Queries.UserVoucher
                                     Id = x.Id,
                                     VoucherId = x.VoucherId,
                                     CreatedDate = x.CreatedDate,
-                                    Percentage = x.Percentage,
                                     PackageId = x.PackageId,
-                                    DiscountedPrice = (double)x.Package!.Price - NumberHelper.ConvertDoublePercent(x.Percentage * (double)x.Package!.Price),
                                     Package = _mapper.Map<PackageModel>(x.Package)
                                 }).ToList(),
                             }).ToListAsync(cancellationToken);
