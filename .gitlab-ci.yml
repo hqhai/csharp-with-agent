@@ -117,7 +117,7 @@ build-prod-auth:
   - changes:
     - Services/Fsel.Identity/**/*
     - Services/Shared/**/*
-  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: always
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: never
@@ -207,10 +207,9 @@ build-prod-gateway:
   - changes:
     - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
     - Services/Shared/**/*
-  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: always
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: never
 
 build-dev-hangfire:
   stage: build-image
@@ -297,7 +296,7 @@ build-prod-hangfire:
   - changes:
     - Services/Fsel.Hangfire/**/*
     - Services/Shared/**/*
-  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: always
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: never
@@ -387,7 +386,7 @@ build-prod-interaction:
   - changes:
     - Services/Fsel.Interaction/**/*
     - Services/Shared/**/*
-  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: always
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: never
@@ -477,7 +476,7 @@ build-prod-lcmsapi:
   - changes:
     - Services/Fsel.Course/**/*
     - Services/Shared/**/*
-  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: always
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: never
@@ -567,7 +566,7 @@ build-prod-lmsapi:
   - changes:
     - Services/Fsel.Course/**/*
     - Services/Shared/**/*
-  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: always
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: never
@@ -657,7 +656,7 @@ build-prod-notification:
   - changes:
     - Services/Fsel.Notification/**/*
     - Services/Shared/**/*
-  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: always
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: never
@@ -747,7 +746,7 @@ build-prod-ordering:
   - changes:
     - Services/Fsel.Ordering/**/*
     - Services/Shared/**/*
-  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: always
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: never
@@ -837,7 +836,7 @@ build-prod-realtime:
   - changes:
     - Services/Fsel.Realtime/**/*
     - Services/Shared/**/*
-  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: always
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: never
@@ -927,7 +926,7 @@ build-prod-sender:
   - changes:
     - Services/Fsel.Sender/**/*
     - Services/Shared/**/*
-  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: always
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: never
@@ -1017,7 +1016,7 @@ build-prod-storage:
   - changes:
     - Services/Fsel.Storage/**/*
     - Services/Shared/**/*
-  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: always
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: never
@@ -1107,7 +1106,7 @@ build-prod-system:
   - changes:
     - Services/Fsel.System/**/*
     - Services/Shared/**/*
-  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: always
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: never
@@ -1197,7 +1196,7 @@ build-prod-training:
   - changes:
     - Services/Fsel.Training/**/*
     - Services/Shared/**/*
-  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: always
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: never
@@ -1287,7 +1286,7 @@ build-prod-identity:
   - changes:
     - Services/Fsel.Identity/**/*
     - Services/Shared/**/*
-  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: always
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: never
@@ -1377,7 +1376,7 @@ build-prod-cms-planetdefender:
   - changes:
     - Services/Fsel.Cms.PlanetDefender/**/*
     - Services/Shared/**/*
-  - if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
+    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: always
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: never
