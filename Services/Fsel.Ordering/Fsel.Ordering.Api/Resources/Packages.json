@@ -7,6 +7,7 @@
     "priceMonth": 500000,
     "monthNumber": 1,
     "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
+    "referToken": 50000,
     "createdDate": "2024-06-04",
     "translations": [
       {
@@ -40,6 +41,7 @@
     "priceMonth": 320000,
     "monthNumber": 6,
     "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
+    "referToken": 240000,
     "createdDate": "2024-06-04",
     "translations": [
       {
@@ -73,6 +75,7 @@
     "priceMonth": 240000,
     "monthNumber": 12,
     "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
+    "referToken": 360000,
     "createdDate": "2024-06-04",
     "translations": [
       {
