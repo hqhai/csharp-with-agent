@@ -58,8 +58,7 @@ namespace Fsel.Ordering.Application.Queries.UserVoucher
                                     Id = x.Id,
                                     VoucherId = x.VoucherId,
                                     CreatedDate = x.CreatedDate,
-                                    PackageId = x.PackageId,
-                                    Package = _mapper.Map<PackageModel>(x.Package)
+                                    PackageId = x.PackageId
                                 }).ToList(),
                             }).ToListAsync(cancellationToken);
 
