@@ -20,6 +20,9 @@ namespace Fsel.Shared.Enums
         [Description("Hoàn thành Bài tập về nhà đầu tiên")]
         CompleteHomeworkFirst,
 
+        [Description("Hoàn thành Khảo sát thông tin")]
+        CompletedSurvey,
+
         [Description("Hoàn thành Focus Mode đầu tiên")]
         CompleteFocusModeFirst,
 
