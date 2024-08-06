@@ -83,21 +83,6 @@ namespace Fsel.Ordering.Api.Controllers
         }
 
         /// <summary>
-        /// Update voucher status
-        /// </summary>
-        [HttpPut("change-status/{id}")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
-        public async Task<IActionResult> ChangeStatus([FromRoute] Guid id, [FromBody] UpdateVoucherStatusCommand command)
-        {
-            ArgumentNullException.ThrowIfNull(command);
-            command.Id = id;
-            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Get list User voucher
         /// </summary>
         [HttpGet("get-current-vouchers")]

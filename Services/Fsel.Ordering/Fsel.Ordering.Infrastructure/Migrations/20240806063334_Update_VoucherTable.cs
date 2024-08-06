@@ -24,6 +24,10 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 table: "Vouchers");
 
             migrationBuilder.DropColumn(
+                name: "IsActive",
+                table: "Vouchers");
+
+            migrationBuilder.DropColumn(
                 name: "IsGlobal",
                 table: "Vouchers");
 
@@ -166,6 +170,13 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 table: "Vouchers",
                 type: "nvarchar(max)",
                 nullable: true);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "IsActive",
+                table: "Vouchers",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
 
             migrationBuilder.AddColumn<bool>(
                 name: "IsGlobal",
