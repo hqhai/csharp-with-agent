@@ -2,23 +2,19 @@
 
 namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 {
-    using System.Globalization;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Interaction.Application.Commands.AuthCmd;
+    using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.Entities;
-    using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys;
     using Fsel.Interaction.Domain.Models.EntityModels;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Models.SenderTemplates;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class CreateCustomerSurveyCommand : CreateCustomerSurveyCommandModel, IRequest<MethodResult<IList<CustomerSurveyModel>>>
     {
@@ -32,6 +28,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
         private readonly IMapper _mapper;
         private readonly MediatR.IMediator _mediator;
         private readonly IUserService _userService;
+        private readonly QuestBoardPublisher _questBoardPublisher;
 
         public CreateCustomerSurveyCommandHandler(ICustomerSurveyRepository customerSurveyRepository, AuthContext authContext, ISurveyQuestionRepository surveyQuestionRepository, IMapper mapper, MediatR.IMediator mediator, IUserService userService)
         {
@@ -79,7 +76,8 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 {
                     Answer = item.Answer,
                     UserId = request.UserId ?? _authContext.CurrentUserId,
-                    SurveyQuestionId = item.Id
+                    SurveyQuestionId = item.Id,
+                    IsCompleted = item.IsCompleted
                 };
                 if (!customerSurvey.IsValid())
                 {
@@ -88,6 +86,14 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 }
 
                 customerSurveys.Add(customerSurvey);
+            }
+
+            bool completedSurvey = customerSurveys.All(x => x.IsCompleted);
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var student = studentResult?.Content?.Result;
+            if (completedSurvey && student != null)
+            {
+                await DoQuestBoard(student.Id, cancellationToken);
             }
 
             await _customerSurveyRepository.ExecuteTransactionAsync(async () =>
@@ -121,6 +127,18 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             });
 
             return methodResult;
+        }
+
+        private async Task DoQuestBoard(Guid studentId, CancellationToken cancellationToken)
+        {
+            QuestBoardQueueModel model = new QuestBoardQueueModel
+            {
+                StudentID = studentId,
+                Type = EnumQuestBoardType.BeginnerQuests,
+                Category = EnumQuestBoardCategory.CompletedSurvey,
+                Value = 1
+            };
+            await _questBoardPublisher.Publish(model, cancellationToken);
         }
     }
 }
