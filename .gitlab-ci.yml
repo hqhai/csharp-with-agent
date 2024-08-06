@@ -132,7 +132,7 @@ build-dev-gateway:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
     DOCKERFILE: "./Environments/Development/Gateway.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -220,7 +220,7 @@ build-dev-hangfire:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
     DOCKERFILE: "./Environments/Development/Hangfire.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -308,7 +308,7 @@ build-dev-interaction:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
     DOCKERFILE: "./Environments/Development/Interaction.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -396,7 +396,7 @@ build-dev-lcmsapi:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
     DOCKERFILE: "./Environments/Development/Lcms.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -484,7 +484,7 @@ build-dev-lmsapi:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
     DOCKERFILE: "./Environments/Development/Lms.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -572,7 +572,7 @@ build-dev-notification:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
     DOCKERFILE: "./Environments/Development/Notification.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -660,7 +660,7 @@ build-dev-ordering:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
     DOCKERFILE: "./Environments/Development/Ordering.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -748,7 +748,7 @@ build-dev-realtime:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
     DOCKERFILE: "./Environments/Development/Realtime.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -836,7 +836,7 @@ build-dev-sender:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
     DOCKERFILE: "./Environments/Development/Sender.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -924,7 +924,7 @@ build-dev-storage:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
     DOCKERFILE: "./Environments/Development/Storage.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -1012,7 +1012,7 @@ build-dev-system:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
     DOCKERFILE: "./Environments/Development/System.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -1100,7 +1100,7 @@ build-dev-training:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
     DOCKERFILE: "./Environments/Development/Training.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -1188,7 +1188,7 @@ build-dev-identity:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
     DOCKERFILE: "./Environments/Development/User.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -1276,7 +1276,7 @@ build-dev-cms-planetdefender:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
     DOCKERFILE: "./Environments/Development/Cms.PlanetDefender.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
