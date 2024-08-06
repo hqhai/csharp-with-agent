@@ -62,11 +62,18 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             }
 
             Voucher voucher = _mapper.Map<Voucher>(request);
+
+            request.PackageIds.ForEach(p => voucher.VoucherPackages.Add(new VoucherPackage()
+            {
+                PackageId = p
+            }));
+
             if (!voucher.IsValid())
             {
                 methodResult.AddErrorBadRequest(voucher.ErrorMessages);
                 return methodResult;
             }
+
             await _voucherRepository.ExecuteTransactionAsync(async () =>
             {
                 voucher = _voucherRepository.Add(voucher);

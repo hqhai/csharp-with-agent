@@ -24,6 +24,6 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i2
         public string? CompanyAddress { get; set; }
         public string? CompanyTaxCode { get; set; }
         public string? ReferralCode { get; set; }
-        public string? Voucher { get; set; }
+        public string? VoucherCode { get; set; }
     }
 }

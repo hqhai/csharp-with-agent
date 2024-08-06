@@ -141,7 +141,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                     CompanyTaxCode = request.CompanyTaxCode,
                     ReferralCode = request.ReferralCode,
                     EventId = request.EventId,
-                    Voucher = request.Voucher,
+                    VoucherCode = request.VoucherCode,
                 }, cancellationToken).ConfigureAwait(false);
 
                 if (!updateOrderResult.IsOK)
@@ -158,11 +158,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
 
             var discountPercent = 0;
 
-            if (!string.IsNullOrEmpty(request.Voucher))
+            if (!string.IsNullOrEmpty(request.VoucherCode))
             {
                 var checkVoucher = await _mediator.Send(new CheckVoucherCommand()
                 {
-                    Code = request.Voucher,
+                    Code = request.VoucherCode,
                     PackageId = request.PackageId,
                 }, cancellationToken);
                 if (!checkVoucher.IsOK)

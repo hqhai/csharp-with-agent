@@ -56,11 +56,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             }
             var discountPercent = 0;
 
-            if (!string.IsNullOrEmpty(request.Voucher))
+            if (!string.IsNullOrEmpty(request.VoucherCode))
             {
                 var checkVoucher = await _mediator.Send(new CheckVoucherCommand()
                 {
-                    Code = request.Voucher,
+                    Code = request.VoucherCode,
                     PackageId = request.Package.Id,
                 }, cancellationToken);
                 if (!checkVoucher.IsOK)
@@ -76,6 +76,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 }
                 discountPercent = voucher.Percent;
                 request.Order.VoucherId = voucher.Id;
+            }
+            else
+            {
+                request.Order.VoucherId = null;
             }
 
             AddDataIntoOrder(request.Order, request.Code, request.Package.Price, discountPercent, request);
