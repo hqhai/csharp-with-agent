@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://s3-sgn10.fptcloud.com;" />
+    @* <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://s3-sgn10.fptcloud.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *;"> *@
 
     <title>Fsel OpenID</title>
     
@@ -18,6 +20,8 @@
 
     <!-- CSS -->
     <link rel="stylesheet" href="~/assets/css/main.css" />
+    @* <link rel="stylesheet" href="~/assets/css/base/index.css" /> *@
+    @* <link rel="stylesheet" href="~/assets/css/components/index.css" /> *@
     <link rel="stylesheet" href="~/assets/css/pages/common.css" />
 
     <link href="~/lib/font-awesome/css/all.css" rel="stylesheet" />
@@ -31,10 +35,12 @@
     @* <partial name="_Nav" /> *@
 
     <div class="container">
-        @await Component.InvokeAsync("Languages")
+        <div class="all-content">
+            <div class="content">
+                @await Component.InvokeAsync("Languages")
 
-        <div class="content">
-            @RenderBody()
+                @RenderBody()
+            </div>
         </div>
     </div>
 

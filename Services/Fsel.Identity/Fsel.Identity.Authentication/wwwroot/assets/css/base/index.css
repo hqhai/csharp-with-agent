@@ -107,7 +107,7 @@ section {
 }
 
 body {
-  line-height: 1.5;
+  line-height: 1;
 }
 
 ol,
@@ -120,13 +120,13 @@ q {
   quotes: none;
 }
 
-blockquote:before,
-blockquote:after,
-q:before,
-q:after {
-  content: "";
-  content: none;
-}
+  blockquote:before,
+  blockquote:after,
+  q:before,
+  q:after {
+    content: "";
+    content: none;
+  }
 
 table {
   border-collapse: collapse;
@@ -204,21 +204,22 @@ strong {
   position: relative;
   width: 100vw;
   height: 100vh;
-  background: url("../../assets/img/auth-bg.png") no-repeat center/cover;
+  background: url("https://s3-sgn10.fptcloud.com/fsel/Files/backgroundsignin_8546_1721122209461.jpg") no-repeat center/cover;
   overflow-y: auto;
 }
 
 .content {
-  margin-left: auto;
-  margin-right: auto;
+  margin-left: 64px;
+  margin-right: 64px;
   margin-bottom: 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 460px;
+  width: 586px;
   padding: 0 16px;
-  padding-top: 64px;
+  /* padding-top: 64px; */
   max-width: 100%;
+  height: 100%;
 }
 
 .logo {
@@ -247,19 +248,18 @@ form {
   flex-direction: column;
   gap: 32px;
 }
+
 @media only screen and (max-width: 576px) {
   form {
     gap: 20px;
   }
 }
 
-/*
-TODO
 form:invalid .btn {
   background: var(--disable-bg);
   color: var(--disable-text-color);
   cursor: default;
-}*/
+}
 
 .social {
   display: flex;

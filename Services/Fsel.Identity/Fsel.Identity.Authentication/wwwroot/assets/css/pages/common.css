@@ -1,5 +1,5 @@
 
-.hidden {
+/*.hidden {
   display: none;
 }
 
@@ -8,9 +8,9 @@
   height: 100vh !important;
   position: absolute !important;
   top: 0;
-  left: 0;
+  left: 0;*/
   /*display: flex;*/
-  justify-content: center;
+  /*justify-content: center;
   align-items: center;
   background-color: rgba(0, 0, 0, 0.5);
 }
@@ -80,4 +80,4 @@
   margin: 10px;
   margin-left: 15px;
   font-size: 20px;
-}
+}*/
