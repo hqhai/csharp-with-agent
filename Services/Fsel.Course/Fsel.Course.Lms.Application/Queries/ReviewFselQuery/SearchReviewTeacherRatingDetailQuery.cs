@@ -3,9 +3,9 @@
 namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using System;
-    using System.Globalization;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Entities;
@@ -78,6 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                    {
                                        Id = baseQ.Id,
                                        Code = c.Code,
+                                       StudentId = baseQ.StudentId,
                                        CreatedDate = baseQ.CreatedDate,
                                        CreatedFullName = baseQ.CreatedFullName,
                                        CreatedUserId = baseQ.CreatedUserId,
@@ -96,6 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                  {
                                      Id = baseQ.Id,
                                      Code = c.Code,
+                                     StudentId = baseQ.StudentId,
                                      CreatedDate = baseQ.CreatedDate,
                                      CreatedFullName = baseQ.CreatedFullName,
                                      CreatedUserId = baseQ.CreatedUserId,
@@ -114,6 +116,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                 select new ReviewTeacherRatingDetailModel
                                 {
                                     Id = baseQ.Id,
+                                    StudentId = baseQ.StudentId,
                                     Code = c.Code,
                                     CreatedDate = baseQ.CreatedDate,
                                     CreatedFullName = baseQ.CreatedFullName,
@@ -126,6 +129,19 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                 };
 
             var query = mockTestQuery.AsEnumerable().Union(classFormQuery.AsEnumerable()).Union(videoResultQuery.AsEnumerable());
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(query.Where(x => x.StudentId.HasValue).Select(x => x.StudentId!.Value).ToList());
+            var students = studentResults?.Content?.Result;
+            if (students == null || !students.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
+                return methodResult;
+            }
+
+            foreach (var item in query)
+            {
+                item.CreatedFullName = students.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.FullName;
+            }
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 query = query.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
@@ -136,6 +152,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             }
             int totalItem = query.Count();
             var lists = query.ApplySortAndPaging(request).ToList();
+
             foreach (var item in lists)
             {
                 item.Stars = NumberHelper.ConvertRound(item.Stars);

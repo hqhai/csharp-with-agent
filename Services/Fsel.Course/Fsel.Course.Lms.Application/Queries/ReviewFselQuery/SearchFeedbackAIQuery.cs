@@ -4,15 +4,16 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ReviewFsels;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -25,6 +26,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     public class SearchFeedbackAIQueryHandler : IRequestHandler<SearchFeedbackAIQuery, MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>>
     {
         private readonly ICourseRepository _courseRepository;
+        private readonly IUserService _userService;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ILessonRepository _lessonRepository;
@@ -34,9 +36,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
         private readonly IStudentFeedbackRepository _studentFeedbackRepository;
         private readonly IClassForumRepository _classForumRepository;
 
-        public SearchFeedbackAIQueryHandler(ICourseRepository courseRepository, IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, ILessonRepository lessonRepository, ICourseUnitMockTestRepository courseUnitMockTestRepository, IUnitRepository unitRepository, IUnitLessonRepository unitLessonRepository, IStudentFeedbackRepository studentFeedbackRepository, IClassForumRepository classForumRepository)
+        public SearchFeedbackAIQueryHandler(ICourseRepository courseRepository, IUserService userService, IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, ILessonRepository lessonRepository, ICourseUnitMockTestRepository courseUnitMockTestRepository, IUnitRepository unitRepository, IUnitLessonRepository unitLessonRepository, IStudentFeedbackRepository studentFeedbackRepository, IClassForumRepository classForumRepository)
         {
             _courseRepository = courseRepository;
+            _userService = userService;
             _classForumResultRepository = classForumResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _lessonRepository = lessonRepository;
@@ -111,6 +114,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
+
             foreach (var item in lists)
             {
                 item.NumberOfStars = NumberHelper.ConvertRound(item.NumberOfStars);

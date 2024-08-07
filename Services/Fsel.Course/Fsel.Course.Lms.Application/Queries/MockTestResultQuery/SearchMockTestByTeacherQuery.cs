@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -73,13 +74,27 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                                                             CreatedDate = x.CreatedDate,
                                                                             CreatedFullName = x.CreatedFullName,
                                                                             CreatedUserId = x.CreatedUserId,
+                                                                            StudentId = x.StudentId,
                                                                             Type = x.MockTest!.MockTestType,
                                                                             CourseSkill = x.MockTest.MockTestSections.Select(x => x.SectionGroup).Select(x => x!.CourseSkill).FirstOrDefault(),
                                                                             UnitDisplayOrder = x.MockTest.MockTestType == EnumMockTestType.FullMockTest ? x.MockTest.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault() : x.MockTest.UnitSkillMockTests.Where(y => y.UnitId == x.UnitId).Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests).Where(y => y.CourseId == x.CourseId).Select(x => x.Number).FirstOrDefault(),
                                                                             CourseCode = x.MockTest.MockTestResults.Where(y => y.Id == x.Id).Select(x => x.Course!.Code).FirstOrDefault(),
-                                                                        });
+                                                                        }).AsEnumerable();
             mockTestResultQuery = mockTestResultQuery.Where(x => x.CourseSkill == EnumCourseSkill.Speaking || x.Type == EnumMockTestType.FullMockTest);
             //Keyword
+
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(mockTestResultQuery.Where(x => x.StudentId.HasValue).Select(x => x.StudentId!.Value).ToList());
+            var students = studentResults?.Content?.Result;
+            if (students == null || !students.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
+                return methodResult;
+            }
+            foreach (var item in mockTestResultQuery)
+            {
+                item.CreatedFullName = students.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.FullName;
+            }
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 mockTestResultQuery = mockTestResultQuery.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
@@ -108,12 +123,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 mockTestResultQuery = mockTestResultQuery.Where(m => m.CourseId == request.CourseId);
             }
 
-            int totalItem = await mockTestResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await mockTestResultQuery
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+            int totalItem = mockTestResultQuery.Count();
+            var lists = mockTestResultQuery.ApplySortAndPaging(request).ToList();
 
             foreach (var item in lists)
             {

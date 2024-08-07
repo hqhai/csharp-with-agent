@@ -160,15 +160,26 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var notificationRemind = await _notificationService.GetListNotificationRemind(query);
             var notificationTurnOff = notificationRemind.Content?.Result;
             List<ClassForumResultModel> classForumResultModels = new List<ClassForumResultModel>();
+
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).ToList());
+            var students = studentResults?.Content?.Result;
+            if (students == null || !students.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
+                return methodResult;
+            }
+
             if (actions != null)
             {
                 classForumResultModels = lists.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
                 foreach (var item in classForumResultModels)
                 {
+                    var studentDto = students.FirstOrDefault(x => x.Id == item.StudentId);
                     var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
                     item.CommentNumber = action?.CommentNumber;
                     item.LikeNumber = action?.LikeNumber;
                     item.IsLiked = action?.IsLiked;
+                    item.CreatedFullName = studentDto?.Human?.FullName;
                     item.IsTurnedOffNotification = notificationTurnOff!.Any(x => x.ObjectId == item.Id);
                     item.CourseLevel = student.CourseLevel;
                 }

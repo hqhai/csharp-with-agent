@@ -7,12 +7,14 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumResults;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -25,10 +27,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     public class SearchClassForumResultAdminQueryHandler : IRequestHandler<SearchClassForumResultAdminQuery, MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
+        private readonly IUserService _userService;
 
-        public SearchClassForumResultAdminQueryHandler(IClassForumResultRepository classForumResultRepository)
+        public SearchClassForumResultAdminQueryHandler(IClassForumResultRepository classForumResultRepository, IUserService userService)
         {
             _classForumResultRepository = classForumResultRepository;
+            _userService = userService;
         }
 
         public async Task<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>> Handle(SearchClassForumResultAdminQuery request, CancellationToken cancellationToken)
@@ -72,7 +76,18 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).ToList());
+            var students = studentResults?.Content?.Result;
+            if (students == null || !students.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
+                return methodResult;
+            }
+            foreach (var item in lists)
+            {
+                var studentDto = students.FirstOrDefault(x => x.Id == item.StudentId);
+                item.CreatedFullName = studentDto?.Human?.FullName;
+            }
             methodResult.Result = new PagingItemsModel<ClassForumResultSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

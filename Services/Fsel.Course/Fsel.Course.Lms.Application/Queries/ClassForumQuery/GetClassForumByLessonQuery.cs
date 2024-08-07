@@ -49,34 +49,35 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                                    .Include(x => x.ClassForumResults.Where(x => x.Status == EnumClassForumResultStatus.Graded).OrderBy(x => x.CreatedDate))
                                    .ThenInclude(x => x.ClassForumResultFiles)
                                    .FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
-
-            var classForm = _mapper.Map<ClassForumModel>(classForumQuery);
-            if (classForumQuery != null)
+            if (classForumQuery == null)
             {
-                var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumQuery.ClassForumResults.Select(x => x.Id).ToList(), UserId = _authContext.CurrentUserId });
-                var actions = actionsResult.Content?.Result;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var classForm = _mapper.Map<ClassForumModel>(classForumQuery);
+            var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumQuery.ClassForumResults.Select(x => x.Id).ToList(), UserId = _authContext.CurrentUserId });
+            var actions = actionsResult.Content?.Result;
 
-                var studentResult = await _userService.GetStudentsByStudentIdsAsync(classForumQuery.ClassForumResults.Select(x => x.StudentId).ToList());
-                var students = studentResult.Content?.Result;
-                if (actions != null)
+            var studentResult = await _userService.GetStudentsByStudentIdsAsync(classForumQuery.ClassForumResults.Select(x => x.StudentId).ToList());
+            var students = studentResult.Content?.Result;
+            if (actions != null)
+            {
+                foreach (var item in classForm?.ClassForumResults!)
                 {
-                    foreach (var item in classForm?.ClassForumResults!)
+                    item.CourseLevel = classForumQuery.Lesson?.CourseLevel ?? default;
+                    var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
+                    if (action != null)
                     {
-                        item.CourseLevel = classForumQuery.Lesson?.CourseLevel ?? default;
-                        var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
-                        if (action != null)
-                        {
-                            item.CommentNumber = action.CommentNumber;
-                            item.LikeNumber = action.LikeNumber;
-                            item.IsLiked = action.IsLiked;
-                        }
-                        var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
-                        item.AvatarPath = student?.Human?.AvatarPath;
-                        item.CreatedFullName = student?.Human?.FullName;
+                        item.CommentNumber = action.CommentNumber;
+                        item.LikeNumber = action.LikeNumber;
+                        item.IsLiked = action.IsLiked;
                     }
+                    var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
+                    item.CreatedFullName = student?.Human?.FullName;
+                    item.AvatarPath = student?.Human?.AvatarPath;
+                    item.CreatedFullName = student?.Human?.FullName;
                 }
             }
-
             methodResult.Result = classForm;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

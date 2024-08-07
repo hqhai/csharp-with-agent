@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -69,6 +70,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                    .Include(x => x.ClassForum)
                                    .Where(x => x.Status == EnumClassForumResultStatus.Pending)
                                    .OrderByDescending(x => x.CreatedDate)
+                                   .AsNoTracking()
                                    .Select(x => new ClassForumResultSearchModel
                                    {
                                        Id = x.Id,
@@ -87,7 +89,19 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                        TeacherId = x.GradingTeacherId,
                                        CourseId = x.LessonResult!.CourseId,
                                        WordContent = x.WordContent
-                                   });
+                                   }).AsEnumerable();
+
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(classForumResultQuery.Select(x => x.StudentId).ToList());
+            var students = studentResults?.Content?.Result;
+            if (students == null || !students.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
+                return methodResult;
+            }
+            foreach (var item in classForumResultQuery)
+            {
+                item.CreatedFullName = students.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.FullName;
+            }
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -117,12 +131,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             {
                 classForumResultQuery = classForumResultQuery.Where(m => m.UnitDisplayOrder == request.UnitDisplayOrder);
             }
-            int totalItem = await classForumResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await classForumResultQuery
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+
+            int totalItem = classForumResultQuery.Count();
+            var lists = classForumResultQuery.ApplySortAndPaging(request).ToList();
 
             var classToCourseResult = await _trainingService.GetsByCourseIdsAsync(new GetsByCourseIdsQueryModel { CourseIdStr = string.Join(",", lists.Select(x => x.CourseId).Distinct().ToList()) });
             var classResultModel = classToCourseResult.Content?.Result;

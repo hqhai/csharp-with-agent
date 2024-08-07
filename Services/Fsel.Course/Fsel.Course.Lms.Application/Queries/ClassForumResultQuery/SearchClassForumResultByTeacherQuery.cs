@@ -3,11 +3,11 @@
 namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 {
     using System;
-    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -86,7 +86,19 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                         UnitName = x.ClassForum.Lesson.UnitLessons.Select(x => x.Unit).Select(x => x!.Name).FirstOrDefault(),
                                         TeacherId = x.GradingTeacherId,
                                         WordContent = x.WordContent
-                                    });
+                                    }).AsEnumerable();
+
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(classForumResultQuery.Select(x => x.StudentId).ToList());
+            var students = studentResults?.Content?.Result;
+            if (students == null || !students.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
+                return methodResult;
+            }
+            foreach (var item in classForumResultQuery)
+            {
+                item.CreatedFullName = students.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.FullName;
+            }
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -117,20 +129,13 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             {
                 classForumResultQuery = classForumResultQuery.Where(m => m.CourseId == request.CourseId);
             }
-            int totalItem = await classForumResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await classForumResultQuery
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+            int totalItem = classForumResultQuery.Count();
+            var lists = classForumResultQuery.ApplySortAndPaging(request).ToList();
+
             foreach (var item in lists)
             {
-                var studentId = item.CreatedUserId;
-                var classResult = await _trainingService.GetClassByStudentId(studentId);
-                if (classResult!.Content!.Result != null)
-                {
-                    item.ClassCode = classResult!.Content!.Result.Code;
-                }
+                var classResult = await _trainingService.GetClassByStudentId(item.StudentId);
+                item.ClassCode = classResult?.Content?.Result?.Code;
                 item.PostArea = "L" + item.LessonDisplayOrder + "_" + "U" + item.UnitDisplayOrder + "_" + item.CourseCode;
             }
 

@@ -21,8 +21,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Lms.Application.Services.NotificationServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Models.ShareModels;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -109,12 +109,19 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 .Where(x => x.LessonResultId == request.LessonResultId && x.ClassForumId == classForum.Id)
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
+            if (classForumResult == null)
+            {
+                methodResult.Result = classForumByStudentModel;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+
             classForumByStudentModel.ClassForumResultCurrentStudent = _mapper.Map<ClassForumResultModel>(classForumResult);
             var classForumResultModel = classForumByStudentModel.ClassForumResultCurrentStudent;
 
-            if (classForumResultModel != null && classForumResult != null)
+            if (classForumResultModel != null)
             {
-                classForumResultModel.ClassForumDetailResults = classForumResult?.ClassForumDetailResults.Select(x =>
+                classForumResultModel.ClassForumDetailResults = classForumResult.ClassForumDetailResults.Select(x =>
                 {
                     x.Score = GetTargetCount(x, classForumResult);
                     return _mapper.Map<ClassForumDetailResultModel>(x);

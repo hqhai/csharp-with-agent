@@ -13,6 +13,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class ReviewTeacherRatingDetailModel : BaseModel
     {
+        public Guid? StudentId { get; set; }
         public string? Code { get; set; }
         public string? ReviewArea { get; set; }
         public double Stars { get; set; }
