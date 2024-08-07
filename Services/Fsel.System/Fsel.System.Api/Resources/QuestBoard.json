@@ -63,7 +63,7 @@
     "ImagePath": "",
     "category": "CompletedSurvey",
     "targetValue": 1,
-    "token": 40,
+    "token": 20,
     "energy": null,
     "repeatType": null,
     "IsActive": true,
