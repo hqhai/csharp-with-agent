@@ -30,7 +30,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
         private readonly IUserService _userService;
         private readonly QuestBoardPublisher _questBoardPublisher;
 
-        public CreateCustomerSurveyCommandHandler(ICustomerSurveyRepository customerSurveyRepository, AuthContext authContext, ISurveyQuestionRepository surveyQuestionRepository, IMapper mapper, MediatR.IMediator mediator, IUserService userService)
+        public CreateCustomerSurveyCommandHandler(ICustomerSurveyRepository customerSurveyRepository, AuthContext authContext, ISurveyQuestionRepository surveyQuestionRepository, IMapper mapper, MediatR.IMediator mediator, IUserService userService, QuestBoardPublisher questBoardPublisher)
         {
             _customerSurveyRepository = customerSurveyRepository;
             _authContext = authContext;
@@ -38,6 +38,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             _mapper = mapper;
             _mediator = mediator;
             _userService = userService;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<IList<CustomerSurveyModel>>> Handle(CreateCustomerSurveyCommand request, CancellationToken cancellationToken)
