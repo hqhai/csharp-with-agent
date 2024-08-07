@@ -222,5 +222,10 @@ namespace Fsel.Shared.Helpers
             // Kiểm tra xem chuỗi có chứa ký tự đặc biệt không
             return regex.IsMatch(input);
         }
+
+        public static ICollection<string> GetEnumNames<T>() where T : Enum
+        {
+            return new List<string>(Enum.GetNames(typeof(T)));
+        }
     }
 }

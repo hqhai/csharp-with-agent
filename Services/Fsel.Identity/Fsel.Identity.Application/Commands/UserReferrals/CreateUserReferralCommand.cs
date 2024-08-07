@@ -6,6 +6,8 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
@@ -21,10 +23,12 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
     public class CreateUserReferralCommandHandler : IRequestHandler<CreateUserReferralCommand, MethodResult<VoidMethodResult>>
     {
         private readonly IUserReferralRepository _userReferralRepository;
+        private readonly UserManager<User> _userManager;
 
-        public CreateUserReferralCommandHandler(IUserReferralRepository userReferralRepository)
+        public CreateUserReferralCommandHandler(IUserReferralRepository userReferralRepository, UserManager<User> userManager)
         {
             _userReferralRepository = userReferralRepository;
+            _userManager = userManager;
         }
 
         public async Task<MethodResult<VoidMethodResult>> Handle(CreateUserReferralCommand request, CancellationToken cancellationToken)
@@ -32,13 +36,20 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<VoidMethodResult>();
 
-            if (request.SenderId == request.ReceiverId)
+            var sender = await _userManager.Users.Include(p => p.Human).FirstOrDefaultAsync(p => p.Human != null && !string.IsNullOrEmpty(p.Human.Code) && p.Human.Code.Trim().ToLower() == request.ReferralCode.Trim().ToLower(), cancellationToken);
+            if (sender == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
+            if (sender.Id == request.ReceiverId)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
                 return methodResult;
             }
 
-            if (await _userReferralRepository.Queryable.AnyAsync(p => p.SenderId == request.SenderId && p.ReceiverId == request.ReceiverId, cancellationToken))
+            if (await _userReferralRepository.Queryable.AnyAsync(p => p.ReceiverId == request.ReceiverId, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
                 return methodResult;
@@ -48,7 +59,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
             {
                 _userReferralRepository.Add(new UserReferral()
                 {
-                    SenderId = request.SenderId,
+                    SenderId = sender.Id,
                     ReceiverId = request.ReceiverId,
                 });
                 await _userReferralRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

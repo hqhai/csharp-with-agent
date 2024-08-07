@@ -8,8 +8,11 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.UserReferrals;
+    using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Identity.Infrastructure.ValueSettings;
+    using Fsel.Shared.Enums;
     using MediatR;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
     public class AddFeatureMissionCommand : AddFeatureMissionCommandModel, IRequest<MethodResult<VoidMethodResult>>
@@ -39,11 +42,39 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                 return methodResult;
             }
 
-            var featureMissions = userReferral.FeatureMissions;
-
-            if (featureMissions != null && )
+            int token = 0;
+            if (request.FeatureUserReferral == EnumFeatureUserReferral.PT)
             {
+                token = _appSetting.UserReferralConfig?.PT ?? 0;
             }
+            else if (request.FeatureUserReferral == EnumFeatureUserReferral.DoneUnit1)
+            {
+                token = _appSetting.UserReferralConfig?.DoneUnit1 ?? 0;
+            }
+            else
+            {
+                token = request.Token ?? 0;
+            }
+
+            var featureMissions = userReferral.FeatureMissions;
+            if (featureMissions == null || !featureMissions.Any(p => p.FeatureUserReferral == request.FeatureUserReferral))
+            {
+                userReferral.FeatureMissions?.Add(new UserReferralToken
+                {
+                    FeatureUserReferral = request.FeatureUserReferral,
+                    Token = token,
+                });
+            }
+
+            await _userReferralRepository.ExecuteTransactionAsync(async () =>
+            {
+                _userReferralRepository.Update(userReferral);
+                await _userReferralRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            });
+
+            return methodResult;
         }
     }
 }
