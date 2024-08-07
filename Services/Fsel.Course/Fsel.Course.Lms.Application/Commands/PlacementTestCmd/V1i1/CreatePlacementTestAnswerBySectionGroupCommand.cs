@@ -19,9 +19,9 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
+    using Fsel.Course.Lms.Application.Commands.StudentCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
@@ -210,14 +210,23 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                     await _placementTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     if (isLockPT)
                     {
-                        await DoQuestBoard(student.Id, cancellationToken);
+                        await DoQuestBoard(student.Id, cancellationToken).ConfigureAwait(false);
                         await SendStudentPlacementTest(currentLevel ?? default, student, age, cancellationToken).ConfigureAwait(false);
-                        ;
+                        await DoUserReferral(student.Human?.UserId ?? _authContext.CurrentUserId, cancellationToken).ConfigureAwait(false);
                     }
                     return isLockPT;
                 }
             }
             return default;
+        }
+
+        private async Task DoUserReferral(Guid receiverId, CancellationToken cancellationToken)
+        {
+            await _mediator.Send(new AddFeatureMissionCommand()
+            {
+                ReceiverId = receiverId,
+                FeatureUserReferral = EnumFeatureUserReferral.PT
+            }, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task DoQuestBoard(Guid studentId, CancellationToken cancellationToken)

@@ -1,11 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Domain.Models.CommandModels.UserReferrals
+namespace Fsel.Shared.Models.ShareModels
 {
-    using System;
     using Fsel.Shared.Enums;
 
-    public class AddFeatureMissionCommandModel
+    public class AddFeatureMissionQueueModel
     {
         public Guid ReceiverId { get; set; }
         public EnumFeatureUserReferral FeatureUserReferral { get; set; }
