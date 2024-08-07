@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
+    using Fsel.Course.Lms.Application.Commands.StudentCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
@@ -77,31 +78,43 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         unitResult.Status = EnumResultStatus.Done;
                         // await DoQuestBoard(userId, unitId, courseId, cancellationToken);
 
-                        //send mail
-                        await SendMail(skillScores, percent, unit, unitResult, course, lessonResults.ToList(), cancellationToken);
+                    //send mail
+                    await SendMail(skillScores, percent, unit, unitResult, course, lessonResults.ToList(), cancellationToken).ConfigureAwait(false);
+                    await DoQuestBoard(studentId, cancellationToken).ConfigureAwait(false);
 
-                        await DoQuestBoard(studentId, cancellationToken);
-                    }
-
-                    if (isUnitUpdate)
+                    if (course.CourseUnitMockTests.First(p => p.UnitId == unit.Id).Number == 1)
                     {
-                        unitResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
-                        unitResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
-                        unitResult.Percent = percent;
-                        unitResult.SkillScores = skillScores;
-                        _unitResultRepository.Update(unitResult);
-                        await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                        if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 6 && course.CourseType == EnumCourseType.Academic && isDone)
+                        await _mediator.Send(new AddFeatureMissionCommand()
                         {
-                            await SendMailMidCourseReport(studentId, course, cancellationToken);
-                        }
-                        else if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 4 && course.CourseType == EnumCourseType.Ielts && isDone)
-                        {
-                            await SendMailMidCourseReport(studentId, course, cancellationToken);
-                        }
+                            FeatureUserReferral = EnumFeatureUserReferral.DoneUnit1,
+                            ReceiverId = unitResult.CreatedUserId,
+                        }).ConfigureAwait(false);
                     }
                 }
+                if (isUnitUpdate)
+                {
+                    unitResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
+                    unitResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+                    unitResult.Percent = percent;
+                    unitResult.SkillScores = skillScores;
+                    _unitResultRepository.Update(unitResult);
+                    try
+                    {
+                        await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                    if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 6 && course.CourseType == EnumCourseType.Academic && isDone)
+                    {
+                        await SendMailMidCourseReport(studentId, course, cancellationToken).ConfigureAwait(false);
+                    }
+                    else if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 4 && course.CourseType == EnumCourseType.Ielts && isDone)
+                    {
+                        await SendMailMidCourseReport(studentId, course, cancellationToken).ConfigureAwait(false);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger1.LogWarning($"Log Trigger UnitResult : {ex.Message} ");
             }
         }
 

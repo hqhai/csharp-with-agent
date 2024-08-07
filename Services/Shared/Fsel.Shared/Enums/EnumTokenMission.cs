@@ -146,8 +146,15 @@ namespace Fsel.Shared.Enums
         TheMysteryOfTheStars,
 
         [Description("Hoàn thành nhiệm vụ tuần")]
-        CompleteWeeklyTasks
+        CompleteWeeklyTasks,
 
         #endregion QuestBoard
+
+        #region Friend mission
+
+        FriendCompletePT,
+        FriendCompleteUnit1
+
+        #endregion Friend mission
     }
 }

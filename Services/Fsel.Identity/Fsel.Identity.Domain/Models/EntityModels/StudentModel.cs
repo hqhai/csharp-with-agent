@@ -24,6 +24,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public Guid? DistrictId { get; set; }
         public Guid? SchoolId { get; set; }
         public Guid? CourseId { get; set; }
+        public Guid? SenderId { get; set; }
         public DateTime? ExpiredDate { get; set; }
         public StudentBeginnerGuide? BeginnerGuide { get; set; }
         public ParentProfileModel? Parent { get; set; }

@@ -15,12 +15,7 @@ namespace Fsel.Identity.Infrastructure.Configs
             builder.HasOne(a => a.Sender)
                  .WithMany(b => b.Senders)
                  .HasForeignKey(p => p.SenderId)
-                 .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasOne(a => a.Receiver)
-                 .WithMany(b => b.Receivers)
-                 .HasForeignKey(p => p.ReceiverId)
-                 .OnDelete(DeleteBehavior.Cascade);
+                 .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

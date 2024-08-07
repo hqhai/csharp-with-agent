@@ -116,6 +116,7 @@ builder.Services.AddScoped<SetTimeRetryMockTestPublisher>();
 builder.Services.AddScoped<SetTimeRetryClassForumPublisher>();
 builder.Services.AddScoped<TechieActionPublisher>();
 builder.Services.AddScoped<CreateLuckyTicketPublisher>();
+builder.Services.AddScoped<AddFeatureMissionPublisher>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
