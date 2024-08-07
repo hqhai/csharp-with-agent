@@ -9,34 +9,37 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using Fsel.Core.Base;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
+    using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class CheckVoucherCommand : IRequest<MethodResult<Guid>>
+    public class CheckVoucherCommand : IRequest<MethodResult<CheckVoucherModel>>
     {
         public string? Code { get; set; }
         public Guid PackageId { get; set; }
     }
 
-    public class CheckVoucherCommandHandler : IRequestHandler<CheckVoucherCommand, MethodResult<Guid>>
+    public class CheckVoucherCommandHandler : IRequestHandler<CheckVoucherCommand, MethodResult<CheckVoucherModel>>
     {
         private readonly IVoucherRepository _voucherRepository;
         private readonly AuthContext _authContext;
         private readonly IOrderRepository _orderRepository;
+        private readonly IPackageRepository _packageRepository;
 
-        public CheckVoucherCommandHandler(IVoucherRepository voucherRepository, AuthContext authContext, IOrderRepository orderRepository)
+        public CheckVoucherCommandHandler(IVoucherRepository voucherRepository, AuthContext authContext, IOrderRepository orderRepository, IPackageRepository packageRepository)
         {
             _voucherRepository = voucherRepository;
             _authContext = authContext;
             _orderRepository = orderRepository;
+            _packageRepository = packageRepository;
         }
 
-        public async Task<MethodResult<Guid>> Handle(CheckVoucherCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<CheckVoucherModel>> Handle(CheckVoucherCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<Guid>();
+            var methodResult = new MethodResult<CheckVoucherModel>();
 
             if (string.IsNullOrEmpty(request.Code))
             {
@@ -83,7 +86,23 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 }
             }
 
-            methodResult.Result = voucher.Id;
+            var package = await _packageRepository.GetByIdAsync(request.PackageId);
+            if (package == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
+            var discountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(package.Price * voucher.Percent));
+            var totalPrice = package.Price - discountPrice;
+
+            methodResult.Result = new CheckVoucherModel()
+            {
+                VoucherId = voucher.Id,
+                DiscountPrice = discountPrice,
+                Percent = voucher.Percent,
+                TotalPrice = totalPrice,
+            };
             return methodResult;
         }
     }

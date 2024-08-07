@@ -111,7 +111,7 @@ namespace Fsel.Ordering.Api.Controllers
         /// Search history voucher
         /// </summary>
         [HttpGet("check-voucher")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<CheckVoucherModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> CheckVoucher([FromQuery] CheckVoucherCommand query)

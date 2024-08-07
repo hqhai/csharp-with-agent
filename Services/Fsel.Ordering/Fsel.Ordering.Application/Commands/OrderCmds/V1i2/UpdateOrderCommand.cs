@@ -68,7 +68,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                     methodResult.AddError(checkVoucher.ErrorMessages);
                     return methodResult;
                 }
-                var voucher = await _voucherRepository.GetByIdAsync(checkVoucher.Result);
+                var voucher = await _voucherRepository.GetByIdAsync(checkVoucher.Result?.VoucherId ?? default);
                 if (voucher == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist));
