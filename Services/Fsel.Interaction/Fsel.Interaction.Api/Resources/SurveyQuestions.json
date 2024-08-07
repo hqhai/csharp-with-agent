@@ -730,8 +730,8 @@
   {
     "id": "713D8BB9-CDBE-42E7-AA16-35A1915C3532",
     "createdDate": "2023-07-21",
-    "question": "Vị trí của bạn",
-    "description": "addd",
+    "question": "Thông tin cá nhân",
+    "description": "Thông tin cá nhân",
     "icon": "wideword.png",
     "displayOrder": 5,
     "displayLevel": 1,
@@ -747,7 +747,7 @@
   {
     "id": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5",
     "createdDate": "2023-07-21",
-    "question": "Trường học của bạn",
+    "question": "Thông tin cá nhân và Trường học",
     "description": "addd",
     "icon": "wideword.png",
     "displayOrder": 6,
@@ -766,7 +766,7 @@
         "id": "365375de-db86-4167-bbe8-e5a3ca2c154e",
         "createdDate": "2023-10-17",
         "surveyQuestionId": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5",
-        "question": "Trường học của bạn",
+        "question": "Thông tin cá nhân và Trường học",
         "language": "vi-VN",
         "description": "addd",
         "answers": {
@@ -781,7 +781,7 @@
         "id": "4393a6a5-ff24-4d2d-b468-4b2c17ae0063",
         "createdDate": "2023-10-17",
         "surveyQuestionId": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5",
-        "question": "Your school",
+        "question": "Personal Infomation And School",
         "language": "en-US",
         "description": "addd",
         "answers": {
