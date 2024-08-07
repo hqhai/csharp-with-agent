@@ -89,7 +89,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var lessonResults = await GetLessonResultsAsync(request, studentId);
             var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
 
-            var classForums = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId)))
+            var classForums = await _classForumRepository.Queryable.Include(x => x.Lesson)
+                                                           .Include(x => x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId)))
                                                            .ThenInclude(x => x.ClassForumScores)
                                                            .Where(x => lessonIds.Contains(x.LessonId))
                                                            .ToListAsync();
@@ -97,6 +98,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             {
                 var lessonResult = lessonResults.FirstOrDefault(y => y.LessonId == x.LessonId);
                 var classForumReport = _mapper.Map<ClassForumReportModel>(x);
+                classForumReport.Name = x.Lesson?.Name;
                 classForumReport.LessonResultId = lessonResult?.Id;
                 classForumReport.ClassForumResultScore = x.ClassForumResults.Select(x => new ClassForumResultScoreModel
                 {

@@ -67,6 +67,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             if (skillScores != null)
             {
                 overallScoreReport.SkillScores = skillScores;
+                overallScoreReport.CorrectCount = skillScores.Sum(x => x.CorrectCount);
+                overallScoreReport.CorrectTotal = skillScores.Sum(x => x.TotalCount);
                 overallScoreReport.CountQuestion = skillScores.Sum(x => x.CountQuestion);
                 overallScoreReport.TotalQuestion = skillScores.Sum(x => x.TotalQuestion);
                 overallScoreReport.CourseSkills = skillScores.Select(x => x!.Skill).Distinct().ToList();
