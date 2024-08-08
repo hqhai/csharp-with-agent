@@ -6,13 +6,10 @@ namespace Fsel.Course.Domain.Entities
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IEntities;
 
     public class MockTestResult : BaseLearnResult, ITokenResult
     {
-        public EnumMockTestType Type { get; set; }
-
         public Guid? GradingTeacherId { get; set; }
 
         public Course? Course { get; set; }
