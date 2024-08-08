@@ -16,7 +16,6 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public EnumSurveyQuestion Type { get; set; }
         public object? Answers { get; set; }
         public IList<CustomerSurveyModel>? CustomerSurveys { get; set; }
-        public IList<SurveyQuestionTranslationModel>? Translations { get; set; }
     }
 
     public class SurveyQuestionTranslationModel : BaseModel, ITranslationObject

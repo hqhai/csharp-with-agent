@@ -79,6 +79,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Student)
                                                    .ThenInclude(x => x!.ParentStudents)
+                                                   .Include(p => p.Receiver).ThenInclude(p => p.Sender).ThenInclude(p => p.Human)
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 var student = userView?.Human?.Student;
                 if (student != null && student.ParentStudents != null && student.ParentStudents.Count > 0)
@@ -88,6 +89,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                   .ThenInclude(x => x!.ParentStudents)
                                                   .ThenInclude(x => x!.Parent)
                                                   .ThenInclude(x => x!.Human)
+                                                  .Include(p => p.Receiver).ThenInclude(p => p.Sender).ThenInclude(p => p.Human)
                                                   .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 }
             }
@@ -189,6 +191,15 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                         });
                         var school = schoolResult.Content?.Result;
                         userModel.SchoolName = school?.FirstOrDefault(x => x.Id == student.SchoolId)?.Name;*/
+                    }
+                    if (userView?.Receiver?.Sender != null)
+                    {
+                        userModel.Sender = new SenderModel()
+                        {
+                            SenderId = userView.Receiver.Sender.Id,
+                            FullName = userView.Receiver.Sender.FullName,
+                            Code = userView.Receiver.Sender.Human?.Code
+                        };
                     }
                 }
             }

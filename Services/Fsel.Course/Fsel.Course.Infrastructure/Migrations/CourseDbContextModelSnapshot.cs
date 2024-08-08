@@ -3181,9 +3181,17 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("SectionTimeCodeId");
 
-                    b.HasIndex("MockTestResultId", "SectionQuestionId", "SectionGroupResultId", "SectionTimeCodeId", "SectionId")
+                    b.HasIndex("MockTestResultId", "SectionGroupResultId", "SectionId")
                         .IsUnique()
-                        .HasFilter("[SectionQuestionId] IS NOT NULL AND [SectionGroupResultId] IS NOT NULL AND [SectionTimeCodeId] IS NOT NULL AND [SectionId] IS NOT NULL");
+                        .HasFilter("[SectionGroupResultId] IS NOT NULL AND [SectionId] IS NOT NULL");
+
+                    b.HasIndex("MockTestResultId", "SectionGroupResultId", "SectionQuestionId")
+                        .IsUnique()
+                        .HasFilter("[SectionGroupResultId] IS NOT NULL AND [SectionQuestionId] IS NOT NULL");
+
+                    b.HasIndex("MockTestResultId", "SectionGroupResultId", "SectionTimeCodeId")
+                        .IsUnique()
+                        .HasFilter("[SectionGroupResultId] IS NOT NULL AND [SectionTimeCodeId] IS NOT NULL");
 
                     b.ToTable("MockTestAnswers");
                 });
@@ -4248,9 +4256,17 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("PlacementTestResultId");
 
-                    b.HasIndex("SectionGroupId", "MockTestResultId", "FinalTestResultId", "PlacementTestResultId")
+                    b.HasIndex("SectionGroupId", "FinalTestResultId")
                         .IsUnique()
-                        .HasFilter("[MockTestResultId] IS NOT NULL AND [FinalTestResultId] IS NOT NULL AND [PlacementTestResultId] IS NOT NULL");
+                        .HasFilter("[FinalTestResultId] IS NOT NULL");
+
+                    b.HasIndex("SectionGroupId", "MockTestResultId")
+                        .IsUnique()
+                        .HasFilter("[MockTestResultId] IS NOT NULL");
+
+                    b.HasIndex("SectionGroupId", "PlacementTestResultId")
+                        .IsUnique()
+                        .HasFilter("[PlacementTestResultId] IS NOT NULL");
 
                     b.ToTable("SectionGroupResults");
                 });

@@ -189,11 +189,23 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get unit class forum detail
         /// </summary>
         [HttpGet("unit/class-forum-detail/{classForumId}")]
-        [ProducesResponseType(typeof(MethodResult<IList<ClassForumAIModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassForumScoreModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUnitByClassForumDetail([FromRoute] Guid classForumId)
         {
-            MethodResult<IList<ClassForumAIModel>> queryResult = await _mediator.Send(new GetUnitByClassForumDetailQuery { ClassForumId = classForumId }).ConfigureAwait(false);
+            MethodResult<IList<ClassForumScoreModel>> queryResult = await _mediator.Send(new GetUnitByClassForumDetailQuery { ClassForumId = classForumId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get unit class forum detail
+        /// </summary>
+        [HttpGet("unit/class-forum-detail")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassForumAIModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUnitByClassForumDetail([FromQuery] GetUnitByClassForumDtoQuery query)
+        {
+            MethodResult<IList<ClassForumAIModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

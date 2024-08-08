@@ -23,5 +23,7 @@ namespace Fsel.Interaction.Domain.Entities
         public Guid? UserId { get; set; }
         public SurveyQuestion? SurveyQuestion { get; set; }
         public Guid SurveyQuestionId { get; set; }
+
+        public bool IsCompleted { get; set; }
     }
 }

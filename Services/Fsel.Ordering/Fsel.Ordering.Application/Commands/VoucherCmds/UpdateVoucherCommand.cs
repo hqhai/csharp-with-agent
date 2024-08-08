@@ -16,6 +16,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using Fsel.Ordering.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class UpdateVoucherCommand : UpdateVoucherCommandModel, IRequest<MethodResult<VoucherModel>>
     {
@@ -41,36 +42,67 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
             #region Validation
 
-            if (request.StartDate > request.EndDate)
+            if (request.EndDate.HasValue && request.StartDate.Date > request.EndDate.Value.Date)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherStartTimeMustSoonerThanEndTime), nameof(request.EndDate), request.EndDate);
                 return methodResult;
             }
-
-            var voucher = await _voucherRepository.GetIncludeByIdAsync(request.Id);
-            if (voucher == null)
+            if (request.PackageIds == null || request.PackageIds.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucher));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.PackageIds));
                 return methodResult;
             }
-            if (!voucher.IsValid())
+            if (_packageRepository.IsIdsInValid(request.PackageIds))
             {
-                methodResult.AddErrorBadRequest(voucher.ErrorMessages);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.PackageIds));
+                return methodResult;
+            }
+            if (!string.IsNullOrEmpty(request.Code) && await _voucherRepository.Queryable.AnyAsync(p => p.Code.ToLower() == request.Code.ToLower() && p.Id != request.Id, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code));
                 return methodResult;
             }
 
             #endregion Validation
 
-            voucher.VoucherPackages = request.VoucherPackages!.Select((x) => new VoucherPackage
+            var voucher = await _voucherRepository.Queryable.Include(p => p.VoucherPackages).FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
+            if (voucher == null)
             {
-                Percentage = x.Percentage,
-                PackageId = x.PackageId
-            }).ToList();
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucher));
+                return methodResult;
+            }
+
+            var currentPackageIds = voucher.VoucherPackages.Select(p => p.PackageId).ToList();
+            var packageIds = request.PackageIds.Where(p => !currentPackageIds.Contains(p)).ToList();
+
             await _voucherRepository.ExecuteTransactionAsync(async () =>
             {
+                _mapper.Map(request, voucher);
+
+                foreach (var item in voucher.VoucherPackages.ToList())
+                {
+                    if (!request.PackageIds.Contains(item.PackageId))
+                    {
+                        voucher.VoucherPackages.Remove(item);
+                    };
+                }
+
+                foreach (var item in packageIds)
+                {
+                    voucher.VoucherPackages.Add(new VoucherPackage()
+                    {
+                        PackageId = item
+                    });
+                }
+
+                if (!voucher.IsValid())
+                {
+                    methodResult.AddError(voucher.ErrorMessages);
+                    return methodResult;
+                }
+
                 voucher = _voucherRepository.Update(voucher);
                 await _voucherRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<VoucherModel>(voucher);
                 return methodResult;

@@ -6,8 +6,6 @@ namespace Fsel.Ordering.Domain.Entities
 
     public class VoucherPackage : Entity
     {
-        public double Percentage { get; set; }
-
         public Guid PackageId { get; set; }
 
         public Guid VoucherId { get; set; }

@@ -131,6 +131,9 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -954,7 +957,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
                             DisplayLevel = 1,
-                            DisplayOrder = 1f,
+                            DisplayOrder = 2f,
                             Icon = "addd",
                             IsDeleted = false,
                             IsPilot = false,
@@ -970,12 +973,43 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
                             DisplayLevel = 1,
-                            DisplayOrder = 2f,
+                            DisplayOrder = 1f,
+                            Icon = "addd",
+                            IsDeleted = false,
+                            Question = "Bạn biết đến Fsel từ đâu?",
+                            Type = "ChooseMultipleColumn"
+                        },
+                        new
+                        {
+                            Id = new Guid("f563da40-d609-4922-90b9-44e4290edfef"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Google\",\"image\":\"gmail-icon.svg\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"facebook-icon.svg\"},{\"id\":3,\"content\":\"YouTube\",\"image\":\"youtube-icon.svg\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"tiktok-icon.svg\"},{\"id\":5,\"content\":\"B\\u1EA1n b\\u00E8/gia \\u0111\\u00ECnh\",\"image\":\"friends_family-icon.svg\"},{\"id\":6,\"content\":\"Tin t\\u1EE9c/b\\u00E1o ch\\u00ED\",\"image\":\"blog-icon.svg\"},{\"id\":7,\"content\":\"TV\",\"image\":\"tv-icon.svg\"},{\"id\":8,\"content\":\"S\\u1EF1 ki\\u1EC7n/h\\u1ED9i th\\u1EA3o\",\"image\":\"event.svg\"},{\"id\":9,\"content\":\"Tr\\u01B0\\u1EDDng h\\u1ECDc\",\"image\":\"school.svg\"},{\"id\":10,\"content\":\"T\\u1EDD r\\u01A1i\",\"image\":\"leaflets.svg\"},{\"id\":11,\"content\":\"Kh\\u00E1c....\",\"image\":\"others-icon.svg\"}]",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Câu hỏi biết đến Fsel",
+                            DisplayLevel = 1,
+                            DisplayOrder = 1f,
                             Icon = "addd",
                             IsDeleted = false,
                             IsPilot = false,
                             Question = "Bạn biết đến Fsel từ đâu?",
-                            Type = "ChooseMultipleColumn"
+                            Type = "CheckList"
+                        },
+                        new
+                        {
+                            Id = new Guid("14787cbf-cc43-4453-a148-6d11a683f311"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"N\\u00E2ng cao \\u0111i\\u1EC3m s\\u1ED1\",\"image\":\"goal 1.png\"},{\"id\":2,\"content\":\"M\\u1EE5c ti\\u00EAu c\\u00F4ng vi\\u1EC7c\",\"image\":\"work-target-icon.svg\"},{\"id\":3,\"content\":\"C\\u1EA3i thi\\u1EC7n giao ti\\u1EBFp\",\"image\":\"friendship 1.png\"},{\"id\":4,\"content\":\"Thi ch\\u1EE9ng ch\\u1EC9\",\"image\":\"student.svg\"},{\"id\":5,\"content\":\"Du h\\u1ECDc\",\"image\":\"plane 1.png\"}]",
+                            CreatedDate = new DateTime(2024, 8, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Câu hỏi mục tiêu",
+                            DisplayLevel = 1,
+                            DisplayOrder = 3f,
+                            Icon = "addd",
+                            IsDeleted = false,
+                            IsPilot = false,
+                            Question = "Mục tiêu học tập của bạn là gì?",
+                            Type = "CheckList"
                         },
                         new
                         {
@@ -1004,7 +1038,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             DisplayOrder = 4f,
                             Icon = "fluent_target-arrow-16-filled.png",
                             IsDeleted = false,
-                            IsPilot = false,
                             Question = "Tại sao bạn học ngoại ngữ",
                             Type = "ChooseMultipleColumn"
                         },
@@ -1015,12 +1048,12 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "addd",
+                            Description = "Thông tin cá nhân",
                             DisplayLevel = 1,
                             DisplayOrder = 5f,
                             Icon = "wideword.png",
                             IsDeleted = false,
-                            Question = "Vị trí của bạn",
+                            Question = "Thông tin cá nhân",
                             Type = "YourPlace"
                         },
                         new
@@ -1036,7 +1069,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Icon = "wideword.png",
                             IsDeleted = false,
                             IsPilot = false,
-                            Question = "Trường học của bạn",
+                            Question = "Thông tin cá nhân và Trường học",
                             Type = "Location"
                         },
                         new
@@ -1048,7 +1081,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
                             DisplayLevel = 1,
-                            DisplayOrder = 6f,
+                            DisplayOrder = 4f,
                             Icon = "wideword.png",
                             IsDeleted = false,
                             IsPilot = false,
@@ -1067,7 +1100,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             DisplayOrder = 7f,
                             Icon = "time.png",
                             IsDeleted = false,
-                            IsPilot = false,
                             Question = "Giới tính của bạn",
                             Type = "AgeGender"
                         },
@@ -1474,6 +1506,58 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         },
                         new
                         {
+                            Id = new Guid("2b267643-bb4f-4ac4-a14a-33350fa35108"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Google\",\"image\":\"gmail-icon.svg\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"facebook-icon.svg\"},{\"id\":3,\"content\":\"YouTube\",\"image\":\"youtube-icon.svg\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"tiktok-icon.svg\"},{\"id\":5,\"content\":\"B\\u1EA1n b\\u00E8/gia \\u0111\\u00ECnh\",\"image\":\"friends_family-icon.svg\"},{\"id\":6,\"content\":\"Tin t\\u1EE9c/b\\u00E1o ch\\u00ED\",\"image\":\"blog-icon.svg\"},{\"id\":7,\"content\":\"TV\",\"image\":\"tv-icon.svg\"},{\"id\":8,\"content\":\"S\\u1EF1 ki\\u1EC7n/h\\u1ED9i th\\u1EA3o\",\"image\":\"event.svg\"},{\"id\":9,\"content\":\"Tr\\u01B0\\u1EDDng h\\u1ECDc\",\"image\":\"school.svg\"},{\"id\":10,\"content\":\"T\\u1EDD r\\u01A1i\",\"image\":\"leaflets.svg\"},{\"id\":11,\"content\":\"Kh\\u00E1c....\",\"image\":\"others-icon.svg\"}]",
+                            CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Bạn biết đến Fsel từ đâu?",
+                            SurveyQuestionId = new Guid("f563da40-d609-4922-90b9-44e4290edfef")
+                        },
+                        new
+                        {
+                            Id = new Guid("f601e0f3-90c2-4738-8e07-cd5120e39148"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Google\",\"image\":\"gmail-icon.svg\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"facebook-icon.svg\"},{\"id\":3,\"content\":\"YouTube\",\"image\":\"youtube-icon.svg\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"tiktok-icon.svg\"},{\"id\":5,\"content\":\"Friends/Family\",\"image\":\"friends_family-icon.svg\"},{\"id\":6,\"content\":\"News/Media\",\"image\":\"blog-icon.svg\"},{\"id\":7,\"content\":\"TV\",\"image\":\"tv-icon.svg\"},{\"id\":8,\"content\":\"Events/Conferences\",\"image\":\"event.svg\"},{\"id\":9,\"content\":\"School\",\"image\":\"school.svg\"},{\"id\":10,\"content\":\"Flyers\",\"image\":\"leaflets.svg\"},{\"id\":11,\"content\":\"Other....\",\"image\":\"others-icon.svg\"}]",
+                            CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "How do you know FSEL?",
+                            SurveyQuestionId = new Guid("f563da40-d609-4922-90b9-44e4290edfef")
+                        },
+                        new
+                        {
+                            Id = new Guid("d823acb4-62d8-4702-b95c-e6c5a8e49e4e"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"N\\u00E2ng cao \\u0111i\\u1EC3m s\\u1ED1\",\"image\":\"goal 1.png\"},{\"id\":2,\"content\":\"M\\u1EE5c ti\\u00EAu c\\u00F4ng vi\\u1EC7c\",\"image\":\"work-target-icon.svg\"},{\"id\":3,\"content\":\"C\\u1EA3i thi\\u1EC7n giao ti\\u1EBFp\",\"image\":\"friendship 1.png\"},{\"id\":4,\"content\":\"Thi ch\\u1EE9ng ch\\u1EC9\",\"image\":\"student.svg\"},{\"id\":5,\"content\":\"Du h\\u1ECDc\",\"image\":\"plane 1.png\"}]",
+                            CreatedDate = new DateTime(2024, 8, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Câu hỏi mục tiêu",
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Mục tiêu học tập của bạn là gì?",
+                            SurveyQuestionId = new Guid("14787cbf-cc43-4453-a148-6d11a683f311")
+                        },
+                        new
+                        {
+                            Id = new Guid("877fc41d-d1ab-4285-8349-d8c71b9ea0a2"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Improve scores\",\"image\":\"goal 1.png\"},{\"id\":2,\"content\":\"Intended use for work\",\"image\":\"work-target-icon.svg\"},{\"id\":3,\"content\":\"Improve communication\",\"image\":\"friendship 1.png\"},{\"id\":4,\"content\":\"Certificate exam\",\"image\":\"student.svg\"},{\"id\":5,\"content\":\"Oversea\",\"image\":\"plane 1.png\"}]",
+                            CreatedDate = new DateTime(2024, 8, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Ask for target",
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "What are your learning goals?",
+                            SurveyQuestionId = new Guid("14787cbf-cc43-4453-a148-6d11a683f311")
+                        },
+                        new
+                        {
                             Id = new Guid("ba027423-106a-4bc6-a3a6-4b8386a44e51"),
                             AnswerStr = "[{\"id\":1,\"content\":\"V\\u0103n h\\u00F3a\",\"image\":\"castle 1.png\"},{\"id\":2,\"content\":\"Du l\\u1ECBch\",\"image\":\"plane 1.png\"},{\"id\":3,\"content\":\"K\\u1EBFt b\\u1EA1n\",\"image\":\"friendship 1.png\"},{\"id\":4,\"content\":\"H\\u1ECDc t\\u1EADp\",\"image\":\"mortarboard 1.png\"},{\"id\":5,\"content\":\"C\\u01A1 h\\u1ED9i ngh\\u1EC1 nghi\\u1EC7p\",\"image\":\"case 1.png\"},{\"id\":6,\"content\":\"Kh\\u00E1c....\",\"image\":\"goal 1.png\"}]",
                             CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -1508,7 +1592,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Description = "addd",
                             IsDeleted = false,
                             Language = "vi-VN",
-                            Question = "Trường học của bạn",
+                            Question = "Thông tin cá nhân và Trường học",
                             SurveyQuestionId = new Guid("b223125a-a4e1-4e10-b4dd-cfcd747d74c5")
                         },
                         new
@@ -1521,7 +1605,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Description = "addd",
                             IsDeleted = false,
                             Language = "en-US",
-                            Question = "Your school",
+                            Question = "Personal Infomation And School",
                             SurveyQuestionId = new Guid("b223125a-a4e1-4e10-b4dd-cfcd747d74c5")
                         },
                         new

@@ -1710,6 +1710,22 @@ namespace Fsel.System.Infrastructure.Migrations
                         },
                         new
                         {
+                            Id = new Guid("6942432d-f45c-45de-a72c-002c0a04cc8c"),
+                            Category = "CompletedSurvey",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Hoàn thành Khảo sát thông tin",
+                            ImagePath = "",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Tân thủ V",
+                            TargetValue = 1,
+                            Token = 20,
+                            Type = "BeginnerQuests"
+                        },
+                        new
+                        {
                             Id = new Guid("9069f184-fd45-413e-b56a-79852879282e"),
                             Category = "CompleteFocusModeFirst",
                             CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -1719,7 +1735,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             ImagePath = "",
                             IsActive = true,
                             IsDeleted = false,
-                            Name = "Tân thủ V",
+                            Name = "Tân thủ VI",
                             TargetValue = 1,
                             Token = 20,
                             Type = "BeginnerQuests"
@@ -1735,7 +1751,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             ImagePath = "",
                             IsActive = true,
                             IsDeleted = false,
-                            Name = "Tân thủ VI",
+                            Name = "Tân thủ VII",
                             TargetValue = 1,
                             Token = 20,
                             Type = "BeginnerQuests"
@@ -2108,7 +2124,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            TargetValue = 6,
+                            TargetValue = 7,
                             Token = 40,
                             Type = "BeginnerQuests"
                         },

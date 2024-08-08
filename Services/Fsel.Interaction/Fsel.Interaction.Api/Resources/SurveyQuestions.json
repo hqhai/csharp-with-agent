@@ -5,7 +5,7 @@
     "question": "Bạn là?",
     "description": "addd",
     "icon": "addd",
-    "displayOrder": 1,
+    "displayOrder": 2,
     "displayLevel": 1,
     "type": "ChooseMultipleColumn",
     "isPilot": false,
@@ -76,10 +76,10 @@
     "question": "Bạn biết đến Fsel từ đâu?",
     "description": "addd",
     "icon": "addd",
-    "displayOrder": 2,
+    "displayOrder": 1,
     "displayLevel": 1,
     "type": "ChooseMultipleColumn",
-    "isPilot": false,
+    "isPilot": null,
     "answers": [
       {
         "id": 1,
@@ -271,6 +271,317 @@
     ]
   },
   {
+    "id": "F563DA40-D609-4922-90B9-44E4290EDFEF",
+    "createdDate": "2023-07-21",
+    "question": "Bạn biết đến Fsel từ đâu?",
+    "description": "Câu hỏi biết đến Fsel",
+    "icon": "addd",
+    "displayOrder": 1,
+    "displayLevel": 1,
+    "type": "CheckList",
+    "isPilot": false,
+    "answers": [
+      {
+        "id": 1,
+        "content": "Google",
+        "image": "gmail-icon.svg"
+      },
+      {
+        "id": 2,
+        "content": "Facebook",
+        "image": "facebook-icon.svg"
+      },
+      {
+        "id": 3,
+        "content": "YouTube",
+        "image": "youtube-icon.svg"
+      },
+      {
+        "id": 4,
+        "content": "Tiktok",
+        "image": "tiktok-icon.svg"
+      },
+      {
+        "id": 5,
+        "content": "Bạn bè/gia đình",
+        "image": "friends_family-icon.svg"
+      },
+      {
+        "id": 6,
+        "content": "Tin tức/báo chí",
+        "image": "blog-icon.svg"
+      },
+      {
+        "id": 7,
+        "content": "TV",
+        "image": "tv-icon.svg"
+      },
+      {
+        "id": 8,
+        "content": "Sự kiện/hội thảo",
+        "image": "event.svg"
+      },
+      {
+        "id": 9,
+        "content": "Trường học",
+        "image": "school.svg"
+      },
+      {
+        "id": 10,
+        "content": "Tờ rơi",
+        "image": "leaflets.svg"
+      },
+      {
+        "id": 11,
+        "content": "Khác....",
+        "image": "others-icon.svg"
+      }
+    ],
+    "translations": [
+      {
+        "id": "2B267643-BB4F-4AC4-A14A-33350FA35108",
+        "createdDate": "2023-10-17",
+        "surveyQuestionId": "F563DA40-D609-4922-90B9-44E4290EDFEF",
+        "question": "Bạn biết đến Fsel từ đâu?",
+        "language": "vi-VN",
+        "description": "addd",
+        "answers": [
+          {
+            "id": 1,
+            "content": "Google",
+            "image": "gmail-icon.svg"
+          },
+          {
+            "id": 2,
+            "content": "Facebook",
+            "image": "facebook-icon.svg"
+          },
+          {
+            "id": 3,
+            "content": "YouTube",
+            "image": "youtube-icon.svg"
+          },
+          {
+            "id": 4,
+            "content": "Tiktok",
+            "image": "tiktok-icon.svg"
+          },
+          {
+            "id": 5,
+            "content": "Bạn bè/gia đình",
+            "image": "friends_family-icon.svg"
+          },
+          {
+            "id": 6,
+            "content": "Tin tức/báo chí",
+            "image": "blog-icon.svg"
+          },
+          {
+            "id": 7,
+            "content": "TV",
+            "image": "tv-icon.svg"
+          },
+          {
+            "id": 8,
+            "content": "Sự kiện/hội thảo",
+            "image": "event.svg"
+          },
+          {
+            "id": 9,
+            "content": "Trường học",
+            "image": "school.svg"
+          },
+          {
+            "id": 10,
+            "content": "Tờ rơi",
+            "image": "leaflets.svg"
+          },
+          {
+            "id": 11,
+            "content": "Khác....",
+            "image": "others-icon.svg"
+          }
+        ]
+      },
+      {
+        "id": "F601E0F3-90C2-4738-8E07-CD5120E39148",
+        "createdDate": "2023-10-17",
+        "surveyQuestionId": "F563DA40-D609-4922-90B9-44E4290EDFEF",
+        "question": "How do you know FSEL?",
+        "language": "en-US",
+        "description": "addd",
+        "answers": [
+          {
+            "id": 1,
+            "content": "Google",
+            "image": "gmail-icon.svg"
+          },
+          {
+            "id": 2,
+            "content": "Facebook",
+            "image": "facebook-icon.svg"
+          },
+          {
+            "id": 3,
+            "content": "YouTube",
+            "image": "youtube-icon.svg"
+          },
+          {
+            "id": 4,
+            "content": "Tiktok",
+            "image": "tiktok-icon.svg"
+          },
+          {
+            "id": 5,
+            "content": "Friends/Family",
+            "image": "friends_family-icon.svg"
+          },
+          {
+            "id": 6,
+            "content": "News/Media",
+            "image": "blog-icon.svg"
+          },
+          {
+            "id": 7,
+            "content": "TV",
+            "image": "tv-icon.svg"
+          },
+          {
+            "id": 8,
+            "content": "Events/Conferences",
+            "image": "event.svg"
+          },
+          {
+            "id": 9,
+            "content": "School",
+            "image": "school.svg"
+          },
+          {
+            "id": 10,
+            "content": "Flyers",
+            "image": "leaflets.svg"
+          },
+          {
+            "id": 11,
+            "content": "Other....",
+            "image": "others-icon.svg"
+          }
+        ]
+      }
+    ]
+  },
+
+  {
+    "id": "14787CBF-CC43-4453-A148-6D11A683F311",
+    "createdDate": "2024-08-05",
+    "question": "Mục tiêu học tập của bạn là gì?",
+    "description": "Câu hỏi mục tiêu",
+    "icon": "addd",
+    "displayOrder": 3,
+    "displayLevel": 1,
+    "type": "CheckList",
+    "isPilot": false,
+    "answers": [
+      {
+        "id": 1,
+        "content": "Nâng cao điểm số",
+        "image": "goal 1.png"
+      },
+      {
+        "id": 2,
+        "content": "Mục tiêu công việc",
+        "image": "work-target-icon.svg"
+      },
+      {
+        "id": 3,
+        "content": "Cải thiện giao tiếp",
+        "image": "friendship 1.png"
+      },
+      {
+        "id": 4,
+        "content": "Thi chứng chỉ",
+        "image": "student.svg"
+      },
+      {
+        "id": 5,
+        "content": "Du học",
+        "image": "plane 1.png"
+      }
+    ],
+    "translations": [
+      {
+        "id": "D823ACB4-62D8-4702-B95C-E6C5A8E49E4E",
+        "createdDate": "2024-08-05",
+        "surveyQuestionId": "14787CBF-CC43-4453-A148-6D11A683F311",
+        "question": "Mục tiêu học tập của bạn là gì?",
+        "language": "vi-VN",
+        "description": "Câu hỏi mục tiêu",
+        "answers": [
+          {
+            "id": 1,
+            "content": "Nâng cao điểm số",
+            "image": "goal 1.png"
+          },
+          {
+            "id": 2,
+            "content": "Mục tiêu công việc",
+            "image": "work-target-icon.svg"
+          },
+          {
+            "id": 3,
+            "content": "Cải thiện giao tiếp",
+            "image": "friendship 1.png"
+          },
+          {
+            "id": 4,
+            "content": "Thi chứng chỉ",
+            "image": "student.svg"
+          },
+          {
+            "id": 5,
+            "content": "Du học",
+            "image": "plane 1.png"
+          }
+        ]
+      },
+      {
+        "id": "877FC41D-D1AB-4285-8349-D8C71B9EA0A2",
+        "createdDate": "2024-08-05",
+        "surveyQuestionId": "14787CBF-CC43-4453-A148-6D11A683F311",
+        "question": "What are your learning goals?",
+        "language": "en-US",
+        "description": "Ask for target",
+        "answers": [
+          {
+            "id": 1,
+            "content": "Improve scores",
+            "image": "goal 1.png"
+          },
+          {
+            "id": 2,
+            "content": "Intended use for work",
+            "image": "work-target-icon.svg"
+          },
+          {
+            "id": 3,
+            "content": "Improve communication",
+            "image": "friendship 1.png"
+          },
+          {
+            "id": 4,
+            "content": "Certificate exam",
+            "image": "student.svg"
+          },
+          {
+            "id": 5,
+            "content": "Oversea",
+            "image": "plane 1.png"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "763D8BB9-CDBE-42E7-AA16-35A1915C3512",
     "createdDate": "2023-07-21",
     "question": "Chọn hướng đi của bạn",
@@ -300,7 +611,7 @@
     "displayOrder": 4,
     "displayLevel": 1,
     "type": "ChooseMultipleColumn",
-    "isPilot": false,
+    "isPilot": null,
     "answers": [
       {
         "id": 1,
@@ -419,8 +730,8 @@
   {
     "id": "713D8BB9-CDBE-42E7-AA16-35A1915C3532",
     "createdDate": "2023-07-21",
-    "question": "Vị trí của bạn",
-    "description": "addd",
+    "question": "Thông tin cá nhân",
+    "description": "Thông tin cá nhân",
     "icon": "wideword.png",
     "displayOrder": 5,
     "displayLevel": 1,
@@ -436,7 +747,7 @@
   {
     "id": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5",
     "createdDate": "2023-07-21",
-    "question": "Trường học của bạn",
+    "question": "Thông tin cá nhân và Trường học",
     "description": "addd",
     "icon": "wideword.png",
     "displayOrder": 6,
@@ -455,7 +766,7 @@
         "id": "365375de-db86-4167-bbe8-e5a3ca2c154e",
         "createdDate": "2023-10-17",
         "surveyQuestionId": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5",
-        "question": "Trường học của bạn",
+        "question": "Thông tin cá nhân và Trường học",
         "language": "vi-VN",
         "description": "addd",
         "answers": {
@@ -470,7 +781,7 @@
         "id": "4393a6a5-ff24-4d2d-b468-4b2c17ae0063",
         "createdDate": "2023-10-17",
         "surveyQuestionId": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5",
-        "question": "Your school",
+        "question": "Personal Infomation And School",
         "language": "en-US",
         "description": "addd",
         "answers": {
@@ -489,7 +800,7 @@
     "question": "Vị trí của bạn?",
     "description": "addd",
     "icon": "wideword.png",
-    "displayOrder": 6,
+    "displayOrder": 4,
     "displayLevel": 1,
     "type": "Location",
     "isPilot": false,
@@ -536,7 +847,7 @@
     "displayOrder": 7,
     "type": "AgeGender",
     "displayLevel": 1,
-    "isPilot": false,
+    "isPilot": null,
     "answers": {
       "birthday": null,
       "ageGenderQuestions": [

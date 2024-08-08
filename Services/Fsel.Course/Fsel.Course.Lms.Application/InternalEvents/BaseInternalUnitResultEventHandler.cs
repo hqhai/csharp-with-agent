@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
+    using Fsel.Course.Lms.Application.Commands.StudentCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
@@ -85,8 +86,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     // await DoQuestBoard(userId, unitId, courseId, cancellationToken);
 
                     //send mail
-                    await SendMail(skillScores, percent, unit, unitResult, course, lessonResults.ToList(), cancellationToken);
-                    await DoQuestBoard(studentId, cancellationToken);
+                    await SendMail(skillScores, percent, unit, unitResult, course, lessonResults.ToList(), cancellationToken).ConfigureAwait(false);
+                    await DoQuestBoard(studentId, cancellationToken).ConfigureAwait(false);
+
+                    if (course.CourseUnitMockTests.First(p => p.UnitId == unit.Id).Number == 1)
+                    {
+                        await _mediator.Send(new AddFeatureMissionCommand()
+                        {
+                            FeatureUserReferral = EnumFeatureUserReferral.DoneUnit1,
+                            ReceiverId = unitResult.CreatedUserId,
+                        }).ConfigureAwait(false);
+                    }
                 }
                 if (isUnitUpdate)
                 {
@@ -106,11 +116,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                     if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 6 && course.CourseType == EnumCourseType.Academic && isDone)
                     {
-                        await SendMailMidCourseReport(studentId, course, cancellationToken);
+                        await SendMailMidCourseReport(studentId, course, cancellationToken).ConfigureAwait(false);
                     }
                     else if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 4 && course.CourseType == EnumCourseType.Ielts && isDone)
                     {
-                        await SendMailMidCourseReport(studentId, course, cancellationToken);
+                        await SendMailMidCourseReport(studentId, course, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
@@ -163,7 +173,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             var listClassForumResult = await _classForumResultRepository.Queryable.Where(p => lessonResultIds.Contains(p.LessonResultId)).ToListAsync(cancellationToken);
 
-            var isSendEmail = lessonResultIds.Count == listClassForumResult.Count && !listClassForumResult.Any(p => p.Status != EnumClassForumResultStatus.Graded);
+            var isSendEmail = lessonResultIds.Count == listClassForumResult.Count && listClassForumResult.All(p => p.Status.HasValue);
             if (!isSendEmail)
                 return;
             MockTestResult? mockTestResult = default;
