@@ -11,6 +11,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Ordering.Domain.Models.QueryModels.Vouchers;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -34,7 +35,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<VoucherModel>>();
 
-            var voucherQuery = _voucherRepository.Queryable.Include(x => x.UserVouchers)
+            var voucherQuery = _voucherRepository.Queryable.Include(x => x.Orders)
                             .Select(x => new VoucherModel
                             {
                                 Id = x.Id,
@@ -46,7 +47,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                                 Quantity = x.Quantity,
                                 Percent = x.Percent,
                                 IsActive = x.IsActive,
-                                QuantityUsed = x.UserVouchers.Count(),
+                                QuantityUsed = x.Orders.Where(p => p.Status == EnumOrderStatus.New || p.Status == EnumOrderStatus.Payment).Count(),
                             });
 
             if (!string.IsNullOrEmpty(request.Keyword))
