@@ -45,6 +45,21 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
+
+            int token = 0;
+            if (request.FeatureUserReferral == EnumFeatureUserReferral.PT)
+            {
+                token = _appSetting.UserReferralConfig?.PT ?? 0;
+            }
+            else if (request.FeatureUserReferral == EnumFeatureUserReferral.DoneUnit1)
+            {
+                token = _appSetting.UserReferralConfig?.DoneUnit1 ?? 0;
+            }
+            else if (request.FeatureUserReferral == EnumFeatureUserReferral.Payment)
+            {
+                token = request.Token ?? 0;
+            }
+
             bool isAddDoneUnit1 = false;
             var featureMissions = userReferral.FeatureMissions;
             if (featureMissions == null || !featureMissions.Any(p => p.FeatureUserReferral == request.FeatureUserReferral))
@@ -56,7 +71,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                         new UserReferralToken
                             {
                                 FeatureUserReferral = request.FeatureUserReferral,
-                                Token = request.Token,
+                                Token = token,
                             }
                     };
                 }
@@ -65,7 +80,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                     featureMissions.Add(new UserReferralToken
                     {
                         FeatureUserReferral = request.FeatureUserReferral,
-                        Token = request.Token,
+                        Token = token,
                     });
                 }
 
@@ -74,7 +89,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                     featureMissions.Add(new UserReferralToken
                     {
                         FeatureUserReferral = EnumFeatureUserReferral.DoneUnit1,
-                        Token = request.Token,
+                        Token = token,
                     });
                     isAddDoneUnit1 = true;
                 }
@@ -101,13 +116,17 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                 {
                     tokenMission = EnumTokenMission.FriendCompleteUnit1;
                 }
+                else if (request.FeatureUserReferral == EnumFeatureUserReferral.Payment)
+                {
+                    tokenMission = EnumTokenMission.FriendCompletePayment;
+                }
 
                 await _createTokenHistoryPublisher.Publish(
                     new List<TokenHistoryQueueModel>
                         {
                             new TokenHistoryQueueModel
                                 {
-                                    VolatileToken = request.Token,
+                                    VolatileToken = token,
                                     Type = EnumTokenHistoryType.Recevived,
                                     Feature = EnumTokenFeature.FriendMission,
                                     Mission = tokenMission,

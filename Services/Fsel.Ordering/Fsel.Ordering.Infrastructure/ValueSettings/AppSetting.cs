@@ -15,14 +15,6 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public UrBoxConfig? UrBoxConfig { get; set; }
         public PurchaseSettings? PurchaseSettings { get; set; }
         public ResourceContent? ResourceContent { get; set; }
-        public UserReferralConfig? UserReferralConfig { get; set; }
-    }
-
-    public class UserReferralConfig
-    {
-        public int OneMonth { get; set; }
-        public int SixMonths { get; set; }
-        public int TwelveMonths { get; set; }
     }
 
     public class PurchaseSettings

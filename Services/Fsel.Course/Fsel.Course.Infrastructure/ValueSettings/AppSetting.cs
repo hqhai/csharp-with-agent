@@ -11,17 +11,10 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public ConstantUrl? ConstantUrl { get; set; }
         public ResourceContent? ResourceContent { get; set; }
         public OpenAiConfig? OpenAiConfig { get; set; }
-        public UserReferralConfig? UserReferralConfig { get; set; }
         public new Services? Services { get; set; }
         public AzureAiConfig? AzureAiConfig { get; set; }
 
         public CustomerSupportConfig? CustomerSupportConfig { get; set; }
-    }
-
-    public class UserReferralConfig
-    {
-        public int PT { get; set; }
-        public int DoneUnit1 { get; set; }
     }
 
     public class ConstantUrl

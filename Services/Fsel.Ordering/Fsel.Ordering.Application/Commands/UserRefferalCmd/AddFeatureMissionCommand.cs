@@ -60,7 +60,8 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
                 return methodResult;
             }
 
-            var token = 0;
+            int token = 0;
+
             if (request.FeatureUserReferral == EnumFeatureUserReferral.Payment)
             {
                 var orders = await _orderRepository.Queryable.Where(p => !p.IsTrial && p.Status == EnumOrderStatus.Payment).ToListAsync(cancellationToken);
@@ -74,18 +75,7 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
                 {
                     return methodResult;
                 }
-                if (package.MonthNumber == 1)
-                {
-                    token = _appSetting.UserReferralConfig?.OneMonth ?? 0;
-                }
-                else if (package.MonthNumber == 6)
-                {
-                    token = _appSetting.UserReferralConfig?.SixMonths ?? 0;
-                }
-                else if (package.MonthNumber == 12)
-                {
-                    token = _appSetting.UserReferralConfig?.TwelveMonths ?? 0;
-                }
+                token = package.ReferToken;
             }
 
             await _addFeatureMissionPublisher.Publish(new AddFeatureMissionQueueModel()
