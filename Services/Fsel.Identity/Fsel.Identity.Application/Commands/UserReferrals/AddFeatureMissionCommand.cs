@@ -121,10 +121,9 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                     tokenMission = EnumTokenMission.FriendCompletePayment;
                 }
 
-                await _createTokenHistoryPublisher.Publish(
-                    new List<TokenHistoryQueueModel>
-                        {
-                            new TokenHistoryQueueModel
+                var tokenHistories = new List<TokenHistoryQueueModel>()
+                {
+                     new TokenHistoryQueueModel
                                 {
                                     VolatileToken = token,
                                     Type = EnumTokenHistoryType.Recevived,
@@ -132,24 +131,23 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                                     Mission = tokenMission,
                                     UserId = userReferral.SenderId,
                                 }
-                        },
-                cancellationToken).ConfigureAwait(false);
+                };
+
                 if (isAddDoneUnit1)
                 {
-                    await _createTokenHistoryPublisher.Publish(
-                    new List<TokenHistoryQueueModel>
-                        {
-                            new TokenHistoryQueueModel
-                                {
-                                    VolatileToken = _appSetting.UserReferralConfig?.DoneUnit1 ?? 0,
-                                    Type = EnumTokenHistoryType.Recevived,
-                                    Feature = EnumTokenFeature.FriendMission,
-                                    Mission = EnumTokenMission.FriendCompleteUnit1,
-                                    UserId = userReferral.SenderId,
-                                }
-                        },
-                cancellationToken).ConfigureAwait(false);
+                    tokenHistories.Add(new TokenHistoryQueueModel
+                    {
+                        VolatileToken = _appSetting.UserReferralConfig?.DoneUnit1 ?? 0,
+                        Type = EnumTokenHistoryType.Recevived,
+                        Feature = EnumTokenFeature.FriendMission,
+                        Mission = EnumTokenMission.FriendCompleteUnit1,
+                        UserId = userReferral.SenderId,
+                    });
                 }
+
+                await _createTokenHistoryPublisher.Publish(
+                    tokenHistories,
+                cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
