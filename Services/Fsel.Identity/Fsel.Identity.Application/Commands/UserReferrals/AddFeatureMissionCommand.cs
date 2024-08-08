@@ -89,7 +89,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                     featureMissions.Add(new UserReferralToken
                     {
                         FeatureUserReferral = EnumFeatureUserReferral.DoneUnit1,
-                        Token = token,
+                        Token = _appSetting.UserReferralConfig?.DoneUnit1 ?? 0
                     });
                     isAddDoneUnit1 = true;
                 }
