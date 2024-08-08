@@ -8,6 +8,7 @@ using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.AdminCmd;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Application.Queries.UserQuery;
+using Fsel.Identity.Application.Queries.UserReferrals;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
@@ -147,6 +148,30 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> CreateStudents([FromBody] CreateUserStudentsToAdminCommand command)
         {
             MethodResult<IList<UserModel>> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search User referral
+        /// </summary>
+        [HttpGet("search-referral-code")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<SearchReferralCodeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchUserReferral([FromQuery] SearchReferralCodeQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search detail user referral
+        /// </summary>
+        [HttpGet("search-detail-referral-code")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<SearchDetailReferralCodeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchDetailUserReferral([FromQuery] SearchDetailReferralCodeQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
