@@ -109,17 +109,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 .Where(x => x.LessonResultId == request.LessonResultId && x.ClassForumId == classForum.Id)
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
-            if (classForumResult == null)
-            {
-                methodResult.Result = classForumByStudentModel;
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
-
             classForumByStudentModel.ClassForumResultCurrentStudent = _mapper.Map<ClassForumResultModel>(classForumResult);
             var classForumResultModel = classForumByStudentModel.ClassForumResultCurrentStudent;
 
-            if (classForumResultModel != null)
+            if (classForumResultModel != null && classForumResult != null)
             {
                 classForumResultModel.ClassForumDetailResults = classForumResult.ClassForumDetailResults.Select(x =>
                 {

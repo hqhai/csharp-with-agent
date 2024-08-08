@@ -26,7 +26,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     public class SearchFeedbackAIQueryHandler : IRequestHandler<SearchFeedbackAIQuery, MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>>
     {
         private readonly ICourseRepository _courseRepository;
-        private readonly IUserService _userService;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ILessonRepository _lessonRepository;
@@ -36,10 +35,9 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
         private readonly IStudentFeedbackRepository _studentFeedbackRepository;
         private readonly IClassForumRepository _classForumRepository;
 
-        public SearchFeedbackAIQueryHandler(ICourseRepository courseRepository, IUserService userService, IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, ILessonRepository lessonRepository, ICourseUnitMockTestRepository courseUnitMockTestRepository, IUnitRepository unitRepository, IUnitLessonRepository unitLessonRepository, IStudentFeedbackRepository studentFeedbackRepository, IClassForumRepository classForumRepository)
+        public SearchFeedbackAIQueryHandler(ICourseRepository courseRepository, IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, ILessonRepository lessonRepository, ICourseUnitMockTestRepository courseUnitMockTestRepository, IUnitRepository unitRepository, IUnitLessonRepository unitLessonRepository, IStudentFeedbackRepository studentFeedbackRepository, IClassForumRepository classForumRepository)
         {
             _courseRepository = courseRepository;
-            _userService = userService;
             _classForumResultRepository = classForumResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _lessonRepository = lessonRepository;
