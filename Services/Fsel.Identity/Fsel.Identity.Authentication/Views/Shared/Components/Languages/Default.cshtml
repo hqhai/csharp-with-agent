@@ -3,23 +3,21 @@
     var languageContext = (AuthContext)ViewBag.LanguageContext;
 }
 
-<div class="langs">
-    <div class="language-container" id="languageContainer">
-        <div class="language">
-            <span class="language_name">@languageContext.CurrentCountryInfo?.CurrentUICultureInfo.Name.ToUpper()</span>
-            <img src="/assets/icons/@(languageContext.CurrentCountryInfo?.CurrentUICultureInfo.Name)-icon.svg" alt="" class="language_image" />
-        </div>
-        <div id="languageDropdown" class="language-dropdown">
-            @if (languageContext.CountryInfos != null)
+<div class="language-container" id="languageContainer">
+    <div class="language">
+        <span class="language_name">@languageContext.CurrentCountryInfo?.CurrentUICultureInfo.Name.ToUpper()</span>
+        <img src="/assets/icons/@(languageContext.CurrentCountryInfo?.CurrentUICultureInfo.Name)-icon.svg" alt="" class="language_image" />
+    </div>
+    <div id="languageDropdown" class="language-dropdown">
+        @if (languageContext.CountryInfos != null)
+        {
+            foreach (var countryInfo in languageContext.CountryInfos.Where(x => x != languageContext.CurrentCountryInfo).OrderBy(x => x.CultureCode))
             {
-                foreach (var countryInfo in languageContext.CountryInfos.Where(x => x != languageContext.CurrentCountryInfo).OrderBy(x => x.CultureCode))
-                {
-                    <div class="language-dropdown-item">
-                        <span class="language_name">@countryInfo.CurrentUICultureInfo.Name.ToUpper()</span>
-                        <img src="/assets/icons/@(countryInfo.CurrentUICultureInfo.Name)-icon.svg" alt="" class="language_image" />
-                    </div>
-                }
+                <div class="language-dropdown-item">
+                    <span class="language_name">@countryInfo.CurrentUICultureInfo.Name.ToUpper()</span>
+                    <img src="/assets/icons/@(countryInfo.CurrentUICultureInfo.Name)-icon.svg" alt="" class="language_image" />
+                </div>
             }
-        </div>
+        }
     </div>
 </div>

@@ -4,4 +4,24 @@
   margin-bottom: 78px;
 }
 
-/*# sourceMappingURL=success_form.css.map */
+.content {
+  margin-left: auto;
+  margin-right: auto;
+  height: 100%;
+  display: flex;
+  /* justify-content: center; */
+  align-items: center;
+  padding-top: 100px;
+}
+
+@media (max-width: 500px) {
+  .content {
+    width: 100vw;
+  }
+}
+
+.language-container {
+  top: 20px;
+  right: 20px;
+}
+

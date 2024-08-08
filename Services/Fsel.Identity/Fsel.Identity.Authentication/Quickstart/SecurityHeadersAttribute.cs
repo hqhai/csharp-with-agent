@@ -1,4 +1,4 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
+// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
@@ -32,6 +32,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 //csp += "upgrade-insecure-requests;";
                 // also an example if you need client images to be displayed from twitter
                 // csp += "img-src 'self' https://pbs.twimg.com;";
+                csp += "img-src 'self' https://s3-sgn10.fptcloud.com;";
 
                 // once for standards compliant browsers
                 if (!context.HttpContext.Response.Headers.ContainsKey("Content-Security-Policy"))

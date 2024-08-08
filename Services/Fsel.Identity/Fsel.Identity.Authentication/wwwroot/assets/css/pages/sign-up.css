@@ -125,7 +125,6 @@
   align-items: center;
   gap: 8px;
   font-size: 1.4rem;
-  justify-content: center;
 }
 
   .rule-item.rule-item--invalid {
@@ -194,3 +193,205 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .cancelBtn:focus {
     outline: unset;
   }
+
+
+.bx {
+  margin: 10px;
+  margin-left: 15px;
+  font-size: 20px;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* Customize the scrollbar */
+.dropdown-content::-webkit-scrollbar {
+  width: 2px;
+  border-radius: 999px;
+  height: 2px;
+}
+
+.dropdown-content::-webkit-scrollbar-thumb {
+  background: #c0d9ff;
+}
+
+  .dropdown-content::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
+/* Dropdown content styling */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  border-radius: 10px;
+  background: var(--Schemes-Surface-Surface-Container-Low, #2a3758);
+  /* FSEL_LMS/Shadow/shadow3 */
+  box-shadow: 0px 36px 10px 0px rgba(10, 27, 67, 0), 0px 23px 9px 0px rgba(10, 27, 67, 0.01), 0px 13px 8px 0px rgba(10, 27, 67, 0.05), 0px 6px 6px 0px rgba(10, 27, 67, 0.09), 0px 1px 3px 0px rgba(10, 27, 67, 0.1), 0px 0px 0px 0px rgba(10, 27, 67, 0.1);
+  /* min-width: 160px; */
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  animation: dropdown 0.1s forwards;
+  overflow: auto;
+  width: 100%;
+}
+
+@keyframes dropdown {
+  from {
+    height: 0px;
+  }
+
+  to {
+    height: 200px;
+  }
+}
+
+.dropdown-content div {
+  padding: 16px 8px;
+  text-decoration: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  display: block;
+  cursor: pointer;
+  color: #f2f4f9 !important;
+  /* FSEL_LMS/Inter/Label/large */
+  font-family: Inter;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px; /* 142.857% */
+}
+
+  .dropdown-content div:hover {
+    background: var(--Schemes-Surface-Surface-Container-Low, #6a87d1);
+  }
+
+.show {
+  display: block;
+}
+
+.selected {
+  background-color: #567fdc !important;
+}
+
+.birthday {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.option-birthday {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+  .option-birthday .name-option {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    color: var(--Schemes-Text-Text-tertiary, #9fb0cb);
+    /* FSEL_LMS/Inter/Body/large */
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px; /* 150% */
+  }
+
+.option-gender {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+  .option-gender .option {
+    width: 100%;
+    display: flex;
+    padding: var(--Spacing-md, 16px) var(--Spacing-sm, 12px);
+    align-items: center;
+    gap: var(--Spacing-md, 16px);
+    flex: 1 0 0;
+    align-self: stretch;
+    border-radius: var(--Radius-sm, 10px);
+    border: 1px solid var(--Schemes-Outline-Outline, #5067a4);
+    color: var(--Schemes-Text-Text-tertiary, #9fb0cb);
+    text-align: center;
+    /* FSEL_LMS/Inter/Body/large */
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px; /* 150% */
+  }
+
+.round-radio {
+  display: none;
+}
+
+.round-radio-label {
+  display: flex;
+  width: 100%;
+  position: relative;
+  padding-left: 30px;
+  cursor: pointer;
+  font-size: 16px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  justify-content: start;
+}
+
+  .round-radio-label:before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: transparent;
+    border: 2px solid #82a1ea;
+  }
+
+  .round-radio-label:after {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #82a1ea;
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+  }
+
+.round-radio:checked + .round-radio-label:after {
+  opacity: 1;
+}
+
+.sign-up-btn {
+  margin-top: 0;
+}
+
+.text-footer {
+  text-align: center;
+}
+
+.meter {
+  margin-top: 0;
+}
+
+.checkbox label::before {
+  width: 18px;
+}

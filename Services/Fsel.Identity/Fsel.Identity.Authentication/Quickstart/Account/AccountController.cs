@@ -108,8 +108,9 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         /// Verify otp for sample user login
         /// </summary>
         /// <returns></returns>
-        public IActionResult VerifyOtp()
+        public IActionResult VerifyOtp(string? type)
         {
+            ViewBag.Type = type;
             return View();
         }
 
@@ -121,14 +122,14 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
             if (ModelState.IsValid)
             {
-                var type = GetFromTempData(nameof(VerifyOtp))?.ToString();
+                //var type = GetFromTempData(nameof(VerifyOtp))?.ToString();
                 var userRegisterModel = GetFromTempData(nameof(UserRegisterModel))?.ToString().Deserialize<UserRegisterModel>();
                 var forgotModel = GetFromTempData(nameof(ForgotModel))?.ToString().Deserialize<ForgotModel>();
 
                 var email = userRegisterModel?.Email ?? forgotModel?.Email;
 
                 var user = await _userManager.FindByEmailAsync(email ?? string.Empty);
-                if (type == nameof(Register))
+                if (request.Type == nameof(Register))
                 {
                     if (userRegisterModel == null)
                     {
@@ -180,7 +181,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         }
                     }
                 }
-                else if (type == nameof(Forgot))
+                else if (request.Type == nameof(Forgot))
                 {
                     if (forgotModel == null)
                     {
@@ -307,8 +308,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     return View(request);
                 }
 
-                TempData[nameof(VerifyOtp)] = nameof(Forgot);
-                return RedirectToAction(nameof(VerifyOtp));
+                return RedirectToAction(nameof(VerifyOtp), new { type = nameof(Forgot) });
             }
 
             return View(request);
@@ -318,18 +318,17 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         /// ResendOtp
         /// </summary>
         /// <returns></returns>
-        public async Task<IActionResult> ResendOtp()
+        public async Task<IActionResult> ResendOtp(string? type)
         {
-            var verifyOtpType = GetFromTempData(nameof(VerifyOtp))?.ToString();
             User? user;
 
-            if (verifyOtpType == nameof(Register))
+            if (type == nameof(Register))
             {
                 var userRegister = GetFromTempData(nameof(UserRegisterModel))?.ToString().Deserialize<UserRegisterModel>();
                 user = await _userManager.FindByEmailAsync(userRegister?.Email ?? string.Empty);
                 if (user == null)
                 {
-                    return RedirectToAction(nameof(VerifyOtp));
+                    return RedirectToAction(nameof(VerifyOtp), new { type });
                 }
             }
             else
@@ -412,8 +411,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
                     scope.Complete();
 
-                    TempData[nameof(VerifyOtp)] = nameof(Register);
-                    return RedirectToAction(nameof(VerifyOtp));
+                    return RedirectToAction(nameof(VerifyOtp), new { type = nameof(Register) });
                 }
 
                 //var context = await _interaction.GetAuthorizationContextAsync(request.ReturnUrl);
@@ -482,9 +480,16 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginInputModel model/*, string button*/)
+        public async Task<IActionResult> Login(LoginInputModel model, string? provider)
         {
             ArgumentNullException.ThrowIfNull(model);
+
+            if (!string.IsNullOrEmpty(provider))
+            {
+                var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { model.ReturnUrl });
+                var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+                return Challenge(properties, provider);
+            }
 
             _logger.LogWarning("Start Login");
             _logger.LogWarning("Model: " + model.Serialize);

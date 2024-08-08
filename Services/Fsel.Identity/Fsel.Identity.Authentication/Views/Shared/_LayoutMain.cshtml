@@ -4,8 +4,6 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://s3-sgn10.fptcloud.com;" />
-    @* <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://s3-sgn10.fptcloud.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *;"> *@
 
     <title>Fsel OpenID</title>
     
@@ -35,13 +33,7 @@
     @* <partial name="_Nav" /> *@
 
     <div class="container">
-        <div class="all-content">
-            <div class="content">
-                @await Component.InvokeAsync("Languages")
-
-                @RenderBody()
-            </div>
-        </div>
+        @RenderBody()
     </div>
 
     <div class="loading hidden" @* style="display: none !important" *@>
@@ -50,11 +42,7 @@
         </div>
     </div>
    
-    @* <div class="container body-container">
-        @RenderBody()
-    </div> *@
-
-    <script src="~/lib/jquery/dist/jquery.slim.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/assets/js/main.js"></script>
 

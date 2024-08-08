@@ -22,7 +22,7 @@
         <h1 class="title">Confirm information to link your <strong>@Model.Provider</strong> account.</h1>
 
         <div>
-            <div class="float-input">
+            <div class="float-input float-input-validate">
                 <input class="text-input"
                        type="text"
                        name="Email"
@@ -34,11 +34,11 @@
                        asp-for="Email" />
                 <label for="Email" class="input-label">Email</label>
             </div>
-            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "content-text-danger" })
         </div>
         <div class="row">
             <div class="col-sm-6">
-                <div class="float-input">
+                <div class="float-input float-input-validate">
                     <input class="text-input"
                            type="text"
                            name="LastName"
@@ -49,10 +49,10 @@
                            asp-for="LastName" />
                     <label for="LastName" class="input-label">Last name</label>
                 </div>
-                @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+                @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "content-text-danger" })
             </div>
             <div class="col-sm-6">
-                <div class="float-input">
+                <div class="float-input float-input-validate">
                     <input class="text-input"
                            type="text"
                            name="FirstName"
@@ -63,11 +63,11 @@
                            asp-for="FirstName" />
                     <label for="FirstName" class="input-label">First name</label>
                 </div>
-                @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "content-text-danger" })
             </div>
         </div>
         <div>
-            <div class="float-input">
+            <div class="float-input float-input-validate">
                 <input class="text-input"
                        type="text"
                        max="@(DateTime.Now.ToString("yyyy-MM-dd"))"
@@ -79,7 +79,7 @@
                        asp-for="Birthday" />
                 <label for="Birthday" class="input-label">Birthday</label>
             </div>
-            @Html.ValidationMessageFor(model => model.Birthday, "", new { @class = "text-danger" })
+            @Html.ValidationMessageFor(model => model.Birthday, "", new { @class = "content-text-danger" })
         </div>
 
         <button type="submit" class="btn continue-btn">
