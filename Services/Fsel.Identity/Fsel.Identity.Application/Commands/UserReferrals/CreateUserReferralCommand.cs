@@ -24,17 +24,21 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
     {
         private readonly IUserReferralRepository _userReferralRepository;
         private readonly UserManager<User> _userManager;
+        private readonly AuthContext _authContext;
 
-        public CreateUserReferralCommandHandler(IUserReferralRepository userReferralRepository, UserManager<User> userManager)
+        public CreateUserReferralCommandHandler(IUserReferralRepository userReferralRepository, UserManager<User> userManager, AuthContext authContext)
         {
             _userReferralRepository = userReferralRepository;
             _userManager = userManager;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<VoidMethodResult>> Handle(CreateUserReferralCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<VoidMethodResult>();
+
+            var receiverId = request.ReceiverId ?? _authContext.CurrentUserId;
 
             var sender = await _userManager.Users.Include(p => p.Human).FirstOrDefaultAsync(p => p.Human != null && !string.IsNullOrEmpty(p.Human.Code) && p.Human.Code.Trim().ToLower() == request.ReferralCode.Trim().ToLower(), cancellationToken);
             if (sender == null)
@@ -60,7 +64,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                 _userReferralRepository.Add(new UserReferral()
                 {
                     SenderId = sender.Id,
-                    ReceiverId = request.ReceiverId,
+                    ReceiverId = receiverId,
                 });
                 await _userReferralRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;

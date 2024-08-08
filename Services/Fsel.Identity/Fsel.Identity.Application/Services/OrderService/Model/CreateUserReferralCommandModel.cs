@@ -4,7 +4,7 @@ namespace Fsel.Identity.Application.Services.OrderService.Model
 {
     public class CreateUserReferralCommandModel
     {
-        public Guid ReceiverId { get; set; }
+        public Guid? ReceiverId { get; set; }
         public string? ReferralCode { get; set; }
     }
 }
