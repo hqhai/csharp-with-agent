@@ -21,6 +21,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class UpdateMockTestCommand : UpdateMockTestCommandModel, IRequest<MethodResult<MockTestModel>>
     {
@@ -147,11 +148,11 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
         {
             if (skill == EnumCourseSkill.Reading)
             {
-                return 3600; //60 phút
+                return SectionGroupIELST.ExecutionTimeReading;
             }
             else if (skill == EnumCourseSkill.Listening && !string.IsNullOrEmpty(fileAudio))
             {
-                return (MediaHelper.GetMediaDurationAsync(fileAudio) ?? default) + 120; //thời gian audio + cộng thêm 2 phút
+                return (MediaHelper.GetMediaDurationAsync(fileAudio) ?? default) + SectionGroupIELST.AdditionalTimeListening;
             }
             else if (skill == EnumCourseSkill.Speaking && !string.IsNullOrEmpty(fileAudio))
             {

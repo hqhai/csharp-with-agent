@@ -11,6 +11,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Models.CommandModels.Questions;
     using Fsel.Course.Domain.Models.CommandModels.Sections;
     using Fsel.Shared.Enums;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class SectionGroupManagerConverter
     {
@@ -238,17 +239,17 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
                 return methodResult;
             }
-            if (sectionGroup.CourseSkill == EnumCourseSkill.Reading && sectionGroup.Sections.Count != 3)
+            if (sectionGroup.CourseSkill == EnumCourseSkill.Reading && sectionGroup.Sections.Count != SectionGroupIELST.MaxSectionSkillReading)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(sectionGroup.Sections));
                 return methodResult;
             }
-            else if (sectionGroup.CourseSkill == EnumCourseSkill.Listening && sectionGroup.Sections.Count != 4)
+            else if (sectionGroup.CourseSkill == EnumCourseSkill.Listening && sectionGroup.Sections.Count != SectionGroupIELST.MaxSectionSkillListening)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(sectionGroup.Sections));
                 return methodResult;
             }
-            else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing && sectionGroup.Sections.Count != 2)
+            else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing && sectionGroup.Sections.Count != SectionGroupIELST.MaxSectionSkillWriting)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(sectionGroup.Sections));
                 return methodResult;

@@ -18,6 +18,20 @@ namespace Fsel.Shared.Constants
         public const int DelayWorkerSecond = 60;
         public const int AmountTrialDays = 14;
 
+        public static class SectionGroupIELST
+        {
+            public const int ExecutionTimeReading = 3600;
+            public const int AdditionalTimeListening = 120;
+
+            public const int MaxSectionSkillWriting = 2;
+            public const int MaxSectionSkillListening = 4;
+            public const int MaxSectionSkillReading = 3;
+
+            public const int MaxScoreSkillListening = 10;
+            public const int MinScoreSkillReading = 13;
+            public const int MaxScoreSkillReading = 14;
+        }
+
         public static class CreateAction
         {
             public const string TwoPeopleLike = "{0},{1}";
@@ -65,7 +79,6 @@ namespace Fsel.Shared.Constants
             public const int PresencePenalty = 0;
             public const int TopP = 0;
         }
-
 
         public static class CustomerSupport
         {
