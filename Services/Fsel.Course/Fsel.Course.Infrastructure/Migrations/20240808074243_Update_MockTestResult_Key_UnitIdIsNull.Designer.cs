@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20240808042145_Update_MockTestResult_Key")]
-    partial class Update_MockTestResult_Key
+    [Migration("20240808074243_Update_MockTestResult_Key_UnitIdIsNull")]
+    partial class Update_MockTestResult_Key_UnitIdIsNull
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -3278,13 +3278,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<int?>("TokenLastTime")
                         .HasColumnType("int");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasComputedColumnSql("IIF(UnitId IS NULL, 'FullMockTest', 'SkillMockTest')");
-
                     b.Property<Guid?>("UnitId")
                         .HasColumnType("uniqueidentifier");
 
@@ -3310,10 +3303,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("UnitId");
 
-                    b.HasIndex("CourseId", "MockTestId", "StudentId", "Type")
-                        .IsUnique();
+                    b.HasIndex("CourseId", "MockTestId", "StudentId")
+                        .IsUnique()
+                        .HasFilter("[UnitId] IS NULL");
 
-                    b.HasIndex("CourseId", "MockTestId", "UnitId", "StudentId", "Type")
+                    b.HasIndex("CourseId", "MockTestId", "UnitId", "StudentId")
                         .IsUnique()
                         .HasFilter("[UnitId] IS NOT NULL");
 
