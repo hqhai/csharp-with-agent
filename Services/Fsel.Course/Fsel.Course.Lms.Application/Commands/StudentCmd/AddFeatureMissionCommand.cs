@@ -49,21 +49,10 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
                 return methodResult;
             }
 
-            var token = 0;
-            if (request.FeatureUserReferral == EnumFeatureUserReferral.PT)
-            {
-                token = _appSetting.UserReferralConfig?.PT ?? 0;
-            }
-            else if (request.FeatureUserReferral == EnumFeatureUserReferral.DoneUnit1)
-            {
-                token = _appSetting.UserReferralConfig?.DoneUnit1 ?? 0;
-            }
-
             await _addFeatureMissionPublisher.Publish(new AddFeatureMissionQueueModel()
             {
                 FeatureUserReferral = request.FeatureUserReferral,
-                ReceiverId = request.ReceiverId,
-                Token = token
+                ReceiverId = request.ReceiverId
             }, cancellationToken);
 
             return methodResult;

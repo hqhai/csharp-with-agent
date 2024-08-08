@@ -153,7 +153,8 @@ namespace Fsel.Shared.Enums
         #region Friend mission
 
         FriendCompletePT,
-        FriendCompleteUnit1
+        FriendCompleteUnit1,
+        FriendCompletePayment
 
         #endregion Friend mission
     }

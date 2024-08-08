@@ -8,6 +8,6 @@ namespace Fsel.Shared.Models.ShareModels
     {
         public Guid ReceiverId { get; set; }
         public EnumFeatureUserReferral FeatureUserReferral { get; set; }
-        public int Token { get; set; }
+        public int? Token { get; set; }
     }
 }
