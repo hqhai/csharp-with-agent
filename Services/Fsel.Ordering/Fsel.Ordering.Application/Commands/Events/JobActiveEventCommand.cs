@@ -35,7 +35,7 @@ namespace Fsel.Ordering.Application.Commands.Events
             {
                 return methodResult;
             }
-            var @event = await _eventRepository.Queryable.Where(p => p.StartDate.HasValue && p.EndDate.HasValue && p.StartDate.Value.Date <= currentDate.Date && p.EndDate.Value.Date <= currentDate.Date).FirstOrDefaultAsync(cancellationToken);
+            var @event = await _eventRepository.Queryable.Where(p => p.StartDate.HasValue && p.EndDate.HasValue && p.StartDate.Value.Date <= currentDate.Date && p.EndDate.Value.Date >= currentDate.Date).FirstOrDefaultAsync(cancellationToken);
             if (@event == null)
             {
                 @event = await _eventRepository.Queryable.FirstOrDefaultAsync(p => p.IsDefault, cancellationToken);
