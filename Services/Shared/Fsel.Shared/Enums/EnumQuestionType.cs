@@ -62,6 +62,15 @@ namespace Fsel.Shared.Enums
         [Description("Multiple Choice")]
         MultichoiceV1,
 
+        [Description("Check list")]
+        CheckListV1,
+
+        [Description("Summary completion (Gap fill)")]
+        SummaryCompletionGapFill,
+
+        [Description("Completion Diagrams")]
+        CompletionDiagrams,
+
         [Description("Yes/No/Not given (Drop down)")]
         YesNoNotGivenDropDown,
 
@@ -79,15 +88,6 @@ namespace Fsel.Shared.Enums
 
         [Description("Matching heading")]
         MatchingHeading,
-
-        [Description("Check list")]
-        CheckListV1,
-
-        [Description("Summary completion (Gap fill)")]
-        SummaryCompletionGapFill,
-
-        [Description("Completion Diagrams")]
-        CompletionDiagrams,
 
         [Description("Table Completion")]
         TableCompletion,

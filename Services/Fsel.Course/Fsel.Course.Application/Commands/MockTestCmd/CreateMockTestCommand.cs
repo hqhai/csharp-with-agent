@@ -16,6 +16,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -100,6 +101,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                         return methodResult;
                     }
                 }
+                newSectionGroup.ExecutionTime = GetTimeSkill(sectionGroup.CourseSkill, sectionGroup.AudioPath);
                 mockTest.MockTestSections.Add(new MockTestSection
                 {
                     SectionGroup = newSectionGroup
@@ -119,6 +121,23 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             });
 
             return methodResult;
+        }
+
+        public double GetTimeSkill(EnumCourseSkill skill, string? fileAudio)
+        {
+            if (skill == EnumCourseSkill.Reading)
+            {
+                return 3600; //60 phút
+            }
+            else if (skill == EnumCourseSkill.Listening && !string.IsNullOrEmpty(fileAudio))
+            {
+                return (MediaHelper.GetMediaDurationAsync(fileAudio) ?? default) + 120; //thời gian audio + cộng thêm 2 phút
+            }
+            else if (skill == EnumCourseSkill.Speaking && !string.IsNullOrEmpty(fileAudio))
+            {
+                return (MediaHelper.GetMediaDurationAsync(fileAudio) ?? default); //thời gian audio
+            }
+            return default;
         }
     }
 }
