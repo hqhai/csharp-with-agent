@@ -10,14 +10,10 @@ namespace Fsel.Course.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_MockTestResults_CourseId_MockTestId_StudentId_Type",
-                table: "MockTestResults");
-
             migrationBuilder.CreateIndex(
-                name: "IX_MockTestResults_CourseId_MockTestId_StudentId_Type",
+                name: "IX_MockTestResults_CourseId_MockTestId_StudentId",
                 table: "MockTestResults",
-                columns: new[] { "CourseId", "MockTestId", "StudentId", "Type" },
+                columns: new[] { "CourseId", "MockTestId", "StudentId" },
                 unique: true,
                 filter: "[UnitId] IS NULL");
         }
@@ -26,14 +22,8 @@ namespace Fsel.Course.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropIndex(
-                name: "IX_MockTestResults_CourseId_MockTestId_StudentId_Type",
+                name: "IX_MockTestResults_CourseId_MockTestId_StudentId",
                 table: "MockTestResults");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MockTestResults_CourseId_MockTestId_StudentId_Type",
-                table: "MockTestResults",
-                columns: new[] { "CourseId", "MockTestId", "StudentId", "Type" },
-                unique: true);
         }
     }
 }

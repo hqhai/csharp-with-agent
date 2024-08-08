@@ -36,17 +36,8 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumResultStatus>());
 
-            builder.Property(e => e.Type)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumMockTestType>());
-
-            builder.Property(e => e.Type)
-                .HasComputedColumnSql($"IIF({nameof(MockTestResult.UnitId)} IS NULL, '{EnumMockTestType.FullMockTest}', '{EnumMockTestType.SkillMockTest}')");
-
-            builder.HasIndex(c => new { c.CourseId, c.MockTestId, c.UnitId, c.StudentId, c.Type }).IsUnique();
-            builder.HasIndex(c => new { c.CourseId, c.MockTestId, c.StudentId, c.Type }).IsUnique().HasFilter("[UnitId] IS NULL");
+            builder.HasIndex(c => new { c.CourseId, c.MockTestId, c.UnitId, c.StudentId }).IsUnique();
+            builder.HasIndex(c => new { c.CourseId, c.MockTestId, c.StudentId }).IsUnique().HasFilter("[UnitId] IS NULL");
         }
     }
 }
