@@ -189,15 +189,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 }
                                 await _userManager.AddToRoleAsync(user, request.Role.ToString() ?? string.Empty);
                             }
-                            if (!string.IsNullOrEmpty(request.ReferralCode))
-                            {
-                                var updateReferralCodeResult = await _mediator.Send(new CreateUserReferralCommand { ReferralCode = request.ReferralCode, ReceiverId = user.Id }, cancellationToken).ConfigureAwait(false);
-                                if (!updateReferralCodeResult.IsOK)
-                                {
-                                    methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);
-                                    return methodResult;
-                                }
-                            }
 
                             #region Send Code OTP
 
@@ -244,6 +235,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 if (user != null && user.EmailConfirmed)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(request.ReferralCode))
+            {
+                var updateReferralCodeResult = await _mediator.Send(new CreateUserReferralCommand { ReferralCode = request.ReferralCode, ReceiverId = user.Id, UserReferralType = EnumUserReferralType.Link }, cancellationToken).ConfigureAwait(false);
+                if (!updateReferralCodeResult.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);
                     return methodResult;
                 }
             }
