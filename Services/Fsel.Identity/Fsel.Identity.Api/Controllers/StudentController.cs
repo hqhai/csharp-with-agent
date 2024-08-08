@@ -192,18 +192,6 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Update Referral Code
-        /// </summary>
-        [HttpPut("update-referral-code")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateReferralCode([FromBody] UpdateReferralCodeStudentCommand command)
-        {
-            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Update Student By Class Id
         /// </summary>
         [HttpPut("update-beginner-guide")]

@@ -6,8 +6,8 @@ using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
-using Fsel.Identity.Application.Commands.StudentCmd;
 using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
+using Fsel.Identity.Application.Commands.UserReferrals;
 using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
@@ -173,6 +173,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     };
 
                                 #endregion add user setting
+
                                 var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password);
                                 if (!validPassword.Succeeded)
                                 {
@@ -190,7 +191,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             }
                             if (!string.IsNullOrEmpty(request.ReferralCode))
                             {
-                                var updateReferralCodeResult = await _mediator.Send(new UpdateReferralCodeStudentCommand { ReferralCode = request.ReferralCode, UserId = user.Id }, cancellationToken).ConfigureAwait(false);
+                                var updateReferralCodeResult = await _mediator.Send(new CreateUserReferralCommand { ReferralCode = request.ReferralCode, ReceiverId = user.Id }, cancellationToken).ConfigureAwait(false);
                                 if (!updateReferralCodeResult.IsOK)
                                 {
                                     methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);
