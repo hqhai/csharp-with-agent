@@ -8,11 +8,10 @@ namespace Fsel.Course.Lcms.Api.Controllers.V1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Common.Models;
-    using Fsel.Course.Application.Queries.CategoryQuery;
+    using Fsel.Course.Application.Queries.CategoryQuery.V1i1;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(ApiSettings.APIVersion1i1)]
