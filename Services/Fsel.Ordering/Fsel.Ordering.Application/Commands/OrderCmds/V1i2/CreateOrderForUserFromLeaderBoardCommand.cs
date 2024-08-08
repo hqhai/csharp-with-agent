@@ -56,6 +56,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             }
             var student = studentResult.Content?.Result;
 
+            if (await _orderRepository.Queryable.AnyAsync(p => !p.IsTrial && p.Status == EnumOrderStatus.Payment && p.UserId == request.UserId, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                return methodResult;
+            }
+
             if (string.IsNullOrEmpty(request.FullName) || string.IsNullOrEmpty(request.Email))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
@@ -74,7 +80,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             }
 
-            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.MonthNumber == 1, cancellationToken);
+            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.MonthNumber == request.Month, cancellationToken);
             if (package == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));

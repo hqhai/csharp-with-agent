@@ -95,7 +95,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     methodResult.StatusCode = StatusCodes.Status200OK;
                     return methodResult;
                 }
-                var courseQuery = _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentCourseIds.Contains(x.StudentId)).ToList();
+                var courseQuery = _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentCourseIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).ToList();
 
                 foreach (var (item, studentId) in courses.SelectMany(course => studentCourseIds.Select(sid => (course, sid))))
                 {
