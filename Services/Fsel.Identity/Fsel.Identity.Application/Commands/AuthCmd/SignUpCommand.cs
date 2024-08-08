@@ -241,7 +241,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             if (!string.IsNullOrEmpty(request.ReferralCode))
             {
-                var updateReferralCodeResult = await _mediator.Send(new CreateUserReferralCommand { ReferralCode = request.ReferralCode, ReceiverId = user.Id }, cancellationToken).ConfigureAwait(false);
+                var updateReferralCodeResult = await _mediator.Send(new CreateUserReferralCommand { ReferralCode = request.ReferralCode, ReceiverId = user.Id, UserReferralType = EnumUserReferralType.Link }, cancellationToken).ConfigureAwait(false);
                 if (!updateReferralCodeResult.IsOK)
                 {
                     methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);
