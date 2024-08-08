@@ -80,7 +80,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             }
 
-            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.MonthNumber == 1, cancellationToken);
+            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.MonthNumber == request.Month, cancellationToken);
             if (package == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
