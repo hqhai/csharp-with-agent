@@ -46,7 +46,7 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasComputedColumnSql($"IIF({nameof(MockTestResult.UnitId)} IS NULL, '{EnumMockTestType.FullMockTest}', '{EnumMockTestType.SkillMockTest}')");
 
             builder.HasIndex(c => new { c.CourseId, c.MockTestId, c.UnitId, c.StudentId, c.Type }).IsUnique();
-            builder.HasIndex(c => new { c.CourseId, c.MockTestId, c.StudentId, c.Type }).IsUnique();
+            builder.HasIndex(c => new { c.CourseId, c.MockTestId, c.StudentId, c.Type }).IsUnique().HasFilter("[UnitId] IS NULL");
         }
     }
 }
