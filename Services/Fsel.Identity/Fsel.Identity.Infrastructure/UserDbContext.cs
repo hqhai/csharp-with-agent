@@ -49,6 +49,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new StudentCompetitionEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentRankingEventsEntityTypeConfiguration());
             builder.ApplyConfiguration(new CompetitionEventsEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserReferralEntityTypeConfiguration());
             base.OnModelCreating(builder);
         }
 
@@ -75,6 +76,7 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<StudentCompetitionSnapShot> StudentCompetitionSnapShots { get; set; }
         public DbSet<StudentRankingEvents> StudentRankingEvents { get; set; }
         public DbSet<CompetitionEvents> CompetitionEvents { get; set; }
+        public DbSet<UserReferral> UserReferrals { get; set; }
 
         #endregion Db Set
 
