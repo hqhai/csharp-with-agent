@@ -5,6 +5,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Attributes;
     using Fsel.Identity.Domain.Constants;
+    using Fsel.Shared.Enums;
 
     public class UserRegisterModel
     {
@@ -17,6 +18,14 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
 
         [Required(ErrorMessage = "Last name cannot be empty.")]
         public string? LastName { get; set; }
+
+        public EnumGender? Gender { get; set; }
+
+        public int? DayBirthday { get; set; }
+
+        public int? MonthBirthday { get; set; }
+
+        public int? YearBirthday { get; set; }
 
         [Required(ErrorMessage = "Birth day cannot be empty.")]
         public DateTime? Birthday { get; set; }

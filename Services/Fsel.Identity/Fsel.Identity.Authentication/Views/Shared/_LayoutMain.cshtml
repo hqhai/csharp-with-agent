@@ -18,6 +18,8 @@
 
     <!-- CSS -->
     <link rel="stylesheet" href="~/assets/css/main.css" />
+    @* <link rel="stylesheet" href="~/assets/css/base/index.css" /> *@
+    @* <link rel="stylesheet" href="~/assets/css/components/index.css" /> *@
     <link rel="stylesheet" href="~/assets/css/pages/common.css" />
 
     <link href="~/lib/font-awesome/css/all.css" rel="stylesheet" />
@@ -31,11 +33,7 @@
     @* <partial name="_Nav" /> *@
 
     <div class="container">
-        @await Component.InvokeAsync("Languages")
-
-        <div class="content">
-            @RenderBody()
-        </div>
+        @RenderBody()
     </div>
 
     <div class="loading hidden" @* style="display: none !important" *@>
@@ -44,11 +42,7 @@
         </div>
     </div>
    
-    @* <div class="container body-container">
-        @RenderBody()
-    </div> *@
-
-    <script src="~/lib/jquery/dist/jquery.slim.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/assets/js/main.js"></script>
 

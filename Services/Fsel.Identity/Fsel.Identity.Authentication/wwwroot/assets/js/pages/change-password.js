@@ -205,10 +205,10 @@
 
     const isValidNewPassword = validatePasswordFormat(newPassword);
     passwordMeter.css("width", `${isValidNewPassword}%`);
-    if (isValidNewPassword >= 61 && isValidNewPassword <= 100) {
+    if (isValidNewPassword > 80 && isValidNewPassword <= 100) {
       meterText.text("Strong");
       passwordMeter.css("background-color", "#3E8E41");
-    } else if (isValidNewPassword >= 40 && isValidNewPassword <= 60) {
+    } else if (isValidNewPassword > 40 && isValidNewPassword <= 80) {
       meterText.text("Good");
       passwordMeter.css("background-color", "#EC9213");
     } else {
@@ -254,7 +254,7 @@
         .attr("src", "/assets/icons/close-icon.svg");
     }
 
-    if (/[A-Z]/.test(newPassword)) {
+    if (/[A-Z]/.test(newPassword) && /[a-z]/.test(newPassword)) {
       passUpCaseItem.css("color", "var(--white-color)");
       passUpCaseItem
         .find("img")
@@ -302,7 +302,7 @@
       /[a-z]/.test(password),
       /\d/.test(password),
       /[!@#$%^&*(),.?":{}|<>]/.test(password),
-      password.length >= 6,
+      password.length >= 8,
     ];
 
     const totalConditions = conditions.length;
@@ -323,12 +323,12 @@
     );
   }
 
-  policyCheckbox.on("change", function () {
-    if (policyCheckbox.prop("checked")) {
-      signUpButton.prop("disabled", false);
-    } else {
-      signUpButton.prop("disabled", true);
-    }
-  });
+  //policyCheckbox.on("change", function () {
+  //  if (policyCheckbox.prop("checked")) {
+  //    signUpButton.prop("disabled", false);
+  //  } else {
+  //    signUpButton.prop("disabled", true);
+  //  }
+  //});
 
 }(jQuery));	
