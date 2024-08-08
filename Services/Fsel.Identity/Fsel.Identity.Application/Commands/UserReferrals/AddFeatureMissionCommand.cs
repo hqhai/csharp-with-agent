@@ -72,6 +72,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                             {
                                 FeatureUserReferral = request.FeatureUserReferral,
                                 Token = token,
+                                CreatedDate = DateTime.UtcNow,
                             }
                     };
                 }
@@ -81,6 +82,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                     {
                         FeatureUserReferral = request.FeatureUserReferral,
                         Token = token,
+                        CreatedDate = DateTime.UtcNow,
                     });
                 }
 
@@ -90,6 +92,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                     {
                         FeatureUserReferral = EnumFeatureUserReferral.DoneUnit1,
                         Token = token,
+                        CreatedDate = DateTime.UtcNow,
                     });
                     isAddDoneUnit1 = true;
                 }

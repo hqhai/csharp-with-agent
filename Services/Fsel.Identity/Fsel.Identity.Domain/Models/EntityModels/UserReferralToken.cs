@@ -8,5 +8,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
     {
         public EnumFeatureUserReferral FeatureUserReferral { get; set; }
         public int Token { get; set; }
+        public DateTime CreatedDate { get; set; }
     }
 }
