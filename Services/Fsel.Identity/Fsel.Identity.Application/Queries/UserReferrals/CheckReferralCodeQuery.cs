@@ -5,32 +5,31 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base.Managers;
-    using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
-    using Microsoft.EntityFrameworkCore;
 
-    public class CheckReferralCodeQuery : IRequest<MethodResult<bool>>
+    public class CheckReferralCodeQuery : IRequest<MethodResult<SenderModel>>
     {
         public string? ReferralCode { get; set; }
     }
 
-    public class CheckReferralCodeQueryHandler : IRequestHandler<CheckReferralCodeQuery, MethodResult<bool>>
+    public class CheckReferralCodeQueryHandler : IRequestHandler<CheckReferralCodeQuery, MethodResult<SenderModel>>
     {
-        private readonly UserManager<User> _userManager;
+        private readonly IMediator _mediator;
 
-        public CheckReferralCodeQueryHandler(UserManager<User> userManager)
+        public CheckReferralCodeQueryHandler(IMediator mediator)
         {
-            _userManager = userManager;
+            _mediator = mediator;
         }
 
-        public async Task<MethodResult<bool>> Handle(CheckReferralCodeQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<SenderModel>> Handle(CheckReferralCodeQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<bool>();
+            var methodResult = new MethodResult<SenderModel>();
 
-            var sender = await _userManager.Users.Include(p => p.Human).FirstOrDefaultAsync(p => p.Human != null && !string.IsNullOrEmpty(p.Human.Code) && p.Human.Code.Trim().ToLower() == request.ReferralCode.Trim().ToLower(), cancellationToken);
-            methodResult.Result = sender != null;
+            var result = await _mediator.Send(new GetSenderByCodeQuery() { ReferralCode = request.ReferralCode }, cancellationToken);
+
+            methodResult.Result = result.Result;
             return methodResult;
         }
     }
