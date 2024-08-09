@@ -134,6 +134,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     GradingStartDate = x.GradingStartDate,
                     CreatedDate = x.CreatedDate,
                     CreatedFullName = x.CreatedFullName,
+                    CreatedUserId = x.CreatedUserId,
                     ClassForumScores = _mapper.Map<IList<ClassForumScoreModel>>(x.ClassForumScores.OrderBy(x => x.CreatedDate)),
                     ClassForumResultFiles = _mapper.Map<IList<ClassForumResultFileModel>>(x.ClassForumResultFiles),
                     TokenLastTime = x.TokenLastTime,
@@ -161,25 +162,19 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var notificationTurnOff = notificationRemind.Content?.Result;
             List<ClassForumResultModel> classForumResultModels = new List<ClassForumResultModel>();
 
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).ToList());
-            var students = studentResults?.Content?.Result;
-            if (students == null || !students.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
-                return methodResult;
-            }
-
+            var userResults = await _userService.GetUsersByUserIdsAsync(lists.Select(x => x.CreatedUserId).ToList());
+            var users = userResults?.Content?.Result;
             if (actions != null)
             {
                 classForumResultModels = lists.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
                 foreach (var item in classForumResultModels)
                 {
-                    var studentDto = students.FirstOrDefault(x => x.Id == item.StudentId);
+                    var user = users?.FirstOrDefault(x => x.Id == item.CreatedUserId);
                     var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
                     item.CommentNumber = action?.CommentNumber;
                     item.LikeNumber = action?.LikeNumber;
                     item.IsLiked = action?.IsLiked;
-                    item.CreatedFullName = studentDto?.Human?.FullName;
+                    item.CreatedFullName = user?.FullName;
                     item.IsTurnedOffNotification = notificationTurnOff!.Any(x => x.ObjectId == item.Id);
                     item.CourseLevel = student.CourseLevel;
                 }

@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -74,7 +73,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                                                             CreatedDate = x.CreatedDate,
                                                                             CreatedFullName = x.CreatedFullName,
                                                                             CreatedUserId = x.CreatedUserId,
-                                                                            StudentId = x.StudentId,
                                                                             Type = x.MockTest!.MockTestType,
                                                                             CourseSkill = x.MockTest.MockTestSections.Select(x => x.SectionGroup).Select(x => x!.CourseSkill).FirstOrDefault(),
                                                                             UnitDisplayOrder = x.MockTest.MockTestType == EnumMockTestType.FullMockTest ? x.MockTest.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault() : x.MockTest.UnitSkillMockTests.Where(y => y.UnitId == x.UnitId).Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests).Where(y => y.CourseId == x.CourseId).Select(x => x.Number).FirstOrDefault(),
@@ -83,16 +81,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             mockTestResultQuery = mockTestResultQuery.Where(x => x.CourseSkill == EnumCourseSkill.Speaking || x.Type == EnumMockTestType.FullMockTest);
             //Keyword
 
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(mockTestResultQuery.Where(x => x.StudentId.HasValue).Select(x => x.StudentId!.Value).ToList());
-            var students = studentResults?.Content?.Result;
-            if (students == null || !students.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
-                return methodResult;
-            }
+            var userResults = await _userService.GetUsersByUserIdsAsync(mockTestResultQuery.Select(x => x.CreatedUserId).ToList());
+            var users = userResults?.Content?.Result;
+
             foreach (var item in mockTestResultQuery)
             {
-                item.CreatedFullName = students.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.FullName;
+                item.CreatedFullName = users?.FirstOrDefault(x => x.Id == item.CreatedUserId)?.FullName;
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))

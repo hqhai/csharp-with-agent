@@ -5,7 +5,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using System;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Entities;
@@ -69,6 +68,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             }
             var teacher = teacherResults.Content?.Result;
 
+            var result = new ReviewTeacherRatingDetailSearchModel
+            {
+                FullName = teacher?.Human?.FullName
+            };
+
             var videoResultQuery = from baseQ in _videoResultRepository.Queryable
                                    join v in _videoRepository.Queryable on baseQ.VideoId equals v.Id
                                    join lr in _lessonResultRepository.Queryable on baseQ.LessonResultId equals lr.Id
@@ -78,7 +82,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                    {
                                        Id = baseQ.Id,
                                        Code = c.Code,
-                                       StudentId = baseQ.StudentId,
                                        CreatedDate = baseQ.CreatedDate,
                                        CreatedFullName = baseQ.CreatedFullName,
                                        CreatedUserId = baseQ.CreatedUserId,
@@ -97,7 +100,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                  {
                                      Id = baseQ.Id,
                                      Code = c.Code,
-                                     StudentId = baseQ.StudentId,
                                      CreatedDate = baseQ.CreatedDate,
                                      CreatedFullName = baseQ.CreatedFullName,
                                      CreatedUserId = baseQ.CreatedUserId,
@@ -116,7 +118,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                 select new ReviewTeacherRatingDetailModel
                                 {
                                     Id = baseQ.Id,
-                                    StudentId = baseQ.StudentId,
                                     Code = c.Code,
                                     CreatedDate = baseQ.CreatedDate,
                                     CreatedFullName = baseQ.CreatedFullName,
@@ -129,17 +130,12 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                 };
 
             var query = mockTestQuery.AsEnumerable().Union(classFormQuery.AsEnumerable()).Union(videoResultQuery.AsEnumerable());
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(query.Where(x => x.StudentId.HasValue).Select(x => x.StudentId!.Value).ToList());
-            var students = studentResults?.Content?.Result;
-            if (students == null || !students.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
-                return methodResult;
-            }
-
+            var userIds = query.Select(x => x.CreatedUserId).Distinct().ToList();
+            var userResults = await _userService.GetUsersByUserIdsAsync(userIds);
+            var users = userResults?.Content?.Result;
             foreach (var item in query)
             {
-                item.CreatedFullName = students.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.FullName;
+                item.CreatedFullName = users?.FirstOrDefault(x => x.Id == item.CreatedUserId)?.FullName;
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -157,7 +153,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             {
                 item.Stars = NumberHelper.ConvertRound(item.Stars);
             }
-            methodResult.Result = new ReviewTeacherRatingDetailSearchModel { FullName = teacher?.Human?.FullName, PagingItemsModel = new PagingItemsModel<ReviewTeacherRatingDetailModel>(lists, request, totalItem) };
+            result.PagingItemsModel = new PagingItemsModel<ReviewTeacherRatingDetailModel>(lists, request, totalItem);
+            methodResult.Result = result;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

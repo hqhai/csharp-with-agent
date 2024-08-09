@@ -56,8 +56,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumQuery.ClassForumResults.Select(x => x.Id).ToList(), UserId = _authContext.CurrentUserId });
                 var actions = actionsResult.Content?.Result;
 
-                var studentResult = await _userService.GetStudentsByStudentIdsAsync(classForumQuery.ClassForumResults.Select(x => x.StudentId).ToList());
-                var students = studentResult.Content?.Result;
+                var userResult = await _userService.GetUsersByUserIdsAsync(classForumQuery.ClassForumResults.Select(x => x.CreatedUserId).ToList());
+                var users = userResult.Content?.Result;
                 if (actions != null)
                 {
                     foreach (var item in classForm?.ClassForumResults!)
@@ -70,10 +70,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                             item.LikeNumber = action.LikeNumber;
                             item.IsLiked = action.IsLiked;
                         }
-                        var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
-                        item.CreatedFullName = student?.Human?.FullName;
-                        item.AvatarPath = student?.Human?.AvatarPath;
-                        item.CreatedFullName = student?.Human?.FullName;
+                        var user = users?.FirstOrDefault(x => x.Id == item.CreatedUserId);
+                        item.CreatedFullName = user?.Human?.FullName;
+                        item.AvatarPath = user?.Human?.AvatarPath;
+                        item.CreatedFullName = user?.Human?.FullName;
                     }
                 }
             }

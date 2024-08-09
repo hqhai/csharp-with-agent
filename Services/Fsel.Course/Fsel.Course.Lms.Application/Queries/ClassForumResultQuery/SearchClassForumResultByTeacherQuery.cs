@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -88,16 +87,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                         WordContent = x.WordContent
                                     }).AsEnumerable();
 
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(classForumResultQuery.Select(x => x.StudentId).ToList());
-            var students = studentResults?.Content?.Result;
-            if (students == null || !students.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
-                return methodResult;
-            }
+            var userResults = await _userService.GetUsersByUserIdsAsync(classForumResultQuery.Select(x => x.CreatedUserId).ToList());
+            var users = userResults?.Content?.Result;
+
             foreach (var item in classForumResultQuery)
             {
-                item.CreatedFullName = students.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.FullName;
+                item.CreatedFullName = users?.FirstOrDefault(x => x.Id == item.CreatedUserId)?.FullName;
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))

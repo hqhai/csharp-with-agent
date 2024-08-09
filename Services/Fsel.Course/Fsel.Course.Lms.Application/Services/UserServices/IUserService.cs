@@ -100,5 +100,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Put("/v1/user/update-code-student")]
         Task<IApiResponse<MethodResult<UserModel>>> UpdateCodeStudentAsync([FromBody] UpdateCodeStudentCommandModel command);
+
+        [Post("/v1/user/get-users-by-userids")]
+        Task<IApiResponse<MethodResult<IList<UserModel>>>> GetUsersByUserIdsAsync([FromBody] IList<Guid>? userIds);
     }
 }

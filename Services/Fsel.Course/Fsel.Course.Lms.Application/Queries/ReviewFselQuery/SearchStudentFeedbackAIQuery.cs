@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
@@ -64,28 +63,17 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                             FeedBackPositivesStr = baseQ.FeedBackPositivesStr,
                             FeedBackStars = baseQ.FeedBackStars,
                             Type = baseQ.Type,
-                            StudentId = cfr.StudentId
                         };
             if (request.NumberOfStars != null)
             {
                 query = query.Where(x => x.FeedBackStars + 0.5 >= request.NumberOfStars && x.FeedBackStars < request.NumberOfStars + 0.5);
             }
             var result = await query.ToListAsync(cancellationToken);
-
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(result.Where(x => x.StudentId.HasValue).Select(x => x.StudentId!.Value).ToList());
-            var students = studentResults?.Content?.Result;
-            if (students == null || !students.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
-                return methodResult;
-            }
-
+            var userResults = await _userService.GetUsersByUserIdsAsync(result.Select(x => x.CreatedUserId).ToList());
+            var users = userResults?.Content?.Result;
             foreach (var item in result)
             {
-                if (item.StudentId.HasValue)
-                {
-                    item.CreatedFullName = students.FirstOrDefault(x => x.Id == item.StudentId.Value)?.Human?.FullName;
-                }
+                item.CreatedFullName = users?.FirstOrDefault(x => x.Id == item.CreatedUserId)?.FullName;
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))

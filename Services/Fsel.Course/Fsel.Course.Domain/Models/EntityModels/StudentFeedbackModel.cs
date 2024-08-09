@@ -8,7 +8,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class StudentFeedbackModel : BaseModel
     {
-        public Guid? StudentId { get; set; }
         public EnumStudentFeedBackType Type { get; set; }
         public EnumFeature Feature { get; set; }
         public int? FeedBackStars { get; set; }

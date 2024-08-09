@@ -55,6 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                         Id = x.Id,
                                         CreatedFullName = x.CreatedFullName,
                                         CreatedDate = x.CreatedDate,
+                                        CreatedUserId = x.CreatedUserId,
                                         Status = x.Status,
                                         CourseSkill = x.ClassForum!.CourseSkill,
                                         CourseType = x.ClassForum.Lesson!.CourseLevel.GetEnumCourseType(),
@@ -76,17 +77,13 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).ToList());
-            var students = studentResults?.Content?.Result;
-            if (students == null || !students.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
-                return methodResult;
-            }
+            var userResults = await _userService.GetUsersByUserIdsAsync(lists.Select(x => x.CreatedUserId).ToList());
+            var users = userResults?.Content?.Result;
+
             foreach (var item in lists)
             {
-                var studentDto = students.FirstOrDefault(x => x.Id == item.StudentId);
-                item.CreatedFullName = studentDto?.Human?.FullName;
+                var user = users?.FirstOrDefault(x => x.Id == item.CreatedUserId);
+                item.CreatedFullName = user?.FullName;
             }
             methodResult.Result = new PagingItemsModel<ClassForumResultSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
