@@ -2,7 +2,6 @@
 
 namespace Fsel.Interaction.Domain.Models.EntityModels
 {
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
 
     public class CustomerSurveyModel : BaseCommandModel
@@ -10,5 +9,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public object? Answer { get; set; }
         public Guid? UserId { get; set; }
         public Guid SurveyQuestionId { get; set; }
+
+        public bool IsCompleted { get; set; }
     }
 }

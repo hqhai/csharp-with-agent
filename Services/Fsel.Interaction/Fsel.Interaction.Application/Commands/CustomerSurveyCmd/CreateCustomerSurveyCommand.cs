@@ -4,6 +4,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.UserServices;
@@ -70,23 +71,42 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             #endregion pilot
 
             List<CustomerSurvey> customerSurveys = new List<CustomerSurvey>();
+            List<CustomerSurvey> customerSurveysUpdate = new List<CustomerSurvey>();
+
+            var listExistsAnswers = _customerSurveyRepository.Queryable.Where(x => x.UserId == request.UserId).ToList();
+
+            var listSurveyQuestionId = listExistsAnswers.Select(x => x.SurveyQuestionId).ToList();
+
 
             foreach (var item in request.Answers)
             {
-                var customerSurvey = new CustomerSurvey
-                {
-                    Answer = item.Answer,
-                    UserId = request.UserId ?? _authContext.CurrentUserId,
-                    SurveyQuestionId = item.Id,
-                    IsCompleted = item.IsCompleted
-                };
+                var customerSurvey = listExistsAnswers.FirstOrDefault(x => x.SurveyQuestionId == item.Id);
+
                 if (!customerSurvey.IsValid())
                 {
                     methodResult.AddErrorBadRequest(customerSurvey.ErrorMessages);
                     return methodResult;
                 }
 
-                customerSurveys.Add(customerSurvey);
+                CustomerSurveyModel modelAnswer = new CustomerSurveyModel
+                {
+                    Answer = item.Answer,
+                    UserId = request.UserId ?? _authContext.CurrentUserId,
+                    SurveyQuestionId = item.Id,
+                    IsCompleted = item.IsCompleted
+                };
+
+                if (customerSurvey != null)
+                {
+                    customerSurvey = _mapper.Map(modelAnswer, customerSurvey);
+                    customerSurveysUpdate.Add(customerSurvey);
+                }
+                else
+                {
+                    var newCustomerSurvey = _mapper.Map<CustomerSurvey>(modelAnswer);
+                    customerSurveys.Add(newCustomerSurvey);
+                }
+
             }
 
             bool completedSurvey = customerSurveys.All(x => x.IsCompleted);
@@ -100,7 +120,8 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             await _customerSurveyRepository.ExecuteTransactionAsync(async () =>
             {
                 await _customerSurveyRepository.AddList(customerSurveys);
-                await _customerSurveyRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                _customerSurveyRepository.UpdateList(customerSurveysUpdate);
+                await _customerSurveyRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 #region Send email Survey Pilot
 
