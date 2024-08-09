@@ -33,7 +33,6 @@ namespace Fsel.System.Application.Commands.TechieCmd
         private readonly TechieSendMessagePublisher _techieSendMessagePublisher;
         private readonly ILogger<object> _logger;
 
-
         public CreateStudentTechieCommandHandler(IMapper mapper, ITechieActionRepository techieActionRepository, IStudentTechieRepository studentTechieRepository, IUserService userService, AuthContext authContext, TechieSendMessagePublisher techieSendMessagePublisher, ILogger<object> logger)
         {
             _mapper = mapper;
@@ -50,14 +49,12 @@ namespace Fsel.System.Application.Commands.TechieCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StudentTechieModel>();
 
-
             var techieActions = _techieActionRepository.Queryable.Where(x => x.Action == request.Actions && x.Feature == request.TechieFeature).ToList();
 
             if (request.Config == null || request.Config.StartTime >= 0 || request.Config.EndTime >= 0)
             {
                 return methodResult;
             }
-
 
             var techieActionFilter = techieActions.FirstOrDefault(x => (x.Config != null && x.Config.StartTime >= 0 && x.Config.EndTime >= 0) &&
                                                                        ((x.Config.StartTime <= request.Config.StartTime && x.Config.EndTime >= request.Config.EndTime) ||
@@ -87,6 +84,7 @@ namespace Fsel.System.Application.Commands.TechieCmd
             };
 
             #region Validate
+
             if (request == null || request.TechieFeature == EnumTechieFeature.Greeting)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentId), studentId);
@@ -106,7 +104,7 @@ namespace Fsel.System.Application.Commands.TechieCmd
                 return methodResult;
             }
 
-            #endregion
+            #endregion Validate
 
             await _studentTechieRepository.ExecuteTransactionAsync(async () =>
             {
@@ -121,7 +119,6 @@ namespace Fsel.System.Application.Commands.TechieCmd
                     Feature = techieActionModel.Feature,
                     Action = techieActionModel.Action,
                     Priority = techieActionModel.Priority,
-
                 };
 
                 _logger.LogInformation("Send Techie To Socket");
@@ -131,7 +128,6 @@ namespace Fsel.System.Application.Commands.TechieCmd
 
             methodResult.StatusCode = StatusCodes.Status201Created;
             return methodResult;
-
         }
     }
 }
