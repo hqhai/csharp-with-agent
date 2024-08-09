@@ -108,7 +108,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     item.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
                 }
             }
-
             methodResult.Result = new PagingItemsModel<StudentProgressModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

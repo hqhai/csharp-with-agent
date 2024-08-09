@@ -9,10 +9,15 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class StudentFeedbackModel : BaseModel
     {
         public EnumStudentFeedBackType Type { get; set; }
+
         public EnumFeature Feature { get; set; }
+
         public int? FeedBackStars { get; set; }
+
         public string? FeedBackNote { get; set; }
+
         public string? FeedBackPositivesStr { get; set; }
+
         public string? FeedBackNegativesStr { get; set; }
     }
 }
