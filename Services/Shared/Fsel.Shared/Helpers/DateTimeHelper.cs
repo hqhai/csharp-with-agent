@@ -126,9 +126,10 @@ namespace Fsel.Shared.Helpers
             return string.Format(CultureInfo.InvariantCulture, "{0}h{1:D2}'", hours, minutes);
         }
 
-        public static int ConvertSecondsToHours(long seconds)
+        public static object ConvertSecondsToHours(long seconds)
         {
-            return (int)seconds / 3600;
+            double hours = (double)seconds / 3600;
+            return hours >= 1 ? (object)(int)hours : Math.Round(hours, 1);
         }
 
         public static int ConvertSecondsToHoursRoundUp(long seconds)
