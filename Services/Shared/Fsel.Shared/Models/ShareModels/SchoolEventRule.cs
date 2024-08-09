@@ -6,6 +6,7 @@ namespace Fsel.Shared.Models.ShareModels
     {
         public bool LuckySpin { get; set; }
         public int PaymentMonth { get; set; }
+        public bool IsByPassPayment { get; set; }
         public IList<WeekEvent>? WeekEvents { get; set; }
     }
 
