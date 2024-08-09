@@ -43,13 +43,13 @@ COPY --from=publish /app/publish .
 RUN mkdir -p /app/Resources/CertificateSSL
 
 # Copy SSL certificate and key into the container
-COPY Services/Fsel.Identity/Fsel.Identity.Authentication/Resources/CertificateSSL/certificate.crt /app/Resources/CertificateSSL/certificate.crt
-COPY Services/Fsel.Identity/Fsel.Identity.Authentication/Resources/CertificateSSL/privatekey.key /app/Resources/CertificateSSL/privatekey.key
+COPY Services/Fsel.Identity/Fsel.Identity.Authentication/Resources/CertificateSSL/certificate_20240809.pem /app/Resources/CertificateSSL/certificate_20240809.pem
+COPY Services/Fsel.Identity/Fsel.Identity.Authentication/Resources/CertificateSSL/privatekey_20240809.pem /app/Resources/CertificateSSL/privatekey_20240809.pem
 
 # Set environment variables for SSL
 ENV ASPNETCORE_URLS="https://+:443;http://+:80"
-ENV ASPNETCORE_Kestrel__Certificates__Default__Path=/app/Resources/CertificateSSL/certificate.crt
-ENV ASPNETCORE_Kestrel__Certificates__Default__KeyPath=/app/Resources/CertificateSSL/privatekey.key
+ENV ASPNETCORE_Kestrel__Certificates__Default__Path=/app/Resources/CertificateSSL/certificate_20240809.pem
+ENV ASPNETCORE_Kestrel__Certificates__Default__KeyPath=/app/Resources/CertificateSSL/privatekey_20240809.pem
 
 # Start the application
 ENTRYPOINT ["dotnet", "Fsel.Identity.Authentication.dll"]
