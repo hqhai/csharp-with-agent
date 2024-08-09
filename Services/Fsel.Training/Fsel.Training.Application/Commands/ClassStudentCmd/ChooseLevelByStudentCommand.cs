@@ -87,7 +87,7 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 return methodResult;
             }
 
-            var checkIsLuckySpinResult = await _userService.CheckLuckySpin();
+            var checkIsLuckySpinResult = await _userService.GetEventByUserId(_authContext.CurrentUserId);
 
             if (checkIsLuckySpinResult.IsSuccessStatusCode && checkIsLuckySpinResult.Content != null && checkIsLuckySpinResult.Content.Result != null && checkIsLuckySpinResult.Content.Result.Any(p => p.EventContent != null && p.EventContent.IsByPassPayment))
             {
