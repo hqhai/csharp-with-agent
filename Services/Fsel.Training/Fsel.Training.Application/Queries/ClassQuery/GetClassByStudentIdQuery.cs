@@ -42,7 +42,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             ArgumentNullException.ThrowIfNull(request);
 
             MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetUserByStudentId(request.StudentId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
@@ -55,7 +55,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                 return methodResult;
             }
             var @class = await _classRepository.Queryable.Include(x => x.ClassStudents.Where(n => !n.IsDeleted))
-                                            .FirstOrDefaultAsync(e => e.ClassStudents.Any(x => x.StudentId == student.Id && x.ClassId == student.ClassId && x.IsActive), cancellationToken);
+                                            .FirstOrDefaultAsync(e => e.ClassStudents.Any(x => x.StudentId == student.Id && x.ClassId == student.ClassId), cancellationToken);
             methodResult.Result = _mapper.Map<ClassModel>(@class);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
