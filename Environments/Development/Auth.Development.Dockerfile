@@ -1,10 +1,10 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
+# Base image for running the application
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
+# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
@@ -24,12 +24,32 @@ COPY . .
 WORKDIR "/src/Services/Fsel.Identity/Fsel.Identity.Authentication"
 RUN dotnet build "./Fsel.Identity.Authentication.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
+# Publish stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./Fsel.Identity.Authentication.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
+# Final stage
 FROM base AS final
 WORKDIR /app
+
+# Set environment
 ENV ASPNETCORE_ENVIRONMENT=Development
+
+# Copy the publish directory
 COPY --from=publish /app/publish .
+
+# Create the directory for certificates
+RUN mkdir -p /app/Resources/CertificateSSL
+
+# Copy SSL certificate and key into the container
+COPY Services/Fsel.Identity/Fsel.Identity.Authentication/Resources/CertificateSSL/certificate.crt /app/Resources/CertificateSSL/certificate.crt
+COPY Services/Fsel.Identity/Fsel.Identity.Authentication/Resources/CertificateSSL/privatekey.key /app/Resources/CertificateSSL/privatekey.key
+
+# Set environment variables for SSL
+ENV ASPNETCORE_URLS="https://+:443;http://+:80"
+ENV ASPNETCORE_Kestrel__Certificates__Default__Path=/app/Resources/CertificateSSL/certificate.crt
+ENV ASPNETCORE_Kestrel__Certificates__Default__KeyPath=/app/Resources/CertificateSSL/privatekey.key
+
+# Start the application
 ENTRYPOINT ["dotnet", "Fsel.Identity.Authentication.dll"]
