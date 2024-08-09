@@ -184,10 +184,22 @@ namespace Fsel.Identity.Api.Controllers
         /// check user referral code
         /// </summary>
         [HttpGet("check-user-referral-code")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
-        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<SenderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CheckUserReferralCode([FromQuery] CheckReferralCodeQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// check user referral code
+        /// </summary>
+        [HttpGet("get-sender-by-code")]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        [ProducesResponseType(typeof(MethodResult<SenderModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSenderByCode([FromQuery] GetSenderByCodeQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
