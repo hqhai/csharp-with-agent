@@ -89,7 +89,7 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
 
             var checkIsLuckySpinResult = await _userService.CheckLuckySpin();
 
-            if (checkIsLuckySpinResult.IsSuccessStatusCode && checkIsLuckySpinResult.Content != null && checkIsLuckySpinResult.Content.Result != null && checkIsLuckySpinResult.Content.Result.Any(p => p.EventContent != null && p.EventContent.LuckySpin))
+            if (checkIsLuckySpinResult.IsSuccessStatusCode && checkIsLuckySpinResult.Content != null && checkIsLuckySpinResult.Content.Result != null && checkIsLuckySpinResult.Content.Result.Any(p => p.EventContent != null && p.EventContent.IsByPassPayment))
             {
                 var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
                 if (!studentResult.IsSuccessStatusCode)
@@ -101,7 +101,7 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
 
                 var checkIsLuckySpin = checkIsLuckySpinResult.Content.Result;
 
-                var paymentMonth = checkIsLuckySpin.Where(p => p.EventContent != null && p.EventContent.LuckySpin).Select(p => p.EventContent).Select(p => p.PaymentMonth).Max();
+                var paymentMonth = checkIsLuckySpin.Where(p => p.EventContent != null && p.EventContent.IsByPassPayment).Select(p => p.EventContent).Select(p => p.PaymentMonth).Max();
 
                 await _orderService.CreateOrderForUserLeaderBoard(new CreateOrderForUserFromLeaderBoardCommandModel()
                 {
