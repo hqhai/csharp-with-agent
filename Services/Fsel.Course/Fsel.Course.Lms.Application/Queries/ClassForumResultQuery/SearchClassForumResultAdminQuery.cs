@@ -83,7 +83,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             foreach (var item in lists)
             {
                 var user = users?.FirstOrDefault(x => x.Id == item.CreatedUserId);
-                item.CreatedFullName = user?.FullName;
+                item.CreatedFullName = user?.FullName ?? item.CreatedFullName;
             }
             methodResult.Result = new PagingItemsModel<ClassForumResultSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

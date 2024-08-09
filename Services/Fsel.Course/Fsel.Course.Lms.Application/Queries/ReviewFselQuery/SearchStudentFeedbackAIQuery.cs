@@ -73,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             var users = userResults?.Content?.Result;
             foreach (var item in result)
             {
-                item.CreatedFullName = users?.FirstOrDefault(x => x.Id == item.CreatedUserId)?.FullName;
+                item.CreatedFullName = users?.FirstOrDefault(x => x.Id == item.CreatedUserId)?.FullName ?? item.CreatedFullName;
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))

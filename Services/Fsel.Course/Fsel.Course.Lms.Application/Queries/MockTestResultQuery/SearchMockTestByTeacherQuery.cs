@@ -49,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
             var teacherId = teacherResult.Content?.Result?.Id;
 
-            var mockTestResultQuery = _mockTestResultRepository.Queryable.Include(x => x.MockTest)
+            var query = _mockTestResultRepository.Queryable.Include(x => x.MockTest)
                                                                         .ThenInclude(x => x!.MockTestSections)
                                                                         .ThenInclude(x => x!.SectionGroup)
                                                                         .Include(x => x.MockTest)
@@ -77,8 +77,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                                                             CourseSkill = x.MockTest.MockTestSections.Select(x => x.SectionGroup).Select(x => x!.CourseSkill).FirstOrDefault(),
                                                                             UnitDisplayOrder = x.MockTest.MockTestType == EnumMockTestType.FullMockTest ? x.MockTest.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault() : x.MockTest.UnitSkillMockTests.Where(y => y.UnitId == x.UnitId).Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests).Where(y => y.CourseId == x.CourseId).Select(x => x.Number).FirstOrDefault(),
                                                                             CourseCode = x.MockTest.MockTestResults.Where(y => y.Id == x.Id).Select(x => x.Course!.Code).FirstOrDefault(),
-                                                                        }).AsEnumerable();
-            mockTestResultQuery = mockTestResultQuery.Where(x => x.CourseSkill == EnumCourseSkill.Speaking || x.Type == EnumMockTestType.FullMockTest);
+                                                                        });
+            var mockTestResultQuery = await query.Where(x => x.CourseSkill == EnumCourseSkill.Speaking || x.Type == EnumMockTestType.FullMockTest).ToListAsync(cancellationToken);
             //Keyword
 
             var userResults = await _userService.GetUsersByUserIdsAsync(mockTestResultQuery.Select(x => x.CreatedUserId).ToList());
@@ -86,12 +86,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 
             foreach (var item in mockTestResultQuery)
             {
-                item.CreatedFullName = users?.FirstOrDefault(x => x.Id == item.CreatedUserId)?.FullName;
+                item.CreatedFullName = users?.FirstOrDefault(x => x.Id == item.CreatedUserId)?.FullName ?? item.CreatedFullName;
             }
-
+            var result = mockTestResultQuery.AsEnumerable();
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                mockTestResultQuery = mockTestResultQuery.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                result = result.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             if (request.MockTestFilter != null)
@@ -99,26 +99,26 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 switch (request.MockTestFilter)
                 {
                     case EnumMockTestFilter.Speaking:
-                        mockTestResultQuery = mockTestResultQuery.Where(m => m.Type == EnumMockTestType.SkillMockTest && m.CourseSkill == EnumCourseSkill.Speaking);
+                        result = result.Where(m => m.Type == EnumMockTestType.SkillMockTest && m.CourseSkill == EnumCourseSkill.Speaking);
                         break;
 
                     case EnumMockTestFilter.Full:
-                        mockTestResultQuery = mockTestResultQuery.Where(m => m.Type == EnumMockTestType.FullMockTest);
+                        result = result.Where(m => m.Type == EnumMockTestType.FullMockTest);
                         break;
                 }
             }
 
             if (request.UnitDisplayOrder != null)
             {
-                mockTestResultQuery = mockTestResultQuery.Where(m => m.UnitDisplayOrder == request.UnitDisplayOrder);
+                result = result.Where(m => m.UnitDisplayOrder == request.UnitDisplayOrder);
             }
             if (request.CourseId != null)
             {
-                mockTestResultQuery = mockTestResultQuery.Where(m => m.CourseId == request.CourseId);
+                result = result.Where(m => m.CourseId == request.CourseId);
             }
 
-            int totalItem = mockTestResultQuery.Count();
-            var lists = mockTestResultQuery.ApplySortAndPaging(request).ToList();
+            int totalItem = result.Count();
+            var lists = result.ApplySortAndPaging(request).ToList();
 
             foreach (var item in lists)
             {
