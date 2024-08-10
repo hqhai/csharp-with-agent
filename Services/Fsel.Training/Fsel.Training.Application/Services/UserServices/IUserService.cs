@@ -55,5 +55,8 @@ namespace Fsel.Training.Application.Services.UserServices
 
         [Get("/v1/student-ranking/check-lucky-spin")]
         Task<IApiResponse<MethodResult<bool>>> CheckLuckySpin();
+
+        [Get("/v1/user/get-by-student-id/{id}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> GetUserByStudentId([FromRoute] Guid id);
     }
 }
