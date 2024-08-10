@@ -28,7 +28,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
         public int? YearBirthday { get; set; }
 
         [Required(ErrorMessage = "Birth day cannot be empty.")]
-        public DateTime? Birthday { get; set; }
+        public DateTime? Birthday => DayBirthday.HasValue && MonthBirthday.HasValue && YearBirthday.HasValue ? new DateTime(YearBirthday.Value, MonthBirthday.Value, DayBirthday.Value) : null;
 
         [DataType(DataType.Password)]
         [RegexValid(ErrorMessage = "Password is not valid.", Regex = RegexSettings.Password)]

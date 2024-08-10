@@ -7,105 +7,203 @@
 
 @section styles {
     <link rel="stylesheet" href="~/assets/css/pages/sign-up.css" />
-    @* <link href="~/lib/daterangepicker/css/daterangepicker.css" rel="stylesheet" /> *@
+    <link href="~/lib/daterangepicker/css/daterangepicker.css" rel="stylesheet" />
     <link href="~/lib/flatpickr/css/flatpickr.min.css" rel="stylesheet" />
     <link href="~/lib/flatpickr/css/custom.css" rel="stylesheet" />
 }
 
-<img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
-<form id="form-ExternalLogin" asp-action="ExternalLoginConfirmation">
-    <input type="hidden" asp-for="ReturnUrl" />
-    @Html.AntiForgeryToken()
-
-    <!-- Choose a password -->
-    <section class="section-survey">
-        <h1 class="title">Confirm information to link your <strong>@Model.Provider</strong> account.</h1>
-
-        <div>
-            <div class="float-input float-input-validate">
-                <input class="text-input"
-                       type="text"
-                       name="Email"
-                       id="email"
-                       placeholder=" "
-                       autocomplete="off"
-                       required
-                       readonly
-                       asp-for="Email" />
-                <label for="Email" class="input-label">Email</label>
-            </div>
-            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "content-text-danger" })
+<div class="all-content">
+    <div class="content">
+        <div class="langs">
+            @await Component.InvokeAsync("Languages")
         </div>
-        <div class="row">
-            <div class="col-sm-6">
-                <div class="float-input float-input-validate">
-                    <input class="text-input"
-                           type="text"
-                           name="LastName"
-                           id="LastName"
-                           placeholder=" "
-                           autocomplete="off"
-                           required
-                           asp-for="LastName" />
-                    <label for="LastName" class="input-label">Last name</label>
+
+        <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
+        <form id="form-ExternalLogin" asp-route="ExternalLoginConfirmation">
+            <input type="hidden" asp-for="ReturnUrl" />
+            @Html.AntiForgeryToken()
+
+            <!-- What’s your email? section -->
+            <div class="section-survey step-2 active">
+                <div class="row lastname-and-name">
+                    <div class="col-sm-6">
+                        <div class="float-input float-input-validate">
+                            <input class="text-input"
+                                   type="text"
+                                   name="LastName"
+                                   id="lastName"
+                                   placeholder=""
+                                   autocomplete="off"
+                                   required
+                                   asp-for="LastName" />
+                            <label for="LastName" class="input-label">Last name</label>
+                        </div>
+                        @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "content-text-danger" })
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="float-input float-input-validate">
+                            <input class="text-input"
+                                   type="text"
+                                   name="FirstName"
+                                   id="firstName"
+                                   placeholder=""
+                                   autocomplete="off"
+                                   required
+                                   asp-for="FirstName" />
+                            <label for="FirstName" class="input-label">First name</label>
+                        </div>
+                        @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "content-text-danger" })
+                    </div>
                 </div>
-                @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "content-text-danger" })
-            </div>
-            <div class="col-sm-6">
-                <div class="float-input float-input-validate">
-                    <input class="text-input"
-                           type="text"
-                           name="FirstName"
-                           id="FirstName"
-                           placeholder=" "
-                           autocomplete="off"
-                           required
-                           asp-for="FirstName" />
-                    <label for="FirstName" class="input-label">First name</label>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="float-input float-input-validate">
+                            <input class="text-input"
+                                   type="text"
+                                   name="Email"
+                                   id="email"
+                                   placeholder=""
+                                   autocomplete="off"
+                                   required
+                                   asp-for="Email" />
+                            <label for="Email" class="input-label">Email</label>
+                        </div>
+                        @Html.ValidationMessageFor(model => model.Email, "", new { @class = "content-text-danger" })
+                    </div>
                 </div>
-                @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "content-text-danger" })
-            </div>
-        </div>
-        <div>
-            <div class="float-input float-input-validate">
-                <input class="text-input"
-                       type="text"
-                       max="@(DateTime.Now.ToString("yyyy-MM-dd"))"
-                       name="Birthday"
-                       id="Birthday"
-                       placeholder=""
-                       autocomplete="off"
-                       value=""
-                       asp-for="Birthday" />
-                <label for="Birthday" class="input-label">Birthday</label>
-            </div>
-            @Html.ValidationMessageFor(model => model.Birthday, "", new { @class = "content-text-danger" })
-        </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="float-input float-input-validate option-birthday">
+                            <div class="name-option">
+                                <span>Birthday</span>
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     width="18"
+                                     height="18"
+                                     viewBox="0 0 18 18"
+                                     fill="none">
+                                    <path d="M8.99365 15.5566C12.7312 15.5566 15.8162 12.4717 15.8162 8.74072C15.8162 5.00977 12.7246 1.9248 8.98706 1.9248C5.2561 1.9248 2.17773 5.00977 2.17773 8.74072C2.17773 12.4717 5.2627 15.5566 8.99365 15.5566ZM8.83545 10.0986C8.40698 10.0986 8.16968 9.90088 8.16968 9.50537V9.43286C8.16968 8.81323 8.52563 8.46387 9.01343 8.12109C9.59351 7.71899 9.87695 7.50146 9.87695 7.07959C9.87695 6.62476 9.52759 6.32153 8.98706 6.32153C8.59155 6.32153 8.30151 6.51929 8.08398 6.85547C7.87305 7.09277 7.77417 7.29712 7.37866 7.29712C7.05566 7.29712 6.79199 7.08618 6.79199 6.75659C6.79199 6.62476 6.81836 6.5061 6.8645 6.38745C7.08203 5.74146 7.87305 5.21411 9.05298 5.21411C10.2791 5.21411 11.314 5.8667 11.314 7.01367C11.314 7.80469 10.8789 8.2002 10.1934 8.64185C9.7583 8.92529 9.50781 9.1626 9.48804 9.51855C9.48804 9.53833 9.48145 9.57129 9.48145 9.59766C9.46167 9.8811 9.21777 10.0986 8.83545 10.0986ZM8.82886 12.208C8.38062 12.208 8.01147 11.885 8.01147 11.45C8.01147 11.0149 8.37402 10.6919 8.82886 10.6919C9.2771 10.6919 9.63965 11.0149 9.63965 11.45C9.63965 11.8916 9.27051 12.208 8.82886 12.208Z"
+                                          fill="#657990" />
+                                </svg>
+                            </div>
+                            <div class="birthday">
+                                <div class="float-input float-input-validate">
+                                    <input type="text"
+                                           placeholder=""
+                                           class="text-input"
+                                           id="Day"
+                                           asp-for="DayBirthday"
+                                           name="DayBirthday"
+                                           autocomplete="off"
+                                           readonly />
+                                    <label for="DayBirthday" class="input-label">Day</label>
+                                    <div class="dropdown-content" id="dayDropdownContent"></div>
+                                </div>
 
-        <button type="submit" class="btn continue-btn">
-            Confirm
-            <svg width="19"
-                 height="18"
-                 viewBox="0 0 19 18"
-                 fill="none"
-                 xmlns="http://www.w3.org/2000/svg">
-                <g id="Icon">
-                    <path id="Vector"
-                          d="M15.4965 9.28717C15.5329 9.19939 15.5531 9.1032 15.5534 9.00233V8.99783C15.5528 8.80664 15.4796 8.61562 15.3337 8.46975L10.0304 3.16645C9.73752 2.87355 9.26264 2.87355 8.96975 3.16645C8.67686 3.45934 8.67686 3.93421 8.96975 4.22711L12.9927 8.25008L4.19678 8.25008C3.78256 8.25008 3.44678 8.58587 3.44678 9.00008C3.44678 9.41429 3.78256 9.75008 4.19678 9.75008H12.9927L8.96975 13.773C8.67685 14.0659 8.67685 14.5408 8.96975 14.8337C9.26264 15.1266 9.73751 15.1266 10.0304 14.8337L15.3333 9.53078L15.3353 9.52882C15.4064 9.45728 15.4601 9.37497 15.4965 9.28717Z"
-                          fill="currentcolor" />
-                </g>
-            </svg>
-        </button>
-    </section>
-</form>
+                                <div class="float-input float-input-validate">
+                                    <input type="text"
+                                           placeholder=""
+                                           class="text-input"
+                                           id="Month"
+                                           asp-for="MonthBirthday"
+                                           name="MonthBirthday"
+                                           autocomplete="off"
+                                           readonly />
+                                    <label for="MonthBirthday" class="input-label">Month</label>
+                                    <div class="dropdown-content"
+                                         id="monthDropdownContent"></div>
+                                </div>
 
-<partial class="mt-3" name="_ValidationSummary" />
+                                <div class="float-input float-input-validate">
+                                    <input type="text"
+                                           placeholder=""
+                                           class="text-input"
+                                           id="Year"
+                                           asp-for="YearBirthday"
+                                           name="YearBirthday"
+                                           autocomplete="off"
+                                           readonly />
+                                    <label for="YearBirthday" class="input-label">Year</label>
+                                    <div class="dropdown-content"
+                                         id="yearDropdownContent"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="option-birthday">
+                            <div class="name-option">
+                                <span>Gender</span>
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     width="18"
+                                     height="18"
+                                     viewBox="0 0 18 18"
+                                     fill="none">
+                                    <path d="M8.99365 15.5566C12.7312 15.5566 15.8162 12.4717 15.8162 8.74072C15.8162 5.00977 12.7246 1.9248 8.98706 1.9248C5.2561 1.9248 2.17773 5.00977 2.17773 8.74072C2.17773 12.4717 5.2627 15.5566 8.99365 15.5566ZM8.83545 10.0986C8.40698 10.0986 8.16968 9.90088 8.16968 9.50537V9.43286C8.16968 8.81323 8.52563 8.46387 9.01343 8.12109C9.59351 7.71899 9.87695 7.50146 9.87695 7.07959C9.87695 6.62476 9.52759 6.32153 8.98706 6.32153C8.59155 6.32153 8.30151 6.51929 8.08398 6.85547C7.87305 7.09277 7.77417 7.29712 7.37866 7.29712C7.05566 7.29712 6.79199 7.08618 6.79199 6.75659C6.79199 6.62476 6.81836 6.5061 6.8645 6.38745C7.08203 5.74146 7.87305 5.21411 9.05298 5.21411C10.2791 5.21411 11.314 5.8667 11.314 7.01367C11.314 7.80469 10.8789 8.2002 10.1934 8.64185C9.7583 8.92529 9.50781 9.1626 9.48804 9.51855C9.48804 9.53833 9.48145 9.57129 9.48145 9.59766C9.46167 9.8811 9.21777 10.0986 8.83545 10.0986ZM8.82886 12.208C8.38062 12.208 8.01147 11.885 8.01147 11.45C8.01147 11.0149 8.37402 10.6919 8.82886 10.6919C9.2771 10.6919 9.63965 11.0149 9.63965 11.45C9.63965 11.8916 9.27051 12.208 8.82886 12.208Z"
+                                          fill="#657990" />
+                                </svg>
+                            </div>
+                            <div class="option-gender">
+                                <div class="option">
+                                    <input class="round-radio"
+                                           type="radio"
+                                           asp-for="Gender"
+                                           name="gender"
+                                           id="male"
+                                           value="Male" />
+                                    <label for="male" class="round-radio-label">Male</label>
+                                </div>
+                                <div class="option">
+                                    <input class="round-radio"
+                                           type="radio"
+                                           asp-for="Gender"
+                                           name="gender"
+                                           id="female"
+                                           value="Female" />
+                                    <label for="female" class="round-radio-label">Female</label>
+                                </div>
+                                <div class="option">
+                                    <input class="round-radio"
+                                           type="radio"
+                                           asp-for="Gender"
+                                           name="gender"
+                                           id="other"
+                                           value="Other" />
+                                    <label for="other" class="round-radio-label">Other</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="checkbox">
+                    <input type="checkbox" name="policy" id="policy" hidden />
+                    <label for="policy" class="service-policy">
+                        I agree to the <a> Terms of Service</a> and
+                        <a>Privacy Policy</a>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn sign-up-btn">
+                Confirm
+            </button>
+
+            <div class="text-footer">Already a member? <a href="/Account/Login">Log in now</a></div>
+        </form>
+
+        <partial class="mt-3" name="_ValidationSummary" />
+    </div>
+
+    @await Component.InvokeAsync("RightBanner")
+</div>
 
 @section scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
         <script src="~/lib/momentjs/js/moment.min.js"></script>
-        // <script src="~/lib/daterangepicker/js/daterangepicker.min.js"></script>
+        <script src="~/lib/daterangepicker/js/daterangepicker.min.js"></script>
         <script src="~/lib/flatpickr/js/flatpickr.js"></script>
 
         <script src="~/assets/js/pages/external-login.js"></script>

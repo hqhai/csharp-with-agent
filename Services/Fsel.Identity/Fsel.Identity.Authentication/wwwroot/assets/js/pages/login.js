@@ -1,53 +1,64 @@
 (function ($) {
   $('#form-Login').on('submit', function (e) {
-    if (this.checkValidity()) {
+    if (validateAll() && this.checkValidity()) {
       $('.loading').removeClass('hidden');
     }
+    e.preventDefault();
   });
 
   const emailInput = $("#username");
   const passwordInput = $("#password");
   const loginButton = $("#loginButton");
 
-  emailInput.on("input", function() {
-      const email = emailInput.val().trim();
+  emailInput.on("input", validateEmail);
+  passwordInput.on("input", validatePasswordFormat);
 
-      /*
-      const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-z]{2,}$/;
-      console.log(email);
-      if (emailRegex.test(email)) {
-          emailInput.css("borderColor", "");
-          enableDisableLoginButton();
-      } else {
-          emailInput.css("borderColor", "#d98c93");
-          enableDisableLoginButton();
-      }
-      */
-     
-      if (email) {
-          emailInput.css("borderColor", "");
-          enableDisableLoginButton();
-      } else {
-          emailInput.css("borderColor", "#d98c93");
-          enableDisableLoginButton();
-      }
-  });
+  function validateEmail() {
+    const email = emailInput.val().trim();
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (email !== "" && emailPattern.test(email)) {
+      emailInput.removeClass("content-border-danger");
+      return true;
+    } else {
+      emailInput.addClass("content-border-danger");
+      return false;
+    }
+  }
 
-  passwordInput.on("input", function() {
-      const password = passwordInput.val();
-      const hasUppercase = /[A-Z]/.test(password);
-      const hasLowercase = /[a-z]/.test(password);
-      const hasSpecialChar = /[@$!%*?&.]/.test(password);
-      const hasNumber = /\d/.test(password);
+  function validatePasswordFormat() {
+    var password = passwordInput.val();
+    const conditions = [
+      /[A-Z]/.test(password),
+      /[a-z]/.test(password),
+      /\d/.test(password),
+      /[!@#$%^&*(),.?":{}|<>]/.test(password),
+      password.length >= 8,
+    ];
+    const totalConditions = conditions.length;
+    let correctConditions = conditions.filter(condition => condition).length;
+    var result = Math.round((correctConditions / totalConditions) * 100);
 
-      if (hasUppercase && hasLowercase && hasSpecialChar && hasNumber && password.length >= 8) {
-          passwordInput.css("borderColor", "");
-          enableDisableLoginButton();
-      } else {
-          passwordInput.css("borderColor", "#d98c93");
-          enableDisableLoginButton();
-      }
-  });
+    if (result !== 100) {
+      passwordInput.addClass("content-border-danger")
+    } else {
+      passwordInput.removeClass("content-border-danger");
+    }
+
+    return result;
+  }
+
+  function validateAll() {
+    let isDoneAllValidate = true;
+
+    // Validate each field
+    const isValidEmail = validateEmail();
+    const isValidPassword = validatePasswordFormat() === 100;
+
+    if (!isValidEmail) isDoneAllValidate = false;
+    if (!isValidPassword) isDoneAllValidate = false;
+
+    return isDoneAllValidate;
+  }
 
   function enableDisableLoginButton() {
       const email = emailInput.val();
@@ -66,6 +77,6 @@
   }
 
   // Kiểm tra khi trang web tải lần đầu
-  enableDisableLoginButton();
+  //enableDisableLoginButton();
 
 }(jQuery));	

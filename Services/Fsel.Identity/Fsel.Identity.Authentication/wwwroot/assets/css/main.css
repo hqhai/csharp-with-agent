@@ -635,10 +635,13 @@ input {
 }
 
 .content-right {
-  height: 100%;
-  padding: 17px 17px 17px 0 !important;
   position: relative;
-  width: 65%;
+  width: 65%; 
+  height: 96vh;
+  border-radius: 20px;
+  background-image: url('https://s3-sgn10.fptcloud.com/fsel-public/Files/Right_7609_1723006204223.png');
+  background-repeat: no-repeat;
+  background-size: cover;
   /* width: 100%;
   animation: smoth-open 0.3s ease-in-out forwards; */
 }

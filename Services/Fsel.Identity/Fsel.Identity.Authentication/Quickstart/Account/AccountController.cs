@@ -719,7 +719,9 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     Email = email,
                     FirstName = firstName,
                     LastName = lastName,
-                    Birthday = birthday,
+                    DayBirthday = birthday?.Day,
+                    MonthBirthday = birthday?.Month,
+                    YearBirthday = birthday?.Year,
                     Provider = info.LoginProvider,
                 };
 
@@ -770,6 +772,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         UserName = request.Email,
                         FirstName = request.FirstName,
                         LastName = request.LastName,
+                        Gender = request.Gender,
                         Birthday = request.Birthday,
                         EmailConfirmed = true,
                     };

@@ -3,7 +3,6 @@
     if (validateAll() && this.checkValidity()) {
       $('.loading').removeClass('hidden');
     }
-
     e.preventDefault();
   });
 
