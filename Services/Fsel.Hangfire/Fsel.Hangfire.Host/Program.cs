@@ -42,7 +42,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.SetTimeRetryMockTest, typeof(SetTimeToRetryMockTestConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SetTimeRetryClassForum, typeof(SetTimeToRetryClassForumConsumer) },
     { QueueSettings.SystemQueue.NameQueue.SetCompleteApprovalPostTimeOut, typeof(SetTimeToCompleteApprovalConsumer) },
-    { QueueSettings.UserQueue.NameQueue.SetTimeToSendReviewFsel, typeof(SetTimeToReviewFselConsumer) },
+    //{ QueueSettings.UserQueue.NameQueue.SetTimeToSendReviewFsel, typeof(SetTimeToReviewFselConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SetTimeClassForumDone, typeof(SetTimeToClassForumApprovalConsumer) },
 });
 var app = builder.Build();
