@@ -1,31 +1,30 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Commands.StudentRankingEvents
-
+namespace Fsel.Identity.Application.Queries.StudentRanking
 {
+    using System.Collections.Generic;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CheckStudentLuckySpinCmd : IRequest<MethodResult<IList<CompetitionEventsModel>?>>
+    public class GetEventsByUserIdQuery : IRequest<MethodResult<IList<CompetitionEventsModel>>>
     {
         public Guid? UserId { get; set; }
     }
 
-    public class CheckStudentLuckySpinCmdHandler : IRequestHandler<CheckStudentLuckySpinCmd, MethodResult<IList<CompetitionEventsModel>?>>
+    public class GetEventsByUserIdQueryHandler : IRequestHandler<GetEventsByUserIdQuery, MethodResult<IList<CompetitionEventsModel>>>
     {
         private readonly AuthContext _authContext;
         private readonly IStudentRankingEventsRepository _studentRankingEventsRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IMapper _mapper;
 
-        public CheckStudentLuckySpinCmdHandler(AuthContext authContext, IStudentRankingEventsRepository studentRankingEventsRepository, IStudentRepository studentRepository, IMapper mapper)
+        public GetEventsByUserIdQueryHandler(AuthContext authContext, IStudentRankingEventsRepository studentRankingEventsRepository, IStudentRepository studentRepository, IMapper mapper)
         {
             _authContext = authContext;
             _studentRankingEventsRepository = studentRankingEventsRepository;
@@ -33,10 +32,10 @@ namespace Fsel.Identity.Application.Commands.StudentRankingEvents
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<IList<CompetitionEventsModel>?>> Handle(CheckStudentLuckySpinCmd request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<CompetitionEventsModel>>> Handle(GetEventsByUserIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<IList<CompetitionEventsModel>?>();
+            var methodResult = new MethodResult<IList<CompetitionEventsModel>>();
 
             var userId = request.UserId ?? _authContext.CurrentUserId;
 
@@ -46,10 +45,10 @@ namespace Fsel.Identity.Application.Commands.StudentRankingEvents
                 .Where(x => student != null && x.StudentId == student.Id)
                 .ToListAsync(cancellationToken);
 
-            var competitionEvents = studentRankingEvents.Where(x => x.CompetitionEvents != null && x.CompetitionEvents.EventContent != null && x.CompetitionEvents.EventContent.LuckySpin)
+            var competitionEvents = studentRankingEvents.Where(x => x.CompetitionEvents != null && x.CompetitionEvents.EventContent != null)
                 .Select(x => x.CompetitionEvents);
 
-            methodResult.Result = _mapper.Map<IList<CompetitionEventsModel>?>(competitionEvents);
+            methodResult.Result = _mapper.Map<IList<CompetitionEventsModel>>(competitionEvents);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

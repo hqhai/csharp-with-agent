@@ -165,6 +165,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 if (studentFocusTimes.Count <= 7)
                 {
                     await DoQuestBoard(studentFocusTime.StudentId, EnumQuestBoardType.LearningQuests, EnumQuestBoardCategory.InfinityFocusMode, cancellationToken);
+                    await DoQuestBoard(studentFocusTime.StudentId, EnumQuestBoardType.LearningQuests, EnumQuestBoardCategory.CompleteMissionDay, cancellationToken);
                 }
 
                 await DoQuestBoard(studentFocusTime.StudentId, EnumQuestBoardType.BeginnerQuests, EnumQuestBoardCategory.CompleteFocusModeFirst, cancellationToken);
