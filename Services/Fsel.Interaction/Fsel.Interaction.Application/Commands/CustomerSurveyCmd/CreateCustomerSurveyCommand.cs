@@ -82,11 +82,6 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             {
                 var customerSurvey = listExistsAnswers.FirstOrDefault(x => x.SurveyQuestionId == item.Id);
 
-                if (!customerSurvey.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(customerSurvey.ErrorMessages);
-                    return methodResult;
-                }
 
                 CustomerSurveyModel modelAnswer = new CustomerSurveyModel
                 {
