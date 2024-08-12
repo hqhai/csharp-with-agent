@@ -116,8 +116,10 @@ namespace Fsel.System.Application.Queries.LuckyTickets
                     AvatarPath = student.Human?.AvatarPath,
                     StudentId = student.Id,
                     StudentName = student.Human?.FullName,
+                    Email = student.Human?.Email,
                     SchoolName = student.School,
                     Ticket = item.Ticket,
+                    CreatedDate = item.CreatedDate,
                 });
             }
 
