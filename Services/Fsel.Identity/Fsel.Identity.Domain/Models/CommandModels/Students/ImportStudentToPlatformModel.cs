@@ -20,5 +20,8 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Students
 
         [EpplusTableColumn(Header = "School")]
         public string? School { get; set; }
+
+        [EpplusTableColumn(Header = "Referral Code")]
+        public string? ReferralCode { get; set; }
     }
 }
