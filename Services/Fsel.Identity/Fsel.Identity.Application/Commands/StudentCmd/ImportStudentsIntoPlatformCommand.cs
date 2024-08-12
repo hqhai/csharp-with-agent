@@ -127,9 +127,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             Student = new Student()
                             {
                                 CreatedByParent = false,
-                                Occupation = "Student",
-                                CourseLevel = EnumCourseLevel.A1,
-                                School = student.School,
+                                Occupation = "Student"
                             }
                         },
                         UserPlatforms = new List<UserPlatform>()
@@ -199,7 +197,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         }
                     }
 
-                    var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = user.Human.Birthday }, cancellationToken);
+                    var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = user.Human.Birthday, SchoolName = student.School }, cancellationToken);
                     if (!updateCode.IsOK)
                     {
                         methodResult.AddErrorBadRequest(updateCode.ErrorMessages);
