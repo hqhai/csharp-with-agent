@@ -18,6 +18,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public bool NotifiEmail { get; set; }
 
+        public bool IsSoundEffect { get; set; }
+
         public string? Language { get; set; }
     }
 }
