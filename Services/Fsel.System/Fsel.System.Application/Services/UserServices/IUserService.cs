@@ -66,7 +66,7 @@ namespace Fsel.System.Application.Services.UserServices
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByEmails([Body] IList<string> emails);
 
         [Get("/v1/student-ranking/check-lucky-spin")]
-        Task<IApiResponse<MethodResult<bool>>> CheckLuckySpin([Query] Guid? userId);
+        Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>?>>> CheckLuckySpin([Query] Guid? userId);
 
         [Post("/v1/student-focus-time")]
         Task<IApiResponse<MethodResult<IList<StudentFocusTimeModel>>>> SaveFocusTime([Body] StudentFocusTimeCommandModel cmd);

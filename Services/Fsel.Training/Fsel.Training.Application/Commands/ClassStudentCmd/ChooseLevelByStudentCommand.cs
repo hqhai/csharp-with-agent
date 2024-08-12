@@ -87,9 +87,9 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 return methodResult;
             }
 
-            var checkIsLuckySpinResult = await _userService.CheckLuckySpin();
+            var checkIsLuckySpinResult = await _userService.GetEventByUserId(_authContext.CurrentUserId);
 
-            if (checkIsLuckySpinResult.IsSuccessStatusCode && checkIsLuckySpinResult.Content?.Result == true)
+            if (checkIsLuckySpinResult.IsSuccessStatusCode && checkIsLuckySpinResult.Content != null && checkIsLuckySpinResult.Content.Result != null && checkIsLuckySpinResult.Content.Result.Any(p => p.EventContent != null && p.EventContent.IsByPassPayment))
             {
                 var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
                 if (!studentResult.IsSuccessStatusCode)
@@ -99,9 +99,14 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 }
                 var student = studentResult.Content?.Result;
 
+                var checkIsLuckySpin = checkIsLuckySpinResult.Content.Result;
+
+                var paymentMonth = checkIsLuckySpin.Where(p => p.EventContent != null && p.EventContent.IsByPassPayment).Select(p => p.EventContent).Select(p => p.PaymentMonth).Max();
+
                 await _orderService.CreateOrderForUserLeaderBoard(new CreateOrderForUserFromLeaderBoardCommandModel()
                 {
                     UserId = _authContext.CurrentUserId,
+                    Month = paymentMonth,
                     FullName = student?.Human?.FullName,
                     Email = student?.Human?.Email,
                     PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
