@@ -222,6 +222,8 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                 if (questBoard.Type == EnumQuestBoardType.BeginnerQuests)
                 {
                     var questBoards = await _questBoardRepository.Queryable.Where(p => p.Type == EnumQuestBoardType.BeginnerQuests).ToListAsync(cancellationToken);
+                    var questBoardOveralls = await _questBoardOverallRepository.Queryable.Where(p => p.Type == EnumQuestBoardType.BeginnerQuests).ToListAsync(cancellationToken);
+                    var maxValue = questBoardOveralls.Max(p => p.TargetValue);
                     var questBoardIds = questBoards.Select(p => p.Id).ToList();
                     var questBoardStudents = await _questBoardStudentRepository.Queryable.Where(p => p.StudentId == studentId && questBoardIds.Contains(p.QuestBoardId) && p.Status == EnumQuestBoardStudentStatus.Received).ToListAsync(cancellationToken);
 
@@ -233,9 +235,9 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                     {
                         await DoQuestBoardOverallBeginnerQuests(studentId, questBoardStudents, 4, cancellationToken);
                     }
-                    else if (questBoardStudents.Count <= 6)
+                    else if (questBoardStudents.Count <= maxValue)
                     {
-                        await DoQuestBoardOverallBeginnerQuests(studentId, questBoardStudents, 6, cancellationToken);
+                        await DoQuestBoardOverallBeginnerQuests(studentId, questBoardStudents, maxValue, cancellationToken);
                     }
                 }
                 else
