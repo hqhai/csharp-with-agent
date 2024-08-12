@@ -19,7 +19,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -96,11 +95,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
                 if (request.IsApprove)
                 {
-                    if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.Autodot || (studentPackageCode == EnumPackageCode.BASIC && classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.TeacherGrading))
-                    {
-                        classForumResult.Status = EnumClassForumResultStatus.Graded;
-                    }
-
+                    classForumResult.Status = EnumClassForumResultStatus.Graded;
                     var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
                     var csoId = csoResults.Content?.Result?.Id;
                     classForumResult.CheckCsoId = csoId;
