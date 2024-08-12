@@ -28,6 +28,7 @@ namespace Fsel.Identity.Application.Queues.Consumers
                 FeatureUserReferral = message.FeatureUserReferral,
                 ReceiverId = message.ReceiverId,
                 Token = message.Token,
+                PackageId = message.PackageId,
             }).ConfigureAwait(false);
         }
     }
