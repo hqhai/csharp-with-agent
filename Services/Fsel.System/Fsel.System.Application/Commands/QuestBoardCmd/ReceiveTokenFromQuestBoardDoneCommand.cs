@@ -229,15 +229,15 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
 
                     if (questBoardStudents.Count <= 2)
                     {
-                        await DoQuestBoardOverallBeginnerQuests(studentId, questBoardStudents, 2, cancellationToken);
+                        await DoQuestBoardOverallBeginnerQuests(studentId, 2, cancellationToken);
                     }
                     else if (questBoardStudents.Count <= 4)
                     {
-                        await DoQuestBoardOverallBeginnerQuests(studentId, questBoardStudents, 4, cancellationToken);
+                        await DoQuestBoardOverallBeginnerQuests(studentId, 4, cancellationToken);
                     }
                     else if (questBoardStudents.Count <= maxValue)
                     {
-                        await DoQuestBoardOverallBeginnerQuests(studentId, questBoardStudents, maxValue, cancellationToken);
+                        await DoQuestBoardOverallBeginnerQuests(studentId, maxValue, cancellationToken);
                     }
                 }
                 else
@@ -267,7 +267,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             return null;
         }
 
-        private async Task DoQuestBoardOverallBeginnerQuests(Guid studentId, List<QuestBoardStudent>? questBoardStudents, int targetValue, CancellationToken cancellationToken)
+        private async Task DoQuestBoardOverallBeginnerQuests(Guid studentId, int targetValue, CancellationToken cancellationToken)
         {
             var questBoardOverall = await _questBoardOverallRepository.Queryable.FirstOrDefaultAsync(p => p.Type == EnumQuestBoardType.BeginnerQuests && p.TargetValue == targetValue, cancellationToken);
             if (questBoardOverall != null)
@@ -279,7 +279,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                     {
                         QuestBoardOverallId = questBoardOverall.Id,
                         StudentId = studentId,
-                        CurrentValue = targetValue - 1,
+                        CurrentValue = targetValue == 7 ? targetValue - 2 : targetValue - 1,
                         Token = questBoardOverall.Token,
                         Status = EnumQuestBoardOverallStudentStatus.NotReceived
                     });
