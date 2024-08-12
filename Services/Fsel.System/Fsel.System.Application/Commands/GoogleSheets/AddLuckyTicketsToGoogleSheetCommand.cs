@@ -63,7 +63,7 @@ namespace Fsel.System.Application.Commands.GoogleSheets
 
             var luckyTickets = luckyTicketResults.Result?.Items;
 
-            var data = luckyTickets?.Select(item => new List<object> { item.Email ?? string.Empty, item.StudentName ?? string.Empty, DateTimeHelper.ConvertTimeFromUtc(item.CreatedDate, EnumCountryKey.Vietnam).ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture), item.Ticket ?? string.Empty }).ToList();
+            var data = luckyTickets?.Select(item => new List<object> { item.Email ?? string.Empty, item.StudentName ?? string.Empty, DateTimeHelper.ConvertTimeFromUtc(item.CreatedDate, EnumCountryKey.Vietnam).ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture), item.SchoolName ?? string.Empty, item.Ticket ?? string.Empty }).ToList();
 
             GoogleCredential credential;
 
