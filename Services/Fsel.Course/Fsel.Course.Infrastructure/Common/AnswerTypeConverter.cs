@@ -93,6 +93,7 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.SummaryCompletionGapFill:
                 case EnumQuestionType.CompletionDiagrams:
+                case EnumQuestionType.FlowChartCompletion:
                     (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerSummaryCompletionGapFill(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<CheckListQuestionV1>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
@@ -105,9 +106,8 @@ namespace Fsel.Course.Infrastructure.Common
                     (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerMatchingTask(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<MatchingTaskQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
-                case EnumQuestionType.FlowChartCompletion:
-                    (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerFlowChartCompletion(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<FlowChartCompletionQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
-                    break;
+                //(totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerFlowChartCompletion(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<FlowChartCompletionQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
+                //break;
 
                 case EnumQuestionType.TableCompletion:
                     (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerTableCompletion(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<TableCompletionQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);

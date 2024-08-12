@@ -104,6 +104,7 @@ namespace Fsel.Course.Infrastructure.Common
                     result = config.Deserialize<ExercisePreparationQuestion>();
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
                     break;
+
                 // Dạng câu hỏi mới
                 case EnumQuestionType.MatchingParagraphInfo:
                     var matchingParagraphInfo = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
@@ -160,16 +161,16 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case EnumQuestionType.CompletionDiagrams:
+                case EnumQuestionType.FlowChartCompletion:
                     var completionDiagrams = HandleQuestion(config.Deserialize<CheckListQuestionV1>());
                     result = isDisableAnswers ? ClearAnswers(completionDiagrams) : completionDiagrams;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(completionDiagrams) : default;
                     break;
 
-                case EnumQuestionType.FlowChartCompletion:
-                    var flowChartCompletion = HandleQuestion(config.Deserialize<FlowChartCompletionQuestion>());
-                    result = isDisableAnswers ? ClearAnswers(flowChartCompletion) : flowChartCompletion;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(flowChartCompletion) : default;
-                    break;
+                //var flowChartCompletion = HandleQuestion(config.Deserialize<FlowChartCompletionQuestion>());
+                //result = isDisableAnswers ? ClearAnswers(flowChartCompletion) : flowChartCompletion;
+                //totalCorrect = isShowCorrectTotal ? GetTotalCorrect(flowChartCompletion) : default;
+                //break;
 
                 case EnumQuestionType.TableCompletion:
                     var tableCompletion = HandleQuestion(config.Deserialize<TableCompletionQuestion>());
@@ -486,6 +487,7 @@ namespace Fsel.Course.Infrastructure.Common
                     {
                         Content = match.Groups[1].Value
                     };
+
                     if (data.Answers.Any() && data.Answers.Count >= replacements.Count)
                     {
                         data.Answers.Insert(replacements.Count, config);
