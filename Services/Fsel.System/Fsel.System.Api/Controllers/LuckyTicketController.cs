@@ -8,12 +8,14 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.System.Application.Commands.GoogleSheets;
     using Fsel.System.Application.Commands.LuckyTickets;
     using Fsel.System.Application.Queries.LuckyTickets;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -75,6 +77,18 @@ namespace Fsel.System.Api.Controllers
         public async Task<IActionResult> GetTicketsByStudent()
         {
             var commandResult = await _mediator.Send(new GetLuckyTicketsByStudentQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get tickets by student
+        /// </summary>
+        [HttpGet("export-tickets")]
+        [ProducesResponseType(typeof(MethodResult<IList<string>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportTickets([FromQuery] AddLuckyTicketsToGoogleSheetCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
