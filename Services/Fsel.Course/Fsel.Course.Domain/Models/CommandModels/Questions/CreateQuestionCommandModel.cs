@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Course.Domain.Enums;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Models.CommandModels.Questions
@@ -9,6 +8,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Questions
     {
         public EnumQuestionType QuestionType { get; set; }
         public string? Explanation { get; set; }
+        public string? Description { get; set; }
         public bool Ungraded { get; set; }
         public object? Config { get; set; }
     }
