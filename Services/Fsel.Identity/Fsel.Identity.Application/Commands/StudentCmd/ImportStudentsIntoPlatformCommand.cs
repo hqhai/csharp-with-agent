@@ -36,14 +36,16 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private const string DefaultPassword = "Fsel@2024";
         private readonly IInteractionService _interactionService;
         private readonly IMediator _mediator;
+        private readonly IHumanRepository _humanRepository;
 
-        public ImportStudentsIntoPlatformCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IMediator mediator)
+        public ImportStudentsIntoPlatformCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IMediator mediator, IHumanRepository humanRepository)
         {
             _userManager = userManager;
             _orderService = orderService;
             _platformRepository = platformRepository;
             _interactionService = interactionService;
             _mediator = mediator;
+            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<Stream>> Handle(ImportStudentsIntoPlatformCommand request, CancellationToken cancellationToken)
@@ -80,6 +82,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 if (string.IsNullOrEmpty(x.DateOfBirth) || (!string.IsNullOrEmpty(x.DateOfBirth) && !DateTime.TryParse(x.DateOfBirth, out DateTime dob)))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = "Date of birth is null or malformed" });
+                }
+                if (!string.IsNullOrEmpty(x.ReferralCode) && !await _humanRepository.Queryable.AnyAsync(p => p.Code == x.ReferralCode))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.ReferralCode), Message = "Referral code not exist" });
                 }
                 return await Task.FromResult(errors.Count == 0);
             });
@@ -202,6 +208,16 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     {
                         methodResult.AddErrorBadRequest(updateCode.ErrorMessages);
                         return methodResult;
+                    }
+
+                    if (!string.IsNullOrEmpty(student.ReferralCode))
+                    {
+                        var updateReferralCodeResult = await _mediator.Send(new UpdateReferralCodeStudentCommand { ReferralCode = student.ReferralCode, UserId = user.Id }, cancellationToken).ConfigureAwait(false);
+                        if (!updateReferralCodeResult.IsOK)
+                        {
+                            methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);
+                            return methodResult;
+                        }
                     }
                 }
                 methodResult.StatusCode = StatusCodes.Status200OK;
