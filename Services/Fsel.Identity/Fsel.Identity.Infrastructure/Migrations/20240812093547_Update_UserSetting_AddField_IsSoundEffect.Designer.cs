@@ -4,6 +4,7 @@ using Fsel.Identity.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240812093547_Update_UserSetting_AddField_IsSoundEffect")]
+    partial class Update_UserSetting_AddField_IsSoundEffect
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1795,82 +1798,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.ToTable("UserPlatforms");
                 });
 
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserReferral", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(0);
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
-
-                    b.Property<string>("CreatedFullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
-
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
-
-                    b.Property<string>("FeatureMissionStr")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
-
-                    b.Property<Guid>("ReceiverId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SenderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReceiverId")
-                        .IsUnique();
-
-                    b.HasIndex("SenderId");
-
-                    b.ToTable("UserReferrals");
-                });
-
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserSetting", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2214,25 +2141,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserReferral", b =>
-                {
-                    b.HasOne("Fsel.Identity.Domain.Entities.User", "Receiver")
-                        .WithOne("Receiver")
-                        .HasForeignKey("Fsel.Identity.Domain.Entities.UserReferral", "ReceiverId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Fsel.Identity.Domain.Entities.User", "Sender")
-                        .WithMany("Senders")
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Receiver");
-
-                    b.Navigation("Sender");
-                });
-
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserSetting", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
@@ -2293,10 +2201,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.User", b =>
                 {
                     b.Navigation("Human");
-
-                    b.Navigation("Receiver");
-
-                    b.Navigation("Senders");
 
                     b.Navigation("UserCourseSettings");
 

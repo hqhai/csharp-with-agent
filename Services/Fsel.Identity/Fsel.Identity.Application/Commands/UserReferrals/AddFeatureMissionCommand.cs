@@ -73,6 +73,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                                 FeatureUserReferral = request.FeatureUserReferral,
                                 Token = token,
                                 CreatedDate = DateTime.UtcNow,
+                                PackageId = request.PackageId,
                             }
                     };
                 }
@@ -83,6 +84,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                         FeatureUserReferral = request.FeatureUserReferral,
                         Token = token,
                         CreatedDate = DateTime.UtcNow,
+                        PackageId = request.PackageId,
                     });
                 }
 
@@ -93,6 +95,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                         FeatureUserReferral = EnumFeatureUserReferral.DoneUnit1,
                         Token = _appSetting.UserReferralConfig?.DoneUnit1 ?? 0,
                         CreatedDate = DateTime.UtcNow,
+                        PackageId = request.PackageId,
                     });
                     isAddDoneUnit1 = true;
                 }

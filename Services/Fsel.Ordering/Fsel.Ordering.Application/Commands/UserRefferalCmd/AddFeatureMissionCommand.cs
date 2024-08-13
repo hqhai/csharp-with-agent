@@ -61,6 +61,7 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
             }
 
             int token = 0;
+            Guid? packageId = null;
 
             if (request.FeatureUserReferral == EnumFeatureUserReferral.Payment)
             {
@@ -76,13 +77,15 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
                     return methodResult;
                 }
                 token = package.ReferToken;
+                packageId = package.Id;
             }
 
             await _addFeatureMissionPublisher.Publish(new AddFeatureMissionQueueModel()
             {
                 FeatureUserReferral = request.FeatureUserReferral,
                 ReceiverId = request.ReceiverId,
-                Token = token
+                Token = token,
+                PackageId = packageId
             }, cancellationToken);
 
             return methodResult;
