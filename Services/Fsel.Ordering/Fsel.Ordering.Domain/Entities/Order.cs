@@ -143,6 +143,9 @@ namespace Fsel.Ordering.Domain.Entities
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? CompanyTaxCode { get; set; }
 
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? CompanyEmail { get; set; }
+
         #endregion Company invoice information
 
         #region Không sử dụng
