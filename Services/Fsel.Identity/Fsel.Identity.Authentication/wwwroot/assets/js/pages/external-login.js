@@ -3,7 +3,9 @@
     if (validateAll() && this.checkValidity()) {
       $('.loading').removeClass('hidden');
     }
-    e.preventDefault();
+    else {
+      e.preventDefault();
+    }
   });
 
   // Input elements
@@ -22,6 +24,7 @@
   const $referralCodeElement = $("#referral-code");
   const $policyCheckbox = $("#policy");
   const $dayInput = $("#Day");
+  const $monthBirthdayInput = $("#MonthBirthday");
   const $monthInput = $("#Month");
   const $yearInput = $("#Year");
   const $genderRadios = $("input[name='gender']");
@@ -100,18 +103,18 @@
     else {
       $dayInput.removeClass("content-border-danger");
     }
-    return isValidDay;
+    return isValidDay && validateDate();
   }
 
   function validateMonth() {
-    var isValidMonth = $monthInput.val().trim() !== "";
+    var isValidMonth = $monthBirthdayInput.val().trim() !== "";
     if (!isValidMonth) {
       $monthInput.addClass("content-border-danger");
     }
     else {
       $monthInput.removeClass("content-border-danger");
     }
-    return isValidMonth;
+    return isValidMonth && validateDate();
   }
 
   function validateYear() {
@@ -122,7 +125,28 @@
     else {
       $yearInput.removeClass("content-border-danger");
     }
-    return isValidYear;
+    return isValidYear && validateDate();
+  }
+
+  function validateDate() {
+    if ($yearInput.val().trim() !== "" && $monthBirthdayInput.val().trim() !== "" && $dayInput.val().trim() !== "") {
+      var year = parseInt($yearInput.val().trim());
+      var month = parseInt($monthBirthdayInput.val().trim()) - 1;
+      var day = parseInt($dayInput.val().trim());
+
+      const date = new Date(year, month, day);
+      if (date.getFullYear() === year && date.getMonth() === month && date.getDate() === day) {
+        $yearInput.removeClass("content-border-danger");
+        $monthInput.removeClass("content-border-danger");
+        $dayInput.removeClass("content-border-danger");
+      }
+      else {
+        $yearInput.addClass("content-border-danger");
+        $monthInput.addClass("content-border-danger");
+        $dayInput.addClass("content-border-danger");
+      }
+    }
+    return true;
   }
 
   function validateAll() {
@@ -178,6 +202,11 @@
     $label.removeClass("content-border-danger")
     $policy.removeClass("content-text-danger")
   });
+
+  function selectOptionMonth(inputId, inputValueId, option, value) {
+    $("#" + inputValueId).attr("value", value);
+    selectOption(inputId, option);
+  }
 
   function selectOption(inputId, option) {
     // Gán giá trị lựa chọn vào phần tử input
@@ -273,12 +302,12 @@
       });
   });
 
-  monthOptions.forEach(function (option) {
+  monthOptions.forEach(function (option, index) {
     $("<div>").addClass("dropdown-option")
       .text(option)
       .appendTo($monthDropdownContent)
       .on("click", function () {
-        selectOption('Month', option);
+        selectOptionMonth('Month', 'MonthBirthday', option, index + 1);
         validateMonth();
       });
   });

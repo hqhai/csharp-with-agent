@@ -1,9 +1,11 @@
 (function ($) {
-
   $('#form-VerifyOtp').on('submit', function (e) {
     if (this.checkValidity()) {
       $('.loading').removeClass('hidden');
-    } 
+    }
+    else {
+      e.preventDefault();
+    }
   });
 
   $(".number-item").keyup(function(event) {

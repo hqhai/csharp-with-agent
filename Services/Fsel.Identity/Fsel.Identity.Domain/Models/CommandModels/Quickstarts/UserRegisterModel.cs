@@ -28,18 +28,31 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
         public int? YearBirthday { get; set; }
 
         [Required(ErrorMessage = "Birth day cannot be empty.")]
-        public DateTime? Birthday => DayBirthday.HasValue && MonthBirthday.HasValue && YearBirthday.HasValue ? new DateTime(YearBirthday.Value, MonthBirthday.Value, DayBirthday.Value) : null;
+        public DateTime? Birthday
+        {
+            get
+            {
+                try
+                {
+                    return DayBirthday.HasValue && MonthBirthday.HasValue && YearBirthday.HasValue ? new DateTime(YearBirthday.Value, MonthBirthday.Value, DayBirthday.Value) : null;
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
 
         [DataType(DataType.Password)]
         [RegexValid(ErrorMessage = "Password is not valid.", Regex = RegexSettings.Password)]
         [Required(ErrorMessage = "Password cannot be empty.")]
         public string? Password { get; set; }
 
-        [DataType(DataType.Password)]
-        [Display(Name = "Confirm Password")]
-        [Compare(nameof(Password), ErrorMessage = "Password and confirmation password not match.")]
-        [Required(ErrorMessage = "Password confirmation cannot be empty.")]
-        public string? ConfirmPassword { get; set; }
+        //[DataType(DataType.Password)]
+        //[Display(Name = "Confirm Password")]
+        //[Compare(nameof(Password), ErrorMessage = "Password and confirmation password not match.")]
+        //[Required(ErrorMessage = "Password confirmation cannot be empty.")]
+        //public string? ConfirmPassword { get; set; }
 
         public string? ReferralCode { get; set; }
 

@@ -3,7 +3,9 @@
     if (validateAll() && this.checkValidity()) {
       $('.loading').removeClass('hidden');
     }
-    e.preventDefault();
+    else {
+      e.preventDefault();
+    }
   });
 
   const emailInput = $("#username");

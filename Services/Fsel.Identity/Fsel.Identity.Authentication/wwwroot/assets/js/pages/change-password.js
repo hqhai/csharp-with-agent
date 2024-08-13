@@ -3,6 +3,9 @@
     if (this.checkValidity()) {
       $('.loading').removeClass('hidden');
     }
+    else {
+      e.preventDefault();
+    }
   });
 
   const continueButton = $(".continue-btn");

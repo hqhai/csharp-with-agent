@@ -38,11 +38,11 @@
             </div>
             <button type="submit" class="btn send-otp-button">Send OTP</button>
         </form>
-
-        <partial class="mt-3" name="_ValidationSummary" />
     </div>
 
     @await Component.InvokeAsync("RightBanner")
+
+    <partial class="mt-3" name="_ValidationSummary" />
 </div>
 
 @section scripts {
