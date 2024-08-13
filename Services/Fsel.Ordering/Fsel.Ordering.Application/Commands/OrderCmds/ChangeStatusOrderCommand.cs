@@ -165,6 +165,7 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                             CompanyTaxCode = order.CompanyTaxCode,
                             CompanyAddress = order.CompanyAddress,
                             CompanyName = order.CompanyName,
+                            CompanyEmail = order.CompanyEmail,
                         });
                     }
 

@@ -120,6 +120,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             order.CompanyName = request.CompanyName;
             order.CompanyAddress = request.CompanyAddress;
             order.CompanyTaxCode = request.CompanyTaxCode;
+            order.CompanyEmail = request.CompanyEmail;
             order.ReferralCode = request.ReferralCode;
             order.EventId = request.EventId;
         }
