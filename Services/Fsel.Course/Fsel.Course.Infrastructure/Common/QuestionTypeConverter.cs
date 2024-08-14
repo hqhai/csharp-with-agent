@@ -382,7 +382,7 @@ namespace Fsel.Course.Infrastructure.Common
                     {
                         var config = new AnswerTable
                         {
-                            RowId = item.Id,
+                            RowId = item.Id ?? Guid.NewGuid(),
                             Content = match.Groups[1].Value
                         };
                         if (data.AnswerTables.Any() && data.AnswerTables.Count >= replacements.Count)
@@ -394,7 +394,7 @@ namespace Fsel.Course.Infrastructure.Common
                             data.AnswerTables.Add(config);
                         }
 
-                        replacements[id] = config.Id;
+                        replacements[id] = config.Id ?? Guid.NewGuid();
                     }
                     else
                     {
@@ -449,7 +449,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 data.Answers.Add(config);
                             }
 
-                            replacements[id] = config.Id;
+                            replacements[id] = config.Id ?? Guid.NewGuid();
                         }
                         else
                         {
@@ -497,7 +497,7 @@ namespace Fsel.Course.Infrastructure.Common
                         data.Answers.Add(config);
                     }
 
-                    replacements[id] = config.Id;
+                    replacements[id] = config.Id ?? Guid.NewGuid();
                 }
                 else
                 {
@@ -533,7 +533,7 @@ namespace Fsel.Course.Infrastructure.Common
                         Key = match.Groups[1].Value
                     };
                     data.Answers.Insert(replacements.Count, config);
-                    replacements[id] = config.Id;
+                    replacements[id] = config.Id ?? Guid.NewGuid();
                 }
                 else
                 {
