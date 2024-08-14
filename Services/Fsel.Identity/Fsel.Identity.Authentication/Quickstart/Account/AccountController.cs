@@ -108,10 +108,13 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         /// Verify otp for sample user login
         /// </summary>
         /// <returns></returns>
-        public IActionResult VerifyOtp(string? type)
+        public IActionResult VerifyOtp(string? returnUrl, string? type)
         {
-            ViewBag.Type = type;
-            return View();
+            return View(new VerifyOtpModel
+            {
+                Type = type,
+                ReturnUrl = returnUrl,
+            });
         }
 
         [HttpPost]
@@ -166,6 +169,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
                                 return RedirectToAction(nameof(Success), new
                                 {
+                                    request.ReturnUrl,
                                     message = "Congratulations, your account has been successfully created."
                                 });
                             }
@@ -202,7 +206,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                                 Email = email,
                                 ReturnUrl = request.ReturnUrl,
                             }.Serialize();
-                            return RedirectToAction(nameof(ForgotPassword));
+                            return RedirectToAction(nameof(ForgotPassword), new { request.ReturnUrl });
                         }
                         else
                         {
@@ -215,15 +219,17 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             return View(request);
         }
 
-        public IActionResult Success(string? message = null)
+        public IActionResult Success(string? returnUrl, string? message = null)
         {
             ViewBag.Message = message;
+            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
-        public IActionResult ForgotPassword()
+        public IActionResult ForgotPassword(string? returnUrl)
         {
             var vm = GetFromTempData(nameof(ForgotPasswordModel))?.ToString().Deserialize<ForgotPasswordModel>();
+            ViewBag.ReturnUrl = returnUrl;
             return View(vm);
         }
 
@@ -259,6 +265,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         {
                             return RedirectToAction(nameof(Success), new
                             {
+                                request.ReturnUrl,
                                 message = "Congratulations, your account password has been successfully changed."
                             });
                         }
@@ -273,9 +280,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             return View(request);
         }
 
-        public IActionResult Forgot()
+        public IActionResult Forgot(string? returnUrl)
         {
-            var returnUrl = GetFromTempData(nameof(ForgotModel.ReturnUrl))?.ToString();
             var vm = new ForgotModel
             {
                 ReturnUrl = returnUrl
@@ -289,7 +295,6 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            TempData[nameof(request.ReturnUrl)] = request.ReturnUrl;
             TempData[nameof(ForgotModel)] = request.Serialize();
 
             if (ModelState.IsValid)
@@ -308,7 +313,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     return View(request);
                 }
 
-                return RedirectToAction(nameof(VerifyOtp), new { type = nameof(Forgot) });
+                return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Forgot) });
             }
 
             return View(request);
@@ -318,7 +323,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         /// ResendOtp
         /// </summary>
         /// <returns></returns>
-        public async Task<IActionResult> ResendOtp(string? type)
+        public async Task<IActionResult> ResendOtp(string? returnUrl, string? type)
         {
             User? user;
 
@@ -328,7 +333,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 user = await _userManager.FindByEmailAsync(userRegister?.Email ?? string.Empty);
                 if (user == null)
                 {
-                    return RedirectToAction(nameof(VerifyOtp), new { type });
+                    return RedirectToAction(nameof(VerifyOtp), new { returnUrl, type });
                 }
             }
             else
@@ -337,7 +342,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 user = await _userManager.FindByEmailAsync(forgotModel?.Email ?? string.Empty);
                 if (user == null || !user.EmailConfirmed)
                 {
-                    return RedirectToAction(nameof(VerifyOtp));
+                    return RedirectToAction(nameof(VerifyOtp), new { returnUrl, type });
                 }
             }
             var sendResult = await SendOtpAsync(user);
@@ -346,16 +351,15 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 ModelState.AddModelError(nameof(user.Email), "Failed to send OTP");
             }
 
-            return RedirectToAction(nameof(VerifyOtp));
+            return RedirectToAction(nameof(VerifyOtp), new { returnUrl, type });
         }
 
         /// <summary>
         /// Registration for sample user login
         /// </summary>
         /// <returns></returns>
-        public IActionResult Register()
+        public IActionResult Register(string? returnUrl)
         {
-            var returnUrl = GetFromTempData(nameof(UserRegisterModel.ReturnUrl))?.ToString();
             var vm = new UserRegisterModel
             {
                 ReturnUrl = returnUrl
@@ -369,7 +373,6 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            TempData[nameof(request.ReturnUrl)] = request.ReturnUrl;
             TempData[nameof(UserRegisterModel)] = request.Serialize();
 
             if (ModelState.IsValid)
@@ -411,7 +414,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
                     scope.Complete();
 
-                    return RedirectToAction(nameof(VerifyOtp), new { type = nameof(Register) });
+                    return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Register) });
                 }
 
                 //var context = await _interaction.GetAuthorizationContextAsync(request.ReturnUrl);
@@ -452,8 +455,6 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         [HttpGet]
         public async Task<IActionResult> Login(string? returnUrl)
         {
-            returnUrl ??= GetFromTempData(nameof(LoginInputModel.ReturnUrl))?.ToString();
-
             // build a model so we know what to show on the login page  
             var vm = await BuildLoginViewModelAsync(returnUrl ?? string.Empty);
             if (!string.IsNullOrEmpty(vm.UiLocales))
@@ -471,7 +472,6 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 return RedirectToAction("Challenge", "External", new { scheme = vm.ExternalLoginScheme, returnUrl });
             }
 
-            TempData[nameof(LoginInputModel.ReturnUrl)] = returnUrl;
             return View(vm);
         }
 
@@ -691,12 +691,11 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null)
         {
             returnUrl ??= string.Empty;
-            TempData[nameof(LoginInputModel.ReturnUrl)] = returnUrl;
 
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
-                return RedirectToAction(nameof(Login));
+                return RedirectToAction(nameof(Login), new { returnUrl });
             }
             var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (signInResult.Succeeded)
@@ -705,7 +704,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             }
             if (signInResult.IsLockedOut)
             {
-                return RedirectToAction(nameof(Forgot));
+                return RedirectToAction(nameof(Forgot), new { returnUrl });
             }
             else
             {
@@ -735,7 +734,6 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginModel request)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var returnUrl = GetFromTempData(nameof(ExternalLoginModel.ReturnUrl))?.ToString();
             var externalLogin = GetFromTempData(nameof(ExternalLoginModel))?.ToString().Deserialize<ExternalLoginModel>();
 
             if (!ModelState.IsValid)
@@ -759,7 +757,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 if (result.Succeeded)
                 {
                     await _signInManager.SignInAsync(user, isPersistent: false);
-                    return Redirect(returnUrl ?? string.Empty);
+                    return Redirect(request.ReturnUrl ?? string.Empty);
                 }
             }
             else
@@ -789,7 +787,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                             await _signInManager.SignInAsync(user, isPersistent: false);
 
                             scope.Complete();
-                            return Redirect(returnUrl ?? string.Empty);
+                            return Redirect(request.ReturnUrl ?? string.Empty);
                         }
                     }
 
@@ -883,7 +881,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
         private async Task<LoginViewModel> BuildLoginViewModelAsync(LoginInputModel model)
         {
-            var vm = await BuildLoginViewModelAsync(model.ReturnUrl);
+            var vm = await BuildLoginViewModelAsync(model.ReturnUrl ?? string.Empty);
             vm.Username = model.Username;
             vm.RememberLogin = model.RememberLogin;
             return vm;

@@ -102,7 +102,7 @@
                             </label>
                         </div>
                     }
-                    <a href="/Account/Forgot">Forgot password</a>
+                    <a href="@Url.Action("Forgot", "Account" , new { Model.ReturnUrl })">Forgot password</a>
                 </div>
 
                 <div class="or-separate">Or</div>
@@ -114,7 +114,8 @@
 
                 <button type="submit" class="btn" id="loginButton">Login</button>
 
-                <div class="text-footer">Not a member? <a href="/Account/Register">Sign up now</a></div>
+                <div class="text-footer">Not a member? <a href="@Url.Action("Register", "Account", new { Model.ReturnUrl })">Sign up now</a></div>
+                @* <div class="text-footer">Not a member? <a href="/Account/Register?returnUrl=@System.Net.WebUtility.UrlEncode(Model.ReturnUrl)">Sign up now</a></div> *@
             </form>
         }
     </div>

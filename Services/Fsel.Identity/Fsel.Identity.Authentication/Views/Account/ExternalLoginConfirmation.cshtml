@@ -189,7 +189,7 @@
                 Confirm
             </button>
 
-            <div class="text-footer">Already a member? <a href="/Account/Login">Log in now</a></div>
+            <div class="text-footer">Already a member? <a href="@Url.Action("Login", "Account", new { Model.ReturnUrl })">Log in now</a></div>
         </form>
     </div>
 

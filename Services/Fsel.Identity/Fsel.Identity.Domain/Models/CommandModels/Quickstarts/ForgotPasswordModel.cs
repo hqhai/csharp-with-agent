@@ -16,6 +16,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
         public string? Password { get; set; }
 
         [DataType(DataType.Password)]
+        [RegexValid(ErrorMessage = "Confirm Password is not valid.", Regex = RegexSettings.Password)]
         [Display(Name = "Confirm Password")]
         [Compare(nameof(Password), ErrorMessage = "Password and confirmation password not match.")]
         [Required(ErrorMessage = "Password confirmation cannot be empty.")]

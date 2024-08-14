@@ -17,7 +17,7 @@
         </div>
 
         <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
-        @if (ViewBag.Type == nameof(AccountController.Register))
+        @if (Model.Type == nameof(AccountController.Register))
         {
             <h1 class="title">Verify OTP</h1>
         }
@@ -27,7 +27,7 @@
         }
 
         <form id="form-VerifyOtp" asp-route="VerifyOtp">
-            @if (ViewBag.Type == nameof(AccountController.Register))
+            @if (Model.Type == nameof(AccountController.Register))
             {
                 <p class="sub-title sub-verify-otp">
                     Để đăng ký thành công, vui lòng kiểm tra Email đăng ký của bạn và xác thực OTP
@@ -120,7 +120,7 @@
 
         <div class="resend-otp">
             Didn’t receive a code?
-            <a href="/Account/ResendOtp">Resend OTP</a>
+            <a href="@Url.Action("ResendOtp", "Account", new { Model.ReturnUrl, type = Model.Type })">Resend OTP</a>
         </div>
     </div>
 

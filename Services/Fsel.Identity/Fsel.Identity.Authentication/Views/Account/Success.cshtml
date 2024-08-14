@@ -18,5 +18,5 @@
         @ViewBag.Message
     </p>
 
-    <a href="/Account/Login" class="btn">Log in now</a>
+    <a href="@Url.Action("Login", "Account", new { ViewBag.ReturnUrl })" class="btn">Log in now</a>
 </div>
