@@ -7,6 +7,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Commands.OrderCmds.V1i2;
+    using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
@@ -73,6 +74,18 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get orders by user id
+        /// </summary>
+        [HttpGet("get-orders-by-user-id")]
+        [ProducesResponseType(typeof(MethodResult<IList<OrderModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetOrderByUserId([FromQuery] GetOrdersByUserIdQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }
