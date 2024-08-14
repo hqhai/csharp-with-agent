@@ -6,7 +6,7 @@ namespace Fsel.Identity.Domain.Entities
     using Fsel.Core.Entities;
     using Fsel.Shared.Models.ShareModels;
 
-    public class CompetitionEvents : Entity
+    public class CompetitionEvent : Entity
     {
         public string? EventCode { get; set; }
 
@@ -22,7 +22,19 @@ namespace Fsel.Identity.Domain.Entities
             set { EventContentStr = Common.Helpers.ConvertHelper.Serialize(value); }
         }
 
-        public IList<StudentRankingEvents>? StudentRankingEvents { get; set; }
+        public string? SchoolIdsStr { get; set; }
+
+        [NotMapped]
+        public IList<Guid>? SchoolIds
+        {
+            get
+            {
+                return Common.Helpers.ConvertHelper.Deserialize<IList<Guid>>(SchoolIdsStr);
+            }
+            set { SchoolIdsStr = Common.Helpers.ConvertHelper.Serialize(value); }
+        }
+
+        public IList<StudentRankingEvent>? StudentRankingEvents { get; set; }
 
     }
 }

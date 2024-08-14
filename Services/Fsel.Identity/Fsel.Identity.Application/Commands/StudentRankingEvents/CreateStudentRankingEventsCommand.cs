@@ -47,14 +47,14 @@ namespace Fsel.Identity.Application.Commands.StudentRankingEvents
                 return methodResult;
             }
 
-            IList<StudentRankingEvents> studentRankingEvents = new List<StudentRankingEvents>();
+            IList<StudentRankingEvent> studentRankingEvents = new List<StudentRankingEvent>();
 
             studentResultIds.ForEach(item =>
             {
-                StudentRankingEvents studentRankingEvent = new StudentRankingEvents
+                StudentRankingEvent studentRankingEvent = new StudentRankingEvent
                 {
                     StudentId = item,
-                    CompetitionRankingId = competitionEvents.Id
+                    CompetitionEventId = competitionEvents.Id
                 };
                 studentRankingEvents.Add(studentRankingEvent);
             });

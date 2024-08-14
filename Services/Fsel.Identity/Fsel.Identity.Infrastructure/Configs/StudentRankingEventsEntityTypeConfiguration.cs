@@ -7,15 +7,15 @@ namespace Fsel.Identity.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class StudentRankingEventsEntityTypeConfiguration : IEntityTypeConfiguration<StudentRankingEvents>
+    public class StudentRankingEventsEntityTypeConfiguration : IEntityTypeConfiguration<StudentRankingEvent>
     {
-        public void Configure(EntityTypeBuilder<StudentRankingEvents> builder)
+        public void Configure(EntityTypeBuilder<StudentRankingEvent> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
 
             builder.HasOne(a => a.CompetitionEvents)
                 .WithMany(b => b.StudentRankingEvents)
-                .HasForeignKey(p => p.CompetitionRankingId)
+                .HasForeignKey(p => p.CompetitionEventId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

@@ -4,12 +4,12 @@ namespace Fsel.Identity.Domain.Entities
 {
     using Fsel.Core.Entities;
 
-    public class StudentRankingEvents : Entity
+    public class StudentRankingEvent : Entity
     {
         public Guid StudentId { get; set; }
 
-        public Guid CompetitionRankingId { get; set; }
+        public Guid CompetitionEventId { get; set; }
 
-        public CompetitionEvents? CompetitionEvents { get; set; }
+        public CompetitionEvent? CompetitionEvents { get; set; }
     }
 }

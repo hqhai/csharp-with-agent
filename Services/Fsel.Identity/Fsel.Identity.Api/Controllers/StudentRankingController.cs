@@ -16,6 +16,7 @@ using Fsel.Identity.Application.Commands.CompetitionEventsCmd;
 using Fsel.Identity.Application.Commands.StudentRankingEvents;
 using Fsel.Identity.Application.Queries.GoogleSheetQuery;
 using Fsel.Identity.Application.Queries.CompetitionEventsQuery;
+using Fsel.Identity.Application.Services.SystemService.Model;
 
 namespace Fsel.Identity.Api.Controllers
 {
@@ -100,6 +101,18 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
+        /// cập nhật dữ liệu sự kiện
+        /// </summary>
+        [HttpPut("competition-events")]
+        [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateCompetitionEvents([FromBody] UpdateCompetitionEventsCommand cmd)
+        {
+            MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Lấy liệu sự kiện
         /// </summary>
         [HttpGet("competition-events/{eventCode}")]
@@ -120,6 +133,22 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> CreateStudentRankingEvents([FromBody] CreateStudentRankingEventsCommand cmd)
         {
             MethodResult<IList<StudentRankingEventsModel>> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+
+        /// <summary>
+        /// Lấy danh sách trường học theo mã sự kiện
+        /// </summary>
+        [HttpGet("schools-by-event/{eventCode}")]
+        [ProducesResponseType(typeof(MethodResult<IList<SchoolModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSchoolsByEventCode([FromRoute] string? eventCode)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(nameof(eventCode));
+            GetSchoolsByEventCodeQuery query = new GetSchoolsByEventCodeQuery();
+            query.EventCode = eventCode;
+            MethodResult<IList<SchoolModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
