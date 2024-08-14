@@ -40,7 +40,7 @@
         </form>
     </div>
 
-    @await Component.InvokeAsync("RightBanner")
+    @await Component.InvokeAsync("RightBanner", new { Model.ReturnUrl })
 
     <partial class="mt-3" name="_ValidationSummary" />
 </div>

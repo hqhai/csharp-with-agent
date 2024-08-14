@@ -102,14 +102,13 @@
                             </label>
                         </div>
                     }
-                    <a href="@Url.Action("Forgot", "Account" , new { Model.ReturnUrl })">Forgot password</a>
+                    <a href="@Url.Action("Forgot", "Account" , new { Model.ReturnUrl })">Forgot password?</a>
                 </div>
 
                 <div class="or-separate">Or</div>
                 <div class="social">
-                    <button type="submit" value="Google" name="provider"><img src="/assets/icons/google-icon.svg" alt="google" /></button>
-                    <button type="submit" value="Facebook" name="provider"><img src="/assets/icons/facebook-icon.svg" alt="facebook" /></button>
-                    @* <button type="submit" value="Apple" name="provider"><img src="/assets/icons/apple-icon.svg" alt="apple" /></button> *@
+                    <a href="@Url.Action("ExternalLogin", "Account", new { provider = "Google", Model.ReturnUrl})"><img src="/assets/icons/google-icon.svg" alt="google" /></a>
+                    <a href="@Url.Action("ExternalLogin", "Account", new { provider = "Facebook", Model.ReturnUrl})"><img src="/assets/icons/facebook-icon.svg" alt="facebook" /></a>
                 </div>
 
                 <button type="submit" class="btn" id="loginButton">Login</button>
@@ -120,7 +119,7 @@
         }
     </div>
 
-    @await Component.InvokeAsync("RightBanner")
+    @await Component.InvokeAsync("RightBanner", new { Model.ReturnUrl })
 
     <partial class="mt-3" name="_ValidationSummary" />
 </div>

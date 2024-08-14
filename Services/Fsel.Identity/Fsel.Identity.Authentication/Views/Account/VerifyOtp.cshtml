@@ -47,7 +47,7 @@
                     <input @* onkeydown="moveToNext(event, this, 'otp-1', 'otp-2')"
                            onpaste="autoFill(event, this)" *@
                            class="number-item"
-                           type="text"
+                           type="password"
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            required
                            maxlength="1"
@@ -58,7 +58,7 @@
                            onpaste="autoFill(event, this)" *@
                            id="otp-2"
                            class="number-item"
-                           type="text"
+                           type="password"
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            required
                            maxlength="1"
@@ -67,7 +67,7 @@
                     @* onkeydown="moveToNext(event, this, 'otp-2', 'otp-4')"
                            onpaste="autoFill(event, this)" *@
                            class="number-item"
-                           type="text"
+                           type="password"
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            required
                            maxlength="1"
@@ -77,7 +77,7 @@
                     @* onkeydown="moveToNext(event, this, 'otp-3', 'otp-5')"
                            onpaste="autoFill(event, this)" *@
                            class="number-item"
-                           type="text"
+                           type="password"
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            required
                            maxlength="1"
@@ -87,7 +87,7 @@
                     @* onkeydown="moveToNext(event, this, 'otp-4', 'otp-6')"
                            onpaste="autoFill(event, this)" *@
                            class="number-item"
-                           type="text"
+                           type="password"
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            required
                            maxlength="1"
@@ -97,7 +97,7 @@
                     @* onkeydown="moveToNext(event, this, 'otp-5', null)"
                            onpaste="autoFill(event, this)" *@
                            class="number-item"
-                           type="text"
+                           type="password"
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            required
                            maxlength="1"
@@ -124,7 +124,7 @@
         </div>
     </div>
 
-    @await Component.InvokeAsync("RightBanner")
+    @await Component.InvokeAsync("RightBanner", new { Model.ReturnUrl })
 
     <partial class="mt-3" name="_ValidationSummary" />
 </div>

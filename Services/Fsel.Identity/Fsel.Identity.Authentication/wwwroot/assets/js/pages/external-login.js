@@ -187,12 +187,12 @@
   }
 
   // Event listeners
-  $emailInput.on("input", checkFormValidity);
-  $firstNameInput.on("input", checkFormValidity);
-  $lastNameInput.on("input", checkFormValidity);
-  $dayInput.on("input", checkFormValidity);
-  $monthInput.on("input", checkFormValidity);
-  $yearInput.on("input", checkFormValidity);
+  $emailInput.on("input", validateEmail);
+  $firstNameInput.on("input", validateFirstName);
+  $lastNameInput.on("input", validateLastName);
+  $dayInput.on("input", validateDay);
+  $monthInput.on("input", validateMonth);
+  $yearInput.on("input", validateYear);
 
   //$genderRadios.on("change", checkFormValidity);
   $genderRadios.on("change", isGenderSelected);

@@ -480,16 +480,9 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginInputModel model, string? provider)
+        public async Task<IActionResult> Login(LoginInputModel model)
         {
             ArgumentNullException.ThrowIfNull(model);
-
-            if (!string.IsNullOrEmpty(provider))
-            {
-                var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { model.ReturnUrl });
-                var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-                return Challenge(properties, provider);
-            }
 
             _logger.LogWarning("Start Login");
             _logger.LogWarning("Model: " + model.Serialize);
@@ -675,11 +668,11 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             }
 
             return Redirect(vm.PostLogoutRedirectUri);
-            //return View("LoggedOut", vm);
+            //return View("LoggedOut", vm);  
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
         public IActionResult ExternalLogin(string provider, string? returnUrl = null)
         {
             var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
@@ -891,7 +884,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         {
             var vm = new LogoutViewModel { LogoutId = logoutId, ShowLogoutPrompt = AccountOptions.ShowLogoutPrompt };
 
-            if (User?.Identity.IsAuthenticated != true)
+            if (User?.Identity?.IsAuthenticated != true)
             {
                 // if the user is not authenticated, then just show logged out page
                 vm.ShowLogoutPrompt = false;

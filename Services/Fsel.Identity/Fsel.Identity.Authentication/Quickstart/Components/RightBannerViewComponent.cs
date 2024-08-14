@@ -10,8 +10,9 @@ namespace Fsel.Identity.Authentication.Quickstart.Components
         {
         }
 
-        public async Task<IViewComponentResult> InvokeAsync()
+        public async Task<IViewComponentResult> InvokeAsync(string? returnUrl)
         {
+            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
     }

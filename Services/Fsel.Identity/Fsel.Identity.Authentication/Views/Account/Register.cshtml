@@ -30,20 +30,6 @@
                         <div class="float-input float-input-validate">
                             <input class="text-input"
                                    type="text"
-                                   name="LastName"
-                                   id="lastName"
-                                   placeholder=""
-                                   autocomplete="off"
-                                   required
-                                   asp-for="LastName" />
-                            <label for="LastName" class="input-label">Last name</label>
-                        </div>
-                        @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "content-text-danger" })
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="float-input float-input-validate">
-                            <input class="text-input"
-                                   type="text"
                                    name="FirstName"
                                    id="firstName"
                                    placeholder=""
@@ -53,6 +39,20 @@
                             <label for="FirstName" class="input-label">First name</label>
                         </div>
                         @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "content-text-danger" })
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="float-input float-input-validate">
+                            <input class="text-input"
+                                   type="text"
+                                   name="LastName"
+                                   id="lastName"
+                                   placeholder=""
+                                   autocomplete="off"
+                                   required
+                                   asp-for="LastName" />
+                            <label for="LastName" class="input-label">Last name</label>
+                        </div>
+                        @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "content-text-danger" })
                     </div>
                 </div>
                 <div class="row">
@@ -268,7 +268,7 @@
         </form>
     </div>
 
-    @await Component.InvokeAsync("RightBanner")
+    @await Component.InvokeAsync("RightBanner", new { Model.ReturnUrl })
 
     <partial class="mt-3" name="_ValidationSummary" />
 </div>
