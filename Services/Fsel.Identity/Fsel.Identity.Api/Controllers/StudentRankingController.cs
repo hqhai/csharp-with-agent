@@ -12,6 +12,9 @@ using Microsoft.AspNetCore.Mvc;
 using Asp.Versioning;
 using Fsel.Shared.Constants;
 using Fsel.Identity.Application.Commands.StudentRankingEvents;
+using Fsel.Identity.Application.Queries.GoogleSheetQuery;
+using Fsel.Identity.Application.Queries.CompetitionEventsQuery;
+using Fsel.Identity.Application.Services.SystemService.Model;
 
 namespace Fsel.Identity.Api.Controllers
 {

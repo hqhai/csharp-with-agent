@@ -23,6 +23,12 @@ namespace Fsel.Shared.Models.ShareModels
         public IList<WeekEvent>? LuckyStarRules { get; set; }
     }
 
+    public enum EnumByPassPaymentType
+    {
+        Month,
+        Date
+    }
+
     public class WeekEvent
     {
         public string? Title { get; set; }
