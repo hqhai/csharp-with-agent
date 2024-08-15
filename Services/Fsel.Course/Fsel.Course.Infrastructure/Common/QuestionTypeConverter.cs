@@ -373,7 +373,7 @@ namespace Fsel.Course.Infrastructure.Common
                     continue;
                 }
                 MatchCollection matches = Regex.Matches(item.Content, @"\{(.*?)\}");
-                Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+                Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
 
                 foreach (Match match in matches)
                 {
@@ -382,7 +382,7 @@ namespace Fsel.Course.Infrastructure.Common
                     {
                         var config = new AnswerTable
                         {
-                            RowId = item.Id,
+                            RowId = item.Id ?? Guid.NewGuid(),
                             Content = match.Groups[1].Value
                         };
                         if (data.AnswerTables.Any() && data.AnswerTables.Count >= replacements.Count)
@@ -429,7 +429,7 @@ namespace Fsel.Course.Infrastructure.Common
                         continue;
                     }
                     MatchCollection matches = Regex.Matches(item2.Content, @"\{(.*?)\}");
-                    Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+                    Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
 
                     foreach (Match match in matches)
                     {
@@ -477,7 +477,7 @@ namespace Fsel.Course.Infrastructure.Common
                 return data;
             }
             MatchCollection matches = Regex.Matches(data.Content, @"\{(.*?)\}");
-            Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+            Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
             foreach (Match match in matches)
             {
                 string id = match.Groups[1].Value;
@@ -522,7 +522,7 @@ namespace Fsel.Course.Infrastructure.Common
                 return data;
             }
             MatchCollection matches = Regex.Matches(data.Content, @"\{(.*?)\}");
-            Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+            Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
             foreach (Match match in matches)
             {
                 string id = match.Groups[1].Value;
