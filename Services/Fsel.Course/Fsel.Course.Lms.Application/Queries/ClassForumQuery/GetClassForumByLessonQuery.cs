@@ -46,7 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             var classForumQuery = await _classForumRepository.Queryable
                                    .Include(x => x.Lesson)
                                    .Include(x => x.ClassForumFiles)
-                                   .Include(x => x.ClassForumResults.Where(x => x.Status == EnumClassForumResultStatus.Graded).OrderBy(x => x.CreatedDate))
+                                   .Include(x => x.ClassForumResults.Where(x => x.Status.HasValue).OrderBy(x => x.CreatedDate))
                                    .ThenInclude(x => x.ClassForumResultFiles)
                                    .FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
 
