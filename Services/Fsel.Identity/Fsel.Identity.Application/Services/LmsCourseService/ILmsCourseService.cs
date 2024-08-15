@@ -34,6 +34,7 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Delete("/v1/admin/student/delete-student/{id}")]
         Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
+
         [Post("/v1/progress/students-competition")]
         Task<IApiResponse<MethodResult<IList<CompetitionStudentProgressModel>>>> GetStudentProgress([FromQuery] StudentCompetitionStatQueryModel query);
 
@@ -51,5 +52,8 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Get("/v1/course-integration/integration-lesson-results")]
         Task<IApiResponse<MethodResult<IList<LessonResultModel>>>> GetLessonResults([FromQuery] CourseIntegrationQueryModel query);
+
+        [Post("/v1.1/course/retake-course")]
+        Task<IApiResponse<MethodResult<CourseResultModel>>> RetakeCourseAsync([FromBody] RetakeCourseResultCommand command);
     }
 }

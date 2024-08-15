@@ -69,7 +69,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// Retake Manage Courses
         /// </summary>
         [HttpPost("retake-course")]
-        [ProducesResponseType(typeof(MethodResult<IList<LevelDtoModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<CourseResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> RetakeCourse([FromBody] RetakeCourseResultCommand command)
         {
