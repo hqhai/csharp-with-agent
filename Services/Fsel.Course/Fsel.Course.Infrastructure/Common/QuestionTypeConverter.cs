@@ -373,7 +373,7 @@ namespace Fsel.Course.Infrastructure.Common
                     continue;
                 }
                 MatchCollection matches = Regex.Matches(item.Content, @"\{(.*?)\}");
-                Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+                Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
 
                 foreach (Match match in matches)
                 {
@@ -394,7 +394,7 @@ namespace Fsel.Course.Infrastructure.Common
                             data.AnswerTables.Add(config);
                         }
 
-                        replacements[id] = config.Id ?? Guid.NewGuid();
+                        replacements[id] = config.Id;
                     }
                     else
                     {
@@ -429,7 +429,7 @@ namespace Fsel.Course.Infrastructure.Common
                         continue;
                     }
                     MatchCollection matches = Regex.Matches(item2.Content, @"\{(.*?)\}");
-                    Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+                    Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
 
                     foreach (Match match in matches)
                     {
@@ -449,7 +449,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 data.Answers.Add(config);
                             }
 
-                            replacements[id] = config.Id ?? Guid.NewGuid();
+                            replacements[id] = config.Id;
                         }
                         else
                         {
@@ -477,7 +477,7 @@ namespace Fsel.Course.Infrastructure.Common
                 return data;
             }
             MatchCollection matches = Regex.Matches(data.Content, @"\{(.*?)\}");
-            Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+            Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
             foreach (Match match in matches)
             {
                 string id = match.Groups[1].Value;
@@ -497,7 +497,7 @@ namespace Fsel.Course.Infrastructure.Common
                         data.Answers.Add(config);
                     }
 
-                    replacements[id] = config.Id ?? Guid.NewGuid();
+                    replacements[id] = config.Id;
                 }
                 else
                 {
@@ -522,7 +522,7 @@ namespace Fsel.Course.Infrastructure.Common
                 return data;
             }
             MatchCollection matches = Regex.Matches(data.Content, @"\{(.*?)\}");
-            Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+            Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
             foreach (Match match in matches)
             {
                 string id = match.Groups[1].Value;
@@ -533,7 +533,7 @@ namespace Fsel.Course.Infrastructure.Common
                         Key = match.Groups[1].Value
                     };
                     data.Answers.Insert(replacements.Count, config);
-                    replacements[id] = config.Id ?? Guid.NewGuid();
+                    replacements[id] = config.Id;
                 }
                 else
                 {
