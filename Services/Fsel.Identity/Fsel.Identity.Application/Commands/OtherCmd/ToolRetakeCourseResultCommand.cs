@@ -13,6 +13,8 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
     using Fsel.Identity.Application.Commands.StudentRankingEvents;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.LmsCourseService.CommandModels;
+    using Fsel.Identity.Application.Services.OrderService;
+    using Fsel.Identity.Application.Services.OrderService.CommandModels;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
@@ -31,15 +33,19 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
     public class ToolRetakeCourseResultCommandHandler : IRequestHandler<ToolRetakeCourseResultCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
+        private readonly ICompetitionEventsRepository _competitionEventsRepository;
+        private readonly IOrderService _orderService;
         private readonly IUserCourseSettingRepository _userCourseSettingRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly MediatR.IMediator _mediator;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ToolRetakeCourseResultCommandHandler(UserManager<User> userManager, IUserCourseSettingRepository userCourseSettingRepository, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, MediatR.IMediator mediator, IHttpContextAccessor httpContextAccessor)
+        public ToolRetakeCourseResultCommandHandler(UserManager<User> userManager, ICompetitionEventsRepository competitionEventsRepository, IOrderService orderService, IUserCourseSettingRepository userCourseSettingRepository, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, MediatR.IMediator mediator, IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
+            _competitionEventsRepository = competitionEventsRepository;
+            _orderService = orderService;
             _userCourseSettingRepository = userCourseSettingRepository;
             _studentRepository = studentRepository;
             _lmsCourseService = lmsCourseService;
@@ -103,12 +109,30 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
                 methodResult.AddErrorBadRequest(nameof(EnumUserCourseSettingErrorCode.CurrentLevelHasNoRetakes), nameof(checkLuckySpinResult));
                 return methodResult;
             }
+            var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.EventCode == request.EventCode, cancellationToken);
+            if (competitionEvent == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent));
+                return methodResult;
+            }
             var courseResult = await _lmsCourseService.RetakeCourseAsync(new RetakeCourseResultCommand { CourseLevel = student.CourseLevel.Value });
             if (!courseResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallCourseServiceError));
                 return methodResult;
             }
+
+            await _orderService.CreateOrderForUserLeaderBoard(new CreateOrderForUserFromLeaderBoardCommandModel()
+            {
+                UserId = user.Id,
+                Month = competitionEvent.EventContent?.PaymentMonth ?? default,
+                FullName = student.Human?.FullName,
+                Email = student.Human?.Email,
+                PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
+                PackageId = default,
+                EventId = default
+            });
+
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
