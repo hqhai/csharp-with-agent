@@ -120,7 +120,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 }
 
                 _classForumResultRepository.Update(classForumResult);
-                await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 //Thông báo cho user khi bài viết được phê duyệt
                 await SendNotification(classForumResult, enumNotification, cancellationToken);
