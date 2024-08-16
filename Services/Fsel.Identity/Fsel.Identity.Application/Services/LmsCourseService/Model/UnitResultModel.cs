@@ -17,5 +17,7 @@ namespace Fsel.Identity.Application.Services.LmsCourseService.Model
         public DateTime? EndCourse { get; set; }
 
         public string? CourseLevel { get; set; }
+
+        public DateTime? DateEdit { get; set; }
     }
 }
