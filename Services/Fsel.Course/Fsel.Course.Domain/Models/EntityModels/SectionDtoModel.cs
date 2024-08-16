@@ -37,6 +37,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<SectionTimeCodeDtoModel>? SectionTimeCodes { get; set; }
         public IList<Guid>? QuestionIds { get; set; }
         public int TotalQuestion { get; set; }
+        public int CountQuestion { get; set; }
         public IList<QuestionCorrectStatusModel>? QuestionTests { get; set; }
         public MockTestAnswerModel? MockTestAnswer { get; set; }
         public object? Answer { get; set; }
