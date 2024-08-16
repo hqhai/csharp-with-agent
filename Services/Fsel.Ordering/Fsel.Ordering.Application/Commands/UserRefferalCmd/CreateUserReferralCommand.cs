@@ -64,18 +64,18 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
                 return methodResult;
             }
 
-            var referralDiscountConfigResults = await _systemService.GetReferralDiscountConfigAsync();
-            if (!referralDiscountConfigResults.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError));
-                return methodResult;
-            }
-            var referralDiscountConfigs = referralDiscountConfigResults?.Content?.Result;
-            if (referralDiscountConfigs != null && referralDiscountConfigs.Count > 0)
-            {
-                await AddVoucher(userReferralCreate.IndexNumber, referralDiscountConfigs, request.SenderId, false);
-                await AddVoucher(userReferralCreate.IndexNumber, referralDiscountConfigs, request.ReceiverId, true);
-            }
+            //var referralDiscountConfigResults = await _systemService.GetReferralDiscountConfigAsync();
+            //if (!referralDiscountConfigResults.IsSuccessStatusCode)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError));
+            //    return methodResult;
+            //}
+            //var referralDiscountConfigs = referralDiscountConfigResults?.Content?.Result;
+            //if (referralDiscountConfigs != null && referralDiscountConfigs.Count > 0)
+            //{
+            //    await AddVoucher(userReferralCreate.IndexNumber, referralDiscountConfigs, request.SenderId, false);
+            //    await AddVoucher(userReferralCreate.IndexNumber, referralDiscountConfigs, request.ReceiverId, true);
+            //}
             await _userReferralRepository.ExecuteTransactionAsync(async () =>
             {
                 _userReferralRepository.Add(userReferralCreate);
@@ -87,37 +87,37 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
             return methodResult;
         }
 
-        public async Task AddVoucher(int index, IList<ReferralDiscountConfigModel>? referralDiscountConfigs, Guid userId, bool isReceiver)
-        {
-            ArgumentNullException.ThrowIfNull(referralDiscountConfigs);
+        //public async Task AddVoucher(int index, IList<ReferralDiscountConfigModel>? referralDiscountConfigs, Guid userId, bool isReceiver)
+        //{
+        //    ArgumentNullException.ThrowIfNull(referralDiscountConfigs);
 
-            var customerTypes = Enum.GetValues(typeof(EnumCustomerType)).Cast<EnumCustomerType>().ToList();
-            var courseLevels = Enum.GetValues(typeof(EnumCourseLevel)).Cast<EnumCourseLevel>().ToList();
-            var referralDiscountConfig = referralDiscountConfigs.Where(x => x.RecevicerDiscountType == EnumDiscountType.Voucher && x.SenderDiscountType == EnumDiscountType.Voucher).OrderBy(x => x.IndexNumber).FirstOrDefault(x => index >= x.IndexNumber);
+        //    var customerTypes = Enum.GetValues(typeof(EnumCustomerType)).Cast<EnumCustomerType>().ToList();
+        //    var courseLevels = Enum.GetValues(typeof(EnumCourseLevel)).Cast<EnumCourseLevel>().ToList();
+        //    var referralDiscountConfig = referralDiscountConfigs.Where(x => x.RecevicerDiscountType == EnumDiscountType.Voucher && x.SenderDiscountType == EnumDiscountType.Voucher).OrderBy(x => x.IndexNumber).FirstOrDefault(x => index >= x.IndexNumber);
 
-            if (referralDiscountConfig == null)
-            {
-                return;
-            }
+        //    if (referralDiscountConfig == null)
+        //    {
+        //        return;
+        //    }
 
-            var voucher = new Voucher
-            {
-                Name = "ReferralCode",
-                StartDate = DateTime.UtcNow.Date,
-                EndDate = DateTime.UtcNow.Date.AddMonths(1),
-                IsGlobal = false,
-                IsActive = true,
-                CustomerTypes = customerTypes,
-                CourseLevels = courseLevels,
-                VoucherPackages = await _packageRepository.Queryable.Select(x => new VoucherPackage
-                {
-                    Percentage = (isReceiver ? referralDiscountConfig.RecevierDiscountValue : referralDiscountConfig.SenderDiscountValue) ?? default,
-                    PackageId = x.Id
-                }).ToListAsync(),
-                UserVouchers = new List<UserVoucher> { new UserVoucher { UserId = userId, Status = EnumUserVoucherStatus.NotUsed } }
-            };
-            _voucherRepository.Add(voucher);
-            await _voucherRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
-        }
+        //    var voucher = new Voucher
+        //    {
+        //        Name = "ReferralCode",
+        //        StartDate = DateTime.UtcNow.Date,
+        //        EndDate = DateTime.UtcNow.Date.AddMonths(1),
+        //        IsGlobal = false,
+        //        IsActive = true,
+        //        CustomerTypes = customerTypes,
+        //        CourseLevels = courseLevels,
+        //        VoucherPackages = await _packageRepository.Queryable.Select(x => new VoucherPackage
+        //        {
+        //            Percentage = (isReceiver ? referralDiscountConfig.RecevierDiscountValue : referralDiscountConfig.SenderDiscountValue) ?? default,
+        //            PackageId = x.Id
+        //        }).ToListAsync(),
+        //        UserVouchers = new List<UserVoucher> { new UserVoucher { UserId = userId, Status = EnumUserVoucherStatus.NotUsed } }
+        //    };
+        //    _voucherRepository.Add(voucher);
+        //    await _voucherRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+        //}
     }
 }
