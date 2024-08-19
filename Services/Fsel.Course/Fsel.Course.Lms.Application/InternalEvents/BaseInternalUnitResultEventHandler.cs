@@ -75,9 +75,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         }
                         unitResult.Status = EnumResultStatus.Done;
 
-                        // Làm nhiệm vụ
-                        // await DoQuestBoard(userId, unitId, courseId, cancellationToken);
-
                         //send mail
                         await SendMail(skillScores, percent, unit, unitResult, course, lessonResults.ToList(), cancellationToken);
 
