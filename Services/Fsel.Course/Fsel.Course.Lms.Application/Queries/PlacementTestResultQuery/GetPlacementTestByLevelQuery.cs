@@ -62,7 +62,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             _mapper = mapper;
             _logger = logger;
             _interactionService = interactionService;
-            _logger = logger;
             _placementTestRepository = placementTestRepository;
         }
 

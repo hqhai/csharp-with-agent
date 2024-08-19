@@ -223,8 +223,15 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 item.CurrentUnit = unitResult?.Name;
                 item.CurrentLesson = unitResult?.CurrentLesson;
                 item.LessonCompleted = unitResult?.LessonCompleted;
-                var dateOrder = orderItem?.UpdatedDate != null ? orderItem.UpdatedDate : orderItem?.CreatedDate ?? null;
-                item.DateEdit = dateOrder > ptTestResult?.DateEdit ? dateOrder : ptTestResult?.DateEdit ?? null;
+
+                var dateOrder = orderItem?.UpdatedDate ?? orderItem?.CreatedDate;
+                var dateUser = userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.UpdatedDate != null ? userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.UpdatedDate : userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.CreatedDate;
+
+                var dateEdits = new[] { dateOrder, ptTestResult?.DateEdit, unitResult?.DateEdit, dateUser };
+                if (dateEdits != null && dateEdits.Any())
+                {
+                    item.DateEdit = dateEdits.Where(d => d.HasValue).Max(d => d.Value);
+                }
 
                 if (ptTestResult != null)
                 {
