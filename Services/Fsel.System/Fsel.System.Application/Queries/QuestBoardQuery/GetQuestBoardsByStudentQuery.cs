@@ -83,7 +83,7 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
                 p.CurrentValue = questBoardStudent == null ? 0 : questBoardStudent.CurrentValue;
                 p.IsFinish = questBoardStudent != null && (p.CurrentValue >= p.TargetValue);
             });
-            beginnerQuests.QuestBoardModels = beginnerQuests.QuestBoardModels.OrderBy(x => x.IsFinish).ThenBy(x => x.RepeatType).ToList();
+            beginnerQuests.QuestBoardModels = beginnerQuests.QuestBoardModels.OrderBy(x => x.IsFinish).ThenBy(x => x.RepeatType).ThenBy(x => x.Status).ToList();
 
             learningQuests.QuestBoardModels.ForEach(p =>
             {
@@ -102,7 +102,7 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
                     p.IsFinish = questBoardStudent != null && (p.CurrentValue >= p.TargetValue);
                 }
             });
-            learningQuests.QuestBoardModels = learningQuests.QuestBoardModels.OrderBy(x => x.IsFinish).ThenBy(x => x.RepeatType).OrderBy(x => x.Status).ToList();
+            learningQuests.QuestBoardModels = learningQuests.QuestBoardModels.OrderBy(x => x.IsFinish).ThenBy(x => x.RepeatType).ThenBy(x => x.Status).ToList();
 
             var beginnerQuestBoardIds = questBoards.Where(p => p.Type == EnumQuestBoardType.BeginnerQuests).Select(x => x.Id).ToList();
             var learningQuestBoardIds = questBoards.Where(p => p.Type == EnumQuestBoardType.LearningQuests).Select(x => x.Id).ToList();
@@ -141,7 +141,7 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
                     Token = p.Token,
                     Status = questBoardOverallStudent == null ? EnumQuestBoardOverallStudentStatus.NotReceived : questBoardOverallStudent.Status,
                 };
-            }).OrderBy(x => x.Status).ToList();
+            }).ToList();
             models.Add(beginnerQuests);
             return methodResult;
         }
