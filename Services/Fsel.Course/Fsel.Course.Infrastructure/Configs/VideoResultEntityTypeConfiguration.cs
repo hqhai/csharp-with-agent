@@ -29,6 +29,8 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumResultStatus>());
+
+            builder.HasIndex(c => new { c.LessonResultId, c.VideoId, c.StudentId }).IsUnique();
         }
     }
 }

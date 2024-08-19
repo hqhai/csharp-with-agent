@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.Helpers;
-using Fsel.Course.Domain.Enums;
 using Fsel.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -25,6 +24,8 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumCourseStatus>());
+
+            builder.HasIndex(c => new { c.ParentCourseId, c.Priority }).IsUnique();
         }
     }
 }

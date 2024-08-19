@@ -27,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class RetakeCourseResultCommand : IRequest<MethodResult<CourseResultModel>>
     {
@@ -43,6 +44,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
         private readonly IUserService _userService;
         private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         private readonly ICourseRepository _courseRepository;
+        private readonly ILogger<RetakeCourseResultCommand> _logger;
         private readonly ICourseResultRepository _courseResultRepository;
 
         public RetakeCourseResultCommandHandler(IMapper mapper
@@ -53,6 +55,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             , IUserService userService
             , SaveUserCourseSettingPublisher saveUserCourseSettingPublisher
             , ICourseRepository courseRepository
+            , ILogger<RetakeCourseResultCommand> logger
             , ICourseResultRepository courseResultRepository)
         {
             _mapper = mapper;
@@ -63,6 +66,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             _userService = userService;
             _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _courseRepository = courseRepository;
+            _logger = logger;
             _courseResultRepository = courseResultRepository;
         }
 
@@ -220,7 +224,15 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 }
                 _courseResultRepository.Add(courseResultNew);
             }
-            await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Duplicate Retake CourseResult : {ex.Message}");
+            }
+
             methodResult.Result = courseResultNew;
             return methodResult;
         }

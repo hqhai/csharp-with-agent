@@ -28,6 +28,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
 
     public class CreateClassForumResultCommand : CreateClassForumResultCommandModel, IRequest<MethodResult<ClassForumResultModel>>
     {
@@ -41,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly ILogger<CreateClassForumResultCommand> _logger;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IClassForumRepository _classForumRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
@@ -54,11 +56,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         public const int DisplayOrderFirst = 0;
         public const int DisplayOrderSecond = 1;
 
-        public CreateClassForumResultCommandHandler(IMapper mapper, ICourseResultRepository courseResultRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, ICourseRepository courseRepository, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, SubmitClassForumGradingPublisher submitClassForumGradingPublisher, ISystemService systemService, IClassForumDetailResultRepository classForumDetailResultRepository, SetTimeClassForumDonePublisher setTimeClassForumDonePublisher, QuestBoardPublisher questBoardPublisher, IHostEnvironment environment)
+        public CreateClassForumResultCommandHandler(IMapper mapper,
+            ICourseResultRepository courseResultRepository,
+            ILogger<CreateClassForumResultCommand> logger,
+            CreateTokenHistoryPublisher createTokenHistoryPublisher, ICourseRepository courseRepository, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, SubmitClassForumGradingPublisher submitClassForumGradingPublisher, ISystemService systemService, IClassForumDetailResultRepository classForumDetailResultRepository, SetTimeClassForumDonePublisher setTimeClassForumDonePublisher, QuestBoardPublisher questBoardPublisher, IHostEnvironment environment)
         {
             _mapper = mapper;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
             _courseResultRepository = courseResultRepository;
+            _logger = logger;
             _courseRepository = courseRepository;
             _authContext = authContext;
             _userService = userService;
@@ -270,7 +276,16 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
 
             classForumDetailResult.MediaType = MediaHelper.GetMediaType(classForumDetailResult.ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
             _classForumDetailResultRepository.Add(classForumDetailResult);
-            await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            try
+            {
+                await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Duplicate ClassForumDetailResult : {ex.Message}");
+            }
+
             if (request.IsSubmit)
             {
                 await PublishAIClassForumResponseAsync(classForumDetailResult, classForum, request, cancellationToken);
@@ -291,12 +306,26 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             if (request.IsSubmit)
             {
                 classForumResult.TokenFirstTime = await GetTokenAsync(classForum, classForumResult, course.CourseType);
-                await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Log Duplicate ClassForumResult : {ex.Message}");
+                }
                 await _setTimeClassForumDonePublisher.Publish(new Core.Base.BaseModels.BaseQueueModel { QueueId = classForumResult.Id.ToString() }, cancellationToken);
             }
             else
             {
-                await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Log Duplicate ClassForumResult : {ex.Message}");
+                }
             }
             return classForumResult;
         }
