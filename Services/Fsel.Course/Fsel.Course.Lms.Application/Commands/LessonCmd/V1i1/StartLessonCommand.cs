@@ -23,6 +23,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class StartLessonCommand : IRequest<MethodResult<LessonResultModel>>
     {
@@ -35,6 +36,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly ILogger<StartLessonCommand> _logger;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly AuthContext _authContext;
         private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
@@ -47,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
             , IUnitRepository unitRepository
             , IUserService userService
             , IMapper mapper
+            , ILogger<StartLessonCommand> logger
             , IUnitResultRepository unitResultRepository
             , AuthContext authContext
             , SaveUserCourseSettingPublisher saveUserCourseSettingPublisher
@@ -59,6 +62,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
             _unitRepository = unitRepository;
             _userService = userService;
             _mapper = mapper;
+            _logger = logger;
             _unitResultRepository = unitResultRepository;
             _authContext = authContext;
             _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
@@ -128,6 +132,16 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
 
             lessonResult.Status = EnumResultStatus.Process;
             lessonResult = _lessonResultRepository.Update(lessonResult);
+
+            try
+            {
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Duplicate Start LessonResult : {ex.Message}");
+            }
+
             await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return lessonResult;
         }
