@@ -172,7 +172,7 @@ namespace Fsel.Identity.Api.Controllers
         /// </summary>
         [HttpGet("get-user-referrals")]
         [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
-        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<UserReferralsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUserReferral([FromQuery] GetUserReferralsByUserQuery query)
         {
