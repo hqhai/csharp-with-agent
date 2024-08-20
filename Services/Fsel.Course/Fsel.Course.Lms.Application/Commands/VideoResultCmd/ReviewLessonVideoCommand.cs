@@ -41,7 +41,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             IMapper mapper,
             VideoConverter videoConverter,
             IVideoRepository videoRepository,
-            QuestBoardPublisher questBoardPublisher)
+            QuestBoardPublisher questBoardPublisher,
+            RankedStudentPublisher rankedStudentPublisher)
         {
             _videoResultRepository = videoResultRepository;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
@@ -49,6 +50,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             _videoConverter = videoConverter;
             _videoRepository = videoRepository;
             _questBoardPublisher = questBoardPublisher;
+            _rankedStudentPublisher = rankedStudentPublisher;
         }
 
         public async Task<MethodResult<VideoResultModel>> Handle(ReviewLessonVideoCommand request, CancellationToken cancellationToken)
