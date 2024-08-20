@@ -17,23 +17,23 @@ namespace Fsel.Ordering.Infrastructure.Repositories
             _eventRepository = eventRepository;
         }
 
-        public override async Task<Package?> GetByIdAsync(Guid id)
-        {
-            var package = await Queryable.FirstOrDefaultAsync(x => x.Id == id);
-            if (package == null)
-            {
-                return null;
-            }
-            var @event = await _eventRepository.Queryable.Include(p => p.PackageEvents).FirstOrDefaultAsync(p => p.Status == EnumEventPackageStatus.Active);
-            if (@event != null)
-            {
-                var packageEvent = @event.PackageEvents.FirstOrDefault(p => p.PackageId == package.Id);
-                if (packageEvent != null)
-                {
-                    package.Price = packageEvent.Price;
-                }
-            }
-            return package;
-        }
+        //public override async Task<Package?> GetByIdAsync(Guid id)
+        //{
+        //    var package = await Queryable.FirstOrDefaultAsync(x => x.Id == id);
+        //    if (package == null)
+        //    {
+        //        return null;
+        //    }
+        //    var @event = await _eventRepository.Queryable.Include(p => p.PackageEvents).FirstOrDefaultAsync(p => p.Status == EnumEventPackageStatus.Active);
+        //    if (@event != null)
+        //    {
+        //        var packageEvent = @event.PackageEvents.FirstOrDefault(p => p.PackageId == package.Id);
+        //        if (packageEvent != null)
+        //        {
+        //            package.Price = packageEvent.Price;
+        //        }
+        //    }
+        //    return package;
+        //}
     }
 }
