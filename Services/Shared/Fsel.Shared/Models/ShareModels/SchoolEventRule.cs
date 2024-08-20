@@ -7,6 +7,12 @@ namespace Fsel.Shared.Models.ShareModels
         public bool LuckySpin { get; set; }
         public int PaymentMonth { get; set; }
         public bool IsByPassPayment { get; set; }
+        public DateTime? RegisterStartDate { get; set; }
+        public DateTime? RegisterEndDate { get; set; }
+        public DateTime? StartDate => WeekEvents?.FirstOrDefault()?.StartDate;
+        public DateTime? EndDate => WeekEvents?.LastOrDefault()?.EndDate;
+        public DateTime? AwardStartDate { get; set; }
+        public DateTime? AwardEndDate { get; set; }
         public IList<WeekEvent>? WeekEvents { get; set; }
     }
 

@@ -2,7 +2,9 @@
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Students
 {
-    public class AddExpiredDateForStudentCommandModel
+    using System;
+
+    public class UpdateExpiredDateForUserOfEventCommandModel
     {
         public Guid StudentId { get; set; }
         public int? Day { get; set; }

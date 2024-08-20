@@ -1,8 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Domain.Models.CommandModels.StudentRanking
+namespace Fsel.Shared.Models.ShareModels
 {
-    public class CreateUserEventFromLandingPageCommandModel
+    using System;
+
+    public class RegisterStudentForEventCommandModel
     {
         public string? EventCode { get; set; }
         public string? FirstName { get; set; }

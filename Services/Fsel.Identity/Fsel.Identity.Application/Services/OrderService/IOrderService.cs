@@ -34,5 +34,8 @@ namespace Fsel.Identity.Application.Services.OrderService
 
         [Delete("/v1/admin/order/delete-student/{id}")]
         Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
+
+        [Get("/v1.2/get-orders-by-user-id")]
+        Task<IApiResponse<MethodResult<IList<OrderModel>>>> GetOrdersByUserId([Query] GetOrdersByUserIdQueryModel query);
     }
 }

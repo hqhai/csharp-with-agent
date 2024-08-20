@@ -191,8 +191,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
             {
                 StudentId = student!.Id,
-                Month = package.MonthNumber,
-                Day = 0
+                Month = request.ExpiredDate.HasValue ? null : package.MonthNumber,
+                Day = request.ExpiredDate.HasValue ? null : 0,
+                ExpiredDate = request.ExpiredDate.HasValue ? request.ExpiredDate.Value : DateTime.UtcNow,
             }, cancellationToken);
 
             return methodResult;
