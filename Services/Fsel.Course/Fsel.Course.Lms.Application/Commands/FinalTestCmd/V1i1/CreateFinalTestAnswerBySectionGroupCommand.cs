@@ -50,9 +50,9 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly IMapper _mapper;
-        private readonly ILogger<object> _logger;
+        private readonly ILogger<CreateFinalTestAnswerBySectionGroupCommand> _logger;
 
-        public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, ICourseResultRepository courseResultRepository, AuthContext authContext, QuestionConverter questionConverter, SectionGroupConverter sectionGroupConverter, IUserService userService, ISystemService systemService, IFinalTestResultRepository finalTestResultRepository, IFinalTestAnswerRepository finalTestAnswerRepository, ISectionGroupResultRepository sectionGroupResultRepository, ISectionGroupRepository sectionGroupRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper, ILogger<object> logger)
+        public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, ICourseResultRepository courseResultRepository, AuthContext authContext, QuestionConverter questionConverter, SectionGroupConverter sectionGroupConverter, IUserService userService, ISystemService systemService, IFinalTestResultRepository finalTestResultRepository, IFinalTestAnswerRepository finalTestAnswerRepository, ISectionGroupResultRepository sectionGroupResultRepository, ISectionGroupRepository sectionGroupRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper, ILogger<CreateFinalTestAnswerBySectionGroupCommand> logger)
         {
             _questionRepository = questionRepository;
             _courseResultRepository = courseResultRepository;
@@ -248,13 +248,21 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             if (createFinalTestAnswers != null && createFinalTestAnswers.Any())
             {
                 await _finalTestAnswerRepository.AddList(createFinalTestAnswers);
-                await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
             if (updateFinalTestAnswers != null && updateFinalTestAnswers.Any())
             {
                 _finalTestAnswerRepository.UpdateList(updateFinalTestAnswers);
+            }
+
+            try
+            {
                 await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Duplicate FinalTestAnswer : {ex.Message}");
+            }
+
             return methodResult;
         }
 
