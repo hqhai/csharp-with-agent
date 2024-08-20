@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Application.Commands.LandingPages
 {
+    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -34,6 +35,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
         public string? EndDateAward { get; set; }
         public string? LinkLeaderBoard { get; set; }
         public string? LinkLuckyStar { get; set; }
+        public string? LinkResetProgress { get; set; }
     };
 
     public class RegisterStudentForEventCommand : RegisterStudentForEventCommandModel, IRequest<MethodResult<bool>>
@@ -83,10 +85,10 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 FullName = request.FirstName + " " + request.LastName,
                 Email = request.Email,
                 Password = DefaultPassword,
-                StartDateEvent = @event.EventContent?.StartDate.ToString(),
-                EndDateEvent = @event.EventContent?.EndDate.ToString(),
-                StartDateAward = @event.EventContent?.AwardStartDate.ToString(),
-                EndDateAward = @event.EventContent?.AwardEndDate.ToString(),
+                StartDateEvent = @event.EventContent?.StartDate?.ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
+                EndDateEvent = @event.EventContent?.EndDate?.ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
+                StartDateAward = @event.EventContent?.AwardStartDate?.ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
+                EndDateAward = @event.EventContent?.AwardEndDate?.ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
                 LinkLeaderBoard = @event.EventContent?.LinkLeaderBoard,
                 LinkLuckyStar = @event.EventContent?.LinkLuckyStar,
             };
