@@ -13,6 +13,8 @@ namespace Fsel.Shared.Models.ShareModels
         public DateTime? EndDate => WeekEvents?.LastOrDefault()?.EndDate;
         public DateTime? AwardStartDate { get; set; }
         public DateTime? AwardEndDate { get; set; }
+        public string? LinkLeaderBoard { get; set; }
+        public string? LinkLuckyStar { get; set; }
         public IList<WeekEvent>? WeekEvents { get; set; }
     }
 

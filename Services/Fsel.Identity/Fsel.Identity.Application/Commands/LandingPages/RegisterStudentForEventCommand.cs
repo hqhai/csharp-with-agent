@@ -22,6 +22,20 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
+    public class ParamSendMailEvent
+    {
+        public string? FullName { get; set; }
+        public string? Email { get; set; }
+        public string? Password { get; set; }
+        public string? LinkLMS { get; set; }
+        public string? StartDateEvent { get; set; }
+        public string? EndDateEvent { get; set; }
+        public string? StartDateAward { get; set; }
+        public string? EndDateAward { get; set; }
+        public string? LinkLeaderBoard { get; set; }
+        public string? LinkLuckyStar { get; set; }
+    };
+
     public class RegisterStudentForEventCommand : RegisterStudentForEventCommandModel, IRequest<MethodResult<bool>>
     {
     }
@@ -64,6 +78,19 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 return methodResult;
             }
 
+            var param = new ParamSendMailEvent
+            {
+                FullName = request.FirstName + " " + request.LastName,
+                Email = request.Email,
+                Password = DefaultPassword,
+                StartDateEvent = @event.EventContent?.StartDate.ToString(),
+                EndDateEvent = @event.EventContent?.EndDate.ToString(),
+                StartDateAward = @event.EventContent?.AwardStartDate.ToString(),
+                EndDateAward = @event.EventContent?.AwardEndDate.ToString(),
+                LinkLeaderBoard = @event.EventContent?.LinkLeaderBoard,
+                LinkLuckyStar = @event.EventContent?.LinkLuckyStar,
+            };
+
             var user = await _userManager.Users.Include(p => p.Human).ThenInclude(p => p.Student).FirstOrDefaultAsync(p => p.UserName.ToLower() == request.Email.ToLower() || p.Email.ToLower() == request.Email.ToLower(), cancellationToken);
             if (user == null)
             {
@@ -72,9 +99,9 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 await _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel
                 {
                     ToEmails = new List<string>() { request.Email ?? string.Empty },
-                    Template = EnumSenderTemplate.SignUpEventSuccess,
+                    Template = EnumSenderTemplate.CreateAccountWithEventSuccess,
                     Subject = "",
-                    Params = request,
+                    Params = param,
                 });
 
                 await _systemService.RegisterStudentForEvent(new RegisterStudentForEventCommandModel()
@@ -104,9 +131,9 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     await _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel
                     {
                         ToEmails = new List<string>() { request.Email ?? string.Empty },
-                        Template = EnumSenderTemplate.SignUpEventSuccess,
+                        Template = EnumSenderTemplate.WasInAnotherEvent,
                         Subject = "",
-                        Params = request,
+                        Params = param,
                     });
                     return methodResult;
                 }
@@ -123,12 +150,32 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     await _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel
                     {
                         ToEmails = new List<string>() { request.Email ?? string.Empty },
-                        Template = EnumSenderTemplate.SignUpEventSuccess,
+                        Template = EnumSenderTemplate.LearnedOnThePlatform,
                         Subject = "",
-                        Params = request,
+                        Params = param,
                     });
                     return methodResult;
                 }
+
+                await _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel
+                {
+                    ToEmails = new List<string>() { request.Email ?? string.Empty },
+                    Template = EnumSenderTemplate.SignUpEventSuccess,
+                    Subject = "",
+                    Params = param,
+                });
+
+                await _studentRankingEventsRepository.ExecuteTransactionAsync(async () =>
+                {
+                    _studentRankingEventsRepository.Add(new StudentRankingEvents()
+                    {
+                        StudentId = user.Human.Student.Id,
+                        CompetitionRankingId = @event.Id
+                    });
+                    await _studentRankingEventsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    return methodResult;
+                });
+                return methodResult;
             }
             return methodResult;
         }

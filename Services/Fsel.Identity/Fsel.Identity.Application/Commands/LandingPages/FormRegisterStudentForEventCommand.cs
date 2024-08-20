@@ -37,17 +37,19 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            if (await _eventRegistrationRepository.Queryable.AnyAsync(p => p.Email.ToLower() == request.Email.ToLower(), cancellationToken))
-            {
-                return methodResult;
-            }
-
             var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.EventCode.ToLower() == request.EventCode.ToLower(), cancellationToken);
             if (competitionEvent == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
+
+            if (await _eventRegistrationRepository.Queryable.AnyAsync(p => p.Email.ToLower() == request.Email.ToLower() && p.CompetitionEventId == competitionEvent.Id, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                return methodResult;
+            }
+
             var eventRegistration = _mapper.Map<EventRegistration>(request);
             eventRegistration.CompetitionEventId = competitionEvent.Id;
             eventRegistration.Status = EnumEventRegistrationStatus.Active;
@@ -64,6 +66,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             });
+            methodResult.Result = true;
             return methodResult;
         }
     }
