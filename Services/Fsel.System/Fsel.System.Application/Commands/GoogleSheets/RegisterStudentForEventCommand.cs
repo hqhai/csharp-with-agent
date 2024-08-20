@@ -116,9 +116,9 @@ namespace Fsel.System.Application.Commands.GoogleSheets
                 request.Province ?? string.Empty,
                 request.District ?? string.Empty,
                 request.School ?? string.Empty,
-                request.Cohort ?? string.Empty,
-                request.Class ?? string.Empty,
-                request.StudentCode ?? string.Empty,
+                request.SchoolGrade ?? string.Empty,
+                request.SchoolClass ?? string.Empty,
+                request.SchoolStudentCode ?? string.Empty,
                 currentDate
             });
                 valueRange.Values = data.ToArray();

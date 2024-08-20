@@ -1,17 +1,18 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Shared.Models.ShareModels
+namespace Fsel.Identity.Domain.Entities
 {
-    using System;
+    using Fsel.Core.Entities;
+    using Fsel.Shared.Enums;
 
-    public class RegisterStudentForEventCommandModel
+    public class EventRegistration : Entity
     {
-        public string? EventCode { get; set; }
+        public Guid CompetitionEventId { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
-        public DateTime BirthDay { get; set; }
+        public DateTime? BirthDay { get; set; }
         public string? Province { get; set; }
         public Guid ProvinceId { get; set; }
         public string? District { get; set; }
@@ -21,5 +22,6 @@ namespace Fsel.Shared.Models.ShareModels
         public string? SchoolGrade { get; set; }
         public string? SchoolClass { get; set; }
         public string? SchoolStudentCode { get; set; }
+        public EnumEventRegistrationStatus Status { get; set; }
     }
 }

@@ -88,9 +88,9 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     Province = request.Province,
                     District = request.District,
                     School = request.School,
-                    Cohort = request.Cohort,
-                    Class = request.Class,
-                    StudentCode = request.StudentCode,
+                    SchoolGrade = request.SchoolGrade,
+                    SchoolClass = request.SchoolClass,
+                    SchoolStudentCode = request.SchoolStudentCode,
                 });
             }
             else
