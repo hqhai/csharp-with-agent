@@ -17,7 +17,7 @@ namespace Fsel.Shared.Models.ShareModels
         public DateTime? AwardEndDate { get; set; }
         public string? LinkLeaderBoard { get; set; }
         public string? LinkLuckyStar { get; set; }
-        public string? LeaderBoardGiftImage{ get; set; }
+        public string? LeaderBoardGiftImage { get; set; }
         public string? LuckySpinGiftImage { get; set; }
         public IList<WeekEvent>? WeekEvents { get; set; }
         public IList<WeekEvent>? LuckyStarRules { get; set; }
