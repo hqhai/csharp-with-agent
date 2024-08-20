@@ -200,39 +200,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(order.UserId);
-            if (!studentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddError(studentResult.Error);
-                return methodResult;
-            }
-            var student = studentResult.Content?.Result;
-
-            if (order.IsInvoice)
-            {
-                await _systemService.AddPaymentInfoToGoogleSheet(new AddPaymentInfoToGoogleSheetModel()
-                {
-                    Code = order.Code,
-                    CreatedDate = order.CreatedDate.ToString("dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture),
-                    Price = order.Price.ToString(CultureInfo.InvariantCulture),
-                    FullName = order.FullName,
-                    StudentEmail = student?.Human?.Email,
-                    BillingEmail = order.Email,
-                    CompanyTaxCode = order.CompanyTaxCode,
-                    CompanyAddress = order.CompanyAddress,
-                    CompanyName = order.CompanyName,
-                });
-            }
-
-            #region Gửi mail thanh toán
-
-            if (order.Status == EnumOrderStatus.Payment)
-            {
-                await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
-            }
-
-            #endregion Gửi mail thanh toán
-
             methodResult.Result = true;
             return methodResult;
         }
