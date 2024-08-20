@@ -83,7 +83,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
             var weekEventRules = competitionEvents.EventContent.WeekEvents.FirstOrDefault(x => x.WeekNumber == request.WeekNumber);
 
-            var resultSnapShot = _studentCompetitionSnapShotRepository.Queryable.FirstOrDefault(x => x.SchoolCode == request.SchoolCode && x.StartDate == weekEventRules!.StartDate && x.EndDate == weekEventRules!.EndDate);
+            var resultSnapShot = _studentCompetitionSnapShotRepository.Queryable.FirstOrDefault(x => x.EventCode == request.SchoolCode && x.StartDate == weekEventRules!.StartDate && x.EndDate == weekEventRules!.EndDate);
 
 
             IList<StudentRankingModel> studentRanking = new List<StudentRankingModel>();
@@ -116,7 +116,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                                   {
                                       StudentId = studentFile.StudentId,
                                       SchoolName = studentFile.SchoolName,
-                                      Grade = studentFile.Grade,
+                                      Grade = studentFile.Grade.ToString(),
                                       Process = studentResult?.ContentCompleted ?? 0, // Thêm kiểm tra null và mặc định giá trị nếu null
                                       OverallScore = studentResult?.TotalScore ?? 0, // Thêm kiểm tra null và mặc định giá trị nếu null
                                       CompetitionEndDate = weekEventRules!.EndDate,

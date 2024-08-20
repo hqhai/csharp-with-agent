@@ -1,19 +1,15 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Domain.Entities
+namespace Fsel.Identity.Domain.Models.CommandModels.StudentRanking
 {
-    using Fsel.Core.Entities;
-
-    public class StudentRankingEvent : Entity
+    public class StudentRankingEventCommandModel
     {
-        public string? Grade { get; set; }
         public double? RankingScore { get; set; }
-
-        public double? OverallScore { get; set; }
-
         public double? Proccess { get; set; }
         public Guid UserId { get; set; }
         public Guid StudentId { get; set; }
         public Guid CourseResultId { get; set; }
+        public double? OverallScore { get; set; }
+
     }
 }

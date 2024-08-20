@@ -4,6 +4,7 @@ using Fsel.Identity.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240820064709_AddTable_StudentRankingEventData")]
+    partial class AddTable_StudentRankingEventData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -195,7 +198,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.ToTable("CSOs");
                 });
 
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.CompetitionEvents", b =>
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.CompetitionEvent", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -238,6 +241,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<string>("SchoolIdsStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -1240,7 +1246,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.ToTable("StudentRankings");
                 });
 
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentRankingEvents", b =>
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentRankingEvent", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1317,7 +1323,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CompetitionRankingId");
+                    b.HasIndex("CompetitionEventId");
 
                     b.ToTable("StudentRankingEvents");
                 });
@@ -2249,7 +2255,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.CompetitionEvents", b =>
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.CompetitionEvent", b =>
                 {
                     b.Navigation("StudentCompetitionEvents");
 

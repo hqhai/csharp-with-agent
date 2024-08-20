@@ -4,7 +4,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
 
-    public class StudentRankingEventsModel : BaseModel
+    public class StudentCompetitionEventsModel : BaseModel
     {
         public Guid StudentId { get; set; }
 
