@@ -245,8 +245,8 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case EnumQuestionType.FlowChartCompletion:
-                    var flowChartCompletion = config.Deserialize<FlowChartCompletionQuestion>();
-                    isError = ValidatFlowChartCompletion(flowChartCompletion);
+                    var flowChartCompletion = config.Deserialize<CheckListQuestionV1>();
+                    isError = ValidateCheckList(flowChartCompletion);
                     break;
 
                 default:
