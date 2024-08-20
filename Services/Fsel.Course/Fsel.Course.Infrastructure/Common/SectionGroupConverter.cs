@@ -536,7 +536,9 @@ namespace Fsel.Course.Infrastructure.Common
                                                        QuestionId = x.QuestionId ?? default,
                                                        Status = GetStatus(x, isDone)
                                                    }).ToList();
-                    sectionDto.CountQuestion = section.SectionQuestions.SelectMany(x => x.MockTestAnswers).Select(x => x.Answer.Deserialize<MultipleChoiceAnswerV1>()).Sum(x => x.Answers.Count);
+                    sectionDto.CountQuestion = section.SectionQuestions.SelectMany(x => x.MockTestAnswers)
+                        .Select(x => x.Answer.Deserialize<MultipleChoiceAnswerV1>())
+                        .Where(x => x != null && x.Answers != null && x.Answers.Any()).Sum(x => x.Answers.Count);
                 }
             }
             return sectionDto;
