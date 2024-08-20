@@ -29,7 +29,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     public class RegisterStudentForEventCommandHandler : IRequestHandler<RegisterStudentForEventCommand, MethodResult<bool>>
     {
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
-        private readonly IStudentRankingEventsRepository _studentRankingEventsRepository;
+        private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly UserManager<User> _userManager;
         private readonly IPlatformRepository _platformRepository;
         private const string DefaultPassword = "Fsel@2024";
@@ -39,10 +39,10 @@ namespace Fsel.Identity.Application.Commands.LandingPages
         private readonly IMediator _mediator;
         private readonly IInteractionService _interactionService;
 
-        public RegisterStudentForEventCommandHandler(ICompetitionEventsRepository competitionEventsRepository, IStudentRankingEventsRepository studentRankingEventsRepository, UserManager<User> userManager, IPlatformRepository platformRepository, ISystemService systemService, ISenderService senderService, IOrderService orderService, MediatR.IMediator mediator, IInteractionService interactionService)
+        public RegisterStudentForEventCommandHandler(ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, UserManager<User> userManager, IPlatformRepository platformRepository, ISystemService systemService, ISenderService senderService, IOrderService orderService, MediatR.IMediator mediator, IInteractionService interactionService)
         {
             _competitionEventsRepository = competitionEventsRepository;
-            _studentRankingEventsRepository = studentRankingEventsRepository;
+            _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _userManager = userManager;
             _platformRepository = platformRepository;
             _systemService = systemService;
@@ -88,16 +88,16 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     Province = request.Province,
                     District = request.District,
                     School = request.School,
-                    Cohort = request.Cohort,
-                    Class = request.Class,
-                    StudentCode = request.StudentCode,
+                    SchoolGrade = request.SchoolGrade,
+                    SchoolClass = request.SchoolClass,
+                    SchoolStudentCode = request.SchoolStudentCode,
                 });
             }
             else
             {
                 var currentDate = DateTime.UtcNow;
 
-                var studentEvents = await _studentRankingEventsRepository.Queryable.Include(p => p.CompetitionEvents).Where(p => p.StudentId == user.Human.Student.Id).ToListAsync(cancellationToken);
+                var studentEvents = await _studentCompetitionEventsRepository.Queryable.Include(p => p.CompetitionEvents).Where(p => p.StudentId == user.Human.Student.Id).ToListAsync(cancellationToken);
 
                 if (studentEvents.Any(p => p.CompetitionEvents != null && p.CompetitionEvents.EventContent != null && p.CompetitionEvents.EventContent.StartDate.HasValue && p.CompetitionEvents.EventContent.EndDate.HasValue && p.CompetitionEvents.EventContent.StartDate.Value.Date <= currentDate.Date && p.CompetitionEvents.EventContent.EndDate.Value.Date >= currentDate.Date))
                 {
@@ -133,7 +133,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             return methodResult;
         }
 
-        private async Task<MethodResult<bool>> CreateUser(RegisterStudentForEventCommandModel request, CompetitionEvents @event, User? user, MethodResult<bool> methodResult, CancellationToken cancellationToken)
+        private async Task<MethodResult<bool>> CreateUser(RegisterStudentForEventCommandModel request, CompetitionEvent @event, User? user, MethodResult<bool> methodResult, CancellationToken cancellationToken)
         {
             var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
             if (platform == null)
@@ -191,7 +191,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 return methodResult;
             }
 
-            await _studentRankingEventsRepository.ExecuteTransactionAsync(async () =>
+            await _studentCompetitionEventsRepository.ExecuteTransactionAsync(async () =>
             {
                 identityStudentResult = await _userManager.CreateAsync(user, DefaultPassword);
                 if (!identityStudentResult.Succeeded)
@@ -208,26 +208,12 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     return methodResult;
                 }
 
-                var createSurveyResult = await _interactionService.CreateSurvey(new CreateCustomerSurveyCommandModel
-                {
-                    Email = user.Email,
-                    UserId = user.Id,
-                    Answers = new List<CreateSurveyCommandModel>
-                {
-                    new CreateSurveyCommandModel
-                    {
-                        Id = Guid.Parse("492D8BB9-CDBE-42E7-AA16-35A1915C3621"),
-                        Answer = new { Id = 1,Content = "Google",Image = "gmail-icon.svg"},
-                    }
-                }
-                });
-
-                _studentRankingEventsRepository.Add(new StudentRankingEvents()
+                _studentCompetitionEventsRepository.Add(new StudentCompetitionEvent()
                 {
                     StudentId = user.Human.Student.Id,
-                    CompetitionRankingId = @event.Id
+                    CompetitionEventId = @event.Id
                 });
-                await _studentRankingEventsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _studentCompetitionEventsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 return methodResult;
             });
