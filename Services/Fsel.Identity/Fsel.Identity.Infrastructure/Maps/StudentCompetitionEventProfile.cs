@@ -7,12 +7,12 @@ namespace Fsel.Identity.Infrastructure.Maps
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.EntityModels;
 
-    public class StudentRankingEventsProfile : Profile
+    public class StudentCompetitionEventProfile : Profile
     {
-        public StudentRankingEventsProfile()
+        public StudentCompetitionEventProfile()
         {
             CreateMap<CompetitionEvent, CompetitionEventsModel>().IgnoreAllNonExisting();
-            CreateMap<StudentRankingEvent, StudentRankingEventsModel>().IgnoreAllNonExisting();
+            CreateMap<StudentCompetitionEvent, StudentCompetitionEventsModel>().IgnoreAllNonExisting();
         }
     }
 }

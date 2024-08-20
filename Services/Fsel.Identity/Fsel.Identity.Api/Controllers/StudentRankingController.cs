@@ -11,12 +11,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Asp.Versioning;
 using Fsel.Shared.Constants;
-using Fsel.Identity.Domain.Entities;
-using Fsel.Identity.Application.Commands.CompetitionEventsCmd;
 using Fsel.Identity.Application.Commands.StudentRankingEvents;
-using Fsel.Identity.Application.Queries.GoogleSheetQuery;
-using Fsel.Identity.Application.Queries.CompetitionEventsQuery;
-using Fsel.Identity.Application.Services.SystemService.Model;
 
 namespace Fsel.Identity.Api.Controllers
 {
@@ -33,6 +28,7 @@ namespace Fsel.Identity.Api.Controllers
             _mediator = mediator;
         }
 
+        #region #Json
         /// <summary>
         /// Lưu xếp hạng
         /// </summary>
@@ -44,6 +40,8 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<List<StudentRankingModel>> commandResult = await _mediator.Send(new CreateStudentRankingsCommand()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+
 
         /// <summary>
         /// Lấy ra list danh sách xếp hạng của học sinh
@@ -72,9 +70,11 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<PagingItemsModel<StudentRankingModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+        #endregion
 
+        #region Excel
         /// <summary>
-        /// Lấy ra list danh sách xếp hạng của học sinh
+        /// Lấy ra list danh sách xếp hạng của học sinh từ Excel
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
@@ -87,85 +87,23 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<PagingItemStudentRankingModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+        #endregion
 
-        /// <summary>
-        /// Tạo dữ liệu sự kiện
-        /// </summary>
-        [HttpPost("competition-events")]
-        [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateCompetitionEvents([FromBody] CreateCompetitionEventsCommand cmd)
-        {
-            MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// cập nhật dữ liệu sự kiện
-        /// </summary>
-        [HttpPut("competition-events")]
-        [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateCompetitionEvents([FromBody] UpdateCompetitionEventsCommand cmd)
-        {
-            MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Lấy liệu sự kiện
-        /// </summary>
-        [HttpGet("competition-events/{eventCode}")]
-        [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetCompetitionEvents([FromRoute] string? eventCode)
-        {
-            MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(new GetCompetitionEventsQuery { EventCode = eventCode }).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
+        #region API for LuckySpin
         /// <summary>
         /// Lưu dữ liệu sự kiện
         /// </summary>
-        [HttpPost("student-ranking-events")]
-        [ProducesResponseType(typeof(MethodResult<IList<StudentRankingEventsModel>>), (int)HttpStatusCode.OK)]
+        [HttpPost("student-competition-event")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentCompetitionEventsModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateStudentRankingEvents([FromBody] CreateStudentRankingEventsCommand cmd)
+        public async Task<IActionResult> CreateStudentRankingEvents([FromBody] CreateStudentCompetitionEventsCommand cmd)
         {
-            MethodResult<IList<StudentRankingEventsModel>> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-
-        /// <summary>
-        /// Lấy danh sách trường học theo mã sự kiện
-        /// </summary>
-        [HttpGet("schools-by-event/{eventCode}")]
-        [ProducesResponseType(typeof(MethodResult<IList<SchoolModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetSchoolsByEventCode([FromRoute] string? eventCode)
-        {
-            ArgumentException.ThrowIfNullOrEmpty(nameof(eventCode));
-            GetSchoolsByEventCodeQuery query = new GetSchoolsByEventCodeQuery();
-            query.EventCode = eventCode;
-            MethodResult<IList<SchoolModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<StudentCompetitionEventsModel>> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
         /// <summary>
-        /// Check dữ liệu học sinh có lucky spin không ?
-        /// </summary>
-        [HttpGet("check-lucky-spin")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CheckLuckySpin([FromQuery] CheckStudentLuckySpinCmd query)
-        {
-            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// get events by user id
+        /// Lấy dữ liệu event dựa vào học sinh
         /// </summary>
         [HttpGet("get-events-by-user-id")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
@@ -175,5 +113,35 @@ namespace Fsel.Identity.Api.Controllers
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Check dữ liệu học sinh có trong sự kiện lucky spin không ?
+        /// </summary>
+        [HttpGet("check-lucky-spin")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckLuckySpin([FromQuery] CheckStudentLuckySpinCmd query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+        #endregion
+
+        #region Static-data
+        /// <summary>
+        /// static-data : fsel-3208
+        /// Lấy dữ liệu student-ranking dựa trên hệ thống fsel
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        [HttpGet("school-event")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemStudentRankingModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetLeaderBoardData([FromQuery] GetStudentCompetitionByEventCodeQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+        #endregion
     }
 }

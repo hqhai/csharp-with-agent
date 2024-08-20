@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Asp.Versioning;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Course.Lms.Application.Queries.CourseQuery;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -61,6 +62,15 @@ namespace Fsel.Course.Lms.Api.Controllers
         {
             MethodResult<LessonOverviewModel> queryResult = await _mediator.Send(new GetLessonOverviewQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        [HttpPost("active-course-result")]
+        [ProducesResponseType(typeof(MethodResult<List<IList<Guid>>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetActiveCourseResult([FromBody] GetActiveCourseQuery query)
+        {
+            MethodResult<IList<Guid>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

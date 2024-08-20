@@ -10,19 +10,13 @@ namespace Fsel.Identity.Application.Commands.CompetitionEventsCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Domain.Models.CommandModels.CompetitionEvent;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class CreateCompetitionEventsCommand : IRequest<MethodResult<CompetitionEventsModel>>
+    public class CreateCompetitionEventsCommand : CreateCompetitionEventCommandModel, IRequest<MethodResult<CompetitionEventsModel>>
     {
-        public string? EventCode { get; set; }
-
-        public string? EventContentStr { get; set; }
-
-        public string? MyProperty { get; set; }
-
-
     }
 
     public class CreateCompetitionEventsCommandHandler : IRequestHandler<CreateCompetitionEventsCommand, MethodResult<CompetitionEventsModel>>
@@ -49,7 +43,8 @@ namespace Fsel.Identity.Application.Commands.CompetitionEventsCmd
             CompetitionEvent competitionEvents = new CompetitionEvent
             {
                 EventCode = request.EventCode,
-                EventContentStr = request.EventContentStr,
+                EventContent = request.EventContent,
+                SchoolIds = request.SchoolIds
             };
 
             await _competitionEventsRepository.ExecuteTransactionAsync(async () =>

@@ -6,9 +6,9 @@ namespace Fsel.Identity.Infrastructure.Repositories
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
 
-    public class StudentRankingEventsRepository : BaseRepository<StudentRankingEvent>, IStudentRankingEventsRepository
+    public class CompetitionEventsRepository : BaseRepository<CompetitionEvent>, ICompetitionEventsRepository
     {
-        public StudentRankingEventsRepository(UserDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public CompetitionEventsRepository(UserDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
 
         }

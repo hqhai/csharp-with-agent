@@ -1,12 +1,11 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Domain.Entities
+namespace Fsel.Shared.Models.ShareModels
 {
-    using Fsel.Core.Entities;
+    using System;
 
-    public class StudentRankingEvent : Entity
+    public class StudentRankingEventModel
     {
-        public string? Grade { get; set; }
         public double? RankingScore { get; set; }
 
         public double? OverallScore { get; set; }
