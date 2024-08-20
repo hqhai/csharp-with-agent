@@ -438,6 +438,7 @@ namespace Fsel.Course.Infrastructure.Common
                         {
                             var config = new ConfigQuestionV1
                             {
+                                Id = Guid.NewGuid(),
                                 Content = match.Groups[1].Value
                             };
                             if (data.Answers.Any() && data.Answers.Count >= replacements.Count)
@@ -485,6 +486,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     var config = new ConfigQuestionV1
                     {
+                        Id = Guid.NewGuid(),
                         Content = match.Groups[1].Value
                     };
 
@@ -530,6 +532,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     var config = new ConfigQuestionV1
                     {
+                        Id = Guid.NewGuid(),
                         Key = match.Groups[1].Value
                     };
                     data.Answers.Insert(replacements.Count, config);
