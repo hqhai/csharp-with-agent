@@ -6,7 +6,7 @@ namespace Fsel.Identity.Domain.Entities
 
     public class StudentCompetitionSnapShot : Entity
     {
-        public string? SchoolCode { get; set; }
+        public string? EventCode { get; set; }
 
         public string? WeekCompetitionData { get; set; }
 
