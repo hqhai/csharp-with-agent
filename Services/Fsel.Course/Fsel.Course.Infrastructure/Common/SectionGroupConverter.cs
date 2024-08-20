@@ -5,6 +5,7 @@ namespace Fsel.Course.Infrastructure.Common
     using AutoMapper;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers.V1i1;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -535,6 +536,9 @@ namespace Fsel.Course.Infrastructure.Common
                                                        QuestionId = x.QuestionId ?? default,
                                                        Status = GetStatus(x, isDone)
                                                    }).ToList();
+                    sectionDto.CountQuestion = section.SectionQuestions.SelectMany(x => x.MockTestAnswers)
+                        .Select(x => x.Answer.Deserialize<MultipleChoiceAnswerV1>())
+                        .Where(x => x != null && x.Answers != null && x.Answers.Any()).Sum(x => x.Answers.Count);
                 }
             }
             return sectionDto;

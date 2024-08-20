@@ -4,7 +4,17 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions.V1i1
 {
     public class ConfigAnswerV1
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
+        private Guid? AnswerId { get; set; }
+
+        public Guid? Id
+        {
+            get
+            {
+                return AnswerId.HasValue ? AnswerId : Guid.NewGuid();
+            }
+            set { AnswerId = value; }
+        }
+
         public string? Content { get; set; }
         public string? Key { get; set; }
         public bool? IsCorrect { get; set; }

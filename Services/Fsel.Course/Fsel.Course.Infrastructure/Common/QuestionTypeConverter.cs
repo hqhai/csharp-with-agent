@@ -104,6 +104,7 @@ namespace Fsel.Course.Infrastructure.Common
                     result = config.Deserialize<ExercisePreparationQuestion>();
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
                     break;
+
                 // Dạng câu hỏi mới
                 case EnumQuestionType.MatchingParagraphInfo:
                     var matchingParagraphInfo = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
@@ -160,16 +161,16 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case EnumQuestionType.CompletionDiagrams:
+                case EnumQuestionType.FlowChartCompletion:
                     var completionDiagrams = HandleQuestion(config.Deserialize<CheckListQuestionV1>());
                     result = isDisableAnswers ? ClearAnswers(completionDiagrams) : completionDiagrams;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(completionDiagrams) : default;
                     break;
 
-                case EnumQuestionType.FlowChartCompletion:
-                    var flowChartCompletion = HandleQuestion(config.Deserialize<FlowChartCompletionQuestion>());
-                    result = isDisableAnswers ? ClearAnswers(flowChartCompletion) : flowChartCompletion;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(flowChartCompletion) : default;
-                    break;
+                //var flowChartCompletion = HandleQuestion(config.Deserialize<FlowChartCompletionQuestion>());
+                //result = isDisableAnswers ? ClearAnswers(flowChartCompletion) : flowChartCompletion;
+                //totalCorrect = isShowCorrectTotal ? GetTotalCorrect(flowChartCompletion) : default;
+                //break;
 
                 case EnumQuestionType.TableCompletion:
                     var tableCompletion = HandleQuestion(config.Deserialize<TableCompletionQuestion>());
@@ -244,8 +245,8 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case EnumQuestionType.FlowChartCompletion:
-                    var flowChartCompletion = config.Deserialize<FlowChartCompletionQuestion>();
-                    isError = ValidatFlowChartCompletion(flowChartCompletion);
+                    var flowChartCompletion = config.Deserialize<CheckListQuestionV1>();
+                    isError = ValidateCheckList(flowChartCompletion);
                     break;
 
                 default:
@@ -372,7 +373,7 @@ namespace Fsel.Course.Infrastructure.Common
                     continue;
                 }
                 MatchCollection matches = Regex.Matches(item.Content, @"\{(.*?)\}");
-                Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+                Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
 
                 foreach (Match match in matches)
                 {
@@ -381,7 +382,7 @@ namespace Fsel.Course.Infrastructure.Common
                     {
                         var config = new AnswerTable
                         {
-                            RowId = item.Id,
+                            RowId = item.Id ?? Guid.NewGuid(),
                             Content = match.Groups[1].Value
                         };
                         if (data.AnswerTables.Any() && data.AnswerTables.Count >= replacements.Count)
@@ -428,7 +429,7 @@ namespace Fsel.Course.Infrastructure.Common
                         continue;
                     }
                     MatchCollection matches = Regex.Matches(item2.Content, @"\{(.*?)\}");
-                    Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+                    Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
 
                     foreach (Match match in matches)
                     {
@@ -437,6 +438,7 @@ namespace Fsel.Course.Infrastructure.Common
                         {
                             var config = new ConfigQuestionV1
                             {
+                                Id = Guid.NewGuid(),
                                 Content = match.Groups[1].Value
                             };
                             if (data.Answers.Any() && data.Answers.Count >= replacements.Count)
@@ -476,7 +478,7 @@ namespace Fsel.Course.Infrastructure.Common
                 return data;
             }
             MatchCollection matches = Regex.Matches(data.Content, @"\{(.*?)\}");
-            Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+            Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
             foreach (Match match in matches)
             {
                 string id = match.Groups[1].Value;
@@ -484,8 +486,10 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     var config = new ConfigQuestionV1
                     {
+                        Id = Guid.NewGuid(),
                         Content = match.Groups[1].Value
                     };
+
                     if (data.Answers.Any() && data.Answers.Count >= replacements.Count)
                     {
                         data.Answers.Insert(replacements.Count, config);
@@ -520,7 +524,7 @@ namespace Fsel.Course.Infrastructure.Common
                 return data;
             }
             MatchCollection matches = Regex.Matches(data.Content, @"\{(.*?)\}");
-            Dictionary<string, Guid> replacements = new Dictionary<string, Guid>();
+            Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
             foreach (Match match in matches)
             {
                 string id = match.Groups[1].Value;
@@ -528,6 +532,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     var config = new ConfigQuestionV1
                     {
+                        Id = Guid.NewGuid(),
                         Key = match.Groups[1].Value
                     };
                     data.Answers.Insert(replacements.Count, config);
