@@ -11,6 +11,7 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.AuthCmd;
     using Fsel.Identity.Application.Commands.StudentRankingEvents;
+    using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.LmsCourseService.CommandModels;
     using Fsel.Identity.Application.Services.OrderService;
@@ -27,6 +28,7 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
     public class ToolRetakeCourseResultCommand : IRequest<MethodResult<bool>>
     {
         public string? Email { get; set; }
+        public string? OtpCode { get; set; }
         public string? EventCode { get; set; }
     }
 
@@ -72,6 +74,12 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
+                return methodResult;
+            }
+            var method = await _mediator.Send(new ConfirmOtpCommand { Otp = request.OtpCode, Email = request.Email }, cancellationToken);
+            if (!method.IsOK || method.Result == null)
+            {
+                methodResult.AddError(method.ErrorMessages);
                 return methodResult;
             }
 
