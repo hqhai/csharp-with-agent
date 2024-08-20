@@ -54,7 +54,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly RankedStudentPublisher _rankedStudentPublisher;
 
-        public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository, ICourseResultRepository courseResultRepository, QuestionConverter questionConverter, IHomeWorkAnswerRepository homeWorkAnswerRepository, IHomeWorkRepository homeWorkRepository, IMediator mediator, IUserService userService, AuthContext authContext, ICourseRepository courseRepository, ILessonResultRepository lessonResultRepository, ISystemService systemService, FinishOneHomeWorkPublisher finishOneHomeWorkPublisher, IQuestionRepository questionRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILogger<CreateHomeWorkAnswerCommand> logger, QuestBoardPublisher questionBoardPublisher)
+        public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository, ICourseResultRepository courseResultRepository, QuestionConverter questionConverter, IHomeWorkAnswerRepository homeWorkAnswerRepository, IHomeWorkRepository homeWorkRepository, IMediator mediator, IUserService userService, AuthContext authContext, ICourseRepository courseRepository, ILessonResultRepository lessonResultRepository, ISystemService systemService, FinishOneHomeWorkPublisher finishOneHomeWorkPublisher, IQuestionRepository questionRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILogger<CreateHomeWorkAnswerCommand> logger, QuestBoardPublisher questionBoardPublisher, RankedStudentPublisher rankedStudentPublisher)
         {
             _homeWorkResultRepository = homeWorkResultRepository;
             _courseResultRepository = courseResultRepository;
@@ -72,6 +72,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
             _logger = logger;
             _questBoardPublisher = questionBoardPublisher;
+            _rankedStudentPublisher = rankedStudentPublisher;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
