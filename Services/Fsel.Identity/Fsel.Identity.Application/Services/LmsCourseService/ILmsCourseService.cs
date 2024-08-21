@@ -54,6 +54,6 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
         Task<IApiResponse<MethodResult<IList<LessonResultModel>>>> GetLessonResults([FromQuery] CourseIntegrationQueryModel query);
 
         [Post("/v1.1/course/retake-course")]
-        Task<IApiResponse<MethodResult<CourseResultModel>>> RetakeCourseAsync([FromBody] RetakeCourseResultCommand command);
+        Task<IApiResponse<MethodResult<CourseResultModel>>> RetakeCourseAsync([FromBody] RetakeCourseResultCommandModel command);
     }
 }

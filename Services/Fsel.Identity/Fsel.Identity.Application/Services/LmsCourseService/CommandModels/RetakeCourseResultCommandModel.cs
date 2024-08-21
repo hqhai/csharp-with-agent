@@ -4,7 +4,7 @@ namespace Fsel.Identity.Application.Services.LmsCourseService.CommandModels
 {
     using Fsel.Shared.Enums;
 
-    public class RetakeCourseResultCommand
+    public class RetakeCourseResultCommandModel
     {
         public EnumCourseLevel CourseLevel { get; set; }
     }

@@ -19,33 +19,36 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Net.Http.Headers;
 
-    public class ToolRetakeCourseResultCommand : IRequest<MethodResult<bool>>
+    public class RetakeCourseResultCommand : IRequest<MethodResult<string>>
     {
         public string? Email { get; set; }
         public string? OtpCode { get; set; }
         public string? EventCode { get; set; }
     }
 
-    public class ToolRetakeCourseResultCommandHandler : IRequestHandler<ToolRetakeCourseResultCommand, MethodResult<bool>>
+    public class RetakeCourseResultCommandHandler : IRequestHandler<RetakeCourseResultCommand, MethodResult<string>>
     {
         private readonly UserManager<User> _userManager;
+        private readonly AppSetting _appSetting;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
         private readonly IOrderService _orderService;
         private readonly IUserCourseSettingRepository _userCourseSettingRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly ILmsCourseService _lmsCourseService;
-        private readonly MediatR.IMediator _mediator;
+        private readonly IMediator _mediator;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ToolRetakeCourseResultCommandHandler(UserManager<User> userManager, ICompetitionEventsRepository competitionEventsRepository, IOrderService orderService, IUserCourseSettingRepository userCourseSettingRepository, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, MediatR.IMediator mediator, IHttpContextAccessor httpContextAccessor)
+        public RetakeCourseResultCommandHandler(UserManager<User> userManager, AppSetting appSetting, ICompetitionEventsRepository competitionEventsRepository, IOrderService orderService, IUserCourseSettingRepository userCourseSettingRepository, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, MediatR.IMediator mediator, IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
+            _appSetting = appSetting;
             _competitionEventsRepository = competitionEventsRepository;
             _orderService = orderService;
             _userCourseSettingRepository = userCourseSettingRepository;
@@ -55,10 +58,11 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<MethodResult<bool>> Handle(ToolRetakeCourseResultCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<string>> Handle(RetakeCourseResultCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
+            MethodResult<string> methodResult = new MethodResult<string>();
+            methodResult.Result = _appSetting.ResourceContent?.LmsWebsiteUrl;
             if (string.IsNullOrEmpty(request.Email))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
@@ -123,7 +127,7 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent));
                 return methodResult;
             }
-            var courseResult = await _lmsCourseService.RetakeCourseAsync(new RetakeCourseResultCommand { CourseLevel = student.CourseLevel.Value });
+            var courseResult = await _lmsCourseService.RetakeCourseAsync(new RetakeCourseResultCommandModel { CourseLevel = student.CourseLevel.Value });
             if (!courseResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallCourseServiceError));
@@ -140,8 +144,6 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
                 PackageId = default,
                 EventId = default
             });
-
-            methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
