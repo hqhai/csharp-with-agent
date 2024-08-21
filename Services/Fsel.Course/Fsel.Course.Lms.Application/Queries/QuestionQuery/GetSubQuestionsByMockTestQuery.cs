@@ -89,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 case EnumQuestionType.MultichoiceV1:
                     var multichoiceV1 = config.Deserialize<MultipleChoiceQuestionV1>();
-                    var subQuestionMultichoices = multichoiceV1?.Answers.SelectMany(x => x.Answers).Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
+                    var subQuestionMultichoices = multichoiceV1?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
                     if (subQuestionMultichoices == null)
                     {
                         return new List<SubQuestionModel>();
