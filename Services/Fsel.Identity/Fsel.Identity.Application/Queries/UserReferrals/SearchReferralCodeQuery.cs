@@ -41,19 +41,22 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
             var userReferrals = await _userReferralRepository.Queryable.ToListAsync(cancellationToken);
             var senderIds = userReferrals.Select(x => x.SenderId).Distinct().ToList();
 
-            var users = _userManager.Users.Include(p => p.Human).Where(p => senderIds != null && senderIds.Contains(p.Id)).Select(x => new SearchReferralCodeModel
+            var users = _userManager.Users.Include(p => p.Human).Include(p => p.Senders).Where(p => senderIds != null && senderIds.Contains(p.Id)).Select(x => new SearchReferralCodeModel
             {
                 SenderId = x.Id,
                 FullName = x.FullName,
                 Email = x.Email,
                 UserName = x.UserName,
                 Code = x.Human != null ? x.Human.Code : null,
+                NumberUser = x.Senders.Count(),
             });
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 users = users?.Where(m => (!string.IsNullOrEmpty(m.Email) && m.Email.Contains(request.Keyword)) || (!string.IsNullOrEmpty(m.Code) && m.Code.Contains(request.Keyword)) || (!string.IsNullOrEmpty(m.FullName) && m.FullName.Contains(request.Keyword)));
             }
+
+            users = users?.OrderByDescending(p => p.NumberUser);
 
             int totalItem = users != null ? await users.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false) : default;
             var lists = users != null ? await users
@@ -66,7 +69,6 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
             {
                 foreach (var item in lists)
                 {
-                    item.NumberUser = userReferrals.Where(p => p.SenderId == item.SenderId).Count();
                     item.TotalToken = userReferrals.Where(p => p.SenderId == item.SenderId).Where(p => p.FeatureMissions != null && p.FeatureMissions.Count > 0).SelectMany(p => p.FeatureMissions!).Sum(x => x.Token);
                 }
             }
