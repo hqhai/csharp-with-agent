@@ -97,6 +97,7 @@ namespace Fsel.Notification.Application.Commands
                 await _notificationsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 List<Guid> listUserReceive = new List<Guid>() { request.UserId };
+
                 //Push notification to onesignal
                 await PushToOneSignal(notificationType, notificationNew, listUserReceive, avatarPath, cancellationToken);
 
