@@ -8,7 +8,7 @@ namespace Fsel.Training.Application.Services.OrderServices.Model
     public class CreateOrderForUserFromLeaderBoardCommandModel
     {
         public Guid UserId { get; set; }
-        public int Month { get; set; }
+        public int? Month { get; set; }
         public string? FullName { get; set; }
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
@@ -23,5 +23,6 @@ namespace Fsel.Training.Application.Services.OrderServices.Model
         public string? CompanyAddress { get; set; }
         public string? CompanyTaxCode { get; set; }
         public string? ReferralCode { get; set; }
+        public DateTime? ExpiredDate { get; set; }
     }
 }
