@@ -87,9 +87,9 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 return methodResult;
             }
 
-            var checkIsLuckySpinResult = await _userService.GetEventByUserId(_authContext.CurrentUserId);
+            var eventResults = await _userService.GetEventByUserId(_authContext.CurrentUserId);
 
-            if (checkIsLuckySpinResult.IsSuccessStatusCode && checkIsLuckySpinResult.Content != null && checkIsLuckySpinResult.Content.Result != null && checkIsLuckySpinResult.Content.Result.Any(p => p.EventContent != null && p.EventContent.IsByPassPayment))
+            if (eventResults.IsSuccessStatusCode && eventResults.Content != null && eventResults.Content.Result != null && eventResults.Content.Result.Any(p => p.EventContent != null && p.EventContent.IsByPassPayment))
             {
                 var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
                 if (!studentResult.IsSuccessStatusCode)
@@ -99,19 +99,22 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 }
                 var student = studentResult.Content?.Result;
 
-                var checkIsLuckySpin = checkIsLuckySpinResult.Content.Result;
+                var @events = eventResults.Content.Result;
 
-                var paymentMonth = checkIsLuckySpin.Where(p => p.EventContent != null && p.EventContent.IsByPassPayment).Select(p => p.EventContent).Select(p => p.PaymentMonth).Max();
+                var currentDate = DateTime.UtcNow;
+
+                var @event = @events.Where(p => p.EventContent != null && p.EventContent.IsByPassPayment).Select(p => p.EventContent).Where(p => p.StartDate.HasValue && p.EndDate.HasValue && p.StartDate.Value.Date <= currentDate.Date && p.EndDate.Value.Date >= currentDate.Date).FirstOrDefault();
 
                 await _orderService.CreateOrderForUserLeaderBoard(new CreateOrderForUserFromLeaderBoardCommandModel()
                 {
                     UserId = _authContext.CurrentUserId,
-                    Month = paymentMonth,
+                    Month = @event?.PaymentMonth,
                     FullName = student?.Human?.FullName,
                     Email = student?.Human?.Email,
                     PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
                     PackageId = default,
-                    EventId = default
+                    EventId = default,
+                    ExpiredDate = @event?.PaymentDate,
                 });
             }
 
