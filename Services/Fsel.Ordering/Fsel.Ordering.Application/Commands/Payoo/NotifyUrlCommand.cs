@@ -95,7 +95,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
                 return methodResult;
             }
 
-            var changeStatusResult = await _mediator.Send(new ChangeStatusOrderCommand()
+            await _mediator.Send(new ChangeStatusOrderCommand()
             {
                 OrderId = order.Id,
                 OrderStatus = paymentInfo.PaymentStatus == 1 ? EnumOrderStatus.Payment : EnumOrderStatus.Fail,
