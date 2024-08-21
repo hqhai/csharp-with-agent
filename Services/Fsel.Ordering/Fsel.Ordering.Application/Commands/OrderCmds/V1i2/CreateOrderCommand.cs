@@ -89,7 +89,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             }
 
-            var @event = await _eventRepository.GetByIdAsync(request.EventId);
+            var @event = await _eventRepository.Queryable.Include(p => p.PackageEvents).FirstOrDefaultAsync(p => p.Id == request.EventId, cancellationToken);
             if (@event == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventNotExist), nameof(@event));
@@ -104,6 +104,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                     methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventHasExpired), nameof(@event));
                     return methodResult;
                 }
+            }
+
+            var packageEvent = @event.PackageEvents.FirstOrDefault(p => p.PackageId == package.Id);
+            if (packageEvent != null)
+            {
+                package.Price = packageEvent.Price;
             }
 
             var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student?.Human?.Code }, cancellationToken).ConfigureAwait(false);
