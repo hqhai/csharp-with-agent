@@ -80,6 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                 methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished), nameof(mockTestResult));
                 return methodResult;
             }
+
             if (mockTestResult.Status == EnumResultStatus.New)
             {
                 await UpdateMockTestResultAsync(mockTestResult, cancellationToken);
@@ -92,6 +93,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             }
             var sectionGroupResult = await GetAndAddSectionGroupResult(request, mockTestResult);
             methodResult.Result = await _sectionGroupConverter.GetSectionGroupDto(sectionGroup, sectionGroupResult, mockTestResult.MockTest?.Version ?? (int)EnumVersion.V1);
+            methodResult.Result.Version = mockTestResult.MockTest?.Version ?? default;
 
             #region Do QuestBoard
 
