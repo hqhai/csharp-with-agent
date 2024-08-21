@@ -37,33 +37,48 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             }
             await _studentRepository.ExecuteTransactionAsync(async () =>
             {
-                if (!student.ExpiredDate.HasValue || student.ExpiredDate.Value.Date < DateTime.UtcNow.Date)
+                if (request.Month.HasValue || request.Day.HasValue)
                 {
-                    if (request.Month.HasValue && request.Day.HasValue)
+                    if (!student.ExpiredDate.HasValue || student.ExpiredDate.Value.Date < DateTime.UtcNow.Date)
                     {
-                        student.ExpiredDate = DateTime.UtcNow.AddMonths(request.Month.Value);
-                        student.ExpiredDate = student.ExpiredDate.Value.AddDays(request.Day.Value);
+                        if (request.Month.HasValue && request.Day.HasValue)
+                        {
+                            student.ExpiredDate = DateTime.UtcNow.AddMonths(request.Month.Value);
+                            student.ExpiredDate = student.ExpiredDate.Value.AddDays(request.Day.Value);
+                        }
+                        else if (request.Month.HasValue)
+                        {
+                            student.ExpiredDate = DateTime.UtcNow.AddMonths(request.Month.Value);
+                        }
+                        else if (request.Day.HasValue)
+                        {
+                            student.ExpiredDate = DateTime.UtcNow.AddDays(request.Day.Value);
+                        }
                     }
-                    else if (request.Month.HasValue)
+                    else
                     {
-                        student.ExpiredDate = DateTime.UtcNow.AddMonths(request.Month.Value);
-                    }
-                    else if (request.Day.HasValue)
-                    {
-                        student.ExpiredDate = DateTime.UtcNow.AddDays(request.Day.Value);
+                        if (request.Month.HasValue)
+                        {
+                            student.ExpiredDate = student.ExpiredDate.Value.AddMonths(request.Month.Value);
+                        }
+                        if (request.Day.HasValue)
+                        {
+                            student.ExpiredDate = student.ExpiredDate.Value.AddDays(request.Day.Value);
+                        }
                     }
                 }
-                else
+                else if (request.ExpiredDate.HasValue)
                 {
-                    if (request.Month.HasValue)
+                    if (!student.ExpiredDate.HasValue)
                     {
-                        student.ExpiredDate = student.ExpiredDate.Value.AddMonths(request.Month.Value);
+                        student.ExpiredDate = request.ExpiredDate.Value;
                     }
-                    if (request.Day.HasValue)
+                    else if (student.ExpiredDate.HasValue && student.ExpiredDate.Value.Date < request.ExpiredDate.Value.Date)
                     {
-                        student.ExpiredDate = student.ExpiredDate.Value.AddDays(request.Day.Value);
+                        student.ExpiredDate = request.ExpiredDate.Value;
                     }
                 }
+
                 student = _studentRepository.Update(student);
                 await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
