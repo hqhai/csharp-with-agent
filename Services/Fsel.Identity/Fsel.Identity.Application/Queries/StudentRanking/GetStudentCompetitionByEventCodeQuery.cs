@@ -114,7 +114,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                               SchoolName = student.School,
                               Grade = student.SchoolGrade,
                               OverallScore = studentEvent.OverallScore,
-                              Process = studentEvent != null ? studentEvent.Proccess : 0, // Thêm kiểm tra null và mặc định giá trị nếu null
+                              Process = studentEvent != null ? studentEvent.Process : 0, // Thêm kiểm tra null và mặc định giá trị nếu null
                               FullName = student.Human != null ? student.Human.FullName : string.Empty,
                               Email = student.Human != null ? student.Human.Email : string.Empty,
                               AvatarPath = student.Human != null ? student.Human.AvatarPath : string.Empty, // Thêm kiểm tra null và mặc định giá trị nếu null
