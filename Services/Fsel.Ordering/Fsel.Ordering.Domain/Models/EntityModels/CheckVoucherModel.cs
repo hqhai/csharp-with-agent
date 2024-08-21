@@ -3,11 +3,12 @@
 namespace Fsel.Ordering.Domain.Models.EntityModels
 {
     using System;
-    using Fsel.Core.Base.BaseModels;
 
-    public class VoucherPackageModel : BaseModel
+    public class CheckVoucherModel
     {
-        public Guid PackageId { get; set; }
         public Guid VoucherId { get; set; }
+        public int Percent { get; set; }
+        public decimal TotalPrice { get; set; }
+        public decimal DiscountPrice { get; set; }
     }
 }

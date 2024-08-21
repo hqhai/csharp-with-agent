@@ -9,11 +9,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
+    using Fsel.Ordering.Application.Commands.VoucherCmds;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums;
+    using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i2;
     using Fsel.Ordering.Domain.Models.EntityModels;
@@ -38,8 +40,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IEventRepository _eventRepository;
+        private readonly IVoucherRepository _voucherRepository;
 
-        public CreateOrderCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, NotificationMessagePublisher notificationMessagePublisher, IPackageRepository packageRepository, AuthContext authContext, IUserService userService, IEventRepository eventRepository)
+        public CreateOrderCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, NotificationMessagePublisher notificationMessagePublisher, IPackageRepository packageRepository, AuthContext authContext, IUserService userService, IEventRepository eventRepository, IVoucherRepository voucherRepository)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
@@ -49,6 +52,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             _authContext = authContext;
             _userService = userService;
             _eventRepository = eventRepository;
+            _voucherRepository = voucherRepository;
         }
 
         public async Task<MethodResult<OrderModel>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -143,6 +147,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                     CompanyTaxCode = request.CompanyTaxCode,
                     ReferralCode = request.ReferralCode,
                     EventId = request.EventId,
+                    VoucherCode = request.VoucherCode,
                 }, cancellationToken).ConfigureAwait(false);
 
                 if (!updateOrderResult.IsOK)
@@ -156,16 +161,41 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             }
 
             var newOrder = _mapper.Map<Order>(request);
+
+            var discountPercent = 0;
+
+            if (!string.IsNullOrEmpty(request.VoucherCode))
+            {
+                var checkVoucher = await _mediator.Send(new CheckVoucherCommand()
+                {
+                    Code = request.VoucherCode,
+                    PackageId = request.PackageId,
+                }, cancellationToken);
+                if (!checkVoucher.IsOK)
+                {
+                    methodResult.AddError(checkVoucher.ErrorMessages);
+                    return methodResult;
+                }
+                var voucher = await _voucherRepository.GetByIdAsync(checkVoucher.Result?.VoucherId ?? default);
+                if (voucher == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist));
+                    return methodResult;
+                }
+                discountPercent = voucher.Percent;
+                newOrder.VoucherId = voucher.Id;
+            }
+
             newOrder.Price = package.Price;
             newOrder.Code = code;
-            newOrder.DiscountPercent = 0;
+            newOrder.DiscountPercent = discountPercent;
             newOrder.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(newOrder.Price * newOrder.DiscountPercent));
             newOrder.TotalPrice = newOrder.Price - newOrder.DiscountPrice;
             newOrder.UserId = _authContext.CurrentUserId;
 
             if (!newOrder.IsValid())
             {
-                methodResult.AddErrorBadRequest(newOrder.ErrorMessages);
+                methodResult.AddError(newOrder.ErrorMessages);
                 return methodResult;
             }
 
