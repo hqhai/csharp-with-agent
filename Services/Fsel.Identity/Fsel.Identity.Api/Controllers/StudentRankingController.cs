@@ -1,17 +1,18 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Net;
+using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Identity.Application.Commands.LandingPages;
 using Fsel.Identity.Application.Commands.StudentRankingCmd;
+using Fsel.Identity.Application.Commands.StudentRankingEvents;
 using Fsel.Identity.Application.Queries.StudentRanking;
 using Fsel.Identity.Domain.Models.EntityModels;
+using Fsel.Shared.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Asp.Versioning;
-using Fsel.Shared.Constants;
-using Fsel.Identity.Application.Commands.StudentRankingEvents;
 
 namespace Fsel.Identity.Api.Controllers
 {
@@ -28,7 +29,6 @@ namespace Fsel.Identity.Api.Controllers
             _mediator = mediator;
         }
 
-        #region #Json
         /// <summary>
         /// Lưu xếp hạng
         /// </summary>
@@ -40,8 +40,6 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<List<StudentRankingModel>> commandResult = await _mediator.Send(new CreateStudentRankingsCommand()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
-
 
         /// <summary>
         /// Lấy ra list danh sách xếp hạng của học sinh
@@ -70,9 +68,7 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<PagingItemsModel<StudentRankingModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-        #endregion
 
-        #region Excel
         /// <summary>
         /// Lấy ra list danh sách xếp hạng của học sinh từ Excel
         /// </summary>
@@ -87,9 +83,7 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<PagingItemStudentRankingModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-        #endregion
 
-        #region API for LuckySpin
         /// <summary>
         /// Lưu dữ liệu sự kiện
         /// </summary>
@@ -125,9 +119,7 @@ namespace Fsel.Identity.Api.Controllers
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-        #endregion
 
-        #region Static-data
         /// <summary>
         /// static-data : fsel-3208
         /// Lấy dữ liệu student-ranking dựa trên hệ thống fsel
@@ -142,6 +134,29 @@ namespace Fsel.Identity.Api.Controllers
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-        #endregion
+
+        /// <summary>
+        /// Form Register Student For Event
+        /// </summary>
+        [HttpPost("form-register-student-for-event")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> FormRegisterStudentForEvent([FromBody] FormRegisterStudentForEventCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        ///  Register Student For Event
+        /// </summary>
+        [HttpPost("register-student-for-event")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RegisterStudentForEvent([FromBody] RegisterStudentForEventCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
