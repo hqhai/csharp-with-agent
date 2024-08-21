@@ -84,7 +84,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
                     OrderDescription = PaymentSetting.Payoo.OrderDescription,
                     NotifyUrl = _appSetting.PayooConfig?.NotifyUrl,
                     ValidityTime = validityTime,
-                    OrderTransactionId = orderTransaction.Id,
+                    OrderCode = order.Code,
                     CustomerName = student?.Human?.FullName,
                     CustomerPhone = student?.Human?.PhoneNumber,
                     CustomerAddress = student?.Human?.Address,
