@@ -45,7 +45,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     public class RegisterStudentForEventCommandHandler : IRequestHandler<RegisterStudentForEventCommand, MethodResult<bool>>
     {
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
-        private readonly IStudentCompetitionEventsRepository _studentRankingEventsRepository;
+        private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly UserManager<User> _userManager;
         private readonly IPlatformRepository _platformRepository;
         private const string DefaultPassword = "Fsel@2024";
@@ -55,10 +55,10 @@ namespace Fsel.Identity.Application.Commands.LandingPages
         private readonly IMediator _mediator;
         private readonly IInteractionService _interactionService;
 
-        public RegisterStudentForEventCommandHandler(ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentRankingEventsRepository, UserManager<User> userManager, IPlatformRepository platformRepository, ISystemService systemService, ISenderService senderService, IOrderService orderService, MediatR.IMediator mediator, IInteractionService interactionService)
+        public RegisterStudentForEventCommandHandler(ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, UserManager<User> userManager, IPlatformRepository platformRepository, ISystemService systemService, ISenderService senderService, IOrderService orderService, MediatR.IMediator mediator, IInteractionService interactionService)
         {
             _competitionEventsRepository = competitionEventsRepository;
-            _studentRankingEventsRepository = studentRankingEventsRepository;
+            _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _userManager = userManager;
             _platformRepository = platformRepository;
             _systemService = systemService;
@@ -126,7 +126,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             {
                 var currentDate = DateTime.UtcNow;
 
-                var studentEvents = await _studentRankingEventsRepository.Queryable.Include(p => p.CompetitionEvents).Where(p => p.StudentId == user.Human.Student.Id).ToListAsync(cancellationToken);
+                var studentEvents = await _studentCompetitionEventsRepository.Queryable.Include(p => p.CompetitionEvents).Where(p => p.StudentId == user.Human.Student.Id).ToListAsync(cancellationToken);
 
                 if (studentEvents.Any(p => p.CompetitionEvents != null && p.CompetitionEvents.EventContent != null && p.CompetitionEvents.EventContent.StartDate.HasValue && p.CompetitionEvents.EventContent.EndDate.HasValue && p.CompetitionEvents.EventContent.StartDate.Value.Date <= currentDate.Date && p.CompetitionEvents.EventContent.EndDate.Value.Date >= currentDate.Date))
                 {
@@ -167,14 +167,14 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     Params = param,
                 });
 
-                await _studentRankingEventsRepository.ExecuteTransactionAsync(async () =>
+                await _studentCompetitionEventsRepository.ExecuteTransactionAsync(async () =>
                 {
-                    _studentRankingEventsRepository.Add(new StudentCompetitionEvent()
+                    _studentCompetitionEventsRepository.Add(new StudentCompetitionEvent()
                     {
                         StudentId = user.Human.Student.Id,
                         CompetitionEventId = @event.Id
                     });
-                    await _studentRankingEventsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    await _studentCompetitionEventsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     return methodResult;
                 });
                 return methodResult;
@@ -240,7 +240,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 return methodResult;
             }
 
-            await _studentRankingEventsRepository.ExecuteTransactionAsync(async () =>
+            await _studentCompetitionEventsRepository.ExecuteTransactionAsync(async () =>
             {
                 identityStudentResult = await _userManager.CreateAsync(user, DefaultPassword);
                 if (!identityStudentResult.Succeeded)
@@ -271,12 +271,12 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 }
                 });
 
-                _studentRankingEventsRepository.Add(new StudentCompetitionEvent()
+                _studentCompetitionEventsRepository.Add(new StudentCompetitionEvent()
                 {
                     StudentId = user.Human.Student.Id,
                     CompetitionEventId = @event.Id
                 });
-                await _studentRankingEventsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _studentCompetitionEventsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 return methodResult;
             });

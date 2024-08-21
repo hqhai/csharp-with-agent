@@ -40,7 +40,8 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<UserOtpCode> methodResult = new MethodResult<UserOtpCode>();
-            var userOtpCode = await _userOtpCodeRepository.Queryable
+            var userOtpCode = await _userOtpCodeRepository.Queryable.Include(x => x.User)
+                                   .Where(x => string.IsNullOrEmpty(request.Email) || (x.User != null && x.User.Email == request.Email))
                                    .FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.Otp, cancellationToken);
             if (!string.IsNullOrEmpty(request.Email) && request.Otp == _otpDefault && (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)))
             {
