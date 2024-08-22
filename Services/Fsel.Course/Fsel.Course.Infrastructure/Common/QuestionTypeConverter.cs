@@ -613,7 +613,8 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case DragAndDropListSentenceOrderQuestion dragAndDropList:
-                    return GenerateRandomLoop(dragAndDropList.Contents);
+                    dragAndDropList.Contents = GenerateRandomLoop(dragAndDropList.Contents);
+                    return dragAndDropList;
 
                 case MatchingTypeQuestion matchingType:
                     matchingType.Link?.Clear();

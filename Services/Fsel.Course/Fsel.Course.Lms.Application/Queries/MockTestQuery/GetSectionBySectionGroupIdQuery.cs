@@ -122,7 +122,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             if (sectionGroupResult == null)
             {
                 _logger.LoggerRequest(request);
-                sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, MockTestResultId = request.MockTestResultId, Status = EnumResultStatus.New });
+                sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = mockTestResult.StudentId, SectionGroupId = request.SectionGroupId, MockTestResultId = request.MockTestResultId, Status = EnumResultStatus.New });
 
                 try
                 {
