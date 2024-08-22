@@ -10,7 +10,7 @@ namespace Fsel.Shared.Models.ShareModels
 
         public double? OverallScore { get; set; }
 
-        public double? Proccess { get; set; }
+        public double? Process { get; set; }
         public Guid UserId { get; set; }
         public Guid StudentId { get; set; }
         public Guid CourseResultId { get; set; }
