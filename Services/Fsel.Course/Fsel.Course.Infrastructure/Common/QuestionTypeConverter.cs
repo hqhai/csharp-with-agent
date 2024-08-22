@@ -10,6 +10,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions.V1i1;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Constants;
 
     public class QuestionTypeConverter
     {
@@ -23,18 +24,18 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.Dropdown:
                     var multichoice = config.Deserialize<MultipleChoiceQuestion>();
                     result = isDisableAnswers ? ClearAnswers(multichoice) : multichoice;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multichoice) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multichoice) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.Checklist:
                     var checklist = config.Deserialize<MultipleChoiceQuestion>();
                     result = isDisableAnswers ? ClearAnswers(checklist) : checklist;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(checklist) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(checklist) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.Listing:
                     result = config.Deserialize<ListingQuestion>();
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.MatchingType1:
@@ -42,48 +43,48 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.DragAndDropPicture:
                     var matchingTypeQuestion = config.Deserialize<MatchingTypeQuestion>();
                     result = isDisableAnswers ? ClearAnswers(matchingTypeQuestion) : matchingTypeQuestion;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(matchingTypeQuestion) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(matchingTypeQuestion) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.ShortAnswerWordBase:
                     var shortAnswerQuestionWordBaseQuestion = config.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
                     result = isDisableAnswers ? ClearAnswers(shortAnswerQuestionWordBaseQuestion) : shortAnswerQuestionWordBaseQuestion;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.ShortAnswerWordCount:
                     result = config.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.GapFillScoreByQuestion:
                     var gapFillQuestion = config.Deserialize<GapFillQuestion>();
                     result = isDisableAnswers ? ClearAnswers(gapFillQuestion) : gapFillQuestion;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillQuestion) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillQuestion) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.GapFillWordBankScoreByQuestion:
                     var gapFillWordBankScoreQuestion = config.Deserialize<GapFillQuestion>();
                     result = isDisableAnswers ? ClearAnswers(gapFillWordBankScoreQuestion) : gapFillWordBankScoreQuestion;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillWordBankScoreQuestion) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillWordBankScoreQuestion) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                     var gapFillWordBankScoreByGap = config.Deserialize<GapFillQuestion>();
                     result = isDisableAnswers ? ClearAnswers(gapFillWordBankScoreByGap) : gapFillWordBankScoreByGap;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillWordBankScoreByGap, true) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillWordBankScoreByGap, true) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.GapFillScoreByGap:
                     var gapFillQuestionByGap = config.Deserialize<GapFillQuestion>();
                     result = isDisableAnswers ? ClearAnswers(gapFillQuestionByGap) : gapFillQuestionByGap;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillQuestionByGap) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillQuestionByGap) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
                     var dragAndDropSentenceOrderQuestion = config.Deserialize<DragAndDropSentenceOrderQuestion>();
                     result = isDisableAnswers ? ClearAnswers(dragAndDropSentenceOrderQuestion) : dragAndDropSentenceOrderQuestion;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(dragAndDropSentenceOrderQuestion) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(dragAndDropSentenceOrderQuestion) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.DragAndDropListSentenceOrder:
@@ -93,80 +94,80 @@ namespace Fsel.Course.Infrastructure.Common
                         dragAndDropList.Contents = dragAndDropList.Contents?.Select((x, index) => { x.Id = ++index; return x; }).ToList();
                     }
                     result = isDisableAnswers ? ClearAnswers(dragAndDropList) : dragAndDropList;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(dragAndDropList) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(dragAndDropList) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
                     var multipleOption = config.Deserialize<MultipleOptionSentenceCompletionQuestion>();
                     result = isDisableAnswers ? ClearAnswers(multipleOption) : multipleOption;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multipleOption) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multipleOption) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.ExercisePreparation:
                     result = config.Deserialize<ExercisePreparationQuestion>();
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : ValueSettings.ValueDefault;
                     break;
 
                 // Dạng câu hỏi mới
                 case EnumQuestionType.MatchingParagraphInfo:
                     var matchingParagraphInfo = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
                     result = isDisableAnswers ? ClearAnswers(matchingParagraphInfo) : matchingParagraphInfo;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(matchingParagraphInfo) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(matchingParagraphInfo) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.MatchingHeading:
                     var matchingHeading = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
                     result = isDisableAnswers ? ClearAnswers(matchingHeading) : matchingHeading;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(matchingHeading) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(matchingHeading) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.YesNoNotGivenDropDown:
                     var yesNoNotGivenDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
                     result = isDisableAnswers ? ClearAnswers(yesNoNotGivenDropDown) : yesNoNotGivenDropDown;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(yesNoNotGivenDropDown) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(yesNoNotGivenDropDown) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.TrueFalseNotGivenDropDown:
                     var trueFalseNotGivenDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
                     result = isDisableAnswers ? ClearAnswers(trueFalseNotGivenDropDown) : trueFalseNotGivenDropDown;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(trueFalseNotGivenDropDown) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(trueFalseNotGivenDropDown) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.MapLabelingDropDown:
                     var mapLabelingDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
                     result = isDisableAnswers ? ClearAnswers(mapLabelingDropDown) : mapLabelingDropDown;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(mapLabelingDropDown) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(mapLabelingDropDown) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.SummaryCompletionDropDown:
                     var summaryCompletionDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
                     result = isDisableAnswers ? ClearAnswers(summaryCompletionDropDown) : summaryCompletionDropDown;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(summaryCompletionDropDown) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(summaryCompletionDropDown) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.MultichoiceV1:
                     var multichoiceV1 = config.Deserialize<MultipleChoiceQuestionV1>();
                     result = isDisableAnswers ? ClearAnswers(multichoiceV1) : multichoiceV1;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multichoiceV1) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multichoiceV1) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.CheckListV1:
                     var checkList = HandleQuestion(config.Deserialize<CheckListQuestionV1>());
                     result = isDisableAnswers ? ClearAnswers(checkList) : checkList;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(checkList) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(checkList) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.SummaryCompletionGapFill:
                     var summaryCompletionGapFill = HandleQuestion(config.Deserialize<CheckListQuestionV1>());
                     result = isDisableAnswers ? ClearAnswers(summaryCompletionGapFill) : summaryCompletionGapFill;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(summaryCompletionGapFill) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(summaryCompletionGapFill) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.CompletionDiagrams:
                 case EnumQuestionType.FlowChartCompletion:
                     var completionDiagrams = HandleQuestion(config.Deserialize<CheckListQuestionV1>());
                     result = isDisableAnswers ? ClearAnswers(completionDiagrams) : completionDiagrams;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(completionDiagrams) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(completionDiagrams) : ValueSettings.ValueDefault;
                     break;
 
                 //var flowChartCompletion = HandleQuestion(config.Deserialize<FlowChartCompletionQuestion>());
@@ -177,7 +178,7 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.TableCompletion:
                     var tableCompletion = HandleQuestion(config.Deserialize<TableCompletionQuestion>());
                     result = isDisableAnswers ? ClearAnswers(tableCompletion) : tableCompletion;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(tableCompletion) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(tableCompletion) : ValueSettings.ValueDefault;
                     break;
 
                 default:
@@ -422,20 +423,17 @@ namespace Fsel.Course.Infrastructure.Common
                     foreach (Match match in matches)
                     {
                         string id = match.Groups[1].Value;
-                        if (!Guid.TryParse(id, out _))
+                        if (Guid.TryParse(id, out _))
                         {
-                            var config = new ConfigQuestionV1
-                            {
-                                Id = Guid.NewGuid(),
-                                Content = match.Groups[1].Value
-                            };
-                            data.Answers.Add(config);
-                            replacements[id] = config.Id;
+                            continue;
                         }
-                        else
+                        var config = new ConfigQuestionV1
                         {
-                            replacements[id] = new Guid(id);
-                        }
+                            Id = Guid.NewGuid(),
+                            Content = match.Groups[1].Value
+                        };
+                        data.Answers.Add(config);
+                        replacements[id] = config.Id;
                     }
 
                     item2.Content = ReplacePlaceholders(item2.Content, replacements);
@@ -477,32 +475,26 @@ namespace Fsel.Course.Infrastructure.Common
 
             foreach (Match match in matches)
             {
-                string id = match.Groups[1].Value;
-                if (!Guid.TryParse(id, out _))
+                string value = match.Groups[1].Value;
+                if (Guid.TryParse(value, out _))
                 {
-                    var config = new ConfigQuestionV1
-                    {
-                        Id = Guid.NewGuid(),
-                        Key = id
-                    };
+                    continue;
+                }
+                var config = new ConfigQuestionV1
+                {
+                    Id = Guid.NewGuid(),
+                    Key = value
+                };
 
-                    // Nếu dataOld có danh sách các câu trả lời, thêm câu trả lời mới vào danh sách đó
-                    if (data.Answers != null)
-                    {
-                        data.Answers.Add(config);
-                    }
-                    else
-                    {
-                        // Nếu dataOld không có danh sách Answers, khởi tạo một danh sách mới
-                        data.Answers = new List<ConfigQuestionV1> { config };
-                    }
-
-                    replacements[id] = config.Id;
+                if (data.Answers != null)
+                {
+                    data.Answers.Add(config);
                 }
                 else
                 {
-                    replacements[id] = new Guid(id);
+                    data.Answers = new List<ConfigQuestionV1> { config };
                 }
+                replacements[value] = config.Id;
             }
 
             data.Content = ReplacePlaceholders(content, replacements);
@@ -645,29 +637,29 @@ namespace Fsel.Course.Infrastructure.Common
             switch (data)
             {
                 case MultipleChoiceQuestion multipleChoice:
-                    return multipleChoice.Contents?.Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value) ?? default;
+                    return multipleChoice.Contents?.Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value) ?? ValueSettings.ValueDefault;
 
                 case MultipleOptionSentenceCompletionQuestion multipleOption:
-                    return multipleOption.Contents?.Count ?? default;
+                    return multipleOption.Contents?.Count ?? ValueSettings.ValueDefault;
 
                 case MatchingTypeQuestion matchingType:
-                    return matchingType.Link?.Count ?? default;
+                    return matchingType.Link?.Count ?? ValueSettings.ValueDefault;
 
                 case GapFillQuestion gapFill when !calculateByGap:
-                    return gapFill.Contents?.Count ?? default;
+                    return gapFill.Contents?.Count ?? ValueSettings.ValueDefault;
 
                 case GapFillQuestion gapFill when calculateByGap:
-                    return gapFill.Contents?.Sum(x => x.Words?.Count ?? default) ?? default;
+                    return gapFill.Contents?.Sum(x => x.Words?.Count ?? ValueSettings.ValueDefault) ?? ValueSettings.ValueDefault;
 
                 case DragAndDropSentenceOrderQuestion dragAndDrop:
-                    return dragAndDrop.Contents?.Count ?? default;
+                    return dragAndDrop.Contents?.Count ?? ValueSettings.ValueDefault;
 
                 // V1
                 case MultipleChoiceQuestionV1 multipleChoiceV1:
                     return multipleChoiceV1.Answers?
                         .Where(x => x.Answers != null && x.Answers.Any())
                         .SelectMany(x => x.Answers!)
-                        .Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value) ?? default;
+                        .Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value) ?? ValueSettings.ValueDefault;
 
                 case CheckListQuestionV1 checkList:
                     if (checkList.Answers != null)
@@ -676,16 +668,16 @@ namespace Fsel.Course.Infrastructure.Common
                             ? checkList.Answers.Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value)
                             : checkList.Answers.Count;
                     }
-                    return default;
+                    return ValueSettings.ValueDefault;
 
                 case MatchingTaskQuestion matchingTask:
-                    return matchingTask.Answers?.Count ?? default;
+                    return matchingTask.Answers?.Count ?? ValueSettings.ValueDefault;
 
                 case TableCompletionQuestion tableCompletion:
-                    return tableCompletion.AnswerTables?.Count ?? default;
+                    return tableCompletion.AnswerTables?.Count ?? ValueSettings.ValueDefault;
 
                 case FlowChartCompletionQuestion flowChart:
-                    return flowChart.Answers?.Count ?? default;
+                    return flowChart.Answers?.Count ?? ValueSettings.ValueDefault;
 
                 default:
                     return 1;
