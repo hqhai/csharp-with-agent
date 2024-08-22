@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.UserCmd;
+    using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Identity.Application.Services;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.InteractionService.Models;
@@ -18,6 +19,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -28,11 +30,11 @@ namespace Fsel.Identity.Application.Commands.LandingPages
         public string? FullName { get; set; }
         public string? Email { get; set; }
         public string? Password { get; set; }
-        public string? LinkLMS { get; set; }
         public string? StartDateEvent { get; set; }
         public string? EndDateEvent { get; set; }
         public string? StartDateAward { get; set; }
         public string? EndDateAward { get; set; }
+        public string? LinkLMS { get; set; }
         public string? LinkLeaderBoard { get; set; }
         public string? LinkLuckyStar { get; set; }
         public string? LinkResetProgress { get; set; }
@@ -54,8 +56,13 @@ namespace Fsel.Identity.Application.Commands.LandingPages
         private readonly IOrderService _orderService;
         private readonly IMediator _mediator;
         private readonly IInteractionService _interactionService;
+        private readonly AppSetting _appSetting;
+        private const string CreateAccountWithEventSuccess = "Thông tin tài khoản tham gia sự kiện";
+        private const string WasInAnotherEvent = "Thông báo tài khoản không đủ điều kiện tham gia sự kiện";
+        private const string LearnedOnThePlatform = "Thông báo đặt lại dữ liệu khóa học để tham gia sự kiện";
+        private const string SignUpEventSuccess = "Thông tin đăng kí tham gia sự kiện";
 
-        public RegisterStudentForEventCommandHandler(ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, UserManager<User> userManager, IPlatformRepository platformRepository, ISystemService systemService, ISenderService senderService, IOrderService orderService, MediatR.IMediator mediator, IInteractionService interactionService)
+        public RegisterStudentForEventCommandHandler(ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, UserManager<User> userManager, IPlatformRepository platformRepository, ISystemService systemService, ISenderService senderService, IOrderService orderService, MediatR.IMediator mediator, IInteractionService interactionService, AppSetting appSetting)
         {
             _competitionEventsRepository = competitionEventsRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
@@ -66,6 +73,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             _orderService = orderService;
             _mediator = mediator;
             _interactionService = interactionService;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<bool>> Handle(RegisterStudentForEventCommand request, CancellationToken cancellationToken)
@@ -89,38 +97,20 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 EndDateEvent = @event.EventContent?.EndDate?.ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
                 StartDateAward = @event.EventContent?.AwardStartDate?.ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
                 EndDateAward = @event.EventContent?.AwardEndDate?.ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
+                LinkLMS = _appSetting.ResourceContent?.LmsWebsiteUrl,
                 LinkLeaderBoard = @event.EventContent?.LinkLeaderBoard,
                 LinkLuckyStar = @event.EventContent?.LinkLuckyStar,
             };
 
             var user = await _userManager.Users.Include(p => p.Human).ThenInclude(p => p.Student).FirstOrDefaultAsync(p => p.UserName.ToLower() == request.Email.ToLower() || p.Email.ToLower() == request.Email.ToLower(), cancellationToken);
+
             if (user == null)
             {
                 await CreateUser(request, @event, user, methodResult, cancellationToken);
 
-                await _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel
-                {
-                    ToEmails = new List<string>() { request.Email ?? string.Empty },
-                    Template = EnumSenderTemplate.CreateAccountWithEventSuccess,
-                    Subject = "",
-                    Params = param,
-                });
+                await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.CreateAccountWithEventSuccess, CreateAccountWithEventSuccess);
 
-                await _systemService.RegisterStudentForEvent(new RegisterStudentForEventCommandModel()
-                {
-                    EventCode = @event.EventCode,
-                    FirstName = request.FirstName,
-                    LastName = request.LastName,
-                    Email = request.Email,
-                    PhoneNumber = request.PhoneNumber,
-                    BirthDay = request.BirthDay,
-                    Province = request.Province,
-                    District = request.District,
-                    School = request.School,
-                    SchoolGrade = request.SchoolGrade,
-                    SchoolClass = request.SchoolClass,
-                    SchoolStudentCode = request.SchoolStudentCode,
-                });
+                await AddToGoogleSheet(request);
             }
             else
             {
@@ -130,13 +120,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
 
                 if (studentEvents.Any(p => p.CompetitionEvents != null && p.CompetitionEvents.EventContent != null && p.CompetitionEvents.EventContent.StartDate.HasValue && p.CompetitionEvents.EventContent.EndDate.HasValue && p.CompetitionEvents.EventContent.StartDate.Value.Date <= currentDate.Date && p.CompetitionEvents.EventContent.EndDate.Value.Date >= currentDate.Date))
                 {
-                    await _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel
-                    {
-                        ToEmails = new List<string>() { request.Email ?? string.Empty },
-                        Template = EnumSenderTemplate.WasInAnotherEvent,
-                        Subject = "",
-                        Params = param,
-                    });
+                    await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.WasInAnotherEvent, WasInAnotherEvent);
                     return methodResult;
                 }
 
@@ -149,23 +133,11 @@ namespace Fsel.Identity.Application.Commands.LandingPages
 
                 if (orders != null && orders.Count > 0)
                 {
-                    await _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel
-                    {
-                        ToEmails = new List<string>() { request.Email ?? string.Empty },
-                        Template = EnumSenderTemplate.LearnedOnThePlatform,
-                        Subject = "",
-                        Params = param,
-                    });
+                    var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id, ExpiredTime = @event.EventContent?.EndDate?.Date }, cancellationToken);
+                    param.LinkResetProgress = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkResetProgress ?? string.Empty, user.Email, userOtpCode.Result, @event.EventCode);
+                    await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.LearnedOnThePlatform, LearnedOnThePlatform);
                     return methodResult;
                 }
-
-                await _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel
-                {
-                    ToEmails = new List<string>() { request.Email ?? string.Empty },
-                    Template = EnumSenderTemplate.SignUpEventSuccess,
-                    Subject = "",
-                    Params = param,
-                });
 
                 await _studentCompetitionEventsRepository.ExecuteTransactionAsync(async () =>
                 {
@@ -177,9 +149,29 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     await _studentCompetitionEventsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     return methodResult;
                 });
+
+                await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.SignUpEventSuccess, SignUpEventSuccess);
+                await AddToGoogleSheet(request);
+
                 return methodResult;
             }
             return methodResult;
+        }
+
+        private async Task AddToGoogleSheet(RegisterStudentForEventCommandModel request)
+        {
+            await _systemService.RegisterStudentForEvent(request);
+        }
+
+        private async Task SendMail(string email, ParamSendMailEvent param, EnumSenderTemplate senderTemplate, string subject)
+        {
+            await _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel
+            {
+                ToEmails = new List<string>() { email },
+                Template = senderTemplate,
+                Subject = subject,
+                Params = param,
+            });
         }
 
         private async Task<MethodResult<bool>> CreateUser(RegisterStudentForEventCommandModel request, CompetitionEvent @event, User? user, MethodResult<bool> methodResult, CancellationToken cancellationToken)
@@ -210,7 +202,11 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     {
                         Occupation = "Student",
                         CourseLevel = EnumCourseLevel.A1,
-                        CreatedByParent = false
+                        CreatedByParent = false,
+                        School = request.School,
+                        SchoolId = request.SchoolId,
+                        SchoolClass = request.SchoolClass,
+                        SchoolGrade = request.SchoolGrade,
                     }
                 },
                 UserPlatforms = new List<UserPlatform>()
