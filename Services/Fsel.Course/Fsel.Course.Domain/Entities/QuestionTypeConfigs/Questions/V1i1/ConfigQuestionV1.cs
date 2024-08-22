@@ -8,6 +8,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions.V1i1
         public string? Content { get; set; }
         public string? Key { get; set; }
         public bool? IsCorrect { get; set; }
+        public Guid? RowId { get; set; }
     }
 
     public class ConfigQuestionV1 : ConfigAnswerV1

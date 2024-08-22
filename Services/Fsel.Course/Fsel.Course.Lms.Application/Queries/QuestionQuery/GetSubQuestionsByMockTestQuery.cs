@@ -178,7 +178,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
                 case EnumQuestionType.TableCompletion:
                     var tableCompletion = config.Deserialize<TableCompletionQuestion>();
-                    var subQuestionTableCompletions = tableCompletion?.AnswerTables.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
+                    var subQuestionTableCompletions = tableCompletion?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
                     if (subQuestionTableCompletions == null)
                     {
                         return new List<SubQuestionModel>();
