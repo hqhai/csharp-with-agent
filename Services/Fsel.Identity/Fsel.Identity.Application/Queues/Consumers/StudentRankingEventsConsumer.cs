@@ -23,7 +23,7 @@ namespace Fsel.Identity.Application.Queues.Consumers
                 await _mediator.Send(new CreateStudentRankingEventCommand
                 {
                     RankingScore = message.RankingScore,
-                    Process = message.Proccess,
+                    Process = message.Process,
                     UserId = message.UserId,
                     StudentId = message.StudentId,
                     CourseResultId = message.CourseResultId,
