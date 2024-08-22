@@ -2,6 +2,8 @@
 
 namespace Fsel.Course.Infrastructure.Common
 {
+    using System.Collections;
+    using System.Collections.Generic;
     using System.Text.Json;
     using System.Text.RegularExpressions;
     using Fsel.Common.Helpers;
@@ -21,7 +23,7 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.Dropdown:
                     var multichoice = config.Deserialize<MultipleChoiceQuestion>();
                     result = isDisableAnswers ? ClearAnswers(multichoice) : multichoice;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multichoice) : default;
                     break;
 
                 case EnumQuestionType.Checklist:
@@ -32,7 +34,7 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.Listing:
                     result = config.Deserialize<ListingQuestion>();
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : default;
                     break;
 
                 case EnumQuestionType.MatchingType1:
@@ -46,36 +48,36 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.ShortAnswerWordBase:
                     var shortAnswerQuestionWordBaseQuestion = config.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
                     result = isDisableAnswers ? ClearAnswers(shortAnswerQuestionWordBaseQuestion) : shortAnswerQuestionWordBaseQuestion;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : default;
                     break;
 
                 case EnumQuestionType.ShortAnswerWordCount:
                     result = config.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : default;
                     break;
 
                 case EnumQuestionType.GapFillScoreByQuestion:
                     var gapFillQuestion = config.Deserialize<GapFillQuestion>();
                     result = isDisableAnswers ? ClearAnswers(gapFillQuestion) : gapFillQuestion;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrectBySubQuestion(gapFillQuestion) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillQuestion) : default;
                     break;
 
                 case EnumQuestionType.GapFillWordBankScoreByQuestion:
                     var gapFillWordBankScoreQuestion = config.Deserialize<GapFillQuestion>();
                     result = isDisableAnswers ? ClearAnswers(gapFillWordBankScoreQuestion) : gapFillWordBankScoreQuestion;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrectBySubQuestion(gapFillWordBankScoreQuestion) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillWordBankScoreQuestion) : default;
                     break;
 
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                     var gapFillWordBankScoreByGap = config.Deserialize<GapFillQuestion>();
                     result = isDisableAnswers ? ClearAnswers(gapFillWordBankScoreByGap) : gapFillWordBankScoreByGap;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrectByGap(gapFillWordBankScoreByGap) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillWordBankScoreByGap, true) : default;
                     break;
 
                 case EnumQuestionType.GapFillScoreByGap:
                     var gapFillQuestionByGap = config.Deserialize<GapFillQuestion>();
                     result = isDisableAnswers ? ClearAnswers(gapFillQuestionByGap) : gapFillQuestionByGap;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrectByGap(gapFillQuestionByGap) : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillQuestionByGap) : default;
                     break;
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
@@ -91,7 +93,7 @@ namespace Fsel.Course.Infrastructure.Common
                         dragAndDropList.Contents = dragAndDropList.Contents?.Select((x, index) => { x.Id = ++index; return x; }).ToList();
                     }
                     result = isDisableAnswers ? ClearAnswers(dragAndDropList) : dragAndDropList;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(dragAndDropList) : default;
                     break;
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
@@ -102,7 +104,7 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.ExercisePreparation:
                     result = config.Deserialize<ExercisePreparationQuestion>();
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : default;
                     break;
 
                 // Dạng câu hỏi mới
@@ -378,37 +380,20 @@ namespace Fsel.Course.Infrastructure.Common
                 foreach (Match match in matches)
                 {
                     string id = match.Groups[1].Value;
-                    if (!Guid.TryParse(id, out _))
+                    if (Guid.TryParse(id, out _))
                     {
-                        var config = new AnswerTable
-                        {
-                            RowId = item.Id ?? Guid.NewGuid(),
-                            Content = match.Groups[1].Value
-                        };
-                        if (data.AnswerTables.Any() && data.AnswerTables.Count >= replacements.Count)
-                        {
-                            data.AnswerTables.Insert(replacements.Count, config);
-                        }
-                        else
-                        {
-                            data.AnswerTables.Add(config);
-                        }
-
-                        replacements[id] = config.Id;
+                        continue;
                     }
-                    else
+                    var config = new AnswerTable
                     {
-                        replacements[id] = new Guid(id);
-                    }
+                        RowId = item.Id ?? Guid.NewGuid(),
+                        Content = match.Groups[1].Value
+                    };
+                    data.AnswerTables.Add(config);
+                    replacements[id] = config.Id;
                 }
 
-                foreach (var pair in replacements)
-                {
-                    if (!Guid.TryParse(pair.Key, out _))
-                    {
-                        item.Content = item.Content.Replace("{" + pair.Key + "}", "{" + pair.Value.ToString() + "}", StringComparison.CurrentCulture);
-                    }
-                }
+                item.Content = ReplacePlaceholders(item.Content, replacements);
             }
 
             return data;
@@ -430,7 +415,10 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                     MatchCollection matches = Regex.Matches(item2.Content, @"\{(.*?)\}");
                     Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
-
+                    if (!matches.Any())
+                    {
+                        continue;
+                    }
                     foreach (Match match in matches)
                     {
                         string id = match.Groups[1].Value;
@@ -441,15 +429,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 Id = Guid.NewGuid(),
                                 Content = match.Groups[1].Value
                             };
-                            if (data.Answers.Any() && data.Answers.Count >= replacements.Count)
-                            {
-                                data.Answers.Insert(replacements.Count, config);
-                            }
-                            else
-                            {
-                                data.Answers.Add(config);
-                            }
-
+                            data.Answers.Add(config);
                             replacements[id] = config.Id;
                         }
                         else
@@ -458,27 +438,43 @@ namespace Fsel.Course.Infrastructure.Common
                         }
                     }
 
-                    foreach (var pair in replacements)
-                    {
-                        if (!Guid.TryParse(pair.Key, out _))
-                        {
-                            item2.Content = item2.Content.Replace("{" + pair.Key + "}", "{" + pair.Value.ToString() + "}", StringComparison.CurrentCulture);
-                        }
-                    }
+                    item2.Content = ReplacePlaceholders(item2.Content, replacements);
                 }
             }
 
             return data;
         }
 
-        private static CheckListQuestionV1? HandleQuestion(CheckListQuestionV1? data)
+        private static dynamic? HandleQuestion(dynamic? data, dynamic? dataList = null)
         {
-            if (data == null || string.IsNullOrEmpty(data.Content))
+            if (dataList is IList list)
+            {
+                // Nếu data là danh sách, đệ quy xử lý từng phần tử
+                foreach (dynamic item in list.OfType<dynamic>())
+                {
+                    HandleQuestion(item, data);
+                }
+                return data; // Trả về danh sách đã được xử lý
+            }
+            if (data == null)
+            {
+                return null;
+            }
+            var content = data.Content;
+            if (string.IsNullOrEmpty(content))
             {
                 return data;
             }
-            MatchCollection matches = Regex.Matches(data.Content, @"\{(.*?)\}");
+
+            MatchCollection matches = Regex.Matches(content, @"\{(.*?)\}");
+            if (!matches.Any())
+            {
+                return data;
+            }
+
+            // Nếu data không phải là danh sách, xử lý thay thế chỗ trống
             Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
+
             foreach (Match match in matches)
             {
                 string id = match.Groups[1].Value;
@@ -487,324 +483,213 @@ namespace Fsel.Course.Infrastructure.Common
                     var config = new ConfigQuestionV1
                     {
                         Id = Guid.NewGuid(),
-                        Content = match.Groups[1].Value
+                        Key = id
                     };
 
-                    if (data.Answers.Any() && data.Answers.Count >= replacements.Count)
-                    {
-                        data.Answers.Insert(replacements.Count, config);
-                    }
-                    else
+                    // Nếu dataOld có danh sách các câu trả lời, thêm câu trả lời mới vào danh sách đó
+                    if (data.Answers != null)
                     {
                         data.Answers.Add(config);
                     }
-
-                    replacements[id] = config.Id;
-                }
-                else
-                {
-                    replacements[id] = new Guid(id);
-                }
-            }
-
-            foreach (var pair in replacements)
-            {
-                if (!Guid.TryParse(pair.Key, out _))
-                {
-                    data.Content = data.Content.Replace("{" + pair.Key + "}", "{" + pair.Value.ToString() + "}", StringComparison.CurrentCulture);
-                }
-            }
-            return data;
-        }
-
-        private static MatchingTaskQuestion? HandleQuestion(MatchingTaskQuestion? data)
-        {
-            if (data == null || string.IsNullOrEmpty(data.Content))
-            {
-                return data;
-            }
-            MatchCollection matches = Regex.Matches(data.Content, @"\{(.*?)\}");
-            Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
-            foreach (Match match in matches)
-            {
-                string id = match.Groups[1].Value;
-                if (!Guid.TryParse(id, out _))
-                {
-                    var config = new ConfigQuestionV1
-                    {
-                        Id = Guid.NewGuid(),
-                        Key = match.Groups[1].Value
-                    };
-                    data.Answers.Insert(replacements.Count, config);
-                    replacements[id] = config.Id;
-                }
-                else
-                {
-                    replacements[id] = new Guid(id);
-                }
-            }
-            foreach (var pair in replacements)
-            {
-                if (!Guid.TryParse(pair.Key, out _))
-                {
-                    data.Content = data.Content.Replace("{" + pair.Key + "}", "{" + pair.Value.ToString() + "}", StringComparison.CurrentCulture);
-                }
-            }
-            return data;
-        }
-
-        private static object? ClearAnswers(MatchingTaskQuestion? data)
-        {
-            if (data != null && data.Answers != null)
-            {
-                foreach (var item in data.Answers)
-                {
-                    item.Key = null;
-                }
-            }
-            return data;
-        }
-
-        private static object? ClearAnswers(TableCompletionQuestion? data)
-        {
-            if (data != null)
-            {
-                data.AnswerTables = new List<AnswerTable>();
-            }
-            return data;
-        }
-
-        private static object? ClearAnswers(FlowChartCompletionQuestion? data)
-        {
-            if (data != null)
-            {
-                data.Answers = new List<ConfigAnswerV1>();
-            }
-            return data;
-        }
-
-        private static object? ClearAnswers(CheckListQuestionV1? data)
-        {
-            if (data != null && data.Answers != null)
-            {
-                foreach (var item in data.Answers)
-                {
-                    if (item.IsCorrect.HasValue)
-                    {
-                        item.IsCorrect = null;
-                    }
                     else
                     {
-                        item.Content = null;
+                        // Nếu dataOld không có danh sách Answers, khởi tạo một danh sách mới
+                        data.Answers = new List<ConfigQuestionV1> { config };
                     }
+
+                    replacements[id] = config.Id;
+                }
+                else
+                {
+                    replacements[id] = new Guid(id);
                 }
             }
+
+            data.Content = ReplacePlaceholders(content, replacements);
             return data;
         }
 
-        private static object? ClearAnswers(MultipleChoiceQuestionV1? data)
+        private static string? ReplacePlaceholders(string? content, Dictionary<string, Guid?> replacements)
         {
-            if (data != null && data.Answers != null)
+            foreach (var pair in replacements)
             {
-                foreach (var item in data.Answers.SelectMany(x => x.Answers))
+                if (!Guid.TryParse(pair.Key, out _))
                 {
-                    item.IsCorrect = null;
+                    content = ReplaceFirst(content, "{" + pair.Key + "}", "{" + pair.Value + "}");
                 }
             }
-            return data;
+            return content;
         }
 
-        private static object? ClearAnswers(MultipleOptionSentenceCompletionQuestion? data)
+        public static string? ReplaceFirst(string? str, string? term, string? replace)
         {
-            if (data != null && data.Contents != null)
+            if (string.IsNullOrEmpty(str) || string.IsNullOrEmpty(term))
             {
-                foreach (var item in data.Contents)
-                {
-                    if (item != null)
+                return str;
+            }
+            int position = str.IndexOf(term, StringComparison.CurrentCulture);
+            if (position < 0)
+            {
+                return str;
+            }
+
+            str = string.Concat(str.AsSpan(0, position), replace, str.AsSpan(position + term.Length));
+            return str;
+        }
+
+        private static object? ClearAnswers<T>(T? data) where T : class
+        {
+            switch (data)
+            {
+                case MatchingTaskQuestion matchingTask:
+                    if (matchingTask.Answers != null)
                     {
-                        item.Answers.ForEach(x =>
+                        foreach (var item in matchingTask.Answers)
                         {
-                            x.IsCorrect = null;
-                        });
+                            item.Key = null;
+                        }
                     }
-                }
-            }
-            return data;
-        }
+                    break;
 
-        private static object? ClearAnswers(ShortAnswerQuestionWordBaseQuestion? data)
-        {
-            if (data != null && data.Content != null && data.Content.Any())
-            {
-                data.Content.Clear();
-            }
-            return data;
-        }
+                case TableCompletionQuestion tableCompletion:
+                    tableCompletion.AnswerTables = new List<AnswerTable>();
+                    break;
 
-        private static object? ClearAnswers(MultipleChoiceQuestion? data)
-        {
-            if (data != null && data.Contents != null)
-            {
-                for (int i = data.Contents.Count - 1; i >= 0; i--)
-                {
-                    data.Contents[i].IsCorrect = default;
-                }
-            }
-            return data;
-        }
+                case FlowChartCompletionQuestion flowChart:
+                    flowChart.Answers = new List<ConfigAnswerV1>();
+                    break;
 
-        private static object? ClearAnswers(DragAndDropSentenceOrderQuestion? data)
-        {
-            if (data != null && data.Contents != null)
-            {
-                foreach (var item in data.Contents)
-                {
-                    item.Words = GenerateRandomLoop(item.Words);
-                }
-            }
-            return data;
-        }
-
-        private static object? ClearAnswers(DragAndDropListSentenceOrderQuestion? data)
-        {
-            return GenerateRandomLoop(data?.Contents);
-        }
-
-        private static object? ClearAnswers(MatchingTypeQuestion? data)
-        {
-            if (data != null && data.Link != null)
-            {
-                data.Link.Clear();
-            }
-            return data;
-        }
-
-        private static object? ClearAnswers(GapFillQuestion? data)
-        {
-            if (data != null && data.Contents != null)
-            {
-                foreach (var item in data.Contents)
-                {
-                    item.Words = GenerateRandomLoop(item.Words);
-                }
-            }
-            return data;
-        }
-
-        private static int GetTotalCorrect(TableCompletionQuestion? data)
-        {
-            if (data != null && data.AnswerTables != null && data.AnswerTables.Any())
-            {
-                return data.AnswerTables.Count;
-            }
-            return default;
-        }
-
-        private static int GetTotalCorrect(FlowChartCompletionQuestion? data)
-        {
-            if (data != null && data.Answers != null && data.Answers.Any())
-            {
-                return data.Answers.Count;
-            }
-            return default;
-        }
-
-        private static int GetTotalCorrect(CheckListQuestionV1? data)
-        {
-            if (data != null && data.Answers != null && data.Answers.Any())
-            {
-                if (data.Answers.Any(x => x.IsCorrect.HasValue))
-                {
-                    return data.Answers.Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value);
-                }
-                return data.Answers.Count;
-            }
-            return default;
-        }
-
-        private static int GetTotalCorrect(MultipleOptionSentenceCompletionQuestion? data)
-        {
-            if (data != null && data.Contents != null)
-            {
-                return data.Contents.Count;
-            }
-            return default;
-        }
-
-        private static int GetTotalCorrect(MultipleChoiceQuestion? data)
-        {
-            int number = 0;
-            if (data != null && data.Contents != null)
-            {
-                foreach (var item in data.Contents)
-                {
-                    if (item.IsCorrect == true)
+                case CheckListQuestionV1 checkList:
+                    if (checkList.Answers != null)
                     {
-                        number++;
+                        foreach (var item in checkList.Answers)
+                        {
+                            if (item.IsCorrect.HasValue)
+                            {
+                                item.IsCorrect = null;
+                            }
+                            else
+                            {
+                                item.Content = null;
+                            }
+                        }
                     }
-                }
-                return data.Contents.Where(x => x.IsCorrect == true).Count();
+                    break;
+
+                case MultipleChoiceQuestionV1 multipleChoiceV1:
+                    if (multipleChoiceV1.Answers != null)
+                    {
+                        foreach (var item in multipleChoiceV1.Answers.SelectMany(x => x.Answers))
+                        {
+                            item.IsCorrect = null;
+                        }
+                    }
+                    break;
+
+                case MultipleOptionSentenceCompletionQuestion multipleOption:
+                    if (multipleOption.Contents != null)
+                    {
+                        foreach (var item in multipleOption.Contents)
+                        {
+                            item?.Answers.ForEach(x => x.IsCorrect = null);
+                        }
+                    }
+                    break;
+
+                case ShortAnswerQuestionWordBaseQuestion shortAnswer:
+                    shortAnswer.Content?.Clear();
+                    break;
+
+                case MultipleChoiceQuestion multipleChoice:
+                    if (multipleChoice.Contents != null)
+                    {
+                        foreach (var item in multipleChoice.Contents)
+                        {
+                            item.IsCorrect = default;
+                        }
+                    }
+                    break;
+
+                case DragAndDropSentenceOrderQuestion dragAndDrop:
+                    if (dragAndDrop.Contents != null)
+                    {
+                        foreach (var item in dragAndDrop.Contents)
+                        {
+                            item.Words = GenerateRandomLoop(item.Words);
+                        }
+                    }
+                    break;
+
+                case DragAndDropListSentenceOrderQuestion dragAndDropList:
+                    return GenerateRandomLoop(dragAndDropList.Contents);
+
+                case MatchingTypeQuestion matchingType:
+                    matchingType.Link?.Clear();
+                    break;
+
+                case GapFillQuestion gapFill:
+                    if (gapFill.Contents != null)
+                    {
+                        foreach (var item in gapFill.Contents)
+                        {
+                            item.Words = GenerateRandomLoop(item.Words);
+                        }
+                    }
+                    break;
             }
-            return default;
+            return data;
         }
 
-        private static int GetTotalCorrect()
+        private static int GetTotalCorrect<T>(T? data, bool calculateByGap = false) where T : class
         {
-            return 1;
-        }
-
-        private static int GetTotalCorrect(MatchingTaskQuestion? data)
-        {
-            if (data != null && data.Answers != null)
+            switch (data)
             {
-                return data.Answers.Count;
-            }
-            return default;
-        }
+                case MultipleChoiceQuestion multipleChoice:
+                    return multipleChoice.Contents?.Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value) ?? default;
 
-        private static int GetTotalCorrect(MultipleChoiceQuestionV1? data)
-        {
-            if (data != null && data.Answers != null)
-            {
-                return data.Answers.Where(x => x.Answers != null && x.Answers.Any()).SelectMany(x => x.Answers!).Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value);
-            }
-            return default;
-        }
+                case MultipleOptionSentenceCompletionQuestion multipleOption:
+                    return multipleOption.Contents?.Count ?? default;
 
-        private static int GetTotalCorrect(MatchingTypeQuestion? data)
-        {
-            if (data != null && data.Link != null)
-            {
-                return data.Link.Count;
-            }
-            return default;
-        }
+                case MatchingTypeQuestion matchingType:
+                    return matchingType.Link?.Count ?? default;
 
-        private static int GetTotalCorrectBySubQuestion(GapFillQuestion? data)
-        {
-            if (data != null && data.Contents != null)
-            {
-                return data.Contents.Count;
-            }
-            return default;
-        }
+                case GapFillQuestion gapFill when !calculateByGap:
+                    return gapFill.Contents?.Count ?? default;
 
-        private static int GetTotalCorrectByGap(GapFillQuestion? data)
-        {
-            if (data != null && data.Contents != null)
-            {
-                return data.Contents.Sum(x => x.Words?.Count ?? default);
-            }
-            return default;
-        }
+                case GapFillQuestion gapFill when calculateByGap:
+                    return gapFill.Contents?.Sum(x => x.Words?.Count ?? default) ?? default;
 
-        private static int GetTotalCorrect(DragAndDropSentenceOrderQuestion? data)
-        {
-            if (data != null && data.Contents != null)
-            {
-                return data.Contents.Count;
+                case DragAndDropSentenceOrderQuestion dragAndDrop:
+                    return dragAndDrop.Contents?.Count ?? default;
+
+                // V1
+                case MultipleChoiceQuestionV1 multipleChoiceV1:
+                    return multipleChoiceV1.Answers?
+                        .Where(x => x.Answers != null && x.Answers.Any())
+                        .SelectMany(x => x.Answers!)
+                        .Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value) ?? default;
+
+                case CheckListQuestionV1 checkList:
+                    if (checkList.Answers != null)
+                    {
+                        return checkList.Answers.Any(x => x.IsCorrect.HasValue)
+                            ? checkList.Answers.Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value)
+                            : checkList.Answers.Count;
+                    }
+                    return default;
+
+                case MatchingTaskQuestion matchingTask:
+                    return matchingTask.Answers?.Count ?? default;
+
+                case TableCompletionQuestion tableCompletion:
+                    return tableCompletion.AnswerTables?.Count ?? default;
+
+                case FlowChartCompletionQuestion flowChart:
+                    return flowChart.Answers?.Count ?? default;
+
+                default:
+                    return 1;
             }
-            return default;
         }
 
         private static IList<T>? GenerateRandomLoop<T>(IList<T>? datas)
