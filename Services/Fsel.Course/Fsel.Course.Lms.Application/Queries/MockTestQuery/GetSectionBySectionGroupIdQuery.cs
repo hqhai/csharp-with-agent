@@ -37,10 +37,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly ISectionGroupRepository _sectionGroupRepository;
-        private readonly ILogger<object> _logger;
+        private readonly ILogger<GetSectionBySectionGroupIdQuery> _logger;
         private readonly QuestBoardPublisher _questBoardPublisher;
 
-        public GetSectionBySectionGroupIdQueryHandler(SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, ISectionGroupRepository sectionGroupRepository, ILogger<object> logger, QuestBoardPublisher questBoardPublisher)
+        public GetSectionBySectionGroupIdQueryHandler(SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, ISectionGroupRepository sectionGroupRepository, ILogger<GetSectionBySectionGroupIdQuery> logger, QuestBoardPublisher questBoardPublisher)
         {
             _sectionGroupConverter = sectionGroupConverter;
             _sectionGroupResultRepository = sectionGroupResultRepository;
@@ -122,8 +122,16 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             if (sectionGroupResult == null)
             {
                 _logger.LoggerRequest(request);
-                sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = mockTestResult.StudentId, SectionGroupId = request.SectionGroupId, MockTestResultId = request.MockTestResultId, Status = EnumResultStatus.New });
-                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, MockTestResultId = request.MockTestResultId, Status = EnumResultStatus.New });
+
+                try
+                {
+                    await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Log Duplicate SectionGroupResult MockTest : {ex.Message}");
+                }
             }
             else if (sectionGroupResult.Status != EnumResultStatus.Done)
             {

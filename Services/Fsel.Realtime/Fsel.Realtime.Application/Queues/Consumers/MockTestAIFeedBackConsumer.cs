@@ -13,7 +13,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
     {
         private readonly IHubContext<MockTestWritingHub> _classForumFeedBackHubContext;
 
-        public MockTestAIFeedBackConsumer(IHubContext<MockTestWritingHub> classForumAIFeedBackHubContext, AuthContext authContext) : base(authContext)
+        public MockTestAIFeedBackConsumer(IHubContext<MockTestWritingHub> classForumAIFeedBackHubContext, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _classForumFeedBackHubContext = classForumAIFeedBackHubContext;
         }

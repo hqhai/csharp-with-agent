@@ -88,6 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
                     EndCourse = courseResults.FirstOrDefault(x => x.CreatedUserId == item.CreatedUserId && x.CourseId == item.CourseId && x.Status == EnumResultStatus.Done)?.UpdatedDate,
                     CourseLevel = item.Course?.CourseLevel.ToString(),
                     CurrentLesson = lessonResults.FirstOrDefault(x => x.CreatedUserId == item.CreatedUserId)?.Lesson?.Name,
+                    DateEdit = lessonResults.FirstOrDefault(x => x.CreatedUserId == item.CreatedUserId)?.UpdatedDate != null ? lessonResults.FirstOrDefault(x => x.CreatedUserId == item.CreatedUserId)?.UpdatedDate : lessonResults.FirstOrDefault(x => x.CreatedUserId == item.CreatedUserId)?.CreatedDate,
                     LessonCompleted = await _lessonResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.UnitId == item.UnitId && x.CreatedUserId == item.CreatedUserId).CountAsync(cancellationToken)
                 };
 
@@ -114,5 +115,7 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
         public DateTime? StartCourse { get; set; }
 
         public DateTime? EndCourse { get; set; }
+
+        public DateTime? DateEdit { get; set; }
     }
 }

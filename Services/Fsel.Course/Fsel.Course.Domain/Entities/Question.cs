@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Entities;
+using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
@@ -24,8 +25,20 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Lưu câu giải thích
         /// </summary>
-        [MaxLength(3000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Explanation { get; set; }
+
+        [NotMapped]
+        public IList<ExplanationTranslationModel>? Explanations
+        {
+            get { return ConvertHelper.Deserialize<IList<ExplanationTranslationModel>>(Explanation); }
+            set
+            {
+                if (value != null)
+                {
+                    Explanation = ConvertHelper.Serialize(value);
+                }
+            }
+        }
 
         /// <summary>
         /// Tổng số câu trả lời đúng

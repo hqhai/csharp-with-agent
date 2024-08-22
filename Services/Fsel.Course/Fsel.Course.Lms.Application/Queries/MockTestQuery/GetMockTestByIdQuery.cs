@@ -38,7 +38,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
         private readonly IMapper _mapper;
 
         public GetMockTestByIdQueryHandler(IMockTestRepository mockTestRepository, ISectionGroupRepository sectionGroupRepository, SectionGroupConverter sectionGroupConverter, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper)
-
         {
             _mockTestRepository = mockTestRepository;
             _sectionGroupRepository = sectionGroupRepository;
@@ -65,25 +64,27 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-
             var studentId = student.Id;
+
+            var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestSections)
+                                                            .ThenInclude(x => x.SectionGroup)
+                                                            .FirstOrDefaultAsync(x => x.Id == request.MockTestId, cancellationToken);
+            if (mockTest == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+
             var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x!.MockTestScores)
-                .Include(x => x.Course)
-                .Where(x => x.CourseId == request.CourseId && x.MockTestId == request.MockTestId && x.StudentId == studentId && (!request.UnitId.HasValue || x.UnitId == request.UnitId))
-                .FirstOrDefaultAsync(cancellationToken);
+                                        .Include(x => x.Course)
+                                        .Where(x => x.CourseId == request.CourseId && x.MockTestId == request.MockTestId)
+                                        .Where(x => x.StudentId == studentId && (!request.UnitId.HasValue || x.UnitId == request.UnitId))
+                                        .FirstOrDefaultAsync(cancellationToken);
             if (mockTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
-
-            var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestSections).ThenInclude(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == request.MockTestId, cancellationToken);
-            if (mockTest == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTest));
-                return methodResult;
-            }
-
             methodResult.Result = await GetMockTestAsync(mockTest, mockTestResult, cancellationToken);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

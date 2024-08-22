@@ -1,0 +1,71 @@
+[
+  {
+    "id": "2371c9af-01a6-489b-8399-0e2a13db0646",
+    "code": "DEF",
+    "name": "Sự kiện mặc định",
+    "description": "Tặng thêm thời gian học khi mua gói 6 tháng, 12 tháng nhân sự kiện ra mắt FSEL.",
+    "monthNumber": 1,
+    "imagePathsStr": "[ \"https://s3-sgn10.fptcloud.com/fsel-public/Images/BannerEvent_7538_1719195644832.jpg\" ]",
+    "status": "Active",
+    "isDefault": true,
+    "createdDate": "2024-06-24",
+    "translations": [
+      {
+        "id": "7ec4ded7-afd4-4c84-8b71-12c8d89afabd",
+        "createdDate": "2024-06-24",
+        "eventId": "2371c9af-01a6-489b-8399-0e2a13db0646",
+        "description": "Tặng thêm thời gian học khi mua gói 6 tháng, 12 tháng nhân sự kiện ra mắt FSEL.",
+        "language": "vi-VN"
+      },
+      {
+        "id": "c64d896b-4a94-4ac3-97ba-28ffef798628",
+        "createdDate": "2024-06-24",
+        "eventId": "2371c9af-01a6-489b-8399-0e2a13db0646",
+        "description": "Get extra study time when purchasing 6-month or 12-month packages during the FSEL launch event",
+        "language": "en-US"
+      },
+      {
+        "id": "a69de45a-a796-4a17-a18d-565e1043bfef",
+        "createdDate": "2024-06-24",
+        "eventId": "2371c9af-01a6-489b-8399-0e2a13db0646",
+        "description": "Bénéficiez de temps d'étude supplémentaire en achetant des forfaits de 6 ou 12 mois lors de l'événement de lancement du FSEL",
+        "language": "fr-FR"
+      }
+    ],
+    "packageEvents": [
+      {
+        "id": "7ec4ded7-afd4-4c84-8b71-12c8d89afabd",
+        "createdDate": "2024-06-24",
+        "price": 500000,
+        "priceMonth": 500000,
+        "dayBonus": 0,
+        "monthBonus": 0,
+        "suggests": null,
+        "packageId": "42d7ddb2-9f36-4f86-badc-67dc16bb722b",
+        "eventId": "2371c9af-01a6-489b-8399-0e2a13db0646"
+      },
+      {
+        "id": "2496f21a-7e62-41a3-a294-89674a411e03",
+        "createdDate": "2024-06-24",
+        "price": 2400000,
+        "priceMonth": 320000,
+        "dayBonus": 15,
+        "monthBonus": 1,
+        "suggests": [ "BestSeller" ],
+        "packageId": "daa6fc87-6461-49d4-b3a5-c9e4cc30bc59",
+        "eventId": "2371c9af-01a6-489b-8399-0e2a13db0646"
+      },
+      {
+        "id": "ebe09800-afd8-4621-a490-7f1fecf0e54c",
+        "createdDate": "2024-06-24",
+        "price": 3600000,
+        "priceMonth": 240000,
+        "dayBonus": 0,
+        "monthBonus": 3,
+        "suggests": [ "Recommend" ],
+        "packageId": "d13ee4ab-785a-425c-bd70-b74b61df42eb",
+        "eventId": "2371c9af-01a6-489b-8399-0e2a13db0646"
+      }
+    ]
+  }
+]

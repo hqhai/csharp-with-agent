@@ -40,19 +40,25 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId });
-            if (!studentResults.IsSuccessStatusCode)
+            var studentResult = await _userService.GetUserByStudentId(request.StudentId);
+            if (!studentResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
                 return methodResult;
             }
-            var student = studentResults.Content?.Result?.FirstOrDefault();
+            var student = studentResult.Content?.Result;
             if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            var startingLevel = student.CourseLevel.GetPlacementTestLevelByCourseLevel();
+            if (!student.CourseLevel.HasValue)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.CourseLevel));
+                return methodResult;
+            }
+
+            var startingLevel = student.CourseLevel.Value.GetPlacementTestLevelByCourseLevel();
             await SavePlacementTestDoneAsync(student, request.CourseLevel, startingLevel, cancellationToken);
             return methodResult;
         }
@@ -68,7 +74,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent, GetInitialAge(startingLevel, age));
                 if (isLock)
                 {
-                    await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel { Id = student.Human?.UserId ?? default, Level = levelNext ?? default });
+                    await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel { Id = student.Human?.UserId ?? default, CourseLevel = levelNext ?? default, BaseCourseLevel = levelNext ?? default });
                     return;
                 }
                 if (levelNext.HasValue)

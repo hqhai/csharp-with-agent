@@ -10,5 +10,8 @@ namespace Fsel.Ordering.Application.Services.SystemService
     {
         [Get("/v1/referral-discount-config")]
         Task<IApiResponse<MethodResult<IList<ReferralDiscountConfigModel>>>> GetReferralDiscountConfigAsync();
+
+        [Post("/v1/google-sheet/add-payment-info-to-google-sheet")]
+        Task<IApiResponse<MethodResult<VoidMethodResult>>> AddPaymentInfoToGoogleSheet([Body] AddPaymentInfoToGoogleSheetModel model);
     }
 }

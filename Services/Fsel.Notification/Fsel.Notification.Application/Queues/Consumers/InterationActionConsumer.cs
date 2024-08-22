@@ -16,7 +16,7 @@ namespace Fsel.Notification.Application.Queues.Consumers
         private readonly IMediator _mediator;
         private readonly INotificationTypeRepository _notificationTypeRepository;
 
-        public InterationActionConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository, AuthContext authContext) : base(authContext)
+        public InterationActionConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
             _notificationTypeRepository = notificationTypeRepository;

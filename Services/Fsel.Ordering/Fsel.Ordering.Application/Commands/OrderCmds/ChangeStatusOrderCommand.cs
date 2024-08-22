@@ -2,23 +2,26 @@
 
 namespace Fsel.Ordering.Application.Commands.OrderCmds
 {
+    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Ordering.Application.Commands.OrderCmds.v1i1;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.SenderService;
+    using Fsel.Ordering.Application.Services.SystemService;
+    using Fsel.Ordering.Application.Services.SystemService.Models;
     using Fsel.Ordering.Application.Services.TrainingService;
-    using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
+    using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
     using Fsel.Ordering.Infrastructure.ValueSettings;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -37,10 +40,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IPackageRepository _packageRepository;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private readonly ChangeStatusOrderPublisher _changeStatusOrderPublisher;
         private readonly AuthContext _authContext;
         private readonly ILmsCourseService _courseService;
         private readonly ISenderServices _senderServices;
         private readonly AppSetting _appSetting;
+        private readonly AddExpiredDateForStudentPublisher _addExpiredDateForStudentPublisher;
+        private readonly ISystemService _systemService;
+        private readonly IMediator _mediator;
+        private readonly IPackageEventRepository _packageEventRepository;
 
         public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository
             , ITrainingService trainingService
@@ -51,7 +59,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             , AuthContext authContext
             , ILmsCourseService courseService,
 ISenderServices senderServices,
-AppSetting appSetting)
+AppSetting appSetting,
+AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher,
+ISystemService systemService,
+IMediator mediator,
+IPackageEventRepository packageEventRepository,
+ChangeStatusOrderPublisher changeStatusOrderPublisher)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
@@ -63,6 +76,11 @@ AppSetting appSetting)
             _courseService = courseService;
             _senderServices = senderServices;
             _appSetting = appSetting;
+            _changeStatusOrderPublisher = changeStatusOrderPublisher;
+            _addExpiredDateForStudentPublisher = addExpiredDateForStudentPublisher;
+            _systemService = systemService;
+            _mediator = mediator;
+            _packageEventRepository = packageEventRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeStatusOrderCommand request, CancellationToken cancellationToken)
@@ -91,20 +109,12 @@ AppSetting appSetting)
             }
             var student = studentResult.Content?.Result;
 
-            var courseResults = await _lmsCourseService.GetCoursesByIdsAsync(new List<Guid> { order.CourseId });
-            if (!courseResults.IsSuccessStatusCode)
-            {
-                methodResult.AddError(courseResults.Error);
-                return methodResult;
-            }
             var package = await _packageRepository.GetByIdAsync(order.PackageId ?? default);
             if (package == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(order));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
                 return methodResult;
             }
-
-            var course = courseResults.Content?.Result?.FirstOrDefault();
 
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
@@ -119,52 +129,62 @@ AppSetting appSetting)
                 }
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
-                    var numberOfShield = package.Code.HasValue ? (int)package.Code.Value : default;
+                    allowOpenNextUnit = true;
 
-                    var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.UserId, CourseId = order.CourseId, PackageId = order.PackageId ?? default, NumberOfShield = numberOfShield });
-                    if (!addStudentIntoClassResult.IsSuccessStatusCode)
+                    var packageEvent = await _packageEventRepository.Queryable.FirstOrDefaultAsync(p => p.PackageId == package.Id && p.EventId == order.EventId, cancellationToken);
+
+                    if (packageEvent == null)
                     {
-                        methodResult.AddError(addStudentIntoClassResult.Error);
+                        methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventNotExist), nameof(packageEvent));
                         return methodResult;
                     }
 
-                    allowOpenNextUnit = true;
+                    order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber + packageEvent.MonthBonus);
+                    order.ExpireDate = order.ExpireDate.Value.AddDays(packageEvent.DayBonus);
 
-                    if (IsInteger(package.MonthBonusNumber))
+                    await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
                     {
-                        int expireDate = package.MonthNumber + (int)package.MonthBonusNumber;
-                        order.ExpireDate = DateTime.UtcNow.AddMonths(expireDate);
-                    }
-                    else
-                    {
-                        int expireDate = package.MonthNumber + (int)package.MonthBonusNumber;
-                        order.ExpireDate = DateTime.UtcNow.AddMonths(expireDate).AddDays(15);
-                    }
+                        StudentId = student!.Id,
+                        Month = package.MonthNumber + packageEvent.MonthBonus,
+                        Day = packageEvent.DayBonus
+                    }, cancellationToken);
 
-                    if (!string.IsNullOrEmpty(student?.Human?.Email))
+                    if (order.IsInvoice)
                     {
-                        await _senderServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
+                        await _systemService.AddPaymentInfoToGoogleSheet(new AddPaymentInfoToGoogleSheetModel()
                         {
-                            ToEmails = new List<string> { student.Human.Email },
-                            Subject = SenderSettings.PaymentApproval,
-                            Template = EnumSenderTemplate.PaymentApproval,
-                            Params = new
-                            {
-                                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
-                            }
+                            Code = order.Code,
+                            CreatedDate = order.CreatedDate.ToString("dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture),
+                            Price = order.Price.ToString(CultureInfo.InvariantCulture),
+                            FullName = order.FullName,
+                            StudentEmail = student?.Human?.Email,
+                            BillingEmail = order.Email,
+                            CompanyTaxCode = order.CompanyTaxCode,
+                            CompanyAddress = order.CompanyAddress,
+                            CompanyName = order.CompanyName,
                         });
                     }
 
-                    await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
+                    var courseResults = await _lmsCourseService.GetCoursesByIdsAsync(new List<Guid> { student?.CourseId ?? order.CourseId ?? default });
+                    if (!courseResults.IsSuccessStatusCode)
                     {
-                        UserIds = new List<Guid>() { order.UserId },
-                        ObjectId = order.Id,
-                        ParamsMessage = new List<object> { course?.Name ?? string.Empty },
-                        Type = EnumNotificationType.Text,
-                        Content = EnumNotificationContent.OrderChangeStatus,
-                        SenderId = _authContext.CurrentUserId,
-                        PlatformCode = EnumPlatformCode.LMS
-                    }, cancellationToken);
+                        methodResult.AddError(courseResults.Error);
+                        return methodResult;
+                    }
+                    var course = courseResults.Content?.Result?.FirstOrDefault();
+                    if (course != null)
+                    {
+                        await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
+                        {
+                            UserIds = new List<Guid>() { order.UserId },
+                            ObjectId = order.Id,
+                            ParamsMessage = new List<object> { course.Name ?? string.Empty },
+                            Type = EnumNotificationType.Text,
+                            Content = EnumNotificationContent.OrderChangeStatus,
+                            SenderId = _authContext.CurrentUserId,
+                            PlatformCode = EnumPlatformCode.LMS
+                        }, cancellationToken);
+                    }
                 }
                 order.OrderTransactions.Add(new OrderTransaction()
                 {
@@ -176,6 +196,26 @@ AppSetting appSetting)
                 order.Status = request.OrderStatus;
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                #region Gửi mail thanh toán
+
+                //if (order.Status == EnumOrderStatus.Payment)
+                //{
+                //    await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
+                //}
+
+                #endregion Gửi mail thanh toán
+
+                #region bắn socket thanh toán
+
+                await _changeStatusOrderPublisher.Publish(new OrderQueueModel()
+                {
+                    OrderId = order.Id,
+                    UserId = order.UserId,
+                    Status = order.Status,
+                }, cancellationToken);
+
+                #endregion bắn socket thanh toán
 
                 // Mở Unit tiếp theo.
 

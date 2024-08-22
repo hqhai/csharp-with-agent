@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "fsel-learning-english",
+  "private_key_id": "8fec56a9de4f6b4a49dfd3562b3f3ca2f9064751",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQChGOPsrzFuwiQj\npcJpE4p0WFPt1ItJ7B88QL4tam73g6ysb4uvvas65yCjAUahQvoSioWU94Xqrj0f\nnEgsOOaHli4H6gPrz7L0K3VwnrCYvyXb9zZXCmN+uVfQaL2xR6MHYTJpjJBn4PhW\npe4ByPG6PWDxxc/CvyxH6ANtNgBrnPNJ5icxsz4otty+OCfVJ5qkL+fWWwHuWqy9\nVRL5x11XjIqZdf9fBwcFi+X8Vc19jzUIUCBbMeAQ22nJdBxRpJeJgVMKsZwBI2sk\n26X3mZEFBR17JZbftazGybgP+8ADXiEDdxNtvp95YFvR7HOwQZjZF1hwvwY8yif2\nqo76oPz5AgMBAAECggEACRzwAnruoEYEkVer0Gc16oWh9HmU35D8kLCrkW93PjKJ\nWWp99mpo/fixKfIaiBN9M1X5XzHuthXhM0vom/J5aADLiHsTzwp9eb6I8t6nPXIi\ntszHRX6QSPeRy3esCL6gBFIv7d9GaU9FUnF/Le6rbfj8O5u7Da3kLV/R7HhPkcbE\n0+lR1Fj+jHg1XhhrE2nyLjhmoAwVPO/q9txyZ/T+BYdP9OJImjw7Y6ASNvWES+Qu\nJtZMNnlNlkNr4jEkON29pQYclo/Wv1POOTHk3TOL0YCdF4Z9nP6/XlNLUswQ8FW6\nLJBeUpIOL1YxNaoNjTDMw58uKfhnHbgdX5G+vjerOQKBgQDPf6yDn2GF/hvRaXQ4\nPTT7k5wc3SlYoeSVUXKPZLPvz6KsIUe/Tm0h+SRIVUhOmbhlZkdrDHtAnbduP4LS\n0W0Va22GW6AFcob9GZ1AnThLpbU7g50GqiCCQpDq3ERS/bQznNtjila4dZWy3eXx\n+nd75v1vN06ghG47EgshwiLSVwKBgQDGwKPEattBer8CPcNBr3JxM9iOf6i1+tqL\n4cZYX6vCPsOagidVno+npdSLoLfsFF98VOUBNjXQI3oC+iac6mA2wGnGAiHXEEDO\nMBBDz19QKgUUu9rjG4xNYgSrFXe7WIbQSWJzVWh+plCVccBnVpxzGAms7mi6AGkn\nbNrWC3E5LwKBgE2a46uqrW/O1RqiRSxPgARjday57p/OlM5f0ufccwvK7X1RSSM8\nssZVBwPimZOEHJoYAbgAyAwnsJYUPNqaJyEut5zboeLHrcL1lIG5C3gHdtvWYqE+\necAeI1MjpI4hgwcWsFrvP3XnzGBEa57v3UZC4yB4X/ja7ts66Vzr3dgrAoGBALWy\nXMTuzzzAQyiAYCWHiD73H8295PVgvDTPFW2rILF2gYmZ3O3IBBpGXtW6+wlG4rge\nQDDoZy+9jwhzuaMQHR9QriIHxvn+cNBOXkAvrznxAC4hQo0GnTANIKlq+cd6udxm\niitX9Cx8TQUiNbwDEQmi+w1t8q3APGF/gVvWoA6fAoGBALS+dTQau2a9hMQBAMJ/\nrgQRvP+cgcbHDZdiKaebMxyes3UAFb/JXLthvOu2XqFD0Aqoe/PLVDKjxS54Gc7I\n97N562K4WOgEu/f5zGCVOSDxpAhheafyiW73T4WcKpc6wj2LqfLb+ayU6KMzmwpX\n11iVu19khEbnaV8jq3KxA4BD\n-----END PRIVATE KEY-----\n",
+  "client_email": "fsel-learning-english-testing@fsel-learning-english.iam.gserviceaccount.com",
+  "client_id": "112951849503630215990",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/fsel-learning-english-testing%40fsel-learning-english.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

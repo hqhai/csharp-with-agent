@@ -38,12 +38,19 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
 
             #endregion pilot
 
-            if (request.CourseId.HasValue)
+            var order = await query.OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+            var status = order?.Status;
+            if (order != null)
             {
-                query = query.Where(x => x.CourseId == request.CourseId);
+                DateTime currentDate = DateTime.UtcNow;
+                var currentExpireDate = order.ExpireDate;
+                if (currentDate.Date > currentExpireDate?.Date && currentDate.Month >= currentExpireDate?.Month && currentDate.Year >= currentExpireDate?.Year)
+                {
+                    status = null;
+                }
             }
-            var order = await query.FirstOrDefaultAsync(cancellationToken);
-            methodResult.Result = order?.Status;
+
+            methodResult.Result = status;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

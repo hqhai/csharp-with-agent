@@ -18,6 +18,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
     using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
@@ -26,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -53,9 +55,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private readonly IMapper _mapper;
         private readonly ISpeakingAIService _speakingAIService;
         private readonly ISpeakingEvaluationAIService _evaluationAIService;
-        private readonly ILogger<object> _logger;
+        private readonly SubmitSpeakingAIPublisher _submitSpeakingAIPublisher;
+        private readonly ILogger<CreateMockTestAnswerBySectionGroupCommand> _logger;
 
-        public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, AuthContext authContext, IUserService userService, QuestionConverter questionConverter, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestResultRepository mockTestResultRepository, ISectionRepository sectionRepository, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, ISectionTimeCodeRepository sectionTimeCodeRepository, ISectionGroupRepository sectionGroupRepository, SubmitMockTestAnswerPublisher submitMockTestAnswerPublisher, IMediator mediator, IMapper mapper, ILogger<object> logger, ISpeakingAIService speakingAIService, ISpeakingEvaluationAIService evaluationAIService)
+        public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, AuthContext authContext, IUserService userService, QuestionConverter questionConverter, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestResultRepository mockTestResultRepository, ISectionRepository sectionRepository, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, ISectionTimeCodeRepository sectionTimeCodeRepository, ISectionGroupRepository sectionGroupRepository, SubmitMockTestAnswerPublisher submitMockTestAnswerPublisher, IMediator mediator, IMapper mapper, ILogger<CreateMockTestAnswerBySectionGroupCommand> logger, ISpeakingAIService speakingAIService, ISpeakingEvaluationAIService evaluationAIService, SubmitSpeakingAIPublisher submitSpeakingAIPublisher)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -74,6 +77,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             _logger = logger;
             _speakingAIService = speakingAIService;
             _evaluationAIService = evaluationAIService;
+            _submitSpeakingAIPublisher = submitSpeakingAIPublisher;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateMockTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -89,13 +93,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             StudentModel? student;
             if (request.StudentId.HasValue)
             {
-                var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId.Value });
-                if (!studentResults.IsSuccessStatusCode)
+                var studentResult = await _userService.GetUserByStudentId(request.StudentId.Value);
+                if (!studentResult.IsSuccessStatusCode)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
                     return methodResult;
                 }
-                student = studentResults.Content?.Result?.FirstOrDefault();
+                student = studentResult.Content?.Result;
             }
             else
             {
@@ -166,7 +170,14 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             });
             if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && sectionGroup.Sections.Any() && request.IsSubmit)
             {
-                await _speakingAIService.EvaluationSpeakingAI(request.MockTestResultId, request.SectionGroupId, cancellationToken);
+                // await _speakingAIService.EvaluationSpeakingAI(request.MockTestResultId, request.SectionGroupId, cancellationToken);
+
+                SpeakingAIEvaluationModel speakingEvaluationModel = new SpeakingAIEvaluationModel()
+                {
+                    MockTestResultId = request.MockTestResultId,
+                    SectionGroupId = request.SectionGroupId,
+                };
+                await _submitSpeakingAIPublisher.Publish(speakingEvaluationModel, cancellationToken);
             }
 
             if (sectionGroup.CourseSkill == EnumCourseSkill.Writing && sectionGroup.Sections.Any() && request.IsSubmit)
@@ -221,7 +232,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private async Task UpdateMockTestResultAsync(MockTestResult mockTestResult, bool isSkillTest, CancellationToken cancellationToken)
         {
             var numberOfDone = 4;
-            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(s => s.MockTestResultId == mockTestResult.Id).ToListAsync(cancellationToken);
+            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.MockTestResultId == mockTestResult.Id).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
             if (sectionGroupResults != null && (isSkillTest || sectionGroupResults.Count == numberOfDone) && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 mockTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
@@ -241,7 +252,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
         private static MockTestResult GetMockTestResult(IList<SectionGroupResult>? sectionGroupResults, MockTestResult mockTestResult)
         {
-            var skillScores = sectionGroupResults?.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList();
+            var skillScores = sectionGroupResults?.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList();
             if (skillScores != null)
             {
                 mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
@@ -283,7 +294,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             {
                 anserResult = await SaveAnswer(request, sectionGroupResult);
             }
-
             if (!anserResult.IsOK)
             {
                 methodResult.AddErrorBadRequest(anserResult.ErrorMessages);
@@ -293,12 +303,19 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             if (createMockTestAnswers != null && createMockTestAnswers.Any())
             {
                 await _mockTestAnswerRepository.AddList(createMockTestAnswers);
-                await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
             if (updateMockTestAnswers != null && updateMockTestAnswers.Any())
             {
                 _mockTestAnswerRepository.UpdateList(updateMockTestAnswers);
+            }
+
+            try
+            {
                 await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Duplicate MockTestAnswer : {ex.Message}");
             }
             methodResult.Result = sectionGroupResult;
             return methodResult;
@@ -413,13 +430,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     if (mockTestAnswer == null)
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, null, sectionTimeCode.Id);
-                        double pronScore = await _evaluationAIService.EvaluationSpeaking(sectionTimeCode.Name ?? string.Empty, request.Answers.FirstOrDefault()?.Answer?.ToString() ?? default);
-                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, request.Answers.Select(x => x.Answer).FirstOrDefault(), request.Answers.Select(x => x.SpeechTextAnswer).FirstOrDefault(), pronScore));
+                        double pronScore = await _evaluationAIService.EvaluationSpeaking(sectionTimeCode.Name, item?.Answer?.ToString() ?? default);
+                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, item?.Answer, item?.SpeechTextAnswer, pronScore));
                     }
                     else
                     {
-                        double pronScore = await _evaluationAIService.EvaluationSpeaking(sectionTimeCode.Name ?? string.Empty, request.Answers.FirstOrDefault()?.Answer?.ToString() ?? default);
-                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, request.Answers.Select(x => x.Answer).FirstOrDefault(), request.Answers.Select(x => x.SpeechTextAnswer).FirstOrDefault(), pronScore));
+                        double pronScore = await _evaluationAIService.EvaluationSpeaking(sectionTimeCode.Name, item?.Answer?.ToString() ?? default);
+                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, item?.Answer, item?.SpeechTextAnswer, pronScore));
                     }
                 }
             }

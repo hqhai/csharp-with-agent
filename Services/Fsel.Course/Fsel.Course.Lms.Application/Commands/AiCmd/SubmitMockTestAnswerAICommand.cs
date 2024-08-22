@@ -151,6 +151,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             {
                 return true;
             }
+
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { mockTestResult.StudentId });
             if (!studentResults.IsSuccessStatusCode)
             {
@@ -202,9 +203,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             (double averageScore, double totalScore) = CalculateOverallAverage(taskResponse!, coherence!, lexicalResource!, grammaticalRange!);
 
-            var skillScore = sectionGroupResult!.SkillScores?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Writing);
-
-            var skillScores = sectionGroupResult!.SkillScores?.ToList() ?? new List<SkillScores>();
+            var skillScore = sectionGroupResult.SkillScores?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Writing);
+            var skillScores = sectionGroupResult.SkillScores?.ToList() ?? new List<SkillScores>();
 
             if (skillScore == null)
             {

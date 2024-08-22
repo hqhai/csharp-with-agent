@@ -3,20 +3,20 @@
 namespace Fsel.Training.Api.Controllers.Cso
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Commands.CancelScheduleLiveCmd;
     using Fsel.Training.Application.Queries.CancelScheduleLiveQuery;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/cso/cancel-schedule")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.CSO))]

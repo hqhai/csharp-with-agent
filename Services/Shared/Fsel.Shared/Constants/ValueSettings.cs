@@ -20,6 +20,12 @@ namespace Fsel.Shared.Constants
         public const int DelayWorkerSecond = 60;
         public const int AmountTrialDays = 14;
 
+        public static class AgeMilestone
+        {
+            public const int ChildrenAge = 13;
+            public const int StudentAge = 14;
+        }
+
         public static class SectionGroupIELST
         {
             public const int ExecutionTimeReading = 3600;
@@ -82,10 +88,29 @@ namespace Fsel.Shared.Constants
             public const int TopP = 0;
         }
 
+        public static class StudentDailyStreak
+        {
+            public const int CheckInGoalTime = 54000;
+        }
+
         public static class CustomerSupport
         {
             public const string TitleMail = "Xử lý sự cố ChatGPT học sinh {0}";
             public const string Content = "Sự cố ChatGPT học sinh {0}\r\n\r\nVị trí gặp sự cố: {1}";
+        }
+
+        public static class TimeCodeStreak
+        {
+            public const int StreakFiveTimeCode = 5;
+            public const int StreakTenTimeCode = 10;
+            public const int StreakFifTeenTimeCode = 15;
+            public const int StreakTwentyTimeCode = 20;
+            public const int StreakTwentyFiveTimeCode = 25;
+            public const int StreakThirtyTimeCode = 30;
+            public const int StreakThirtyFiveTimeCode = 35;
+            public const int StreakFourtyTimeCode = 40;
+            public const int StreakFourtyFiveTimeCode = 45;
+            public const int StreakFiftyTimeCode = 50;
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Fsel.Notification.Application.Queues.Consumers
         private readonly INotificationTypeRepository _notificationTypeRepository;
         private readonly AppSetting _appSetting;
 
-        public SendNotificationConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository, AppSetting appSetting, AuthContext authContext) : base(authContext)
+        public SendNotificationConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository, AppSetting appSetting, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
             _notificationTypeRepository = notificationTypeRepository;

@@ -189,6 +189,11 @@ namespace Fsel.Course.Infrastructure.Common
                     result = GetAnswer(dragAndDropSentenceOrderQuestion, isShowSubStatus, status, isDisableAnswer);
                     break;
 
+                case EnumQuestionType.DragAndDropListSentenceOrder:
+                    var dragAndDropSentenceListOrderQuestion = configAnswer.Deserialize<DragAndDropListSentenceOrderAnswer>();
+                    result = GetAnswer(dragAndDropSentenceListOrderQuestion, isShowSubStatus, status, isDisableAnswer);
+                    break;
+
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
                     var multipleOption = configAnswer.Deserialize<MultipleOptionSentenceCompletionAnswer>();
                     result = GetAnswer(multipleOption, isShowSubStatus, status, isDisableAnswer);
@@ -254,6 +259,18 @@ namespace Fsel.Course.Infrastructure.Common
         }
 
         private static object? GetAnswer(DragAndDropSentenceOrderAnswer? data, bool isShowSubStatus, EnumResultStatus status, bool isDisableAnswer)
+        {
+            if (data != null && data.Answers != null && status != EnumResultStatus.Done)
+            {
+                foreach (var item in data.Answers)
+                {
+                    item.IsExact = IsDisableAnswers(status, item.IsFirstSubmit, item.IsExact, isShowSubStatus, isDisableAnswer);
+                }
+            }
+            return data;
+        }
+
+        private static object? GetAnswer(DragAndDropListSentenceOrderAnswer? data, bool isShowSubStatus, EnumResultStatus status, bool isDisableAnswer)
         {
             if (data != null && data.Answers != null && status != EnumResultStatus.Done)
             {

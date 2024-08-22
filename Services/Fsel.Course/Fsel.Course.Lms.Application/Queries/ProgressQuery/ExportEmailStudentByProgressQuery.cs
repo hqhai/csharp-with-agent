@@ -10,8 +10,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -26,6 +30,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IVideoResultRepository _videoResultRepository;
+        private readonly ISystemService _systemService;
+        private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
 
@@ -34,6 +40,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             IUnitResultRepository unitResultRepository,
             ILessonResultRepository lessonResultRepository,
             IVideoResultRepository videoResultRepository,
+            ISystemService systemService,
+            IPlacementTestResultRepository placementTestResultRepository,
             IClassForumResultRepository classForumResultRepository,
             ICourseResultRepository courseResultRepository)
         {
@@ -41,6 +49,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             _unitResultRepository = unitResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _videoResultRepository = videoResultRepository;
+            _systemService = systemService;
+            _placementTestResultRepository = placementTestResultRepository;
             _classForumResultRepository = classForumResultRepository;
             _courseResultRepository = courseResultRepository;
         }
@@ -78,9 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
             if (students != null && students.Any())
             {
-                var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId)).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
-                var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => studentIds.Contains(x.StudentId) && x.Status != EnumResultStatus.Unfinished)
-                                                                                            .OrderByDescending(x => x.CreatedDate).ToListAsync(cancellationToken);
+                var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
 
                 foreach (var student in students)
                 {
@@ -92,15 +100,22 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                         Email = student?.Human?.Email,
                         CourseName = courseResult?.Course?.Name,
                     };
+                    var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { UserId = student?.Human?.UserId ?? default });
+                    if (featureAccessTimeResult.IsSuccessStatusCode)
+                    {
+                        reportProgress.LastEntry = featureAccessTimeResult.Content?.Result?.LastVisited;
+                    }
                     if (courseResult != null)
                     {
                         var courseType = courseResult.Course?.CourseType;
-                        var unitResult = unitResults.Where(x => x.StudentId == courseResult.StudentId).OrderByDescending(x => x.CreatedDate).FirstOrDefault();
+                        var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit)
+                                                                            .Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
+                                                                            .OrderByDescending(x => x.CreatedDate)
+                                                                            .FirstOrDefaultAsync(cancellationToken);
                         if (unitResult != null)
                         {
                             reportProgress.UnitName = unitResult.Unit?.Name;
                             reportProgress.UnitStatus = unitResult.Status;
-
                             var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.Lesson)
                                                         .Where(x => x.StudentId == courseResult.StudentId && x.Status != EnumResultStatus.Unfinished)
                                                         .Where(x => x.CourseId == courseResult.CourseId && x.UnitId == unitResult.UnitId)
@@ -109,11 +124,16 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                             {
                                 reportProgress.LessonName = lessonResult.Lesson?.Name;
                                 reportProgress.LessonStatus = lessonResult.Status;
-                                reportProgress.UpdatedDate = lessonResult.UpdatedDate ?? lessonResult.CreatedDate;
+                                reportProgress.FinalStudyPeriod = lessonResult.UpdatedDate ?? lessonResult.CreatedDate;
                                 await SetReportProgress(lessonResult, reportProgress);
+                                if (lessonResult.Status == EnumResultStatus.Done)
+                                {
+                                    reportProgress.FinalStudyPeriod = courseResult.UpdatedDate;
+                                }
                             }
                         }
                     }
+
                     reportStudents.Add(reportProgress);
                 }
             }

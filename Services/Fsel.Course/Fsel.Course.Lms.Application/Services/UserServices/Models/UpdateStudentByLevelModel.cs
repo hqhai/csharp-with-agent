@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
     public class UpdateStudentByLevelModel
     {
         public Guid Id { get; set; }
-        public EnumCourseLevel Level { get; set; }
+        public EnumCourseLevel CourseLevel { get; set; }
+        public EnumCourseLevel? BaseCourseLevel { get; set; }
     }
 }

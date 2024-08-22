@@ -12,7 +12,7 @@ namespace Fsel.Hangfire.Application.Queues.Consumers
 
     public class SetTimeToCompleteTestConsumer : BaseConsumer<SetTimeToCompleteTestModel>
     {
-        public SetTimeToCompleteTestConsumer(AuthContext authContext) : base(authContext)
+        public SetTimeToCompleteTestConsumer(AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
         }
 
