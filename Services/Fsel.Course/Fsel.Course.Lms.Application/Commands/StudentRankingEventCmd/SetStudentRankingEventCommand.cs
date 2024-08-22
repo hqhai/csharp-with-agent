@@ -436,7 +436,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentRankingEventCmd
             StudentRankingEventModel model = new StudentRankingEventModel
             {
                 RankingScore = Process_Ratio * (finalResult.ContentCompleted) + Overall_Ratio * (finalResult.TotalScore),
-                Proccess = finalResult.ContentCompleted,
+                Process = finalResult.ContentCompleted,
                 UserId = courseResuilt.CreatedUserId,
                 StudentId = finalResult.StudentId,
                 CourseResultId = courseResuilt.Id,
