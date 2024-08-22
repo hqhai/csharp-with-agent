@@ -18,6 +18,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
 
     public class NotifyUrlCommand : NotifyUrlCommandModel, IRequest<MethodResult<NotifyUrlModel>>
@@ -70,32 +71,14 @@ namespace Fsel.Ordering.Application.Commands.Payoo
                 return methodResult;
             }
 
-            Guid orderTransactionId = default;
-            try
-            {
-                orderTransactionId = Guid.Parse(paymentInfo.OrderNo);
-            }
-            catch (FormatException)
-            {
-                _logger.LogError($"OrderNo Malformed: {paymentInfo.OrderNo}");
-                return methodResult;
-            }
-
-            var orderTransaction = await _orderTransactionRepository.GetByIdAsync(orderTransactionId);
-            if (orderTransaction == null)
-            {
-                _logger.LogError($"OrderTransaction Null: {orderTransactionId}");
-                return methodResult;
-            }
-
-            var order = await _orderRepository.GetByIdAsync(orderTransaction.OrderId ?? default);
+            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.Code.ToLower() == paymentInfo.OrderNo.ToLower(), cancellationToken);
             if (order == null)
             {
-                _logger.LogError($"Order Null: {orderTransaction.OrderId}");
+                _logger.LogError($"Order Null: {paymentInfo.OrderNo}");
                 return methodResult;
             }
 
-            var changeStatusResult = await _mediator.Send(new ChangeStatusOrderCommand()
+            await _mediator.Send(new ChangeStatusOrderCommand()
             {
                 OrderId = order.Id,
                 OrderStatus = paymentInfo.PaymentStatus == 1 ? EnumOrderStatus.Payment : EnumOrderStatus.Fail,
