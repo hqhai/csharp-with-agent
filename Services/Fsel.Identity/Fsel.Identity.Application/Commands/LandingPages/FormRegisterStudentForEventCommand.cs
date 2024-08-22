@@ -7,6 +7,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Enums;
@@ -44,15 +45,30 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 return methodResult;
             }
 
-            if (await _eventRegistrationRepository.Queryable.AnyAsync(p => p.Email.ToLower() == request.Email.ToLower() && p.CompetitionEventId == competitionEvent.Id, cancellationToken))
+            if (!string.IsNullOrEmpty(request.Email) && !request.Email.IsValidEmail())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
+                return methodResult;
+            }
+            if (!string.IsNullOrEmpty(request.PhoneNumber) && !request.PhoneNumber.IsValidPhoneNumber())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
                 return methodResult;
             }
 
-            var eventRegistration = _mapper.Map<EventRegistration>(request);
-            eventRegistration.CompetitionEventId = competitionEvent.Id;
-            eventRegistration.Status = EnumEventRegistrationStatus.Active;
+            var eventRegistration = await _eventRegistrationRepository.Queryable.FirstOrDefaultAsync(p => p.Email.ToLower() == request.Email.ToLower() && p.CompetitionEventId == competitionEvent.Id, cancellationToken);
+
+            if (eventRegistration == null)
+            {
+                eventRegistration = _mapper.Map<EventRegistration>(request);
+                eventRegistration.CompetitionEventId = competitionEvent.Id;
+                eventRegistration.Status = EnumEventRegistrationStatus.Active;
+            }
+            else
+            {
+                _mapper.Map(request, eventRegistration);
+            }
+
             if (!eventRegistration.IsValid())
             {
                 methodResult.AddError(eventRegistration.ErrorMessages);
