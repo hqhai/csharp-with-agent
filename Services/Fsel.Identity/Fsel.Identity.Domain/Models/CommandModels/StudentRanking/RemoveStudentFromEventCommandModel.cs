@@ -6,5 +6,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.StudentRanking
     {
         public string? EventCode { get; set; }
         public IList<string>? Emails { get; set; }
+        public DateTime SupportDay { get; set; }
     }
 }

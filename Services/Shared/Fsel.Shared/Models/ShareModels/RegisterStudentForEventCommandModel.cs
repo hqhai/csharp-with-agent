@@ -13,9 +13,9 @@ namespace Fsel.Shared.Models.ShareModels
         public string? PhoneNumber { get; set; }
         public DateTime BirthDay { get; set; }
         public string? Province { get; set; }
-        public Guid ProvinceId { get; set; }
+        public Guid? ProvinceId { get; set; }
         public string? District { get; set; }
-        public Guid DistrictId { get; set; }
+        public Guid? DistrictId { get; set; }
         public string? School { get; set; }
         public Guid SchoolId { get; set; }
         public string? SchoolGrade { get; set; }
