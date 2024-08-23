@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private readonly ILogger<BaseInternalUnitResultEventHandler> _logger;
         private readonly ILessonResultRepository _lessonResultRepository;
 
-        public BaseInternalUnitResultEventHandler(ISystemService systemService, ILessonResultRepository lessonResultRepository, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILogger<BaseInternalUnitResultEventHandler> logger) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService)
+        public BaseInternalUnitResultEventHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, ILessonResultRepository lessonResultRepository, IOrderService orderService, ILessonNoteRepository lessonNoteRepository, ILogger<BaseInternalUnitResultEventHandler> logger) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository)
         {
             _questBoardPublisher = questBoardPublisher;
             _lessonResultRepository = lessonResultRepository;
@@ -327,7 +327,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 CourseType = course.CourseType,
                 Percent = percentUnit.ToString(CultureInfo.CurrentCulture),
                 ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
-                LinkReport = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkMockTestReport!, mockTestId, course.Id, userId)
+                LinkReport = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkFullMockTestReport!, course.Id, mockTestId, userId)
             };
 
             if (course.CourseType == EnumCourseType.Ielts && mockTestResult != null)
@@ -458,10 +458,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 skillTestHtml += html;
             });
 
-            var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(p => p.CourseId == course.Id && p.UnitId == unit.Id && p.StudentId == studentId, cancellationToken);
+            var skillMockTestResult = await _mockTestResultRepository.Queryable.Include(p => p.SectionGroupResults).FirstOrDefaultAsync(p => p.CourseId == course.Id && p.UnitId == unit.Id && p.StudentId == studentId, cancellationToken);
             var mockTestHtml = string.Empty;
 
-            mockTestResult?.SkillScores.ForEach(p =>
+            skillMockTestResult?.SkillScores.ForEach(p =>
             {
                 var (color, skillName, icon) = SendMailHelper.ConvertEnum(p.Skill);
                 var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, p.Percent, p.Percent < 100 ? SendMailSetting.NoBorderRight : SendMailSetting.Border, color, 100 - p.Percent, percent > 0 ? SendMailSetting.NoBorderLeft : SendMailSetting.Border, p.Scores == 0 ? 0 : p.Scores.ToString("0.0", CultureInfo.CurrentCulture));
@@ -504,6 +504,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 parameter.NextUnit = nextCourseUnitMockTest.FinalTest?.Name;
             }
             var skillScoreHtml = string.Empty;
+            var linkReport = string.Empty;
+            if (skillMockTestResult != null)
+            {
+                linkReport = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkMockTestReport ?? string.Empty, course.Id, unit.Id, skillMockTestResult.Id, skillMockTestResult.SectionGroupResults.FirstOrDefault()?.SectionGroupId, userId);
+                parameter.LinkReport = linkReport;
+            }
             if (numberUnit == 1)
             {
                 parameter.SenderTemplate = EnumSenderTemplate.Unit1Report;
@@ -573,11 +579,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                     var mockTestResultsPrevious = await _mockTestResultRepository.Queryable.Include(x => x.Unit).Where(p => p.CourseId == course.Id && studentId == p.StudentId && p.UnitId.HasValue && p.Status == EnumResultStatus.Done && p.UnitId != unit.Id).OrderByDescending(n => n.CreatedDate).ToListAsync(cancellationToken);
 
-                    var mockTestResultPrevious = mockTestResultsPrevious.FirstOrDefault(p => p.SkillScores != null && p.SkillScores.Any(x => x.Skill == mockTestResult?.SkillScores?.FirstOrDefault()?.Skill));
+                    var mockTestResultPrevious = mockTestResultsPrevious.FirstOrDefault(p => p.SkillScores != null && p.SkillScores.Any(x => x.Skill == skillMockTestResult?.SkillScores?.FirstOrDefault()?.Skill));
 
                     if (mockTestResultPrevious != null)
                     {
-                        var currentMockTestScore = mockTestResult?.SkillScores?.FirstOrDefault()?.Scores;
+                        var currentMockTestScore = skillMockTestResult?.SkillScores?.FirstOrDefault()?.Scores;
                         var previousMockTestScore = mockTestResultPrevious.SkillScores?.FirstOrDefault()?.Scores;
 
                         var skillMockTestPrevious = mockTestResultPrevious.SkillScores!.FirstOrDefault();
@@ -594,13 +600,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         parameter.IeltDisplay2 = SendMailSetting.Display;
                     }
                 }
-
                 var previousLearn = Shared.Helpers.DateTimeHelper.ConvertSecondsToMinutes(featureAccessTimePrevious?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Learn).Sum(p => p.AccessTime) ?? 0);
                 var previousSocial = Shared.Helpers.DateTimeHelper.ConvertSecondsToMinutes(featureAccessTimePrevious?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Social).Sum(p => p.AccessTime) ?? 0);
                 var previousOther = Shared.Helpers.DateTimeHelper.ConvertSecondsToMinutes(featureAccessTimePrevious?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Other).Sum(p => p.AccessTime) ?? 0);
-
                 parameter.TotalHourPrevious = SendMailHelper.FormatTimeSpanAsClock(previousLearn + previousSocial + previousOther);
-
                 (parameter.ColorTotal, parameter.CompareTotal) = SendMailHelper.Compare((currentLearn + currentSocial + currentOther), (previousLearn + previousSocial + previousOther));
 
                 parameter.PreviousLearn = SendMailHelper.FormatTimeSpanAsClock(previousLearn);
