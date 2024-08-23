@@ -65,6 +65,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                 {
                     SenderId = sender.Id,
                     ReceiverId = receiverId,
+                    Type = request.UserReferralType
                 });
                 await _userReferralRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
