@@ -82,8 +82,9 @@ namespace Fsel.Ordering.Application.Commands.Payoo
             {
                 OrderId = order.Id,
                 OrderStatus = paymentInfo.PaymentStatus == 1 ? EnumOrderStatus.Payment : EnumOrderStatus.Fail,
-                Type = EnumOrderTransactionType.AppStore,
-                Receipt = paymentInfo.Serialize()
+                Type = EnumOrderTransactionType.Payoo,
+                Receipt = paymentInfo.Serialize(),
+                RevenueType = EnumPaymentRevenueType.Revenue
             }, cancellationToken);
 
             methodResult.Result = new NotifyUrlModel { ReturnCode = 0, Description = string.Empty };

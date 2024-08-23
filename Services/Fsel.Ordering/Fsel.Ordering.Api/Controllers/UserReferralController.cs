@@ -44,7 +44,7 @@ namespace Fsel.Ordering.Api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Create([FromBody] CreateUserReferralCommand command)
+        public async Task<IActionResult> Create([FromBody] AddFeatureMissionCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

@@ -38,7 +38,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         //Tham gia cuộc thi
         public string? SchoolName { get; set; }
 
-        public double? Grade { get; set; }
+        public string? Grade { get; set; }
 
         public double? Process { get; set; }
 
@@ -47,6 +47,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public DateTime? CompetitionEndDate { get; set; }
 
         public double? RankingScore { get; set; }
+
+        public Guid CourseResultId { get; set; }
 
         public WeekEvent? WeekEvent { get; set; }
 

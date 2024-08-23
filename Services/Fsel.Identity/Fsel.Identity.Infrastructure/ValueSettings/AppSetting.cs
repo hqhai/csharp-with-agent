@@ -13,6 +13,13 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public new Services? Services { get; set; }
 
         public GoogleSheetConfig? GoogleSheetConfig { get; set; }
+        public UserReferralConfig? UserReferralConfig { get; set; }
+    }
+
+    public class UserReferralConfig
+    {
+        public int PT { get; set; }
+        public int DoneUnit1 { get; set; }
     }
 
     public class ResourceContent
