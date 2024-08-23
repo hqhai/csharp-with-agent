@@ -63,10 +63,12 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 eventRegistration = _mapper.Map<EventRegistration>(request);
                 eventRegistration.CompetitionEventId = competitionEvent.Id;
                 eventRegistration.Status = EnumEventRegistrationStatus.Active;
+                eventRegistration = _eventRegistrationRepository.Add(eventRegistration);
             }
             else
             {
                 _mapper.Map(request, eventRegistration);
+                eventRegistration = _eventRegistrationRepository.Update(eventRegistration);
             }
 
             if (!eventRegistration.IsValid())
@@ -77,7 +79,6 @@ namespace Fsel.Identity.Application.Commands.LandingPages
 
             await _eventRegistrationRepository.ExecuteTransactionAsync(async () =>
             {
-                eventRegistration = _eventRegistrationRepository.Add(eventRegistration);
                 await _eventRegistrationRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
