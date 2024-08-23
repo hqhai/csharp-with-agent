@@ -895,6 +895,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var answerQuestion = dataQuestion?.Answers.FirstOrDefault(x => x.Id == item.Id);
                 if (answerQuestion != null)
                 {
+                    answerQuestion.Content ??= answerQuestion.Key;
                     if (_linQAnswerHelper.CheckAnswer(answerQuestion.Content, item.Content))
                     {
                         number++;
@@ -968,7 +969,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             var dataAnswer = configAnswer.Deserialize<MultipleChoiceAnswerV1>();
             int number = 0;
-            bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.AnswerTables, EnumQuestionType.TableCompletion, isSubmit, isMandatoryAnswer);
+            bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.Answers, EnumQuestionType.TableCompletion, isSubmit, isMandatoryAnswer);
             if (((dataAnswer == null || dataAnswer.Answers == null) || !dataAnswer.Answers.Any()) || (isMandatoryAnswer && isAnswerMissing))
             {
                 configAnswer = dataAnswer;
@@ -976,9 +977,10 @@ namespace Fsel.Course.Infrastructure.Common
             }
             foreach (var item in dataAnswer.Answers)
             {
-                var answerQuestion = dataQuestion?.AnswerTables.FirstOrDefault(x => x.Id == item.Id);
+                var answerQuestion = dataQuestion?.Answers.FirstOrDefault(x => x.Id == item.Id);
                 if (answerQuestion != null)
                 {
+                    answerQuestion.Content ??= answerQuestion.Key;
                     if (_linQAnswerHelper.CheckAnswer(answerQuestion.Content, item.Content))
                     {
                         number++;
