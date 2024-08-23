@@ -50,7 +50,8 @@ builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeReposito
 builder.Services.AddScoped<IStudentTrialRegistrationRepository, StudentTrialRegistrationRepository>();
 builder.Services.AddScoped<IStudentCompetitionSnapShotRepository, StudentCompetitionSnapShotRepository>();
 builder.Services.AddScoped<ICompetitionEventsRepository, CompetitionEventsRepository>();
-builder.Services.AddScoped<IStudentRankingEventsRepository, StudentRankingEventsRepository>();
+builder.Services.AddScoped<IStudentCompetitionEventsRepository, StudentCompetitionEventRepository>();
+builder.Services.AddScoped<IStudentRankingEventRepository, StudentRankingEventRepository>();
 
 
 //Publisher
@@ -79,7 +80,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.UserQueue.NameQueue.UpdateStatusTrialStudent, typeof(UpdateTrialStudentStatusConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
     { QueueSettings.TrainingQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
-    { QueueSettings.UserQueue.NameQueue.AddExpiredDateForStudent, typeof(AddExpiredDateForStudentConsumer) }
+    { QueueSettings.UserQueue.NameQueue.AddExpiredDateForStudent, typeof(AddExpiredDateForStudentConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.StudentRankingEvent, typeof(StudentRankingEventsConsumer) },
 });
 var app = builder.Build();
 app.UseServices();
