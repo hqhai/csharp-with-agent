@@ -16,13 +16,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class MockTestResultInputThenUpdateUnitResultHandler : BaseInternalUnitResultEventHandler,
         INotificationHandler<EntityChangedEvent<MockTestResult>>
     {
         private readonly IMockTestRepository _mockTestRepository;
 
-        public MockTestResultInputThenUpdateUnitResultHandler(ISystemService systemService, IMockTestRepository mockTestRepository, ILessonResultRepository lessonResultRepository, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService) : base(systemService, lessonResultRepository, appSetting, courseUnitMockTestRepository, mediator, userService, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService)
+        public MockTestResultInputThenUpdateUnitResultHandler(ISystemService systemService, IMockTestRepository mockTestRepository, ILessonResultRepository lessonResultRepository, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILogger<BaseInternalUnitResultEventHandler> logger) : base(systemService, lessonResultRepository, appSetting, courseUnitMockTestRepository, mediator, userService, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, logger)
         {
             _mockTestRepository = mockTestRepository;
         }
