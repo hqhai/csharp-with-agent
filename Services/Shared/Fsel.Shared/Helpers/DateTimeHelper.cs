@@ -149,36 +149,6 @@ namespace Fsel.Shared.Helpers
             return (monday, sunday);
         }
 
-        public static string ConvertSecondsToTimeString(long totalSeconds)
-        {
-            int hours = (int)totalSeconds / 3600;
-            int minutes = (int)(totalSeconds % 3600) / 60;
-            return string.Format(CultureInfo.InvariantCulture, "{0}h{1:D2}'", hours, minutes);
-        }
-
-        public static int ConvertSecondsToHours(long seconds)
-        {
-            return (int)seconds / 3600;
-        }
-
-        public static int ConvertSecondsToHoursRoundUp(long seconds)
-        {
-            int hours = (int)seconds / 3600;
-            if (seconds % 3600 > 0)
-            {
-                hours += 1;
-            }
-            return hours;
-        }
-
-        public static string ConvertSecondsToHoursAndMinutes(long seconds)
-        {
-            int hours = (int)seconds / 3600;
-            int minutes = (int)(seconds % 3600) / 60;
-
-            return $"{hours} giờ {minutes:D2} phút";
-        }
-
         public static bool IsCurrentDateInRange(DateTime? startDate, DateTime? endDate)
         {
             var currentDate = DateTime.UtcNow;

@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -92,10 +93,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             }
 
             videoResult = await GetVideoResult(videoResult, cancellationToken);
+
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {
                 videoResult = _videoResultRepository.Update(videoResult);
                 await _videoResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                //Xếp hạng học sinh
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<VideoResultModel>(videoResult);
                 return methodResult;

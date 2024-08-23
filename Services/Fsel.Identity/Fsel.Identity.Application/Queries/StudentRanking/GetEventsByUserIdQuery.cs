@@ -20,11 +20,11 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
     public class GetEventsByUserIdQueryHandler : IRequestHandler<GetEventsByUserIdQuery, MethodResult<IList<CompetitionEventsModel>>>
     {
         private readonly AuthContext _authContext;
-        private readonly IStudentRankingEventsRepository _studentRankingEventsRepository;
+        private readonly IStudentCompetitionEventsRepository _studentRankingEventsRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IMapper _mapper;
 
-        public GetEventsByUserIdQueryHandler(AuthContext authContext, IStudentRankingEventsRepository studentRankingEventsRepository, IStudentRepository studentRepository, IMapper mapper)
+        public GetEventsByUserIdQueryHandler(AuthContext authContext, IStudentCompetitionEventsRepository studentRankingEventsRepository, IStudentRepository studentRepository, IMapper mapper)
         {
             _authContext = authContext;
             _studentRankingEventsRepository = studentRankingEventsRepository;
