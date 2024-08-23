@@ -51,6 +51,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly IMapper _mapper;
+        private readonly ILogger<CreateFinalTestAnswerBySectionGroupCommand> _logger;
         private readonly RankedStudentPublisher _rankedStudentPublisher;
 
         public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, ICourseResultRepository courseResultRepository, AuthContext authContext, QuestionConverter questionConverter, SectionGroupConverter sectionGroupConverter, IUserService userService, ISystemService systemService, IFinalTestResultRepository finalTestResultRepository, IFinalTestAnswerRepository finalTestAnswerRepository, ISectionGroupResultRepository sectionGroupResultRepository, ISectionGroupRepository sectionGroupRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper, RankedStudentPublisher rankedStudentPublisher, ILogger<CreateFinalTestAnswerBySectionGroupCommand> logger)

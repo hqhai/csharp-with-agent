@@ -2150,19 +2150,22 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentDailyStreak", b =>
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentRankingEvent", b =>
-                {
-                    b.HasOne("Fsel.Identity.Domain.Entities.Student", "Student")
-                        .WithMany("StudentDailyStreaks")
-                        .HasForeignKey("StudentId")
-                    b.HasOne("Fsel.Identity.Domain.Entities.CompetitionEvent", "CompetitionEvents")
-                        .WithMany("StudentRankingEvents")
-                        .HasForeignKey("CompetitionEventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("Fsel.Identity.Domain.Entities.Student", "Student")
+                    .WithMany("StudentDailyStreaks")
+                    .HasForeignKey("StudentId");
+            });
 
-                    b.Navigation("Student");
-                });
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentRankingEvent", b =>
+            { 
+                b.HasOne("Fsel.Identity.Domain.Entities.CompetitionEvent", "CompetitionEvents")
+                    .WithMany("StudentRankingEvents")
+                    .HasForeignKey("CompetitionEventId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Student");
+            });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Teacher", b =>
                 {
