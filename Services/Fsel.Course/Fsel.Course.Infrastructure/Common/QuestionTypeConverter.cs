@@ -9,8 +9,8 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions.V1i1;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
 
     public class QuestionTypeConverter
     {
@@ -170,11 +170,6 @@ namespace Fsel.Course.Infrastructure.Common
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(completionDiagrams) : ValueSettings.ValueDefault;
                     break;
 
-                //var flowChartCompletion = HandleQuestion(config.Deserialize<FlowChartCompletionQuestion>());
-                //result = isDisableAnswers ? ClearAnswers(flowChartCompletion) : flowChartCompletion;
-                //totalCorrect = isShowCorrectTotal ? GetTotalCorrect(flowChartCompletion) : default;
-                //break;
-
                 case EnumQuestionType.TableCompletion:
                     var tableCompletion = HandleQuestion(config.Deserialize<TableCompletionQuestion>());
                     result = isDisableAnswers ? ClearAnswers(tableCompletion) : tableCompletion;
@@ -261,11 +256,11 @@ namespace Fsel.Course.Infrastructure.Common
         private static bool ValidateTableCompletion(TableCompletionQuestion? data)
         {
             var isError = true;
-            if (data == null || !data.AnswerTables.Any())
+            if (data == null || !data.Answers.Any())
             {
                 return isError;
             }
-            foreach (var item in data.AnswerTables)
+            foreach (var item in data.Answers)
             {
                 if (string.IsNullOrEmpty(item.Content))
                 {
@@ -363,116 +358,33 @@ namespace Fsel.Course.Infrastructure.Common
             return false;
         }
 
-        private static TableCompletionQuestion? HandleQuestion(TableCompletionQuestion? data)
-        {
-            if (data == null || data.Rows == null || !data.Rows.Any())
-            {
-                return data;
-            }
-            foreach (var item in data.Rows)
-            {
-                if (string.IsNullOrEmpty(item.Content))
-                {
-                    continue;
-                }
-                MatchCollection matches = Regex.Matches(item.Content, @"\{(.*?)\}");
-                Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
-
-                foreach (Match match in matches)
-                {
-                    string id = match.Groups[1].Value;
-                    if (Guid.TryParse(id, out _))
-                    {
-                        continue;
-                    }
-                    var config = new AnswerTable
-                    {
-                        RowId = item.Id ?? Guid.NewGuid(),
-                        Content = match.Groups[1].Value
-                    };
-                    data.AnswerTables.Add(config);
-                    replacements[id] = config.Id;
-                }
-
-                item.Content = ReplacePlaceholders(item.Content, replacements);
-            }
-
-            return data;
-        }
-
-        private static FlowChartCompletionQuestion? HandleQuestion(FlowChartCompletionQuestion? data)
-        {
-            if (data == null || data.Contents == null || !data.Contents.Any())
-            {
-                return data;
-            }
-            foreach (var item in data.Contents)
-            {
-                foreach (var item2 in item.Contents)
-                {
-                    if (string.IsNullOrEmpty(item2.Content))
-                    {
-                        continue;
-                    }
-                    MatchCollection matches = Regex.Matches(item2.Content, @"\{(.*?)\}");
-                    Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
-                    if (!matches.Any())
-                    {
-                        continue;
-                    }
-                    foreach (Match match in matches)
-                    {
-                        string id = match.Groups[1].Value;
-                        if (Guid.TryParse(id, out _))
-                        {
-                            continue;
-                        }
-                        var config = new ConfigQuestionV1
-                        {
-                            Id = Guid.NewGuid(),
-                            Content = match.Groups[1].Value
-                        };
-                        data.Answers.Add(config);
-                        replacements[id] = config.Id;
-                    }
-
-                    item2.Content = ReplacePlaceholders(item2.Content, replacements);
-                }
-            }
-
-            return data;
-        }
-
         private static dynamic? HandleQuestion(dynamic? data, dynamic? dataList = null)
         {
+            dataList ??= data;
+            if (dataList == null)
+            {
+                return dataList;
+            }
             if (dataList is IList list)
             {
-                // Nếu data là danh sách, đệ quy xử lý từng phần tử
+                var listData = new List<dynamic>();
                 foreach (dynamic item in list.OfType<dynamic>())
                 {
-                    HandleQuestion(item, data);
+                    listData.Add(HandleQuestion(data, item));
                 }
-                return data; // Trả về danh sách đã được xử lý
-            }
-            if (data == null)
-            {
-                return null;
-            }
-            var content = data.Content;
-            if (string.IsNullOrEmpty(content))
-            {
                 return data;
             }
-
+            var content = dataList.Content;
+            if (string.IsNullOrEmpty(content))
+            {
+                return dataList;
+            }
             MatchCollection matches = Regex.Matches(content, @"\{(.*?)\}");
             if (!matches.Any())
             {
-                return data;
+                return dataList;
             }
-
-            // Nếu data không phải là danh sách, xử lý thay thế chỗ trống
-            Dictionary<string, Guid?> replacements = new Dictionary<string, Guid?>();
-
+            Dictionary<Guid, string?> replacements = new Dictionary<Guid, string?>();
             foreach (Match match in matches)
             {
                 string value = match.Groups[1].Value;
@@ -480,34 +392,34 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     continue;
                 }
-                var config = new ConfigQuestionV1
+                var id = Guid.NewGuid();
+                var config = new ConfigAnswerV1
                 {
-                    Id = Guid.NewGuid(),
+                    Id = id,
                     Key = value
                 };
-
-                if (data.Answers != null)
+                if (data?.GetType().GetProperty(nameof(data.Rows)) != null)
                 {
-                    data.Answers.Add(config);
+                    config.RowId = dataList.Id;
                 }
-                else
+                if (data?.GetType().GetProperty(nameof(data.Answers)) != null)
                 {
-                    data.Answers = new List<ConfigQuestionV1> { config };
+                    data?.Answers.Add(config);
                 }
-                replacements[value] = config.Id;
+                replacements[id] = value;
             }
 
-            data.Content = ReplacePlaceholders(content, replacements);
-            return data;
+            dataList.Content = ReplacePlaceholders(content, replacements);
+            return dataList;
         }
 
-        private static string? ReplacePlaceholders(string? content, Dictionary<string, Guid?> replacements)
+        private static string? ReplacePlaceholders(string? content, Dictionary<Guid, string> replacements)
         {
             foreach (var pair in replacements)
             {
-                if (!Guid.TryParse(pair.Key, out _))
+                if (!Guid.TryParse(pair.Value, out _))
                 {
-                    content = ReplaceFirst(content, "{" + pair.Key + "}", "{" + pair.Value + "}");
+                    content = ReplaceFirst(content, "{" + pair.Value + "}", "{" + pair.Key + "}");
                 }
             }
             return content;
@@ -544,7 +456,7 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case TableCompletionQuestion tableCompletion:
-                    tableCompletion.AnswerTables = new List<AnswerTable>();
+                    tableCompletion.Answers = new List<ConfigAnswerV1>();
                     break;
 
                 case FlowChartCompletionQuestion flowChart:
@@ -675,7 +587,7 @@ namespace Fsel.Course.Infrastructure.Common
                     return matchingTask.Answers?.Count ?? ValueSettings.ValueDefault;
 
                 case TableCompletionQuestion tableCompletion:
-                    return tableCompletion.AnswerTables?.Count ?? ValueSettings.ValueDefault;
+                    return tableCompletion.Answers?.Count ?? ValueSettings.ValueDefault;
 
                 case FlowChartCompletionQuestion flowChart:
                     return flowChart.Answers?.Count ?? ValueSettings.ValueDefault;
