@@ -19,6 +19,13 @@ namespace Fsel.Identity.Infrastructure.Configs
                  .HasConversion(
                      v => v.ToString(),
                      v => v.EnumParse<EnumCourseLevel>());
+
+            builder.Property(e => e.BaseCourseLevel)
+                 .HasMaxLength(100)
+                 .HasConversion(
+                     v => v.ToString(),
+                     v => v.EnumParse<EnumCourseLevel>());
+
             builder.HasOne(a => a.Human)
                     .WithOne(b => b.Student)
                     .HasForeignKey<Student>(b => b.HumanId)

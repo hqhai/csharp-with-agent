@@ -93,5 +93,25 @@ namespace Fsel.Shared.Constants
                 public const string ChatBot = $"ChatBot";
             }
         }
+
+        public static class TechieHub
+        {
+            public const string Pattern = $"/techie";
+
+            public static class Methods
+            {
+                public const string Techie = $"TechieHub";
+            }
+        }
+
+        public static class PaymentHub
+        {
+            public const string Pattern = $"/payment";
+
+            public static class Methods
+            {
+                public const string Payment = $"Payment";
+            }
+        }
     }
 }

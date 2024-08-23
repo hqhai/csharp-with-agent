@@ -6,7 +6,6 @@
     "price": 500000,
     "priceMonth": 500000,
     "monthNumber": 1,
-    "monthBonusNumber": 0,
     "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
     "createdDate": "2024-06-04",
     "translations": [
@@ -40,9 +39,7 @@
     "price": 2400000,
     "priceMonth": 320000,
     "monthNumber": 6,
-    "monthBonusNumber": 1.5,
     "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
-    "suggest": "BestSeller",
     "createdDate": "2024-06-04",
     "translations": [
       {
@@ -75,9 +72,7 @@
     "price": 3600000,
     "priceMonth": 240000,
     "monthNumber": 12,
-    "monthBonusNumber": 3,
     "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
-    "suggest": "Recommend",
     "createdDate": "2024-06-04",
     "translations": [
       {

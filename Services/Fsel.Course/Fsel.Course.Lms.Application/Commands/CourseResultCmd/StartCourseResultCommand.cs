@@ -1,10 +1,13 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Microsoft.EntityFrameworkCore;
+
 namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -19,12 +22,15 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
     public class StartCourseResultCommandHandler : IRequestHandler<StartCourseResultCommand, MethodResult<CourseResultModel>>
     {
         private readonly IMapper _mapper;
+        private readonly AuthContext _authContext;
         private readonly ICourseResultRepository _courseResultRepository;
 
         public StartCourseResultCommandHandler(IMapper mapper
+            , AuthContext authContext
             , ICourseResultRepository courseResultRepository)
         {
             _mapper = mapper;
+            _authContext = authContext;
             _courseResultRepository = courseResultRepository;
         }
 
@@ -33,18 +39,26 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseResultModel> methodResult = new MethodResult<CourseResultModel>();
 
-            var courseResult = await _courseResultRepository.GetByIdAsync(request.CourseResultId);
+            var courseResult = await _courseResultRepository.Queryable.Include(x => x.Course).FirstOrDefaultAsync(x => x.Id == request.CourseResultId, cancellationToken);
             if (courseResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courseResult));
                 return methodResult;
             }
+
+            if (courseResult.Course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courseResult.Course));
+                return methodResult;
+            }
             if (courseResult.Status == EnumResultStatus.New)
             {
+                courseResult.ProcessDate = DateTime.UtcNow;
                 courseResult.Status = EnumResultStatus.Process;
                 _courseResultRepository.Update(courseResult);
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
+
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<CourseResultModel>(courseResult);
             return methodResult;

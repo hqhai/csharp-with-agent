@@ -35,6 +35,9 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumResultStatus>());
+
+            builder.HasIndex(c => new { c.CourseId, c.MockTestId, c.UnitId, c.StudentId }).IsUnique();
+            builder.HasIndex(c => new { c.CourseId, c.MockTestId, c.StudentId }).IsUnique().HasFilter("[UnitId] IS NULL");
         }
     }
 }

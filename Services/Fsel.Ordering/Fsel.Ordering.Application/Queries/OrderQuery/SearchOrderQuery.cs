@@ -47,7 +47,6 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 Id = x.Id,
                 UserId = x.UserId,
                 Code = x.Code,
-                CourseId = x.CourseId,
                 CreatedDate = x.CreatedDate,
                 CreatedFullName = x.CreatedFullName,
                 PackageName = x.Package!.Code.ToString(),
@@ -59,9 +58,14 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 ExpireDate = x.ExpireDate,
                 Email = x.Email,
             });
+
             if (request.Status.HasValue)
             {
                 query = query.Where(p => request.Status == false ? p.Status == EnumOrderStatus.New : p.Status != EnumOrderStatus.New);
+                if (!request.Status.Value)
+                {
+                    query = query.Where(p => p.PaymentMethod == EnumPaymentMethodStatus.BankTransfer || p.PaymentMethod == EnumPaymentMethodStatus.Card);
+                }
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -81,14 +85,14 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            var courses = await _lmsCourseService.GetCoursesByIdsAsync(lists.Select(p => p.CourseId).ToList()!);
-            if (courses.IsSuccessStatusCode)
-            {
-                foreach (var item in lists)
-                {
-                    item.CourseName = courses.Content?.Result?.FirstOrDefault(x => item.CourseId == x.Id)?.CourseLevel;
-                }
-            }
+            //var courses = await _lmsCourseService.GetCoursesByIdsAsync(lists.Select(p => p.CourseId).ToList()!);
+            //if (courses.IsSuccessStatusCode)
+            //{
+            //    foreach (var item in lists)
+            //    {
+            //        item.CourseName = courses.Content?.Result?.FirstOrDefault(x => item.CourseId == x.Id)?.CourseLevel;
+            //    }
+            //}
 
             methodResult.Result = new PagingItemsModel<OrderSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

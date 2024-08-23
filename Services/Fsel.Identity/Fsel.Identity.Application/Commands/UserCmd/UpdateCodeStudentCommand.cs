@@ -13,7 +13,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Identity.Application.Services.InteractionService.Models;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;

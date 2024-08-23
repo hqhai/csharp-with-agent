@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Fsel.Shared.Constants;
@@ -34,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     public class GetStudentsProgressCoursesQueryHandler : IRequestHandler<GetStudentsProgressCoursesQuery, MethodResult<IList<CompetitionStudentProgressModel>>>
     {
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly ManagerProgressHelper _managerProgressHelper;
         private readonly ICourseRepository _courseRepository;
         private readonly ITrainingService _trainingService;
         private readonly IVideoResultRepository _videoResultRepository;
@@ -44,9 +46,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private const int TotalProcessIelsts = 106; // tổng số tiến trình hiện có của Ielts
         private const int ClassForumDominator = 36;
 
-        public GetStudentsProgressCoursesQueryHandler(ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, ITrainingService trainingService, IVideoResultRepository videoResultRepository, IHomeWorkResultRepository homeWorkResultRepository, IFinalTestResultRepository finalTestResultRepository, IClassForumResultRepository classForumResultRepository)
+        public GetStudentsProgressCoursesQueryHandler(ICourseResultRepository courseResultRepository, ManagerProgressHelper managerProgressHelper, ICourseRepository courseRepository, ITrainingService trainingService, IVideoResultRepository videoResultRepository, IHomeWorkResultRepository homeWorkResultRepository, IFinalTestResultRepository finalTestResultRepository, IClassForumResultRepository classForumResultRepository)
         {
             _courseResultRepository = courseResultRepository;
+            _managerProgressHelper = managerProgressHelper;
             _courseRepository = courseRepository;
             _trainingService = trainingService;
             _videoResultRepository = videoResultRepository;
@@ -77,6 +80,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
             #endregion validate
 
+            studentIds = await _courseResultRepository.Queryable.Where(x =>
+               x.Status != EnumResultStatus.Unfinished &&
+               x.Status != EnumResultStatus.New &&
+               x.WorkingStatus == EnumWorkingStatus.Active &&
+               studentIds.Contains(x.StudentId)).Select(x => x.StudentId).ToListAsync(cancellationToken);
+
             #region Progress
 
             var classStudentResults = await _trainingService.GetListClassBySpecificStudentIdsAsync(new GetClassListBySpecificStudentIdsModel { StudentIds = request.StudentIds });
@@ -85,14 +94,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             if (classStudentResultsContent != null && classStudentResultsContent.Any())
             {
                 var courseIds = classStudentResultsContent.Select(x => x.CourseId).ToList();
-                var studentCourseIds = classStudentResultsContent.Select(x => x.StudentId).ToList();
+                var studentCourseIds = classStudentResultsContent.Select(x => x.StudentId).Distinct().ToList();
                 var courses = await _courseRepository.GetByIdsAsync(courseIds);
                 if (courses == null || !courses.Any())
                 {
                     methodResult.StatusCode = StatusCodes.Status200OK;
                     return methodResult;
                 }
-                var courseQuery = _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentCourseIds.Contains(x.StudentId)).ToList();
+                var courseQuery = _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentCourseIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).ToList();
 
                 foreach (var (item, studentId) in courses.SelectMany(course => studentCourseIds.Select(sid => (course, sid))))
                 {
@@ -110,7 +119,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         CourseId = courseResult.CourseId,
                         StudentId = studentId
                     };
-                    var (currentProgress, progress) = await _courseRepository.GetContentComplete(courseResultModel);
+                    var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResultModel);
 
                     double progressPercentage = ((float)currentProgress / TotalProcessIelsts) * 100;
                     // Update số lượng process do trên dữ liệu chưa nhập đủ

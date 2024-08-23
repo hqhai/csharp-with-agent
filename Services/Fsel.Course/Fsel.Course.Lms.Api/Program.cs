@@ -114,6 +114,8 @@ builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<SetTimeRetryMockTestPublisher>();
 builder.Services.AddScoped<SetTimeRetryClassForumPublisher>();
+builder.Services.AddScoped<TechieActionPublisher>();
+builder.Services.AddScoped<CreateLuckyTicketPublisher>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
@@ -130,8 +132,13 @@ builder.Services.AddScoped<SectionGroupManagerConverter>();
 // Helper
 builder.Services.AddScoped<LinQHelper>();
 builder.Services.AddScoped<LinQAnswerHelper>();
+builder.Services.AddScoped<ChangeCourseHelper>();
+builder.Services.AddScoped<ManagerProgressHelper>();
 
 // Publisher
+builder.Services.AddScoped<QuestBoardPublisher>();
+builder.Services.AddScoped<SaveUserCourseSettingPublisher>();
+builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<FinishOneFinalTestPublisher>();
 builder.Services.AddScoped<SetTimeClassForumDonePublisher>();
 builder.Services.AddScoped<FinishOneHomeWorkPublisher>();
@@ -141,7 +148,6 @@ builder.Services.AddScoped<FinishOneUnitPublisher>();
 builder.Services.AddScoped<FinishOneUnitTestPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<CreateOrderPublisher>();
-builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<GetTimeToCompleteTestPublisher>();
 builder.Services.AddScoped<SubmitAIResponsePublisher>();
 builder.Services.AddScoped<SubmitClassForumGradingPublisher>();
@@ -151,6 +157,7 @@ builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<DisconnectSocketCalculateTimePublisher>();
 builder.Services.AddScoped<SubmitAiSpeakingAnswerPublisher>();
 builder.Services.AddScoped<GetTimeModulePublisher>();
+builder.Services.AddScoped<SubmitSpeakingAIPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -184,6 +191,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.RetryMockTestAction, typeof(RetryMockTestWhenScoreZeroConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
     { QueueSettings.LmsQueue.NameQueue.RetryClassForumAction, typeof(RetryClassForumConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.SpeakingAI, typeof(SpeakingAIEvaluationConsumer) },
 });
 
 var app = builder.Build();

@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -44,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             MethodResult<LeaderBoardSearchModel> methodResult = new MethodResult<LeaderBoardSearchModel>();
 
             // Lấy ra danh sách StudentId đã hoàn thành khóa học
-            var studentIds = await _courseResultRepository.Queryable.Where(x => x.Status != EnumResultStatus.New).Select(c => c.StudentId).Distinct().ToListAsync(cancellationToken);
+            var studentIds = await _courseResultRepository.Queryable.Where(x => x.Status != EnumResultStatus.New && x.WorkingStatus == EnumWorkingStatus.Active).Select(c => c.StudentId).Distinct().ToListAsync(cancellationToken);
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
             if (!studentResults.IsSuccessStatusCode)
             {
@@ -77,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 
             var leaderBoardsToAdd = student!.Select(student =>
             {
-                var unitResultCaculate = _unitResultRepository.Queryable.Where(x => x.StudentId == student.Id && x.Status != EnumResultStatus.Unfinished);
+                var unitResultCaculate = _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == student.Id && x.Status != EnumResultStatus.Unfinished && x.Unit!.CourseLevel == student.CourseLevel);
                 double totalQuestion = unitResultCaculate.Sum(x => x.CorrectTotal);
                 var scores = unitResultCaculate.Sum(x => x.CorrectCount);
                 return new LeaderBoardModel

@@ -48,7 +48,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
                 return methodResult;
             }
-            var studentId = studentResult?.Content?.Result?.Id;
+            var student = studentResult?.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+            var studentId = student.Id;
             var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.UnitId == request.UnitId && x.CourseId == request.CourseId, cancellationToken);
             if (unitResult == null)
             {

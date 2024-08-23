@@ -34,7 +34,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            MethodResult<ClassLiveCalendarModel> methodResult = new MethodResult<ClassLiveCalendarModel>();
+            var methodResult = new MethodResult<ClassLiveCalendarModel>();
 
             var classLiveModel = await _classLiveCalendarRepository.Queryable
                                     .Include(x => x.Class)

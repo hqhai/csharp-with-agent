@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Apis.AndroidPublisher.v3" Version="1.68.0.3449" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Fsel.Ordering.Infrastructure\Fsel.Ordering.Infrastructure.csproj" />
   </ItemGroup>
 

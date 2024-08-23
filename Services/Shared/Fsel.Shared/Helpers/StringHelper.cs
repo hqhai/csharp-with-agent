@@ -213,6 +213,16 @@ namespace Fsel.Shared.Helpers
             return Regex.Replace(word ?? string.Empty, pattern, replacement);
         }
 
+        public static bool ContainsSpecialCharacter(string input)
+        {
+            // Định nghĩa biểu thức chính quy cho các ký tự đặc biệt
+            string pattern = @"[^a-zA-Z0-9]";
+            Regex regex = new Regex(pattern);
+
+            // Kiểm tra xem chuỗi có chứa ký tự đặc biệt không
+            return regex.IsMatch(input);
+        }
+
         public static bool IsBase64Image(string? inputString)
         {
             if (string.IsNullOrEmpty(inputString))
