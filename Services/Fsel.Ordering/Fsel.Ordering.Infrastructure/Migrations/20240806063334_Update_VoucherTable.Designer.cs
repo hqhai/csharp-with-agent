@@ -4,6 +4,7 @@ using Fsel.Ordering.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingDbContext))]
-    partial class OrderingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240806063334_Update_VoucherTable")]
+    partial class Update_VoucherTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -527,9 +530,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<decimal>("PriceMonth")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("ReferToken")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(108);
@@ -560,8 +560,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             MonthNumber = 1,
                             Name = "Fsel_1_Month",
                             Price = 500000m,
-                            PriceMonth = 500000m,
-                            ReferToken = 50000
+                            PriceMonth = 500000m
                         },
                         new
                         {
@@ -575,8 +574,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             MonthNumber = 6,
                             Name = "Fsel_6_Months",
                             Price = 2400000m,
-                            PriceMonth = 320000m,
-                            ReferToken = 240000
+                            PriceMonth = 320000m
                         },
                         new
                         {
@@ -590,8 +588,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             MonthNumber = 12,
                             Name = "Fsel_12_Months",
                             Price = 3600000m,
-                            PriceMonth = 240000m,
-                            ReferToken = 360000
+                            PriceMonth = 240000m
                         });
                 });
 
