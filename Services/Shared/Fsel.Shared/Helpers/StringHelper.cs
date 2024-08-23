@@ -222,5 +222,16 @@ namespace Fsel.Shared.Helpers
             // Kiểm tra xem chuỗi có chứa ký tự đặc biệt không
             return regex.IsMatch(input);
         }
+
+        public static bool IsBase64Image(string? inputString)
+        {
+            if (string.IsNullOrEmpty(inputString))
+            {
+                return false;
+            }
+            // Mẫu để khớp với URI dữ liệu của một hình ảnh có nội dung Base64
+            string base64Pattern = @"^data:image\/(jpeg|jpg|png|gif|bmp|tiff);base64,([A-Za-z0-9+/]+={0,2})$";
+            return Regex.IsMatch(inputString, base64Pattern, RegexOptions.Compiled);
+        }
     }
 }
