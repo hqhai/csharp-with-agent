@@ -34,15 +34,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
         private readonly VideoConverter _videoConverter;
         private readonly IVideoRepository _videoRepository;
         private readonly QuestBoardPublisher _questBoardPublisher;
-        private readonly RankedStudentPublisher _rankedStudentPublisher;
 
         public ReviewLessonVideoCommandHandler(IVideoResultRepository videoResultRepository,
             IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
             IMapper mapper,
             VideoConverter videoConverter,
             IVideoRepository videoRepository,
-            QuestBoardPublisher questBoardPublisher,
-            RankedStudentPublisher rankedStudentPublisher)
+            QuestBoardPublisher questBoardPublisher)
         {
             _videoResultRepository = videoResultRepository;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
@@ -50,7 +48,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             _videoConverter = videoConverter;
             _videoRepository = videoRepository;
             _questBoardPublisher = questBoardPublisher;
-            _rankedStudentPublisher = rankedStudentPublisher;
         }
 
         public async Task<MethodResult<VideoResultModel>> Handle(ReviewLessonVideoCommand request, CancellationToken cancellationToken)
@@ -103,7 +100,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                 await _videoResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 //Xếp hạng học sinh
-                await PublishRankedStudent(videoResult.CreatedUserId, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<VideoResultModel>(videoResult);
                 return methodResult;
@@ -142,12 +138,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                 Category = EnumQuestBoardCategory.CompleteTheFirstVideoLesson,
                 Value = 1
             }, cancellationToken);
-        }
-
-        private async Task PublishRankedStudent(Guid userId, CancellationToken cancellationToken)
-        {
-            StudentRankingEventModel baseQueue = new StudentRankingEventModel { UserId = userId };
-            await _rankedStudentPublisher.Publish(baseQueue, cancellationToken);
         }
     }
 }

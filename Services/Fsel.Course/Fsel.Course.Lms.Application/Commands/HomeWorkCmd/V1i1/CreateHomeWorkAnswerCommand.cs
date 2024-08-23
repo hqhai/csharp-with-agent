@@ -287,6 +287,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             }
             _homeWorkResultRepository.Update(homeWorkResult);
             await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            await PublishRankedStudent(homeWorkResult.CreatedUserId, cancellationToken);
             methodResult.Result = true;
             return methodResult;
         }
@@ -307,9 +308,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             {
                 homeWorkResult.Status = EnumResultStatus.Done;
                 await _finishOneHomeWorkPublisher.Publish(homeWorkResult, CancellationToken.None);
-
-                await PublishRankedStudent(homeWorkResult.CreatedUserId, CancellationToken.None);
-
                 #region Do QuestBoard
 
                 await DoQuestBoard(homeWorkResult.StudentId, EnumQuestBoardType.BeginnerQuests, EnumQuestBoardCategory.CompleteHomeworkFirst, CancellationToken.None);
