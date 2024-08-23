@@ -223,6 +223,11 @@ namespace Fsel.Shared.Helpers
             return regex.IsMatch(input);
         }
 
+        public static ICollection<string> GetEnumNames<T>() where T : Enum
+        {
+            return new List<string>(Enum.GetNames(typeof(T)));
+        }
+
         public static bool IsBase64Image(string? inputString)
         {
             if (string.IsNullOrEmpty(inputString))

@@ -9,6 +9,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Commands.OrderCmds.v1i1;
+    using Fsel.Ordering.Application.Commands.UserRefferalCmd;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.SenderService;
@@ -199,10 +200,15 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
 
                 #region Gửi mail thanh toán
 
-                //if (order.Status == EnumOrderStatus.Payment)
-                //{
-                //    await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
-                //}
+                if (order.Status == EnumOrderStatus.Payment)
+                {
+                    //await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
+                    await _mediator.Send(new AddFeatureMissionCommand()
+                    {
+                        ReceiverId = order.UserId,
+                        FeatureUserReferral = EnumFeatureUserReferral.Payment
+                    }, cancellationToken).ConfigureAwait(false);
+                }
 
                 #endregion Gửi mail thanh toán
 
