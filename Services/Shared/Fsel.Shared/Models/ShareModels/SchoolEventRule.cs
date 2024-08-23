@@ -17,6 +17,8 @@ namespace Fsel.Shared.Models.ShareModels
         public DateTime? AwardEndDate { get; set; }
         public string? LinkLeaderBoard { get; set; }
         public string? LinkLuckyStar { get; set; }
+        public string? LeaderBoardGiftImage{ get; set; }
+        public string? LuckySpinGiftImage { get; set; }
         public IList<WeekEvent>? WeekEvents { get; set; }
         public IList<WeekEvent>? LuckyStarRules { get; set; }
     }
@@ -30,9 +32,7 @@ namespace Fsel.Shared.Models.ShareModels
     public class WeekEvent
     {
         public string? Title { get; set; }
-
         public IList<WeekRule>? Rules { get; set; }
-
         public int PrizeCount { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -43,7 +43,6 @@ namespace Fsel.Shared.Models.ShareModels
     public class WeekRule
     {
         public string? PrizeQuantity { get; set; }
-
         public string? Detail { get; set; }
         public string? RewardImagine { get; set; }
         public int Rank { get; set; }
