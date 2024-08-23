@@ -191,7 +191,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 OrderId = order.Id,
                 OrderStatus = EnumOrderStatus.Payment,
                 Receipt = transactionInfo.Serialize(),
-                Type = EnumOrderTransactionType.AppStore
+                Type = EnumOrderTransactionType.AppStore,
+                RevenueType = EnumPaymentRevenueType.Revenue
             }, cancellationToken);
 
             if (!changeStatusResult.IsOK)

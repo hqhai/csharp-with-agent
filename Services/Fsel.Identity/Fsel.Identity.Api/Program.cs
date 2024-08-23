@@ -52,7 +52,7 @@ builder.Services.AddScoped<IStudentCompetitionSnapShotRepository, StudentCompeti
 builder.Services.AddScoped<ICompetitionEventsRepository, CompetitionEventsRepository>();
 builder.Services.AddScoped<IStudentCompetitionEventsRepository, StudentCompetitionEventRepository>();
 builder.Services.AddScoped<IStudentRankingEventRepository, StudentRankingEventRepository>();
-
+builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
 
 //Publisher
 builder.Services.AddScoped<QuestBoardPublisher>();
@@ -82,6 +82,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.TrainingQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
     { QueueSettings.UserQueue.NameQueue.AddExpiredDateForStudent, typeof(AddExpiredDateForStudentConsumer) },
     { QueueSettings.LmsQueue.NameQueue.StudentRankingEvent, typeof(StudentRankingEventsConsumer) },
+    { QueueSettings.UserQueue.NameQueue.AddFeatureMission, typeof(AddFeatureMissionConsumer) }
 });
 var app = builder.Build();
 app.UseServices();

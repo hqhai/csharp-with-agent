@@ -2,6 +2,8 @@
 
 namespace Fsel.Ordering.Domain.Models.EntityModels
 {
+    using Fsel.Common.Enums.ErrorCodes;
+    using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
@@ -23,6 +25,10 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public Guid CourseId { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
+        public bool IsInvoice { get; set; }
+        public string? CompanyName { get; set; }
+        public string? CompanyAddress { get; set; }
+        public string? CompanyTaxCode { get; set; }
         public PackageModel? Package { get; set; }
         public Guid UserId { get; set; }
         public DateTime? ExpireDate { get; set; }
