@@ -171,7 +171,8 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case EnumQuestionType.TableCompletion:
-                    var tableCompletion = HandleQuestion(config.Deserialize<TableCompletionQuestion>());
+                    var tableCompletion = config.Deserialize<TableCompletionQuestion>();
+                    tableCompletion = HandleQuestion(tableCompletion, tableCompletion?.Rows);
                     result = isDisableAnswers ? ClearAnswers(tableCompletion) : tableCompletion;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(tableCompletion) : ValueSettings.ValueDefault;
                     break;
