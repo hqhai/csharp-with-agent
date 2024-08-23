@@ -149,8 +149,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
 
                 await _mediator.Send(new ChangeStatusOrderCommand()
                 {
-                    OrderId = order.Id,
-                    OrderStatus = EnumOrderStatus.Payment,
+                    OrderIds = new List<Guid>() { order.Id },
+                    Status = EnumOrderStatus.Payment,
+                    RevenueType = EnumPaymentRevenueType.NotRevenue
                 }, cancellationToken);
 
                 return methodResult;
