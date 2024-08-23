@@ -52,5 +52,11 @@ namespace Fsel.Training.Application.Services.UserServices
 
         [Get("/v1/teacher/get-teachers-by-keyword/{keyword}")]
         Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetTeachersByKeyword([FromRoute] string? keyword);
+
+        [Get("/v1/student-ranking/check-lucky-spin")]
+        Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>?>>> CheckLuckySpin();
+
+        [Get("/v1/student-ranking/get-events-by-user-id")]
+        Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>>>> GetEventByUserId([Query] Guid? userId);
     }
 }

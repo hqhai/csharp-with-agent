@@ -121,7 +121,6 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                             Mission = GetEnumTokenMission(questBoardOverall),
                             UserId = _authContext.CurrentUserId,
                             Type = EnumTokenHistoryType.Recevived,
-                            Config = $"{questBoardOverall.Type}: TargetValue: {questBoardOverall.TargetValue}"
                         }
                     }
                 });
@@ -209,7 +208,6 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                             Mission = CheckEnum(questBoard.Category),
                             UserId = _authContext.CurrentUserId,
                             Type = EnumTokenHistoryType.Recevived,
-                            Config =  $"{questBoard.Name} {questBoard.Description}"
                         }
                     }
                 });

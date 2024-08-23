@@ -10,7 +10,7 @@ namespace Fsel.Hangfire.Application.Queues.Consumers
 
     public class SetTimeToCompleteApprovalConsumer : BaseConsumer<SetTimeCompleteApprovalModel>
     {
-        public SetTimeToCompleteApprovalConsumer(AuthContext authContext) : base(authContext)
+        public SetTimeToCompleteApprovalConsumer(AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
         }
 

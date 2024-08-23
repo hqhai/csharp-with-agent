@@ -68,7 +68,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
         [EpplusTableColumn(Header = "Total access")]
         public int? TotalAccess { get; set; }
 
+        [EpplusTableColumn(Header = "Final study period", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
+        public DateTime? FinalStudyPeriod { get; set; }
+
         [EpplusTableColumn(Header = "Last entry", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
-        public DateTime? UpdatedDate { get; set; }
+        public DateTime? LastEntry { get; set; }
     }
 }

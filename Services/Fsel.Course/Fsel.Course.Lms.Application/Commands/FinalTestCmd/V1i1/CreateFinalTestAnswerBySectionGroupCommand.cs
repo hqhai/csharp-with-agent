@@ -43,17 +43,19 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
         private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IFinalTestAnswerRepository _finalTestAnswerRepository;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly IMapper _mapper;
-        private readonly ILogger<object> _logger;
+        private readonly ILogger<CreateFinalTestAnswerBySectionGroupCommand> _logger;
 
-        public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, AuthContext authContext, QuestionConverter questionConverter, SectionGroupConverter sectionGroupConverter, IUserService userService, ISystemService systemService, IFinalTestResultRepository finalTestResultRepository, IFinalTestAnswerRepository finalTestAnswerRepository, ISectionGroupResultRepository sectionGroupResultRepository, ISectionGroupRepository sectionGroupRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper, ILogger<object> logger)
+        public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, ICourseResultRepository courseResultRepository, AuthContext authContext, QuestionConverter questionConverter, SectionGroupConverter sectionGroupConverter, IUserService userService, ISystemService systemService, IFinalTestResultRepository finalTestResultRepository, IFinalTestAnswerRepository finalTestAnswerRepository, ISectionGroupResultRepository sectionGroupResultRepository, ISectionGroupRepository sectionGroupRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper, ILogger<CreateFinalTestAnswerBySectionGroupCommand> logger)
         {
             _questionRepository = questionRepository;
+            _courseResultRepository = courseResultRepository;
             _authContext = authContext;
             _questionConverter = questionConverter;
             _sectionGroupConverter = sectionGroupConverter;
@@ -80,13 +82,13 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             StudentModel? student;
             if (request.StudentId.HasValue)
             {
-                var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId.Value });
-                if (!studentResults.IsSuccessStatusCode)
+                var studentResult = await _userService.GetUserByStudentId(request.StudentId.Value);
+                if (!studentResult.IsSuccessStatusCode)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
                     return methodResult;
                 }
-                student = studentResults.Content?.Result?.FirstOrDefault();
+                student = studentResult.Content?.Result;
             }
             else
             {
@@ -165,11 +167,10 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
         private async Task UpdateFinalTestResultAsync(FinalTestResult finalTestResult, StudentModel student, CancellationToken cancellationToken)
         {
             var numberOfDone = 3;
-            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(s => s.FinalTestResultId == finalTestResult.Id).ToListAsync(cancellationToken);
+            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.FinalTestResultId == finalTestResult.Id).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
             if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
             {
-                (finalTestResult, var tokenConfigId) = await GetFinalTestResult(sectionGroupResults, finalTestResult);
-
+                finalTestResult = await SetFinalTestResultAsync(sectionGroupResults, finalTestResult);
                 var token = finalTestResult.TokenFirstTime ?? default;
                 if (token > 0)
                 {
@@ -179,6 +180,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                         {
                             ObjectId = finalTestResult.Id,
                             VolatileToken = token,
+                            CourseResultId = _courseResultRepository.Queryable.FirstOrDefault(x => x.CourseId == finalTestResult.CourseId && x.StudentId == finalTestResult.StudentId)?.Id,
                             Type = EnumTokenHistoryType.Recevived,
                             Feature = EnumTokenFeature.Test,
                             Mission = EnumTokenMission.FinalTest,
@@ -193,7 +195,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             }
         }
 
-        private async Task<(Guid, long)> GetTokenConfig()
+        private async Task<long> GetTokenConfig()
         {
             var getTokenQuery = new GetTokenQueryModel
             {
@@ -207,13 +209,13 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 return default;
             }
             var tokenConfig = tokenConfigResults?.Content?.Result;
-            return (tokenConfig?.Id ?? default, tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default);
+            return tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
         }
 
-        private async Task<(FinalTestResult, Guid)> GetFinalTestResult(IList<SectionGroupResult> sectionGroupResults, FinalTestResult finalTestResult)
+        private async Task<FinalTestResult> SetFinalTestResultAsync(IList<SectionGroupResult> sectionGroupResults, FinalTestResult finalTestResult)
         {
-            var skillScores = sectionGroupResults.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList();
-            var (tokenConfigId, token) = await GetTokenConfig();
+            var skillScores = sectionGroupResults.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList();
+            var token = await GetTokenConfig();
 
             finalTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
             finalTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
@@ -222,7 +224,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             finalTestResult.Status = EnumResultStatus.Done;
             finalTestResult.SkillScores = skillScores;
             finalTestResult.TokenFirstTime = (int)(token * finalTestResult.CorrectCount);
-            return (finalTestResult, tokenConfigId);
+            return finalTestResult;
         }
 
         private async Task<MethodResult<IList<FinalTestAnswer>>> CreateAnswerAsync(CreateFinalTestAnswerBySectionGroupCommand request, SectionGroupResult sectionGroupResult)
@@ -246,13 +248,21 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             if (createFinalTestAnswers != null && createFinalTestAnswers.Any())
             {
                 await _finalTestAnswerRepository.AddList(createFinalTestAnswers);
-                await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
             if (updateFinalTestAnswers != null && updateFinalTestAnswers.Any())
             {
                 _finalTestAnswerRepository.UpdateList(updateFinalTestAnswers);
+            }
+
+            try
+            {
                 await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Duplicate FinalTestAnswer : {ex.Message}");
+            }
+
             return methodResult;
         }
 

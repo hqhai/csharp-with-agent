@@ -5,10 +5,12 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.System.Application.Commands.QuestBoardCmd;
     using Fsel.System.Application.Services.UserServices;
+    using Fsel.System.Application.Services.UserServices.Models.QueryModels;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.FeatureAccessTimes;
@@ -53,15 +55,45 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
             }
             var student = studentResult.Content?.Result;
 
+            EnumFeature featureType = ConvertType(request.Type!);
+
+            var featureAccessTimeCheck = await _featureAccessTimeRepository.Queryable.OrderByDescending(x => x.LastVisited).FirstOrDefaultAsync(x => x.CreatedUserId == _authContext.CurrentUserId && (x.ObjectId == request.ObjectId || x.EnumFeature == EnumFeature.Other) && x.EnumFeature == featureType, cancellationToken);
+
+            bool isActiveToday = featureAccessTimeCheck != null;
+            //focus mode
+            if (isActiveToday)
+            {
+                StudentFocusTimeCommandModel cmd = new StudentFocusTimeCommandModel
+                {
+                    ExecuteTime = (long)request.AccessTime!,
+                    TargetTime = 0,
+                    UserId = _authContext.CurrentUserId,
+                };
+                await _userService.SaveFocusTime(cmd).ConfigureAwait(false);
+            }
+
+            //Daily checkin
+            long existsTime = featureAccessTimeCheck != null ? featureAccessTimeCheck.AccessTime + (long)request.AccessTime! : 0;
+
+            if (existsTime >= ValueSettings.StudentDailyStreak.CheckInGoalTime)
+            {
+                StudentDailyStreakCommandModel cmdDaily = new StudentDailyStreakCommandModel
+                {
+                    StudentId = student?.Id ?? default,
+                    IsUseShield = false,
+                    DailyDate = DateTime.UtcNow,
+                    UserId = _authContext.CurrentUserId,
+                };
+                await _userService.SaveDailyStreak(cmdDaily);
+            }
+
             await _featureAccessTimeRepository.ExecuteTransactionAsync(async () =>
             {
                 //Phân tách dữ liệu accesstime theo từng khung giờ
                 var accessTimes = GetAccessTimeByRangeHour(DateTime.UtcNow, request.AccessTime);
 
-                EnumFeature featureType = ConvertType(request.Type!);
                 foreach (var (time, seconds) in accessTimes)
                 {
-                    var featureAccessTimeCheck = await _featureAccessTimeRepository.Queryable.OrderByDescending(x => x.LastVisited).FirstOrDefaultAsync(x => x.CreatedUserId == request.UserId && (x.ObjectId == request.ObjectId || x.EnumFeature == EnumFeature.Other) && x.EnumFeature == featureType, cancellationToken);
 
                     if (featureAccessTimeCheck == null || !IsSameRangeHour(featureAccessTimeCheck))
                     {

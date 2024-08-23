@@ -11,7 +11,7 @@ namespace Fsel.Notification.Application.Queues.Consumers
     {
         private readonly IMediator _mediator;
 
-        public DiscussionBoardCommentConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
+        public DiscussionBoardCommentConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }

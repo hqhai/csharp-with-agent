@@ -25,10 +25,10 @@ namespace Fsel.Course.Infrastructure.Repositories
                 return default;
             }
             return await Queryable.Include(x => x.ClassForumResults.Where(x => ids.Contains(x.LessonResultId)))
-                                                     .Include(x => x.VideoResult)
-                                                     .Include(x => x.HomeWorkResults.Where(x => ids.Contains(x.LessonResultId)))
-                                                     .Where(x => ids.Contains(x.Id))
-                                                     .ToListAsync();
+                                    .Include(x => x.VideoResult)
+                                    .Include(x => x.HomeWorkResults.Where(x => ids.Contains(x.LessonResultId)))
+                                    .Where(x => ids.Contains(x.Id))
+                                    .ToListAsync();
         }
 
         public async Task<LessonResult?> GetAsync(Guid? courseId, Guid? unitId, Guid? lessonId, Guid? studentId)
@@ -45,26 +45,29 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             return await Queryable.Include(x => x.Lesson).ThenInclude(x => x!.LessonInstructions)
                                                         .Include(x => x.VideoResult)
-                                                        .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
-                                                        .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                                                        .Where(x => x.StudentId == studentId && x.Status != EnumResultStatus.Unfinished && x.Status != EnumResultStatus.New && x.CourseId == courseId)
+                                                        .Include(x => x.HomeWorkResults)
+                                                        .Include(x => x.ClassForumResults)
+                                                        .Where(x => x.Status != EnumResultStatus.New && x.CourseId == courseId)
+                                                        .Where(x => x.StudentId == studentId && x.Status != EnumResultStatus.Unfinished)
                                                         .OrderByDescending(x => x.CreatedDate)
                                                         .ThenBy(x => x.UpdatedDate)
                                                         .AsNoTracking()
                                                         .FirstOrDefaultAsync();
         }
 
-        public async Task<List<LessonResult>?> GetListAsync(IList<Guid>? lessonIds, Guid? studentId, Guid unitId)
+        public async Task<List<LessonResult>?> GetListAsync(IList<Guid>? lessonIds, Guid courseId, Guid unitId, Guid? studentId)
         {
             if (lessonIds == null || !lessonIds.Any())
             {
                 return default;
             }
-            return await Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                                                        .Include(x => x.VideoResult)
-                                                     .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
-                                                        .Where(x => lessonIds.Contains(x.LessonId) && x.StudentId == studentId && x.UnitId == unitId)
-                                                     .ToListAsync();
+            return await Queryable.Include(x => x.ClassForumResults)
+                                .Include(x => x.VideoResult)
+                                .Include(x => x.HomeWorkResults)
+                                .Where(x => x.UnitId == unitId && x.CourseId == courseId)
+                                .Where(x => lessonIds.Contains(x.LessonId) && x.StudentId == studentId)
+                                .AsNoTracking()
+                                .ToListAsync();
         }
 
         public async Task<List<LessonResult>?> GetListAsync(CourseResultModel courseResult)

@@ -9,7 +9,7 @@ namespace Fsel.Hangfire.Application.Queues.Consumers
 
     public class SetTimeToReviewFselConsumer : BaseConsumer<NotificationSendingQueueModel>
     {
-        public SetTimeToReviewFselConsumer(AuthContext authContext) : base(authContext)
+        public SetTimeToReviewFselConsumer(AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
         }
 

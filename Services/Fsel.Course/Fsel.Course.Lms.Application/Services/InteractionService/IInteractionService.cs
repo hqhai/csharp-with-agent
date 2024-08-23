@@ -6,8 +6,10 @@ namespace Fsel.Course.Lms.Application.Services.InteractionService
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Lms.Application.Services.InteractionService.CommandModels;
     using Fsel.Course.Lms.Application.Services.InteractionService.Models;
     using Fsel.Shared.Enums;
+    using Microsoft.AspNetCore.Mvc;
     using Refit;
 
     public interface IInteractionService
@@ -26,5 +28,11 @@ namespace Fsel.Course.Lms.Application.Services.InteractionService
 
         [Post("/v1/interaction-action/aggregate-number-of-likes-and-comments")]
         Task<IApiResponse<MethodResult<AggregateNumberOfLikesAndCommentsModels>>> AggregateNumberOfLikesAndComments([Body] AggregateNumberOfLikesAndCommentsQueryModel query);
+
+        [Get("/v1/customerSurvey/IsCompleted/{id}")]
+        Task<IApiResponse<MethodResult<bool>>> IsSurveyCompleted([FromRoute] Guid id);
+
+        [Post("/v1/customerSurvey")]
+        Task<IApiResponse<MethodResult<IList<CustomerSurveyModel>>>> CreateSurveyAsync([FromBody] CreateCustomerSurveyCommandModel model);
     }
 }

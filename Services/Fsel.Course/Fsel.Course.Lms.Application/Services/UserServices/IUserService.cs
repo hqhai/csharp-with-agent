@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Lms.Application.Services.UserServices.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -76,11 +77,11 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Post("/v1/student/get-student-by-emails")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByEmailsAsync([FromBody] IList<string> emails);
 
+        [Put("/v1/student/update-course-to-student/{courseId}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> UpdateCourseToStudentAsync([FromRoute] Guid courseId);
+
         [Post("/v1/student/get-student-by-full-names")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByFullNamesAsync([FromBody] IList<string> fullNames);
-
-        [Get("/v1/user/get-by-student-id/{id}")]
-        Task<IApiResponse<MethodResult<StudentModel>>> GetUserByStudentId([FromRoute] Guid id);
 
         [Get("/v1/admin/user/token/{id}")]
         Task<IApiResponse<MethodResult<TokenModel>>> GetJWTAsync([FromRoute] Guid id);
@@ -88,8 +89,17 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Post("/v1/user-setting/users")]
         Task<IApiResponse<MethodResult<List<UserSettingModel>>>> GetListUserSetting([Body] UserSettingQuery query);
 
+        [Get("/v1/user-course-setting")]
+        Task<IApiResponse<MethodResult<IList<UserCourseSettingModel>>>> GetUserCourseSettingsAsync();
+
         [Post("/v1/student/get-by-user-ids")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetUserByIds([FromBody] IList<Guid>? userIds);
+
+        [Get("/v1/user/get-by-student-id/{id}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> GetUserByStudentId([FromRoute] Guid id);
+
+        [Put("/v1/user/update-code-student")]
+        Task<IApiResponse<MethodResult<UserModel>>> UpdateCodeStudentAsync([FromBody] UpdateCodeStudentCommandModel command);
 
         [Get("/v1/student-daily-streak/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<StudentConsecutiveDayModel>>>> StudentDailyStreakExecuteQuery([Query] BaseQueryModel baseQuery);

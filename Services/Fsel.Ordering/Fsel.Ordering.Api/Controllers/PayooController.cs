@@ -3,20 +3,20 @@
 namespace Fsel.Ordering.Api.Controllers
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Commands.Payoo;
     using Fsel.Ordering.Application.Services.PayooService.Models;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/payoo")]
     [ApiController]
-    public class PayooController : ControllerBase
+    public class PayooController : BaseController
     {
         private readonly IMediator _mediator;
 

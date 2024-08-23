@@ -5,14 +5,16 @@ namespace Fsel.Realtime.Application.Hubs
     using Fsel.Core.Base;
     using Fsel.Core.Extensions;
     using Fsel.Core.Services.IpApiServices;
+    using Fsel.Realtime.Application.Trackers;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.SignalR;
 
     public class NotificationHub : BaseHub
     {
         private readonly AuthContext _authContext;
-        public NotificationHub(AuthContext authContext, IIpApiService ipApiService) : base(authContext, ipApiService)
+        public NotificationHub(AuthContext authContext, IIpApiService ipApiService, IHttpContextAccessor httpContextAccessor) : base(authContext, ipApiService, httpContextAccessor)
         {
             _authContext = authContext;
         }

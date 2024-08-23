@@ -136,5 +136,17 @@ namespace Fsel.Shared.Helpers
 
             return $"{hours} giờ {minutes:D2} phút";
         }
+
+        public static (DateTime Monday, DateTime Sunday) GetMondayAndSunday(DateTime date)
+        {
+            // Tìm ngày Thứ Hai
+            int diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
+            DateTime monday = date.AddDays(-1 * diff).Date;
+
+            // Tìm ngày Chủ Nhật
+            DateTime sunday = monday.AddDays(6).Date;
+
+            return (monday, sunday);
+        }
     }
 }

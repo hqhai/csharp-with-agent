@@ -29,6 +29,7 @@ namespace Fsel.Shared.Enums
         NoticeExpireAfterTwoDay,
         CommentPost,
         LikePost,
-        ReplyCommentPost
+        ReplyCommentPost,
+        CourseChange
     }
 }

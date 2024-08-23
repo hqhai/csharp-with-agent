@@ -8,6 +8,7 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
+    using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using MediatR;
@@ -79,7 +80,8 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 {
                     StudentId = request.StudentId,
                     ClassId = request.ClassId,
-                    PackageId = request.PackageId
+                    PackageId = request.PackageId,
+                    CourseId = classes.CourseId
                 });
                 if (!studentResult.IsSuccessStatusCode)
                 {
