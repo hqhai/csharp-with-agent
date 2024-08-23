@@ -147,7 +147,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 return methodResult;
             }
 
-            result = result.Where(x => activeCourseResultIds.Contains(x.CourseResultId)).ToList();
+            result = result.DistinctBy(x => x.CourseResultId).Where(x => activeCourseResultIds.Contains(x.CourseResultId)).ToList();
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {

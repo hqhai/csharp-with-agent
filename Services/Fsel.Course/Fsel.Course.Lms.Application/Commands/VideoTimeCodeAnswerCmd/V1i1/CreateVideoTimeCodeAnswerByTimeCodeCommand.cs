@@ -139,6 +139,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             var (videoResult, videoTimeCode, videoTimeCodeResult) = method.Result;
             if (request.IsSubmit)
             {
+             
                 await _disconnectSocketCalculateTimePublisher.Publish(new SetTimeModuleModel
                 {
                     Type = nameof(Video),
@@ -149,6 +150,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {
+
                 if (request.IsSubmit)
                 {
                     if (videoTimeCodeResult.Status == EnumResultStatus.New && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
@@ -167,6 +169,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 }
                 _videoResultRepository.Update(videoResult);
                 await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             });
@@ -175,14 +179,14 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             {
                 await UpdateVideoResultAsync(videoResult, cancellationToken);
 
-                await PublishRankedStudent(videoResult.CreatedUserId, cancellationToken);
+
                 #region Do QuestBoard
 
                 var countAnswers = await _videoTimeCodeAnswerRepository.Queryable.Where(p => p.VideoTimeCodeResultId == videoTimeCodeResult.Id).CountAsync(cancellationToken);
 
                 await DoQuestBoard(videoResult.StudentId, EnumQuestBoardCategory.DecodingTheNebula, countAnswers, cancellationToken);
                 await DoQuestBoard(videoResult.StudentId, EnumQuestBoardCategory.JourneyOfKnowledge, countAnswers, cancellationToken);
-
+                await PublishRankedStudent(videoResult.CreatedUserId, cancellationToken);
                 #endregion Do QuestBoard
             }
 
@@ -196,7 +200,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             }, cancellationToken);
 
             await StreakTimeCodeCheer(request, cancellationToken);
-
             methodResult.Result = videoTimeCodeMethod.Result;
             methodResult.StatusCode = StatusCodes.Status200OK;
 
@@ -321,6 +324,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         {
             var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id)).Where(x => x.VideoId == videoResult.VideoId).ToListAsync(cancellationToken);
             var videoTimeCodeResults = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Where(x => x.VideoResultId == videoResult.Id && x.Status == EnumResultStatus.Done).ToList();
+
             if (videoTimeCodes.Count == videoTimeCodeResults.Count)
             {
                 await _mediator.Send(new ReviewLessonVideoCommand { LessonResultId = videoResult.LessonResultId }, cancellationToken).ConfigureAwait(false);

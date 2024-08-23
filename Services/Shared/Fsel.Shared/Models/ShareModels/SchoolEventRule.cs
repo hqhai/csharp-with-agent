@@ -18,6 +18,7 @@ namespace Fsel.Shared.Models.ShareModels
         public string? LinkLeaderBoard { get; set; }
         public string? LinkLuckyStar { get; set; }
         public IList<WeekEvent>? WeekEvents { get; set; }
+        public IList<WeekEvent>? LuckyStarRules { get; set; }
     }
 
     public enum EnumByPassPaymentType
