@@ -7,9 +7,6 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Models;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;

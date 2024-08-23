@@ -1,43 +1,43 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Application.Queries.OrderQuery
+namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
 {
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
-    using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Domain.IRepositories;
-    using Fsel.Ordering.Domain.Models.EntityModels;
-    using Fsel.Ordering.Domain.Models.QueryModels.Oders;
+    using Fsel.Ordering.Domain.Models.EntityModels.V1i2;
+    using Fsel.Ordering.Domain.Models.QueryModels.Oders.V1i2;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchOrderQuery : SearchOrderQueryModel, IRequest<MethodResult<PagingItemsModel<OrderSearchModel>>>
+    public class SearchOrderQuery : SearchOrderQueryModel, IRequest<MethodResult<PagingItemsModel<SearchOrderModel>>>
     {
     }
 
-    public class SearchOrderQueryHandler : IRequestHandler<SearchOrderQuery, MethodResult<PagingItemsModel<OrderSearchModel>>>
+    public class SearchOrderQueryHandler : IRequestHandler<SearchOrderQuery, MethodResult<PagingItemsModel<SearchOrderModel>>>
     {
         private readonly IOrderRepository _orderRepository;
-        private readonly ILmsCourseService _lmsCourseService;
+        private readonly AuthContext _authContext;
 
-        public SearchOrderQueryHandler(IOrderRepository orderRepository, ILmsCourseService lmsCourseService)
+        public SearchOrderQueryHandler(IOrderRepository orderRepository, AuthContext authContext)
         {
             _orderRepository = orderRepository;
-            _lmsCourseService = lmsCourseService;
+            _authContext = authContext;
         }
 
-        public async Task<MethodResult<PagingItemsModel<OrderSearchModel>>> Handle(SearchOrderQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<SearchOrderModel>>> Handle(SearchOrderQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<PagingItemsModel<OrderSearchModel>>();
+            var methodResult = new MethodResult<PagingItemsModel<SearchOrderModel>>();
 
-            var query = _orderRepository.Queryable.Include(p => p.Package).Select(x => new OrderSearchModel
+            var query = _orderRepository.Queryable.Include(p => p.Package).Where(p => !p.IsTrial).Select(x => new SearchOrderModel
             {
                 Id = x.Id,
                 Code = x.Code,
@@ -52,11 +52,21 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 PackageId = x.PackageId,
                 MonthNumber = x.Package == null ? null : x.Package.MonthNumber,
                 RevenueType = x.RevenueType,
+                TotalPrice = x.TotalPrice,
             });
 
-            if (request.Status.HasValue)
+            if (request.IsNew.HasValue && request.IsNew == true)
             {
-                query = query.Where(p => p.Status == request.Status);
+                query = query.Where(p => p.Status == EnumOrderStatus.New && (p.PaymentMethod == EnumPaymentMethodStatus.BankTransfer || p.PaymentMethod == EnumPaymentMethodStatus.Card));
+            }
+            else if (request.IsNew.HasValue && request.IsNew == false)
+            {
+                query = query.Where(p => p.Status != EnumOrderStatus.New || (p.Status == EnumOrderStatus.New && (p.PaymentMethod == EnumPaymentMethodStatus.Payoo || p.PaymentMethod == EnumPaymentMethodStatus.AppStore || p.PaymentMethod == EnumPaymentMethodStatus.CHPlay)));
+            }
+
+            if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
+            {
+                query = query.Where(p => p.UserId == _authContext.CurrentUserId);
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -89,6 +99,11 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 query = query.Where(p => p.CreatedDate.HasValue && request.EndDate.Value.Date >= p.CreatedDate.Value.Date);
             }
 
+            if (request.RevenueType.HasValue)
+            {
+                query = query.Where(p => p.RevenueType == request.RevenueType);
+            }
+
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
                     .ApplySortAndPaging(request)
@@ -96,7 +111,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<OrderSearchModel>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<SearchOrderModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
