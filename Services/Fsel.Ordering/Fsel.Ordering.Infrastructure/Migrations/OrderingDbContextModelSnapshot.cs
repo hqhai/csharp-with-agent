@@ -522,6 +522,9 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<decimal>("PriceMonth")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("ReferToken")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(108);
@@ -552,7 +555,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             MonthNumber = 1,
                             Name = "Fsel_1_Month",
                             Price = 500000m,
-                            PriceMonth = 500000m
+                            PriceMonth = 500000m,
+                            ReferToken = 50000
                         },
                         new
                         {
@@ -566,7 +570,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             MonthNumber = 6,
                             Name = "Fsel_6_Months",
                             Price = 2400000m,
-                            PriceMonth = 320000m
+                            PriceMonth = 320000m,
+                            ReferToken = 240000
                         },
                         new
                         {
@@ -580,7 +585,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             MonthNumber = 12,
                             Name = "Fsel_12_Months",
                             Price = 3600000m,
-                            PriceMonth = 240000m
+                            PriceMonth = 240000m,
+                            ReferToken = 360000
                         });
                 });
 
