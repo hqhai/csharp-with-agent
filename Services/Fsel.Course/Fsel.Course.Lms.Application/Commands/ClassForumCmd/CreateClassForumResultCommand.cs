@@ -83,7 +83,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassForumResultModel> methodResult = new MethodResult<ClassForumResultModel>();
-
+            if (StringHelper.IsBase64Image(request.Content) || StringHelper.IsBase64Image(request.WordContent))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.Base64InText));
+                return methodResult;
+            }
             // Check từ khoá cấm
             var listForbiddenWordResultContent = await _systemService.CheckContainForbiddenWord(request.Content ?? string.Empty);
             var listForbiddenWordResultWordContent = await _systemService.CheckContainForbiddenWord(request.WordContent ?? string.Empty);

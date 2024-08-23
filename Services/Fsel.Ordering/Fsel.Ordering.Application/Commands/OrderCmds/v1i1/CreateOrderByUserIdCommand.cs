@@ -176,6 +176,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     OrderId = newOrder.Id,
                     OrderStatus = EnumOrderStatus.Payment,
                     Type = EnumOrderTransactionType.BankTransfer,
+                    RevenueType = request.IsTrialRegistration ? EnumPaymentRevenueType.NotRevenue : EnumPaymentRevenueType.Revenue
                 }, cancellationToken);
 
                 if (!changeStatusOrderResult.IsOK)

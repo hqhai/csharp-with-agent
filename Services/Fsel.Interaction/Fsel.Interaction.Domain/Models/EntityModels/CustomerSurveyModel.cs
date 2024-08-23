@@ -9,5 +9,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public object? Answer { get; set; }
         public Guid? UserId { get; set; }
         public Guid SurveyQuestionId { get; set; }
+
+        public bool IsCompleted { get; set; }
     }
 }
