@@ -11,6 +11,15 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public ConstantUrl? ConstantUrl { get; set; }
         public ResourceContent? ResourceContent { get; set; }
         public new Services? Services { get; set; }
+
+        public GoogleSheetConfig? GoogleSheetConfig { get; set; }
+        public UserReferralConfig? UserReferralConfig { get; set; }
+    }
+
+    public class UserReferralConfig
+    {
+        public int PT { get; set; }
+        public int DoneUnit1 { get; set; }
     }
 
     public class ResourceContent
@@ -48,5 +57,10 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public int Port { get; set; }
         public string? Username { get; set; }
         public string? Password { get; set; }
+    }
+
+    public class GoogleSheetConfig
+    {
+        public string? SchoolStudentSheetId { get; set; }
     }
 }

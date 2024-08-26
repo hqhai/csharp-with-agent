@@ -14,10 +14,16 @@ namespace Fsel.Ordering.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<Order> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+
             builder.HasOne(a => a.Package)
                   .WithMany(b => b.Orders)
                   .HasForeignKey(b => b.PackageId)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(a => a.Event)
+                  .WithMany(b => b.Orders)
+                  .HasForeignKey(b => b.EventId)
+                  .OnDelete(DeleteBehavior.NoAction);
 
             builder.Property(e => e.Status)
                 .HasMaxLength(100)
@@ -30,6 +36,12 @@ namespace Fsel.Ordering.Infrastructure.Configs
                .HasConversion(
                    v => v == null ? null : v.ToString(),
                    v => string.IsNullOrEmpty(v) ? null : v.EnumParse<EnumPaymentMethodStatus>());
+
+            builder.Property(e => e.RevenueType)
+               .HasMaxLength(100)
+               .HasConversion(
+                   v => v == null ? null : v.ToString(),
+                   v => string.IsNullOrEmpty(v) ? null : v.EnumParse<EnumPaymentRevenueType>());
         }
     }
 }

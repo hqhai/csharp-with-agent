@@ -8,7 +8,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.StudentProgress;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -21,14 +23,17 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     {
         private readonly ICourseRepository _courseRepository;
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly ManagerProgressHelper _managerProgressHelper;
         private readonly IUserService _userService;
 
         public SearchStudentProgressQueryHandler(ICourseRepository courseRepository,
             ICourseResultRepository courseResultRepository,
+            ManagerProgressHelper managerProgressHelper,
             IUserService userService)
         {
             _courseRepository = courseRepository;
             _courseResultRepository = courseResultRepository;
+            _managerProgressHelper = managerProgressHelper;
             _userService = userService;
         }
 
@@ -42,7 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => !x.IsDeleted)
+            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => !x.IsDeleted && x.WorkingStatus == EnumWorkingStatus.Active)
                 .GroupBy(r => new { r.StudentId, r.CourseId })
                 .Select(group => new CourseResultModel
                 {
@@ -55,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 .OrderByDescending(x => x.CreatedDate)
                 .ToListAsync(cancellationToken);
 
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(courseResults.Select(x => x.StudentId).ToList());
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(courseResults.Select(x => x.StudentId).Distinct().ToList());
             var students = studentResults.Content?.Result;
             var studentProgress = new List<StudentProgressModel>();
             foreach (var courseResult in courseResults)
@@ -88,15 +93,15 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             {
                 studentProgress = studentProgress.Where(m => m.Level == request.Level).ToList();
             }
-
             int totalItem = studentProgress.Count;
             var lists = studentProgress.ApplySortAndPaging(request).ToList();
+
             foreach (var item in lists)
             {
                 var courseResult = courseResults.FirstOrDefault(x => x.CourseId == item.CourseId && x.StudentId == item.StudentId);
                 if (courseResult != null)
                 {
-                    var (currentProgress, progress) = await _courseRepository.GetContentComplete(courseResult);
+                    var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResult);
                     var (displayOrderUnit, displayOrderLesson) = await _courseRepository.GetDisplayOrder(courseResult);
                     item.DisplayOrderLesson = displayOrderLesson;
                     item.DisplayOrderUnit = displayOrderUnit;

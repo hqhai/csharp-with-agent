@@ -6,7 +6,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -16,7 +15,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     public class UpdateStudentByCourseLevelCommand : IRequest<MethodResult<bool>>
     {
         public Guid Id { get; set; }
-        public EnumCourseLevel Level { get; set; }
+        public EnumCourseLevel CourseLevel { get; set; }
+        public EnumCourseLevel? BaseCourseLevel { get; set; }
     }
 
     public class UpdateStudentByCourseLevelCommandHandler : IRequestHandler<UpdateStudentByCourseLevelCommand, MethodResult<bool>>
@@ -41,7 +41,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            student.CourseLevel = request.Level;
+            student.CourseLevel = request.CourseLevel;
+            if (request.BaseCourseLevel.HasValue)
+            {
+                student.BaseCourseLevel = request.BaseCourseLevel.Value;
+            }
 
             await _studentRepository.ExecuteTransactionAsync(async () =>
             {

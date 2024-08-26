@@ -14,7 +14,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
         private readonly IHubContext<ClassForumAIFeedBackHub> _classForumFeedBackHubContext;
         private readonly IQueueProvider _queueProvider;
 
-        public AIFeedBackConsumer(IHubContext<ClassForumAIFeedBackHub> classForumAIFeedBackHubContext, IQueueProvider queueProvider, AuthContext authContext) : base(authContext)
+        public AIFeedBackConsumer(IHubContext<ClassForumAIFeedBackHub> classForumAIFeedBackHubContext, IQueueProvider queueProvider, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _classForumFeedBackHubContext = classForumAIFeedBackHubContext;
             _queueProvider = queueProvider;

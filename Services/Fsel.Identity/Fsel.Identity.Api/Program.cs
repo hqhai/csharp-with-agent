@@ -26,7 +26,9 @@ builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<UserDbContext>();
 
 builder.AddIdentity<User, Role, UserDbContext>();
+builder.AddAuthenticationIdentity();
 
+//Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserTokenRepository, UserTokenRepository>();
 builder.Services.AddScoped<IHumanRepository, HumanRepository>();
@@ -39,18 +41,25 @@ builder.Services.AddScoped<IStudentDailyStreakRepository, StudentDailyStreakRepo
 builder.Services.AddScoped<ICSORepository, CSORepository>();
 builder.Services.AddScoped<ITeacherBankAccountRepository, TeacherBankAccountRepository>();
 builder.Services.AddScoped<IUserSettingRepository, UserSettingRepository>();
+builder.Services.AddScoped<IUserCourseSettingRepository, UserCourseSettingRepository>();
 builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
 builder.Services.AddScoped<IStudentRankingRepository, StudentRankingRepository>();
-builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<IUserPlatformRepository, UserPlatformRepository>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeRepository>();
 builder.Services.AddScoped<IStudentTrialRegistrationRepository, StudentTrialRegistrationRepository>();
+builder.Services.AddScoped<IStudentCompetitionSnapShotRepository, StudentCompetitionSnapShotRepository>();
+builder.Services.AddScoped<ICompetitionEventsRepository, CompetitionEventsRepository>();
+builder.Services.AddScoped<IStudentRankingEventsRepository, StudentRankingEventsRepository>();
+builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
 
+//Publisher
 builder.Services.AddScoped<QuestBoardPublisher>();
+builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 
+//Refit
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);
@@ -58,14 +67,20 @@ builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApi
 builder.AddRefitClients(typeof(ILmsCourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 
+//MassTransit
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
     { QueueSettings.UserQueue.NameQueue.SyncStudentShieldEveryDay, typeof(SyncStudentShieldForDailyStreakEveryDayConsumer) },
     { QueueSettings.UserQueue.NameQueue.UpdateStudentsDailyStreak, typeof(SyncStudentShieldForDailyStreakEveryDayConsumer) },
     { QueueSettings.UserQueue.NameQueue.LeaderBoard, typeof(LeaderBoardConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.WeeklySnapShotLeaderBoard, typeof(LeaderBoardForSchoolConsumer) },
     { QueueSettings.PlantDefenderQueue.NameQueue.DeleteGuestStudent, typeof(DeleteGuestStudentConsumer) },
-    { QueueSettings.UserQueue.NameQueue.UpdateStatusTrialStudent, typeof(UpdateTrialStudentStatusConsumer) }
+    { QueueSettings.UserQueue.NameQueue.UpdateStatusTrialStudent, typeof(UpdateTrialStudentStatusConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
+    { QueueSettings.TrainingQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
+    { QueueSettings.UserQueue.NameQueue.AddExpiredDateForStudent, typeof(AddExpiredDateForStudentConsumer) },
+    { QueueSettings.UserQueue.NameQueue.AddFeatureMission, typeof(AddFeatureMissionConsumer) }
 });
 var app = builder.Build();
 app.UseServices();

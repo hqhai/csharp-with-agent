@@ -3,20 +3,19 @@
 namespace Fsel.Training.Api.Controllers.Cso
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Shared.Enums;
+    using Fsel.Shared.Constants;
     using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/cso/class-live")]
     [ApiController]
     public class ClassLiveController : ControllerBase

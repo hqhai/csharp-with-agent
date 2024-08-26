@@ -72,8 +72,11 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// The course does not exist or has not been activated
         /// </summary>
-        CourseNotExistOrNotActive
+        CourseNotExistOrNotActive,
 
-,
+        /// <summary>
+        ///  You chose the wrong Level
+        /// </summary>
+        YouChoseTheWrongLevel,
     }
 }

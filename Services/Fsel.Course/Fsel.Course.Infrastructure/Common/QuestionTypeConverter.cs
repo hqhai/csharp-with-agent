@@ -160,9 +160,14 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswers(DragAndDropListSentenceOrderQuestion? data)
+        private static DragAndDropListSentenceOrderQuestion? ClearAnswers(DragAndDropListSentenceOrderQuestion? data)
         {
-            return GenerateRandomLoop(data?.Contents);
+            var contents = GenerateRandomLoop(data?.Contents);
+            if (data != null)
+            {
+                data.Contents = contents;
+            }
+            return data;
         }
 
         private static object? ClearAnswers(MatchingTypeQuestion? data)

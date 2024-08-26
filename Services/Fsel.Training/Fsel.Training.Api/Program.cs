@@ -36,7 +36,9 @@ builder.Services.AddScoped<ITeacherFreeTimeRepository, TeacherFreeTimeRepository
 builder.Services.AddScoped<IClassLiveWorkFlowRepository, ClassLiveWorkFlowRepository>();
 builder.Services.AddScoped<IClassLiveWorkFlowPlanRepository, ClassLiveWorkFlowPlanRepository>();
 builder.Services.AddScoped<ITeacherFreeTimeLiveRepository, TeacherFreeTimeLiveRepository>();
+
 builder.Services.AddScoped<NotificationMessagePublisher>();
+builder.Services.AddScoped<SaveUserCourseSettingPublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.CourseApiUrl);
@@ -46,7 +48,7 @@ builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiU
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.TrainingQueue.NameQueue.UpdateClassLiveAssignment, typeof(UpdateClassLiveAssignmentConsumer) }
+    { QueueSettings.TrainingQueue.NameQueue.UpdateClassLiveAssignment, typeof(UpdateClassLiveAssignmentConsumer) },
 });
 //builder.Services.AddMediator(cfg =>
 //{

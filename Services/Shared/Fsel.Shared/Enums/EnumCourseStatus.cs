@@ -6,6 +6,7 @@ namespace Fsel.Shared.Enums
     {
         New,
         Active,
-        InActive
+        InActive,
+        Clone
     }
 }

@@ -51,6 +51,7 @@ namespace Fsel.Identity.Api.Controllers
         /// Get Student by UserId
         /// </summary>
         [HttpGet("get-by-user-id/{id}")]
+        //[ServerCache(CacheSettings.TimeCache.TwoMinutes)]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetByUserId([FromRoute] Guid id)
@@ -191,18 +192,6 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Update Referral Code
-        /// </summary>
-        [HttpPut("update-referral-code")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateReferralCode([FromBody] UpdateReferralCodeStudentCommand command)
-        {
-            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Update Student By Class Id
         /// </summary>
         [HttpPut("update-beginner-guide")]
@@ -247,6 +236,18 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> GetStudentByFullNames([FromBody] IList<string> fullNames)
         {
             MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(new GetStudentByFullNamesQuery { FullNames = fullNames }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update Course To Student
+        /// </summary>
+        [HttpPut("update-course-to-student/{courseId}")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateCourseToStudent([FromRoute] Guid courseId)
+        {
+            MethodResult<StudentModel> commandResult = await _mediator.Send(new UpdateStudentByCourseCommand { CourseId = courseId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

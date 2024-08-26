@@ -59,7 +59,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
                                 CourseLevel = x.CourseLevel,
                                 DisplayOrder = x.CourseUnitMockTests.Max(x => x.DisplayOrder),
                                 CreatedDate = x.CreatedDate,
-                                UnitResult = _mapper.Map<UnitResultModel>(x.UnitResults.AsQueryable().Include(x => x.Unit).ThenInclude(x => x!.LessonResults.Where(x => x.StudentId == studentId))
+                                UnitResult = _mapper.Map<UnitResultModel>(x.UnitResults.AsQueryable().Include(x => x.Unit).ThenInclude(x => x!.LessonResults.Where(x => x.CourseId == request.CourseId && x.StudentId == studentId))
                                                                  .Include(x => x.Unit).ThenInclude(x => x!.UnitLessons)
                                                                  .Where(y => y.StudentId == studentId && y.CourseId == request.CourseId)
                                                                  .AsNoTracking().FirstOrDefault()),
