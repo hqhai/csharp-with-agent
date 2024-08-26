@@ -80,6 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
             lessonReport.CorrectTotal = questions.Where(x => !x!.Ungraded).Sum(x => x!.CorrectTotal);
             lessonReport.Percent = NumberHelper.GetPercent(lessonReport.CorrectCount, lessonReport.CorrectTotal);
             lessonReport.HighestStreak = videoResult.HighestStreak;
+            lessonReport.TimeCodeHighestStreak = videoResult.TimeCodeHighestStreak;
             return lessonReport;
         }
     }
