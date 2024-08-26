@@ -10,6 +10,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
+    using Fsel.Identity.Application.Queries.UserCourseSettingQuery;
     using Fsel.Identity.Application.Services;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.InteractionService.Models;
@@ -135,7 +136,18 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 {
                     var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id, ExpiredTime = @event.EventContent?.EndDate?.Date }, cancellationToken);
                     param.LinkResetProgress = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkResetProgress ?? string.Empty, user.Email, userOtpCode.Result, @event.EventCode);
-                    await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.LearnedOnThePlatform, LearnedOnThePlatform);
+
+                    var userCourseSettingResults = await _mediator.Send(new GetUserCourseSettingsQuery() { UserId = user.Id }, cancellationToken);
+                    var userCourseSettings = userCourseSettingResults.Result;
+                    var userCourseSetting = userCourseSettings?.FirstOrDefault(x => x.CourseLevel == user.Human?.Student?.CourseLevel && x.Type == EnumUserCourseType.ResetAndLearnAgain);
+                    if (userCourseSetting != null && userCourseSetting.Value <= 0)
+                    {
+                        await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.WasInAnotherEvent, WasInAnotherEvent);
+                    }
+                    else
+                    {
+                        await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.LearnedOnThePlatform, LearnedOnThePlatform);
+                    }
                     return methodResult;
                 }
 
