@@ -33,7 +33,6 @@ namespace Fsel.System.Application.Commands.TechieCmd
         private readonly TechieSendMessagePublisher _techieSendMessagePublisher;
         private readonly ILogger<object> _logger;
 
-
         public CreateStudentTechieCommandHandler(IMapper mapper, ITechieActionRepository techieActionRepository, IStudentTechieRepository studentTechieRepository, IUserService userService, AuthContext authContext, TechieSendMessagePublisher techieSendMessagePublisher, ILogger<object> logger)
         {
             _mapper = mapper;
@@ -49,7 +48,6 @@ namespace Fsel.System.Application.Commands.TechieCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StudentTechieModel>();
-
 
             var techieActions = _techieActionRepository.Queryable.Where(x => x.Action == request.Actions && x.Feature == request.TechieFeature).ToList();
 
@@ -121,7 +119,6 @@ namespace Fsel.System.Application.Commands.TechieCmd
                     Feature = techieActionModel.Feature,
                     Action = techieActionModel.Action,
                     Priority = techieActionModel.Priority,
-
                 };
 
                 _logger.LogInformation("Send Techie To Socket");
@@ -131,7 +128,6 @@ namespace Fsel.System.Application.Commands.TechieCmd
 
             methodResult.StatusCode = StatusCodes.Status201Created;
             return methodResult;
-
         }
     }
 }
