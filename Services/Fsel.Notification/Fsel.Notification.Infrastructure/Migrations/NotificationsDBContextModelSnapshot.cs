@@ -455,7 +455,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Priority = 1,
                             TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}?type=aiFeedback",
-                            TemplateMessage = "Bài viết của bạn đã được hệ thống AI ChatGPT nhận xét. Nhấn để xem chi tiết",
+                            TemplateMessage = "Bài đăng của bạn đã được chấm bởi hệ thống AI của FSEL. Nhấn để xem chi tiết",
                             Type = "LinkPage"
                         },
                         new

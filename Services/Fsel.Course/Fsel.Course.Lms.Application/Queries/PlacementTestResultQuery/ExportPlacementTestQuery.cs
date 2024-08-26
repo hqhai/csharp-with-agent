@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -71,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 students = studentResults.Content?.Result?.ToList();
             }
 
-            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId)).ToListAsync(cancellationToken);
+            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).ToListAsync(cancellationToken);
             foreach (var item in placementTestResults)
             {
                 if (item != null)

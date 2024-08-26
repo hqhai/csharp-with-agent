@@ -21,6 +21,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
+    using Fsel.Course.Lms.Application.Commands.StudentCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
@@ -55,10 +56,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
         private readonly IMapper _mapper;
         private readonly ICourseRepository _courseRepository;
         private readonly AppSetting _appSetting;
-        private readonly ILogger<object> _logger;
+        private readonly ILogger<CreatePlacementTestAnswerBySectionGroupCommand> _logger;
         private readonly QuestBoardPublisher _questBoardPublisher;
 
-        public CreatePlacementTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, AuthContext authContext, QuestionConverter questionConverter, SectionGroupConverter sectionGroupConverter, IUserService userService, IMediator mediator, IPlacementTestResultRepository placementTestResultRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, ISectionGroupResultRepository sectionGroupResultRepository, ISectionGroupRepository sectionGroupRepository, IPlacementTestRepository placementTestRepository, IMapper mapper, ICourseRepository courseRepository, AppSetting appSetting, ILogger<object> logger, QuestBoardPublisher questBoardPublisher)
+        public CreatePlacementTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, AuthContext authContext, QuestionConverter questionConverter, SectionGroupConverter sectionGroupConverter, IUserService userService, IMediator mediator, IPlacementTestResultRepository placementTestResultRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, ISectionGroupResultRepository sectionGroupResultRepository, ISectionGroupRepository sectionGroupRepository, IPlacementTestRepository placementTestRepository, IMapper mapper, ICourseRepository courseRepository, AppSetting appSetting, ILogger<CreatePlacementTestAnswerBySectionGroupCommand> logger, QuestBoardPublisher questBoardPublisher)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -209,14 +210,23 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                     await _placementTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     if (isLockPT)
                     {
-                        await DoQuestBoard(student.Id, cancellationToken);
+                        await DoQuestBoard(student.Id, cancellationToken).ConfigureAwait(false);
                         await SendStudentPlacementTest(currentLevel ?? default, student, age, cancellationToken).ConfigureAwait(false);
-                        ;
+                        await DoUserReferral(student.Human?.UserId ?? _authContext.CurrentUserId, cancellationToken).ConfigureAwait(false);
                     }
                     return isLockPT;
                 }
             }
             return default;
+        }
+
+        private async Task DoUserReferral(Guid receiverId, CancellationToken cancellationToken)
+        {
+            await _mediator.Send(new AddFeatureMissionCommand()
+            {
+                ReceiverId = receiverId,
+                FeatureUserReferral = EnumFeatureUserReferral.PT
+            }, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task DoQuestBoard(Guid studentId, CancellationToken cancellationToken)
@@ -328,12 +338,18 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             if (createPlacementTestAnswers != null && createPlacementTestAnswers.Any())
             {
                 await _placementTestAnswerRepository.AddList(createPlacementTestAnswers);
-                await _placementTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
             if (updatePlacementTestAnswers != null && updatePlacementTestAnswers.Any())
             {
                 _placementTestAnswerRepository.UpdateList(updatePlacementTestAnswers);
+            }
+            try
+            {
                 await _placementTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Duplicate PlacementTestAnswer : {ex.Message}");
             }
             return methodResult;
         }

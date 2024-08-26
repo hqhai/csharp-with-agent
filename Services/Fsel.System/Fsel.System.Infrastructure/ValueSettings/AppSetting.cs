@@ -43,6 +43,7 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public string? OrderInfoSpreadSheetId { get; set; }
         public string? OrderInfoSheet { get; set; }
         public string? SchoolStudentSheetId { get; set; }
+        public string? LuckyTicketSpreadSheetId { get; set; }
     }
 
     public class Services : BaseServices

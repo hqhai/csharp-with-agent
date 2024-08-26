@@ -78,7 +78,7 @@ namespace Fsel.System.Application.Commands.LuckyTickets
             }
 
             var checkLuckySpin = checkLuckySpinResults.Content?.Result;
-            if (!checkLuckySpin.HasValue || checkLuckySpin == false)
+            if (checkLuckySpin == null || checkLuckySpin.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
