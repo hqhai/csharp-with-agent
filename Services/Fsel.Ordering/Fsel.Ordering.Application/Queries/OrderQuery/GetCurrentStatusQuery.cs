@@ -32,7 +32,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             MethodResult<EnumTrialRegistrationStatus?> methodResult = new MethodResult<EnumTrialRegistrationStatus?>();
             var currentStatus = EnumTrialRegistrationStatus.New;
 
-            var query = _orderRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefault(x => (x.UserId == request.UserId));
+            var query = _orderRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefault(x => x.UserId == request.UserId);
 
             if (query == null)
             {
@@ -56,7 +56,6 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
 
             DateTime currentDate = DateTime.UtcNow;
             var currentExpireDate = student.ExpiredDate ?? query.ExpireDate;
-            var checkTrial = query.IsTrial;
 
             if (!currentExpireDate.HasValue)
             {
@@ -70,7 +69,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             {
                 currentStatus = EnumTrialRegistrationStatus.Payment;
             }
-            else if (checkTrial)
+            else if (await _orderRepository.Queryable.AnyAsync(p => p.UserId == request.UserId && p.IsTrial && p.Status == EnumOrderStatus.Payment, cancellationToken))
             {
                 currentStatus = EnumTrialRegistrationStatus.Trial;
             }
