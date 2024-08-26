@@ -4,6 +4,7 @@ using Fsel.Course.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240716074336_Update_VideoResult_TimeCodeHighestStreak")]
+    partial class Update_VideoResult_TimeCodeHighestStreak
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -222,9 +225,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClassForumResultId", "SubmissionCount")
-                        .IsUnique()
-                        .HasFilter("[SubmissionCount] IS NOT NULL");
+                    b.HasIndex("ClassForumResultId");
 
                     b.ToTable("ClassForumDetailResults");
                 });
@@ -412,8 +413,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("ClassForumId");
 
-                    b.HasIndex("LessonResultId", "ClassForumId", "StudentId")
-                        .IsUnique();
+                    b.HasIndex("LessonResultId");
 
                     b.ToTable("ClassForumResults");
                 });
@@ -692,12 +692,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<Guid?>("ParentCourseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Priority")
-                        .HasColumnType("int");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -718,10 +712,6 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ParentCourseId", "Priority")
-                        .IsUnique()
-                        .HasFilter("[ParentCourseId] IS NOT NULL");
-
                     b.ToTable("Courses");
                 });
 
@@ -731,9 +721,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
-
-                    b.Property<DateTime?>("CompletionDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("CorrectCount")
                         .HasColumnType("int");
@@ -778,9 +765,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<double>("Percent")
                         .HasColumnType("float");
 
-                    b.Property<DateTime?>("ProcessDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("SkillScoresStr")
                         .HasColumnType("nvarchar(max)");
 
@@ -805,15 +789,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
-                    b.Property<string>("WorkingStatus")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("CourseId", "StudentId")
-                        .IsUnique();
+                    b.HasIndex("CourseId");
 
                     b.ToTable("CourseResults");
                 });
@@ -1818,13 +1796,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FinalTestResultId");
+
                     b.HasIndex("SectionGroupResultId");
 
                     b.HasIndex("SectionQuestionId");
-
-                    b.HasIndex("FinalTestResultId", "SectionQuestionId", "SectionGroupResultId")
-                        .IsUnique()
-                        .HasFilter("[SectionGroupResultId] IS NOT NULL");
 
                     b.ToTable("FinalTestAnswers");
                 });
@@ -1920,10 +1896,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FinalTestId");
+                    b.HasIndex("CourseId");
 
-                    b.HasIndex("CourseId", "FinalTestId", "StudentId")
-                        .IsUnique();
+                    b.HasIndex("FinalTestId");
 
                     b.ToTable("FinalTestResults");
                 });
@@ -2150,10 +2125,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("HomeWorkResultId");
+                    b.HasIndex("HomeWorkQuestionId");
 
-                    b.HasIndex("HomeWorkQuestionId", "HomeWorkResultId")
-                        .IsUnique();
+                    b.HasIndex("HomeWorkResultId");
 
                     b.ToTable("HomeWorkAnswers");
                 });
@@ -2315,8 +2289,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("HomeWorkId");
 
-                    b.HasIndex("LessonResultId", "HomeWorkId", "StudentId")
-                        .IsUnique();
+                    b.HasIndex("LessonResultId");
 
                     b.ToTable("HomeWorkResults");
                 });
@@ -2759,14 +2732,13 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CourseId");
+
                     b.HasIndex("LessonId");
 
                     b.HasIndex("UnitId");
 
                     b.HasIndex("UnitLessonId");
-
-                    b.HasIndex("CourseId", "UnitId", "LessonId", "StudentId")
-                        .IsUnique();
 
                     b.ToTable("LessonResults");
                 });
@@ -3170,6 +3142,8 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("MockTestResultId");
+
                     b.HasIndex("SectionGroupResultId");
 
                     b.HasIndex("SectionId");
@@ -3177,18 +3151,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("SectionQuestionId");
 
                     b.HasIndex("SectionTimeCodeId");
-
-                    b.HasIndex("MockTestResultId", "SectionGroupResultId", "SectionId")
-                        .IsUnique()
-                        .HasFilter("[SectionGroupResultId] IS NOT NULL AND [SectionId] IS NOT NULL");
-
-                    b.HasIndex("MockTestResultId", "SectionGroupResultId", "SectionQuestionId")
-                        .IsUnique()
-                        .HasFilter("[SectionGroupResultId] IS NOT NULL AND [SectionQuestionId] IS NOT NULL");
-
-                    b.HasIndex("MockTestResultId", "SectionGroupResultId", "SectionTimeCodeId")
-                        .IsUnique()
-                        .HasFilter("[SectionGroupResultId] IS NOT NULL AND [SectionTimeCodeId] IS NOT NULL");
 
                     b.ToTable("MockTestAnswers");
                 });
@@ -3296,17 +3258,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CourseId");
+
                     b.HasIndex("MockTestId");
 
                     b.HasIndex("UnitId");
-
-                    b.HasIndex("CourseId", "MockTestId", "StudentId")
-                        .IsUnique()
-                        .HasFilter("[UnitId] IS NULL");
-
-                    b.HasIndex("CourseId", "MockTestId", "UnitId", "StudentId")
-                        .IsUnique()
-                        .HasFilter("[UnitId] IS NOT NULL");
 
                     b.ToTable("MockTestResults");
                 });
@@ -3607,13 +3563,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("PlacementTestResultId");
+
                     b.HasIndex("SectionGroupResultId");
 
                     b.HasIndex("SectionQuestionId");
-
-                    b.HasIndex("PlacementTestResultId", "SectionGroupResultId", "SectionQuestionId")
-                        .IsUnique()
-                        .HasFilter("[SectionGroupResultId] IS NOT NULL");
 
                     b.ToTable("PlacementTestAnswers");
                 });
@@ -3705,9 +3659,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlacementTestId", "StudentId")
-                        .IsUnique()
-                        .HasFilter("[PlacementTestId] IS NOT NULL");
+                    b.HasIndex("PlacementTestId");
 
                     b.ToTable("PlacementTestResults");
                 });
@@ -3888,7 +3840,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnOrder(103);
 
                     b.Property<string>("Explanation")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(3000)
+                        .HasColumnType("nvarchar(3000)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -4250,17 +4203,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("PlacementTestResultId");
 
-                    b.HasIndex("SectionGroupId", "FinalTestResultId")
-                        .IsUnique()
-                        .HasFilter("[FinalTestResultId] IS NOT NULL");
-
-                    b.HasIndex("SectionGroupId", "MockTestResultId")
-                        .IsUnique()
-                        .HasFilter("[MockTestResultId] IS NOT NULL");
-
-                    b.HasIndex("SectionGroupId", "PlacementTestResultId")
-                        .IsUnique()
-                        .HasFilter("[PlacementTestResultId] IS NOT NULL");
+                    b.HasIndex("SectionGroupId");
 
                     b.ToTable("SectionGroupResults");
                 });
@@ -4772,9 +4715,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<DateTime?>("CompletionDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("CorrectCount")
                         .HasColumnType("int");
 
@@ -4820,9 +4760,6 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<double>("Percent")
                         .HasColumnType("float");
-
-                    b.Property<DateTime?>("ProcessDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("SkillScoresStr")
                         .HasColumnType("nvarchar(max)");
@@ -5116,9 +5053,6 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("VideoId");
 
-                    b.HasIndex("LessonResultId", "VideoId", "StudentId")
-                        .IsUnique();
-
                     b.ToTable("VideoResults");
                 });
 
@@ -5284,13 +5218,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("QuestionId");
 
+                    b.HasIndex("VideoResultId");
+
                     b.HasIndex("VideoTimeCodeId");
 
                     b.HasIndex("VideoTimeCodeResultId");
-
-                    b.HasIndex("VideoResultId", "VideoTimeCodeId", "ExerciseId", "QuestionId", "VideoTimeCodeResultId")
-                        .IsUnique()
-                        .HasFilter("[VideoResultId] IS NOT NULL AND [VideoTimeCodeResultId] IS NOT NULL");
 
                     b.ToTable("VideoTimeCodeAnswers");
                 });
@@ -5401,10 +5333,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("VideoTimeCodeId");
+                    b.HasIndex("VideoResultId");
 
-                    b.HasIndex("VideoResultId", "VideoTimeCodeId", "StudentId")
-                        .IsUnique();
+                    b.HasIndex("VideoTimeCodeId");
 
                     b.ToTable("VideoTimeCodeResults");
                 });
