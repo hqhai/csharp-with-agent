@@ -33,6 +33,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         /// change status order
         /// </summary>
         [HttpPut("change-status-order")]
+        [ApiVersions(ApiSettings.APIVersion1i2)]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ChangeStatusOrder([FromBody] ChangeStatusOrderCommand query)
