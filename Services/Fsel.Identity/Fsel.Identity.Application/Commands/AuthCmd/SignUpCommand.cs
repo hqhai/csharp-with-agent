@@ -136,7 +136,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 result = await _userManager.UpdateAsync(user);
                                 if (!result.Succeeded)
                                 {
-                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
+                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate), nameof(result.Errors));
                                     return methodResult;
                                 }
                             }
@@ -173,6 +173,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     };
 
                                 #endregion add user setting
+
                                 var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password);
                                 if (!validPassword.Succeeded)
                                 {
