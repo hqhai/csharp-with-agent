@@ -91,7 +91,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
             var classForums = await _classForumRepository.Queryable.Include(x => x.Lesson)
                                                            .Include(x => x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId)))
-                                                           .ThenInclude(x => x.ClassForumScores)
+                                                           .ThenInclude(x => x.ClassForumDetailResults)
                                                            .Where(x => lessonIds.Contains(x.LessonId))
                                                            .ToListAsync();
             return classForums.OrderBy(x => lessonIds.IndexOf(x.LessonId)).Select(x =>
@@ -107,6 +107,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     TotalCorrect = x.CorrectTotal,
                     Percent = x.Percent,
                     Status = x.Status,
+                    ProcessDate = x.ClassForumDetailResults.Where(x => x.ProcessDate.HasValue).OrderBy(x => x.CreatedDate).FirstOrDefault()?.ProcessDate
                 }).FirstOrDefault();
                 return classForumReport;
             }).ToList();
