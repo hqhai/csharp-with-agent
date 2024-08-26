@@ -132,6 +132,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     courseStudentProgress.CourseName = item.Code;
                     courseStudentProgress.CourseId = item.Id;
                     courseStudentProgress.StudentId = studentId;
+                    courseStudentProgress.CourseResultId = courseResult.Id;
                     courseProgress.Add(courseStudentProgress);
                 }
             }
@@ -254,7 +255,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                               CourseId = progress.CourseId,
                               CourseName = progress.CourseName,
                               ContentCompleted = progress.ContentCompleted,
-                              TotalScore = NumberHelper.RoundNumberDouble(overall.TotalScore)
+                              TotalScore = NumberHelper.RoundNumberDouble(overall.TotalScore),
+                              CourseResultId = progress.CourseResultId,
                           }).ToList();
 
             #endregion Result

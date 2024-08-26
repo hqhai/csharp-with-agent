@@ -4,6 +4,7 @@ namespace Fsel.System.Application.Commands.TechieCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -50,34 +51,60 @@ namespace Fsel.System.Application.Commands.TechieCmd
 
             var techieActions = _techieActionRepository.Queryable.Where(x => x.Action == request.Actions && x.Feature == request.TechieFeature).ToList();
 
-            var techieActionFilter = techieActions.FirstOrDefault(x => x.Config!.StartTime <= request!.Config!.StartTime && x.Config.EndTime >= request.Config.EndTime);
+            if (request.Config == null || request.Config.StartTime >= 0 || request.Config.EndTime >= 0)
+            {
+                return methodResult;
+            }
+
+
+            var techieActionFilter = techieActions.FirstOrDefault(x => (x.Config != null && x.Config.StartTime >= 0 && x.Config.EndTime >= 0) &&
+                                                                       ((x.Config.StartTime <= request.Config.StartTime && x.Config.EndTime >= request.Config.EndTime) ||
+                                                                           (x.Action == EnumTechieAction.GoodLateNight && x.Config.EndTime < request.Config.EndTime ||
+                                                                            x.Config.StartTime > request.Config.StartTime)
+                                                                       ));
+
             var techieActionModel = _mapper.Map<TechieActionModel>(techieActionFilter);
-            if (techieActions == null || techieActionModel == null)
+            if (techieActions == null || techieActionModel == null || string.IsNullOrEmpty(techieActionModel.TemplateMessage))
             {
                 return methodResult;
             }
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var studentId = studentResult?.Content?.Result?.Id;
-
+            if (studentId == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentId), studentId);
+                return methodResult;
+            }
             StudentTechie studentTechie = new StudentTechie
             {
-                Message = string.Format(CultureInfo.InvariantCulture, techieActionModel!.TemplateMessage!, request?.Config?.Value ?? default),
-                StudentId = (Guid)studentId!,
+                Message = string.Format(CultureInfo.InvariantCulture, techieActionModel.TemplateMessage, request?.Config?.Value ?? default),
+                StudentId = (Guid)studentId,
                 Config = request?.Config ?? default,
                 TechieActionId = techieActionModel.Id,
             };
 
             #region Validate
-
-            bool isExistsTechieGreeting = _studentTechieRepository.Queryable.Any(x => x.TechieActionId == techieActionModel.Id && x.TechieAction!.Feature == request!.TechieFeature && x.TechieAction.Action == request.Actions && x.CreatedUserId == _authContext.CurrentUserId);
-
-            if (isExistsTechieGreeting && request!.TechieFeature == EnumTechieFeature.Greeting)
+            if (request == null || request.TechieFeature == EnumTechieFeature.Greeting)
             {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentId), studentId);
                 return methodResult;
             }
 
-            #endregion Validate
+            // Check xem techie chào ngày mới đã tồn tại hay chưa
+            bool isExistsTechieGreeting = _studentTechieRepository.Queryable.Any(x => x.TechieAction != null &&
+                                                                                      x.TechieActionId == techieActionModel.Id &&
+                                                                                      x.TechieAction.Feature == request.TechieFeature &&
+                                                                                      x.TechieAction.Action == request.Actions &&
+                                                                                      x.CreatedUserId == _authContext.CurrentUserId);
+
+            if (isExistsTechieGreeting)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(studentId), studentId);
+                return methodResult;
+            }
+
+            #endregion
 
             await _studentTechieRepository.ExecuteTransactionAsync(async () =>
             {
