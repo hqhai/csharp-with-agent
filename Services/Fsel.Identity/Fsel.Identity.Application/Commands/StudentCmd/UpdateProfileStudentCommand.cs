@@ -44,7 +44,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
-            if (!string.IsNullOrEmpty(request.PhoneNumber) && request.PhoneNumber.TryParse())
+            if (!string.IsNullOrEmpty(request.PhoneNumber) && !request.PhoneNumber.TryParse())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.PhoneNumber));
                 return methodResult;
