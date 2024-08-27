@@ -13,6 +13,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.TokenHistorys;
     using Fsel.System.Domain.Models.EntityModels;
+    using Fsel.System.Domain.Models.EntityModels.Configs;
     using global::System;
     using global::System.Threading.Tasks;
     using MediatR;
@@ -69,6 +70,13 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
             {
                 TokenHistory tokenHistory = _mapper.Map<TokenHistory>(item);
                 tokenHistory.InitialToken = numberOfToken;
+                if (!string.IsNullOrEmpty(item.EventCode))
+                {
+                    tokenHistory.ConfigData = new ConfigDataToken
+                    {
+                        EventCode = item.EventCode
+                    };
+                }
                 if (item.Feature != EnumTokenFeature.MarketPlace)
                 {
                     var tokenConfig = tokenConfigs.FirstOrDefault(x => x.Feature == item.Feature && x.Mission == item.Mission);
