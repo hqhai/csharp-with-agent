@@ -261,12 +261,9 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return isError;
             }
-            foreach (var item in data.Answers)
+            if (HasInvalidKeysOrContent(data.Answers))
             {
-                if (string.IsNullOrEmpty(item.Content))
-                {
-                    return isError;
-                }
+                return isError;
             }
             if (HasInvalidKeysOrContent(data.Rows))
             {
@@ -386,6 +383,7 @@ namespace Fsel.Course.Infrastructure.Common
                 return dataList;
             }
             Dictionary<Guid, string?> replacements = new Dictionary<Guid, string?>();
+            var propertyInfo = data?.GetType().GetProperty(nameof(data.Answers));
             foreach (Match match in matches)
             {
                 string value = match.Groups[1].Value;
@@ -394,11 +392,15 @@ namespace Fsel.Course.Infrastructure.Common
                     continue;
                 }
                 var id = Guid.NewGuid();
-                var config = new ConfigAnswerV1
+                dynamic config;
+                if (GetTypeData(propertyInfo).Name == nameof(ConfigAnswerV1))
                 {
-                    Id = id,
-                    Key = value
-                };
+                    config = new ConfigAnswerV1 { Id = id, Key = value };
+                }
+                else
+                {
+                    config = new ConfigQuestionV1 { Id = id, Key = value };
+                }
                 if (data?.GetType().GetProperty(nameof(data.Rows)) != null)
                 {
                     config.RowId = dataList.Id;
@@ -412,6 +414,16 @@ namespace Fsel.Course.Infrastructure.Common
 
             dataList.Content = ReplacePlaceholders(content, replacements);
             return dataList;
+        }
+
+        private static Type? GetTypeData(dynamic propertyInfo)
+        {
+            Type propertyType = propertyInfo.PropertyType;
+            if (propertyType.IsGenericType && typeof(IEnumerable<>).MakeGenericType(propertyType.GetGenericArguments()).IsAssignableFrom(propertyType))
+            {
+                return propertyType.GetGenericArguments().FirstOrDefault();
+            }
+            return propertyType;
         }
 
         private static string? ReplacePlaceholders(string? content, Dictionary<Guid, string> replacements)
