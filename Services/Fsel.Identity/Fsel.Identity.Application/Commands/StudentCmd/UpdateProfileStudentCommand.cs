@@ -51,6 +51,16 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             }
             _mapper.Map(request, user);
             _mapper.Map(request, user.Human);
+            if (!user.IsValid())
+            {
+                methodResult.AddErrorBadRequest(user.ErrorMessages);
+                return methodResult;
+            }
+            if (user.Human != null && !user.Human.IsValid())
+            {
+                methodResult.AddErrorBadRequest(user.Human.ErrorMessages);
+                return methodResult;
+            }
             await _userManager.UpdateAsync(user);
 
             methodResult.Result = _mapper.Map<UserModel>(user);
