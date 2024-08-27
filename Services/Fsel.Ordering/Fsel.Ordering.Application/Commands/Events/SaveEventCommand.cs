@@ -60,7 +60,7 @@ namespace Fsel.Ordering.Application.Commands.Events
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.MissingVersionOfPackage), EnumEventErrorCode.MissingVersionOfPackage.GetDescription());
                 return;
             }
-            if (request.Translations == null || request.Translations.Count != 0)
+            if (request.Translations == null || request.Translations.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.MissingVersionOfTranslation), EnumEventErrorCode.MissingVersionOfTranslation.GetDescription());
                 return;
@@ -83,10 +83,10 @@ namespace Fsel.Ordering.Application.Commands.Events
             }
             if (!request.StartDate.HasValue || !request.EndDate.HasValue)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
                 return;
             }
-            if (request.StartDate.Value.Date > request.EndDate.Value.Date)
+            if (request.StartDate.Value > request.EndDate.Value)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.StartDateIsGreaterThanEndDate), EnumEventErrorCode.StartDateIsGreaterThanEndDate.GetDescription());
                 return;

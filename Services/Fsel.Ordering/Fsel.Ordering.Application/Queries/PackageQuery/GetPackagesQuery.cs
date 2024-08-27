@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -39,7 +40,14 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
 
             var packageModels = new List<PackageModel>();
 
-            var @event = await _eventRepository.Queryable.Include(p => p.PackageEvents).FirstOrDefaultAsync(p => p.Status == EnumEventPackageStatus.Active, cancellationToken);
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+            var @event = await _eventRepository.Queryable.Include(p => p.PackageEvents).FirstOrDefaultAsync(p => p.StartDate.HasValue && p.EndDate.HasValue && p.StartDate.Value <= currentDate && p.EndDate >= currentDate, cancellationToken);
+
+            if (@event == null)
+            {
+                @event = await _eventRepository.Queryable.Include(p => p.PackageEvents).FirstOrDefaultAsync(p => p.IsDefault, cancellationToken);
+            }
 
             if (@event == null)
             {

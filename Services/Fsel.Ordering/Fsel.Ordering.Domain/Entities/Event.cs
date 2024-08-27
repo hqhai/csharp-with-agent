@@ -53,10 +53,14 @@ namespace Fsel.Ordering.Domain.Entities
             set { ImagePathsStr = ConvertHelper.Serialize(value); }
         }
 
+        #region không dùng field này
+
         /// <summary>
         /// Trạng thái
         /// </summary>
         public EnumEventPackageStatus Status { get; set; }
+
+        #endregion không dùng field này
 
         public ICollection<PackageEvent> PackageEvents { get; set; } = new List<PackageEvent>();
         public ICollection<EventTranslation> Translations { get; set; } = new List<EventTranslation>();
