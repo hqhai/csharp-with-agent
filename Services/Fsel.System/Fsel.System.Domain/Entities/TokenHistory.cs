@@ -53,8 +53,8 @@ namespace Fsel.System.Domain.Entities
             set { ConfigStr = ConvertHelper.Serialize(value); }
         }
 
+        public string? EventCode { get; set; }
         public EnumTokenHistoryType Type { get; set; }
-
         public TokenConfig? TokenConfig { get; set; }
     }
 }
