@@ -15,8 +15,11 @@ namespace Fsel.Ordering.Domain.Enums
         [Description("Sự kiện không tồn tại")]
         EventNotExist,
 
-        [Description("Thiếu bản gi Package Event hoặc dịch")]
-        MissingVersionOfPackageEventOrTranslation,
+        [Description("Thiếu bản ghi dịch")]
+        MissingVersionOfTranslation,
+
+        [Description("Thiếu bản ghi package")]
+        MissingVersionOfPackage,
 
         [Description("Id Package Sai")]
         PackageIdIsWrong,

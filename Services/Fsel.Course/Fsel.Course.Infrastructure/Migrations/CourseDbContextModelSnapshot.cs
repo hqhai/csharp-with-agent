@@ -5082,6 +5082,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("TimeCodeHighestStreak")
+                        .HasColumnType("int");
+
                     b.Property<int?>("TokenFirstTime")
                         .HasColumnType("int");
 

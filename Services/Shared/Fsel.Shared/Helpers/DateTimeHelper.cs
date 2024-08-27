@@ -148,5 +148,21 @@ namespace Fsel.Shared.Helpers
 
             return (monday, sunday);
         }
+
+        public static bool IsCurrentDateInRange(DateTime? startDate, DateTime? endDate)
+        {
+            var currentDate = DateTime.UtcNow;
+
+            if (endDate.HasValue && startDate.HasValue && startDate.Value.Date <= currentDate && endDate.Value.Date >= currentDate.Date)
+            {
+                return true;
+            }
+            else if (!endDate.HasValue && startDate.HasValue && startDate.Value.Date <= currentDate)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }
