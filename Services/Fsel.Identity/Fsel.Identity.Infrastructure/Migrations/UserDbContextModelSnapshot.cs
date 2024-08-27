@@ -2358,6 +2358,17 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentRankingEvent", b =>
+            {
+                b.HasOne("Fsel.Identity.Domain.Entities.CompetitionEvent", "CompetitionEvents")
+                    .WithMany("StudentRankingEvents")
+                    .HasForeignKey("CompetitionEventId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Student");
+            });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Teacher", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.Human", "Human")

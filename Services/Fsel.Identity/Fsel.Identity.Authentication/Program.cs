@@ -49,7 +49,6 @@ builder.Services.AddScoped<ICompetitionEventsRepository, CompetitionEventsReposi
 builder.Services.AddScoped<IEventRegistrationRepository, EventRegistrationRepository>();
 builder.Services.AddScoped<IStudentCompetitionEventsRepository, StudentCompetitionEventRepository>();
 builder.Services.AddScoped<IStudentRankingEventRepository, StudentRankingEventRepository>();
-
 builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
 
 // Queue

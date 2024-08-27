@@ -3,9 +3,13 @@
 namespace Fsel.Ordering.Domain.Models.QueryModels.Oders
 {
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
 
     public class SearchOrderQueryModel : BaseQueryModel
     {
-        public bool? Status { get; set; }
+        public EnumOrderStatus? Status { get; set; }
+        public IList<Guid>? PackageIds { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }

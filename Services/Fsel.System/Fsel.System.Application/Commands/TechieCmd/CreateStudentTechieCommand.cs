@@ -84,7 +84,6 @@ namespace Fsel.System.Application.Commands.TechieCmd
             };
 
             #region Validate
-
             if (request == null || request.TechieFeature == EnumTechieFeature.Greeting)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentId), studentId);

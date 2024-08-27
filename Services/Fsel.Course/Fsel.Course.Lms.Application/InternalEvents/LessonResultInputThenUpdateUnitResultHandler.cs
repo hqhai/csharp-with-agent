@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.InternalEvents
 {
+    using Amazon.Runtime.Internal.Util;
     using Fsel.Core.Applications.InternalEvents;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -19,13 +20,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     public class LessonResultInputThenUpdateUnitResultHandler : BaseInternalUnitResultEventHandler,
         INotificationHandler<EntityChangedEvent<LessonResult>>
     {
-        private readonly ILogger<LessonResultInputThenUpdateUnitResultHandler> _logger2;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly ILogger<LessonResultInputThenUpdateUnitResultHandler> _logger;
 
-        public LessonResultInputThenUpdateUnitResultHandler(ISystemService systemService, ILogger<LessonResultInputThenUpdateUnitResultHandler> logger2, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, ILogger<BaseInternalUnitResultEventHandler> logger1, IMediator mediator, IUserService userService, ILogger<BaseInternalEventHandler> logger, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository) : base(systemService, appSetting, courseUnitMockTestRepository, logger1, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository)
+        public LessonResultInputThenUpdateUnitResultHandler(ISystemService systemService, ILessonResultRepository lessonResultRepository, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, ILogger<LessonResultInputThenUpdateUnitResultHandler> logger, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonNoteRepository lessonNoteRepository) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, lessonResultRepository, orderService, lessonNoteRepository)
         {
-            _logger2 = logger2;
             _lessonResultRepository = lessonResultRepository;
+            _logger = logger;
         }
 
         public async Task Handle(EntityChangedEvent<LessonResult> notification, CancellationToken cancellationToken)
@@ -67,7 +68,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
             catch (Exception ex)
             {
-                _logger2.LogWarning($"Log Trigger LessonResult : {ex.Message} ");
+                _logger.LogWarning($"Log Trigger LessonResult : {ex.Message} ");
             }
         }
 
