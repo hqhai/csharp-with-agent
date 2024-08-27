@@ -26,6 +26,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class ChangeCourseLevelCommand : IRequest<MethodResult<CourseResultModel>>
     {
@@ -41,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
         private readonly ICourseRepository _courseRepository;
         private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         private readonly IUserService _userService;
+        private readonly ILogger<ChangeCourseLevelCommand> _logger;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
@@ -51,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             , ICourseRepository courseRepository
             , SaveUserCourseSettingPublisher saveUserCourseSettingPublisher
             , IUserService userService
+            , ILogger<ChangeCourseLevelCommand> logger
             , ICourseResultRepository courseResultRepository
             , NotificationMessagePublisher notificationMessagePublisher)
         {
@@ -61,6 +64,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             _courseRepository = courseRepository;
             _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _userService = userService;
+            _logger = logger;
             _courseResultRepository = courseResultRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
         }
@@ -167,7 +171,17 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                     return methodResult;
                 }
 
-                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Log Duplicate CourseResult : {ex.Message}");
+                    courseResult = await _courseResultRepository.Queryable.Where(x => x.WorkingStatus == EnumWorkingStatus.Active && x.StudentId == student.Id)
+                                                                          .FirstOrDefaultAsync(cancellationToken);
+                }
+
                 methodResult.Result = _mapper.Map<CourseResultModel>(courseResult);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;

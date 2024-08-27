@@ -9,6 +9,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Ordering.Application.Queries.OrderQuery;
+    using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums;
@@ -16,6 +17,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
     using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i2;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -32,8 +34,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
         private readonly IPackageRepository _packageRepository;
         private readonly IUserService _userService;
         private readonly IEventRepository _eventRepository;
+        private readonly AddExpiredDateForStudentPublisher _addExpiredDateForStudentPublisher;
 
-        public CreateOrderForUserFromLeaderBoardCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, IPackageRepository packageRepository, IUserService userService, IEventRepository eventRepository)
+        public CreateOrderForUserFromLeaderBoardCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, IPackageRepository packageRepository, IUserService userService, IEventRepository eventRepository, AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
@@ -41,6 +44,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             _packageRepository = packageRepository;
             _userService = userService;
             _eventRepository = eventRepository;
+            _addExpiredDateForStudentPublisher = addExpiredDateForStudentPublisher;
         }
 
         public async Task<MethodResult<VoidMethodResult>> Handle(CreateOrderForUserFromLeaderBoardCommand request, CancellationToken cancellationToken)
@@ -55,6 +59,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             }
             var student = studentResult.Content?.Result;
+
+            if (await _orderRepository.Queryable.AnyAsync(p => !p.IsTrial && p.Status == EnumOrderStatus.Payment && p.UserId == request.UserId, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                return methodResult;
+            }
 
             if (string.IsNullOrEmpty(request.FullName) || string.IsNullOrEmpty(request.Email))
             {
@@ -74,7 +84,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             }
 
-            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.MonthNumber == 1, cancellationToken);
+            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.MonthNumber == request.Month, cancellationToken);
             if (package == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
@@ -139,8 +149,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
 
                 await _mediator.Send(new ChangeStatusOrderCommand()
                 {
-                    OrderId = order.Id,
-                    OrderStatus = EnumOrderStatus.Payment,
+                    OrderIds = new List<Guid>() { order.Id },
+                    Status = EnumOrderStatus.Payment,
+                    RevenueType = EnumPaymentRevenueType.NotRevenue
                 }, cancellationToken);
 
                 return methodResult;
@@ -155,7 +166,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             newOrder.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(newOrder.Price * newOrder.DiscountPercent));
             newOrder.TotalPrice = newOrder.Price - newOrder.DiscountPrice;
             newOrder.UserId = request.UserId;
-
+            newOrder.Status = EnumOrderStatus.Payment;
+            newOrder.UpdatedDate = DateTime.UtcNow;
+            newOrder.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber);
+            newOrder.OrderTransactions.Add(new OrderTransaction()
+            {
+                Status = EnumOrderTransactionStatus.Success,
+                RequestBody = request,
+                Type = EnumOrderTransactionType.BankTransfer
+            });
             if (!newOrder.IsValid())
             {
                 methodResult.AddErrorBadRequest(newOrder.ErrorMessages);
@@ -167,14 +186,14 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 newOrder = _orderRepository.Add(newOrder);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
-
                 return methodResult;
             });
 
-            await _mediator.Send(new ChangeStatusOrderCommand()
+            await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
             {
-                OrderId = newOrder.Id,
-                OrderStatus = EnumOrderStatus.Payment,
+                StudentId = student!.Id,
+                Month = package.MonthNumber,
+                Day = 0
             }, cancellationToken);
 
             return methodResult;
