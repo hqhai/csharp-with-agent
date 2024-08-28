@@ -7,6 +7,7 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using Fsel.System.Application.Commands.OtherCmd;
     using Fsel.System.Application.Queries.TokenHistoryQuery;
     using Fsel.System.Domain.Models.EntityModels;
@@ -55,6 +56,7 @@ namespace Fsel.System.Api.Controllers
         /// Import User Token History
         /// </summary>
         [HttpPost("import-token-history")]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ImportTokenHistory([FromQuery] ToolAddCoinToStudentsCommad command)
@@ -65,6 +67,23 @@ namespace Fsel.System.Api.Controllers
                 return commandResult.GetActionResult();
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "tokenHistory.xlsx");
+        }
+
+        /// <summary>
+        /// Export Template Add Coin Event
+        /// </summary>
+        [HttpGet("export-template-add-coin-event")]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportTemplate()
+        {
+            var commandResult = await _mediator.Send(new ExportTemplateToolAddCoinEventCommand()).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "templateAddCoinEvent.xlsx");
         }
     }
 }

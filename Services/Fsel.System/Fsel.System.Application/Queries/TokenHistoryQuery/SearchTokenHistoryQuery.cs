@@ -87,6 +87,7 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
                                         Id = x.Id,
                                         TokenConfigId = x.TokenConfigId,
                                         Config = x.Config,
+                                        ConfigData = x.ConfigData,
                                         CreatedDate = x.CreatedDate,
                                         CreatedFullName = x.CreatedFullName,
                                         CreatedUserId = x.UserId,

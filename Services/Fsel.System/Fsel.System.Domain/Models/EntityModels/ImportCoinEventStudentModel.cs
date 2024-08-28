@@ -10,7 +10,7 @@ namespace Fsel.System.Domain.Models.EntityModels
         public string? Email { get; set; }
 
         [EpplusTableColumn(Header = "Coin")]
-        public int? Coin { get; set; }
+        public double Coin { get; set; }
 
         [EpplusTableColumn(Header = "EventCode")]
         public string? EventCode { get; set; }
