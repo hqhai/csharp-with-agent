@@ -51,39 +51,5 @@ namespace Fsel.System.Api.Controllers
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
-        /// <summary>
-        /// Import User Token History
-        /// </summary>
-        [HttpPost("import-token-history")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
-        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ImportTokenHistory([FromQuery] ToolAddCoinToStudentsCommad command)
-        {
-            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            if (!commandResult.IsOK || commandResult.Result == null)
-            {
-                return commandResult.GetActionResult();
-            }
-            return File(commandResult.Result, Settings.Excels.ContentType, "tokenHistory.xlsx");
-        }
-
-        /// <summary>
-        /// Export Template Add Coin Event
-        /// </summary>
-        [HttpGet("export-template-add-coin-event")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
-        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ExportTemplate()
-        {
-            var commandResult = await _mediator.Send(new ExportTemplateToolAddCoinEventCommand()).ConfigureAwait(false);
-            if (!commandResult.IsOK || commandResult.Result == null)
-            {
-                return commandResult.GetActionResult();
-            }
-            return File(commandResult.Result, Settings.Excels.ContentType, "templateAddCoinEvent.xlsx");
-        }
     }
 }
