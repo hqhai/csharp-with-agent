@@ -117,46 +117,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             }
 
-            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == request.UserId && p.Status == EnumOrderStatus.New && !p.IsTrial, cancellationToken);
-
-            if (order != null)
-            {
-                var updateOrderResult = await _mediator.Send(new UpdateOrderCommand()
-                {
-                    Order = order,
-                    Package = package,
-                    Code = code,
-                    FullName = request.FullName,
-                    PhoneNumber = request.PhoneNumber,
-                    Email = request.Email,
-                    Address = request.Address,
-                    PaymentMethod = request.PaymentMethod,
-                    ProvinceId = request.ProvinceId,
-                    DistrictId = request.DistrictId,
-                    IsInvoice = request.IsInvoice,
-                    CompanyAddress = request.CompanyAddress,
-                    CompanyName = request.CompanyName,
-                    CompanyTaxCode = request.CompanyTaxCode,
-                    ReferralCode = request.ReferralCode,
-                    EventId = request.EventId,
-                }, cancellationToken).ConfigureAwait(false);
-
-                if (!updateOrderResult.IsOK)
-                {
-                    methodResult.AddError(updateOrderResult.ErrorMessages);
-                    return methodResult;
-                }
-
-                await _mediator.Send(new ChangeStatusOrderCommand()
-                {
-                    OrderIds = new List<Guid>() { order.Id },
-                    Status = EnumOrderStatus.Payment,
-                    RevenueType = EnumPaymentRevenueType.NotRevenue
-                }, cancellationToken);
-
-                return methodResult;
-            }
-
             var newOrder = _mapper.Map<Order>(request);
             newOrder.PackageId = package.Id;
             newOrder.EventId = @event.Id;
@@ -169,6 +129,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             newOrder.Status = EnumOrderStatus.Payment;
             newOrder.UpdatedDate = DateTime.UtcNow;
             newOrder.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber);
+            newOrder.RevenueType = null;
             newOrder.OrderTransactions.Add(new OrderTransaction()
             {
                 Status = EnumOrderTransactionStatus.Success,
