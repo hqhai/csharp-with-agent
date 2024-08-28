@@ -24,13 +24,31 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentOccupyVideo = 40;
         private const int PercentOccupyClassForum = 30;
         private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly QuestBoardPublisher _questBoardPublisher;
-        private readonly ILogger<BaseInternalLessonResultEventHandler> _logger1;
+        private readonly ILogger<BaseInternalLessonResultEventHandler> _logger;
 
-        public BaseInternalLessonResultEventHandler(ISystemService systemService, AppSetting appSetting, ILogger<BaseInternalLessonResultEventHandler> logger1, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, ILogger<BaseInternalEventHandler> logger, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository)
+        public BaseInternalLessonResultEventHandler(ISystemService systemService,
+            AppSetting appSetting,
+            ICourseUnitMockTestRepository courseUnitMockTestRepository,
+            IMediator mediator,
+            IUserService userService,
+            ILogger<BaseInternalLessonResultEventHandler> logger,
+            ILessonResultRepository lessonResultRepository,
+            SaveUserCourseSettingPublisher saveUserCourseSettingPublisher,
+            IVideoResultRepository videoResultRepository,
+            IClassForumResultRepository classForumResultRepository,
+            IUnitResultRepository unitResultRepository,
+            ICourseResultRepository courseResultRepository,
+            ICourseRepository courseRepository,
+            IUnitRepository unitRepository,
+            IFinalTestResultRepository finalTestResultRepository,
+            IMockTestResultRepository mockTestResultRepository,
+            IHomeWorkResultRepository homeWorkResultRepository,
+            QuestBoardPublisher questBoardPublisher,
+            IOrderService orderService,
+            ILessonNoteRepository lessonNoteRepository) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository)
         {
-            _logger1 = logger1;
             _lessonResultRepository = lessonResultRepository;
+            _logger = logger;
         }
 
         public async Task UpdateLessonResultAsync(LessonResult? lessonResult, CancellationToken cancellationToken)
@@ -62,7 +80,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
             catch (Exception ex)
             {
-                _logger1.LogWarning($"Log Trigger LessonResult : {ex.Message} ");
+                _logger.LogWarning($"Log Trigger LessonResult : {ex.Message} ");
             }
         }
 
@@ -81,7 +99,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
             catch (Exception ex)
             {
-                _logger1.LogWarning($"Log Trigger Save LessonResult : {ex.Message} ");
+                _logger.LogWarning($"Log Trigger Save LessonResult : {ex.Message} ");
             }
         }
 

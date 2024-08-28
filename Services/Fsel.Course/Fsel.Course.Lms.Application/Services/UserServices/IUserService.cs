@@ -101,10 +101,10 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Put("/v1/user/update-code-student")]
         Task<IApiResponse<MethodResult<UserModel>>> UpdateCodeStudentAsync([FromBody] UpdateCodeStudentCommandModel command);
 
-        [Get("/v1/student-daily-streak/execute-list-query")]
-        Task<IApiResponse<MethodResult<IList<StudentConsecutiveDayModel>>>> StudentDailyStreakExecuteQuery([Query] BaseQueryModel baseQuery);
-
         [Post("/v1/user/get-users-by-userids")]
         Task<IApiResponse<MethodResult<IList<UserModel>>>> GetUsersByUserIdsAsync([FromBody] IList<Guid>? userIds);
+
+        [Get("/v1/student-daily-streak/execute-list-query")]
+        Task<IApiResponse<MethodResult<IList<StudentConsecutiveDayModel>>>> StudentDailyStreakExecuteQuery([Query] BaseQueryModel baseQuery);
     }
 }

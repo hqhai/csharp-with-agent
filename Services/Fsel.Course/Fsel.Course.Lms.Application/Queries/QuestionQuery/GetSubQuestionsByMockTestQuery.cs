@@ -58,8 +58,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                                                         .Where(x => x.QuestionId.HasValue)
                                                         .Select(x => x.QuestionId!.Value)
                                                         .ToListAsync(cancellationToken);
-            var questions = await _questionRepository.GetByIdsAsync(questionIds);
-
+            var questions = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
             var subQuestions = questions.SelectMany(x => GetConfigQuestion(x.Config, x.QuestionType)).ToList();
             foreach (var subQuestion in subQuestions)
             {
@@ -179,7 +178,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
                 case EnumQuestionType.TableCompletion:
                     var tableCompletion = config.Deserialize<TableCompletionQuestion>();
-                    var subQuestionTableCompletions = tableCompletion?.AnswerTables.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
+                    var subQuestionTableCompletions = tableCompletion?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
                     if (subQuestionTableCompletions == null)
                     {
                         return new List<SubQuestionModel>();

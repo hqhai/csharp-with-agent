@@ -51,7 +51,7 @@ namespace Fsel.System.Application.Commands.TechieCmd
 
             var techieActions = _techieActionRepository.Queryable.Where(x => x.Action == request.Actions && x.Feature == request.TechieFeature).ToList();
 
-            if (request.Config == null || request.Config.StartTime >= 0 || request.Config.EndTime >= 0)
+            if (request.Config == null || request.Config.StartTime < 0 || request.Config.EndTime < 0)
             {
                 return methodResult;
             }
@@ -84,8 +84,7 @@ namespace Fsel.System.Application.Commands.TechieCmd
             };
 
             #region Validate
-
-            if (request == null || request.TechieFeature == EnumTechieFeature.Greeting)
+            if (request == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentId), studentId);
                 return methodResult;

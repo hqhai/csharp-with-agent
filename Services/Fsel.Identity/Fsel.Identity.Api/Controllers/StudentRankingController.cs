@@ -8,6 +8,7 @@ using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.LandingPages;
 using Fsel.Identity.Application.Commands.StudentRankingCmd;
 using Fsel.Identity.Application.Commands.StudentRankingEvents;
+using Fsel.Identity.Application.Queries.CompetitionEventsQuery;
 using Fsel.Identity.Application.Queries.StudentRanking;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
@@ -40,6 +41,8 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<List<StudentRankingModel>> commandResult = await _mediator.Send(new CreateStudentRankingsCommand()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+
 
         /// <summary>
         /// Lấy ra list danh sách xếp hạng của học sinh
@@ -85,7 +88,7 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Lưu dữ liệu sự kiện
+        /// Tạo dữ liệu sự kiện
         /// </summary>
         [HttpPost("student-competition-event")]
         [ProducesResponseType(typeof(MethodResult<IList<StudentCompetitionEventsModel>>), (int)HttpStatusCode.OK)]
@@ -154,6 +157,18 @@ namespace Fsel.Identity.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> RegisterStudentForEvent([FromBody] RegisterStudentForEventCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        ///  remove Student from Event
+        /// </summary>
+        [HttpPost("remove-student-from-event")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RemoveStudentFromEvent([FromBody] RemoveStudentFromEventCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

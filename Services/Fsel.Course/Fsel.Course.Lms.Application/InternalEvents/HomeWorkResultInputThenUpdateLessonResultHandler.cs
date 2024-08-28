@@ -20,13 +20,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     public class HomeWorkResultInputThenUpdateLessonResultHandler : BaseInternalLessonResultEventHandler,
         INotificationHandler<EntityChangedEvent<HomeWorkResult>>
     {
-        private readonly ILogger<HomeWorkResultInputThenUpdateLessonResultHandler> _logger2;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly ILogger<HomeWorkResultInputThenUpdateLessonResultHandler> _logger;
 
-        public HomeWorkResultInputThenUpdateLessonResultHandler(ISystemService systemService, ILogger<HomeWorkResultInputThenUpdateLessonResultHandler> logger2, AppSetting appSetting, ILogger<BaseInternalLessonResultEventHandler> logger1, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, ILogger<BaseInternalEventHandler> logger, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository) : base(systemService, appSetting, logger1, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository)
+        public HomeWorkResultInputThenUpdateLessonResultHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, ILogger<HomeWorkResultInputThenUpdateLessonResultHandler> logger, ILessonResultRepository lessonResultRepository, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonNoteRepository lessonNoteRepository) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, lessonResultRepository, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository)
         {
-            _logger2 = logger2;
             _lessonResultRepository = lessonResultRepository;
+            _logger = logger;
         }
 
         public async Task Handle(EntityChangedEvent<HomeWorkResult> notification, CancellationToken cancellationToken)
@@ -52,7 +52,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
             catch (Exception ex)
             {
-                _logger2.LogWarning($"Log Trigger HomeWorkResult : {ex.Message} ");
+                _logger.LogWarning($"Log Trigger HomeWorkResult : {ex.Message} ");
             }
         }
     }
