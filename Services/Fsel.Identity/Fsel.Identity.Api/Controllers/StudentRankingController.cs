@@ -42,8 +42,6 @@ namespace Fsel.Identity.Api.Controllers
             return commandResult.GetActionResult();
         }
 
-
-
         /// <summary>
         /// Lấy ra list danh sách xếp hạng của học sinh
         /// </summary>
@@ -171,6 +169,18 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> RemoveStudentFromEvent([FromBody] RemoveStudentFromEventCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        ///  Job run events
+        /// </summary>
+        [HttpPost("job-run-events")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> JobRunEvents()
+        {
+            var commandResult = await _mediator.Send(new JobRunEventsCommand()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
