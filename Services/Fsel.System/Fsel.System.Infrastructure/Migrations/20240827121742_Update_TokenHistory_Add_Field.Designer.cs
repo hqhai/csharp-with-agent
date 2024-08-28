@@ -4,6 +4,7 @@ using Fsel.System.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    partial class SystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240827121742_Update_TokenHistory_Add_Field")]
+    partial class Update_TokenHistory_Add_Field
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1710,22 +1713,6 @@ namespace Fsel.System.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("6942432d-f45c-45de-a72c-002c0a04cc8c"),
-                            Category = "CompletedSurvey",
-                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Hoàn thành Khảo sát thông tin",
-                            ImagePath = "",
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Tân thủ V",
-                            TargetValue = 1,
-                            Token = 20,
-                            Type = "BeginnerQuests"
-                        },
-                        new
-                        {
                             Id = new Guid("9069f184-fd45-413e-b56a-79852879282e"),
                             Category = "CompleteFocusModeFirst",
                             CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -1735,7 +1722,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             ImagePath = "",
                             IsActive = true,
                             IsDeleted = false,
-                            Name = "Tân thủ VI",
+                            Name = "Tân thủ V",
                             TargetValue = 1,
                             Token = 20,
                             Type = "BeginnerQuests"
@@ -1751,7 +1738,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             ImagePath = "",
                             IsActive = true,
                             IsDeleted = false,
-                            Name = "Tân thủ VII",
+                            Name = "Tân thủ VI",
                             TargetValue = 1,
                             Token = 20,
                             Type = "BeginnerQuests"
@@ -2124,7 +2111,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            TargetValue = 7,
+                            TargetValue = 6,
                             Token = 40,
                             Type = "BeginnerQuests"
                         },
