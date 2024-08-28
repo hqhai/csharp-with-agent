@@ -89,7 +89,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             {
                 await _eventRegistrationRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                await SendMail(request, competitionEvent, EnumSenderTemplate.MailRegisterEvent, Subject).ConfigureAwait(false);
+                await SendMail(request, competitionEvent, EnumSenderTemplate.MailRegisterEvent, Subject, CultureInfo.InvariantCulture).ConfigureAwait(false);
                 return methodResult;
             });
 

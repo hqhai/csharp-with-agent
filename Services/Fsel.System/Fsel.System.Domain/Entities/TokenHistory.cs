@@ -5,6 +5,7 @@ namespace Fsel.System.Domain.Entities
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
+    using Fsel.System.Domain.Models.EntityModels.Configs;
     using global::System.ComponentModel.DataAnnotations.Schema;
 
     public class TokenHistory : Entity
@@ -53,8 +54,16 @@ namespace Fsel.System.Domain.Entities
             set { ConfigStr = ConvertHelper.Serialize(value); }
         }
 
-        public EnumTokenHistoryType Type { get; set; }
+        public string? ConfigDataStr { get; set; }
 
+        [NotMapped]
+        public ConfigDataToken? ConfigData
+        {
+            get { return ConvertHelper.Deserialize<ConfigDataToken>(ConfigDataStr); }
+            set { ConfigDataStr = ConvertHelper.Serialize(value); }
+        }
+
+        public EnumTokenHistoryType Type { get; set; }
         public TokenConfig? TokenConfig { get; set; }
     }
 }
