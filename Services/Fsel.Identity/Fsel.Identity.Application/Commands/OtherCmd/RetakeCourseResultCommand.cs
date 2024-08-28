@@ -22,6 +22,7 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Net.Http.Headers;
@@ -115,10 +116,10 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(checkLuckySpinResult));
                 return methodResult;
             }
-            var userCourseSetting = _userCourseSettingRepository.Queryable.FirstOrDefault(x => x.CourseLevel == student.CourseLevel && x.UserId == user.Id && x.Type == EnumUserCourseType.ResetAndLearnAgain);
-            if (userCourseSetting != null && userCourseSetting.Value <= 0)
+            var userCourseSetting = await _userCourseSettingRepository.Queryable.FirstOrDefaultAsync(x => x.CourseLevel == student.CourseLevel && x.UserId == user.Id && x.Type == EnumUserCourseType.ResetAndLearnAgain, cancellationToken);
+            if (userCourseSetting.IsValidValue())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUserCourseSettingErrorCode.CurrentLevelHasNoRetakes), nameof(checkLuckySpinResult));
+                methodResult.AddErrorBadRequest(nameof(EnumUserCourseSettingErrorCode.CurrentLevelHasNoRetakes), nameof(userCourseSetting));
                 return methodResult;
             }
             var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.EventCode == request.EventCode, cancellationToken);
@@ -127,6 +128,7 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent));
                 return methodResult;
             }
+
             var courseResult = await _lmsCourseService.RetakeCourseAsync(new RetakeCourseResultCommandModel { CourseLevel = student.CourseLevel.Value });
             if (!courseResult.IsSuccessStatusCode)
             {
