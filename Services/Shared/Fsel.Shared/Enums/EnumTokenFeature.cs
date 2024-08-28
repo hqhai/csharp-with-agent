@@ -14,6 +14,6 @@ namespace Fsel.Shared.Enums
         MarketPlace,
         QuestBoard,
         FriendMission,
-        FSELEVENT
+        FselEvent
     }
 }

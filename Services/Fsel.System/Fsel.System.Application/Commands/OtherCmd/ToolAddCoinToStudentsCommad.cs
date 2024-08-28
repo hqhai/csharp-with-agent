@@ -93,7 +93,7 @@ namespace Fsel.System.Application.Commands.OtherCmd
                         new TokenHistoryQueueModel
                         {
                             EventCode = dataToken?.EventCode,
-                            Feature = Shared.Enums.EnumTokenFeature.FSELEVENT,
+                            Feature = Shared.Enums.EnumTokenFeature.FselEvent,
                             Type = Shared.Enums.EnumTokenHistoryType.Recevived,
                             UserId = student.Human?.UserId ?? default,
                             VolatileToken = dataToken?.Coin ?? default,
