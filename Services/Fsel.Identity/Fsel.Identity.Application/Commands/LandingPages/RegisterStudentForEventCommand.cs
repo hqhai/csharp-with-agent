@@ -30,10 +30,19 @@ namespace Fsel.Identity.Application.Commands.LandingPages
         public string? FullName { get; set; }
         public string? Email { get; set; }
         public string? Password { get; set; }
+        public string? SchoolGrade { get; set; }
+        public string? SchoolClass { get; set; }
+        public string? SchoolStudentCode { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? BirthDay { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? School { get; set; }
         public string? StartDateEvent { get; set; }
         public string? EndDateEvent { get; set; }
         public string? StartDateAward { get; set; }
         public string? EndDateAward { get; set; }
+        public string? Date { get; set; }
         public string? LinkLMS { get; set; }
         public string? LinkLeaderBoard { get; set; }
         public string? LinkLuckyStar { get; set; }

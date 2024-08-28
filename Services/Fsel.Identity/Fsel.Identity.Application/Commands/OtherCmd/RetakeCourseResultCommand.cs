@@ -5,23 +5,25 @@ using Microsoft.EntityFrameworkCore;
 namespace Fsel.Identity.Application.Commands.OtherCmd
 {
     using System.Linq.Dynamic.Core;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.AuthCmd;
-    using Fsel.Identity.Application.Commands.StudentRankingEvents;
     using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.LmsCourseService.CommandModels;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.OrderService.CommandModels;
+    using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -45,8 +47,12 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
         private readonly ILmsCourseService _lmsCourseService;
         private readonly IMediator _mediator;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
+        private readonly IEventRegistrationRepository _eventRegistrationRepository;
+        private readonly ISystemService _systemService;
+        private readonly IMapper _mapper;
 
-        public RetakeCourseResultCommandHandler(UserManager<User> userManager, AppSetting appSetting, ICompetitionEventsRepository competitionEventsRepository, IOrderService orderService, IUserCourseSettingRepository userCourseSettingRepository, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, MediatR.IMediator mediator, IHttpContextAccessor httpContextAccessor)
+        public RetakeCourseResultCommandHandler(UserManager<User> userManager, AppSetting appSetting, ICompetitionEventsRepository competitionEventsRepository, IOrderService orderService, IUserCourseSettingRepository userCourseSettingRepository, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, MediatR.IMediator mediator, IHttpContextAccessor httpContextAccessor, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, ISystemService systemService, IEventRegistrationRepository eventRegistrationRepository, IMapper mapper)
         {
             _userManager = userManager;
             _appSetting = appSetting;
@@ -57,6 +63,10 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
             _lmsCourseService = lmsCourseService;
             _mediator = mediator;
             _httpContextAccessor = httpContextAccessor;
+            _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
+            _systemService = systemService;
+            _eventRegistrationRepository = eventRegistrationRepository;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<string>> Handle(RetakeCourseResultCommand request, CancellationToken cancellationToken)
@@ -104,26 +114,33 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.CourseLevel));
                 return methodResult;
             }
-            var checkLuckySpinResult = await _mediator.Send(new CheckStudentLuckySpinCmd(), cancellationToken);
-            if (!checkLuckySpinResult.IsOK)
-            {
-                methodResult.AddErrorBadRequest(checkLuckySpinResult.ErrorMessages);
-                return methodResult;
-            }
 
-            if (checkLuckySpinResult.Result != null && checkLuckySpinResult.Result.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(checkLuckySpinResult));
-                return methodResult;
-            }
             var userCourseSetting = await _userCourseSettingRepository.Queryable.FirstOrDefaultAsync(x => x.CourseLevel == student.CourseLevel && x.UserId == user.Id && x.Type == EnumUserCourseType.ResetAndLearnAgain, cancellationToken);
             if (userCourseSetting.IsValidValue())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUserCourseSettingErrorCode.CurrentLevelHasNoRetakes), nameof(userCourseSetting));
                 return methodResult;
             }
-            var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.EventCode == request.EventCode, cancellationToken);
+
+            #region đoạn này sai tại Phúc Xo p.StudentCompetitionEvents.Where(x => x.StudentId == student.Id)
+
+            var competitionEvent = await _competitionEventsRepository.Queryable.Include(p => p.StudentCompetitionEvents.Where(x => x.StudentId == student.Id)).FirstOrDefaultAsync(x => x.EventCode == request.EventCode, cancellationToken);
+
+            #endregion đoạn này sai tại Phúc Xo p.StudentCompetitionEvents.Where(x => x.StudentId == student.Id)
+
             if (competitionEvent == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent));
+                return methodResult;
+            }
+
+            if (competitionEvent.StudentCompetitionEvents.Any(p => p.StudentId == student.Id))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(competitionEvent));
+                return methodResult;
+            }
+
+            if (competitionEvent.EventContent == null || !competitionEvent.EventContent.EndDate.HasValue || competitionEvent.EventContent.EndDate.Value.Date < DateTime.UtcNow.Date)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent));
                 return methodResult;
@@ -136,6 +153,17 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
                 return methodResult;
             }
 
+            await _studentCompetitionEventsRepository.ExecuteTransactionAsync(async () =>
+            {
+                _studentCompetitionEventsRepository.Add(new StudentCompetitionEvent()
+                {
+                    StudentId = student.Id,
+                    CompetitionEventId = competitionEvent.Id
+                });
+                await _studentCompetitionEventsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                return methodResult;
+            });
+
             await _orderService.CreateOrderForUserLeaderBoard(new CreateOrderForUserFromLeaderBoardCommandModel()
             {
                 UserId = user.Id,
@@ -146,8 +174,22 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
                 PackageId = default,
                 EventId = default
             });
+
+            var eventRegistrations = await _eventRegistrationRepository.Queryable.FirstOrDefaultAsync(p => p.Email == request.Email && p.CompetitionEventId == competitionEvent.Id, cancellationToken);
+            if (eventRegistrations != null)
+            {
+                var model = _mapper.Map<RegisterStudentForEventCommandModel>(eventRegistrations);
+                model.EventCode = competitionEvent.EventCode;
+                await AddToGoogleSheet(model);
+            }
+
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task AddToGoogleSheet(RegisterStudentForEventCommandModel request)
+        {
+            await _systemService.RegisterStudentForEvent(request);
         }
     }
 }
