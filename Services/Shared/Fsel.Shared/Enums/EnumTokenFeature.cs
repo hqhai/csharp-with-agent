@@ -13,6 +13,7 @@ namespace Fsel.Shared.Enums
         Achievement,
         MarketPlace,
         QuestBoard,
-        FriendMission
+        FriendMission,
+        FSELEVENT
     }
 }
