@@ -3,17 +3,19 @@
 namespace Fsel.System.Application.Commands.OtherCmd
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base.BaseModels;
-    using MediatR;
-    using Fsel.System.Application.Services.UserServices;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.System.Domain.Models.EntityModels;
     using Fsel.Common.Helpers;
-    using Microsoft.AspNetCore.Http;
-    using Fsel.Shared.Models.ShareModels;
     using Fsel.Common.Models.Excels;
-    using Fsel.System.Domain.Models.CommandModels.TokenHistorys;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Application.Commands.TokenHistoryCmd;
+    using Fsel.System.Application.Services.UserServices;
+    using Fsel.System.Domain.IRepositories;
+    using Fsel.System.Domain.Models.EntityModels;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class ToolAddCoinToStudentsCommad : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
@@ -23,11 +25,13 @@ namespace Fsel.System.Application.Commands.OtherCmd
     {
         private readonly IUserService _userService;
         private readonly IMediator _mediator;
+        private readonly ITokenHistoryRepository _tokenHistoryRepository;
 
-        public ToolAddCoinToStudentsCommadHandler(IUserService userService, IMediator mediator)
+        public ToolAddCoinToStudentsCommadHandler(IUserService userService, IMediator mediator, ITokenHistoryRepository tokenHistoryRepository)
         {
             _userService = userService;
             _mediator = mediator;
+            _tokenHistoryRepository = tokenHistoryRepository;
         }
 
         public async Task<MethodResult<Stream>> Handle(ToolAddCoinToStudentsCommad request, CancellationToken cancellationToken)
@@ -55,7 +59,6 @@ namespace Fsel.System.Application.Commands.OtherCmd
             });
 
             var duplicateEmails = result.Datas.GroupBy(user => user.Email).Where(group => group.Count() > 1).Select(group => group.Key);
-
             if (duplicateEmails.Any())
             {
                 methodResult.AddErrorBadRequest("Duplicate Emails");
@@ -81,6 +84,46 @@ namespace Fsel.System.Application.Commands.OtherCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
+            var resultData = request.FormFile.ImportAndValidateExcel(async (ImportCoinEventStudentModel x, IList<ImportCoinEventStudentModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
+            {
+                if (string.IsNullOrEmpty(x.Email) || !x.Email.IsValidEmail())
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null or malformed" });
+                }
+
+                var student = students.FirstOrDefault(y => y.Human != null && y.Human.Email == x.Email);
+                if (student == null)
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email Is Not Exist" });
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(x.EventCode))
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.EventCode), Message = "EventCode is null" });
+                    }
+                    else
+                    {
+                        var userId = student.Human?.UserId ?? Guid.Empty;
+                        var tokenHistoryStudents = await _tokenHistoryRepository.Queryable.Where(x => x.UserId == userId && x.Feature == EnumTokenFeature.FselEvent).ToListAsync(cancellationToken);
+                        var tokenHistoryEvent = tokenHistoryStudents.FirstOrDefault(y => !string.IsNullOrEmpty(y.ConfigData?.EventCode) && y.ConfigData.EventCode == x.EventCode);
+                        if (tokenHistoryEvent != null)
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.EventCode), Message = "EventCode Is Already Exist" });
+                        }
+                    }
+                }
+
+                return await Task.FromResult(errors.Count == 0);
+            });
+
+            if (resultData.Stream != null)
+            {
+                methodResult.Result = resultData.Stream;
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
+
             var tokenHistoryData = new List<TokenHistoryModel>();
             foreach (var student in students)
             {
@@ -93,8 +136,8 @@ namespace Fsel.System.Application.Commands.OtherCmd
                         new TokenHistoryQueueModel
                         {
                             EventCode = dataToken?.EventCode,
-                            Feature = Shared.Enums.EnumTokenFeature.FselEvent,
-                            Type = Shared.Enums.EnumTokenHistoryType.Recevived,
+                            Feature = EnumTokenFeature.FselEvent,
+                            Type = EnumTokenHistoryType.Recevived,
                             UserId = student.Human?.UserId ?? default,
                             VolatileToken = dataToken?.Coin ?? default,
                         }

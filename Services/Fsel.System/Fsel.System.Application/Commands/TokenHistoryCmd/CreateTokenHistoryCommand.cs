@@ -62,6 +62,19 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
+            var userId = student.Human?.UserId ?? Guid.Empty;
+            var listEventCode = request.TokenHistorys.Where(x => !string.IsNullOrEmpty(x.EventCode)).Select(x => x.EventCode!).ToList();
+            if (listEventCode.Any())
+            {
+                var tokenHistoryStudents = await _tokenHistoryRepository.Queryable.Where(x => x.UserId == userId && x.Feature == EnumTokenFeature.FselEvent).ToListAsync(cancellationToken);
+                var tokenHistoryEvent = tokenHistoryStudents.FirstOrDefault(x => !string.IsNullOrEmpty(x.ConfigData?.EventCode) && listEventCode.Contains(x.ConfigData.EventCode));
+                if (tokenHistoryEvent != null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(tokenHistoryEvent.ConfigData.EventCode), tokenHistoryEvent.ConfigData?.EventCode);
+                    return methodResult;
+                }
+            }
+
             var numberOfToken = student.NumberOfToken;
 
             var tokenHistorys = new List<TokenHistory>();
