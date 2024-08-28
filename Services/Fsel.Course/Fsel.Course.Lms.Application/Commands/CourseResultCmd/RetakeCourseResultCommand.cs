@@ -107,13 +107,11 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             }
 
             var userCourseSettings = userCourseSettingsResult.Content?.Result;
-            var userCourseSetting = userCourseSettings?.FirstOrDefault(x => x.CourseLevel == request.CourseLevel && x.Type == EnumUserCourseType.ResetAndLearnAgain);
-            if (userCourseSetting != null && userCourseSetting.Value <= 0)
+            if (!userCourseSettings.IsValidValue(EnumUserCourseType.ResetAndLearnAgain, request.CourseLevel))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.RetakesExpired), nameof(userCourseSetting));
+                methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.RetakesExpired), nameof(userCourseSettings));
                 return methodResult;
             }
-
             var courseResult = await _courseResultRepository.Queryable.Where(x => x.StudentId == student.Id)
                                                                       .Where(x => x.Course != null && x.Course.CourseLevel == request.CourseLevel)
                                                                       .OrderByDescending(x => x.CreatedDate)

@@ -160,28 +160,19 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                     await SetProgressModuleAsync(courseManager, courseResult);
                 }
                 await SetHideCourseOnCourse(courseManager, courseResult, student, isChangeLevelAllCourse);
-
-                var userCourseSettingLevel = userCourseSettings?.FirstOrDefault(x => x.Type == EnumUserCourseType.ResetAndLearnAgain && x.CourseLevel == courseResult.Course?.CourseLevel);
-                var userCourseSetting = userCourseSettings?.FirstOrDefault(x => x.Type == EnumUserCourseType.ChangeLevel);
                 if (courseManager.IsHiddenCourseLevel)
                 {
                     (courseManager.IsChangeLevel, courseManager.IsResetCourse) = (false, false);
                 }
                 else
                 {
-                    if (userCourseSetting != null)
-                    {
-                        courseManager.IsChangeLevel = userCourseSetting.Value > 0;
-                    }
-                    if (userCourseSettingLevel != null)
-                    {
-                        courseManager.IsResetCourse = userCourseSettingLevel.Value > 0;
-                    }
+                    courseManager.IsChangeLevel = userCourseSettings.IsValidValue(EnumUserCourseType.ResetAndLearnAgain, courseResult.Course?.CourseLevel);
+                    courseManager.IsResetCourse = userCourseSettings.IsValidValue(EnumUserCourseType.ChangeLevel);
                 }
                 courseManager.IsCheckPercentColor = await IsColorToPercentAsync(courseResult);
                 courseManagers.Add(courseManager);
             }
-            methodResult.Result = courseManagers ?? new();
+            methodResult.Result = courseManagers;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
