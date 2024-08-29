@@ -199,10 +199,10 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
 
                 #region Gửi mail thanh toán
 
-                //if (order.Status == EnumOrderStatus.Payment)
-                //{
-                //    await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
-                //}
+                if (order.Status == EnumOrderStatus.Payment)
+                {
+                    await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
+                }
 
                 #endregion Gửi mail thanh toán
 
