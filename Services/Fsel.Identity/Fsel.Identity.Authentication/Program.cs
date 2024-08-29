@@ -47,7 +47,7 @@ builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeReposito
 builder.Services.AddScoped<IStudentCompetitionSnapShotRepository, StudentCompetitionSnapShotRepository>();
 builder.Services.AddScoped<ICompetitionEventsRepository, CompetitionEventsRepository>();
 builder.Services.AddScoped<IStudentRankingEventsRepository, StudentRankingEventsRepository>();
-
+builder.Services.AddScoped<IUserDeletionRepository, UserDeletionRepository>();
 
 // Queue
 builder.Services.AddScoped<LeaderBoardPublisher>();

@@ -35,6 +35,7 @@ builder.Services.AddScoped<RetryMockTestPublisher>();
 builder.Services.AddScoped<RetryClassForumPublisher>();
 builder.Services.AddScoped<UpdateClassForumResultToExpiredTimePublisher>();
 builder.Services.AddScoped<JobActiveEventPublisher>();
+builder.Services.AddScoped<DeleteAccountPublisher>();
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
