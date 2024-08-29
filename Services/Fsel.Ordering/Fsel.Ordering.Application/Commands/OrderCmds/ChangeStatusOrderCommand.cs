@@ -7,9 +7,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Commands.OrderCmds.v1i1;
     using Fsel.Ordering.Application.Commands.UserRefferalCmd;
+    using Fsel.Ordering.Application.Commands.VoucherCmds;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.SenderService;
@@ -187,6 +189,18 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                             SenderId = _authContext.CurrentUserId,
                             PlatformCode = EnumPlatformCode.LMS
                         }, cancellationToken);
+                    }
+
+                    var createDate = order.CreatedDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+                    var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+                    if (!order.VoucherId.HasValue && _appSetting.VoucherConfigs?.VoucherForRetail?.StartDate <= createDate && _appSetting.VoucherConfigs.VoucherForRetail.EndDate >= createDate && currentDate < _appSetting.VoucherConfigs.VoucherForRetail.ExpiredDate)
+                    {
+                        await _mediator.Send(new CreateVoucherForRetailCommand()
+                        {
+                            UserId = order.UserId,
+                            PackageId = order.PackageId ?? default,
+                        }, cancellationToken).ConfigureAwait(false);
                     }
                 }
                 order.OrderTransactions.Add(new OrderTransaction()

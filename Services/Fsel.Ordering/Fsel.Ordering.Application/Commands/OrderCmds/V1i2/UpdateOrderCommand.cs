@@ -96,6 +96,20 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<OrderModel>(request.Order);
+                if (request.Order.TotalPrice == 0)
+                {
+                    var changeStatusOrdersResult = await _mediator.Send(new ChangeStatusOrderCommand()
+                    {
+                        OrderIds = new[] { request.Order.Id },
+                        RevenueType = EnumPaymentRevenueType.NotRevenue,
+                        Status = EnumOrderStatus.Payment
+                    });
+                    if (!changeStatusOrdersResult.IsOK)
+                    {
+                        methodResult.AddError(changeStatusOrdersResult.ErrorMessages);
+                        return methodResult;
+                    }
+                }
                 return methodResult;
             });
 

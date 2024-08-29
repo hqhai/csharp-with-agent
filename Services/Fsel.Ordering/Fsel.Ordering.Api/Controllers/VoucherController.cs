@@ -119,5 +119,17 @@ namespace Fsel.Ordering.Api.Controllers
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Create vouchers for MA
+        /// </summary>
+        [HttpPost("create-vouchers-for-master-agency")]
+        [ProducesResponseType(typeof(MethodResult<CheckVoucherModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateVouchersForMA([FromBody] CreateVoucherForMasterAgencyCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

@@ -77,6 +77,12 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 return methodResult;
             }
 
+            if (voucher.Source == EnumVoucherSource.Retail && voucher.SourceUserId.HasValue && voucher.SourceUserId.Value == _authContext.CurrentUserId)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.NotSubjectToUse));
+                return methodResult;
+            }
+
             if (voucher.VoucherType == EnumVoucherType.NewSale)
             {
                 if (await _orderRepository.Queryable.AnyAsync(p => p.Status == EnumOrderStatus.Payment && p.UserId == _authContext.CurrentUserId && !p.IsTrial, cancellationToken))
