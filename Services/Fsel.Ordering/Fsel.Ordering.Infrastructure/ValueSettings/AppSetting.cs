@@ -21,7 +21,6 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
     public class VoucherConfigs
     {
         public VoucherConfig? VoucherForRetail { get; set; }
-        public VoucherConfig? VoucherForMasterAgency { get; set; }
     }
 
     public class VoucherConfig
