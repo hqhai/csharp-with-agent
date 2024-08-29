@@ -8,9 +8,10 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
+    using Fsel.Ordering.Application.Queries.Events;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -24,12 +25,14 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
         private readonly IPackageRepository _packageRepository;
         private readonly IMapper _mapper;
         private readonly IEventRepository _eventRepository;
+        private readonly IMediator _mediator;
 
-        public GetPackagesQueryHandler(IPackageRepository packageRepository, IMapper mapper, IEventRepository eventRepository)
+        public GetPackagesQueryHandler(IPackageRepository packageRepository, IMapper mapper, IEventRepository eventRepository, IMediator mediator)
         {
             _packageRepository = packageRepository;
             _mapper = mapper;
             _eventRepository = eventRepository;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<List<PackageModel>>> Handle(GetPackagesQuery request, CancellationToken cancellationToken)
@@ -39,15 +42,17 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
 
             var packageModels = new List<PackageModel>();
 
-            var @event = await _eventRepository.Queryable.Include(p => p.PackageEvents).FirstOrDefaultAsync(p => p.Status == EnumEventPackageStatus.Active, cancellationToken);
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
-            if (@event == null)
+            var eventResult = await _mediator.Send(new GetCurrentEventQuery(), cancellationToken).ConfigureAwait(false);
+            var @event = eventResult.Result;
+
+            if (@event == null || @event.PackageEvents == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@event));
                 return methodResult;
             }
 
-            var eventModel = _mapper.Map<EventModel>(@event);
             var packages = await _packageRepository.Queryable.ToListAsync(cancellationToken);
 
             foreach (var item in @event.PackageEvents)
@@ -59,13 +64,13 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
                     return methodResult;
                 }
                 var packageModel = _mapper.Map<PackageModel>(package);
-                packageModel.EventId = eventModel.Id;
+                packageModel.EventId = @event.Id;
                 packageModel.Price = item.Price;
                 packageModel.PriceMonth = item.PriceMonth;
                 packageModel.MonthBonus = item.MonthBonus;
                 packageModel.DayBonus = item.DayBonus;
-                packageModel.ImagePaths = eventModel.ImagePaths;
-                packageModel.EventDescription = eventModel.Description;
+                packageModel.ImagePaths = @event.ImagePaths;
+                packageModel.EventDescription = @event.Description;
                 packageModel.Suggests = item.Suggests;
                 packageModels.Add(packageModel);
             }

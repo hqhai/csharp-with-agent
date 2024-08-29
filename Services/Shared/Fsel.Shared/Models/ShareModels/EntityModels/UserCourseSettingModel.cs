@@ -1,8 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Services.UserServices.Models
+namespace Fsel.Shared.Models.ShareModels.EntityModels
 {
-    using System;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 

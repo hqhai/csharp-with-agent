@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using System.Globalization;
     using System.Linq;
     using System.Threading;
+    using Amazon.Runtime.Internal.Util;
     using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
     using Fsel.Common.Models;
@@ -41,22 +42,20 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentOccupyClassForum = 20;
 
         private readonly QuestBoardPublisher _questBoardPublisher;
-        protected readonly ILogger<BaseInternalUnitResultEventHandler> _logger1;
+        private readonly ILogger<BaseInternalUnitResultEventHandler> _logger;
         private readonly ILessonResultRepository _lessonResultRepository;
 
-        public BaseInternalUnitResultEventHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, ILogger<BaseInternalUnitResultEventHandler> logger1, IMediator mediator, IUserService userService, ILogger<BaseInternalEventHandler> logger, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository)
+        public BaseInternalUnitResultEventHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, ILogger<BaseInternalUnitResultEventHandler> logger, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, ILessonResultRepository lessonResultRepository, IOrderService orderService, ILessonNoteRepository lessonNoteRepository) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository)
         {
-            _logger1 = logger1;
-            _lessonResultRepository = lessonResultRepository;
             _questBoardPublisher = questBoardPublisher;
+            _lessonResultRepository = lessonResultRepository;
+            _logger = logger;
         }
 
         public async Task UpdateUnitResultAsync(IList<LessonResult>? lessonResults, Domain.Entities.Unit? unit, Guid courseId, Guid studentId, bool isDone, CancellationToken cancellationToken, bool isUnitUpdate = true)
         {
             ArgumentNullException.ThrowIfNull(unit);
-            try
-            {
-                var course = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests.OrderBy(x => x.DisplayOrder))
+            var course = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests.OrderBy(x => x.DisplayOrder))
                                                             .ThenInclude(p => p.Unit)
                                                             .Include(p => p.CourseUnitMockTests.OrderBy(x => x.DisplayOrder))
                                                             .ThenInclude(p => p.FinalTest)
@@ -64,68 +63,63 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                                             .ThenInclude(p => p.MockTest)
                                                             .Include(x => x.CourseResults.Where(x => x.StudentId == studentId))
                                                             .FirstOrDefaultAsync(x => x.Id == courseId, cancellationToken);
-                if (course == null)
-                {
-                    return;
-                }
-                var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == unit.Id && x.StudentId == studentId && x.CourseId == courseId, cancellationToken);
-                if (unit == null || unitResult == null || (lessonResults == null || !lessonResults.Any()))
-                {
-                    return;
-                }
-                var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
-                var (skillScores, percent) = await GetUnitSkillScores(lessonResultIds, course.CourseType);
-                if (isDone)
-                {
-                    if (unitResult.Status != EnumResultStatus.Done)
-                    {
-                        unitResult.CompletionDate = DateTime.UtcNow;
-                    }
-                    unitResult.Status = EnumResultStatus.Done;
-                    // await DoQuestBoard(userId, unitId, courseId, cancellationToken);
-
-                    //send mail
-                    await SendMail(skillScores, percent, unit, unitResult, course, lessonResults.ToList(), cancellationToken).ConfigureAwait(false);
-                    await DoQuestBoard(studentId, cancellationToken).ConfigureAwait(false);
-
-                    if (course.CourseUnitMockTests.First(p => p.UnitId == unit.Id).Number == 1)
-                    {
-                        await _mediator.Send(new AddFeatureMissionCommand()
-                        {
-                            FeatureUserReferral = EnumFeatureUserReferral.DoneUnit1,
-                            ReceiverId = unitResult.CreatedUserId,
-                        }).ConfigureAwait(false);
-                    }
-                }
-                if (isUnitUpdate)
-                {
-                    unitResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
-                    unitResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
-                    unitResult.Percent = percent;
-                    unitResult.SkillScores = skillScores;
-                    _unitResultRepository.Update(unitResult);
-                    try
-                    {
-                        await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger1.LogWarning($"Log Trigger Save UnitResult : {ex.Message} ");
-                    }
-
-                    if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 6 && course.CourseType == EnumCourseType.Academic && isDone)
-                    {
-                        await SendMailMidCourseReport(studentId, course, cancellationToken).ConfigureAwait(false);
-                    }
-                    else if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 4 && course.CourseType == EnumCourseType.Ielts && isDone)
-                    {
-                        await SendMailMidCourseReport(studentId, course, cancellationToken).ConfigureAwait(false);
-                    }
-                }
-            }
-            catch (Exception ex)
+            if (course != null)
             {
-                _logger1.LogWarning($"Log Trigger UnitResult : {ex.Message} ");
+                var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == unit.Id && x.StudentId == studentId && x.CourseId == courseId, cancellationToken);
+
+                if (unit != null && unitResult != null && lessonResults != null)
+                {
+                    var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
+                    var (skillScores, percent) = await GetUnitSkillScores(lessonResultIds, course.CourseType);
+                    if (isDone)
+                    {
+                        if (unitResult.Status != EnumResultStatus.Done)
+                        {
+                            unitResult.CompletionDate = DateTime.UtcNow;
+                            await SendMail(skillScores, percent, unit, unitResult, course, lessonResults.ToList(), cancellationToken);
+                        }
+                        unitResult.Status = EnumResultStatus.Done;
+                        // await DoQuestBoard(userId, unitId, courseId, cancellationToken);
+
+                        //send mail
+                        await SendMail(skillScores, percent, unit, unitResult, course, lessonResults.ToList(), cancellationToken).ConfigureAwait(false);
+                        await DoQuestBoard(studentId, cancellationToken).ConfigureAwait(false);
+
+                        if (course.CourseUnitMockTests.First(p => p.UnitId == unit.Id).Number == 1)
+                        {
+                            await _mediator.Send(new AddFeatureMissionCommand()
+                            {
+                                FeatureUserReferral = EnumFeatureUserReferral.DoneUnit1,
+                                ReceiverId = unitResult.CreatedUserId,
+                            }).ConfigureAwait(false);
+                        }
+                    }
+                    if (isUnitUpdate)
+                    {
+                        unitResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
+                        unitResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+                        unitResult.Percent = percent;
+                        unitResult.SkillScores = skillScores;
+                        _unitResultRepository.Update(unitResult);
+                        try
+                        {
+                            await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                            if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 6 && course.CourseType == EnumCourseType.Academic && isDone)
+                            {
+                                await SendMailMidCourseReport(studentId, course, cancellationToken).ConfigureAwait(false);
+                            }
+                            else if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 4 && course.CourseType == EnumCourseType.Ielts && isDone)
+                            {
+                                await SendMailMidCourseReport(studentId, course, cancellationToken).ConfigureAwait(false);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"Log Trigger UnitResult : {ex.Message} ");
+                        }
+                    }
+                }
             }
         }
 

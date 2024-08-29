@@ -69,6 +69,7 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
             {
                 foreach (var item in lists)
                 {
+                    item.NumberUser = userReferrals.Where(p => p.SenderId == item.SenderId).Count();
                     item.TotalToken = userReferrals.Where(p => p.SenderId == item.SenderId).Where(p => p.FeatureMissions != null && p.FeatureMissions.Count > 0).SelectMany(p => p.FeatureMissions!).Sum(x => x.Token);
                 }
             }

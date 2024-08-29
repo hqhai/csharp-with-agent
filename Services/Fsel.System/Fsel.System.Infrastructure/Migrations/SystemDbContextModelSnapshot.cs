@@ -4401,6 +4401,9 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<string>("ConfigDataStr")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ConfigStr")
                         .HasColumnType("nvarchar(max)");
 
