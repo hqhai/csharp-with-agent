@@ -39,7 +39,6 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
     public class RetakeCourseResultCommandHandler : IRequestHandler<RetakeCourseResultCommand, MethodResult<string>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly IMapper _mapper;
         private readonly AppSetting _appSetting;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
         private readonly IOrderService _orderService;
@@ -48,11 +47,11 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
         private readonly ILmsCourseService _lmsCourseService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
 
-        public RetakeCourseResultCommandHandler(UserManager<User> userManager, IMapper mapper, AppSetting appSetting, ICompetitionEventsRepository competitionEventsRepository, IOrderService orderService, IUserCourseSettingRepository userCourseSettingRepository, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public RetakeCourseResultCommandHandler(UserManager<User> userManager, AppSetting appSetting, ICompetitionEventsRepository competitionEventsRepository, IOrderService orderService, IUserCourseSettingRepository userCourseSettingRepository, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, IHttpContextAccessor httpContextAccessor, IMediator mediator, IMapper mapper)
         {
             _userManager = userManager;
-            _mapper = mapper;
             _appSetting = appSetting;
             _competitionEventsRepository = competitionEventsRepository;
             _orderService = orderService;
@@ -61,6 +60,7 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
             _lmsCourseService = lmsCourseService;
             _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<string>> Handle(RetakeCourseResultCommand request, CancellationToken cancellationToken)
