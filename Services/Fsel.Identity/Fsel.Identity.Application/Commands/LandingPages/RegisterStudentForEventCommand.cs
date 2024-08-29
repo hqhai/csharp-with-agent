@@ -5,11 +5,13 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
+    using Fsel.Identity.Application.Queries.UserCourseSettingQuery;
     using Fsel.Identity.Application.Services;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.InteractionService.Models;
@@ -19,9 +21,12 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
+    using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -66,12 +71,14 @@ namespace Fsel.Identity.Application.Commands.LandingPages
         private readonly IMediator _mediator;
         private readonly IInteractionService _interactionService;
         private readonly AppSetting _appSetting;
+        private readonly IMapper _mapper;
+        private readonly IUserCourseSettingRepository _userCourseSettingRepository;
         private const string CreateAccountWithEventSuccess = "Thông tin tài khoản tham gia sự kiện";
         private const string WasInAnotherEvent = "Thông báo tài khoản không đủ điều kiện tham gia sự kiện";
         private const string LearnedOnThePlatform = "Thông báo đặt lại dữ liệu khóa học để tham gia sự kiện";
         private const string SignUpEventSuccess = "Thông tin đăng kí tham gia sự kiện";
 
-        public RegisterStudentForEventCommandHandler(ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, UserManager<User> userManager, IPlatformRepository platformRepository, ISystemService systemService, ISenderService senderService, IOrderService orderService, MediatR.IMediator mediator, IInteractionService interactionService, AppSetting appSetting)
+        public RegisterStudentForEventCommandHandler(ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, UserManager<User> userManager, IPlatformRepository platformRepository, ISystemService systemService, ISenderService senderService, IOrderService orderService, MediatR.IMediator mediator, IInteractionService interactionService, AppSetting appSetting, IMapper mapper, IUserCourseSettingRepository userCourseSettingRepository)
         {
             _competitionEventsRepository = competitionEventsRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
@@ -83,6 +90,8 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             _mediator = mediator;
             _interactionService = interactionService;
             _appSetting = appSetting;
+            _mapper = mapper;
+            _userCourseSettingRepository = userCourseSettingRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(RegisterStudentForEventCommand request, CancellationToken cancellationToken)
@@ -144,7 +153,18 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 {
                     var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id, ExpiredTime = @event.EventContent?.EndDate?.Date }, cancellationToken);
                     param.LinkResetProgress = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkResetProgress ?? string.Empty, user.Email, userOtpCode.Result, @event.EventCode);
-                    await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.LearnedOnThePlatform, LearnedOnThePlatform);
+                    // sai tại Phuc Xo
+                    var userCourseSetting = await _userCourseSettingRepository.Queryable.FirstOrDefaultAsync(x => x.CourseLevel == user.Human.Student.CourseLevel && x.UserId == user.Id && x.Type == EnumUserCourseType.ResetAndLearnAgain, cancellationToken);
+                    var userCourseSettingModel = _mapper.Map<UserCourseSettingModel>(userCourseSetting);
+                    if (!userCourseSettingModel.HasRemainingAttempts())
+                    {
+                        await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.WasInAnotherEvent, WasInAnotherEvent);
+                    }
+                    // sai tại Phuc Xo
+                    else
+                    {
+                        await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.LearnedOnThePlatform, LearnedOnThePlatform);
+                    }
                     return methodResult;
                 }
 
