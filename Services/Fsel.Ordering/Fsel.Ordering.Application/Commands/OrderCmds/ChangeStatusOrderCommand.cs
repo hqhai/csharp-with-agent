@@ -204,7 +204,7 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
 
                 if (order.Status == EnumOrderStatus.Payment)
                 {
-                    //await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
+                    await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
                     await _mediator.Send(new AddFeatureMissionCommand()
                     {
                         ReceiverId = order.UserId,
