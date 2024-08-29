@@ -46,10 +46,10 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
         private readonly IUserCourseSettingRepository _userCourseSettingRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly ILmsCourseService _lmsCourseService;
-        private readonly IMediator _mediator;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IMediator _mediator;
 
-        public RetakeCourseResultCommandHandler(UserManager<User> userManager, IMapper mapper, AppSetting appSetting, ICompetitionEventsRepository competitionEventsRepository, IOrderService orderService, IUserCourseSettingRepository userCourseSettingRepository, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, MediatR.IMediator mediator, IHttpContextAccessor httpContextAccessor)
+        public RetakeCourseResultCommandHandler(UserManager<User> userManager, IMapper mapper, AppSetting appSetting, ICompetitionEventsRepository competitionEventsRepository, IOrderService orderService, IUserCourseSettingRepository userCourseSettingRepository, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
             _userManager = userManager;
             _mapper = mapper;
@@ -59,8 +59,8 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
             _userCourseSettingRepository = userCourseSettingRepository;
             _studentRepository = studentRepository;
             _lmsCourseService = lmsCourseService;
-            _mediator = mediator;
             _httpContextAccessor = httpContextAccessor;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<string>> Handle(RetakeCourseResultCommand request, CancellationToken cancellationToken)
