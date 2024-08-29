@@ -25,6 +25,7 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Net.Http.Headers;
@@ -45,7 +46,6 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
         private readonly IUserCourseSettingRepository _userCourseSettingRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly ILmsCourseService _lmsCourseService;
-        private readonly IMediator _mediator;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IEventRegistrationRepository _eventRegistrationRepository;
@@ -116,7 +116,8 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
             }
 
             var userCourseSetting = await _userCourseSettingRepository.Queryable.FirstOrDefaultAsync(x => x.CourseLevel == student.CourseLevel && x.UserId == user.Id && x.Type == EnumUserCourseType.ResetAndLearnAgain, cancellationToken);
-            if (userCourseSetting.IsValidValue())
+            var userCourseSettingModel = _mapper.Map<UserCourseSettingModel>(userCourseSetting);
+            if (!userCourseSettingModel.HasRemainingAttempts())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUserCourseSettingErrorCode.CurrentLevelHasNoRetakes), nameof(userCourseSetting));
                 return methodResult;

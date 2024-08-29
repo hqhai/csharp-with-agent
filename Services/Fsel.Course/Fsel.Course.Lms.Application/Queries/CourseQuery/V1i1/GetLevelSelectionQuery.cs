@@ -53,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 return methodResult;
             }
             var userCourseSettings = userCourseSettingResults?.Content?.Result;
-            if (!userCourseSettings.IsValidValue(EnumUserCourseType.ChangeLevel))
+            if (!userCourseSettings.HasRemainingAttempts(EnumUserCourseType.ChangeLevel))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.RetakesExpired), nameof(userCourseSettings));
                 return methodResult;
@@ -109,7 +109,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                     var userCourseSetting = userCourseSettings?.FirstOrDefault(x => x.CourseLevel == item.CourseLevel && x.Type == EnumUserCourseType.ResetAndLearnAgain);
                     if (userCourseSetting != null)
                     {
-                        item.IsResetCourse = !isChangeLevelStudent && userCourseSetting.IsValidValue();
+                        item.IsResetCourse = !isChangeLevelStudent && userCourseSetting.HasRemainingAttempts();
                     }
                     else
                     {
