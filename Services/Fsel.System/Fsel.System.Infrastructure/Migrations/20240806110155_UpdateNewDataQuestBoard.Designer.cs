@@ -4,6 +4,7 @@ using Fsel.System.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    partial class SystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240806110155_UpdateNewDataQuestBoard")]
+    partial class UpdateNewDataQuestBoard
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1721,7 +1724,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             IsDeleted = false,
                             Name = "Tân thủ V",
                             TargetValue = 1,
-                            Token = 20,
+                            Token = 40,
                             Type = "BeginnerQuests"
                         },
                         new
@@ -2124,7 +2127,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            TargetValue = 7,
+                            TargetValue = 6,
                             Token = 40,
                             Type = "BeginnerQuests"
                         },

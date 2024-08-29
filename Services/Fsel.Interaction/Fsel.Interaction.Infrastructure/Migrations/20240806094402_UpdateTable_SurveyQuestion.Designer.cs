@@ -4,6 +4,7 @@ using Fsel.Interaction.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Interaction.Infrastructure.Migrations
 {
     [DbContext(typeof(InteractionDbContext))]
-    partial class InteractionDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240806094402_UpdateTable_SurveyQuestion")]
+    partial class UpdateTable_SurveyQuestion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1048,12 +1051,12 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Thông tin cá nhân",
+                            Description = "addd",
                             DisplayLevel = 1,
                             DisplayOrder = 5f,
                             Icon = "wideword.png",
                             IsDeleted = false,
-                            Question = "Thông tin cá nhân",
+                            Question = "Vị trí của bạn",
                             Type = "YourPlace"
                         },
                         new
@@ -1069,7 +1072,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Icon = "wideword.png",
                             IsDeleted = false,
                             IsPilot = false,
-                            Question = "Thông tin cá nhân và Trường học",
+                            Question = "Trường học của bạn",
                             Type = "Location"
                         },
                         new
@@ -1592,7 +1595,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Description = "addd",
                             IsDeleted = false,
                             Language = "vi-VN",
-                            Question = "Thông tin cá nhân và Trường học",
+                            Question = "Trường học của bạn",
                             SurveyQuestionId = new Guid("b223125a-a4e1-4e10-b4dd-cfcd747d74c5")
                         },
                         new
@@ -1605,7 +1608,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Description = "addd",
                             IsDeleted = false,
                             Language = "en-US",
-                            Question = "Personal Infomation And School",
+                            Question = "Your school",
                             SurveyQuestionId = new Guid("b223125a-a4e1-4e10-b4dd-cfcd747d74c5")
                         },
                         new
