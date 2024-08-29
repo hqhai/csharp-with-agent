@@ -169,7 +169,8 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
             await _orderService.CreateOrderForUserLeaderBoard(new CreateOrderForUserFromLeaderBoardCommandModel()
             {
                 UserId = user.Id,
-                Month = competitionEvent.EventContent?.PaymentMonth ?? default,
+                Month = competitionEvent.EventContent?.PaymentMonth,
+                ExpiredDate = competitionEvent.EventContent?.PaymentDate,
                 FullName = student.Human?.FullName,
                 Email = student.Human?.Email,
                 PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
