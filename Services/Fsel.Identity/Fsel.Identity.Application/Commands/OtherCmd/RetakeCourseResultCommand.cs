@@ -24,6 +24,8 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Models.ShareModels;
+    using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Net.Http.Headers;
@@ -44,12 +46,12 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
         private readonly IUserCourseSettingRepository _userCourseSettingRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly ILmsCourseService _lmsCourseService;
-        private readonly IMediator _mediator;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IEventRegistrationRepository _eventRegistrationRepository;
         private readonly ISystemService _systemService;
         private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
         public RetakeCourseResultCommandHandler(UserManager<User> userManager, AppSetting appSetting, ICompetitionEventsRepository competitionEventsRepository, IOrderService orderService, IUserCourseSettingRepository userCourseSettingRepository, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, MediatR.IMediator mediator, IHttpContextAccessor httpContextAccessor, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, ISystemService systemService, IEventRegistrationRepository eventRegistrationRepository, IMapper mapper)
         {
@@ -114,10 +116,11 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
                 return methodResult;
             }
 
-            var userCourseSetting = _userCourseSettingRepository.Queryable.FirstOrDefault(x => x.CourseLevel == student.CourseLevel && x.UserId == user.Id && x.Type == EnumUserCourseType.ResetAndLearnAgain);
-            if (userCourseSetting != null && userCourseSetting.Value <= 0)
+            var userCourseSetting = await _userCourseSettingRepository.Queryable.FirstOrDefaultAsync(x => x.CourseLevel == student.CourseLevel && x.UserId == user.Id && x.Type == EnumUserCourseType.ResetAndLearnAgain, cancellationToken);
+            var userCourseSettingModel = _mapper.Map<UserCourseSettingModel>(userCourseSetting);
+            if (!userCourseSettingModel.HasRemainingAttempts())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUserCourseSettingErrorCode.CurrentLevelHasNoRetakes));
+                methodResult.AddErrorBadRequest(nameof(EnumUserCourseSettingErrorCode.CurrentLevelHasNoRetakes), nameof(userCourseSetting));
                 return methodResult;
             }
 
@@ -166,7 +169,8 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
             await _orderService.CreateOrderForUserLeaderBoard(new CreateOrderForUserFromLeaderBoardCommandModel()
             {
                 UserId = user.Id,
-                Month = competitionEvent.EventContent?.PaymentMonth ?? default,
+                Month = competitionEvent.EventContent?.PaymentMonth,
+                ExpiredDate = competitionEvent.EventContent?.PaymentDate,
                 FullName = student.Human?.FullName,
                 Email = student.Human?.Email,
                 PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
