@@ -122,7 +122,7 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
             }
             var userCourseSetting = await _userCourseSettingRepository.Queryable.FirstOrDefaultAsync(x => x.CourseLevel == student.CourseLevel && x.UserId == user.Id && x.Type == EnumUserCourseType.ResetAndLearnAgain, cancellationToken);
             var userCourseSettingModel = _mapper.Map<UserCourseSettingModel>(userCourseSetting);
-            if (userCourseSettingModel.HasRemainingAttempts())
+            if (!userCourseSettingModel.HasRemainingAttempts())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUserCourseSettingErrorCode.CurrentLevelHasNoRetakes), nameof(userCourseSetting));
                 return methodResult;
