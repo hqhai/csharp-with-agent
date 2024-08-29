@@ -47,12 +47,6 @@ namespace Fsel.System.Application.Commands.LuckyTickets
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<VoidMethodResult>();
 
-            DateTime currentDate = DateTime.Now;
-            if (currentDate.Month != 8 || currentDate.Year != 2024)
-            {
-                return methodResult;
-            }
-
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentsResult.IsSuccessStatusCode)
             {
