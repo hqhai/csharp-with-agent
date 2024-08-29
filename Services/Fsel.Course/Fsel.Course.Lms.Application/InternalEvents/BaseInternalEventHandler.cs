@@ -481,7 +481,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             if (courseResult.Status != EnumResultStatus.Done)
             {
-                await SendStudentCompleteCourse(studentId, course.Id, courseResult, cancellationToken);
+                //await SendStudentCompleteCourse(studentId, course.Id, courseResult, cancellationToken);
 
                 await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel
                 {
