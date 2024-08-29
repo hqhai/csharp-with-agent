@@ -2,11 +2,14 @@
 
 namespace Fsel.Ordering.Application.Commands.VoucherCmds
 {
+    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.Ordering.Application.Services.SystemService;
+    using Fsel.Ordering.Application.Services.SystemService.Models;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Vouchers;
@@ -25,14 +28,14 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     {
         private readonly IVoucherRepository _voucherRepository;
         private readonly IPackageRepository _packageRepository;
-        private readonly AppSetting _appSetting;
+        private readonly ISystemService _systemService;
         private const string Name = "Voucher launching for MA";
 
-        public CreateVoucherForMasterAgencyCommandHandler(IVoucherRepository voucherRepository, IPackageRepository packageRepository, AppSetting appSetting)
+        public CreateVoucherForMasterAgencyCommandHandler(IVoucherRepository voucherRepository, IPackageRepository packageRepository, ISystemService systemService)
         {
             _voucherRepository = voucherRepository;
             _packageRepository = packageRepository;
-            _appSetting = appSetting;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateVoucherForMasterAgencyCommand request, CancellationToken cancellationToken)
@@ -75,10 +78,10 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             {
                 Name = Name,
                 Code = p,
-                Percent = _appSetting.VoucherConfigs?.VoucherForMasterAgency?.Percent ?? 0,
-                Quantity = _appSetting.VoucherConfigs?.VoucherForMasterAgency?.Quantity ?? 0,
+                Percent = request.Percent,
+                Quantity = request.Quantity,
                 StartDate = currentDate,
-                EndDate = _appSetting.VoucherConfigs?.VoucherForMasterAgency?.ExpiredDate,
+                EndDate = request.ExpiredDate,
                 VoucherType = EnumVoucherType.NewSale,
                 Source = EnumVoucherSource.MasterAgency,
                 SourceName = request.MasterAgency,
@@ -103,6 +106,15 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             {
                 await _voucherRepository.AddList(vouchers);
                 await _voucherRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                await _systemService.AddVouchersForMAIntoGGSheet(new AddVouchersForMAIntoGoogleSheetCommandModel()
+                {
+                    MACode = request.MasterAgency,
+                    Package = $"{request.Package} months",
+                    ExpiredDate = request.ExpiredDate.ToString("dd-MM-yyyy HH:mm:ss", CultureInfo.InvariantCulture),
+                    Vouchers = codes,
+                }).ConfigureAwait(false);
+
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = true;
                 return methodResult;
