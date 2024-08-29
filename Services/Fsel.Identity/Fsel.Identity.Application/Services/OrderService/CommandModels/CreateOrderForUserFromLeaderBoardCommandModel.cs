@@ -8,7 +8,8 @@ namespace Fsel.Identity.Application.Services.OrderService.CommandModels
     public class CreateOrderForUserFromLeaderBoardCommandModel
     {
         public Guid UserId { get; set; }
-        public int Month { get; set; }
+        public int? Month { get; set; }
+        public DateTime? ExpiredDate { get; set; }
         public string? FullName { get; set; }
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
