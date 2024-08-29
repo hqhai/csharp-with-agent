@@ -253,6 +253,20 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     return methodResult;
                 }
 
+                //var createSurveyResult = await _interactionService.CreateSurvey(new CreateCustomerSurveyCommandModel
+                //{
+                //    Email = user.Email,
+                //    UserId = user.Id,
+                //    Answers = new List<CreateSurveyCommandModel>
+                //    {
+                //        new CreateSurveyCommandModel
+                //        {
+                //            Id = Guid.Parse("492D8BB9-CDBE-42E7-AA16-35A1915C3621"),
+                //            Answer = new { Id = 1,Content = "Google",Image = "gmail-icon.svg"},
+                //        }
+                //    }
+                //});
+
                 _studentCompetitionEventsRepository.Add(new StudentCompetitionEvent()
                 {
                     StudentId = user.Human.Student.Id,
