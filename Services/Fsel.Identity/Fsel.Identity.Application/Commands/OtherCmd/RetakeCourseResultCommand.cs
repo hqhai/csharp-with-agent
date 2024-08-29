@@ -51,6 +51,7 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
         private readonly IEventRegistrationRepository _eventRegistrationRepository;
         private readonly ISystemService _systemService;
         private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
         public RetakeCourseResultCommandHandler(UserManager<User> userManager, AppSetting appSetting, ICompetitionEventsRepository competitionEventsRepository, IOrderService orderService, IUserCourseSettingRepository userCourseSettingRepository, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, MediatR.IMediator mediator, IHttpContextAccessor httpContextAccessor, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, ISystemService systemService, IEventRegistrationRepository eventRegistrationRepository, IMapper mapper)
         {
