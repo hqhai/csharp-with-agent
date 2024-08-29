@@ -103,7 +103,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             }
 
             var userCourseSettings = userCourseSettingsResult.Content?.Result;
-            if (!userCourseSettings.IsValidValue(EnumUserCourseType.ResetAndLearnAgain, request.CourseLevel))
+            if (!userCourseSettings.HasRemainingAttempts(EnumUserCourseType.ResetAndLearnAgain, request.CourseLevel))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.RetakesExpired), nameof(userCourseSettings));
                 return methodResult;

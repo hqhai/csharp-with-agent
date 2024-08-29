@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Lms.Application.Services.UserServices.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Models.ShareModels.EntityModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 

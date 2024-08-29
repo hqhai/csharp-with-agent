@@ -166,8 +166,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 }
                 else
                 {
-                    courseManager.IsChangeLevel = userCourseSettings.IsValidValue(EnumUserCourseType.ResetAndLearnAgain, courseResult.Course?.CourseLevel);
-                    courseManager.IsResetCourse = userCourseSettings.IsValidValue(EnumUserCourseType.ChangeLevel);
+                    courseManager.IsChangeLevel = userCourseSettings.HasRemainingAttempts(EnumUserCourseType.ResetAndLearnAgain, courseResult.Course?.CourseLevel);
+                    courseManager.IsResetCourse = userCourseSettings.HasRemainingAttempts(EnumUserCourseType.ChangeLevel);
                 }
                 courseManager.IsCheckPercentColor = await IsColorToPercentAsync(courseResult);
                 courseManagers.Add(courseManager);

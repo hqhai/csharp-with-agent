@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Fsel.Identity.Application.Commands.OtherCmd
 {
     using System.Linq.Dynamic.Core;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -23,6 +24,7 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Net.Http.Headers;
@@ -37,6 +39,7 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
     public class RetakeCourseResultCommandHandler : IRequestHandler<RetakeCourseResultCommand, MethodResult<string>>
     {
         private readonly UserManager<User> _userManager;
+        private readonly IMapper _mapper;
         private readonly AppSetting _appSetting;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
         private readonly IOrderService _orderService;
@@ -46,9 +49,10 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
         private readonly IMediator _mediator;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public RetakeCourseResultCommandHandler(UserManager<User> userManager, AppSetting appSetting, ICompetitionEventsRepository competitionEventsRepository, IOrderService orderService, IUserCourseSettingRepository userCourseSettingRepository, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, MediatR.IMediator mediator, IHttpContextAccessor httpContextAccessor)
+        public RetakeCourseResultCommandHandler(UserManager<User> userManager, IMapper mapper, AppSetting appSetting, ICompetitionEventsRepository competitionEventsRepository, IOrderService orderService, IUserCourseSettingRepository userCourseSettingRepository, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, MediatR.IMediator mediator, IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
+            _mapper = mapper;
             _appSetting = appSetting;
             _competitionEventsRepository = competitionEventsRepository;
             _orderService = orderService;
@@ -117,7 +121,8 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
                 return methodResult;
             }
             var userCourseSetting = await _userCourseSettingRepository.Queryable.FirstOrDefaultAsync(x => x.CourseLevel == student.CourseLevel && x.UserId == user.Id && x.Type == EnumUserCourseType.ResetAndLearnAgain, cancellationToken);
-            if (userCourseSetting.IsValidValue())
+            var userCourseSettingModel = _mapper.Map<UserCourseSettingModel>(userCourseSetting);
+            if (userCourseSettingModel.HasRemainingAttempts())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUserCourseSettingErrorCode.CurrentLevelHasNoRetakes), nameof(userCourseSetting));
                 return methodResult;
