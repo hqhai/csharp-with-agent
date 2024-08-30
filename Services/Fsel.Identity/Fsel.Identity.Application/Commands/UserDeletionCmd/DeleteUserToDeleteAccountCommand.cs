@@ -34,7 +34,7 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
 
             foreach (var userDeletion in userDeletions)
             {
-                await _mediator.Publish(new UpdateStatusUserDeletionCommand { Status = EnumUserDeletionStatus.Deleted, UserId = userDeletion.UserId }, cancellationToken);
+                await _mediator.Send(new UpdateStatusUserDeletionCommand { Status = EnumUserDeletionStatus.Deleted, UserId = userDeletion.UserId }, cancellationToken);
             }
 
             methodResult.Result = true;

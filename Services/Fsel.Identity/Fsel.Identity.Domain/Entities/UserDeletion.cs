@@ -28,6 +28,6 @@ namespace Fsel.Identity.Domain.Entities
         public DateTime DeletionDate { get; set; } = DateTime.UtcNow.AddDays(30);
         public EnumUserDeletionStatus Status { get; set; }
         public virtual User? User { get; set; }
-        public Guid UserId { get; set; }
+        public Guid? UserId { get; set; }
     }
 }

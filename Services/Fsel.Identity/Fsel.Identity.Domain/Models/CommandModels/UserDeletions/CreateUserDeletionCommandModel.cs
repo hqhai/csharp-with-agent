@@ -6,9 +6,8 @@ namespace Fsel.Identity.Domain.Models.CommandModels.UserDeletions
 
     public class CreateUserDeletionCommandModel
     {
+        public string? Password { get; set; }
         public EnumUserDeletionReason Reason { get; set; }
         public string? ReasonContent { get; set; }
-        public DateTime DeletionDate { get; set; }
-        public EnumUserDeletionStatus Status { get; set; }
     }
 }

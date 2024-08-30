@@ -4,16 +4,19 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Constants;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.UserDeletions;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Hosting;
 
     public class CreateUserDeletionCommand : CreateUserDeletionCommandModel, IRequest<MethodResult<bool>>
     {
@@ -22,13 +25,15 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
     public class CreateUserDeletionCommandHandler : IRequestHandler<CreateUserDeletionCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
+        private readonly IHostEnvironment _environment;
         private readonly IUserDeletionRepository _userDeletionRepository;
         private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
 
-        public CreateUserDeletionCommandHandler(UserManager<User> userManager, IUserDeletionRepository userDeletionRepository, AuthContext authContext, IMapper mapper)
+        public CreateUserDeletionCommandHandler(UserManager<User> userManager, IHostEnvironment environment, IUserDeletionRepository userDeletionRepository, AuthContext authContext, IMapper mapper)
         {
             _userManager = userManager;
+            _environment = environment;
             _userDeletionRepository = userDeletionRepository;
             _authContext = authContext;
             _mapper = mapper;
@@ -38,10 +43,21 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
+            if (string.IsNullOrEmpty(request.Password))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Password));
+                return methodResult;
+            }
             var user = await _userManager.FindByIdAsync(_authContext.CurrentUserId.ToString());
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
+                return methodResult;
+            }
+
+            if (!await _userManager.CheckPasswordAsync(user, request.Password))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OldPasswordIncorrect), nameof(user));
                 return methodResult;
             }
 
@@ -56,6 +72,11 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
             userDeletion.PhoneNumber = user.PhoneNumber;
             userDeletion.Email = user.Email;
             userDeletion.FullName = user.FullName;
+            userDeletion.UserId = user.Id;
+            if (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing) || _environment.IsStaging())
+            {
+                userDeletion.DeletionDate = DateTime.UtcNow.AddMinutes(10);
+            }
             if (!userDeletion.IsValid())
             {
                 methodResult.AddErrorBadRequest(userDeletion.ErrorMessages);

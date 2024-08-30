@@ -17,7 +17,7 @@ namespace Fsel.Identity.Infrastructure.Configs
             builder.HasOne(a => a.User)
                  .WithMany(b => b.UserDeletions)
                  .HasForeignKey(p => p.UserId)
-                 .OnDelete(DeleteBehavior.NoAction);
+                 .OnDelete(DeleteBehavior.SetNull);
 
             builder.Property(e => e.Status)
                    .HasMaxLength(100)
