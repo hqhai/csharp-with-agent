@@ -40,6 +40,9 @@
     <None Update="Resources\MailFromLandingPage.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\MailPaymentWithVoucher.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\MailRegisterEvent.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
