@@ -29,6 +29,7 @@ namespace Fsel.Shared.Constants
                 public const string AddExpiredDateForStudent = $"{KeyQueue}_AddExpiredDateForStudent";
                 public const string AddFeatureMission = $"{KeyQueue}_AddFeatureMission";
                 public const string JobRunEvents = $"{KeyQueue}_JobRunEvents";
+                public const string CheckUserDeletion = $"{KeyQueue}_CheckUserDeletion";
             }
         }
 
