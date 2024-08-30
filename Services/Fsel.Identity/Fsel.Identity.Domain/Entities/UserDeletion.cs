@@ -25,7 +25,7 @@ namespace Fsel.Identity.Domain.Entities
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? ReasonContent { get; set; }
 
-        public DateTime DeletionDate { get; set; } = DateTime.UtcNow.AddDays(30);
+        public DateTime DeletionDate { get; set; }
         public EnumUserDeletionStatus Status { get; set; }
         public virtual User? User { get; set; }
         public Guid? UserId { get; set; }

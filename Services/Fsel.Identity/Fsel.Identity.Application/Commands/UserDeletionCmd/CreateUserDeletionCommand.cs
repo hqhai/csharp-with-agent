@@ -13,6 +13,7 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.UserDeletions;
+    using Fsel.Identity.Infrastructure.ValueSettings;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -29,14 +30,22 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
         private readonly IUserDeletionRepository _userDeletionRepository;
         private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
+        private readonly AppSetting _appSetting;
 
-        public CreateUserDeletionCommandHandler(UserManager<User> userManager, IHostEnvironment environment, IUserDeletionRepository userDeletionRepository, AuthContext authContext, IMapper mapper)
+        public CreateUserDeletionCommandHandler(UserManager<User> userManager,
+            IHostEnvironment environment,
+            IUserDeletionRepository userDeletionRepository,
+            AuthContext authContext,
+            IMapper mapper,
+            AppSetting appSetting
+            )
         {
             _userManager = userManager;
             _environment = environment;
             _userDeletionRepository = userDeletionRepository;
             _authContext = authContext;
             _mapper = mapper;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateUserDeletionCommand request, CancellationToken cancellationToken)
@@ -57,7 +66,7 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
 
             if (!await _userManager.CheckPasswordAsync(user, request.Password))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIncorrect), nameof(user));
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIncorrect), nameof(request.Password));
                 return methodResult;
             }
 
@@ -73,11 +82,15 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
             userDeletion.Email = user.Email;
             userDeletion.FullName = user.FullName;
             userDeletion.UserId = user.Id;
+
             if (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing) || _environment.IsStaging())
             {
-                userDeletion.DeletionDate = DateTime.UtcNow.AddMinutes(10);
+                userDeletion.DeletionDate = DateTime.UtcNow.AddMinutes(_appSetting.DaysInfo?.MinutesUntilUserDeletion ?? default);
             }
-
+            else
+            {
+                userDeletion.DeletionDate = DateTime.UtcNow.AddDays(_appSetting.DaysInfo?.DaysUntilUserDeletion ?? default);
+            }
             if (!userDeletion.IsValid())
             {
                 methodResult.AddErrorBadRequest(userDeletion.ErrorMessages);
