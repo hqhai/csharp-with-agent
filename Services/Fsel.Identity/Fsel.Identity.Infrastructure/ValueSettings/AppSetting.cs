@@ -12,7 +12,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public ResourceContent? ResourceContent { get; set; }
         public new Services? Services { get; set; }
         public GoogleSheetConfig? GoogleSheetConfig { get; set; }
-        public DaysInfo? DaysInfo { get; set; }
+        public UserDeletionConfig? UserDeletionConfig { get; set; }
     }
 
     public class ResourceContent
@@ -57,9 +57,9 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public string? SchoolStudentSheetId { get; set; }
     }
 
-    public class DaysInfo
+    public class UserDeletionConfig
     {
-        public int DaysUntilUserDeletion { get; set; }
-        public int MinutesUntilUserDeletion { get; set; }
+        public int DeletionDays { get; set; }
+        public int DeletionMinutes { get; set; }
     }
 }
