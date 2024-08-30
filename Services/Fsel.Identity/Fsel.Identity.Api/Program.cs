@@ -54,6 +54,7 @@ builder.Services.AddScoped<IStudentCompetitionEventsRepository, StudentCompetiti
 builder.Services.AddScoped<IStudentRankingEventRepository, StudentRankingEventRepository>();
 builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
 builder.Services.AddScoped<IEventRegistrationRepository, EventRegistrationRepository>();
+builder.Services.AddScoped<IUserDeletionRepository, UserDeletionRepository>();
 
 //Publisher
 builder.Services.AddScoped<QuestBoardPublisher>();
@@ -85,6 +86,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.StudentRankingEvent, typeof(StudentRankingEventsConsumer) },
     { QueueSettings.UserQueue.NameQueue.AddFeatureMission, typeof(AddFeatureMissionConsumer) },
     { QueueSettings.UserQueue.NameQueue.JobRunEvents, typeof(JobRunEventsConsumer) },
+    { QueueSettings.UserQueue.NameQueue.DeleteAccount, typeof(DeleteAccountConsumer) }
 });
 var app = builder.Build();
 app.UseServices();
