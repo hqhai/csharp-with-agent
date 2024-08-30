@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
+namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
 {
     using System.Globalization;
     using System.Threading;
@@ -8,40 +8,47 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.ActionResults;
     using Fsel.Ordering.Application.Services.SenderService;
     using Fsel.Ordering.Application.Services.UserService;
-    using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class SendMailPaymentCommand : IRequest<MethodResult<VoidMethodResult>>
+    public class SendMailPaymentWithVoucherCommand : IRequest<MethodResult<VoidMethodResult>>
     {
         public Guid OrderId { get; set; }
+        public Guid VoucherId { get; set; }
     }
 
-    public class SendMailPaymentCommandHandler : IRequestHandler<SendMailPaymentCommand, MethodResult<VoidMethodResult>>
+    public class SendMailPaymentWithVoucherCommandHandler : IRequestHandler<SendMailPaymentWithVoucherCommand, MethodResult<VoidMethodResult>>
     {
         private readonly ISenderServices _serverServices;
         private readonly IOrderRepository _orderRepository;
         private readonly IUserService _userService;
         private readonly AppSetting _appSetting;
+        private readonly IVoucherRepository _voucherRepository;
 
-        public SendMailPaymentCommandHandler(ISenderServices serverServices, IOrderRepository orderRepository, IUserService userService, AppSetting appSetting)
+        public SendMailPaymentWithVoucherCommandHandler(ISenderServices serverServices, IOrderRepository orderRepository, IUserService userService, AppSetting appSetting, IVoucherRepository voucherRepository)
         {
             _serverServices = serverServices;
             _orderRepository = orderRepository;
             _userService = userService;
             _appSetting = appSetting;
+            _voucherRepository = voucherRepository;
         }
 
-        public async Task<MethodResult<VoidMethodResult>> Handle(SendMailPaymentCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<VoidMethodResult>> Handle(SendMailPaymentWithVoucherCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<VoidMethodResult>();
 
             var order = await _orderRepository.Queryable.Include(p => p.Package).FirstOrDefaultAsync(p => p.Id == request.OrderId, cancellationToken);
             if (order == null)
+            {
+                return methodResult;
+            }
+            var voucher = await _voucherRepository.Queryable.FirstOrDefaultAsync(p => p.Id == request.VoucherId, cancellationToken);
+            if (voucher == null)
             {
                 return methodResult;
             }
@@ -57,20 +64,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             }
 
             var expiredDate = !student.ExpiredDate.HasValue ? string.Empty : student.ExpiredDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
-
-            await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
-            {
-                ToEmails = new List<string> { student.Human?.Email ?? string.Empty },
-                Subject = "Chào mừng bạn đến với FSEL!",
-                Params = new
-                {
-                    FullName = student.Human?.FullName,
-                    OrderCode = order.Code,
-                    ExpiredDate = expiredDate,
-                    ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
-                },
-                Template = EnumSenderTemplate.MailPaymentForStudent
-            });
 
             var updatedDate = !order.UpdatedDate.HasValue ? string.Empty : order.UpdatedDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
@@ -90,34 +83,16 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     Discount = order.DiscountPrice,
                     CreatedDate = updatedDate,
                     ExpiredDate = expiredDate,
-                    Package = GetPackageName(order.Package),
+                    Package = order.Package?.MonthNumber,
                     Price = price.ToString(CultureInfo.InvariantCulture),
                     TotalPrice = totalPrice.ToString(CultureInfo.InvariantCulture),
-                    ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
+                    ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                    Voucher = voucher.Code,
+                    Date = _appSetting.VoucherConfigs?.VoucherForRetail?.StartDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
                 },
-                Template = EnumSenderTemplate.MailPaymentForCustomer
+                Template = EnumSenderTemplate.MailPaymentWithVoucher
             });
             return methodResult;
-        }
-
-        private static string GetPackageName(Package? package)
-        {
-            if (package == null)
-            {
-                return string.Empty;
-            }
-            if (package.MonthNumber == 1)
-            {
-                return "1 month";
-            }
-            else if (package.MonthNumber == 6)
-            {
-                return "6 months";
-            }
-            else
-            {
-                return "12 months";
-            }
         }
     }
 }
