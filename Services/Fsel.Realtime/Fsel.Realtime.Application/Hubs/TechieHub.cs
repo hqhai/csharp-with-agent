@@ -43,7 +43,7 @@ namespace Fsel.Realtime.Application.Hubs
         public async Task TechieSendAction(string modelStr)
         {
             string acceptLanguage = _httpContextAccessor.HttpContext!.Request.Headers.AcceptLanguage.ToString();
-            _logger.LogInformation($"Start Invoke Techie!: {modelStr},{acceptLanguage}");
+            _logger.LogInformation($"Start Invoke Techie!: {modelStr},Accept-Language:{acceptLanguage}");
             var model = ConvertHelper.Deserialize<StudentTechieActionModel>(modelStr);
             await _actionPublisher.Publish(model, CancellationToken.None);
         }
