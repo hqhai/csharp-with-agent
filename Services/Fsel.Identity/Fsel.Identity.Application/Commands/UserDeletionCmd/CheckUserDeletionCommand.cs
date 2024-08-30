@@ -9,23 +9,23 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class DeleteUserToDeleteAccountCommand : IRequest<MethodResult<bool>>
+    public class CheckUserDeletionCommand : IRequest<MethodResult<bool>>
     {
     }
 
-    public class DeleteUserToDeleteAccountCommandHandler : IRequestHandler<DeleteUserToDeleteAccountCommand, MethodResult<bool>>
+    public class CheckUserDeletionCommandHandler : IRequestHandler<CheckUserDeletionCommand, MethodResult<bool>>
     {
         private readonly IUserDeletionRepository _userDeletionRepository;
         private readonly IMediator _mediator;
 
-        public DeleteUserToDeleteAccountCommandHandler(IUserDeletionRepository userDeletionRepository,
+        public CheckUserDeletionCommandHandler(IUserDeletionRepository userDeletionRepository,
             IMediator mediator)
         {
             _userDeletionRepository = userDeletionRepository;
             _mediator = mediator;
         }
 
-        public async Task<MethodResult<bool>> Handle(DeleteUserToDeleteAccountCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(CheckUserDeletionCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();

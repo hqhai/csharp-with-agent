@@ -143,5 +143,10 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// Password is not valid
         /// </summary>
         PasswordIsNotValid,
+
+        /// <summary>
+        /// Password is incorrect
+        /// </summary>
+        PasswordIncorrect,
     }
 }

@@ -24,7 +24,7 @@ namespace Fsel.Hangfire.Host.Jobs
             //JobExtensions.SetRecurringJob<JobActiveEventWorker>(WorkerSettings.JobName.ActiveEvent, Cron.Daily(17, 0));
             JobExtensions.SetRecurringJob<JobRunEventsWorker>(WorkerSettings.JobName.RunEvents, Cron.Daily(17, 0));
             JobExtensions.SetRecurringJob<WeeklySnapShotLeaderBoardWorker>(WorkerSettings.JobName.WeeklySnapShot, Cron.Weekly(DayOfWeek.Sunday, 23, 30), EnumCountryKey.Vietnam.FindSystemTimeZoneInfo());
-            JobExtensions.SetRecurringJob<DeleteAccountWorker>(WorkerSettings.JobName.DeleteAccountJob, Cron.Daily());
+            JobExtensions.SetRecurringJob<CheckUserDeletionWorker>(WorkerSettings.JobName.CheckUserDeletionJob, Cron.Daily());
             //JobExtensions.SetRecurringJob<TestWorker>(WorkerSettings.JobName.TestWorkerJob, Cron.Daily);
         }
     }
