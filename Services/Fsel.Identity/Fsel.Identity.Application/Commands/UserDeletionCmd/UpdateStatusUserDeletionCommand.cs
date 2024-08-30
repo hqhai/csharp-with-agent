@@ -55,7 +55,7 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
                 var deleteAccountResult = await _mediator.Send(new AdminCmd.DeleteUserCommand { Id = userId, IsHashDelete = true }, cancellationToken);
                 if (!deleteAccountResult.IsOK)
                 {
-                    methodResult.AddErrorBadRequest(deleteAccountResult.ErrorMessages);
+                    methodResult.AddError(deleteAccountResult.ErrorMessages);
                     return methodResult;
                 }
             }

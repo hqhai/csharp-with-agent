@@ -27,8 +27,7 @@ namespace Fsel.Shared.Constants
                 public const string SendNotification = $"{KeyQueue}_SendNotification";
                 public const string CreateTokenHistory = $"{KeyQueue}_CreateTokenHistory";
                 public const string AddExpiredDateForStudent = $"{KeyQueue}_AddExpiredDateForStudent";
-                public const string SetTimeToDeleteAccount = $"{KeyQueue}_SetTimeToDeleteAccount";
-                public const string DeleteAccount = $"{KeyQueue}_DeleteAccount";
+                public const string CheckUserDeletion = $"{KeyQueue}_CheckUserDeletion";
             }
         }
 

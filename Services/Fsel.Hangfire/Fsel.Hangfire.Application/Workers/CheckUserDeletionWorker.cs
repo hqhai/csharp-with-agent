@@ -5,11 +5,11 @@ namespace Fsel.Hangfire.Application.Workers
     using Fsel.Core.Base.Interfaces;
     using Fsel.Hangfire.Application.Queues.Publishers;
 
-    public class DeleteAccountWorker : IWorker
+    public class CheckUserDeletionWorker : IWorker
     {
-        private readonly DeleteAccountPublisher _deleteAccountPublisher;
+        private readonly CheckUserDeletionPublisher _deleteAccountPublisher;
 
-        public DeleteAccountWorker(DeleteAccountPublisher deleteAccountPublisher)
+        public CheckUserDeletionWorker(CheckUserDeletionPublisher deleteAccountPublisher)
         {
             _deleteAccountPublisher = deleteAccountPublisher;
         }

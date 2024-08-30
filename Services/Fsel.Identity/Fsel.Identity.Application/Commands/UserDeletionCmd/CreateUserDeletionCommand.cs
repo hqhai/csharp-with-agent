@@ -57,7 +57,7 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
 
             if (!await _userManager.CheckPasswordAsync(user, request.Password))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OldPasswordIncorrect), nameof(user));
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIncorrect), nameof(user));
                 return methodResult;
             }
 
@@ -77,6 +77,7 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
             {
                 userDeletion.DeletionDate = DateTime.UtcNow.AddMinutes(10);
             }
+
             if (!userDeletion.IsValid())
             {
                 methodResult.AddErrorBadRequest(userDeletion.ErrorMessages);

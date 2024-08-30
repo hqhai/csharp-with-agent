@@ -9,18 +9,18 @@ namespace Fsel.Identity.Application.Queues.Consumers
     using Fsel.Identity.Application.Commands.UserDeletionCmd;
     using MediatR;
 
-    public class DeleteAccountConsumer : BaseConsumer<BaseQueueModel>
+    public class CheckUserDeletionConsumer : BaseConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public DeleteAccountConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
+        public CheckUserDeletionConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }
 
         public override async Task ConsumeQueue(BaseQueueModel? message)
         {
-            await _mediator.Send(new DeleteUserToDeleteAccountCommand()).ConfigureAwait(false);
+            await _mediator.Send(new CheckUserDeletionCommand()).ConfigureAwait(false);
         }
     }
 }

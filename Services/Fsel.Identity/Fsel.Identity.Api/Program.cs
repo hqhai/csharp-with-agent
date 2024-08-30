@@ -80,7 +80,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
     { QueueSettings.TrainingQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
     { QueueSettings.UserQueue.NameQueue.AddExpiredDateForStudent, typeof(AddExpiredDateForStudentConsumer) },
-    { QueueSettings.UserQueue.NameQueue.DeleteAccount, typeof(DeleteAccountConsumer) }
+    { QueueSettings.UserQueue.NameQueue.CheckUserDeletion, typeof(CheckUserDeletionConsumer) }
 });
 var app = builder.Build();
 app.UseServices();
