@@ -52,10 +52,10 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(userDeletion.DeletionDate));
                     return methodResult;
                 }
-                var deleteAccountResult = await _mediator.Send(new AdminCmd.DeleteUserCommand { Id = userId, IsHashDelete = true }, cancellationToken);
-                if (!deleteAccountResult.IsOK)
+                var deleteUserResult = await _mediator.Send(new AdminCmd.DeleteUserCommand { Id = userId, IsHashDelete = true }, cancellationToken);
+                if (!deleteUserResult.IsOK)
                 {
-                    methodResult.AddError(deleteAccountResult.ErrorMessages);
+                    methodResult.AddError(deleteUserResult.ErrorMessages);
                     return methodResult;
                 }
             }
