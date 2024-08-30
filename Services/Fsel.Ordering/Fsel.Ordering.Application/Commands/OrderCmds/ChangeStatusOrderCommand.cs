@@ -10,6 +10,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Commands.OrderCmds.v1i1;
+    using Fsel.Ordering.Application.Commands.OrderCmds.V1i2;
     using Fsel.Ordering.Application.Commands.UserRefferalCmd;
     using Fsel.Ordering.Application.Commands.VoucherCmds;
     using Fsel.Ordering.Application.Queues.Publishers;
@@ -190,18 +191,6 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                             PlatformCode = EnumPlatformCode.LMS
                         }, cancellationToken);
                     }
-
-                    var createDate = order.CreatedDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
-                    var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
-
-                    if (!order.VoucherId.HasValue && _appSetting.VoucherConfigs?.VoucherForRetail?.StartDate <= createDate && _appSetting.VoucherConfigs.VoucherForRetail.EndDate >= createDate && currentDate < _appSetting.VoucherConfigs.VoucherForRetail.ExpiredDate)
-                    {
-                        await _mediator.Send(new CreateVoucherForRetailCommand()
-                        {
-                            UserId = order.UserId,
-                            PackageId = order.PackageId ?? default,
-                        }, cancellationToken).ConfigureAwait(false);
-                    }
                 }
                 order.OrderTransactions.Add(new OrderTransaction()
                 {
@@ -218,12 +207,32 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
 
                 if (order.Status == EnumOrderStatus.Payment)
                 {
-                    //await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
                     await _mediator.Send(new AddFeatureMissionCommand()
                     {
                         ReceiverId = order.UserId,
                         FeatureUserReferral = EnumFeatureUserReferral.Payment
                     }, cancellationToken).ConfigureAwait(false);
+
+                    var createDate = order.CreatedDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+                    var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+                    Guid voucherId = default;
+
+                    if (!order.VoucherId.HasValue && _appSetting.VoucherConfigs?.VoucherForRetail?.StartDate <= createDate && _appSetting.VoucherConfigs.VoucherForRetail.EndDate >= createDate && currentDate < _appSetting.VoucherConfigs.VoucherForRetail.ExpiredDate)
+                    {
+                        var voucher = await _mediator.Send(new CreateVoucherForRetailCommand()
+                        {
+                            UserId = order.UserId,
+                            PackageId = order.PackageId ?? default,
+                        }, cancellationToken).ConfigureAwait(false);
+                        voucherId = voucher.Result?.Id ?? default;
+
+                        await _mediator.Send(new SendMailPaymentWithVoucherCommand() { OrderId = order.Id, VoucherId = voucherId }).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        //await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
+                    }
                 }
 
                 #endregion Gửi mail thanh toán

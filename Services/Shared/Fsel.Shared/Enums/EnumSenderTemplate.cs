@@ -24,6 +24,7 @@ namespace Fsel.Shared.Enums
         PaymentApproval,
         MailPaymentForStudent,
         MailPaymentForCustomer,
-        MailFromLandingPage
+        MailFromLandingPage,
+        MailPaymentWithVoucher
     }
 }
