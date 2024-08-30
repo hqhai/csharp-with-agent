@@ -4,7 +4,6 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Constants;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
@@ -17,7 +16,6 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Hosting;
 
     public class CreateUserDeletionCommand : CreateUserDeletionCommandModel, IRequest<MethodResult<bool>>
     {
@@ -26,14 +24,12 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
     public class CreateUserDeletionCommandHandler : IRequestHandler<CreateUserDeletionCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly IHostEnvironment _environment;
         private readonly IUserDeletionRepository _userDeletionRepository;
         private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
         private readonly AppSetting _appSetting;
 
         public CreateUserDeletionCommandHandler(UserManager<User> userManager,
-            IHostEnvironment environment,
             IUserDeletionRepository userDeletionRepository,
             AuthContext authContext,
             IMapper mapper,
@@ -41,7 +37,6 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
             )
         {
             _userManager = userManager;
-            _environment = environment;
             _userDeletionRepository = userDeletionRepository;
             _authContext = authContext;
             _mapper = mapper;
@@ -82,15 +77,9 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
             userDeletion.Email = user.Email;
             userDeletion.FullName = user.FullName;
             userDeletion.UserId = user.Id;
+            userDeletion.DeletionDate = DateTime.UtcNow.AddDays(_appSetting.UserDeletionConfig?.DeletionDays ?? default)
+                                                       .AddMinutes(_appSetting.UserDeletionConfig?.DeletionMinutes ?? default);
 
-            if (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing) || _environment.IsStaging())
-            {
-                userDeletion.DeletionDate = DateTime.UtcNow.AddMinutes(_appSetting.DaysInfo?.MinutesUntilUserDeletion ?? default);
-            }
-            else
-            {
-                userDeletion.DeletionDate = DateTime.UtcNow.AddDays(_appSetting.DaysInfo?.DaysUntilUserDeletion ?? default);
-            }
             if (!userDeletion.IsValid())
             {
                 methodResult.AddErrorBadRequest(userDeletion.ErrorMessages);
