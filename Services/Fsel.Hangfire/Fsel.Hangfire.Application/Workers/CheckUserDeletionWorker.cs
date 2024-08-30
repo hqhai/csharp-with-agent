@@ -7,16 +7,16 @@ namespace Fsel.Hangfire.Application.Workers
 
     public class CheckUserDeletionWorker : IWorker
     {
-        private readonly CheckUserDeletionPublisher _deleteAccountPublisher;
+        private readonly CheckUserDeletionPublisher _checkUserDeletionPublisher;
 
-        public CheckUserDeletionWorker(CheckUserDeletionPublisher deleteAccountPublisher)
+        public CheckUserDeletionWorker(CheckUserDeletionPublisher checkUserDeletionPublisher)
         {
-            _deleteAccountPublisher = deleteAccountPublisher;
+            _checkUserDeletionPublisher = checkUserDeletionPublisher;
         }
 
         public async Task RunAsync()
         {
-            await _deleteAccountPublisher.Publish(CancellationToken.None);
+            await _checkUserDeletionPublisher.Publish(CancellationToken.None);
         }
     }
 }
