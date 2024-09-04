@@ -12,6 +12,7 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
     using Fsel.Ordering.Application.Queries.Events;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -53,7 +54,8 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
                 return methodResult;
             }
 
-            var packages = await _packageRepository.Queryable.ToListAsync(cancellationToken);
+            var eventModel = _mapper.Map<EventModel>(@event);
+            var packages = await _packageRepository.Queryable.Where(p => p.Status == EnumPackageStatus.Active).ToListAsync(cancellationToken);
 
             foreach (var item in @event.PackageEvents)
             {
