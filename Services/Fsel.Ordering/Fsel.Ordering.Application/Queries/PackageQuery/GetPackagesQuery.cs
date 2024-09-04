@@ -62,8 +62,7 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
                 var package = packages.FirstOrDefault(p => p.Id == item.PackageId);
                 if (package == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
-                    return methodResult;
+                    continue;
                 }
                 var packageModel = _mapper.Map<PackageModel>(package);
                 packageModel.EventId = eventModel.Id;
