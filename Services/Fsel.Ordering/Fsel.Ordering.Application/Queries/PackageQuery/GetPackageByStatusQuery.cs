@@ -33,7 +33,7 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<List<PackageModel>>();
 
-            var packages = await _packageRepository.Queryable.Where(p => p.Status == EnumPackageStatus.Active).ToListAsync(cancellationToken);
+            var packages = await _packageRepository.Queryable.ToListAsync(cancellationToken);
 
             if (request.Status.HasValue)
             {
