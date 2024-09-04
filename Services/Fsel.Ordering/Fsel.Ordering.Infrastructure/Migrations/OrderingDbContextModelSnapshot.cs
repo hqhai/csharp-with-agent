@@ -615,7 +615,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             Price = 7200000m,
                             PriceMonth = 300000m,
                             Status = "Active",
-                            ReferToken = 720000
+                            ReferToken = 720000 
                         });
                 });
 
