@@ -66,13 +66,13 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
                     return methodResult;
                 }
                 var packageModel = _mapper.Map<PackageModel>(package);
-                packageModel.EventId = @event.Id;
+                packageModel.EventId = eventModel.Id;
                 packageModel.Price = item.Price;
                 packageModel.PriceMonth = item.PriceMonth;
                 packageModel.MonthBonus = item.MonthBonus;
                 packageModel.DayBonus = item.DayBonus;
-                packageModel.ImagePaths = @event.ImagePaths;
-                packageModel.EventDescription = @event.Description;
+                packageModel.ImagePaths = eventModel.ImagePaths;
+                packageModel.EventDescription = eventModel.Description;
                 packageModel.Suggests = item.Suggests;
                 packageModels.Add(packageModel);
             }
