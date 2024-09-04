@@ -4,6 +4,7 @@ using Fsel.Ordering.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingDbContext))]
-    partial class OrderingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240904065717_Update_PackageTable_Add_Field_Status")]
+    partial class Update_PackageTable_Add_Field_Status
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -253,10 +256,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<string>("CompanyEmail")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
                     b.Property<string>("CompanyName")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -351,10 +350,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<string>("RevenueType")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -379,16 +374,11 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("VoucherId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("EventId");
 
                     b.HasIndex("PackageId");
-
-                    b.HasIndex("VoucherId");
 
                     b.ToTable("Orders");
                 });
@@ -531,9 +521,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<decimal>("PriceMonth")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("ReferToken")
-                        .HasColumnType("int");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -570,7 +557,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             Name = "Fsel_1_Month",
                             Price = 500000m,
                             PriceMonth = 500000m,
-                            ReferToken = 50000,
                             Status = "InActive"
                         },
                         new
@@ -586,7 +572,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             Name = "Fsel_6_Months",
                             Price = 2400000m,
                             PriceMonth = 400000m,
-                            ReferToken = 240000,
                             Status = "Active"
                         },
                         new
@@ -602,7 +587,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             Name = "Fsel_12_Months",
                             Price = 3600000m,
                             PriceMonth = 300000m,
-                            ReferToken = 360000,
                             Status = "Active"
                         },
                         new
@@ -618,7 +602,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             Name = "Fsel_24_Months",
                             Price = 7200000m,
                             PriceMonth = 300000m,
-                            ReferToken = 720000,
                             Status = "Active"
                         });
                 });
@@ -1095,10 +1078,11 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
+                    b.Property<string>("ContentFilePath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CourseLevelsStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -1113,6 +1097,9 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<Guid>("CreatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
+
+                    b.Property<string>("CustomerTypesStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
@@ -1130,34 +1117,22 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
+                    b.Property<bool>("IsGlobal")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
-                    b.Property<int>("Percent")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Source")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("SourceName")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<Guid?>("SourceUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("StartDate")
+                    b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -1172,11 +1147,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<Guid?>("UpdatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
-
-                    b.Property<string>("VoucherType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -1223,6 +1193,9 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.Property<Guid>("PackageId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("Percentage")
+                        .HasColumnType("float");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -1272,15 +1245,9 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasForeignKey("PackageId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Fsel.Ordering.Domain.Entities.Voucher", "Voucher")
-                        .WithMany("Orders")
-                        .HasForeignKey("VoucherId");
-
                     b.Navigation("Event");
 
                     b.Navigation("Package");
-
-                    b.Navigation("Voucher");
                 });
 
             modelBuilder.Entity("Fsel.Ordering.Domain.Entities.OrderTransaction", b =>
@@ -1380,8 +1347,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Ordering.Domain.Entities.Voucher", b =>
                 {
-                    b.Navigation("Orders");
-
                     b.Navigation("UserVouchers");
 
                     b.Navigation("VoucherPackages");

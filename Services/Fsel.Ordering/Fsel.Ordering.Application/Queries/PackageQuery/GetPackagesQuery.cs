@@ -12,6 +12,7 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
     using Fsel.Ordering.Application.Queries.Events;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -53,24 +54,24 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
                 return methodResult;
             }
 
-            var packages = await _packageRepository.Queryable.ToListAsync(cancellationToken);
+            var eventModel = _mapper.Map<EventModel>(@event);
+            var packages = await _packageRepository.Queryable.Where(p => p.Status == EnumPackageStatus.Active).ToListAsync(cancellationToken);
 
             foreach (var item in @event.PackageEvents)
             {
                 var package = packages.FirstOrDefault(p => p.Id == item.PackageId);
                 if (package == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
-                    return methodResult;
+                    continue;
                 }
                 var packageModel = _mapper.Map<PackageModel>(package);
-                packageModel.EventId = @event.Id;
+                packageModel.EventId = eventModel.Id;
                 packageModel.Price = item.Price;
                 packageModel.PriceMonth = item.PriceMonth;
                 packageModel.MonthBonus = item.MonthBonus;
                 packageModel.DayBonus = item.DayBonus;
-                packageModel.ImagePaths = @event.ImagePaths;
-                packageModel.EventDescription = @event.Description;
+                packageModel.ImagePaths = eventModel.ImagePaths;
+                packageModel.EventDescription = eventModel.Description;
                 packageModel.Suggests = item.Suggests;
                 packageModels.Add(packageModel);
             }
