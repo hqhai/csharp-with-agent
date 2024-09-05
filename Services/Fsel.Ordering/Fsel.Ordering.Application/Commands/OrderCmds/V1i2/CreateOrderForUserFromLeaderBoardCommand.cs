@@ -84,7 +84,17 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             }
 
-            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.MonthNumber == request.Month, cancellationToken);
+            Package? package = null;
+
+            if (request.Month.HasValue)
+            {
+                package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.MonthNumber == request.Month.Value, cancellationToken);
+            }
+            else
+            {
+                package = await _packageRepository.Queryable.OrderByDescending(p => p.MonthNumber).FirstOrDefaultAsync(cancellationToken);
+            }
+
             if (package == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
@@ -153,8 +163,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
             {
                 StudentId = student!.Id,
-                Month = package.MonthNumber,
-                Day = 0
+                Month = request.ExpiredDate.HasValue ? null : package.MonthNumber,
+                Day = request.ExpiredDate.HasValue ? null : 0,
+                ExpiredDate = request.ExpiredDate.HasValue ? request.ExpiredDate.Value : DateTime.UtcNow,
             }, cancellationToken);
 
             return methodResult;
