@@ -30,7 +30,6 @@ namespace Fsel.Identity.Application.Queues.Consumers
                     OverallScore = message.OverallScore
                 }).ConfigureAwait(false);
             }
-
         }
     }
 }
