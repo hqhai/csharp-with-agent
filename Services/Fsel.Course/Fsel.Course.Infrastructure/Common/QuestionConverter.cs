@@ -51,13 +51,34 @@ namespace Fsel.Course.Infrastructure.Common
             (question.Config, question.CorrectTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isShowCorrectTotal);
             if (question.Config == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), new Error[]{
+                    new Error
+                    {
+                        FieldName = nameof(question.Config)
+                    },
+                    new Error
+                    {
+                        FieldName = nameof(question.QuestionType),
+                        ErrorValues = new List<object>{ question.QuestionType }
+                    }
+                });
                 return methodResult;
             }
             var isError = _questionTypeConverter.ValidateQuestion(question.Config, question.QuestionType);
             if (isError)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigInvalidFormat), nameof(question.Config), question.Config);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigInvalidFormat), new Error[]{
+                    new Error
+                    {
+                        FieldName = nameof(question.Config),
+                        ErrorValues = new List<object>{ question.Config}
+                    },
+                    new Error
+                    {
+                        FieldName = nameof(question.QuestionType),
+                        ErrorValues = new List<object>{ question.QuestionType }
+                    }
+                });
                 return methodResult;
             }
             if (!question.IsValid())
