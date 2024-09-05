@@ -1571,6 +1571,11 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
