@@ -33,6 +33,10 @@ namespace Fsel.Shared.Constants
         public const string NoBorderLeft = "0px 100px 100px 0px";
 
         public const string Skill = "Resources//MailTemplates//Skill.html";
+        public const string CourseSkill = "Resources//MailTemplates//CourseSkill.html";
+        public const string UnitNumber = "Resources//MailTemplates//UnitNumber.html";
+        public const string Chart = "Resources//MailTemplates//Chart.html";
+        public const string MockTestSkill = "Resources//MailTemplates//MockTestSkill.html";
         public const string CompareSkill = "Resources//MailTemplates//CompareSkill.html";
         public const string TeachersInFo = "Resources//MailTemplates//TeachersInfo.html";
         public const string CoursePreA1 = "Resources//MailTemplates//CoursePreA1.html";
@@ -75,5 +79,16 @@ namespace Fsel.Shared.Constants
         public const string MS1Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/MS1Photo_1713325276.png";
         public const string MS2Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/MS2Photo_1713325287.png";
         public const string MS3Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/MS3Photo_1713325299.png";
+        public const string BackgroundVerticalGreen = "https://s3-sgn10.fptcloud.com/fsel/Files/Result_Round_7_9903_1721731832148.png";
+        public const string BackgroundVerticalOrange = "https://s3-sgn10.fptcloud.com/fsel/Files/Result_Round_5_3096_1721731831875.png";
+
+        public const string Conquer = "Bạn đã chinh phục toàn bộ <span style=\"color: #809fe5\">{0} hành tinh</span> của khóa học <span style=\"color: #809fe5\">{1}</span>";
+        public const string ConquerC1 = "Bạn đã chinh phục khóa học <span style=\"color: #809fe5\">C1</span> thành công!";
+        public const string ConquerIELTS = "Bạn đã chinh phục toàn bộ <span style=\"color: #809fe5\">giáo trình IELTS</span>";
+        public const string Discover = "Vẫn còn rất nhiều hành tinh mới chờ bạn khám phá. Cùng FSEL tiếp tục hành trình nào!";
+        public const string DiscoverIELTS = "Với trình độ hiện tại của bạn, bạn đã sẵn sàng để tham dự kỳ thi cấp chứng chỉ quốc tế, hoặc bạn có thể ôn lại khoá học để củng cố kiến thức của mình.";
+        public const string DiscoverC1 = "Bạn có thể tiếp tục nâng cao kiến thức với giáo trình IELTS của Fsel nhé.";
+        public const string ReviewGood = "Kết quả thể hiện sự nỗ lực của bạn. Hãy duy trì và cố gắng hơn trong chặng đường sắp tới nhé!";
+        public const string ReviewBad = "Kết quả thể hiện sự nỗ lực của bạn. Hãy cố gắng đạt mục tiêu trong chặng đường sắp tới nhé!";
     }
 }

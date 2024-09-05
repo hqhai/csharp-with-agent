@@ -53,6 +53,7 @@ builder.Services.AddScoped<IExtraPracticeResultRepository, ExtraPracticeResultRe
 builder.Services.AddScoped<IExtraPracticeAnswerRepository, ExtraPracticeAnswerRepository>();
 builder.Services.AddScoped<IExtraPracticeChapterRepository, ExtraPracticeChapterRepository>();
 builder.Services.AddScoped<BaseInternalUnitResultEventHandler>();
+builder.Services.AddScoped<BaseInternalEventHandler>();
 builder.Services.AddScoped<MockTestResultInputThenUpdateUnitResultHandler>();
 
 builder.Services.AddScoped<IClassForumRepository, ClassForumRepository>();
@@ -116,6 +117,7 @@ builder.Services.AddScoped<SetTimeRetryMockTestPublisher>();
 builder.Services.AddScoped<SetTimeRetryClassForumPublisher>();
 builder.Services.AddScoped<TechieActionPublisher>();
 builder.Services.AddScoped<CreateLuckyTicketPublisher>();
+builder.Services.AddScoped<AddFeatureMissionPublisher>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
@@ -158,6 +160,8 @@ builder.Services.AddScoped<DisconnectSocketCalculateTimePublisher>();
 builder.Services.AddScoped<SubmitAiSpeakingAnswerPublisher>();
 builder.Services.AddScoped<GetTimeModulePublisher>();
 builder.Services.AddScoped<SubmitSpeakingAIPublisher>();
+builder.Services.AddScoped<StudentRankingEventsPublisher>();
+builder.Services.AddScoped<RankedStudentPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -192,6 +196,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
     { QueueSettings.LmsQueue.NameQueue.RetryClassForumAction, typeof(RetryClassForumConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SpeakingAI, typeof(SpeakingAIEvaluationConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.RankedStudent, typeof(RankedStudentConsumer) },
 });
 
 var app = builder.Build();

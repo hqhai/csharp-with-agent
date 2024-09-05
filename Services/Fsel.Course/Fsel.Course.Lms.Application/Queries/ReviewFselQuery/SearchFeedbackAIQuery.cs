@@ -4,7 +4,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -111,6 +110,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
+
             foreach (var item in lists)
             {
                 item.NumberOfStars = NumberHelper.ConvertRound(item.NumberOfStars);

@@ -144,6 +144,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 newOrder.DiscountPrice = 0;
                 newOrder.TotalPrice = 0;
                 newOrder.UserId = request.UserId;
+                newOrder.RevenueType = EnumPaymentRevenueType.NotRevenue;
                 await _userService.CreateStudentTrialRegistration();
             }
             var numberOfShield = package.Code.HasValue ? (int)package.Code.Value : default;
@@ -176,6 +177,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     OrderId = newOrder.Id,
                     OrderStatus = EnumOrderStatus.Payment,
                     Type = EnumOrderTransactionType.BankTransfer,
+                    RevenueType = null
                 }, cancellationToken);
 
                 if (!changeStatusOrderResult.IsOK)

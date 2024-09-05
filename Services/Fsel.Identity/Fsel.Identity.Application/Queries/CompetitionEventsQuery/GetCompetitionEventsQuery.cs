@@ -2,19 +2,14 @@
 
 namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 {
-    using System.Text.Json;
-    using System.Text.Json.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Options;
-    using static System.Runtime.InteropServices.JavaScript.JSType;
 
     public class GetCompetitionEventsQuery : IRequest<MethodResult<CompetitionEventsModel>>
     {

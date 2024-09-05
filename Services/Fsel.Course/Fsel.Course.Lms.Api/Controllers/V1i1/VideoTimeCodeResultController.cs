@@ -3,18 +3,18 @@
 namespace Fsel.Course.Lms.Api.Controllers.V1i1
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.VideoTimeCodeResultCmd;
     using Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/video-time-code-result")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Student))]

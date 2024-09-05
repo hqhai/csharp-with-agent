@@ -49,15 +49,15 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                                    .Include(x => x.ClassForumResults.Where(x => x.Status == EnumClassForumResultStatus.Graded).OrderBy(x => x.CreatedDate))
                                    .ThenInclude(x => x.ClassForumResultFiles)
                                    .FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
-
             var classForm = _mapper.Map<ClassForumModel>(classForumQuery);
+
             if (classForumQuery != null)
             {
                 var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumQuery.ClassForumResults.Select(x => x.Id).ToList(), UserId = _authContext.CurrentUserId });
                 var actions = actionsResult.Content?.Result;
 
-                var studentResult = await _userService.GetStudentsByStudentIdsAsync(classForumQuery.ClassForumResults.Select(x => x.StudentId).ToList());
-                var students = studentResult.Content?.Result;
+                var userResult = await _userService.GetUsersByUserIdsAsync(classForumQuery.ClassForumResults.Select(x => x.CreatedUserId).ToList());
+                var users = userResult.Content?.Result;
                 if (actions != null)
                 {
                     foreach (var item in classForm?.ClassForumResults!)
@@ -70,13 +70,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                             item.LikeNumber = action.LikeNumber;
                             item.IsLiked = action.IsLiked;
                         }
-                        var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
-                        item.AvatarPath = student?.Human?.AvatarPath;
-                        item.CreatedFullName = student?.Human?.FullName;
+                        var user = users?.FirstOrDefault(x => x.Id == item.CreatedUserId);
+                        item.CreatedFullName = user?.Human?.FullName ?? item.CreatedFullName;
+                        item.AvatarPath = user?.Human?.AvatarPath;
                     }
                 }
             }
-
             methodResult.Result = classForm;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
