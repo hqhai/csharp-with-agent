@@ -30,6 +30,7 @@ namespace Fsel.Identity.Infrastructure
             SeedPlatforms(builder);
             SeedRoles(builder);
 
+            base.OnModelCreating(builder);
             builder.ApplyConfiguration(new HumanEntityTypeConfiguration());
             builder.ApplyConfiguration(new TeacherEntityTypeConfiguration());
             builder.ApplyConfiguration(new TeacherBankAccountEntityTypeConfiguration());
@@ -50,10 +51,6 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new StudentRankingEventsEntityTypeConfiguration());
             builder.ApplyConfiguration(new CompetitionEventsEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserDeletionEntityTypeConfiguration());
-            base.OnModelCreating(builder);
-
-            var index = builder.Entity<User>().HasIndex(u => u.NormalizedUserName).Metadata;
-            var applicationUserType = builder.Entity<User>().Metadata.RemoveIndex(index.Properties);
         }
 
         #region Db Set
