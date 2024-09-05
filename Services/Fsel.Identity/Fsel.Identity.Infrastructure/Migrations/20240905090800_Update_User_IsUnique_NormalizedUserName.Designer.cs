@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20240904090741_Update_User_IsUnique_NormalizedUserName")]
+    [Migration("20240905090800_Update_User_IsUnique_NormalizedUserName")]
     partial class Update_User_IsUnique_NormalizedUserName
     {
         /// <inheritdoc />
