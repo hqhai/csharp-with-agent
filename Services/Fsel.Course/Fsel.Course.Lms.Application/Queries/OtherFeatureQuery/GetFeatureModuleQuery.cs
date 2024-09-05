@@ -336,7 +336,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                         methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumDetailResult));
                         return methodResult;
                     }
-                    var classForumResultDto = await _classForumResultRepository.GetByIdAsync(request.ObjectId);
+                    var classForumResultDto = await _classForumResultRepository.GetByIdAsync(classForumDetailResult.ClassForumResultId);
                     if (classForumResultDto == null)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
