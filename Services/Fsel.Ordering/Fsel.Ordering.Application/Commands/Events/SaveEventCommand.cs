@@ -60,7 +60,7 @@ namespace Fsel.Ordering.Application.Commands.Events
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.MissingVersionOfPackage), EnumEventErrorCode.MissingVersionOfPackage.GetDescription());
                 return;
             }
-            if (request.Translations == null || request.Translations.Count != 0)
+            if (request.Translations == null || request.Translations.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.MissingVersionOfTranslation), EnumEventErrorCode.MissingVersionOfTranslation.GetDescription());
                 return;
@@ -76,7 +76,7 @@ namespace Fsel.Ordering.Application.Commands.Events
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.PackageIdIsWrong), EnumEventErrorCode.PackageIdIsWrong.GetDescription());
                 return;
             }
-            if (await _packageRepository.Queryable.AnyAsync(p => !packageIds.Contains(p.Id), cancellationToken))
+            if (await _packageRepository.Queryable.AnyAsync(p => !packageIds.Contains(p.Id) && p.Status == EnumPackageStatus.Active, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.PackageIdIsWrong), EnumEventErrorCode.PackageIdIsWrong.GetDescription());
                 return;
@@ -161,7 +161,7 @@ namespace Fsel.Ordering.Application.Commands.Events
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return;
             }
-            if (await _packageRepository.Queryable.AnyAsync(p => !packageIds.Contains(p.Id), cancellationToken))
+            if (await _packageRepository.Queryable.AnyAsync(p => !packageIds.Contains(p.Id) && p.Status == EnumPackageStatus.Active, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return;
