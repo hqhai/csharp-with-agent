@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Identity.Application.Commands.StudentCmd;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
     using MediatR;
@@ -52,7 +53,7 @@ namespace Fsel.Identity.Application.Commands.UserDeletionCmd
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(userDeletion.DeletionDate));
                     return methodResult;
                 }
-                var deleteUserResult = await _mediator.Send(new AdminCmd.DeleteUserCommand { Id = userId, IsHashDelete = true }, cancellationToken);
+                var deleteUserResult = await _mediator.Send(new DeleteListDataStudentCommand { UserId = userId }, cancellationToken);
                 if (!deleteUserResult.IsOK)
                 {
                     methodResult.AddError(deleteUserResult.ErrorMessages);
