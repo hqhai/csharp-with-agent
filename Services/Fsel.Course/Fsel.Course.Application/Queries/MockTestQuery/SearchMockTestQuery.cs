@@ -47,6 +47,7 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
                                           MockTestType = x.MockTestType,
                                           CreatedFullName = x.CreatedFullName,
                                           UpdatedFullName = x.UpdatedFullName,
+                                          Version = x.Version,
                                           Skills = x.MockTestSections.Select(x => x.SectionGroup).Select(n => n!.CourseSkill).ToList(),
                                       });
             if (!string.IsNullOrEmpty(request.Keyword))
