@@ -129,12 +129,12 @@ namespace Fsel.Course.Infrastructure.Common
                     {
                         foreach (var sectionPart in section.SectionParts)
                         {
-                            if (sectionPart == null)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionPart));
-                                return methodResult;
-                            }
-                            else
+                            //if (sectionPart == null)
+                            //{
+                            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionPart));
+                            //    return methodResult;
+                            //}
+                            if (sectionPart != null)
                             {
                                 SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
                                 if (sectionPart.Questions != null && sectionPart.Questions.Count > 0)
@@ -172,7 +172,18 @@ namespace Fsel.Course.Infrastructure.Common
                         var correctCount = newSection.SectionQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal);
                         if (type == EnumCourseType.Ielts && !SectionValidation.IsCheckSection(sectionGroup.CourseSkill, index, correctCount))
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.ExceededValidScore), nameof(index), index);
+                            methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.ExceededValidScore), new Error[]{
+                                new Error
+                                {
+                                    FieldName = nameof(index),
+                                    ErrorValues = new List<object>{ index }
+                                },
+                                new Error
+                                {
+                                    FieldName = nameof(sectionGroup.CourseSkill),
+                                    ErrorValues = new List<object>{ correctCount }
+                                }
+                            });
                             return methodResult;
                         }
                     }
@@ -241,17 +252,17 @@ namespace Fsel.Course.Infrastructure.Common
             }
             if (sectionGroup.CourseSkill == EnumCourseSkill.Reading && sectionGroup.Sections.Count != SectionGroupIELST.MaxSectionSkillReading)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(sectionGroup.Sections));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(sectionGroup.Sections), sectionGroup.Sections.Count);
                 return methodResult;
             }
             else if (sectionGroup.CourseSkill == EnumCourseSkill.Listening && sectionGroup.Sections.Count != SectionGroupIELST.MaxSectionSkillListening)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(sectionGroup.Sections));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(sectionGroup.Sections), sectionGroup.Sections.Count);
                 return methodResult;
             }
             else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing && sectionGroup.Sections.Count != SectionGroupIELST.MaxSectionSkillWriting)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(sectionGroup.Sections));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(sectionGroup.Sections), sectionGroup.Sections.Count);
                 return methodResult;
             }
             return methodResult;
