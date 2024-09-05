@@ -6,7 +6,6 @@ namespace Fsel.Identity.Application.Commands.StudentRankingEvents
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -21,11 +20,11 @@ namespace Fsel.Identity.Application.Commands.StudentRankingEvents
     public class CheckStudentLuckySpinCmdHandler : IRequestHandler<CheckStudentLuckySpinCmd, MethodResult<IList<CompetitionEventsModel>?>>
     {
         private readonly AuthContext _authContext;
-        private readonly IStudentRankingEventsRepository _studentRankingEventsRepository;
+        private readonly IStudentCompetitionEventsRepository _studentRankingEventsRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IMapper _mapper;
 
-        public CheckStudentLuckySpinCmdHandler(AuthContext authContext, IStudentRankingEventsRepository studentRankingEventsRepository, IStudentRepository studentRepository, IMapper mapper)
+        public CheckStudentLuckySpinCmdHandler(AuthContext authContext, IStudentCompetitionEventsRepository studentRankingEventsRepository, IStudentRepository studentRepository, IMapper mapper)
         {
             _authContext = authContext;
             _studentRankingEventsRepository = studentRankingEventsRepository;

@@ -21,8 +21,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Lms.Application.Services.NotificationServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Models.ShareModels;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -114,7 +114,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             if (classForumResultModel != null && classForumResult != null)
             {
-                classForumResultModel.ClassForumDetailResults = classForumResult?.ClassForumDetailResults.Select(x =>
+                classForumResultModel.ClassForumDetailResults = classForumResult.ClassForumDetailResults.Select(x =>
                 {
                     x.Score = GetTargetCount(x, classForumResult);
                     return _mapper.Map<ClassForumDetailResultModel>(x);

@@ -9,6 +9,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Commands.OrderCmds.v1i1;
+    using Fsel.Ordering.Application.Commands.UserRefferalCmd;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.SenderService;
@@ -129,6 +130,8 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                 }
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
+                    order.RevenueType = request.RevenueType;
+
                     allowOpenNextUnit = true;
 
                     var packageEvent = await _packageEventRepository.Queryable.FirstOrDefaultAsync(p => p.PackageId == package.Id && p.EventId == order.EventId, cancellationToken);
@@ -190,7 +193,7 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                 {
                     Status = request.OrderStatus == EnumOrderStatus.Payment ? EnumOrderTransactionStatus.Success : EnumOrderTransactionStatus.Fail,
                     ResponseBody = request.Receipt,
-                    Type = request.Type == EnumOrderTransactionType.AppStore ? EnumOrderTransactionType.AppStore : (request.Type == EnumOrderTransactionType.GooglePlay ? EnumOrderTransactionType.GooglePlay : EnumOrderTransactionType.BankTransfer)
+                    Type = request.Type ?? EnumOrderTransactionType.BankTransfer
                 });
 
                 order.Status = request.OrderStatus;
@@ -202,6 +205,11 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                 if (order.Status == EnumOrderStatus.Payment)
                 {
                     await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
+                    await _mediator.Send(new AddFeatureMissionCommand()
+                    {
+                        ReceiverId = order.UserId,
+                        FeatureUserReferral = EnumFeatureUserReferral.Payment
+                    }, cancellationToken).ConfigureAwait(false);
                 }
 
                 #endregion Gửi mail thanh toán
