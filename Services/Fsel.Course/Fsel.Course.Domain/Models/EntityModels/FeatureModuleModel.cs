@@ -18,6 +18,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? VideoResultId { get; set; }
         public Guid? ClassForumId { get; set; }
         public Guid? ClassForumResultId { get; set; }
+        public Guid? ClassForumDetailResultId { get; set; }
         public Guid? HomeWorkId { get; set; }
         public Guid? HomeWorkResultId { get; set; }
         public Guid? SectionGroupId { get; set; }

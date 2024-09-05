@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
 {
+    using System.Linq.Dynamic.Core;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -48,6 +49,8 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
         private readonly ILessonVideoRepository _lessonVideoRepository;
         private readonly ILessonHomeWorkRepository _lessonHomeWorkRepository;
+        private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly IUserService _userService;
 
         public GetFeatureModuleQueryHandler(ICourseRepository courseRepository,
@@ -72,6 +75,8 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             ICourseUnitMockTestRepository courseUnitMockTestRepository,
             ILessonVideoRepository lessonVideoRepository,
             ILessonHomeWorkRepository lessonHomeWorkRepository,
+            ISectionGroupRepository sectionGroupRepository,
+            ISectionGroupResultRepository sectionGroupResultRepository,
             IUserService userService)
         {
             _courseRepository = courseRepository;
@@ -96,6 +101,8 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
             _lessonVideoRepository = lessonVideoRepository;
             _lessonHomeWorkRepository = lessonHomeWorkRepository;
+            _sectionGroupRepository = sectionGroupRepository;
+            _sectionGroupResultRepository = sectionGroupResultRepository;
             _userService = userService;
         }
 
@@ -191,6 +198,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                         methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                         return methodResult;
                     }
+                    featureModule.MockTestResultId = mockTestResult.Id;
                     featureModule = await GetFeatureModuleToMockTest(featureModule, mockTestResult.MockTestId);
                     break;
 
@@ -211,7 +219,30 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                         methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestResult));
                         return methodResult;
                     }
+                    featureModule.FinalTestResultId = finalTestResult.Id;
                     featureModule = await GetFeatureModuleToFinalTest(featureModule, finalTestResult.FinalTestId);
+                    break;
+
+                case EnumFeatureModule.SectionGroup:
+                    var sectionGroup = await _sectionGroupRepository.GetByIdAsync(request.ObjectId);
+                    if (sectionGroup == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
+                        return methodResult;
+                    }
+                    featureModule = await GetFeatureModuleToSectionGroup(featureModule, sectionGroup.Id);
+                    break;
+
+                case EnumFeatureModule.SectionGroupResult:
+                    var sectionGroupResult = await _sectionGroupResultRepository.GetByIdAsync(request.ObjectId);
+                    if (sectionGroupResult == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroupResult));
+                        return methodResult;
+                    }
+                    featureModule.FinalTestResultId = sectionGroupResult.FinalTestResultId;
+                    featureModule.MockTestResultId = sectionGroupResult.MockTestResultId;
+                    featureModule = await GetFeatureModuleToSectionGroup(featureModule, sectionGroupResult.SectionGroupId);
                     break;
 
                 case EnumFeatureModule.Lesson:
@@ -277,6 +308,45 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                     featureModule = await GetFeatureModuleToVideo(featureModule, homeWorkResult.HomeWorkId);
                     break;
 
+                case EnumFeatureModule.ClassForum:
+                    var classForum = await _classForumRepository.GetByIdAsync(request.ObjectId);
+                    if (classForum == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
+                        return methodResult;
+                    }
+                    featureModule = await GetFeatureModuleToClassForum(featureModule, classForum.Id);
+                    break;
+
+                case EnumFeatureModule.ClassForumResult:
+                    var classForumResult = await _classForumResultRepository.GetByIdAsync(request.ObjectId);
+                    if (classForumResult == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
+                        return methodResult;
+                    }
+                    featureModule.LessonResultId = classForumResult.LessonResultId;
+                    featureModule = await GetFeatureModuleToClassForum(featureModule, classForumResult.ClassForumId);
+                    break;
+
+                case EnumFeatureModule.ClassForumDetailResult:
+                    var classForumDetailResult = await _classForumDetailResultRepository.GetByIdAsync(request.ObjectId);
+                    if (classForumDetailResult == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumDetailResult));
+                        return methodResult;
+                    }
+                    var classForumResultDto = await _classForumResultRepository.GetByIdAsync(request.ObjectId);
+                    if (classForumResultDto == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
+                        return methodResult;
+                    }
+                    featureModule.ClassForumDetailResultId = classForumDetailResult.Id;
+                    featureModule.LessonResultId = classForumResultDto.LessonResultId;
+                    featureModule = await GetFeatureModuleToClassForum(featureModule, classForumResultDto.ClassForumId);
+                    break;
+
                 default:
                     break;
             }
@@ -319,6 +389,33 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             return featureModule;
         }
 
+        private async Task<FeatureModuleModel> GetFeatureModuleToSectionGroup(FeatureModuleModel featureModule, Guid sectionGroupId)
+        {
+            var sectionGroup = await _sectionGroupRepository.Queryable.Include(x => x.MockTestSections)
+                                                                      .Include(x => x.FinalTestSections)
+                                                                      .FirstOrDefaultAsync(x => x.Id == sectionGroupId);
+            if (sectionGroup == null)
+            {
+                return featureModule;
+            }
+            var mockTestId = sectionGroup.MockTestSections.FirstOrDefault()?.MockTestId;
+            var finalTestId = sectionGroup.FinalTestSections.FirstOrDefault()?.FinalTestId;
+            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => !featureModule.MockTestResultId.HasValue || x.MockTestResultId == featureModule.MockTestResultId.Value)
+                                                .Where(x => !featureModule.FinalTestResultId.HasValue || x.FinalTestResultId == featureModule.FinalTestResultId.Value)
+                                                .FirstOrDefaultAsync(x => x.SectionGroupId == sectionGroup.Id);
+            if (sectionGroup.MockTestSections.Any() && mockTestId.HasValue)
+            {
+                featureModule = await GetFeatureModuleToMockTest(featureModule, mockTestId.Value);
+            }
+            else if (sectionGroup.FinalTestSections.Any() && finalTestId.HasValue)
+            {
+                featureModule = await GetFeatureModuleToFinalTest(featureModule, finalTestId.Value);
+            }
+            featureModule.SectionGroupId = sectionGroup.Id;
+            featureModule.SectionGroupResultId = sectionGroupResult?.Id;
+            return featureModule;
+        }
+
         private async Task<FeatureModuleModel> GetFeatureModuleToVideo(FeatureModuleModel featureModule, Guid videoId)
         {
             Guid lessonId;
@@ -343,7 +440,6 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                                   orderby lv.CreatedDate
                                   select baseQ).Select(x => x.Id).FirstOrDefaultAsync();
             }
-
             featureModule = await GetFeatureModuleToLesson(featureModule, lessonId);
             var video = await _videoRepository.Queryable.Include(x => x.VideoResults.Where(x => x.LessonResultId == featureModule.LessonResultId))
                                                         .FirstOrDefaultAsync(x => x.Id == videoId);
@@ -380,22 +476,57 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                                   orderby lh.CreatedDate
                                   select baseQ).Select(x => x.Id).FirstOrDefaultAsync();
             }
-
             featureModule = await GetFeatureModuleToLesson(featureModule, lessonId);
-            var video = await _videoRepository.Queryable.Include(x => x.VideoResults.Where(x => x.LessonResultId == featureModule.LessonResultId))
-                                                        .FirstOrDefaultAsync(x => x.Id == homeWorkId);
-            if (video == null)
+            var homeWork = await _homeWorkRepository.Queryable.Include(x => x.HomeWorkResults.Where(x => x.LessonResultId == featureModule.LessonResultId && x.HomeWorkId == homeWorkId))
+                                                              .FirstOrDefaultAsync(x => x.Id == homeWorkId);
+            if (homeWork == null)
             {
                 return featureModule;
             }
-            featureModule.VideoId = video.Id;
-            featureModule.VideoResultId = video.VideoResults.FirstOrDefault()?.Id;
+            featureModule.HomeWorkId = homeWork.Id;
+            featureModule.HomeWorkResultId = homeWork.HomeWorkResults.FirstOrDefault()?.Id;
+            return featureModule;
+        }
+
+        private async Task<FeatureModuleModel> GetFeatureModuleToClassForum(FeatureModuleModel featureModule, Guid classForumId)
+        {
+            Guid lessonId;
+            if (featureModule.LessonResultId.HasValue)
+            {
+                var lessonResult = await _lessonResultRepository.GetByIdAsync(featureModule.LessonResultId.Value);
+                if (lessonResult == null)
+                {
+                    return featureModule;
+                }
+                featureModule.UnitId = lessonResult.UnitId;
+                lessonId = lessonResult.LessonId;
+            }
+            else
+            {
+                lessonId = await (from baseQ in _lessonRepository.Queryable
+                                  join cl in _classForumRepository.Queryable on baseQ.Id equals cl.LessonId
+                                  join ul in _unitLessonRepository.Queryable on baseQ.Id equals ul.LessonId
+                                  join u in _unitRepository.Queryable on ul.UnitId equals u.Id
+                                  join cum in _courseUnitMockTestRepository.Queryable on u.Id equals cum.UnitId
+                                  where cum.CourseId == featureModule.CourseId && cl.Id == classForumId
+                                  select baseQ).Select(x => x.Id).FirstOrDefaultAsync();
+            }
+            featureModule = await GetFeatureModuleToLesson(featureModule, lessonId);
+            var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => x.LessonResultId == featureModule.LessonResultId))
+                .FirstOrDefaultAsync(x => x.Id == classForumId);
+            if (classForum == null)
+            {
+                return featureModule;
+            }
+            featureModule.ClassForumId = classForum.Id;
+            featureModule.ClassForumResultId = classForum.ClassForumResults.FirstOrDefault()?.Id;
             return featureModule;
         }
 
         private async Task<FeatureModuleModel> GetFeatureModuleToFinalTest(FeatureModuleModel featureModule, Guid finalTestId)
         {
-            var finalTest = await _finalTestRepository.Queryable.Include(x => x.FinalTestResults.Where(x => x.CourseId == featureModule.CourseId && x.StudentId == featureModule.StudentId))
+            var finalTest = await _finalTestRepository.Queryable.Include(x => x.FinalTestResults.Where(x => x.CourseId == featureModule.CourseId && x.StudentId == featureModule.StudentId)
+                                                                                                .Where(x => !featureModule.FinalTestResultId.HasValue || x.Id == featureModule.FinalTestResultId))
                                                    .FirstOrDefaultAsync(x => x.Id == finalTestId);
             if (finalTest == null)
             {
@@ -408,7 +539,8 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
 
         private async Task<FeatureModuleModel> GetFeatureModuleToMockTest(FeatureModuleModel featureModule, Guid mockTestId)
         {
-            var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestResults.Where(x => x.CourseId == featureModule.CourseId && x.StudentId == featureModule.StudentId))
+            var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestResults.Where(x => x.CourseId == featureModule.CourseId && x.StudentId == featureModule.StudentId)
+                                                                                             .Where(x => !featureModule.MockTestResultId.HasValue || x.Id == featureModule.MockTestResultId))
                                                             .FirstOrDefaultAsync(x => x.Id == mockTestId);
             if (mockTest == null)
             {
