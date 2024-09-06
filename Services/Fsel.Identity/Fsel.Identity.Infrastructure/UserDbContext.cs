@@ -82,6 +82,7 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<StudentRankingEvent> StudentRankingEvents { get; set; }
         public DbSet<CompetitionEvent> CompetitionEvents { get; set; }
         public DbSet<UserReferral> UserReferrals { get; set; }
+        public DbSet<EventRegistration> EventRegistrations { get; set; }
         public DbSet<UserDeletion> UserDeletions { get; set; }
 
         #endregion Db Set

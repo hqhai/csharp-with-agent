@@ -232,7 +232,7 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                     }
                     else
                     {
-                        //await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
+                        await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
                     }
                 }
 
