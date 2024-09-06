@@ -170,7 +170,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             {
                 StudentCompetitionSnapShotModel snapshotModel = new StudentCompetitionSnapShotModel
                 {
-                    SchoolCode = request.SchoolCode,
+                    EventCode = request.SchoolCode,
                     WeekCompetitionData = ConvertHelper.Serialize(lists),
                     StartDate = weekEventRules!.StartDate,
                     EndDate = weekEventRules!.EndDate,
@@ -195,7 +195,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 EndDate = modelCommand.EndDate,
                 StartDate = modelCommand.StartDate,
                 WeekCompetitionData = modelCommand.WeekCompetitionData,
-                SchoolCode = modelCommand.SchoolCode
+                EventCode = modelCommand.EventCode
             };
             await _mediator.Send(cmd, cancellationToken);
         }
