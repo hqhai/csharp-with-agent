@@ -35,6 +35,8 @@ namespace Fsel.Ordering.Domain.Entities
         [Range(0, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int MonthBonus { get; set; }
 
+        public EnumEventPackageStatus Status { get; set; }
+
         /// <summary>
         /// Gợi ý
         /// </summary>
