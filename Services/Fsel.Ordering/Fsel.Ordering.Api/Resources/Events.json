@@ -40,6 +40,7 @@
         "priceMonth": 500000,
         "dayBonus": 0,
         "monthBonus": 0,
+        "status": "Active",
         "suggests": null,
         "packageId": "42d7ddb2-9f36-4f86-badc-67dc16bb722b",
         "eventId": "2371c9af-01a6-489b-8399-0e2a13db0646"
@@ -51,6 +52,7 @@
         "priceMonth": 320000,
         "dayBonus": 15,
         "monthBonus": 1,
+        "status": "Active",
         "suggests": [ "BestSeller" ],
         "packageId": "daa6fc87-6461-49d4-b3a5-c9e4cc30bc59",
         "eventId": "2371c9af-01a6-489b-8399-0e2a13db0646"
@@ -62,6 +64,7 @@
         "priceMonth": 240000,
         "dayBonus": 0,
         "monthBonus": 3,
+        "status": "Active",
         "suggests": [ "Recommend" ],
         "packageId": "d13ee4ab-785a-425c-bd70-b74b61df42eb",
         "eventId": "2371c9af-01a6-489b-8399-0e2a13db0646"
