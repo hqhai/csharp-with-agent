@@ -2,6 +2,8 @@
 namespace Fsel.Identity.Application.Queries.StudentRanking
 
 {
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -18,6 +20,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Options;
+    using static System.Runtime.InteropServices.JavaScript.JSType;
 
     public class GetStudentCompetitionByEventCodeQuery : BaseQueryModel, IRequest<MethodResult<PagingItemStudentRankingModel>>
     {
@@ -34,6 +38,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
         private readonly IStudentRankingEventRepository _eventRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
+        private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IStudentCompetitionSnapShotRepository _studentCompetitionSnapShotRepository;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
@@ -42,7 +47,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
         private const double Process_Ratio = 0.75;
         private const double Overall_Ratio = 0.25;
 
-        public GetStudentCompetitionByEventCodeQueryHandler(IStudentRankingEventRepository eventRepository, IStudentRepository studentRepository, ICompetitionEventsRepository competitionEventsRepository, IMediator mediator, IMapper mapper, IStudentCompetitionSnapShotRepository studentCompetitionSnapShotRepository, ILmsCourseService lmsCourseService)
+        public GetStudentCompetitionByEventCodeQueryHandler(IStudentRankingEventRepository eventRepository, IStudentRepository studentRepository, ICompetitionEventsRepository competitionEventsRepository, IMediator mediator, IMapper mapper, IStudentCompetitionSnapShotRepository studentCompetitionSnapShotRepository, ILmsCourseService lmsCourseService, IStudentCompetitionEventsRepository studentCompetitionEventsRepository)
         {
             _eventRepository = eventRepository;
             _studentRepository = studentRepository;
@@ -51,6 +56,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             _mapper = mapper;
             _studentCompetitionSnapShotRepository = studentCompetitionSnapShotRepository;
             _lmsCourseService = lmsCourseService;
+            _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
         }
 
         public async Task<MethodResult<PagingItemStudentRankingModel>> Handle(GetStudentCompetitionByEventCodeQuery request, CancellationToken cancellationToken)
@@ -61,15 +67,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
             var timeNowVI = DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam);
 
-
-
-
-
             var competitionEvents = _competitionEventsRepository.Queryable
                                     .FirstOrDefault(x => !string.IsNullOrEmpty(x.EventContentStr) && x.EventCode == request.EventCode);
-
-
-
 
             #region Validate
 
@@ -82,13 +81,6 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             if (competitionEvents.EventContent == null || competitionEvents.EventContent.WeekEvents == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvents.EventContent), competitionEvents.EventContent);
-                return methodResult;
-            }
-
-            var listSchoolIds = competitionEvents.SchoolIds;
-            if (listSchoolIds == null || listSchoolIds.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(listSchoolIds), listSchoolIds);
                 return methodResult;
             }
             #endregion
@@ -105,9 +97,9 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             if (resultSnapShots == null)
             {
                 result = (from studentEvent in _eventRepository.Queryable
-                          join student in _studentRepository.Queryable.Include(x => x.Human) on studentEvent.StudentId equals student.Id into resultGroup
+                          join studentCompetitionEvent in _studentCompetitionEventsRepository.Queryable.Where(x => x.CompetitionEventId == competitionEvents.Id) on studentEvent.StudentId equals studentCompetitionEvent.StudentId
+                          join student in _studentRepository.Queryable.Include(x => x.Human) on studentCompetitionEvent.StudentId equals student.Id into resultGroup
                           from student in resultGroup.DefaultIfEmpty()
-                          where student.SchoolId != null && listSchoolIds.Contains((Guid)student.SchoolId)
                           select new StudentRankingModel
                           {
                               StudentId = studentEvent.StudentId,
@@ -125,11 +117,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             }
             else
             {
-                result = ConvertHelper.Deserialize<IList<StudentRankingModel>>(resultSnapShots.WeekCompetitionData)!.ToList();
+                result = ConvertHelper.Deserialize<IList<StudentRankingModel>>(resultSnapShots.WeekCompetitionData)?.ToList() ?? new List<StudentRankingModel>();
             }
-
-
-
 
             #region Filter
 
