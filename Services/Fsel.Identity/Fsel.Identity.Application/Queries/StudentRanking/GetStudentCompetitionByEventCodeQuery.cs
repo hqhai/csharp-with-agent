@@ -20,8 +20,6 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Options;
-    using static System.Runtime.InteropServices.JavaScript.JSType;
 
     public class GetStudentCompetitionByEventCodeQuery : BaseQueryModel, IRequest<MethodResult<PagingItemStudentRankingModel>>
     {
@@ -114,6 +112,26 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                               RankingScore = studentEvent.RankingScore,
                               CourseResultId = studentEvent.CourseResultId
                           }).OrderByDescending(x => x.RankingScore).ToList();
+
+                #region Filter
+
+                var eventStudentIds = result.Select(x => x.StudentId).ToList();
+                ActiveCourseResultModel query = new ActiveCourseResultModel
+                {
+                    StudentIds = eventStudentIds
+                };
+                var activeCourseResult = await _lmsCourseService.GetActiveCourseResultByStudentId(query);
+                var activeCourseResultIds = activeCourseResult?.Content?.Result;
+
+                if (activeCourseResultIds == null || activeCourseResultIds.Count == 0)
+                {
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                    return methodResult;
+                }
+
+                result = result.DistinctBy(x => x.CourseResultId).Where(x => activeCourseResultIds.Contains(x.CourseResultId)).ToList();
+
+                #endregion
             }
             else
             {
@@ -122,30 +140,10 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
             #region Filter
 
-            var eventStudentIds = result.Select(x => x.StudentId).ToList();
-            ActiveCourseResultModel query = new ActiveCourseResultModel
-            {
-                StudentIds = eventStudentIds
-            };
-            var activeCourseResult = await _lmsCourseService.GetActiveCourseResultByStudentId(query);
-            var activeCourseResultIds = activeCourseResult?.Content?.Result;
-
-            if (activeCourseResultIds == null || activeCourseResultIds.Count == 0)
-            {
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
-
-            result = result.DistinctBy(x => x.CourseResultId).Where(x => activeCourseResultIds.Contains(x.CourseResultId)).ToList();
-
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 result = result.Where(x => (x.FullName != null && x.FullName.ToLower().Contains(request.Keyword.ToLower().Trim())) || (x.Email != null && x.Email.ToLower() == request.Keyword.ToLower().Trim())).ToList();
             }
-
-            var lists = result.ApplyPaging(request).ToList();
-            int totalItem = result.Count;
-            var resultPaging = new PagingItemsModel<StudentRankingModel>(lists, request, totalItem);
             #endregion
 
             #region Snapshot
@@ -164,6 +162,10 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 await UpdateSnapShot(snapshotModel, cancellationToken);
             }
             #endregion
+
+            var lists = result.ApplyPaging(request).ToList();
+            int totalItem = result.Count;
+            var resultPaging = new PagingItemsModel<StudentRankingModel>(lists, request, totalItem);
 
             methodResult.Result = new PagingItemStudentRankingModel
             {
