@@ -400,9 +400,6 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             }
             var mockTestId = sectionGroup.MockTestSections.FirstOrDefault()?.MockTestId;
             var finalTestId = sectionGroup.FinalTestSections.FirstOrDefault()?.FinalTestId;
-            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => !featureModule.MockTestResultId.HasValue || x.MockTestResultId == featureModule.MockTestResultId.Value)
-                                                .Where(x => !featureModule.FinalTestResultId.HasValue || x.FinalTestResultId == featureModule.FinalTestResultId.Value)
-                                                .FirstOrDefaultAsync(x => x.SectionGroupId == sectionGroup.Id);
             if (sectionGroup.MockTestSections.Any() && mockTestId.HasValue)
             {
                 featureModule = await GetFeatureModuleToMockTest(featureModule, mockTestId.Value);
@@ -411,6 +408,9 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             {
                 featureModule = await GetFeatureModuleToFinalTest(featureModule, finalTestId.Value);
             }
+            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => !featureModule.MockTestResultId.HasValue || x.MockTestResultId == featureModule.MockTestResultId.Value)
+                                                .Where(x => !featureModule.FinalTestResultId.HasValue || x.FinalTestResultId == featureModule.FinalTestResultId.Value)
+                                                .FirstOrDefaultAsync(x => x.SectionGroupId == sectionGroup.Id && x.StudentId == featureModule.StudentId);
             featureModule.SectionGroupId = sectionGroup.Id;
             featureModule.SectionGroupResultId = sectionGroupResult?.Id;
             return featureModule;
