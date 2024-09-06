@@ -39,6 +39,7 @@ namespace Fsel.Notification.Application.Queries
             var methodResult = new MethodResult<PagingItemsModel<NotificationMessageModel>>();
 
             var notificationQuery = _notificationsRepository.Queryable.Include(x => x.NotificationType)
+                                                                      .Include(x => x.Translations)
                                                                       .Where(x => x.UserId == _authContext.CurrentUserId);
             var notificationSenderIds = await notificationQuery.Where(p => p.SenderId.HasValue).Select(x => x.SenderId ?? default).Distinct().ToListAsync(cancellationToken);
 
@@ -65,7 +66,7 @@ namespace Fsel.Notification.Application.Queries
             {
                 foreach (var notify in lists)
                 {
-                    notify.AvatarPath = listSenderInfo.FirstOrDefault(x => notify.SenderId.HasValue && x.UserId == notify.SenderId)?.AvatarPath;
+                    notify.AvatarPath = listSenderInfo.FirstOrDefault(x => notify.SenderId.HasValue && x.UserId                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     d == notify.SenderId)?.AvatarPath;
                     notify.Content = notify.NotificationType?.Content ?? default;
                     notify.Type = notify.NotificationType?.Type ?? default;
                 }

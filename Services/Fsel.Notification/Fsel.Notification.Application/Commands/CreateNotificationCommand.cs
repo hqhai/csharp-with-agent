@@ -21,8 +21,6 @@ namespace Fsel.Notification.Application.Commands
     using Fsel.Common.Models;
     using Fsel.Core.Base.Interfaces;
     using System.Threading;
-    using OneSignalApi.Api;
-    using OneSignalApi.Model;
 
     public class CreateNotificationCommand : CreateNotificationCommandModel, IRequest<MethodResult<NotificationMessageModel>>
     {

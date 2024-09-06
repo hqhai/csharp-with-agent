@@ -70,155 +70,153 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseResultModel> methodResult = new MethodResult<CourseResultModel>();
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
-                return methodResult;
-            }
-            var student = studentResult.Content?.Result;
-            if (student == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
-                return methodResult;
-            }
-            if (student.CourseLevel == request.CourseLevel)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.DoNotChangeCurrentKey), nameof(request.CourseLevel));
-                return methodResult;
-            }
-            var isChangeLevelStudent = await _changeCourseHelper.CheckChangeLevelAllCourseAsync(student.Id);
-            if (isChangeLevelStudent)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.StudiedUpToUnit3), nameof(isChangeLevelStudent));
-                return methodResult;
-            }
-            var userCourseSettingsResult = await _userService.GetUserCourseSettingsAsync();
-            if (!userCourseSettingsResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(userCourseSettingsResult));
-                return methodResult;
-            }
-            var userCourseSettings = userCourseSettingsResult.Content?.Result;
-            var userCourseSetting = userCourseSettings?.FirstOrDefault(x => x.Type == EnumUserCourseType.ChangeLevel);
-            if (userCourseSetting != null && userCourseSetting.Value <= 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.ChangesExpired), nameof(userCourseSetting));
-                return methodResult;
-            }
+            //var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            //if (!studentResult.IsSuccessStatusCode)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+            //    return methodResult;
+            //}
+            //var student = studentResult.Content?.Result;
+            //if (student == null)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+            //    return methodResult;
+            //}
+            //if (student.CourseLevel == request.CourseLevel)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.DoNotChangeCurrentKey), nameof(request.CourseLevel));
+            //    return methodResult;
+            //}
+            //var isChangeLevelStudent = await _changeCourseHelper.CheckChangeLevelAllCourseAsync(student.Id);
+            //if (isChangeLevelStudent)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.StudiedUpToUnit3), nameof(isChangeLevelStudent));
+            //    return methodResult;
+            //}
+            //var userCourseSettingsResult = await _userService.GetUserCourseSettingsAsync();
+            //if (!userCourseSettingsResult.IsSuccessStatusCode)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(userCourseSettingsResult));
+            //    return methodResult;
+            //}
+            //var userCourseSettings = userCourseSettingsResult.Content?.Result;
+            //var userCourseSetting = userCourseSettings?.FirstOrDefault(x => x.Type == EnumUserCourseType.ChangeLevel);
+            //if (userCourseSetting != null && userCourseSetting.Value <= 0)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.ChangesExpired), nameof(userCourseSetting));
+            //    return methodResult;
+            //}
 
-            var isUsedCourse = await _courseResultRepository.Queryable.AnyAsync(x => x.StudentId == student.Id, cancellationToken);
-            if (!isUsedCourse)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isUsedCourse));
-                return methodResult;
-            }
+            //var isUsedCourse = await _courseResultRepository.Queryable.AnyAsync(x => x.StudentId == student.Id, cancellationToken);
+            //if (!isUsedCourse)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isUsedCourse));
+            //    return methodResult;
+            //}
 
-            if (!await IsUsedLevel(student, request.CourseLevel))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.LevelIsIncorrect), nameof(isChangeLevelStudent));
-                return methodResult;
-            }
-            var courseResult = await _courseResultRepository.Queryable.Include(x => x.Course)
-                                    .Where(x => x.Course != null && x.Course.CourseLevel == request.CourseLevel)
-                                    .FirstOrDefaultAsync(x => x.WorkingStatus != EnumWorkingStatus.NotWorking && x.StudentId == student.Id, cancellationToken);
-            var course = courseResult?.Course;
-            if (course == null)
-            {
-                course = await GetCourseAsync(request.CourseLevel);
-            }
-            if (course == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
-                return methodResult;
-            }
-            await _courseResultRepository.ExecuteTransactionAsync(async () =>
-            {
-                var courseResultActives = await _courseResultRepository.Queryable.Where(x => x.WorkingStatus == EnumWorkingStatus.Active && x.StudentId == student.Id).ToListAsync(cancellationToken);
-                if (courseResultActives != null)
-                {
-                    foreach (var item in courseResultActives)
-                    {
-                        item.WorkingStatus = EnumWorkingStatus.InActive;
-                    }
-                    _courseResultRepository.UpdateList(courseResultActives);
-                    await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                }
+            //if (!await IsUsedLevel(student, request.CourseLevel))
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.LevelIsIncorrect), nameof(isChangeLevelStudent));
+            //    return methodResult;
+            //}
+            //var courseResult = await _courseResultRepository.Queryable.Include(x => x.Course)
+            //                        .Where(x => x.Course != null && x.Course.CourseLevel == request.CourseLevel)
+            //                        .FirstOrDefaultAsync(x => x.WorkingStatus != EnumWorkingStatus.NotWorking && x.StudentId == student.Id, cancellationToken);
+            //var course = courseResult?.Course;
+            //if (course == null)
+            //{
+            //    course = await GetCourseAsync(request.CourseLevel);
+            //}
+            //if (course == null)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+            //    return methodResult;
+            //}
+            //await _courseResultRepository.ExecuteTransactionAsync(async () =>
+            //{
+            //    var courseResultActives = await _courseResultRepository.Queryable.Where(x => x.WorkingStatus == EnumWorkingStatus.Active && x.StudentId == student.Id).ToListAsync(cancellationToken);
+            //    if (courseResultActives != null)
+            //    {
+            //        foreach (var item in courseResultActives)
+            //        {
+            //            item.WorkingStatus = EnumWorkingStatus.InActive;
+            //        }
+            //        _courseResultRepository.UpdateList(courseResultActives);
+            //        await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            //    }
 
-                if (courseResult == null)
-                {
-                    courseResult = new CourseResult
-                    {
-                        CourseId = course.Id,
-                        StudentId = student.Id,
-                        Status = EnumResultStatus.New,
-                        WorkingStatus = EnumWorkingStatus.Active
-                    };
-                    _courseResultRepository.Add(courseResult);
-                }
-                else
-                {
-                    courseResult.WorkingStatus = EnumWorkingStatus.Active;
-                    _courseResultRepository.Update(courseResult);
-                }
-                if (!courseResult.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(courseResult.ErrorMessages);
-                    return methodResult;
-                }
+            //    if (courseResult == null)
+            //    {
+            //        courseResult = new CourseResult
+            //        {
+            //            CourseId = course.Id,
+            //            StudentId = student.Id,
+            //            Status = EnumResultStatus.New,
+            //            WorkingStatus = EnumWorkingStatus.Active
+            //        };
+            //        _courseResultRepository.Add(courseResult);
+            //    }
+            //    else
+            //    {
+            //        courseResult.WorkingStatus = EnumWorkingStatus.Active;
+            //        _courseResultRepository.Update(courseResult);
+            //    }
+            //    if (!courseResult.IsValid())
+            //    {
+            //        methodResult.AddErrorBadRequest(courseResult.ErrorMessages);
+            //        return methodResult;
+            //    }
 
-                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.Result = _mapper.Map<CourseResultModel>(courseResult);
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            });
+            //    await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            //    methodResult.Result = _mapper.Map<CourseResultModel>(courseResult);
+            //    methodResult.StatusCode = StatusCodes.Status200OK;
+            //    return methodResult;
+            //});
 
-            var classResult = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel
-            {
-                CourseId = course.Id,
-                UserId = _authContext.CurrentUserId,
-            });
+            //var classResult = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel
+            //{
+            //    CourseId = course.Id,
+            //    UserId = _authContext.CurrentUserId,
+            //});
 
-            if (!classResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError), nameof(classResult));
-                return methodResult;
-            }
+            //if (!classResult.IsSuccessStatusCode)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError), nameof(classResult));
+            //    return methodResult;
+            //}
 
-            await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
-            {
-                IsDeduction = true,
-                Type = EnumUserCourseType.ChangeLevel,
-                UserId = _authContext.CurrentUserId
-            }, cancellationToken).ConfigureAwait(false);
+            //await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
+            //{
+            //    IsDeduction = true,
+            //    Type = EnumUserCourseType.ChangeLevel,
+            //    UserId = _authContext.CurrentUserId
+            //}, cancellationToken).ConfigureAwait(false);
 
-            var updateResult = await _userService.UpdateCourseToStudentAsync(course.Id);
+            //var updateResult = await _userService.UpdateCourseToStudentAsync(course.Id);
 
-            if (updateResult.IsSuccessStatusCode)
-            {
-                await SendNotification(course, courseResult, cancellationToken);
-            }
+            
+            await SendNotification(cancellationToken);
 
-            methodResult.Result = _mapper.Map<CourseResultModel>(courseResult);
+            //methodResult.Result = _mapper.Map<CourseResultModel>(courseResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task SendNotification(Course course, CourseResult? courseResult, CancellationToken cancellationToken)
+        private async Task SendNotification(CancellationToken cancellationToken)
         {
-            if (courseResult == null)
-            {
-                return;
-            }
+            //if (courseResult == null)
+            //{
+            //    return;
+            //}
 
-            NotificationSendingQueueModel notificationModel = new NotificationSendingQueueModel()
+            NotificationSendingQueueModel notificationModel = new NotificationSendingQueueModel() 
             {
-                UserIds = new List<Guid>() { courseResult.CreatedUserId },
-                ParamsMessage = new List<object> { course.Name ?? string.Empty, },
+                UserIds = new List<Guid>() { new Guid("65ECB9A2-2F86-4112-C7CD-08DCBB6EDDA0") },
+                ParamsMessage = new List<object> { "A1" ?? string.Empty, },
                 Type = EnumNotificationType.LinkPage,
                 Content = EnumNotificationContent.CourseChange,
                 PlatformCode = EnumPlatformCode.LMS,
-                ObjectId = courseResult.Id,
+                ObjectId = new Guid("8DB9BC06-302B-4D8E-8DA2-1A1AE8641105")
             };
 
             await _notificationMessagePublisher.Publish(notificationModel, cancellationToken);

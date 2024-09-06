@@ -4,6 +4,7 @@ using Fsel.Notification.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Notification.Infrastructure.Migrations
 {
     [DbContext(typeof(NotificationsDBContext))]
-    partial class NotificationsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240829042512_UpdateNotificationTypeV10")]
+    partial class UpdateNotificationTypeV10
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -101,73 +104,6 @@ namespace Fsel.Notification.Infrastructure.Migrations
                     b.HasIndex("NotificationTypeId");
 
                     b.ToTable("NotificationMessages");
-                });
-
-            modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationMessageTranslation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(0);
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
-
-                    b.Property<string>("CreatedFullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
-
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
-
-                    b.Property<string>("Language")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("NotificationMessageId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NotificationMessageId");
-
-                    b.ToTable("NotificationMessageTranslations");
                 });
 
             modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationRemind", b =>
@@ -1101,7 +1037,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
                             Language = "vi-VN",
-                            NotificationTypeId = new Guid("6f75034f-4d9b-4471-b5a4-a226979b5ab3"),
+                            NotificationTypeId = new Guid("a99bfaae-4139-4766-9405-ef24332fb51a"),
                             TemplateMessage = "Yay! Bạn đã đổi trình độ sang khóa học {0} thành công! Hãy cùng Techie và Fsel bắt đầu hành trình học tập thú vị ngay thôi nào!"
                         },
                         new
@@ -1112,7 +1048,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
                             Language = "en-US",
-                            NotificationTypeId = new Guid("6f75034f-4d9b-4471-b5a4-a226979b5ab3"),
+                            NotificationTypeId = new Guid("a99bfaae-4139-4766-9405-ef24332fb51a"),
                             TemplateMessage = "Yay! You've successfully changed your level to the {0} course! Let's join Techie and Fsel to start this exciting learning journey now!"
                         },
                         new
@@ -1123,7 +1059,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
                             Language = "fr-FR",
-                            NotificationTypeId = new Guid("6f75034f-4d9b-4471-b5a4-a226979b5ab3"),
+                            NotificationTypeId = new Guid("a99bfaae-4139-4766-9405-ef24332fb51a"),
                             TemplateMessage = "Yay! Vous avez réussi à changer votre niveau pour le cours {0} ! Rejoignons Techie et Fsel pour commencer ce voyage d'apprentissage passionnant maintenant"
                         });
                 });
@@ -1139,17 +1075,6 @@ namespace Fsel.Notification.Infrastructure.Migrations
                     b.Navigation("NotificationType");
                 });
 
-            modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationMessageTranslation", b =>
-                {
-                    b.HasOne("Fsel.Notification.Domain.Entities.NotificationMessage", "NotificationMessage")
-                        .WithMany("Translations")
-                        .HasForeignKey("NotificationMessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("NotificationMessage");
-                });
-
             modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationTypeTranslation", b =>
                 {
                     b.HasOne("Fsel.Notification.Domain.Entities.NotificationType", "NotificationType")
@@ -1159,11 +1084,6 @@ namespace Fsel.Notification.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("NotificationType");
-                });
-
-            modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationMessage", b =>
-                {
-                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationType", b =>
