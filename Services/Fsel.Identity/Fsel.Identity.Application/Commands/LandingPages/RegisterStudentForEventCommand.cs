@@ -163,7 +163,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     // sai tại Phuc Xo
                     else
                     {
-                        await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.LearnedOnThePlatform, LearnedOnThePlatform);
+                    await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.LearnedOnThePlatform, LearnedOnThePlatform);
                     }
                     return methodResult;
                 }

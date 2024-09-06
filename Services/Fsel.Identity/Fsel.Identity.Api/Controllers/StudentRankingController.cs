@@ -5,6 +5,7 @@ using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Identity.Application.Commands.CompetitionEventsCmd;
 using Fsel.Identity.Application.Commands.LandingPages;
 using Fsel.Identity.Application.Commands.StudentRankingCmd;
 using Fsel.Identity.Application.Commands.StudentRankingEvents;
@@ -98,6 +99,18 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
+        /// Tạo dữ liệu sự kiện
+        /// </summary>
+        [HttpPost("competition-events")]
+        [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateCompetitionEvents([FromBody] CreateCompetitionEventsCommand cmd)
+        {
+            MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Lấy dữ liệu event dựa vào học sinh
         /// </summary>
         [HttpGet("get-events-by-user-id")]
@@ -106,6 +119,18 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> GetEventsByUserId([FromQuery] GetEventsByUserIdQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Lấy liệu sự kiện
+        /// </summary>
+        [HttpGet("competition-events/{eventCode}")]
+        [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCompetitionEvents([FromRoute] string? eventCode)
+        {
+            MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(new GetCompetitionEventsQuery { EventCode = eventCode }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
