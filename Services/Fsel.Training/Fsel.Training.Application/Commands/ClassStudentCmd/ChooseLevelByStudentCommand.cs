@@ -105,17 +105,20 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
 
                 var @event = @events.Where(p => p.EventContent != null && p.EventContent.IsByPassPayment).Select(p => p.EventContent).Where(p => p.StartDate.HasValue && p.EndDate.HasValue && p.StartDate.Value.Date <= currentDate.Date && p.EndDate.Value.Date >= currentDate.Date).FirstOrDefault();
 
-                await _orderService.CreateOrderForUserLeaderBoard(new CreateOrderForUserFromLeaderBoardCommandModel()
+                if (@event != null)
                 {
-                    UserId = _authContext.CurrentUserId,
-                    Month = @event?.PaymentMonth,
-                    FullName = student?.Human?.FullName,
-                    Email = student?.Human?.Email,
-                    PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
-                    PackageId = default,
-                    EventId = default,
-                    ExpiredDate = @event?.PaymentDate,
-                });
+                    await _orderService.CreateOrderForUserLeaderBoard(new CreateOrderForUserFromLeaderBoardCommandModel()
+                    {
+                        UserId = _authContext.CurrentUserId,
+                        Month = @event.PaymentMonth,
+                        FullName = student?.Human?.FullName,
+                        Email = student?.Human?.Email,
+                        PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
+                        PackageId = default,
+                        EventId = default,
+                        ExpiredDate = @event.PaymentDate,
+                    });
+                }
             }
 
             methodResult.Result = true;
