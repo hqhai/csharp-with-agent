@@ -155,13 +155,6 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 });
             }
 
-            methodResult.Result = new PagingItemStudentRankingModel
-            {
-                Items = resultPaging.Items,
-                PagingInfo = resultPaging.PagingInfo,
-                WeekEvent = weekEventRules
-            };
-
             TimeSpan timeWeek = new TimeSpan(weekEventRules!.EndDate.Hour, weekEventRules.EndDate.Minute, 0);
             TimeSpan timeNow = new TimeSpan(timeNowVI.Hour, timeNowVI.Minute, 0);
 
@@ -180,6 +173,12 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 await UpdateSnapShot(snapshotModel, cancellationToken);
             }
 
+            methodResult.Result = new PagingItemStudentRankingModel
+            {
+                Items = resultPaging.Items,
+                PagingInfo = resultPaging.PagingInfo,
+                WeekEvent = weekEventRules
+            };
             methodResult.StatusCode = StatusCodes.Status200OK;
 
             return methodResult;
