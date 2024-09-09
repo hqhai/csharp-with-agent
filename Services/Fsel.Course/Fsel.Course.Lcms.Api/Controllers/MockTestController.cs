@@ -17,6 +17,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/mock-test")]
+    [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
     [ApiController]
     public class MockTestController : ControllerBase
     {
