@@ -36,7 +36,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} vừa bình luận bài viết của bạn.",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
+    "templateLink": "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
     "createdDate": "2023-08-28",
     "translations": [
       {
@@ -99,7 +99,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} vừa trả lời bình luận của bạn.",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
+    "templateLink": "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum-user",
     "createdDate": "2023-08-28",
     "translations": [
       {
@@ -175,7 +175,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bình luận của bạn trong bài viết của {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL.",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
+    "templateLink": "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
     "createdDate": "2023-08-28",
     "translations": [
       {
@@ -208,7 +208,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bài viết của bạn trong {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
+    "templateLink": "learn/{0}/{1}/lesson/{2}?page=class-forum",
     "createdDate": "2023-08-28",
     "translations": [
       {
@@ -241,7 +241,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} đã thích bài viết của bạn.",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
+    "templateLink": "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
     "createdDate": "2023-08-28",
     "translations": [
       {
@@ -400,7 +400,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bài đăng của bạn đã được phê duyệt. Nhấn để xem chi tiết",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
+    "templateLink": "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
     "createdDate": "2023-08-28",
     "translations": [
       {
@@ -433,7 +433,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bài viết của bạn trong {0} đã bị từ chối phê duyệt do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
+    "templateLink": "learn/{0}/{1}/lesson/{2}?page=class-forum",
     "createdDate": "2023-08-28",
     "translations": [
       {

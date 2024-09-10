@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -40,8 +41,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly IOrderService _orderService;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private readonly IMediator _mediator;
 
-        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext, IUserService userService, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher)
+        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext, IUserService userService, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, IMediator mediator)
         {
             _classForumResultRepository = classForumResultRepository;
             _mapper = mapper;
@@ -51,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             _orderService = orderService;
             _lessonResultRepository = lessonResultRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(ApproveClassForumPenddingCommand request, CancellationToken cancellationToken)
@@ -146,7 +149,18 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 var user = await _userService.GetUserByStudentId(lessonResult.StudentId);
                 var userId = user?.Content?.Result?.Human?.UserId;
 
-                List<object> paramLinksValue = new List<object> { lessonResult.LessonId.ToString() ?? string.Empty, lessonResult.CourseId.ToString() ?? string.Empty, lessonResult?.UnitId.ToString() ?? string.Empty };
+
+
+                GetFeatureModuleQuery query = new GetFeatureModuleQuery
+                {
+                    FeatureModule = EnumFeatureModule.ClassForumResult,
+                    ObjectId = classForumResult?.Id ?? default
+                };
+
+                var featureModule = await _mediator.Send(query).ConfigureAwait(false);
+                var featureModuleResult = featureModule?.Result;
+
+                List<object> paramLinksValue = new List<object> { featureModuleResult?.CourseId.ToString() ?? string.Empty, featureModuleResult?.UnitId.ToString() ?? string.Empty, featureModuleResult?.LessonId.ToString() ?? string.Empty };
 
                 NotificationSendingQueueModel model = new NotificationSendingQueueModel()
                 {
