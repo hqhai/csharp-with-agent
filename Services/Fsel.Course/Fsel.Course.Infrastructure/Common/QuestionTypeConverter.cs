@@ -14,7 +14,7 @@ namespace Fsel.Course.Infrastructure.Common
 
     public class QuestionTypeConverter
     {
-        public (object?, int) QuestionTypeConverterObject(object? config, EnumQuestionType type, bool isShowCorrectTotal = false, bool isDisableAnswers = false)
+        public (object?, int) QuestionTypeConverterObject(object? config, EnumQuestionType type, bool isShowCorrectTotal = false, bool isDisableAnswers = false, bool isCreated = false)
         {
             int totalCorrect = default;
             object? result;
@@ -110,37 +110,37 @@ namespace Fsel.Course.Infrastructure.Common
 
                 // Dạng câu hỏi mới
                 case EnumQuestionType.MatchingParagraphInfo:
-                    var matchingParagraphInfo = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
+                    var matchingParagraphInfo = HandleQuestion(config.Deserialize<MatchingTaskQuestion>(), isCreated);
                     result = isDisableAnswers ? ClearAnswers(matchingParagraphInfo) : matchingParagraphInfo;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(matchingParagraphInfo) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.MatchingHeading:
-                    var matchingHeading = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
+                    var matchingHeading = HandleQuestion(config.Deserialize<MatchingTaskQuestion>(), isCreated);
                     result = isDisableAnswers ? ClearAnswers(matchingHeading) : matchingHeading;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(matchingHeading) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.YesNoNotGivenDropDown:
-                    var yesNoNotGivenDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
+                    var yesNoNotGivenDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>(), isCreated);
                     result = isDisableAnswers ? ClearAnswers(yesNoNotGivenDropDown) : yesNoNotGivenDropDown;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(yesNoNotGivenDropDown) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.TrueFalseNotGivenDropDown:
-                    var trueFalseNotGivenDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
+                    var trueFalseNotGivenDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>(), isCreated);
                     result = isDisableAnswers ? ClearAnswers(trueFalseNotGivenDropDown) : trueFalseNotGivenDropDown;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(trueFalseNotGivenDropDown) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.MapLabelingDropDown:
-                    var mapLabelingDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
+                    var mapLabelingDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>(), isCreated);
                     result = isDisableAnswers ? ClearAnswers(mapLabelingDropDown) : mapLabelingDropDown;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(mapLabelingDropDown) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.SummaryCompletionDropDown:
-                    var summaryCompletionDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>());
+                    var summaryCompletionDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>(), isCreated);
                     result = isDisableAnswers ? ClearAnswers(summaryCompletionDropDown) : summaryCompletionDropDown;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(summaryCompletionDropDown) : ValueSettings.ValueDefault;
                     break;
@@ -152,27 +152,27 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case EnumQuestionType.CheckListV1:
-                    var checkList = HandleQuestion(config.Deserialize<CheckListQuestionV1>());
+                    var checkList = HandleQuestion(config.Deserialize<CheckListQuestionV1>(), isCreated);
                     result = isDisableAnswers ? ClearAnswers(checkList) : checkList;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(checkList) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.SummaryCompletionGapFill:
-                    var summaryCompletionGapFill = HandleQuestion(config.Deserialize<CheckListQuestionV1>());
+                    var summaryCompletionGapFill = HandleQuestion(config.Deserialize<CheckListQuestionV1>(), isCreated);
                     result = isDisableAnswers ? ClearAnswers(summaryCompletionGapFill) : summaryCompletionGapFill;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(summaryCompletionGapFill) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.CompletionDiagrams:
                 case EnumQuestionType.FlowChartCompletion:
-                    var completionDiagrams = HandleQuestion(config.Deserialize<CheckListQuestionV1>());
+                    var completionDiagrams = HandleQuestion(config.Deserialize<CheckListQuestionV1>(), isCreated);
                     result = isDisableAnswers ? ClearAnswers(completionDiagrams) : completionDiagrams;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(completionDiagrams) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.TableCompletion:
                     var tableCompletion = config.Deserialize<TableCompletionQuestion>();
-                    tableCompletion = HandleQuestion(tableCompletion, tableCompletion?.Rows);
+                    tableCompletion = HandleQuestion(tableCompletion, isCreated, tableCompletion?.Rows);
                     result = isDisableAnswers ? ClearAnswers(tableCompletion) : tableCompletion;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(tableCompletion) : ValueSettings.ValueDefault;
                     break;
@@ -356,7 +356,7 @@ namespace Fsel.Course.Infrastructure.Common
             return false;
         }
 
-        private static dynamic? HandleQuestion(dynamic? data, dynamic? dataList = null)
+        private static dynamic? HandleQuestion(dynamic? data, bool isCreated = false, dynamic? dataList = null)
         {
             dataList ??= data;
             if (dataList == null)
@@ -365,14 +365,14 @@ namespace Fsel.Course.Infrastructure.Common
             }
             if (dataList is IList list)
             {
-                if (data?.GetType().GetProperty(nameof(data.Answers)) != null)
+                if (data?.GetType().GetProperty(nameof(data.Answers)) != null && isCreated)
                 {
                     data?.Answers.Clear();
                 }
                 var listData = new List<dynamic>();
                 foreach (dynamic item in list.OfType<dynamic>())
                 {
-                    listData.Add(HandleQuestion(data, item));
+                    listData.Add(HandleQuestion(data, isCreated, item));
                 }
                 return data;
             }
@@ -382,7 +382,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return dataList;
             }
-            if (data?.GetType().GetProperty(nameof(data.Answers)) != null && dataList.GetType().Name == data?.GetType().Name)
+            if (data?.GetType().GetProperty(nameof(data.Answers)) != null && dataList.GetType().Name == data?.GetType().Name && isCreated)
             {
                 data?.Answers.Clear();
             }
