@@ -40,7 +40,6 @@ namespace Fsel.Notification.Application.Queues.Consumers
                     {
                         UserIds = message.UserIds ?? default,
                         ObjectId = message.ObjectId,
-                        Message = messageNoti,
                         Link = link,
                         Roles = message.Roles,
                         NotificationTypeId = notificationType?.Id ?? default,
