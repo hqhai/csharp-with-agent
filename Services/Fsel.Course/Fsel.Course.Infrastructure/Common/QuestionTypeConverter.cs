@@ -365,6 +365,10 @@ namespace Fsel.Course.Infrastructure.Common
             }
             if (dataList is IList list)
             {
+                if (data?.GetType().GetProperty(nameof(data.Answers)) != null)
+                {
+                    data?.Answers.Clear();
+                }
                 var listData = new List<dynamic>();
                 foreach (dynamic item in list.OfType<dynamic>())
                 {
@@ -372,10 +376,15 @@ namespace Fsel.Course.Infrastructure.Common
                 }
                 return data;
             }
+
             var content = dataList.Content;
             if (string.IsNullOrEmpty(content))
             {
                 return dataList;
+            }
+            if (data?.GetType().GetProperty(nameof(data.Answers)) != null && dataList.GetType().Name == data?.GetType().Name)
+            {
+                data?.Answers.Clear();
             }
             MatchCollection matches = Regex.Matches(content, @"\{(.*?)\}");
             if (!matches.Any())

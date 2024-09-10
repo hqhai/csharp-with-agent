@@ -842,31 +842,19 @@ namespace Fsel.Course.Infrastructure.Common
                 configAnswer = dataAnswer;
                 return (default, isAnswerMissing, false);
             }
-            if (dataAnswer.Answers.Count > dataQuestion?.Answers.Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value))
-            {
-                configAnswer = dataAnswer;
-                return (default, isAnswerMissing, false);
-            }
             foreach (var item in dataAnswer.Answers)
             {
                 var answerQuestion = dataQuestion?.Answers.FirstOrDefault(x => x.Id == item.Id);
                 if (answerQuestion != null)
                 {
-                    if (answerQuestion.IsCorrect.HasValue && answerQuestion.IsCorrect.Value)
-                    {
-                        number++;
-                        item.IsExact = true;
-                    }
-                    else
-                    {
-                        item.IsExact = false;
-                    }
+                    var isCorrect = answerQuestion.IsCorrect.HasValue && answerQuestion.IsCorrect.Value;
+                    item.IsExact = isCorrect;
+                    number = isCorrect ? ++number : --number;
                 }
                 else
                 {
                     item.IsExact = default;
                 }
-
                 if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                 {
                     var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
