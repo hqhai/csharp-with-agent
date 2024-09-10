@@ -38,7 +38,7 @@
   // Validation functions
   function validateEmail() {
     const email = $emailInput.val().trim();
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailPattern = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
     if (email !== "" && emailPattern.test(email)) {
       $emailInput.removeClass("content-border-danger");
       return true;
@@ -125,13 +125,13 @@
     const isValidNewPassword = validatePasswordFormat(newPassword);
     $passwordMeter.css("width", `${isValidNewPassword}%`);
     if (isValidNewPassword > 80) {
-      $meterText.text("Strong");
+      $meterText.text($meterText.attr("text-strong"));
       $passwordMeter.css("background-color", "#3E8E41");
     } else if (isValidNewPassword > 40) {
-      $meterText.text("Good");
+      $meterText.text($meterText.attr("text-good"));
       $passwordMeter.css("background-color", "#EC9213");
     } else {
-      $meterText.text("Weak");
+      $meterText.text($meterText.attr("text-weak"));
       $passwordMeter.css("background-color", "#C0404C");
     }
 

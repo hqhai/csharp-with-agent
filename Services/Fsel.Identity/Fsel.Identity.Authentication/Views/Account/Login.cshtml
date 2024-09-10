@@ -1,3 +1,5 @@
+@using Fsel.Identity.Authentication.Quickstart
+@inject Microsoft.Extensions.Localization.IStringLocalizer Localizer
 @model LoginViewModel
 
 @{
@@ -40,9 +42,9 @@
                     autocomplete="off"
                     pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$"
                     required/> *@
-                        <label for="username" class="input-label">Username</label>
+                        <label for="username" class="input-label">@Localizer["i18n_username"]</label>
                     </div>
-                    @Html.ValidationMessageFor(model => model.Username, "", new { @class = "content-text-danger" })
+                    @Html.CustomValidationMessageFor(model => model.Username, Localizer, "", new { @class = "content-text-danger" })
                 </div>
 
                 <div>
@@ -87,9 +89,9 @@
                                autocomplete="off"
                                required
                                asp-for="Password" />
-                        <label for="password" class="input-label">Password</label>
+                        <label for="password" class="input-label">@Localizer["i18n_password"]</label>
                     </div>
-                    @Html.ValidationMessageFor(model => model.Password, "", new { @class = "content-text-danger" })
+                    @Html.CustomValidationMessageFor(model => model.Password, Localizer, "", new { @class = "content-text-danger" })
                 </div>
 
                 <div class="remember-forgot-password">
@@ -98,22 +100,22 @@
                         <div class="checkbox">
                             <input type="checkbox" id="remember" asp-for="RememberLogin" hidden>
                             <label class="form-check-label" asp-for="RememberLogin" for="remember">
-                                Stay signed in
+                                @Localizer["i18n_stay_signed_in"]
                             </label>
                         </div>
                     }
-                    <a href="@Url.Action("Forgot", "Account" , new { Model.ReturnUrl })">Forgot password?</a>
+                    <a href="@Url.Action("Forgot", "Account" , new { Model.ReturnUrl })">@Localizer["i18n_forgot_password"]?</a>
                 </div>
 
-                <div class="or-separate">Or</div>
+                <div class="or-separate">@Localizer["i18n_or"]</div>
                 <div class="social">
                     <a href="@Url.Action("ExternalLogin", "Account", new { provider = "Google", Model.ReturnUrl})"><img src="/assets/icons/google-icon.svg" alt="google" /></a>
                     <a href="@Url.Action("ExternalLogin", "Account", new { provider = "Facebook", Model.ReturnUrl})"><img src="/assets/icons/facebook-icon.svg" alt="facebook" /></a>
                 </div>
 
-                <button type="submit" class="btn" id="loginButton">Sign in</button>
+                <button type="submit" class="btn" id="loginButton">@Localizer["i18nSigninButtonSignIn"]</button>
 
-                <div class="text-footer">Not a member? <a href="@Url.Action("Register", "Account", new { Model.ReturnUrl })">Sign up now</a></div>
+                <div class="text-footer">@Localizer["i18n_not_a_member"]? <a href="@Url.Action("Register", "Account", new { Model.ReturnUrl })">@Localizer["i18n_sign_up_now"]</a></div>
                 @* <div class="text-footer">Not a member? <a href="/Account/Register?returnUrl=@System.Net.WebUtility.UrlEncode(Model.ReturnUrl)">Sign up now</a></div> *@
             </form>
         }

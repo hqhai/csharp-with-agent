@@ -1,3 +1,5 @@
+@using Fsel.Identity.Authentication.Quickstart
+@inject Microsoft.Extensions.Localization.IStringLocalizer Localizer
 @model Fsel.Identity.Domain.Models.CommandModels.Quickstarts.ExternalLoginModel
 
 @{
@@ -30,29 +32,29 @@
                         <div class="float-input float-input-validate">
                             <input class="text-input"
                                    type="text"
-                                   name="LastName"
-                                   id="lastName"
-                                   placeholder=""
-                                   autocomplete="off"
-                                   required
-                                   asp-for="LastName" />
-                            <label for="LastName" class="input-label">Last name</label>
-                        </div>
-                        @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "content-text-danger" })
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="float-input float-input-validate">
-                            <input class="text-input"
-                                   type="text"
                                    name="FirstName"
                                    id="firstName"
                                    placeholder=""
                                    autocomplete="off"
                                    required
                                    asp-for="FirstName" />
-                            <label for="FirstName" class="input-label">First name</label>
+                            <label for="FirstName" class="input-label">@Localizer["i18nSignUpLabelFirstName"]</label>
                         </div>
-                        @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "content-text-danger" })
+                        @Html.CustomValidationMessageFor(model => model.FirstName, Localizer, "", new { @class = "content-text-danger" })
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="float-input float-input-validate">
+                            <input class="text-input"
+                                   type="text"
+                                   name="LastName"
+                                   id="lastName"
+                                   placeholder=""
+                                   autocomplete="off"
+                                   required
+                                   asp-for="LastName" />
+                            <label for="LastName" class="input-label">@Localizer["i18nSignUpLabelLastName"]</label>
+                        </div>
+                        @Html.CustomValidationMessageFor(model => model.LastName, Localizer, "", new { @class = "content-text-danger" })
                     </div>
                 </div>
                 <div class="row">
@@ -66,16 +68,16 @@
                                    autocomplete="off"
                                    required
                                    asp-for="Email" />
-                            <label for="Email" class="input-label">Email</label>
+                            <label for="Email" class="input-label">@Localizer["i18n_email"]</label>
                         </div>
-                        @Html.ValidationMessageFor(model => model.Email, "", new { @class = "content-text-danger" })
+                        @Html.CustomValidationMessageFor(model => model.Email, Localizer, "", new { @class = "content-text-danger" })
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="float-input float-input-validate option-birthday">
                             <div class="name-option">
-                                <span>Birthday</span>
+                                <span>@Localizer["i18nSignUpLabelBirthday"]</span>
                                 <svg xmlns="http://www.w3.org/2000/svg"
                                      width="18"
                                      height="18"
@@ -95,7 +97,7 @@
                                            name="DayBirthday"
                                            autocomplete="off"
                                            readonly />
-                                    <label for="DayBirthday" class="input-label">Day</label>
+                                    <label for="DayBirthday" class="input-label">@Localizer["i18n_day"]</label>
                                     <div class="dropdown-content" id="dayDropdownContent"></div>
                                 </div>
 
@@ -107,7 +109,7 @@
                                            id="Month"
                                            autocomplete="off"
                                            readonly />
-                                    <label for="MonthBirthday" class="input-label">Month</label>
+                                    <label for="MonthBirthday" class="input-label">@Localizer["i18n_month"]</label>
                                     <div class="dropdown-content"
                                          id="monthDropdownContent"></div>
                                 </div>
@@ -121,7 +123,7 @@
                                            name="YearBirthday"
                                            autocomplete="off"
                                            readonly />
-                                    <label for="YearBirthday" class="input-label">Year</label>
+                                    <label for="YearBirthday" class="input-label">@Localizer["i18n_year"]</label>
                                     <div class="dropdown-content"
                                          id="yearDropdownContent"></div>
                                 </div>
@@ -133,7 +135,7 @@
                     <div class="col-sm-12">
                         <div class="option-birthday">
                             <div class="name-option">
-                                <span>Gender</span>
+                                <span>@Localizer["i18nSignUpLabelGender"]</span>
                                 <svg xmlns="http://www.w3.org/2000/svg"
                                      width="18"
                                      height="18"
@@ -151,7 +153,7 @@
                                            name="gender"
                                            id="male"
                                            value="Male" />
-                                    <label for="male" class="round-radio-label">Male</label>
+                                    <label for="male" class="round-radio-label">@Localizer["i18n_male"]</label>
                                 </div>
                                 <div class="option">
                                     <input class="round-radio"
@@ -160,7 +162,7 @@
                                            name="gender"
                                            id="female"
                                            value="Female" />
-                                    <label for="female" class="round-radio-label">Female</label>
+                                    <label for="female" class="round-radio-label">@Localizer["i18n_female"]</label>
                                 </div>
                                 <div class="option">
                                     <input class="round-radio"
@@ -169,7 +171,7 @@
                                            name="gender"
                                            id="other"
                                            value="Other" />
-                                    <label for="other" class="round-radio-label">Other</label>
+                                    <label for="other" class="round-radio-label">@Localizer["i18n_other"]</label>
                                 </div>
                             </div>
                         </div>
@@ -179,17 +181,17 @@
                 <div class="checkbox">
                     <input type="checkbox" name="policy" id="policy" hidden />
                     <label for="policy" class="service-policy">
-                        I agree to the <a target="_blank" href="https://lms.fsel.edu.vn/term-condition"> Terms of Service</a> and
-                        <a target="_blank" href="https://lms.fsel.edu.vn/policy">Privacy Policy</a>
+                        @Localizer["i18n_i_agree"] <a target="_blank" href="https://lms.fsel.edu.vn/term-condition">@Localizer["i18n_term_of_services"]</a> @Localizer["i18n_and"]
+                        <a target="_blank" href="https://lms.fsel.edu.vn/policy">@Localizer["i18n_privacy_policy"]</a>
                     </label>
                 </div>
             </div>
 
             <button type="submit" class="btn sign-up-btn">
-                Confirm
+                @Localizer["i18n_confirm"]
             </button>
 
-            <div class="text-footer">Already a member? <a href="@Url.Action("Login", "Account", new { Model.ReturnUrl })">Log in now</a></div>
+            <div class="text-footer">@Localizer["i18n_already_a_member"]? <a href="@Url.Action("Login", "Account", new { Model.ReturnUrl })">@Localizer["i18n_login_now"]</a></div>
         </form>
     </div>
 

@@ -14,10 +14,22 @@
 
     $(this).html(existingHtml);
     $("#languageContainer .language").html(currentHtml);
+
+    var url = $(this).attr("data-href");
+    var returnUrl = encodeURIComponent(window.location.href);
+    var newUrl = `${url}&returnUrl=${returnUrl}`;
+    window.location.href = newUrl;
   });
 
   setTimeout(function () {
     $(".message-error").hide();
   }, 3000);
+
+  $('.validation-message-text').each(function () {
+    var field = $(this).attr('data-field');
+    if (field) {
+      $(`[name="${field}"]`).attr("data-val-required", $(this).html());
+    }
+  });
 
 }(jQuery));	

@@ -1,3 +1,5 @@
+@using Fsel.Identity.Authentication.Quickstart
+@inject Microsoft.Extensions.Localization.IStringLocalizer Localizer
 @model Fsel.Identity.Domain.Models.CommandModels.Quickstarts.ForgotModel
 
 @{
@@ -16,7 +18,7 @@
         </div>
 
         <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
-        <h1 class="title">Forgot password</h1>
+        <h1 class="title">@Localizer["i18n_forgot_password"]</h1>
 
         <form asp-route="Forgot">
             <input type="hidden" asp-for="ReturnUrl" />
@@ -32,11 +34,11 @@
                            autocomplete="off"
                            required
                            asp-for="Email" />
-                    <label for="Email" class="input-label">Email</label>
+                    <label for="Email" class="input-label">@Localizer["i18n_email"]</label>
                 </div>
-                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "content-text-danger" })
+                @Html.CustomValidationMessageFor(model => model.Email, Localizer, "", new { @class = "content-text-danger" })
             </div>
-            <button type="submit" class="btn send-otp-button">Send OTP</button>
+            <button type="submit" class="btn send-otp-button">@Localizer["i18n_send_otp"]</button>
         </form>
     </div>
 

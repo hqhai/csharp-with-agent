@@ -57,8 +57,8 @@
         container.removeClass("field-validation-valid").addClass("field-validation-error");
         error.data("unobtrusiveContainer", container);
 
-        var inputValidate = container.prev('.float-input-validate');
-        inputValidate.addClass("mb-2");
+        var inputValidate = container.closest('div');
+        inputValidate.addClass("mt-2");
 
         if (replace) {
             container.empty();
@@ -93,8 +93,8 @@
             container.addClass("field-validation-valid").removeClass("field-validation-error");
             error.removeData("unobtrusiveContainer");
 
-            var inputValidate = container.prev('.float-input-validate');
-            inputValidate.removeClass("mb-2");
+            var inputValidate = container.closest('div');
+            inputValidate.removeClass("mt-2");
 
             if (replace) {
                 container.empty();

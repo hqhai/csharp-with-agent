@@ -2,6 +2,8 @@
 
 namespace Fsel.Identity.Authentication.Quickstart.Components
 {
+    using Fsel.Common.Constants;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Microsoft.AspNetCore.Mvc;
 

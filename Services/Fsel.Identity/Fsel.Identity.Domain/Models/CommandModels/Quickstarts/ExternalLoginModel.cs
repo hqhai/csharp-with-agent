@@ -9,14 +9,14 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
 
     public class ExternalLoginModel
     {
-        [EmailValid(ErrorMessage = "Email is not valid.")]
-        [Required(ErrorMessage = "Email cannot be empty.")]
+        [EmailValid(ErrorMessage = "i18n_Email_is_not_valid")]
+        [Required(ErrorMessage = "i18n_Email_cannot_be_empty")]
         public string? Email { get; set; }
 
-        [Required(ErrorMessage = "First name cannot be empty.")]
+        [Required(ErrorMessage = "i18n_First_name_cannot_be_empty")]
         public string? FirstName { get; set; }
 
-        [Required(ErrorMessage = "Last name cannot be empty.")]
+        [Required(ErrorMessage = "i18n_Last_name_cannot_be_empty")]
         public string? LastName { get; set; }
 
         public EnumGender? Gender { get; set; }
@@ -27,7 +27,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
 
         public int? YearBirthday { get; set; }
 
-        [Required(ErrorMessage = "Birth day cannot be empty.")]
+        [Required(ErrorMessage = "i18n_Birth_day_cannot_be_empty")]
         public DateTime? Birthday => DayBirthday.HasValue && MonthBirthday.HasValue && YearBirthday.HasValue ? new DateTime(YearBirthday.Value, MonthBirthday.Value, DayBirthday.Value) : null;
 
         public string? Provider { get; set; }

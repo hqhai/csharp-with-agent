@@ -17,7 +17,7 @@
 
   function validateEmail() {
     const email = emailInput.val().trim();
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailPattern = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
     if (email !== "" && emailPattern.test(email)) {
       emailInput.removeClass("content-border-danger");
       return true;

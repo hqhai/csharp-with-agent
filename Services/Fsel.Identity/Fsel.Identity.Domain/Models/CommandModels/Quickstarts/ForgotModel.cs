@@ -7,8 +7,8 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
 
     public class ForgotModel
     {
-        [EmailValid(ErrorMessage = "Email is not valid.")]
-        [Required(ErrorMessage = "Email cannot be empty.")]
+        [EmailValid(ErrorMessage = "i18n_Email_is_not_valid")]
+        [Required(ErrorMessage = "i18n_Email_cannot_be_empty")]
         public string? Email { get; set; }
 
         public string? ReturnUrl { get; set; }

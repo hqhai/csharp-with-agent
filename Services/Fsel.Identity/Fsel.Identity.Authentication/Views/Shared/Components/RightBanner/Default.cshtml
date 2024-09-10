@@ -1,3 +1,4 @@
+@inject Microsoft.Extensions.Localization.IStringLocalizer Localizer
 
 <div class="content-right">
     <div class="content-right-image">
@@ -5,9 +6,9 @@
         src="https://s3-sgn10.fptcloud.com/fsel-public/Files/Right_7609_1723006204223.png"
         alt="" /> *@
         <div class="text-and-btn">
-            <div class="text">An english center in your pocket</div>
+            <div class="text">@Localizer["i18nSigninContentSlogan"]</div>
             <div class="btn-action">
-                <a href="@Url.Action("Register", "Account", new { ViewBag.ReturnUrl })">Start a FREE 14-day trial</a>
+                <a href="@Url.Action("Register", "Account", new { ViewBag.ReturnUrl })">@Localizer["i18nSigninContentFree14DayTrial"]</a>
             </div>
         </div>
     </div>

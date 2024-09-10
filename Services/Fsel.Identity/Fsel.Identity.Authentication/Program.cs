@@ -3,7 +3,9 @@
 using AutoMapper;
 using Fsel.Authentication.Infrastructure.Configs;
 using Fsel.Common.Constants;
+using Fsel.Common.Helpers;
 using Fsel.Core.Extensions;
+using Fsel.Core.Localization;
 using Fsel.Core.Middlewares;
 using Fsel.Identity.Application.Events;
 using Fsel.Identity.Application.Queues.Publishers;
@@ -27,7 +29,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -213,6 +214,7 @@ builder.Services.AddHttpsRedirection(opt => opt.HttpsPort = 443);
 
 //App config
 var app = builder.Build();
+app.UseLanguages();
 app.UseStaticFiles();
 app.UseIdentityServer();
 app.UseCertificateForwarding();
@@ -227,18 +229,19 @@ app.UseCookiePolicy(new CookiePolicyOptions
     MinimumSameSitePolicy = SameSiteMode.None,
     Secure = CookieSecurePolicy.Always
 });
-app.Use(async (context, next) =>
-{
-    //context.SetIdentityServerOrigin("https://fsel-auth-testing.fsel.edu.vn");
-    context.Request.Scheme = "https";
-    context.Request.IsHttps = true;
-    await next();
-});
+//app.Use(async (context, next) =>
+//{
+//    //context.SetIdentityServerOrigin("https://fsel-auth-testing.fsel.edu.vn");
+//    //context.Request.Scheme = "https";
+//    //context.Request.IsHttps = true;
+//    await next();
+//});
 
 app.UseCors();
 app.UseCors(Settings.CorsPolicy);
 
 app.UseForwardedHeaders(fordwardedHeaderOptions);
+app.UseDefaultServices();
 
 //app.UseServices();
 

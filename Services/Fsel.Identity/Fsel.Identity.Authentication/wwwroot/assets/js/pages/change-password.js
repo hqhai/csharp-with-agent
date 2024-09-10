@@ -63,13 +63,13 @@
     const isValidNewPassword = validatePasswordFormat(newPassword);
     $passwordMeter.css("width", `${isValidNewPassword}%`);
     if (isValidNewPassword > 80) {
-      $meterText.text("Strong");
+      $meterText.text($meterText.attr("text-strong"));
       $passwordMeter.css("background-color", "#3E8E41");
     } else if (isValidNewPassword > 40) {
-      $meterText.text("Good");
+      $meterText.text($meterText.attr("text-good"));
       $passwordMeter.css("background-color", "#EC9213");
     } else {
-      $meterText.text("Weak");
+      $meterText.text($meterText.attr("text-weak"));
       $passwordMeter.css("background-color", "#C0404C");
     }
 

@@ -1,3 +1,4 @@
+@inject Microsoft.Extensions.Localization.IStringLocalizer Localizer
 @model Fsel.Identity.Domain.Models.CommandModels.Quickstarts.VerifyOtpModel
 @using Fsel.Identity.Authentication.Quickstart.Account;
 
@@ -19,18 +20,18 @@
         <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
         @if (Model.Type == nameof(AccountController.Register))
         {
-            <h1 class="title">Verify OTP</h1>
+            <h1 class="title">@Localizer["i18n_verify_otp"]</h1>
         }
         else
         {
-            <h1 class="title">Forgot password</h1>
+            <h1 class="title">@Localizer["i18n_forgot_password"]</h1>
         }
 
         <form id="form-VerifyOtp" asp-route="VerifyOtp">
             @if (Model.Type == nameof(AccountController.Register))
             {
                 <p class="sub-title sub-verify-otp">
-                    Để đăng ký thành công, vui lòng kiểm tra Email đăng ký của bạn và xác thực OTP
+                    @Localizer["i18nSignUpContentCheckmailotp"]
                 </p>
             }
             else
@@ -112,15 +113,15 @@
                            autocomplete="off"
                            required
                            asp-for="Otp" />
-                    @* @Html.ValidationMessageFor(model => model.Otp, "", new { @class = "content-text-danger" }) *@
+                    @* @Html.CustomValidationMessageFor(model => model.Otp, Localizer, "", new { @class = "content-text-danger" }) *@
                 </div>
             </div>
-            <button type="submit" class="btn">Verify</button>
+            <button type="submit" class="btn">@Localizer["i18n_verify"]</button>
         </form>
 
         <div class="resend-otp">
-            Didn’t receive a code?
-            <a href="@Url.Action("ResendOtp", "Account", new { Model.ReturnUrl, type = Model.Type })">Resend OTP</a>
+            @Localizer["i18n_did_not_a_code"]?
+            <a href="@Url.Action("ResendOtp", "Account", new { Model.ReturnUrl, type = Model.Type })">@Localizer["i18n_resend_otp"]</a>
         </div>
     </div>
 

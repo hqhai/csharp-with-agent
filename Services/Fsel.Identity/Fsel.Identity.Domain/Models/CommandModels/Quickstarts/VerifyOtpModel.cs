@@ -6,7 +6,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
 
     public class VerifyOtpModel
     {
-        [Required(ErrorMessage = "Otp cannot be empty.")]
+        [Required(ErrorMessage = "i18n_OTP_cannot_be_empty")]
         public string? Otp { get; set; }
 
         public string? ReturnUrl { get; set; }

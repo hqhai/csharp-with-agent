@@ -8,10 +8,10 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 {
     public class LoginInputModel
     {
-        [Required(ErrorMessage = "Username cannot be empty.")]
+        [Required(ErrorMessage = "i18n_Username_cannot_be_empty")]
         public string? Username { get; set; }
 
-        [Required(ErrorMessage = "Password cannot be empty.")]
+        [Required(ErrorMessage = "i18n_Password_cannot_be_empty")]
         public string? Password { get; set; }
 
         public bool RememberLogin { get; set; }

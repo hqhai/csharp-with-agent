@@ -266,7 +266,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     },
 
                     AllowOfflineAccess = true, // Cho phép sử dụng refresh token
-                    AccessTokenLifetime = 3600,
+                    AccessTokenLifetime = 60,
                     UpdateAccessTokenClaimsOnRefresh = true,
                     RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
                     RefreshTokenExpiration = TokenExpiration.Sliding, // Cấu hình thời gian sống của refresh token

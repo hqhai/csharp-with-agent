@@ -18,8 +18,6 @@ using IdentityServer4.Stores;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-
-//using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using System.Security.Claims;
@@ -28,11 +26,10 @@ using Fsel.Identity.Domain.Models.CommandModels.Quickstarts;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using Fsel.Identity.Domain.IRepositories;
-using Microsoft.EntityFrameworkCore;
 using Fsel.Core.Base.Managers;
-using Microsoft.Net.Http.Headers;
 using Fsel.Common.Constants;
-using PhoneNumbers;
+using Microsoft.Extensions.Localization;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Fsel.Identity.Authentication.Quickstart.Account
 {
@@ -41,8 +38,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
     /// The login service encapsulates the interactions with the user data store. This data store is in-memory only and cannot be used for production!
     /// The interaction service provides a way for the UI to communicate with identityserver for validation and context retrieval
     /// </summary>
-    [SecurityHeaders]
     [AllowAnonymous]
+    //[SecurityHeaders]
     public class AccountController : BaseController
     {
         //private readonly TestUserStore _users;
@@ -63,6 +60,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         private readonly IUserOtpRepository _userOtpRepository;
         private readonly IUserRepository _userRepository;
         private readonly Core.Base.AuthContext _languageContext;
+        private readonly IStringLocalizer _localizer;
 
         public AccountController(
             IUserSession userSession,
@@ -80,7 +78,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             IStudentRepository studentRepository,
             IUserOtpRepository userOtpRepository,
             IUserRepository userRepository,
-            Core.Base.AuthContext languageContext)
+            Core.Base.AuthContext languageContext,
+            IStringLocalizer localizer)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -102,6 +101,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             _userOtpRepository = userOtpRepository;
             _userRepository = userRepository;
             _languageContext = languageContext;
+            _localizer = localizer;
         }
 
         /// <summary>
@@ -136,19 +136,19 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 {
                     if (userRegisterModel == null)
                     {
-                        ModelState.AddModelError(string.Empty, "Data does not exist");
+                        ModelState.AddModelError(string.Empty, _localizer["i18n_Data_does_not_exist"]);
                     }
                     else if (string.IsNullOrEmpty(userRegisterModel.Password))
                     {
-                        ModelState.AddModelError(nameof(userRegisterModel.Password), "Password cannot be empty");
+                        ModelState.AddModelError(nameof(userRegisterModel.Password), _localizer["i18n_Password_cannot_be_empty"]);
                     }
                     else if (user == null)
                     {
-                        ModelState.AddModelError(string.Empty, "User does not exist");
+                        ModelState.AddModelError(string.Empty, _localizer["i18n_User_does_not_exist"]);
                     }
                     else if (user.EmailConfirmed)
                     {
-                        ModelState.AddModelError(string.Empty, "User has been confirmed");
+                        ModelState.AddModelError(string.Empty, _localizer["i18n_User_has_been_confirmed"]);
                     }
                     else
                     {
@@ -165,12 +165,12 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
                             if (result.Succeeded)
                             {
-                                ViewBag.Success = "User successfuly added!!";
+                                ViewBag.Success = _localizer["i18n_User_successfuly_added"];
 
                                 return RedirectToAction(nameof(Success), new
                                 {
                                     request.ReturnUrl,
-                                    message = "Congratulations, your account has been successfully created."
+                                    message = _localizer["i18n_Congratulations_your_account_has_been_successfully_created"]
                                 });
                             }
 
@@ -181,7 +181,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         }
                         else
                         {
-                            ModelState.AddModelError(nameof(request.Otp), "OTP Invalid");
+                            ModelState.AddModelError(nameof(request.Otp), _localizer["i18n_OTP_is_not_valid"]);
                         }
                     }
                 }
@@ -189,11 +189,11 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 {
                     if (forgotModel == null)
                     {
-                        ModelState.AddModelError(string.Empty, "Data does not exist");
+                        ModelState.AddModelError(string.Empty, _localizer["i18n_Data_does_not_exist"]);
                     }
                     else if (user == null || !user.EmailConfirmed)
                     {
-                        ModelState.AddModelError(string.Empty, "User does not exist");
+                        ModelState.AddModelError(string.Empty, _localizer["i18n_User_does_not_exist"]);
                     }
                     else
                     {
@@ -210,7 +210,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         }
                         else
                         {
-                            ModelState.AddModelError(nameof(request.Otp), "OTP Invalid");
+                            ModelState.AddModelError(nameof(request.Otp), _localizer["i18n_OTP_is_not_valid"]);
                         }
                     }
                 }
@@ -243,18 +243,18 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 var forgotPasswordModel = GetFromTempData(nameof(ForgotPasswordModel))?.ToString().Deserialize<ForgotPasswordModel>();
                 if (forgotPasswordModel == null)
                 {
-                    ModelState.AddModelError(string.Empty, "Data does not exist");
+                    ModelState.AddModelError(string.Empty, _localizer["i18n_Data_does_not_exist"]);
                 }
                 else if (request.VerifyId != forgotPasswordModel.VerifyId)
                 {
-                    ModelState.AddModelError(string.Empty, "Authentication data is incorrect");
+                    ModelState.AddModelError(string.Empty, _localizer["i18n_Authentication_data_is_incorrect"]);
                 }
                 else
                 {
                     var user = await _userManager.FindByEmailAsync(forgotPasswordModel.Email ?? string.Empty);
                     if (user == null)
                     {
-                        ModelState.AddModelError(string.Empty, "User does not exist");
+                        ModelState.AddModelError(string.Empty, _localizer["i18n_User_does_not_exist"]);
                     }
                     else
                     {
@@ -266,7 +266,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                             return RedirectToAction(nameof(Success), new
                             {
                                 request.ReturnUrl,
-                                message = "Congratulations, your account password has been successfully changed."
+                                message = _localizer["i18n_Congratulations_your_account_password_has_been_successfully_changed"]
                             });
                         }
 
@@ -302,14 +302,14 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
                 if (user == null || !user.EmailConfirmed)
                 {
-                    ModelState.AddModelError(nameof(request.Email), "Email does not exist in the system");
+                    ModelState.AddModelError(nameof(request.Email), _localizer["i18n_Email_does_not_exist_in_the_system"]);
                     return View(request);
                 }
 
                 var sendResult = await SendOtpAsync(user);
                 if (!sendResult.IsOK)
                 {
-                    ModelState.AddModelError(nameof(request.Email), "Failed to send OTP");
+                    ModelState.AddModelError(nameof(request.Email), _localizer["i18n_Failed_to_send_OTP"]);
                     return View(request);
                 }
 
@@ -348,7 +348,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             var sendResult = await SendOtpAsync(user);
             if (!sendResult.IsOK)
             {
-                ModelState.AddModelError(nameof(user.Email), "Failed to send OTP");
+                ModelState.AddModelError(nameof(user.Email), _localizer["i18n_Failed_to_send_OTP"]);
             }
 
             return RedirectToAction(nameof(VerifyOtp), new { returnUrl, type });
@@ -380,7 +380,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
                 if (user != null && user.EmailConfirmed)
                 {
-                    ModelState.AddModelError(nameof(request.Email), "Email duplicated!");
+                    ModelState.AddModelError(nameof(request.Email), _localizer["i18n_Email_already_exists_in_the_system"]);
                     return View(request);
                 }
 
@@ -408,7 +408,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     if (!sendResult.IsOK)
                     {
                         scope.Dispose();
-                        ModelState.AddModelError(nameof(request.Email), "Failed to send OTP");
+                        ModelState.AddModelError(nameof(request.Email), _localizer["i18n_Failed_to_send_OTP"]);
                         return View(request);
                     }
 
@@ -461,7 +461,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             {
                 _languageContext.AcceptLanguage = vm.UiLocales;
             }
-            HttpContext.SetCookie(Settings.RequestHeader.AcceptLanguage, _languageContext.CurrentCountryInfo?.CultureCode);
+            HttpContext.SetCookie(Settings.RequestHeader.AcceptLanguage, vm.UiLocales);
             HttpContext.SetCookie(Settings.RequestHeader.OSName, vm.OSName);
             HttpContext.SetCookie(Settings.RequestHeader.DeviceId, vm.DeviceId);
             HttpContext.SetCookie(Settings.RequestHeader.DeviceName, vm.DeviceName);
@@ -517,7 +517,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             //    }
             //}
 
-            _logger.LogWarning("ModelState.IsValid: " + ModelState.IsValid);
+            _logger.LogWarning("ModelState.IsValid: {IsValid}", ModelState.IsValid);
 
             if (ModelState.IsValid)
             {
@@ -582,14 +582,14 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         }
                         else
                         {
+                            _logger.LogWarning("Invalid return URL");
                             // user might have clicked on a malicious link - should be logged
-                            throw new Exception("invalid return URL");
                         }
                     }
                 }
 
-                await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials", clientId: context?.Client.ClientId));
-                ModelState.AddModelError(string.Empty, AccountOptions.InvalidCredentialsErrorMessage);
+                await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, _localizer["i18n_Invalid_Credentials"], clientId: context?.Client.ClientId));
+                ModelState.AddModelError(string.Empty, _localizer["ERROR_CODE.UserNameAndPasswordIncorrect"]);
             }
 
             // something went wrong, show form with error
@@ -628,7 +628,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             ArgumentNullException.ThrowIfNull(model);
 
             // build a model so the logged out page knows what to display
-            var vm = await BuildLoggedOutViewModelAsync(model.LogoutId);
+            var vm = await BuildLoggedOutViewModelAsync(model.LogoutId ?? string.Empty);
 
             if (User?.Identity?.IsAuthenticated == true)
             {

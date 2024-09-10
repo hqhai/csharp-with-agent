@@ -11,15 +11,15 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
         public string? Email { get; set; }
 
         [DataType(DataType.Password)]
-        [RegexValid(ErrorMessage = "Password is not valid.", Regex = RegexSettings.Password)]
-        [Required(ErrorMessage = "Password cannot be empty.")]
+        [RegexValid(ErrorMessage = "i18n_Password_is_not_valid", Regex = RegexSettings.Password)]
+        [Required(ErrorMessage = "i18n_Password_cannot_be_empty")]
         public string? Password { get; set; }
 
         [DataType(DataType.Password)]
-        [RegexValid(ErrorMessage = "Confirm Password is not valid.", Regex = RegexSettings.Password)]
-        [Display(Name = "Confirm Password")]
-        [Compare(nameof(Password), ErrorMessage = "Password and confirmation password not match.")]
-        [Required(ErrorMessage = "Password confirmation cannot be empty.")]
+        [Display(Name = "i18n_confirmation_password")]
+        [Compare(nameof(Password), ErrorMessage = "i18n_Password_and_Confirm_Password_not_match")]
+        [RegexValid(ErrorMessage = "i18n_Confirm_Password_is_not_valid.", Regex = RegexSettings.Password)]
+        [Required(ErrorMessage = "i18n_Confirm_Password_cannot_be_empty.")]
         public string? ConfirmPassword { get; set; }
 
         public Guid? VerifyId { get; set; }
