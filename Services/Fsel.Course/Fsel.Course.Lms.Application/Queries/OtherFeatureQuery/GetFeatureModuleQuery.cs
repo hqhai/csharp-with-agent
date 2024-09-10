@@ -370,9 +370,10 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
 
         private async Task<FeatureModuleModel> GetFeatureModuleToLesson(FeatureModuleModel featureModule, Guid lessonId)
         {
-            var lesson = await _lessonRepository.Queryable.Include(x => x.LessonResults.OrderBy(x => x.CreatedDate)
+            var lesson = await _lessonRepository.Queryable.Include(x => x.LessonResults
                                                                         .Where(x => x.CourseId == featureModule.CourseId && x.StudentId == featureModule.StudentId)
                                                                         .Where(x => !featureModule.UnitId.HasValue || x.UnitId == featureModule.UnitId)
+                                                                        .OrderBy(x => x.CreatedDate)
                                                                   )
                                                           .FirstOrDefaultAsync(x => x.Id == lessonId);
             if (lesson == null)
@@ -503,13 +504,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             }
             else
             {
-                lessonId = await (from baseQ in _lessonRepository.Queryable
-                                  join cl in _classForumRepository.Queryable on baseQ.Id equals cl.LessonId
-                                  join ul in _unitLessonRepository.Queryable on baseQ.Id equals ul.LessonId
-                                  join u in _unitRepository.Queryable on ul.UnitId equals u.Id
-                                  join cum in _courseUnitMockTestRepository.Queryable on u.Id equals cum.UnitId
-                                  where cum.CourseId == featureModule.CourseId && cl.Id == classForumId
-                                  select baseQ).Select(x => x.Id).FirstOrDefaultAsync();
+                lessonId = await _classForumRepository.Queryable.Where(x => x.Id == classForumId).Select(x => x.LessonId).FirstOrDefaultAsync();
             }
             featureModule = await GetFeatureModuleToLesson(featureModule, lessonId);
             var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => x.LessonResultId == featureModule.LessonResultId))
@@ -520,7 +515,18 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             }
             featureModule.ClassForumId = classForum.Id;
             featureModule.ClassForumResultId = classForum.ClassForumResults.FirstOrDefault()?.Id;
+            if (featureModule.ClassForumResultId.HasValue)
+            {
+                featureModule.ClassForumDetailResultId = await GetClassFourmDetailResultIdAsync(featureModule.ClassForumResultId.Value);
+            }
             return featureModule;
+        }
+
+        private async Task<Guid?> GetClassFourmDetailResultIdAsync(Guid classForumResultId)
+        {
+            var classForumDetailResult = await _classForumDetailResultRepository.Queryable.Where(x => x.ClassForumResultId == classForumResultId && x.Status == EnumClassForumResultStatus.Graded)
+                                                                   .FirstOrDefaultAsync();
+            return classForumDetailResult?.Id;
         }
 
         private async Task<FeatureModuleModel> GetFeatureModuleToFinalTest(FeatureModuleModel featureModule, Guid finalTestId)
