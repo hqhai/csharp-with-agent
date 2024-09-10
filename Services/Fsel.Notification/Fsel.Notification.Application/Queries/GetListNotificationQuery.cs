@@ -40,6 +40,7 @@ namespace Fsel.Notification.Application.Queries
             var methodResult = new MethodResult<PagingItemsNotificationModel>();
 
             var notificationQuery = _notificationsRepository.Queryable.Include(x => x.NotificationType)
+                                                                      .Include(x => x.Translations)
                                                                       .Where(x => x.UserId == _authContext.CurrentUserId);
             var notificationSenderIds = await notificationQuery.Where(p => p.SenderId.HasValue).Select(x => x.SenderId ?? default).Distinct().ToListAsync(cancellationToken);
 

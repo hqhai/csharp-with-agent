@@ -15,6 +15,7 @@ namespace Fsel.Notification.Infrastructure.Maps
         {
             CreateMap<NotificationMessage, NotificationMessageModel>().IgnoreAllNonExisting();
             CreateMap<NotificationMessage, OneSignalMessageModel>().IgnoreAllNonExisting();
+            CreateMap<NotificationMessageTranslationModel, NotificationMessageTranslation>().IgnoreAllNonExisting();
             CreateMap<CreateNotificationCommandModel, NotificationMessage>().IgnoreAllNonExisting();
             CreateMap<UpdateNotificationCommandModel, NotificationMessage>().IgnoreAllNonExisting();
             CreateMap<NotificationType, NotificationsTypeModel>().IgnoreAllNonExisting();
