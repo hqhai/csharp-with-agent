@@ -18,7 +18,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
     using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
@@ -57,8 +56,27 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private readonly ISpeakingEvaluationAIService _evaluationAIService;
         private readonly SubmitSpeakingAIPublisher _submitSpeakingAIPublisher;
         private readonly ILogger<CreateMockTestAnswerBySectionGroupCommand> _logger;
+        private readonly DisconnectSocketCalculateTimePublisher _disconnectSocketCalculateTimePublisher;
 
-        public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, AuthContext authContext, IUserService userService, QuestionConverter questionConverter, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestResultRepository mockTestResultRepository, ISectionRepository sectionRepository, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, ISectionTimeCodeRepository sectionTimeCodeRepository, ISectionGroupRepository sectionGroupRepository, SubmitMockTestAnswerPublisher submitMockTestAnswerPublisher, IMediator mediator, IMapper mapper, ILogger<CreateMockTestAnswerBySectionGroupCommand> logger, ISpeakingAIService speakingAIService, ISpeakingEvaluationAIService evaluationAIService, SubmitSpeakingAIPublisher submitSpeakingAIPublisher)
+        public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository,
+            AuthContext authContext,
+            IUserService userService,
+            QuestionConverter questionConverter,
+            IMockTestAnswerRepository mockTestAnswerRepository,
+            IMockTestResultRepository mockTestResultRepository,
+            ISectionRepository sectionRepository,
+            SectionGroupConverter sectionGroupConverter,
+            ISectionGroupResultRepository sectionGroupResultRepository,
+            ISectionTimeCodeRepository sectionTimeCodeRepository,
+            ISectionGroupRepository sectionGroupRepository,
+            SubmitMockTestAnswerPublisher submitMockTestAnswerPublisher,
+            IMediator mediator,
+            IMapper mapper,
+            ILogger<CreateMockTestAnswerBySectionGroupCommand> logger,
+            ISpeakingAIService speakingAIService,
+            ISpeakingEvaluationAIService evaluationAIService,
+            SubmitSpeakingAIPublisher submitSpeakingAIPublisher,
+            DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -78,6 +96,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             _speakingAIService = speakingAIService;
             _evaluationAIService = evaluationAIService;
             _submitSpeakingAIPublisher = submitSpeakingAIPublisher;
+            _disconnectSocketCalculateTimePublisher = disconnectSocketCalculateTimePublisher;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateMockTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -151,6 +170,15 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             }
 
             #endregion Validate
+
+            if (request.IsSubmit)
+            {
+                await _disconnectSocketCalculateTimePublisher.Publish(new SetTimeModuleModel
+                {
+                    Type = nameof(MockTest),
+                    ObjectId = sectionGroupResult.Id
+                }, cancellationToken);
+            }
 
             var isSkillTest = mockTestResult.MockTest.MockTestType == EnumMockTestType.SkillMockTest;
             await _mockTestAnswerRepository.ExecuteTransactionAsync(async () =>

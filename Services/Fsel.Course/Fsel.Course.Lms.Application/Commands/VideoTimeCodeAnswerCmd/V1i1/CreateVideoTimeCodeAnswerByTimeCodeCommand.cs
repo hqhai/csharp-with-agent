@@ -11,7 +11,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -139,7 +138,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             var (videoResult, videoTimeCode, videoTimeCodeResult) = method.Result;
             if (request.IsSubmit)
             {
-             
                 await _disconnectSocketCalculateTimePublisher.Publish(new SetTimeModuleModel
                 {
                     Type = nameof(Video),
@@ -150,7 +148,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {
-
                 if (request.IsSubmit)
                 {
                     if (videoTimeCodeResult.Status == EnumResultStatus.New && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
@@ -171,7 +168,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 _videoResultRepository.Update(videoResult);
                 await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             });
@@ -180,7 +176,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             {
                 await UpdateVideoResultAsync(videoResult, cancellationToken);
 
-
                 #region Do QuestBoard
 
                 var countAnswers = await _videoTimeCodeAnswerRepository.Queryable.Where(p => p.VideoTimeCodeResultId == videoTimeCodeResult.Id).CountAsync(cancellationToken);
@@ -188,6 +183,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 await DoQuestBoard(videoResult.StudentId, EnumQuestBoardCategory.DecodingTheNebula, countAnswers, cancellationToken);
                 await DoQuestBoard(videoResult.StudentId, EnumQuestBoardCategory.JourneyOfKnowledge, countAnswers, cancellationToken);
                 await PublishRankedStudent(videoResult.CreatedUserId, cancellationToken);
+
                 #endregion Do QuestBoard
             }
 
