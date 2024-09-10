@@ -42,7 +42,7 @@ namespace Fsel.Interaction.Application.Services.CourseServices
         [Get("/v1.1/lesson/detail")]
         Task<IApiResponse<MethodResult<LessonModel>>> GetLessonResult([FromRoute] Guid LessonResultId);
 
-        [Get("/v1.1/other/feature-module")]
+        [Get("/v1/other/feature-module")]
         Task<IApiResponse<MethodResult<FeatureModuleModel>>> GetModuleModel([FromQuery] FeatureModuleQuery query);
 
     }

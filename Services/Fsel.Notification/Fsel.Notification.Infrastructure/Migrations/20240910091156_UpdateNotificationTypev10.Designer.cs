@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Notification.Infrastructure.Migrations
 {
     [DbContext(typeof(NotificationsDBContext))]
-    [Migration("20240829094233_UpdateNotificationTypeV11")]
-    partial class UpdateNotificationTypeV11
+    [Migration("20240910091156_UpdateNotificationTypev10")]
+    partial class UpdateNotificationTypev10
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -104,6 +104,73 @@ namespace Fsel.Notification.Infrastructure.Migrations
                     b.HasIndex("NotificationTypeId");
 
                     b.ToTable("NotificationMessages");
+                });
+
+            modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationMessageTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Language")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("NotificationMessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NotificationMessageId");
+
+                    b.ToTable("NotificationMessageTranslations");
                 });
 
             modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationRemind", b =>
@@ -303,7 +370,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
+                            TemplateLink = "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
                             TemplateMessage = "{0} vừa bình luận bài viết của bạn.",
                             Type = "LinkComment"
                         },
@@ -359,7 +426,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
+                            TemplateLink = "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum-user",
                             TemplateMessage = "{0} vừa trả lời bình luận của bạn.",
                             Type = "LinkComment"
                         },
@@ -401,7 +468,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
+                            TemplateLink = "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
                             TemplateMessage = "Bình luận của bạn trong bài viết của {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL.",
                             Type = "LinkComment"
                         },
@@ -415,7 +482,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
+                            TemplateLink = "learn/{0}/{1}/lesson/{2}?page=class-forum",
                             TemplateMessage = "Bài viết của bạn trong {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
                             Type = "LinkPage"
                         },
@@ -429,7 +496,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
+                            TemplateLink = "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
                             TemplateMessage = "{0} đã thích bài viết của bạn.",
                             Type = "LinkPage"
                         },
@@ -555,7 +622,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
+                            TemplateLink = "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
                             TemplateMessage = "Bài đăng của bạn đã được phê duyệt. Nhấn để xem chi tiết",
                             Type = "LinkPage"
                         },
@@ -569,7 +636,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
+                            TemplateLink = "learn/{0}/{1}/lesson/{2}?page=class-forum",
                             TemplateMessage = "Bài viết của bạn trong {0} đã bị từ chối phê duyệt do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
                             Type = "LinkPage"
                         },
@@ -1075,6 +1142,17 @@ namespace Fsel.Notification.Infrastructure.Migrations
                     b.Navigation("NotificationType");
                 });
 
+            modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationMessageTranslation", b =>
+                {
+                    b.HasOne("Fsel.Notification.Domain.Entities.NotificationMessage", "NotificationMessage")
+                        .WithMany("Translations")
+                        .HasForeignKey("NotificationMessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NotificationMessage");
+                });
+
             modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationTypeTranslation", b =>
                 {
                     b.HasOne("Fsel.Notification.Domain.Entities.NotificationType", "NotificationType")
@@ -1084,6 +1162,11 @@ namespace Fsel.Notification.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("NotificationType");
+                });
+
+            modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationMessage", b =>
+                {
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationType", b =>
