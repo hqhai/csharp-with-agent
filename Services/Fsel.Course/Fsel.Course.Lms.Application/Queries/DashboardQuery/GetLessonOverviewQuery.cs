@@ -354,7 +354,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 
         private static (EnumResultStatus, double) GetStatus(ClassForumResult? classForumResult, EnumResultStatus status)
         {
-            if (classForumResult != null && classForumResult.Status != EnumClassForumResultStatus.Draft)
+            if (classForumResult != null && classForumResult.Status.HasValue)
             {
                 return (EnumResultStatus.Done, PercentClassForum);
             }

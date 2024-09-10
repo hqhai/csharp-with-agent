@@ -121,6 +121,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                                       OverallScore = studentResult?.TotalScore ?? 0, // Thêm kiểm tra null và mặc định giá trị nếu null
                                       CompetitionEndDate = weekEventRules!.EndDate,
                                       FullName = studentFile.FullName,
+                                      Email = studentFile.Email,
                                       AvatarPath = studentInfo?.Human?.AvatarPath ?? string.Empty, // Thêm kiểm tra null và mặc định giá trị nếu null
                                       UserId = studentFile.UserId,
                                       RankingScore = Process_Ratio * (studentResult?.ContentCompleted ?? 0) + Overall_Ratio * (studentResult?.TotalScore ?? 0),
@@ -133,8 +134,9 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                studentRanking = studentRanking.Where(x => x.FullName != null && x.FullName.Contains(request.Keyword)).ToList();
+                studentRanking = studentRanking.Where(x => (x.FullName != null && x.FullName.ToLower().Contains(request.Keyword.ToLower().Trim())) || (x.Email != null && x.Email.ToLower() == request.Keyword.ToLower().Trim())).ToList();
             }
+
             var lists = studentRanking.ApplyPaging(request).ToList();
             int totalItem = studentRanking.Count;
             var resultPaging = new PagingItemsModel<StudentRankingModel>(lists, request, totalItem);

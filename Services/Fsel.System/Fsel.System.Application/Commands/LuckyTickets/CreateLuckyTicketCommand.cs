@@ -70,15 +70,7 @@ namespace Fsel.System.Application.Commands.LuckyTickets
                 return methodResult;
             }
 
-            var spreadSheetId = _appSetting.GoogleSheetConfig?.SchoolStudentSheetId;
-
-            if (string.IsNullOrEmpty(spreadSheetId))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                return methodResult;
-            }
-
-            var checkLuckySpinResults = await _userService.CheckLuckySpin();
+            var checkLuckySpinResults = await _userService.CheckLuckySpin(_authContext.CurrentUserId);
             if (!checkLuckySpinResults.IsSuccessStatusCode)
             {
                 methodResult.AddError(checkLuckySpinResults.Error);
@@ -86,7 +78,7 @@ namespace Fsel.System.Application.Commands.LuckyTickets
             }
 
             var checkLuckySpin = checkLuckySpinResults.Content?.Result;
-            if (!checkLuckySpin.HasValue || checkLuckySpin == false)
+            if (checkLuckySpin == null || checkLuckySpin.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;

@@ -48,8 +48,5 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Post("/v1/course-integration/integration-unit-results")]
         Task<IApiResponse<MethodResult<IList<UnitResultModel>>>> GetUnitResults([FromBody] CourseIntegrationQueryModel query);
-
-        [Get("/v1/course-integration/integration-lesson-results")]
-        Task<IApiResponse<MethodResult<IList<LessonResultModel>>>> GetLessonResults([FromQuery] CourseIntegrationQueryModel query);
     }
 }

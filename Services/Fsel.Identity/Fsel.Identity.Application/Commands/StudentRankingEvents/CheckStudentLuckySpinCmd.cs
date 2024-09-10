@@ -3,41 +3,53 @@
 namespace Fsel.Identity.Application.Commands.StudentRankingEvents
 
 {
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CheckStudentLuckySpinCmd : IRequest<MethodResult<bool>>
+    public class CheckStudentLuckySpinCmd : IRequest<MethodResult<IList<CompetitionEventsModel>?>>
     {
+        public Guid? UserId { get; set; }
     }
 
-    public class CheckStudentLuckySpinCmdHandler : IRequestHandler<CheckStudentLuckySpinCmd, MethodResult<bool>>
+    public class CheckStudentLuckySpinCmdHandler : IRequestHandler<CheckStudentLuckySpinCmd, MethodResult<IList<CompetitionEventsModel>?>>
     {
         private readonly AuthContext _authContext;
         private readonly IStudentRankingEventsRepository _studentRankingEventsRepository;
         private readonly IStudentRepository _studentRepository;
+        private readonly IMapper _mapper;
 
-        public CheckStudentLuckySpinCmdHandler(AuthContext authContext, IStudentRankingEventsRepository studentRankingEventsRepository, IStudentRepository studentRepository)
+        public CheckStudentLuckySpinCmdHandler(AuthContext authContext, IStudentRankingEventsRepository studentRankingEventsRepository, IStudentRepository studentRepository, IMapper mapper)
         {
             _authContext = authContext;
             _studentRankingEventsRepository = studentRankingEventsRepository;
             _studentRepository = studentRepository;
+            _mapper = mapper;
         }
 
-        public async Task<MethodResult<bool>> Handle(CheckStudentLuckySpinCmd request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<CompetitionEventsModel>?>> Handle(CheckStudentLuckySpinCmd request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<bool>();
+            var methodResult = new MethodResult<IList<CompetitionEventsModel>?>();
 
-            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(x => x.Human != null && x.Human.UserId == _authContext.CurrentUserId, cancellationToken);
-            var studentRankingEvents = await _studentRankingEventsRepository.Queryable.Include(x => x.CompetitionEvents).Where(x => student != null && x.StudentId == student.Id).ToListAsync(cancellationToken);
+            var userId = request.UserId ?? _authContext.CurrentUserId;
 
-            bool checkLuckySpin = studentRankingEvents.Any(x => x.CompetitionEvents != null && x.CompetitionEvents.EventContent != null && x.CompetitionEvents.EventContent.LuckySpin);
+            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(x => x.Human != null && x.Human.UserId == userId, cancellationToken);
+            var studentRankingEvents = await _studentRankingEventsRepository.Queryable
+                .Include(x => x.CompetitionEvents)
+                .Where(x => student != null && x.StudentId == student.Id)
+                .ToListAsync(cancellationToken);
 
-            methodResult.Result = checkLuckySpin;
+            var competitionEvents = studentRankingEvents.Where(x => x.CompetitionEvents != null && x.CompetitionEvents.EventContent != null && x.CompetitionEvents.EventContent.LuckySpin)
+                .Select(x => x.CompetitionEvents);
+
+            methodResult.Result = _mapper.Map<IList<CompetitionEventsModel>?>(competitionEvents);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -86,7 +86,7 @@ namespace Fsel.System.Application.Queries.LuckyTickets
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                studentsLeaderBoard = studentsLeaderBoard.Where(p => p.FullName.ToLower().Contains(request.Keyword.ToLower()) || p.Email.ToLower().Contains(request.Keyword.ToLower())).ToList();
+                studentsLeaderBoard = studentsLeaderBoard.Where(p => p.FullName.ToLower().Contains(request.Keyword.ToLower().Trim()) || p.Email.ToLower() == request.Keyword.ToLower().Trim()).ToList();
             }
 
             var emails = studentsLeaderBoard.Select(p => p.Email!).ToList();
@@ -116,8 +116,10 @@ namespace Fsel.System.Application.Queries.LuckyTickets
                     AvatarPath = student.Human?.AvatarPath,
                     StudentId = student.Id,
                     StudentName = student.Human?.FullName,
+                    Email = student.Human?.Email,
                     SchoolName = student.School,
                     Ticket = item.Ticket,
+                    CreatedDate = item.CreatedDate,
                 });
             }
 

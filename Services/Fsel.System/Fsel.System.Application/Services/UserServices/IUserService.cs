@@ -62,9 +62,8 @@ namespace Fsel.System.Application.Services.UserServices
         [Get("/v1/user/get-users-by-role")]
         Task<IApiResponse<MethodResult<IList<UserModel>>>> GetUserByRoleAsync([Query] GetUsersByRoleQueryModel query);
 
-
         [Get("/v1/student-ranking/check-lucky-spin")]
-        Task<IApiResponse<MethodResult<bool>>> CheckLuckySpin();
+        Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>?>>> CheckLuckySpin([Query] Guid? userId);
 
         [Post("/v1/student-focus-time")]
         Task<IApiResponse<MethodResult<IList<StudentFocusTimeModel>>>> SaveFocusTime([Body] StudentFocusTimeCommandModel cmd);

@@ -15,16 +15,16 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ExportPlacementTestsToStudentQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
+    public class ExportModulePlacementTestsToStudentQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
     }
 
-    public class ExportPlacementTestsToStudentQueryHandler : IRequestHandler<ExportPlacementTestsToStudentQuery, MethodResult<Stream>>
+    public class ExportModulePlacementTestsToStudentQueryHandler : IRequestHandler<ExportModulePlacementTestsToStudentQuery, MethodResult<Stream>>
     {
         private readonly IUserService _userService;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
 
-        public ExportPlacementTestsToStudentQueryHandler(
+        public ExportModulePlacementTestsToStudentQueryHandler(
             IUserService userService,
             IPlacementTestResultRepository placementTestResultRepository)
         {
@@ -32,7 +32,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             _placementTestResultRepository = placementTestResultRepository;
         }
 
-        public async Task<MethodResult<Stream>> Handle(ExportPlacementTestsToStudentQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<Stream>> Handle(ExportModulePlacementTestsToStudentQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<Stream>();
@@ -40,7 +40,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             {
                 return methodResult;
             }
-            var listEmail = new List<ImportStudentEmailModel>();
             var placementTestResultExports = new List<PlacementTestModuleExportModel>();
             var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentEmailModel x, IList<ImportStudentEmailModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
@@ -50,13 +49,14 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 }
                 return await Task.FromResult(errors.Count == 0);
             });
-            listEmail = result.Datas.ToList();
-            var studentResultToEmail = await _userService.GetStudentByEmailsAsync(listEmail.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).ToList());
+            var listEmail = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).ToList();
+            var studentResultToEmail = await _userService.GetStudentByEmailsAsync(listEmail);
             if (!studentResultToEmail.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
                 return methodResult;
             }
+
             var students = studentResultToEmail.Content?.Result?.ToList();
             var studentIds = students?.Select(x => x.Id).ToList() ?? new List<Guid>();
 

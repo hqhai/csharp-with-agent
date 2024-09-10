@@ -9,26 +9,28 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using Fsel.Common.Helpers;
     using Fsel.Common.Models.Excels;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ImportAndExportPlacementTestQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
+    public class ExportPlacementTestByStudentsQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
     }
 
-    public class ImportAndExportPlacementTestQueryHandler : IRequestHandler<ImportAndExportPlacementTestQuery, MethodResult<Stream>>
+    public class ExportPlacementTestByStudentsQueryHandler : IRequestHandler<ExportPlacementTestByStudentsQuery, MethodResult<Stream>>
     {
         private readonly IUserService _userService;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
 
-        public ImportAndExportPlacementTestQueryHandler(
+        public ExportPlacementTestByStudentsQueryHandler(
             IUserService userService,
             ICourseResultRepository courseResultRepository,
             IPlacementTestResultRepository placementTestResultRepository)
@@ -38,7 +40,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             _placementTestResultRepository = placementTestResultRepository;
         }
 
-        public async Task<MethodResult<Stream>> Handle(ImportAndExportPlacementTestQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<Stream>> Handle(ExportPlacementTestByStudentsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<Stream>();
@@ -47,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 return methodResult;
             }
             var placementTestResultExports = new List<PlacementTestResultExportModel>();
+
             var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentEmailModel x, IList<ImportStudentEmailModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
                 if (string.IsNullOrEmpty(x.Email) || !x.Email.IsValidEmail())
@@ -55,22 +58,23 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 }
                 return await Task.FromResult(errors.Count == 0);
             });
-            var listEmail = result.Datas.ToList();
-            var studentResultToEmail = await _userService.GetStudentByEmailsAsync(listEmail.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).ToList());
+            var listEmail = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).ToList();
+            var studentResultToEmail = await _userService.GetStudentByEmailsAsync(listEmail);
             if (!studentResultToEmail.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
                 return methodResult;
             }
+
             var students = studentResultToEmail.Content?.Result?.ToList();
             var studentIds = students?.Select(x => x.Id).ToList() ?? new List<Guid>();
-
             var placementTestResults = await _placementTestResultRepository.Queryable
-                                            .Where(x => x != null && studentIds.Contains(x.StudentId))
+                                            .Where(x => studentIds.Contains(x.StudentId))
                                             .GroupBy(x => x.StudentId)
-                                            .Select(x => x.OrderByDescending(x => x.UpdatedDate).FirstOrDefault())
+                                            .Select(x => x.OrderByDescending(x => x.UpdatedDate).ThenByDescending(x => x.CreatedDate).FirstOrDefault())
                                             .ToListAsync(cancellationToken);
-            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId)).ToListAsync(cancellationToken);
+
+            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).ToListAsync(cancellationToken);
             foreach (var item in placementTestResults)
             {
                 if (item != null)
@@ -87,9 +91,11 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                             Name = student.Human?.FullName,
                             Birthday = student.Human?.Birthday,
                             Email = student.Human?.Email,
-                            CurrentLevel = student.CourseLevel,
-                            LevelCompleted = levelCompleted,
+                            CourseLevel = item.Level.GetCourseLevelByPlacementTestLevel(),
+                            CurrentLevel = isLock ? student.CourseLevel : null,
+                            LevelCompleted = item.Status == EnumResultStatus.Done ? levelCompleted : item.Level.GetCourseLevelByPlacementTestLevel(),
                             Percent = item.Percent,
+                            IsPTdone = isLock,
                             CourseName = courseResult?.Course?.Name,
                             UpdatedDate = item.UpdatedDate.HasValue ? item.UpdatedDate.Value : null,
                         });

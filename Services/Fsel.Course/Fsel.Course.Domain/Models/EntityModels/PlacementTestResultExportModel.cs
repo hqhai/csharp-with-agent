@@ -31,6 +31,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
         [EpplusTableColumn(Header = "Percentage of final PT")]
         public double Percent { get; set; }
 
+        [EpplusTableColumn(Header = "Placement Test Completed")]
+        public bool IsPTdone { get; set; }
+
         [EpplusTableColumn(Header = "Finish day", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
         public DateTime? UpdatedDate { get; set; }
     }

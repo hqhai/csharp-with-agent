@@ -6,7 +6,6 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
@@ -57,7 +56,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
             }
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.InvalidOTP), nameof(request.Otp), request.Otp);
                 return methodResult;
             }
 
@@ -65,13 +64,13 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
                        .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
             if (userOtpCode == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.InvalidOTP), nameof(request.Otp), request.Otp);
                 return methodResult;
             }
 
             if (DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OTPExpired), nameof(request.Otp), request.Otp);
                 return methodResult;
             }
 

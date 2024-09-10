@@ -107,7 +107,7 @@ namespace Fsel.Identity.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetCompetitionEvents([FromRoute] string? eventCode)
         {
-            MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(new GetCompetitionEventsQuery { EventCode = eventCode}).ConfigureAwait(false);
+            MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(new GetCompetitionEventsQuery { EventCode = eventCode }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -129,9 +129,21 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("check-lucky-spin")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CheckLuckySpin()
+        public async Task<IActionResult> CheckLuckySpin([FromQuery] CheckStudentLuckySpinCmd query)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new CheckStudentLuckySpinCmd()).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get events by user id
+        /// </summary>
+        [HttpGet("get-events-by-user-id")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetEventsByUserId([FromQuery] GetEventsByUserIdQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
