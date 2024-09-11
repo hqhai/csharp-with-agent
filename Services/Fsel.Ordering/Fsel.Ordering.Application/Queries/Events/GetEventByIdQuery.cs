@@ -63,6 +63,7 @@ namespace Fsel.Ordering.Application.Queries.Events
                     if (package != null)
                     {
                         item.Month = package.MonthNumber;
+                        item.PackageEventStatus = item.Status == EnumEventPackageStatus.Active;
                     }
                 }
 
@@ -80,7 +81,8 @@ namespace Fsel.Ordering.Application.Queries.Events
                             DayBonus = 0,
                             MonthBonus = 0,
                             Month = package.MonthNumber,
-                            Status = EnumEventPackageStatus.Inactive
+                            Status = EnumEventPackageStatus.Inactive,
+                            PackageEventStatus = false,
                         });
                     }
                 }
