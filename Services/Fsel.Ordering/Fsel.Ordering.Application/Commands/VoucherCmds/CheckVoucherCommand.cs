@@ -109,6 +109,8 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             var discountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(package.Price * voucher.Percent));
             var totalPrice = package.Price - discountPrice;
 
+            await ResetUserVoucherLockAsync(_authContext.CurrentUserId, cancellationToken);
+
             methodResult.Result = new CheckVoucherModel()
             {
                 VoucherId = voucher.Id,
@@ -116,6 +118,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 Percent = voucher.Percent,
                 TotalPrice = totalPrice,
             };
+
             return methodResult;
         }
 
@@ -164,6 +167,19 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
         {
             var userVoucherLock = await _userVoucherLockRepository.Queryable.FirstOrDefaultAsync(p => p.CreatedUserId == userId, cancellationToken);
             return userVoucherLock;
+        }
+
+        private async Task ResetUserVoucherLockAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            var userVoucherLock = await _userVoucherLockRepository.Queryable.FirstOrDefaultAsync(p => p.CreatedUserId == userId, cancellationToken);
+            if (userVoucherLock != null)
+            {
+                userVoucherLock.Count = 0;
+                userVoucherLock.ExpiredDate = null;
+                userVoucherLock.IsLockForever = false;
+                _userVoucherLockRepository.Update(userVoucherLock);
+                await _userVoucherLockRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 }

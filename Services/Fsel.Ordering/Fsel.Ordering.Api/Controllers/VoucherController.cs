@@ -108,7 +108,7 @@ namespace Fsel.Ordering.Api.Controllers
         }
 
         /// <summary>
-        /// Search history voucher
+        /// check voucher
         /// </summary>
         [HttpGet("check-voucher")]
         [ProducesResponseType(typeof(MethodResult<CheckVoucherModel>), (int)HttpStatusCode.OK)]
@@ -117,6 +117,19 @@ namespace Fsel.Ordering.Api.Controllers
         public async Task<IActionResult> CheckVoucher([FromQuery] CheckVoucherCommand query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search history voucher
+        /// </summary>
+        [HttpGet("get-user-voucher-lock-by-user")]
+        [ProducesResponseType(typeof(MethodResult<UserVoucherLockModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        public async Task<IActionResult> GetUserVoucherLockByUser()
+        {
+            var queryResult = await _mediator.Send(new GetUserVoucherLockByUserQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
