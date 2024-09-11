@@ -198,26 +198,32 @@ namespace Fsel.Ordering.Application.Commands.Events
 
             await _eventRepository.ExecuteTransactionAsync(async () =>
             {
-                foreach (var item in @event.Translations)
+                foreach (var item in request.Translations)
                 {
-                    var translation = request.Translations.FirstOrDefault(x => x.Id == item.Id);
+                    var translation = @event.Translations.FirstOrDefault(x => x.Id == item.Id);
                     if (translation == null)
                     {
-                        @event.Translations.Remove(item);
+                        var eventTranslationEntity = _mapper.Map<EventTranslation>(item);
+                        if (!eventTranslationEntity.IsValid())
+                        {
+                            methodResult.AddError(eventTranslationEntity.ErrorMessages);
+                            return methodResult;
+                        }
+                        @event.Translations.Add(eventTranslationEntity);
                     }
                     else
                     {
-                        UpdateTranslation(translation, item);
-                        if (!item.IsValid())
+                        UpdateTranslation(item, translation);
+                        if (!translation.IsValid())
                         {
-                            methodResult.AddError(item.ErrorMessages);
+                            methodResult.AddError(translation.ErrorMessages);
                             return methodResult;
                         }
                     }
                 }
-                foreach (var item in @event.PackageEvents)
+                foreach (var item in request.PackageEvents)
                 {
-                    var packageEvent = request.PackageEvents.FirstOrDefault(x => x.Id == item.Id);
+                    var packageEvent = @event.PackageEvents.FirstOrDefault(x => x.Id == item.Id);
                     if (packageEvent == null)
                     {
                         var packageEventEntity = _mapper.Map<PackageEvent>(item);
@@ -230,10 +236,10 @@ namespace Fsel.Ordering.Application.Commands.Events
                     }
                     else
                     {
-                        UpdatePackageEvent(packageEvent, item);
-                        if (!item.IsValid())
+                        UpdatePackageEvent(item, packageEvent);
+                        if (!packageEvent.IsValid())
                         {
-                            methodResult.AddError(item.ErrorMessages);
+                            methodResult.AddError(packageEvent.ErrorMessages);
                             return methodResult;
                         }
                     }
