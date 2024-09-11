@@ -53,6 +53,7 @@ namespace Fsel.Ordering.Infrastructure
         public DbSet<PackageEvent> PackageEvents { get; set; }
         public DbSet<EventTranslation> EventTranslations { get; set; }
         public DbSet<PackageTranslation> PackageTranslations { get; set; }
+        public DbSet<UserVoucherLock> UserVoucherLocks { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
