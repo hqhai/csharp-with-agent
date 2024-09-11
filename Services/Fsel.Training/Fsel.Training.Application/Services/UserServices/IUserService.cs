@@ -58,5 +58,8 @@ namespace Fsel.Training.Application.Services.UserServices
 
         [Get("/v1/student-ranking/get-events-by-user-id")]
         Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>>>> GetEventByUserId([Query] Guid? userId);
+
+        [Get("/v1/user/get-by-student-id/{id}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> GetUserByStudentId([FromRoute] Guid id);
     }
 }

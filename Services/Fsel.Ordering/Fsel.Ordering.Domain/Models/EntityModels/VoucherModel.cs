@@ -2,32 +2,30 @@
 
 namespace Fsel.Ordering.Domain.Models.EntityModels
 {
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Ordering.Domain.Enums;
+    using Fsel.Ordering.Domain.Entities;
     using Fsel.Shared.Enums;
 
     public class VoucherModel : BaseModel
     {
+        public string? Code { get; set; }
+
         public string? Name { get; set; }
 
-        public DateTime? StartDate { get; set; }
+        public int Percent { get; set; }
+
+        public int Quantity { get; set; }
+
+        public int? QuantityUsed { get; set; }
+
+        public DateTime StartDate { get; set; }
 
         public DateTime? EndDate { get; set; }
 
-        private string? _contentFilePath;
-        public string? ContentFilePath
-        {
-            set { _contentFilePath = value; }
-            get { return _contentFilePath.AddS3BaseUrl(); }
-        }
+        public EnumVoucherType VoucherType { get; set; }
 
-        public bool IsGlobal { get; set; }
-        public bool? IsActive { get; set; }
+        public bool IsActive { get; set; }
 
-        public IList<EnumCustomerType>? CustomerTypes { get; set; }
-        public IList<EnumCourseLevel>? CourseLevels { get; set; }
-
-        public IList<VoucherPackageModel>? VoucherPackages { get; set; }
+        public ICollection<VoucherPackageModel>? VoucherPackages { get; set; }
     }
 }

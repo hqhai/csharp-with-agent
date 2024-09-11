@@ -48,8 +48,11 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new StudentFocusTimeEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentTrialRegistrationEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentCompetitionEntityTypeConfiguration());
-            builder.ApplyConfiguration(new StudentRankingEventsEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentCompetitionEventsEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentRankingEventEntityTypeConfiguration());
             builder.ApplyConfiguration(new CompetitionEventsEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserReferralEntityTypeConfiguration());
+            builder.ApplyConfiguration(new EventRegistrationEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserDeletionEntityTypeConfiguration());
         }
 
@@ -74,8 +77,11 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<StudentFocusTime> StudentFocusTimes { get; set; }
         public DbSet<StudentTrialRegistration> StudentTrialRegistrations { get; set; }
         public DbSet<StudentCompetitionSnapShot> StudentCompetitionSnapShots { get; set; }
-        public DbSet<StudentRankingEvents> StudentRankingEvents { get; set; }
-        public DbSet<CompetitionEvents> CompetitionEvents { get; set; }
+        public DbSet<StudentCompetitionEvent> StudentCompetitionEvents { get; set; }
+        public DbSet<StudentRankingEvent> StudentRankingEvents { get; set; }
+        public DbSet<CompetitionEvent> CompetitionEvents { get; set; }
+        public DbSet<UserReferral> UserReferrals { get; set; }
+        public DbSet<EventRegistration> EventRegistrations { get; set; }
         public DbSet<UserDeletion> UserDeletions { get; set; }
 
         #endregion Db Set

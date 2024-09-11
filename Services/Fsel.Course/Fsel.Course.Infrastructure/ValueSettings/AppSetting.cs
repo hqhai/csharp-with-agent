@@ -19,9 +19,9 @@ namespace Fsel.Course.Infrastructure.ValueSettings
 
     public class ConstantUrl
     {
+        public string? LinkFullMockTestReport { get; set; }
         public string? LinkMockTestReport { get; set; }
     }
-
 
     public class CustomerSupportConfig
     {

@@ -84,7 +84,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 ExpireDate = DateTime.UtcNow.AddDays(14),
                 IsTrial = true,
                 IsInvoice = false,
-                UserId = _authContext.CurrentUserId
+                UserId = _authContext.CurrentUserId,
+                RevenueType = EnumPaymentRevenueType.NotRevenue
             };
 
             if (!orderTrial.IsValid())

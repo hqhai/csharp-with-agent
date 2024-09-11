@@ -18,6 +18,8 @@ namespace Fsel.Identity.Domain.Entities
         public virtual ICollection<UserSetting> UserSettings { get; set; } = new List<UserSetting>();
         public virtual ICollection<UserCourseSetting> UserCourseSettings { get; set; } = new List<UserCourseSetting>();
         public virtual ICollection<UserPlatform> UserPlatforms { get; set; } = new List<UserPlatform>();
+        public virtual ICollection<UserReferral> Senders { get; set; } = new List<UserReferral>();
+        public virtual UserReferral? Receiver { get; set; }
         public virtual ICollection<UserDeletion> UserDeletions { get; set; } = new List<UserDeletion>();
     }
 }

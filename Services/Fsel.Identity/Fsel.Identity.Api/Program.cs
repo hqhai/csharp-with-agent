@@ -50,7 +50,10 @@ builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeReposito
 builder.Services.AddScoped<IStudentTrialRegistrationRepository, StudentTrialRegistrationRepository>();
 builder.Services.AddScoped<IStudentCompetitionSnapShotRepository, StudentCompetitionSnapShotRepository>();
 builder.Services.AddScoped<ICompetitionEventsRepository, CompetitionEventsRepository>();
-builder.Services.AddScoped<IStudentRankingEventsRepository, StudentRankingEventsRepository>();
+builder.Services.AddScoped<IStudentCompetitionEventsRepository, StudentCompetitionEventRepository>();
+builder.Services.AddScoped<IStudentRankingEventRepository, StudentRankingEventRepository>();
+builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
+builder.Services.AddScoped<IEventRegistrationRepository, EventRegistrationRepository>();
 builder.Services.AddScoped<IUserDeletionRepository, UserDeletionRepository>();
 
 //Publisher
@@ -80,6 +83,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
     { QueueSettings.TrainingQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
     { QueueSettings.UserQueue.NameQueue.AddExpiredDateForStudent, typeof(AddExpiredDateForStudentConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.StudentRankingEvent, typeof(StudentRankingEventsConsumer) },
+    { QueueSettings.UserQueue.NameQueue.AddFeatureMission, typeof(AddFeatureMissionConsumer) },
     { QueueSettings.UserQueue.NameQueue.CheckUserDeletion, typeof(CheckUserDeletionConsumer) }
 });
 var app = builder.Build();

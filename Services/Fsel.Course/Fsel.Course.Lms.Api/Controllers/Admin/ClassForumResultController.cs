@@ -10,10 +10,10 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Attributes;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/admin/class-forum-result")]
     [ApiController]
     public class ClassForumResultController : ControllerBase
