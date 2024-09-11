@@ -6,6 +6,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
@@ -136,21 +137,23 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             {
                 userVoucherLock.Count += 1;
 
+                var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
                 if (userVoucherLock.Count == 10)
                 {
-                    userVoucherLock.ExpiredDate = DateTime.UtcNow.AddMinutes(15);
+                    userVoucherLock.ExpiredDate = currentDate.AddMinutes(15);
                 }
                 else if (userVoucherLock.Count == 20)
                 {
-                    userVoucherLock.ExpiredDate = DateTime.UtcNow.AddHours(2);
+                    userVoucherLock.ExpiredDate = currentDate.AddHours(2);
                 }
                 else if (userVoucherLock.Count == 50)
                 {
-                    userVoucherLock.ExpiredDate = DateTime.UtcNow.AddHours(6);
+                    userVoucherLock.ExpiredDate = currentDate.AddHours(6);
                 }
                 else if (userVoucherLock.Count == 100)
                 {
-                    userVoucherLock.ExpiredDate = DateTime.UtcNow.AddHours(24);
+                    userVoucherLock.ExpiredDate = currentDate.AddHours(24);
                 }
                 else if (userVoucherLock.Count == 200)
                 {
