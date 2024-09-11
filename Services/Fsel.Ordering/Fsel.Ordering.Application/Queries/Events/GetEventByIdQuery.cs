@@ -10,6 +10,7 @@ namespace Fsel.Ordering.Application.Queries.Events
     using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -36,31 +37,66 @@ namespace Fsel.Ordering.Application.Queries.Events
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<EventModel>();
 
-            var @event = await _eventRepository.Queryable.Include(p => p.PackageEvents).Include(p => p.Translations).FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
+            var @event = await _eventRepository.Queryable
+                .Include(p => p.PackageEvents)
+                .Include(p => p.Translations)
+                .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
+
             if (@event == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventNotExist), EnumEventErrorCode.EventNotExist.GetDescription());
                 return methodResult;
             }
 
-            var packages = await _packageRepository.Queryable.ToListAsync(cancellationToken);
+            var packages = await _packageRepository.Queryable
+                  .Where(p => p.Status == EnumPackageStatus.Active)
+                  .ToListAsync(cancellationToken);
 
             var @eventModel = _mapper.Map<EventModel>(@event);
 
-            if (@eventModel.PackageEvents != null && @eventModel.PackageEvents.Count > 0)
+            if (@eventModel.PackageEvents?.Any() == true)
             {
-                foreach (var item in @eventModel.PackageEvents)
+                var packageDict = packages.ToDictionary(p => p.Id);
+
+                var itemsToRemove = @eventModel.PackageEvents
+                    .Where(pe => !packageDict.ContainsKey(pe.PackageId))
+                    .ToList();
+
+                foreach (var item in itemsToRemove)
                 {
-                    var package = packages.FirstOrDefault(p => p.Id == item.PackageId);
-                    if (package == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventNotExist), EnumEventErrorCode.EventNotExist.GetDescription());
-                        return methodResult;
-                    }
-                    item.Month = package.MonthNumber;
+                    @eventModel.PackageEvents.Remove(item);
                 }
 
-                @eventModel.PackageEvents = @eventModel.PackageEvents.OrderBy(pe => pe.Month).ToList();
+                foreach (var item in @eventModel.PackageEvents)
+                {
+                    var package = packageDict[item.PackageId];
+                    if (package != null)
+                    {
+                        item.Month = package.MonthNumber;
+                    }
+                }
+
+                var existingPackageIds = @eventModel.PackageEvents.Select(pe => pe.PackageId).ToHashSet();
+
+                foreach (var package in packages)
+                {
+                    if (!existingPackageIds.Contains(package.Id))
+                    {
+                        @eventModel.PackageEvents.Add(new PackageEventModel
+                        {
+                            Price = package.Price,
+                            PackageId = package.Id,
+                            PriceMonth = package.PriceMonth,
+                            DayBonus = 0,
+                            MonthBonus = 0,
+                            Month = package.MonthNumber,
+                        });
+                    }
+                }
+
+                @eventModel.PackageEvents = @eventModel.PackageEvents
+                    .OrderBy(pe => pe.Month)
+                    .ToList();
             }
 
             methodResult.Result = @eventModel;

@@ -62,6 +62,9 @@ namespace Fsel.System.Application.Services.UserServices
         [Get("/v1/user/get-users-by-role")]
         Task<IApiResponse<MethodResult<IList<UserModel>>>> GetUserByRoleAsync([Query] GetUsersByRoleQueryModel query);
 
+        [Post("/v1/student/get-student-by-emails")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByEmails([Body] IList<string> emails);
+
         [Get("/v1/student-ranking/check-lucky-spin")]
         Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>?>>> CheckLuckySpin([Query] Guid? userId);
 
@@ -70,8 +73,5 @@ namespace Fsel.System.Application.Services.UserServices
 
         [Post("/v1/student-daily-streak")]
         Task<IApiResponse<MethodResult<bool>>> SaveDailyStreak([Body] StudentDailyStreakCommandModel cmd);
-
-        [Post("/v1/student/get-student-by-emails")]
-        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByEmails([Body] IList<string> emails);
     }
 }

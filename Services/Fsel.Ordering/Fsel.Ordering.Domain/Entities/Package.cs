@@ -52,6 +52,8 @@ namespace Fsel.Ordering.Domain.Entities
 
         public int ReferToken { get; set; }
 
+        public EnumPackageStatus Status { get; set; }
+
         public ICollection<Order> Orders { get; set; } = new List<Order>();
 
         public ICollection<VoucherPackage> VoucherPackages { get; set; } = new List<VoucherPackage>();

@@ -39,15 +39,13 @@ namespace Fsel.System.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-        
-
         /// <summary>
         /// Get locations by ids
         /// </summary>
-        [HttpGet("detail")]
+        [HttpGet("get-by-ids")]
         [ProducesResponseType(typeof(MethodResult<IList<LocationModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetDetailLocation([FromQuery] GetDetailLocationQuery query)
+        public async Task<IActionResult> GetByIds([FromQuery] GetLocationsByIdsQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -56,10 +54,10 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Get locations by ids
         /// </summary>
-        [HttpGet("get-by-ids")]
+        [HttpGet("detail")]
         [ProducesResponseType(typeof(MethodResult<IList<LocationModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetByIds([FromQuery] GetLocationsByIdsQuery query)
+        public async Task<IActionResult> GetDetailLocation([FromQuery] GetDetailLocationQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

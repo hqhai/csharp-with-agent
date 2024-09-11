@@ -103,6 +103,73 @@ namespace Fsel.Notification.Infrastructure.Migrations
                     b.ToTable("NotificationMessages");
                 });
 
+            modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationMessageTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Language")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("NotificationMessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NotificationMessageId");
+
+                    b.ToTable("NotificationMessageTranslations");
+                });
+
             modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationRemind", b =>
                 {
                     b.Property<Guid>("Id")
@@ -300,7 +367,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
+                            TemplateLink = "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
                             TemplateMessage = "{0} vừa bình luận bài viết của bạn.",
                             Type = "LinkComment"
                         },
@@ -356,7 +423,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
+                            TemplateLink = "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum-user",
                             TemplateMessage = "{0} vừa trả lời bình luận của bạn.",
                             Type = "LinkComment"
                         },
@@ -371,7 +438,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Priority = 1,
                             TemplateLink = "/learn",
-                            TemplateMessage = "Bạn đã mua khóa học {0} thành công. Hãy bắt đầu học nào!",
+                            TemplateMessage = "Bạn đã mua gói {0} thành công. Hãy bắt đầu học nào!",
                             Type = "Text"
                         },
                         new
@@ -398,7 +465,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
+                            TemplateLink = "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
                             TemplateMessage = "Bình luận của bạn trong bài viết của {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL.",
                             Type = "LinkComment"
                         },
@@ -412,7 +479,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
+                            TemplateLink = "learn/{0}/{1}/lesson/{2}?page=class-forum",
                             TemplateMessage = "Bài viết của bạn trong {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
                             Type = "LinkPage"
                         },
@@ -426,7 +493,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
+                            TemplateLink = "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
                             TemplateMessage = "{0} đã thích bài viết của bạn.",
                             Type = "LinkPage"
                         },
@@ -455,7 +522,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Priority = 1,
                             TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}?type=aiFeedback",
-                            TemplateMessage = "Bài đăng của bạn đã được chấm bởi hệ thống AI của FSEL. Nhấn để xem chi tiết",
+                            TemplateMessage = "Bài đăng của bạn đã được chấm bởi hệ thống AI ChatGPT. Nhấn để xem chi tiết",
                             Type = "LinkPage"
                         },
                         new
@@ -552,7 +619,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
+                            TemplateLink = "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
                             TemplateMessage = "Bài đăng của bạn đã được phê duyệt. Nhấn để xem chi tiết",
                             Type = "LinkPage"
                         },
@@ -566,7 +633,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
+                            TemplateLink = "learn/{0}/{1}/lesson/{2}?page=class-forum",
                             TemplateMessage = "Bài viết của bạn trong {0} đã bị từ chối phê duyệt do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
                             Type = "LinkPage"
                         },
@@ -625,6 +692,453 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             TemplateLink = "",
                             TemplateMessage = "Yay! Bạn đã đổi trình độ sang khóa học {0} thành công! Hãy cùng Techie và Fsel bắt đầu hành trình học tập thú vị ngay thôi nào!",
                             Type = "LinkPage"
+                        },
+                        new
+                        {
+                            Id = new Guid("2a138a4c-6b3c-4a86-bbc2-3aa845e70c21"),
+                            Content = "LuckyTicket",
+                            CreatedDate = new DateTime(2024, 8, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "{0}",
+                            TemplateMessage = "Bạn đã nhận được Mã đổi thưởng: {0}. Hãy truy cập leaderboard.fsel.vn để đổi thưởng ngay nào!",
+                            Type = "LinkPopup"
+                        });
+                });
+
+            modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationTypeTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Language")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("NotificationTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("TemplateMessage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NotificationTypeId");
+
+                    b.ToTable("NotificationTypeTranslations");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("02dc26ac-2d45-4983-b0e8-15b4c7cb8b90"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("810c70ca-4f3c-4d02-a194-708fa45d42ea"),
+                            TemplateMessage = "{0} vừa bình luận bài viết của bạn."
+                        },
+                        new
+                        {
+                            Id = new Guid("678236d5-543b-4dd1-ab99-c2caa99a62af"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("810c70ca-4f3c-4d02-a194-708fa45d42ea"),
+                            TemplateMessage = "{0} has just commented on your post."
+                        },
+                        new
+                        {
+                            Id = new Guid("0489ba9d-222f-4bea-ae35-3d8ac36cb35f"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            NotificationTypeId = new Guid("810c70ca-4f3c-4d02-a194-708fa45d42ea"),
+                            TemplateMessage = "{0} vient de commenter votre publication."
+                        },
+                        new
+                        {
+                            Id = new Guid("0d199223-e152-4a39-9b22-c0a510033e14"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("9e983172-dba2-4ca7-b602-372c011ecb99"),
+                            TemplateMessage = "{0} vừa trả lời bình luận của bạn."
+                        },
+                        new
+                        {
+                            Id = new Guid("77c8859e-37c0-4ce9-8bf0-d9aa2cec1d43"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("9e983172-dba2-4ca7-b602-372c011ecb99"),
+                            TemplateMessage = "{0} has just replied to your comment."
+                        },
+                        new
+                        {
+                            Id = new Guid("dbfdb359-cd76-443d-94c1-c73888957d56"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            NotificationTypeId = new Guid("9e983172-dba2-4ca7-b602-372c011ecb99"),
+                            TemplateMessage = "{0} vient de répondre à votre commentaire."
+                        },
+                        new
+                        {
+                            Id = new Guid("973b9f47-3bb6-4ecc-8a4f-e6482c6fb80e"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("cd8a1edb-029f-4b2d-9725-c796e6fd7e5b"),
+                            TemplateMessage = "Bạn đã mua gói {0} thành công. Hãy bắt đầu học nào!"
+                        },
+                        new
+                        {
+                            Id = new Guid("e8d53f67-68ee-4352-b134-ab47d6e9768c"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("cd8a1edb-029f-4b2d-9725-c796e6fd7e5b"),
+                            TemplateMessage = "You have successfully purchased the {0} package. Let's start learning!"
+                        },
+                        new
+                        {
+                            Id = new Guid("f5560aac-3ac4-4a88-9d84-a82800e1b149"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            NotificationTypeId = new Guid("cd8a1edb-029f-4b2d-9725-c796e6fd7e5b"),
+                            TemplateMessage = "Vous avez acheté avec succès le forfait {0}. Commençons à apprendre !"
+                        },
+                        new
+                        {
+                            Id = new Guid("876495b2-1756-4cb3-8a68-2261221a89ad"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("27007edb-25d8-493e-84d8-85f6f9e165b2"),
+                            TemplateMessage = "Bình luận của bạn trong bài viết của {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL."
+                        },
+                        new
+                        {
+                            Id = new Guid("efb6b960-c668-4643-b433-93142da84ad3"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("27007edb-25d8-493e-84d8-85f6f9e165b2"),
+                            TemplateMessage = "Your comment on {0}'s post has been removed because it violated FSEL's community standards."
+                        },
+                        new
+                        {
+                            Id = new Guid("72c38c36-fc6b-4ed6-a8e6-fc711903b5af"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            NotificationTypeId = new Guid("27007edb-25d8-493e-84d8-85f6f9e165b2"),
+                            TemplateMessage = "Votre commentaire sur la publication de {0} a été supprimé car il enfreignait les normes de la communauté FSEL."
+                        },
+                        new
+                        {
+                            Id = new Guid("dff468cf-a150-4685-b7ba-fa2d4eeb2b05"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("57c709a6-03bd-4a3f-ad34-f9449587e1df"),
+                            TemplateMessage = "Bài viết của bạn trong {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!"
+                        },
+                        new
+                        {
+                            Id = new Guid("d095d2c0-2266-4765-b4d4-2da0c685336f"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("57c709a6-03bd-4a3f-ad34-f9449587e1df"),
+                            TemplateMessage = "Your post in {0} has been removed for violating FSEL's community standards. Please try again!"
+                        },
+                        new
+                        {
+                            Id = new Guid("9bfd2b9d-eb69-4a3b-8788-6526e1b4d784"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            NotificationTypeId = new Guid("57c709a6-03bd-4a3f-ad34-f9449587e1df"),
+                            TemplateMessage = "Votre publication dans {0} a été supprimée pour non-respect des normes de la communauté FSEL. Veuillez réessayer !"
+                        },
+                        new
+                        {
+                            Id = new Guid("dc5dd6e3-41d5-4221-b5ff-04035926cf7d"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("810c70ca-4f3c-4d02-a491-708fa45d42ea"),
+                            TemplateMessage = "{0} đã thích bài viết của bạn."
+                        },
+                        new
+                        {
+                            Id = new Guid("782036f2-e5e3-4a36-b8ea-484c7c1db06c"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("810c70ca-4f3c-4d02-a491-708fa45d42ea"),
+                            TemplateMessage = "{0} has liked your post!"
+                        },
+                        new
+                        {
+                            Id = new Guid("48853c68-df32-4ba2-af20-73d47260655d"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            NotificationTypeId = new Guid("810c70ca-4f3c-4d02-a491-708fa45d42ea"),
+                            TemplateMessage = "{0} a aimé votre publication !"
+                        },
+                        new
+                        {
+                            Id = new Guid("d8977047-e977-4772-a3e0-c20cb0bc76e3"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("59942527-ca1f-4f18-a66b-cdcfe87b317e"),
+                            TemplateMessage = "Bài đăng của bạn đã được chấm bởi hệ thống AI ChatGPT. Nhấn để xem chi tiết"
+                        },
+                        new
+                        {
+                            Id = new Guid("760bcc15-6445-4302-b59f-07a3d4c5337a"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("59942527-ca1f-4f18-a66b-cdcfe87b317e"),
+                            TemplateMessage = "Your submission has been graded by FSEL's AI. Click to view the results."
+                        },
+                        new
+                        {
+                            Id = new Guid("abab8049-4c5d-44c7-93dc-bca5416fc87e"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            NotificationTypeId = new Guid("59942527-ca1f-4f18-a66b-cdcfe87b317e"),
+                            TemplateMessage = "Votre soumission a été notée par l'IA de FSEL. Cliquez pour voir les résultats."
+                        },
+                        new
+                        {
+                            Id = new Guid("39ddf48b-b3bb-4898-91e0-54451a4accd0"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("9da28757-2d28-40cb-b88c-cc51fc15bb43"),
+                            TemplateMessage = "Chúc mừng bạn đã đạt top {0} trên Bảng xếp hạng!"
+                        },
+                        new
+                        {
+                            Id = new Guid("61a570d9-f58d-4278-863f-120680ef789b"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("9da28757-2d28-40cb-b88c-cc51fc15bb43"),
+                            TemplateMessage = "Congratulations on reaching top {0} on the Leaderboard!"
+                        },
+                        new
+                        {
+                            Id = new Guid("1dc3d61c-00f1-434a-9700-5a1adc423745"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            NotificationTypeId = new Guid("9da28757-2d28-40cb-b88c-cc51fc15bb43"),
+                            TemplateMessage = "Félicitations pour avoir atteint le top {0} du classement !"
+                        },
+                        new
+                        {
+                            Id = new Guid("66de6e9c-0c63-4bad-b5e4-c52cafe2bb7f"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("69cc9e39-82d5-4d1a-81b9-8c97ec54bfad"),
+                            TemplateMessage = "Bài đăng của bạn đã được phê duyệt. Nhấn để xem chi tiết"
+                        },
+                        new
+                        {
+                            Id = new Guid("a5609e92-e166-46ec-ad23-2c0222fcb351"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("69cc9e39-82d5-4d1a-81b9-8c97ec54bfad"),
+                            TemplateMessage = "Your post has been approved. Click to view more details."
+                        },
+                        new
+                        {
+                            Id = new Guid("5a5954c6-b3f4-4018-8bf2-7134e09ea540"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            NotificationTypeId = new Guid("69cc9e39-82d5-4d1a-81b9-8c97ec54bfad"),
+                            TemplateMessage = "Votre publication a été approuvée. Cliquez pour voir plus de détails."
+                        },
+                        new
+                        {
+                            Id = new Guid("561ea827-f02c-49a8-9ea7-240994cfb8cd"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("75540141-a6d9-409d-a3ce-90c9a7577e8a"),
+                            TemplateMessage = "Bài viết của bạn trong {0} đã bị từ chối phê duyệt do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!"
+                        },
+                        new
+                        {
+                            Id = new Guid("de49fb73-928f-418c-a8bc-58d843ff0d42"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("75540141-a6d9-409d-a3ce-90c9a7577e8a"),
+                            TemplateMessage = "Your post in {0} has been denied due to violating FSEL's community standards. Please try again!"
+                        },
+                        new
+                        {
+                            Id = new Guid("e43e20b2-ed0a-4353-9e44-faa7ad0f2bf0"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            NotificationTypeId = new Guid("75540141-a6d9-409d-a3ce-90c9a7577e8a"),
+                            TemplateMessage = "Votre publication dans {0} a été refusée en raison de la violation des normes de la communauté FSEL. Veuillez réessayer !"
+                        },
+                        new
+                        {
+                            Id = new Guid("d114228f-71cb-4607-b50d-b0992e28c270"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("6f75034f-4d9b-4471-b5a4-a226979b5ab3"),
+                            TemplateMessage = "Yay! Bạn đã đổi trình độ sang khóa học {0} thành công! Hãy cùng Techie và Fsel bắt đầu hành trình học tập thú vị ngay thôi nào!"
+                        },
+                        new
+                        {
+                            Id = new Guid("063795cd-d905-4097-8c3b-979c6830f5b0"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("6f75034f-4d9b-4471-b5a4-a226979b5ab3"),
+                            TemplateMessage = "Yay! You've successfully changed your level to the {0} course! Let's join Techie and Fsel to start this exciting learning journey now!"
+                        },
+                        new
+                        {
+                            Id = new Guid("6a98a753-d5d0-4296-a082-6c9d2df66a70"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            NotificationTypeId = new Guid("6f75034f-4d9b-4471-b5a4-a226979b5ab3"),
+                            TemplateMessage = "Yay! Vous avez réussi à changer votre niveau pour le cours {0} ! Rejoignons Techie et Fsel pour commencer ce voyage d'apprentissage passionnant maintenant"
                         });
                 });
 
@@ -637,6 +1151,38 @@ namespace Fsel.Notification.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("NotificationType");
+                });
+
+            modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationMessageTranslation", b =>
+                {
+                    b.HasOne("Fsel.Notification.Domain.Entities.NotificationMessage", "NotificationMessage")
+                        .WithMany("Translations")
+                        .HasForeignKey("NotificationMessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NotificationMessage");
+                });
+
+            modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationTypeTranslation", b =>
+                {
+                    b.HasOne("Fsel.Notification.Domain.Entities.NotificationType", "NotificationType")
+                        .WithMany("Translations")
+                        .HasForeignKey("NotificationTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NotificationType");
+                });
+
+            modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationMessage", b =>
+                {
+                    b.Navigation("Translations");
+                });
+
+            modelBuilder.Entity("Fsel.Notification.Domain.Entities.NotificationType", b =>
+                {
+                    b.Navigation("Translations");
                 });
 #pragma warning restore 612, 618
         }

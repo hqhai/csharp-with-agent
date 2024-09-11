@@ -13,34 +13,45 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class UnitResultInputThenUpdateCourseResultHandler : BaseInternalEventHandler,
         INotificationHandler<EntityChangedEvent<UnitResult>>
     {
-        public UnitResultInputThenUpdateCourseResultHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository)
+        private readonly ILogger<UnitResultInputThenUpdateCourseResultHandler> _logger;
+
+        public UnitResultInputThenUpdateCourseResultHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, ILogger<UnitResultInputThenUpdateCourseResultHandler> logger, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository)
         {
+            _logger = logger;
         }
 
         public async Task Handle(EntityChangedEvent<UnitResult> notification, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(notification);
             var unitResult = notification.Data;
-            var courseResult = await _courseResultRepository.Queryable.Where(x => x.CourseId == unitResult.CourseId && x.StudentId == unitResult.StudentId).FirstOrDefaultAsync(cancellationToken);
-            if (courseResult != null)
+            try
             {
-                if (courseResult.Status == EnumResultStatus.Done)
+                var courseResult = await _courseResultRepository.Queryable.Where(x => x.CourseId == unitResult.CourseId && x.StudentId == unitResult.StudentId).FirstOrDefaultAsync(cancellationToken);
+                if (courseResult != null)
                 {
-                    await UpdateCourseResult(unitResult.Course, unitResult.StudentId, cancellationToken);
+                    if (courseResult.Status == EnumResultStatus.Done)
+                    {
+                        await UpdateCourseResult(unitResult.Course, unitResult.StudentId, cancellationToken);
+                    }
+                    else
+                    {
+                        await UpdateCourse(unitResult.Course, unitResult.StudentId, cancellationToken);
+                    }
                 }
-                else
+                if (unitResult.Status != EnumResultStatus.Done)
                 {
-                    await UpdateCourse(unitResult.Course, unitResult.StudentId, cancellationToken);
+                    return;
                 }
-            }
-            Thread.Sleep(2000);
-            if (unitResult.Status == EnumResultStatus.Done)
-            {
                 await UpdateProcessUnit(unitResult, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Trigger UnitResult : {ex.Message} ");
             }
         }
     }

@@ -2432,11 +2432,15 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentDailyStreak", b =>
-            {
-                b.HasOne("Fsel.Identity.Domain.Entities.Student", "Student")
-                    .WithMany("StudentDailyStreaks")
-                    .HasForeignKey("StudentId");
-            });
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.Student", "Student")
+                        .WithMany("StudentDailyStreaks")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+                });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Teacher", b =>
                 {

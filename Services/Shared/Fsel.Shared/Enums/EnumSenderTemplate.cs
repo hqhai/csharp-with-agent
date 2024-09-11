@@ -25,6 +25,7 @@ namespace Fsel.Shared.Enums
         MailPaymentForStudent,
         MailPaymentForCustomer,
         MailFromLandingPage,
+        MailPaymentWithVoucher,
 
         #region event
 
@@ -32,7 +33,8 @@ namespace Fsel.Shared.Enums
         SignUpEventSuccess,
         WasInAnotherEvent,
         LearnedOnThePlatform,
-        NotEligibleToParticipate
+        NotEligibleToParticipate,
+        MailRegisterEvent
 
         #endregion event
     }

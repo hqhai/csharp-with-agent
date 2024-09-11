@@ -43,15 +43,42 @@ namespace Fsel.Course.Infrastructure.Common
             return methodResult;
         }
 
-        public MethodResult<Question> HandleQuestion(Question? question, bool isUseTypeExercisePreparation = false)
+        public MethodResult<Question> HandleQuestion(Question question, bool isUseTypeExercisePreparation = false, bool isCreated = true)
         {
             ArgumentNullException.ThrowIfNull(question);
             var methodResult = new MethodResult<Question>();
             var isShowCorrectTotal = (isUseTypeExercisePreparation || question.QuestionType != EnumQuestionType.ExercisePreparation);
-            (question.Config, question.CorrectTotal) = _questionTypeConverter.QuestionTypeConverterObject(question!.Config, question.QuestionType, isShowCorrectTotal);
+            (question.Config, question.CorrectTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isShowCorrectTotal, false, isCreated);
             if (question.Config == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), new Error[]{
+                    new Error
+                    {
+                        FieldName = nameof(question.Config)
+                    },
+                    new Error
+                    {
+                        FieldName = nameof(question.QuestionType),
+                        ErrorValues = new List<object>{ question.QuestionType }
+                    }
+                });
+                return methodResult;
+            }
+            var isError = _questionTypeConverter.ValidateQuestion(question.Config, question.QuestionType);
+            if (isError)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigInvalidFormat), new Error[]{
+                    new Error
+                    {
+                        FieldName = nameof(question.Config),
+                        ErrorValues = new List<object>{ question.Config}
+                    },
+                    new Error
+                    {
+                        FieldName = nameof(question.QuestionType),
+                        ErrorValues = new List<object>{ question.QuestionType }
+                    }
+                });
                 return methodResult;
             }
             if (!question.IsValid())

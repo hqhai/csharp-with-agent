@@ -15,25 +15,31 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
     using MediatR;
+    using Microsoft.Extensions.Logging;
 
     public class VideoResultInputThenUpdateLessonResultHandler : BaseInternalLessonResultEventHandler,
         INotificationHandler<EntityChangedEvent<VideoResult>>
     {
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly ILogger<VideoResultInputThenUpdateLessonResultHandler> _logger;
 
-        public VideoResultInputThenUpdateLessonResultHandler(ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonNoteRepository noteRepository) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, lessonResultRepository, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, noteRepository)
+        public VideoResultInputThenUpdateLessonResultHandler(ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, ILogger<VideoResultInputThenUpdateLessonResultHandler> logger, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonNoteRepository noteRepository) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, lessonResultRepository, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, noteRepository)
         {
             _lessonResultRepository = lessonResultRepository;
+            _logger = logger;
         }
 
         public async Task Handle(EntityChangedEvent<VideoResult> notification, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(notification);
-            Thread.Sleep(1000);
             var videoResult = notification.Data;
-            var lessonResult = videoResult.LessonResult;
-            if (lessonResult != null && videoResult.Status == EnumResultStatus.Done)
+            try
             {
+                var lessonResult = videoResult.LessonResult;
+                if (lessonResult == null || videoResult.Status != EnumResultStatus.Done)
+                {
+                    return;
+                }
                 var skillScores = videoResult.VideoSkillScores?.FirstOrDefault(x => x.Type == EnumTimeCodeType.Standalone)?.SkillScores;
                 lessonResult.CorrectCount = videoResult.CorrectCount;
                 lessonResult.CorrectTotal = videoResult.CorrectTotal;
@@ -41,6 +47,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 lessonResult.SkillScores = skillScores;
                 _lessonResultRepository.Update(lessonResult);
                 await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Trigger VideoResult : {ex.Message} ");
             }
         }
     }

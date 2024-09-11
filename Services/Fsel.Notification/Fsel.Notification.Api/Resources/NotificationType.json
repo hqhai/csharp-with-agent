@@ -36,8 +36,31 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} vừa bình luận bài viết của bạn.",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
-    "createdDate": "2023-08-28"
+    "templateLink": "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "02DC26AC-2D45-4983-B0E8-15B4C7CB8B90",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "810C70CA-4F3C-4D02-A194-708FA45D42EA",
+        "templateMessage": "{0} vừa bình luận bài viết của bạn.",
+        "language": "vi-VN"
+      },
+      {
+        "id": "678236D5-543B-4DD1-AB99-C2CAA99A62AF",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "810C70CA-4F3C-4D02-A194-708FA45D42EA",
+        "templateMessage": "{0} has just commented on your post.",
+        "language": "en-US"
+      },
+      {
+        "id": "0489BA9D-222F-4BEA-AE35-3D8AC36CB35F",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "810C70CA-4F3C-4D02-A194-708FA45D42EA",
+        "templateMessage": "{0} vient de commenter votre publication.",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "10C2D5F8-1316-45E4-8FA1-E512EC1510C0",
@@ -76,8 +99,31 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} vừa trả lời bình luận của bạn.",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
-    "createdDate": "2023-08-28"
+    "templateLink": "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum-user",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "0D199223-E152-4A39-9B22-C0A510033E14",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "9E983172-DBA2-4CA7-B602-372C011ECB99",
+        "templateMessage": "{0} vừa trả lời bình luận của bạn.",
+        "language": "vi-VN"
+      },
+      {
+        "id": "77C8859E-37C0-4CE9-8BF0-D9AA2CEC1D43",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "9E983172-DBA2-4CA7-B602-372C011ECB99",
+        "templateMessage": "{0} has just replied to your comment.",
+        "language": "en-US"
+      },
+      {
+        "id": "DBFDB359-CD76-443D-94C1-C73888957D56",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "9E983172-DBA2-4CA7-B602-372C011ECB99",
+        "templateMessage": "{0} vient de répondre à votre commentaire.",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "CD8A1EDB-029F-4B2D-9725-C796E6FD7E5B",
@@ -85,9 +131,32 @@
     "content": "OrderChangeStatus",
     "icon": "",
     "priority": 1,
-    "templateMessage": "Bạn đã mua khóa học {0} thành công. Hãy bắt đầu học nào!",
+    "templateMessage": "Bạn đã mua gói {0} thành công. Hãy bắt đầu học nào!",
     "templateLink": "/learn",
-    "createdDate": "2023-08-28"
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "973B9F47-3BB6-4ECC-8A4F-E6482C6FB80E",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "CD8A1EDB-029F-4B2D-9725-C796E6FD7E5B",
+        "templateMessage": "Bạn đã mua gói {0} thành công. Hãy bắt đầu học nào!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "E8D53F67-68EE-4352-B134-AB47D6E9768C",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "CD8A1EDB-029F-4B2D-9725-C796E6FD7E5B",
+        "templateMessage": "You have successfully purchased the {0} package. Let's start learning!",
+        "language": "en-US"
+      },
+      {
+        "id": "F5560AAC-3AC4-4A88-9D84-A82800E1B149",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "CD8A1EDB-029F-4B2D-9725-C796E6FD7E5B",
+        "templateMessage": "Vous avez acheté avec succès le forfait {0}. Commençons à apprendre !",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "3881403A-D412-4593-AEE5-5A38F4E078F9",
@@ -106,8 +175,31 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bình luận của bạn trong bài viết của {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL.",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
-    "createdDate": "2023-08-28"
+    "templateLink": "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "876495B2-1756-4CB3-8A68-2261221A89AD",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "27007EDB-25D8-493E-84D8-85F6F9E165B2",
+        "templateMessage": "Bình luận của bạn trong bài viết của {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL.",
+        "language": "vi-VN"
+      },
+      {
+        "id": "EFB6B960-C668-4643-B433-93142DA84AD3",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "27007EDB-25D8-493E-84D8-85F6F9E165B2",
+        "templateMessage": "Your comment on {0}'s post has been removed because it violated FSEL's community standards.",
+        "language": "en-US"
+      },
+      {
+        "id": "72C38C36-FC6B-4ED6-A8E6-FC711903B5AF",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "27007EDB-25D8-493E-84D8-85F6F9E165B2",
+        "templateMessage": "Votre commentaire sur la publication de {0} a été supprimé car il enfreignait les normes de la communauté FSEL.",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "57C709A6-03BD-4A3F-AD34-F9449587E1DF",
@@ -116,8 +208,31 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bài viết của bạn trong {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
-    "createdDate": "2023-08-28"
+    "templateLink": "learn/{0}/{1}/lesson/{2}?page=class-forum",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "DFF468CF-A150-4685-B7BA-FA2D4EEB2B05",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "57C709A6-03BD-4A3F-AD34-F9449587E1DF",
+        "templateMessage": "Bài viết của bạn trong {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "D095D2C0-2266-4765-B4D4-2DA0C685336F",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "57C709A6-03BD-4A3F-AD34-F9449587E1DF",
+        "templateMessage": "Your post in {0} has been removed for violating FSEL's community standards. Please try again!",
+        "language": "en-US"
+      },
+      {
+        "id": "9BFD2B9D-EB69-4A3B-8788-6526E1B4D784",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "57C709A6-03BD-4A3F-AD34-F9449587E1DF",
+        "templateMessage": "Votre publication dans {0} a été supprimée pour non-respect des normes de la communauté FSEL. Veuillez réessayer !",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "810C70CA-4F3C-4D02-A491-708FA45D42EA",
@@ -126,8 +241,31 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} đã thích bài viết của bạn.",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
-    "createdDate": "2023-08-28"
+    "templateLink": "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "DC5DD6E3-41D5-4221-B5FF-04035926CF7D",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "810C70CA-4F3C-4D02-A491-708FA45D42EA",
+        "templateMessage": "{0} đã thích bài viết của bạn.",
+        "language": "vi-VN"
+      },
+      {
+        "id": "782036F2-E5E3-4A36-B8EA-484C7C1DB06C",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "810C70CA-4F3C-4D02-A491-708FA45D42EA",
+        "templateMessage": "{0} has liked your post!",
+        "language": "en-US"
+      },
+      {
+        "id": "48853C68-DF32-4BA2-AF20-73D47260655D",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "810C70CA-4F3C-4D02-A491-708FA45D42EA",
+        "templateMessage": "{0} a aimé votre publication !",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "3AD02DE7-A8A8-4DB6-8286-486C81390ED3",
@@ -145,9 +283,32 @@
     "content": "AIFeedBack",
     "icon": "",
     "priority": 1,
-    "templateMessage": "Bài đăng của bạn đã được chấm bởi hệ thống AI của FSEL. Nhấn để xem chi tiết",
+    "templateMessage": "Bài đăng của bạn đã được chấm bởi hệ thống AI ChatGPT. Nhấn để xem chi tiết",
     "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}?type=aiFeedback",
-    "createdDate": "2023-08-28"
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "D8977047-E977-4772-A3E0-C20CB0BC76E3",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "59942527-CA1F-4F18-A66B-CDCFE87B317E",
+        "templateMessage": "Bài đăng của bạn đã được chấm bởi hệ thống AI ChatGPT. Nhấn để xem chi tiết",
+        "language": "vi-VN"
+      },
+      {
+        "id": "760BCC15-6445-4302-B59F-07A3D4C5337A",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "59942527-CA1F-4F18-A66B-CDCFE87B317E",
+        "templateMessage": "Your submission has been graded by FSEL's AI. Click to view the results.",
+        "language": "en-US"
+      },
+      {
+        "id": "ABAB8049-4C5D-44C7-93DC-BCA5416FC87E",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "59942527-CA1F-4F18-A66B-CDCFE87B317E",
+        "templateMessage": "Votre soumission a été notée par l'IA de FSEL. Cliquez pour voir les résultats.",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "4B5173D1-3D0B-4DF6-B3CA-15CD175926A1",
@@ -207,7 +368,30 @@
     "priority": 1,
     "templateMessage": "Chúc mừng bạn đã đạt top {0} trên Bảng xếp hạng!",
     "templateLink": "/home",
-    "createdDate": "2023-08-28"
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "39DDF48B-B3BB-4898-91E0-54451A4ACCD0",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "9DA28757-2D28-40CB-B88C-CC51FC15BB43",
+        "templateMessage": "Chúc mừng bạn đã đạt top {0} trên Bảng xếp hạng!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "61A570D9-F58D-4278-863F-120680EF789B",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "9DA28757-2D28-40CB-B88C-CC51FC15BB43",
+        "templateMessage": "Congratulations on reaching top {0} on the Leaderboard!",
+        "language": "en-US"
+      },
+      {
+        "id": "1DC3D61C-00F1-434A-9700-5A1ADC423745",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "9DA28757-2D28-40CB-B88C-CC51FC15BB43",
+        "templateMessage": "Félicitations pour avoir atteint le top {0} du classement !",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "69CC9E39-82D5-4D1A-81B9-8C97EC54BFAD",
@@ -216,8 +400,31 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bài đăng của bạn đã được phê duyệt. Nhấn để xem chi tiết",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
-    "createdDate": "2023-08-28"
+    "templateLink": "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "66DE6E9C-0C63-4BAD-B5E4-C52CAFE2BB7F",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "69CC9E39-82D5-4D1A-81B9-8C97EC54BFAD",
+        "templateMessage": "Bài đăng của bạn đã được phê duyệt. Nhấn để xem chi tiết",
+        "language": "vi-VN"
+      },
+      {
+        "id": "A5609E92-E166-46EC-AD23-2C0222FCB351",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "69CC9E39-82D5-4D1A-81B9-8C97EC54BFAD",
+        "templateMessage": "Your post has been approved. Click to view more details.",
+        "language": "en-US"
+      },
+      {
+        "id": "5A5954C6-B3F4-4018-8BF2-7134E09EA540",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "69CC9E39-82D5-4D1A-81B9-8C97EC54BFAD",
+        "templateMessage": "Votre publication a été approuvée. Cliquez pour voir plus de détails.",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "75540141-A6D9-409D-A3CE-90C9A7577E8A",
@@ -226,8 +433,31 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bài viết của bạn trong {0} đã bị từ chối phê duyệt do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
-    "createdDate": "2023-08-28"
+    "templateLink": "learn/{0}/{1}/lesson/{2}?page=class-forum",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "561EA827-F02C-49A8-9EA7-240994CFB8CD",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "75540141-A6D9-409D-A3CE-90C9A7577E8A",
+        "templateMessage": "Bài viết của bạn trong {0} đã bị từ chối phê duyệt do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "DE49FB73-928F-418C-A8BC-58D843FF0D42",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "75540141-A6D9-409D-A3CE-90C9A7577E8A",
+        "templateMessage": "Your post in {0} has been denied due to violating FSEL's community standards. Please try again!",
+        "language": "en-US"
+      },
+      {
+        "id": "E43E20B2-ED0A-4353-9E44-FAA7AD0F2BF0",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "75540141-A6D9-409D-A3CE-90C9A7577E8A",
+        "templateMessage": "Votre publication dans {0} a été refusée en raison de la violation des normes de la communauté FSEL. Veuillez réessayer !",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "05441907-46A9-4178-9A69-FCE295D670BE",
@@ -267,6 +497,39 @@
     "priority": 1,
     "templateMessage": "Yay! Bạn đã đổi trình độ sang khóa học {0} thành công! Hãy cùng Techie và Fsel bắt đầu hành trình học tập thú vị ngay thôi nào!",
     "templateLink": "",
-    "createdDate": "2023-08-28"
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "D114228F-71CB-4607-B50D-B0992E28C270",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "6F75034F-4D9B-4471-B5A4-A226979B5AB3",
+        "templateMessage": "Yay! Bạn đã đổi trình độ sang khóa học {0} thành công! Hãy cùng Techie và Fsel bắt đầu hành trình học tập thú vị ngay thôi nào!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "063795CD-D905-4097-8C3B-979C6830F5B0",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "6F75034F-4D9B-4471-B5A4-A226979B5AB3",
+        "templateMessage": "Yay! You've successfully changed your level to the {0} course! Let's join Techie and Fsel to start this exciting learning journey now!",
+        "language": "en-US"
+      },
+      {
+        "id": "6A98A753-D5D0-4296-A082-6C9D2DF66A70",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "6F75034F-4D9B-4471-B5A4-A226979B5AB3",
+        "templateMessage": "Yay! Vous avez réussi à changer votre niveau pour le cours {0} ! Rejoignons Techie et Fsel pour commencer ce voyage d'apprentissage passionnant maintenant",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "2a138a4c-6b3c-4a86-bbc2-3aa845e70c21",
+    "type": "LinkPopup",
+    "content": "LuckyTicket",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bạn đã nhận được Mã đổi thưởng: {0}. Hãy truy cập leaderboard.fsel.vn để đổi thưởng ngay nào!",
+    "templateLink": "{0}",
+    "createdDate": "2024-08-05"
   }
 ]

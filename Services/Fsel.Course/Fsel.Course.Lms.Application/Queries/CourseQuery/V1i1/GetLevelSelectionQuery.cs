@@ -8,6 +8,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -30,7 +32,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
         private readonly ChangeCourseHelper _changeCourseHelper;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
-        private const int MinLearnAgain = 0;
         private const int MaxAgeIELST = 14;
 
         public GetLevelSelectionQueryHandler(ICourseResultRepository courseResultRepository, ChangeCourseHelper changeCourseHelper, AuthContext authContext, IUserService userService)
@@ -52,11 +53,9 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 return methodResult;
             }
             var userCourseSettings = userCourseSettingResults?.Content?.Result;
-
-            var userCourseSettingLevel = userCourseSettings?.FirstOrDefault(x => x.Type == EnumUserCourseType.ChangeLevel);
-            if (userCourseSettingLevel != null && userCourseSettingLevel.Value <= 0)
+            if (!userCourseSettings.HasRemainingAttempts(EnumUserCourseType.ChangeLevel))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(userCourseSettingLevel));
+                methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.RetakesExpired), nameof(userCourseSettings));
                 return methodResult;
             }
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
@@ -94,15 +93,23 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
             var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => x.StudentId == student.Id && x.WorkingStatus != EnumWorkingStatus.NotWorking).ToListAsync(cancellationToken);
             var isStudentsAchieveScore = await _changeCourseHelper.IsStudentsAchieveScoresAsync(student.Id, student.BaseCourseLevel);
             var levelDtos = ConvertHelper.Deserialize<List<LevelDtoModel>>(request.CourseType.GetListCourseLevels(student.BaseCourseLevel.Value, isStudentsAchieveScore));
+
             if (levelDtos != null && levelDtos.Any())
             {
+                var skillLevels = ConvertHelper.EnumToList<EnumSkillLevel>();
+
                 foreach (var item in levelDtos)
                 {
+                    if (courseResults.Any(x => x.Status == EnumResultStatus.Done && x.WorkingStatus == EnumWorkingStatus.Active))
+                    {
+                        item.SkillLevel = EnumCourseLevelHelper.GetSkillLevel(student.BaseCourseLevel ?? default, item.CourseLevel, isStudentsAchieveScore);
+                    }
+
                     var courseResultLevel = courseResults.FirstOrDefault(x => x.Course != null && x.Course.CourseLevel == item.CourseLevel);
                     var userCourseSetting = userCourseSettings?.FirstOrDefault(x => x.CourseLevel == item.CourseLevel && x.Type == EnumUserCourseType.ResetAndLearnAgain);
                     if (userCourseSetting != null)
                     {
-                        item.IsResetCourse = !isChangeLevelStudent && userCourseSetting.Value > MinLearnAgain;
+                        item.IsResetCourse = !isChangeLevelStudent && userCourseSetting.HasRemainingAttempts();
                     }
                     else
                     {
