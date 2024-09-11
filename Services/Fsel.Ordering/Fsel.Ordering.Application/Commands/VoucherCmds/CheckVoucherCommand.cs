@@ -79,7 +79,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 return methodResult;
             }
 
-            if (!DateTimeHelper.IsCurrentDateInRange(voucher.StartDate, voucher.EndDate))
+            if (!Shared.Helpers.DateTimeHelper.IsCurrentDateInRange(voucher.StartDate, voucher.EndDate))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherHasExpired));
                 return methodResult;
