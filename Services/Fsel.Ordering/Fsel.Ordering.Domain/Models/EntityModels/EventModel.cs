@@ -31,6 +31,8 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public int DayBonus { get; set; }
         public int MonthBonus { get; set; }
         public int Month { get; set; }
+        public EnumEventPackageStatus Status { get; set; }
+        public bool PackageEventStatus { get; set; }
         public IList<EnumPackageSuggest>? Suggests { get; set; }
     }
 
