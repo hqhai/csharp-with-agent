@@ -38,9 +38,9 @@ namespace Fsel.Ordering.Application.Queries.Events
             var methodResult = new MethodResult<EventModel>();
 
             var @event = await _eventRepository.Queryable
-                .Include(p => p.PackageEvents)
-                .Include(p => p.Translations)
-                .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
+    .Include(p => p.PackageEvents)
+    .Include(p => p.Translations)
+    .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
             if (@event == null)
             {
@@ -49,8 +49,7 @@ namespace Fsel.Ordering.Application.Queries.Events
             }
 
             var packages = await _packageRepository.Queryable
-                  .Where(p => p.Status == EnumPackageStatus.Active)
-                  .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken);
 
             var @eventModel = _mapper.Map<EventModel>(@event);
 
@@ -58,21 +57,13 @@ namespace Fsel.Ordering.Application.Queries.Events
             {
                 var packageDict = packages.ToDictionary(p => p.Id);
 
-                var itemsToRemove = @eventModel.PackageEvents
-                    .Where(pe => !packageDict.ContainsKey(pe.PackageId))
-                    .ToList();
-
-                foreach (var item in itemsToRemove)
-                {
-                    @eventModel.PackageEvents.Remove(item);
-                }
-
                 foreach (var item in @eventModel.PackageEvents)
                 {
                     var package = packageDict[item.PackageId];
                     if (package != null)
                     {
                         item.Month = package.MonthNumber;
+                        item.PackageEventStatus = item.Status == EnumEventPackageStatus.Active;
                     }
                 }
 
@@ -90,6 +81,8 @@ namespace Fsel.Ordering.Application.Queries.Events
                             DayBonus = 0,
                             MonthBonus = 0,
                             Month = package.MonthNumber,
+                            Status = EnumEventPackageStatus.Inactive,
+                            PackageEventStatus = false,
                         });
                     }
                 }
