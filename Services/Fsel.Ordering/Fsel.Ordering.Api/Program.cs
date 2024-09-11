@@ -44,6 +44,7 @@ builder.Services.AddScoped<INotificationProcessor, NotificationProcessor>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IPackageEventRepository, PackageEventRepository>();
 builder.Services.AddScoped<IGooglePlayBillingService, GooglePlayBillingService>();
+builder.Services.AddScoped<IUserVoucherLockRepository, UserVoucherLockRepository>();
 builder.Services.AddScoped<VnPayLibrary>();
 
 // Publisher
