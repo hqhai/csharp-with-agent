@@ -7,6 +7,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
@@ -27,13 +28,15 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
         private readonly AuthContext _authContext;
         private readonly IOrderRepository _orderRepository;
         private readonly IPackageRepository _packageRepository;
+        private readonly IUserVoucherLockRepository _userVoucherLockRepository;
 
-        public CheckVoucherCommandHandler(IVoucherRepository voucherRepository, AuthContext authContext, IOrderRepository orderRepository, IPackageRepository packageRepository)
+        public CheckVoucherCommandHandler(IVoucherRepository voucherRepository, AuthContext authContext, IOrderRepository orderRepository, IPackageRepository packageRepository, IUserVoucherLockRepository userVoucherLockRepository)
         {
             _voucherRepository = voucherRepository;
             _authContext = authContext;
             _orderRepository = orderRepository;
             _packageRepository = packageRepository;
+            _userVoucherLockRepository = userVoucherLockRepository;
         }
 
         public async Task<MethodResult<CheckVoucherModel>> Handle(CheckVoucherCommand request, CancellationToken cancellationToken)
@@ -50,6 +53,16 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             var voucher = await _voucherRepository.Queryable.Include(p => p.Orders).Include(p => p.VoucherPackages).FirstOrDefaultAsync(p => p.Code.ToLower() == request.Code.ToLower(), cancellationToken);
             if (voucher == null)
             {
+                await ManageUserVoucherLockAsync(_authContext.CurrentUserId, cancellationToken);
+                var result = await GetUserVoucherLockAsync(_authContext.CurrentUserId, cancellationToken);
+                methodResult.Result = new CheckVoucherModel()
+                {
+                    VoucherId = default,
+                    DiscountPrice = 0,
+                    Percent = 0,
+                    TotalPrice = 0,
+                    UserVoucherLock = result
+                };
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist));
                 return methodResult;
             }
@@ -110,6 +123,53 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 TotalPrice = totalPrice,
             };
             return methodResult;
+        }
+
+        private async Task ManageUserVoucherLockAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            var userVoucherLock = await _userVoucherLockRepository.Queryable.FirstOrDefaultAsync(p => p.CreatedUserId == userId, cancellationToken);
+            if (userVoucherLock == null)
+            {
+                _userVoucherLockRepository.Add(new UserVoucherLock()
+                {
+                    Count = 1,
+                });
+            }
+            else
+            {
+                userVoucherLock.Count += 1;
+
+                if (userVoucherLock.Count == 10)
+                {
+                    userVoucherLock.ExpiredDate = DateTime.UtcNow.AddMinutes(15);
+                }
+                else if (userVoucherLock.Count == 20)
+                {
+                    userVoucherLock.ExpiredDate = DateTime.UtcNow.AddHours(2);
+                }
+                else if (userVoucherLock.Count == 50)
+                {
+                    userVoucherLock.ExpiredDate = DateTime.UtcNow.AddHours(6);
+                }
+                else if (userVoucherLock.Count == 100)
+                {
+                    userVoucherLock.ExpiredDate = DateTime.UtcNow.AddHours(24);
+                }
+                else if (userVoucherLock.Count == 200)
+                {
+                    userVoucherLock.ExpiredDate = DateTime.MaxValue;
+                    userVoucherLock.IsLockForever = true;
+                }
+
+                _userVoucherLockRepository.Update(userVoucherLock);
+            }
+            await _userVoucherLockRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<UserVoucherLock?> GetUserVoucherLockAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            var userVoucherLock = await _userVoucherLockRepository.Queryable.FirstOrDefaultAsync(p => p.CreatedUserId == userId, cancellationToken);
+            return userVoucherLock;
         }
     }
 }
