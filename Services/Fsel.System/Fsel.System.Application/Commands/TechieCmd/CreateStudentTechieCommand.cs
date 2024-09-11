@@ -50,12 +50,10 @@ namespace Fsel.System.Application.Commands.TechieCmd
             var methodResult = new MethodResult<StudentTechieModel>();
 
             var techieActions = _techieActionRepository.Queryable.Where(x => x.Action == request.Actions && x.Feature == request.TechieFeature).ToList();
-
             if (request.Config == null || request.Config.StartTime < 0 || request.Config.EndTime < 0)
             {
                 return methodResult;
             }
-
 
             var techieActionFilter = techieActions.FirstOrDefault(x => (x.Config != null && x.Config.StartTime >= 0 && x.Config.EndTime >= 0) &&
                                                                        ((x.Config.StartTime <= request.Config.StartTime && x.Config.EndTime >= request.Config.EndTime) ||
@@ -85,6 +83,7 @@ namespace Fsel.System.Application.Commands.TechieCmd
             };
 
             #region Validate
+
             if (request == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentId), studentId);
@@ -98,18 +97,17 @@ namespace Fsel.System.Application.Commands.TechieCmd
                                                                                       x.TechieAction.Action == request.Actions &&
                                                                                       x.CreatedUserId == _authContext.CurrentUserId);
 
-            if (isExistsTechieGreeting)
+            if (isExistsTechieGreeting && request.TechieFeature == EnumTechieFeature.Greeting)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(studentId), studentId);
                 return methodResult;
             }
 
-            #endregion
+            #endregion Validate
 
             await _studentTechieRepository.ExecuteTransactionAsync(async () =>
             {
                 _studentTechieRepository.Add(studentTechie);
-
                 await _studentTechieRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
 
                 StudentTechieMessageModel socketModel = new StudentTechieMessageModel

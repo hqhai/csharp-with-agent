@@ -155,13 +155,6 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 });
             }
 
-            methodResult.Result = new PagingItemStudentRankingModel
-            {
-                Items = resultPaging.Items,
-                PagingInfo = resultPaging.PagingInfo,
-                WeekEvent = weekEventRules
-            };
-
             TimeSpan timeWeek = new TimeSpan(weekEventRules!.EndDate.Hour, weekEventRules.EndDate.Minute, 0);
             TimeSpan timeNow = new TimeSpan(timeNowVI.Hour, timeNowVI.Minute, 0);
 
@@ -170,7 +163,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             {
                 StudentCompetitionSnapShotModel snapshotModel = new StudentCompetitionSnapShotModel
                 {
-                    SchoolCode = request.SchoolCode,
+                    EventCode = request.SchoolCode,
                     WeekCompetitionData = ConvertHelper.Serialize(lists),
                     StartDate = weekEventRules!.StartDate,
                     EndDate = weekEventRules!.EndDate,
@@ -180,6 +173,12 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 await UpdateSnapShot(snapshotModel, cancellationToken);
             }
 
+            methodResult.Result = new PagingItemStudentRankingModel
+            {
+                Items = resultPaging.Items,
+                PagingInfo = resultPaging.PagingInfo,
+                WeekEvent = weekEventRules
+            };
             methodResult.StatusCode = StatusCodes.Status200OK;
 
             return methodResult;
@@ -195,7 +194,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 EndDate = modelCommand.EndDate,
                 StartDate = modelCommand.StartDate,
                 WeekCompetitionData = modelCommand.WeekCompetitionData,
-                SchoolCode = modelCommand.SchoolCode
+                EventCode = modelCommand.EventCode
             };
             await _mediator.Send(cmd, cancellationToken);
         }
