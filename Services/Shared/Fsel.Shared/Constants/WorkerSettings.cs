@@ -21,7 +21,7 @@ namespace Fsel.Shared.Constants
             public const string ActiveEvent = "ActiveEvent";
             public const string UpdateVouchersStatus = "UpdateVouchersStatus";
             public const string RunEvents = "RunEvents";
-            public const string CheckUserDeletionJob = "CheckUserDeletionJob";
+            public const string CheckUserDeletionJob = "CheckUserDeletion";
         }
     }
 }
