@@ -67,18 +67,16 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
 
             var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentEmailModel x, IList<ImportStudentEmailModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
-                if (string.IsNullOrEmpty(x.Email) || !x.Email.IsValidEmail())
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null or malformed" });
-                }
-                return await Task.FromResult(errors.Count == 0);
+                return true;
             });
-            var duplicateEmails = result.Datas.GroupBy(user => user.Email).Where(group => group.Count() > 1).Select(group => group.Key);
-            if (duplicateEmails.Any())
-            {
-                methodResult.AddErrorBadRequest("Duplicate Emails");
-                return methodResult;
-            }
+            //var duplicateEmails = result.Datas.GroupBy(user => user.Email).Where(group => group.Count() > 1).Select(group => group.Key);
+            //if (duplicateEmails.Any())
+            //{
+            //    methodResult.AddErrorBadRequest("Duplicate Emails");
+            //    return methodResult;
+            //}
+
+            result.Datas = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email) && x.Email.IsValidEmail()).Distinct().ToList();
 
             if (result.Stream != null)
             {
