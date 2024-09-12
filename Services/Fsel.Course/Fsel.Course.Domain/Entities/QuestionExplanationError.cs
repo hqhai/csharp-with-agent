@@ -9,8 +9,7 @@ namespace Fsel.Course.Domain.Entities
 
     public class QuestionExplanationError : Entity
     {
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(254, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(255, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Feedback { get; set; }
 
         public EnumFeedbackExplanation FeedbackExplanation { get; set; }

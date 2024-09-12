@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20240912044507_Create_QuestionExplanationError")]
+    [Migration("20240912103641_Create_QuestionExplanationError")]
     partial class Create_QuestionExplanationError
     {
         /// <inheritdoc />
@@ -3958,9 +3958,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnOrder(103);
 
                     b.Property<string>("Feedback")
-                        .IsRequired()
-                        .HasMaxLength(254)
-                        .HasColumnType("nvarchar(254)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("FeedbackExplanation")
                         .IsRequired()
