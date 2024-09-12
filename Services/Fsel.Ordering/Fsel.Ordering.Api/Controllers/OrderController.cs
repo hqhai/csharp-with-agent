@@ -135,7 +135,7 @@ namespace Fsel.Ordering.Api.Controllers
         [MapToApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<IList<OrderSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetOrderIntegrationByStatusQuery([FromBody] GetOrderIntegrationByStatusQuery query)
+        public async Task<IActionResult> GetOrderIntegrationByStatusQuery([FromBody] GetOrderByStatusIntegrationQuery query)
         {
             MethodResult<IList<OrderSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

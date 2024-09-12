@@ -11,7 +11,7 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetOrderIntegrationByStatusQuery : IRequest<MethodResult<IList<OrderSearchModel>>>
+    public class GetOrderByStatusIntegrationQuery : IRequest<MethodResult<IList<OrderSearchModel>>>
     {
         public DateTime StartDate { get; set; }
 
@@ -22,20 +22,20 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
         public IList<Guid>? UserIds { get; set; }
     }
 
-    public class GetOrderIntegrationByStatusQueryHandler : IRequestHandler<GetOrderIntegrationByStatusQuery, MethodResult<IList<OrderSearchModel>>>
+    public class GetOrderByStatusIntegrationQueryHandler : IRequestHandler<GetOrderByStatusIntegrationQuery, MethodResult<IList<OrderSearchModel>>>
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IMapper _mapper;
         private readonly ILmsCourseService _lmsCourseService;
 
-        public GetOrderIntegrationByStatusQueryHandler(IOrderRepository orderRepository, IMapper mapper, ILmsCourseService lmsCourseService)
+        public GetOrderByStatusIntegrationQueryHandler(IOrderRepository orderRepository, IMapper mapper, ILmsCourseService lmsCourseService)
         {
             _orderRepository = orderRepository;
             _mapper = mapper;
             _lmsCourseService = lmsCourseService;
         }
 
-        public async Task<MethodResult<IList<OrderSearchModel>>> Handle(GetOrderIntegrationByStatusQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<OrderSearchModel>>> Handle(GetOrderByStatusIntegrationQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<OrderSearchModel>>();
