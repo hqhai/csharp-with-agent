@@ -25,40 +25,40 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? CurrentPosition { get; set; }
 
         [EpplusTableColumn(Header = "Unit 1 overall")]
-        public double OverallUnitOne { get; set; }
+        public double OverallUnit1 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 2 overall")]
-        public double OverallUnitTwo { get; set; }
+        public double OverallUnit2 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 3 overall")]
-        public double OverallUnitThree { get; set; }
+        public double OverallUnit3 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 4 overall")]
-        public double OverallUnitFour { get; set; }
+        public double OverallUnit4 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 5 overall")]
-        public double OverallUnitFive { get; set; }
+        public double OverallUnit5 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 6 overall")]
-        public double OverallUnitSix { get; set; }
+        public double OverallUnit6 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 7 overall")]
-        public double OverallUnitSeven { get; set; }
+        public double OverallUnit7 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 8 overall")]
-        public double OverallUnitEight { get; set; }
+        public double OverallUnit8 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 9 overall")]
-        public double OverallUnitNine { get; set; }
+        public double OverallUnit9 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 10 overall")]
-        public double OverallUnitTen { get; set; }
+        public double OverallUnit10 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 11 overall")]
-        public double OverallUnitEleven { get; set; }
+        public double OverallUnit11 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 12 overall")]
-        public double OverallUnitTwelve { get; set; }
+        public double OverallUnit12 { get; set; }
 
         [EpplusTableColumn(Header = "Overall theo leaderboard")]
         public double LeaderboardPercent { get; set; }
@@ -69,10 +69,13 @@ namespace Fsel.Course.Domain.Models.EntityModels
         [EpplusTableColumn(Header = "Social Time")]
         public double SocialTime { get; set; }
 
-        [EpplusTableColumn(Header = "Tổng số lần truy cập")]
-        public double TotalVisits { get; set; }
+        [EpplusTableColumn(Header = "Other Time")]
+        public double OtherTime { get; set; }
 
-        [EpplusTableColumn(Header = "Tổng số lần truy cập", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
+        [EpplusTableColumn(Header = "Tổng số lần truy cập")]
+        public double TotalVisit { get; set; }
+
+        [EpplusTableColumn(Header = "Thời gian bắt đầu học", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
         public DateTime? ProcessDate { get; set; }
     }
 }

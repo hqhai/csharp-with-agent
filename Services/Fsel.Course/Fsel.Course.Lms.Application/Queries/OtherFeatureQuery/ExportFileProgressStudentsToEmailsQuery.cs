@@ -7,11 +7,17 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
     using Fsel.Common.Helpers;
     using Fsel.Common.Models.Excels;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -25,12 +31,26 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
         private readonly IUserService _userService;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ISystemService _systemService;
+        private readonly ManagerProgressHelper _managerProgressHelper;
+        private readonly IUnitResultRepository _unitResultRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly ILessonRepository _lessonRepository;
 
-        public ExportFileProgressStudentsToEmailsQueryHandler(IUserService userService, ICourseResultRepository courseResultRepository, ISystemService systemService)
+        public ExportFileProgressStudentsToEmailsQueryHandler(IUserService userService,
+            ICourseResultRepository courseResultRepository,
+            ISystemService systemService,
+            ManagerProgressHelper managerProgressHelper,
+            IUnitResultRepository unitResultRepository,
+            ILessonResultRepository lessonResultRepository,
+            ILessonRepository lessonRepository)
         {
             _userService = userService;
             _courseResultRepository = courseResultRepository;
             _systemService = systemService;
+            _managerProgressHelper = managerProgressHelper;
+            _unitResultRepository = unitResultRepository;
+            _lessonResultRepository = lessonResultRepository;
+            _lessonRepository = lessonRepository;
         }
 
         public async Task<MethodResult<Stream>> Handle(ExportFileProgressStudentsToEmailsQuery request, CancellationToken cancellationToken)
@@ -90,6 +110,18 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             }
             var schools = schoolResults.Content?.Result;
 
+            var studentRankingResults = await _userService.GetLeaderBoardDataAsync(new GetStudentCompetitionByEventCodeQueryModel
+            {
+                WeekNumber = 1,
+                EventCode = "EVTH01_2024"
+            });
+            if (!studentRankingResults.IsSuccessStatusCode)
+            {
+                methodResult.AddError(studentRankingResults.Error);
+                return methodResult;
+            }
+            var studentRankings = studentRankingResults.Content?.Result.Items;
+
             var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course)
                 .Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active)
                 .ToListAsync(cancellationToken);
@@ -100,15 +132,86 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 {
                     FullName = student.Human?.FullName,
                     Email = student.Human?.Email,
-                    School = student.School ?? schools?.FirstOrDefault(x => x.Id == student.Id)?.Name,
-                    CourseName = courseResult?.Course?.Name
+                    School = student.School ?? schools?.FirstOrDefault(x => x.Id == student.SchoolId)?.Name,
+                    ProcessDate = courseResult?.ProcessDate
                 };
+                if (courseResult != null)
+                {
+                    var courseResultModel = new CourseResultModel
+                    {
+                        CourseType = courseResult.Course?.CourseType,
+                        CourseId = courseResult.CourseId,
+                        StudentId = courseResult.StudentId,
+                    };
+                    var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResultModel);
+                    studentProgressReport.CourseName = courseResult.Course?.Name;
+                    studentProgressReport.ProgressPercent = NumberHelper.GetPercent(currentProgress, progress);
+                    await SetProgressModuleAsync(studentProgressReport, courseResult);
+                    await SetOverallPercentUnitAsync(studentProgressReport, courseResult);
+                    var featureAccessTimeResults = await _systemService.GetFeatureAccessTimeBusiness(new GetFeatureAccessTimeBusinessQueryModel
+                    {
+                        UserId = student.Human?.UserId ?? default,
+                        CourseId = courseResult.CourseId
+                    });
+
+                    if (featureAccessTimeResults.IsSuccessStatusCode)
+                    {
+                        var featureAccessTimes = featureAccessTimeResults.Content?.Result;
+                        studentProgressReport.LearnTime = featureAccessTimes?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Learn).Sum(p => p.AccessTime) ?? default;
+                        studentProgressReport.SocialTime = featureAccessTimes?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Social).Sum(p => p.AccessTime) ?? default;
+                        studentProgressReport.OtherTime = featureAccessTimes?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Other).Sum(p => p.AccessTime) ?? default;
+                        studentProgressReport.TotalVisit = featureAccessTimes?.Sum(x => x.TotalVisit) ?? default;
+                    }
+                    studentProgressReport.LeaderboardPercent = studentRankings?.FirstOrDefault(x => x.StudentId == student.Id && x.CourseResultId == courseResult.Id)?.OverallScore ?? default;
+                }
+
                 studentProgressReports.Add(studentProgressReport);
             }
 
             methodResult.Result = studentProgressReports.ExportExcel();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task SetOverallPercentUnitAsync(StudentProgressReportModel studentProgressReport, CourseResult courseResult)
+        {
+            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
+                                                         .OrderBy(x => x.CreatedDate)
+                                                         .ToListAsync();
+            foreach (var unitResult in unitResults)
+            {
+                var index = unitResults.IndexOf(unitResult);
+                var unitField = typeof(StudentProgressReportModel).GetProperty($"OverallUnit{index + 1}");
+                if (unitField != null)
+                {
+                    unitField.SetValue(studentProgressReport, unitResult.Percent);
+                }
+            }
+        }
+
+        private async Task SetProgressModuleAsync(StudentProgressReportModel studentProgressReport, CourseResult courseResult)
+        {
+            var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
+                                                        .OrderByDescending(x => x.CreatedDate)
+                                                        .ThenByDescending(x => x.UpdatedDate)
+                                                        .FirstOrDefaultAsync();
+            if (unitResult == null)
+            {
+                return;
+            }
+            var lessonResult = await _lessonResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.UnitId == unitResult.UnitId)
+                                                                      .Where(x => x.Status != EnumResultStatus.Unfinished && x.CourseId == courseResult.CourseId)
+                                                                      .OrderByDescending(x => x.CreatedDate)
+                                                                      .ThenByDescending(x => x.UpdatedDate)
+                                                                      .FirstOrDefaultAsync();
+            var lesson = lessonResult?.Lesson;
+            if (lesson == null)
+            {
+                lesson = await _lessonRepository.Queryable.Include(x => x.UnitLessons.Where(y => y.UnitId == unitResult.UnitId)).Where(x => x.UnitLessons.Any(y => y.UnitId == unitResult.UnitId))
+                                                                                      .OrderBy(x => x.UnitLessons.Max(x => x.DisplayOrder))
+                                                                                      .FirstOrDefaultAsync();
+            }
+            studentProgressReport.CurrentPosition = string.Concat(lesson?.Name, "_", unitResult.Unit?.Name);
         }
     }
 }
