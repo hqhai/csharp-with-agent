@@ -65,5 +65,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<HomeWorkQuestion> HomeWorkQuestions { get; set; } = new List<HomeWorkQuestion>();
         public ICollection<SectionQuestion> SectionQuestions { get; set; } = new List<SectionQuestion>();
         public ICollection<QuestionExplanationError> QuestionExplanationErrors = new List<QuestionExplanationError>();
+        public ICollection<QuestionExplanationLog> QuestionExplanationLogs { get; set; } = new HashSet<QuestionExplanationLog>();
     }
 }
