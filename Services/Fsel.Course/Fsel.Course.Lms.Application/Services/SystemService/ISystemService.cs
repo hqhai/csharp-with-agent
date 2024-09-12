@@ -44,5 +44,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Get("/v1/feature-access-time/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetListFeatureAccessTime([FromQuery] BaseQueryModel model);
+
+        [Post("/v1/school/get-by-ids")]
+        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolsAsync([Body] IList<Guid>? ids);
     }
 }
