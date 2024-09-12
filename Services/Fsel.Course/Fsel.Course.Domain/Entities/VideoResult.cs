@@ -64,5 +64,7 @@ namespace Fsel.Course.Domain.Entities
         public bool IsShowToken { get; set; }
         public ICollection<VideoTimeCodeResult> VideoTimeCodeResults { get; set; } = new List<VideoTimeCodeResult>();
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
+
+        public ICollection<QuestionExplanationError> QuestionExplanationErrors = new List<QuestionExplanationError>();
     }
 }
