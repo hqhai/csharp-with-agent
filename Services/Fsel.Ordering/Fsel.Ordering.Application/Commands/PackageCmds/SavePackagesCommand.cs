@@ -74,6 +74,7 @@ namespace Fsel.Ordering.Application.Commands.PackageCmds
                 {
                     var package = _mapper.Map<Package>(item);
                     package.Code = EnumPackageCode.BASIC;
+                    package.IncentivesWhenPurchasing = item.Name;
                     if (!package.IsValid())
                     {
                         methodResult.AddError(package.ErrorMessages);
