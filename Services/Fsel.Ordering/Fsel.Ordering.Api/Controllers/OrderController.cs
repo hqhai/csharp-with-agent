@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Commands.OrderCmds;
+    using Fsel.Ordering.Application.Queries.IntegrationQuery;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Attributes;
@@ -122,6 +123,19 @@ namespace Fsel.Ordering.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<IList<OrderSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetOrderByStatus([FromBody] GetOrderByStatusQuery query)
+        {
+            MethodResult<IList<OrderSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Integration Query
+        /// </summary>
+        [HttpPost("integration-order")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [ProducesResponseType(typeof(MethodResult<IList<OrderSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetOrderIntegrationByStatusQuery([FromBody] GetOrderByStatusIntegrationQuery query)
         {
             MethodResult<IList<OrderSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
