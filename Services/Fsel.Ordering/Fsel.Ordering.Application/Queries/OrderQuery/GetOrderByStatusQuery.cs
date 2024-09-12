@@ -69,7 +69,23 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             }
             else
             {
+                var userExpire = await _orderRepository.Queryable
+                                                       .Include(p => p.Package)
+                                                       .Where(x => (x.ExpireDate >= request.StartDate) && (x.ExpireDate <= request.EndDate))
+                                                       .ToListAsync(cancellationToken);
+
                 orders = orders.Where(x => !orderClients.Contains(x.UserId)).ToList();
+
+                if (userExpire != null && userExpire.Any())
+                {
+                    foreach (var item in userExpire)
+                    {
+                        if (!orders.Any(x => x.Id == item.Id))
+                        {
+                            orders.Add(item);
+                        }
+                    }
+                }
             }
 
             methodResult.Result = _mapper.Map(orders, methodResult.Result);
