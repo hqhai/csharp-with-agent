@@ -10,6 +10,7 @@ namespace Fsel.Ordering.Application.Commands.PackageCmds
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -47,23 +48,44 @@ namespace Fsel.Ordering.Application.Commands.PackageCmds
                 return methodResult;
             }
 
-            var packages = new List<Package>();
+            var packagesUpdate = new List<Package>();
+            var packagesCreate = new List<Package>();
 
             foreach (var item in request.Packages)
             {
-                var package = await _packageRepository.GetByIdAsync(item.Id);
-                if (package == null)
+                if (item.Id.HasValue)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                    return methodResult;
+                    var package = await _packageRepository.GetByIdAsync(item.Id.Value);
+                    if (package == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                        return methodResult;
+                    }
+                    _mapper.Map(item, package);
+                    if (!package.IsValid())
+                    {
+                        methodResult.AddError(package.ErrorMessages);
+                        return methodResult;
+                    }
+                    packagesUpdate.Add(package);
                 }
-                _mapper.Map(item, package);
-                packages.Add(package);
+                else
+                {
+                    var package = _mapper.Map<Package>(item);
+                    package.Code = EnumPackageCode.BASIC;
+                    if (!package.IsValid())
+                    {
+                        methodResult.AddError(package.ErrorMessages);
+                        return methodResult;
+                    }
+                    packagesCreate.Add(package);
+                }
             }
 
             await _packageRepository.ExecuteTransactionAsync(async () =>
             {
-                _packageRepository.UpdateList(packages);
+                _packageRepository.UpdateList(packagesUpdate);
+                await _packageRepository.AddList(packagesCreate);
                 await _packageRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
