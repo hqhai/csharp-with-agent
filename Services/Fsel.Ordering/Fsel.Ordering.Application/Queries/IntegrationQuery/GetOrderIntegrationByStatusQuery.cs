@@ -1,20 +1,17 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Application.Queries.OrderQuery
+namespace Fsel.Ordering.Application.Queries.IntegrationQuery
 {
-    using System.Threading;
-    using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
-    using MassTransit.Initializers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetOrderByStatusQuery : IRequest<MethodResult<IList<OrderSearchModel>>>
+    public class GetOrderIntegrationByStatusQuery : IRequest<MethodResult<IList<OrderSearchModel>>>
     {
         public DateTime StartDate { get; set; }
 
@@ -25,20 +22,20 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
         public IList<Guid>? UserIds { get; set; }
     }
 
-    public class GetOrderByStatusQueryHandler : IRequestHandler<GetOrderByStatusQuery, MethodResult<IList<OrderSearchModel>>>
+    public class GetOrderIntegrationByStatusQueryHandler : IRequestHandler<GetOrderIntegrationByStatusQuery, MethodResult<IList<OrderSearchModel>>>
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IMapper _mapper;
         private readonly ILmsCourseService _lmsCourseService;
 
-        public GetOrderByStatusQueryHandler(IOrderRepository orderRepository, IMapper mapper, ILmsCourseService lmsCourseService)
+        public GetOrderIntegrationByStatusQueryHandler(IOrderRepository orderRepository, IMapper mapper, ILmsCourseService lmsCourseService)
         {
             _orderRepository = orderRepository;
             _mapper = mapper;
             _lmsCourseService = lmsCourseService;
         }
 
-        public async Task<MethodResult<IList<OrderSearchModel>>> Handle(GetOrderByStatusQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<OrderSearchModel>>> Handle(GetOrderIntegrationByStatusQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<OrderSearchModel>>();
@@ -69,7 +66,23 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             }
             else
             {
+                var userExpire = await _orderRepository.Queryable
+                                                       .Include(p => p.Package)
+                                                       .Where(x => (x.ExpireDate >= request.StartDate) && (x.ExpireDate <= request.EndDate))
+                                                       .ToListAsync(cancellationToken);
+
                 orders = orders.Where(x => !orderClients.Contains(x.UserId)).ToList();
+
+                if (userExpire != null && userExpire.Any())
+                {
+                    foreach (var item in userExpire)
+                    {
+                        if (!orders.Any(x => x.Id == item.Id))
+                        {
+                            orders.Add(item);
+                        }
+                    }
+                }
             }
 
             methodResult.Result = _mapper.Map(orders, methodResult.Result);
