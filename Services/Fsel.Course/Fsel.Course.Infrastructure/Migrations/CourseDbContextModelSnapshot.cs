@@ -3965,9 +3965,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnOrder(103);
 
                     b.Property<string>("Feedback")
-                        .IsRequired()
-                        .HasMaxLength(254)
-                        .HasColumnType("nvarchar(254)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("FeedbackExplanation")
                         .IsRequired()
