@@ -11,6 +11,17 @@ namespace Fsel.Ordering.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterColumn<string>(
+                name: "Status",
+                table: "Packages",
+                type: "nvarchar(100)",
+                maxLength: 100,
+                nullable: false,
+                defaultValue: "Active",
+                oldClrType: typeof(string),
+                oldType: "nvarchar(100)",
+                oldMaxLength: 100);
+
             migrationBuilder.AddColumn<string>(
                 name: "Description",
                 table: "Packages",
@@ -52,6 +63,17 @@ namespace Fsel.Ordering.Infrastructure.Migrations
             migrationBuilder.DropColumn(
                 name: "Description",
                 table: "Packages");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Status",
+                table: "Packages",
+                type: "nvarchar(100)",
+                maxLength: 100,
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(100)",
+                oldMaxLength: 100,
+                oldDefaultValue: "Active");
         }
     }
 }

@@ -539,8 +539,10 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasDefaultValue("Active");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")

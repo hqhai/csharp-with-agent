@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingDbContext))]
-    [Migration("20240912033546_Update_PackageTable_Add_Field_Description")]
+    [Migration("20240912065800_Update_PackageTable_Add_Field_Description")]
     partial class Update_PackageTable_Add_Field_Description
     {
         /// <inheritdoc />
@@ -542,8 +542,10 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasDefaultValue("Active");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
