@@ -76,7 +76,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     },
 
                     AllowOfflineAccess = true,
-                    AccessTokenLifetime = 3600,
+                    AccessTokenLifetime = 120,
                     AllowAccessTokensViaBrowser = true,
                     UpdateAccessTokenClaimsOnRefresh = true,
                     RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
@@ -232,8 +232,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
 
                     RequireClientSecret = false,
                     RequirePkce = false,
-                    RedirectUris = { "https://lms-testing.fsel.edu.vn/auth/login", "http://lms-testing.fsel.edu.vn/auth/login" },
-                    PostLogoutRedirectUris = { "https://lms-testing.fsel.edu.vn/auth/login", "http://lms-testing.fsel.edu.vn/auth/login" },
+                    RedirectUris = { "https://lms-testing.fsel.edu.vn/auth/login", "http://lms-testing.fsel.edu.vn/auth/login", "fsel-uat://lms-testing.fsel.edu.vn" },
+                    PostLogoutRedirectUris = { "https://lms-testing.fsel.edu.vn/auth/login", "http://lms-testing.fsel.edu.vn/auth/login", "fsel-uat://lms-testing.fsel.edu.vn" },
 
                     AllowOfflineAccess = true,
                     RequireConsent = false,
