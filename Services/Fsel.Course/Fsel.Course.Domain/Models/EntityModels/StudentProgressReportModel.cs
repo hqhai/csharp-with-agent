@@ -18,6 +18,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
         [EpplusTableColumn(Header = "Course Name")]
         public string? CourseName { get; set; }
 
+        [EpplusTableColumn(Header = "Trạng Thái")]
+        public string? StatusUser { get; set; }
+
         [EpplusTableColumn(Header = "Tiến độ học tập theo %")]
         public double ProgressPercent { get; set; }
 
@@ -77,5 +80,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         [EpplusTableColumn(Header = "Thời gian bắt đầu học", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
         public DateTime? ProcessDate { get; set; }
+
+        [EpplusTableColumn(Header = "Ngày hết hạn", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
+        public DateTime? ExpiredDate { get; set; }
     }
 }

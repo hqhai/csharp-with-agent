@@ -21,6 +21,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Nest;
 
     public class ExportFileProgressStudentsToEmailsQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
@@ -34,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
         private readonly ManagerProgressHelper _managerProgressHelper;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly ILessonRepository _lessonRepository;
 
         public ExportFileProgressStudentsToEmailsQueryHandler(IUserService userService,
@@ -42,6 +44,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             ManagerProgressHelper managerProgressHelper,
             IUnitResultRepository unitResultRepository,
             ILessonResultRepository lessonResultRepository,
+            IPlacementTestResultRepository placementTestResultRepository,
             ILessonRepository lessonRepository)
         {
             _userService = userService;
@@ -50,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             _managerProgressHelper = managerProgressHelper;
             _unitResultRepository = unitResultRepository;
             _lessonResultRepository = lessonResultRepository;
+            _placementTestResultRepository = placementTestResultRepository;
             _lessonRepository = lessonRepository;
         }
 
@@ -120,7 +124,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 methodResult.AddError(studentRankingResults.Error);
                 return methodResult;
             }
-            var studentRankings = studentRankingResults.Content?.Result.Items;
+            var studentRankings = studentRankingResults.Content?.Result?.Items;
 
             var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course)
                 .Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active)
@@ -133,8 +137,21 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                     FullName = student.Human?.FullName,
                     Email = student.Human?.Email,
                     School = student.School ?? schools?.FirstOrDefault(x => x.Id == student.SchoolId)?.Name,
-                    ProcessDate = courseResult?.ProcessDate
+                    ProcessDate = courseResult?.ProcessDate,
+                    ExpiredDate = student.ExpiredDate
                 };
+                var placementTestResultCurrent = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == student.Id)
+                                                                                               .OrderByDescending(x => x.UpdatedDate)
+                                                                                               .ThenByDescending(x => x.CreatedDate)
+                                                                                               .FirstOrDefaultAsync(cancellationToken);
+                if (placementTestResultCurrent != null)
+                {
+                    var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == student.Id)
+                                                                              .OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+                    int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
+                    var (levelCompleted, isLock) = placementTestResultCurrent.Level.GetLevelInScore(placementTestResultCurrent.Percent, IeltsScoreHelper.GetInitialAge(placementTestResult?.Level, age));
+                    studentProgressReport.StatusUser = isLock ? "Hoàn Thành PT" : "Chưa Hoàn Thành PT";
+                }
                 if (courseResult != null)
                 {
                     var courseResultModel = new CourseResultModel
@@ -146,6 +163,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                     var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResultModel);
                     studentProgressReport.CourseName = courseResult.Course?.Name;
                     studentProgressReport.ProgressPercent = NumberHelper.GetPercent(currentProgress, progress);
+                    studentProgressReport.StatusUser = "Đang Học";
                     await SetProgressModuleAsync(studentProgressReport, courseResult);
                     await SetOverallPercentUnitAsync(studentProgressReport, courseResult);
                     var featureAccessTimeResults = await _systemService.GetFeatureAccessTimeBusiness(new GetFeatureAccessTimeBusinessQueryModel
@@ -199,7 +217,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             {
                 return;
             }
-            var lessonResult = await _lessonResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.UnitId == unitResult.UnitId)
+            var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.Lesson).Where(x => x.StudentId == courseResult.StudentId && x.UnitId == unitResult.UnitId)
                                                                       .Where(x => x.Status != EnumResultStatus.Unfinished && x.CourseId == courseResult.CourseId)
                                                                       .OrderByDescending(x => x.CreatedDate)
                                                                       .ThenByDescending(x => x.UpdatedDate)
