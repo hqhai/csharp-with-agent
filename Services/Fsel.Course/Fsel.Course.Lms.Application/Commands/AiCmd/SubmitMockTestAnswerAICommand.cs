@@ -246,7 +246,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 _mockTestAnswerRepository.Update(mockTestAnswer);
                 await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                _sectionGroupResultRepository.Update(sectionGroupResult);
+                _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
                 await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 if (checkSkillMockTest)

@@ -32,7 +32,7 @@ namespace Fsel.Course.Lms.Application.Services.InteractionService
         [Get("/v1/customerSurvey/IsCompleted/{id}")]
         Task<IApiResponse<MethodResult<bool>>> IsSurveyCompleted([FromRoute] Guid id);
 
-        [Post("/v1/customerSurvey")]
-        Task<IApiResponse<MethodResult<IList<CustomerSurveyModel>>>> CreateSurveyAsync([FromBody] CreateCustomerSurveyCommandModel model);
+        //[Post("/v1/customerSurvey")]
+        //Task<IApiResponse<MethodResult<IList<CustomerSurveyModel>>>> CreateSurveyAsync([FromBody] CreateCustomerSurveyCommandModel model);
     }
 }

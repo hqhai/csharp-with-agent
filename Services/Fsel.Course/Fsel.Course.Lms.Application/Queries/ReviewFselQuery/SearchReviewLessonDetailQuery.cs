@@ -57,7 +57,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var lessonResultIds = await _lessonResultRepository.Queryable.Where(x => x.LessonId == request.LessonId).Select(x => x.Id).ToListAsync(cancellationToken);
+            var lessonResultIds = await _lessonResultRepository.Queryable.Where(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId && x.CourseId == request.CourseId).Select(x => x.Id).ToListAsync(cancellationToken);
             var videoResults = await _videoResultRepository.Queryable.Where(x => lessonResultIds.Contains(x.LessonResultId) && x.Status == EnumResultStatus.Done)
                                                        .ToListAsync(cancellationToken);
             var studentIds = videoResults.Select(x => x.StudentId).Distinct().ToList();

@@ -56,6 +56,18 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
+        /// Get locations by ids
+        /// </summary>
+        [HttpGet("detail")]
+        [ProducesResponseType(typeof(MethodResult<IList<LocationModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetDetailLocation([FromQuery] GetDetailLocationQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get locations
         /// </summary>
         [HttpPost("execute-list-query")]

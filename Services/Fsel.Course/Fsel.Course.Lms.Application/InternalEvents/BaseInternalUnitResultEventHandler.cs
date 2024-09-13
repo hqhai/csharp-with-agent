@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using System.Globalization;
     using System.Linq;
     using System.Threading;
+    using Amazon.Runtime.Internal.Util;
     using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
     using Fsel.Common.Models;
@@ -17,6 +18,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
+    using Fsel.Course.Lms.Application.Commands.StudentCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
@@ -29,6 +31,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class BaseInternalUnitResultEventHandler : BaseInternalEventHandler
     {
@@ -39,16 +42,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentOccupyClassForum = 20;
 
         private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly ILogger<BaseInternalUnitResultEventHandler> _logger;
         private readonly ILessonResultRepository _lessonResultRepository;
 
-        public BaseInternalUnitResultEventHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, ILessonResultRepository lessonResultRepository, IOrderService orderService, ILessonNoteRepository lessonNoteRepository, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository)
+        public BaseInternalUnitResultEventHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, ILogger<BaseInternalUnitResultEventHandler> logger, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, ILessonResultRepository lessonResultRepository, IOrderService orderService, ILessonNoteRepository lessonNoteRepository) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository)
         {
             _questBoardPublisher = questBoardPublisher;
             _lessonResultRepository = lessonResultRepository;
+            _logger = logger;
         }
 
         public async Task UpdateUnitResultAsync(IList<LessonResult>? lessonResults, Domain.Entities.Unit? unit, Guid courseId, Guid studentId, bool isDone, CancellationToken cancellationToken, bool isUnitUpdate = true)
-
         {
             ArgumentNullException.ThrowIfNull(unit);
             var course = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests.OrderBy(x => x.DisplayOrder))
@@ -78,11 +82,18 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         // await DoQuestBoard(userId, unitId, courseId, cancellationToken);
 
                         //send mail
-                        await SendMail(skillScores, percent, unit, unitResult, course, lessonResults.ToList(), cancellationToken);
+                        await SendMail(skillScores, percent, unit, unitResult, course, lessonResults.ToList(), cancellationToken).ConfigureAwait(false);
+                        await DoQuestBoard(studentId, cancellationToken).ConfigureAwait(false);
 
-                        await DoQuestBoard(studentId, cancellationToken);
+                        if (course.CourseUnitMockTests.First(p => p.UnitId == unit.Id).Number == 1)
+                        {
+                            await _mediator.Send(new AddFeatureMissionCommand()
+                            {
+                                FeatureUserReferral = EnumFeatureUserReferral.DoneUnit1,
+                                ReceiverId = unitResult.CreatedUserId,
+                            }).ConfigureAwait(false);
+                        }
                     }
-
                     if (isUnitUpdate)
                     {
                         unitResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
@@ -90,15 +101,22 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         unitResult.Percent = percent;
                         unitResult.SkillScores = skillScores;
                         _unitResultRepository.Update(unitResult);
-                        await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                        try
+                        {
+                            await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                        if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 6 && course.CourseType == EnumCourseType.Academic && isDone)
-                        {
-                            await SendMailMidCourseReport(studentId, course, cancellationToken);
+                            if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 6 && course.CourseType == EnumCourseType.Academic && isDone)
+                            {
+                                await SendMailMidCourseReport(studentId, course, cancellationToken).ConfigureAwait(false);
+                            }
+                            else if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 4 && course.CourseType == EnumCourseType.Ielts && isDone)
+                            {
+                                await SendMailMidCourseReport(studentId, course, cancellationToken).ConfigureAwait(false);
+                            }
                         }
-                        else if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 4 && course.CourseType == EnumCourseType.Ielts && isDone)
+                        catch (Exception ex)
                         {
-                            await SendMailMidCourseReport(studentId, course, cancellationToken);
+                            _logger.LogWarning($"Log Trigger UnitResult : {ex.Message} ");
                         }
                     }
                 }
@@ -148,7 +166,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             var listClassForumResult = await _classForumResultRepository.Queryable.Where(p => lessonResultIds.Contains(p.LessonResultId)).ToListAsync(cancellationToken);
 
-            var isSendEmail = lessonResultIds.Count == listClassForumResult.Count && !listClassForumResult.Any(p => p.Status != EnumClassForumResultStatus.Graded);
+            var isSendEmail = lessonResultIds.Count == listClassForumResult.Count && listClassForumResult.All(p => p.Status.HasValue);
             if (!isSendEmail)
                 return;
             MockTestResult? mockTestResult = default;
@@ -353,7 +371,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
             var listClassForumResult = await _classForumResultRepository.Queryable.Where(p => lessonResultIds.Contains(p.LessonResultId)).ToListAsync(cancellationToken);
-            var isSendEmail = lessonResultIds.Count == listClassForumResult.Count && !listClassForumResult.Any(p => p.Status != EnumClassForumResultStatus.Graded && p.Status != EnumClassForumResultStatus.Denied);
+            var isSendEmail = lessonResultIds.Count == listClassForumResult.Count && listClassForumResult.All(p => p.Status.HasValue);
 
             if (course.CourseType == EnumCourseType.Ielts && isSendEmail)
             {

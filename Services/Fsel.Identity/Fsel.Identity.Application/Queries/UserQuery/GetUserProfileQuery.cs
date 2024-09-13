@@ -71,6 +71,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             {
                 userView = await _userManager.Users.Include(x => x!.Student)
                                                    .ThenInclude(x => x!.ParentStudents)
+                                                   .Include(p => p.Receiver).ThenInclude(p => p.Sender)
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 var student = userView?.Student;
                 if (student != null && student.ParentStudents != null && student.ParentStudents.Count > 0)
@@ -79,6 +80,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                   .ThenInclude(x => x!.ParentStudents)
                                                   .ThenInclude(x => x!.Parent)
                                                   .ThenInclude(x => x!.User)
+                                                  .Include(p => p.Receiver).ThenInclude(p => p.Sender)
                                                   .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 }
             }
@@ -162,6 +164,15 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                             return methodResult;
                         }
                         userModel.Membership = package.Content?.Result?.FirstOrDefault(p => p.Id == userModel.PackageId)?.Code;
+                    }
+                    if (userView?.Receiver?.Sender != null)
+                    {
+                        userModel.Sender = new SenderModel()
+                        {
+                            SenderId = userView.Receiver.Sender.Id,
+                            FullName = userView.Receiver.Sender.FullName,
+                            Code = userView.Receiver.Sender.Code
+                        };
                     }
                 }
             }

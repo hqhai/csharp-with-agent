@@ -148,6 +148,9 @@ namespace Fsel.Ordering.Domain.Entities
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? CompanyTaxCode { get; set; }
 
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? CompanyEmail { get; set; }
+
         #endregion Company invoice information
 
         #region Không sử dụng
@@ -163,6 +166,9 @@ namespace Fsel.Ordering.Domain.Entities
         public Guid? ClassId { get; set; }
 
         #endregion Không sử dụng
+
+        public Guid? VoucherId { get; set; }
+        public Voucher? Voucher { get; set; }
 
         public ICollection<OrderTransaction> OrderTransactions { get; set; } = new List<OrderTransaction>();
     }

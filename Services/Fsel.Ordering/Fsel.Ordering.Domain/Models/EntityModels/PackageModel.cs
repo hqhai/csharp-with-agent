@@ -17,6 +17,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public int DayBonus { get; set; }
         public IList<string>? ImagePaths { get; set; }
         public string? EventDescription { get; set; }
+        public string? Description { get; set; }
         public string? IncentivesWhenPurchasing { get; set; }
         public IList<EnumPackageSuggest>? Suggests { get; set; }
     }

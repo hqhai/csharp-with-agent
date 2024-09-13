@@ -2,7 +2,6 @@
 
 namespace Fsel.Ordering.Application.Queries.VoucherQuery
 {
-    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -11,7 +10,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Ordering.Domain.Models.QueryModels.Vouchers;
-    using Fsel.Shared.Helpers;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -32,28 +31,29 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
         public async Task<MethodResult<PagingItemsModel<VoucherModel>>> Handle(SearchVoucherQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<PagingItemsModel<VoucherModel>> methodResult = new MethodResult<PagingItemsModel<VoucherModel>>();
+            var methodResult = new MethodResult<PagingItemsModel<VoucherModel>>();
 
-            if (request.PageSize > 100)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                return methodResult;
-            }
-
-            var voucherQuery = _voucherRepository.Queryable
+            var voucherQuery = _voucherRepository.Queryable.Include(x => x.Orders)
                             .Select(x => new VoucherModel
                             {
                                 Id = x.Id,
+                                Code = x.Code,
                                 Name = x.Name,
+                                CreatedDate = x.CreatedDate,
                                 StartDate = x.StartDate,
                                 EndDate = x.EndDate,
-                                CustomerTypes = x.CustomerTypes,
-                                CreatedDate = x.CreatedDate,
-                                IsActive = (x.StartDate <= DateTime.UtcNow && DateTime.UtcNow <= x.EndDate),
+                                Quantity = x.Quantity,
+                                Percent = x.Percent,
+                                IsActive = x.IsActive,
+                                Source = x.Source,
+                                QuantityUsed = x.Orders.Where(p => p.Status == EnumOrderStatus.New || p.Status == EnumOrderStatus.Payment).Count(),
                             });
+
+            voucherQuery = voucherQuery.Where(p => request.Source == EnumVoucherSource.Admin ? p.Source == EnumVoucherSource.Admin : p.Source != EnumVoucherSource.Admin);
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                voucherQuery = voucherQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                voucherQuery = voucherQuery.Where(m => (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()) || (m.Code ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             int totalItem = await voucherQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

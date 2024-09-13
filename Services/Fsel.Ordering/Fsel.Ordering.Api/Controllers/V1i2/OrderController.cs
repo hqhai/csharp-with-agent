@@ -20,7 +20,6 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
     [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class OrderController : BaseController
     {
         private readonly IMediator _mediator;
@@ -36,6 +35,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> Create([FromBody] CreateOrderCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -48,6 +48,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         [HttpPost("create-order-trial")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> Create([FromBody] CreateOrderTrialCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -60,6 +61,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         [HttpPost("verify-data-from-android-app")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> VerifyDataFromAndroidApp([FromBody] VerifyDataFromAndroidAppCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -72,6 +74,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         [HttpGet("get-by-id/{id}")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<SearchOrderModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> Search([FromRoute] Guid id)
         {
             var queryResult = await _mediator.Send(new GetOrderByIdQuery() { Id = id }).ConfigureAwait(false);
@@ -84,10 +87,35 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         [HttpGet("search-order")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<SearchOrderModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> Search([FromQuery] SearchOrderQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create Order for student
+        /// </summary>
+        [HttpPost("create-order-for-student-leader-board")]
+        [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateOrderForStudentLeaderBoard([FromBody] CreateOrderForUserFromLeaderBoardCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get orders by user id
+        /// </summary>
+        [HttpGet("get-orders-by-user-id")]
+        [ProducesResponseType(typeof(MethodResult<IList<OrderModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetOrderByUserId([FromQuery] GetOrdersByUserIdQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

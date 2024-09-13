@@ -6,8 +6,9 @@ using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
-using Fsel.Identity.Application.Commands.StudentCmd;
 using Fsel.Identity.Application.Commands.UserOtpCmd;
+using Fsel.Identity.Application.Commands.UserReferrals;
+using Fsel.Identity.Application.Commands.StudentCmd;
 using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
@@ -133,7 +134,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 result = await _userManager.UpdateAsync(user);
                                 if (!result.Succeeded)
                                 {
-                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
+                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate), nameof(result.Errors));
                                     return methodResult;
                                 }
                             }
@@ -170,6 +171,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     };
 
                                 #endregion add user setting
+
                                 var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password);
                                 if (!validPassword.Succeeded)
                                 {
@@ -184,15 +186,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     return methodResult;
                                 }
                                 await _userManager.AddToRoleAsync(user, request.Role.ToString() ?? string.Empty);
-                            }
-                            if (!string.IsNullOrEmpty(request.ReferralCode))
-                            {
-                                var updateReferralCodeResult = await _mediator.Send(new UpdateReferralCodeStudentCommand { ReferralCode = request.ReferralCode, UserId = user.Id }, cancellationToken).ConfigureAwait(false);
-                                if (!updateReferralCodeResult.IsOK)
-                                {
-                                    methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);
-                                    return methodResult;
-                                }
                             }
 
                             #region Send Code OTP
@@ -240,6 +233,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 if (user != null && user.EmailConfirmed)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(request.ReferralCode))
+            {
+                var updateReferralCodeResult = await _mediator.Send(new CreateUserReferralCommand { ReferralCode = request.ReferralCode, ReceiverId = user.Id, UserReferralType = EnumUserReferralType.Link }, cancellationToken).ConfigureAwait(false);
+                if (!updateReferralCodeResult.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);
                     return methodResult;
                 }
             }

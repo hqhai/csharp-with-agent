@@ -94,8 +94,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
             if (students != null && students.Any())
             {
-                var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId)).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
-
+                var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
                 foreach (var student in students)
                 {
                     var userId = student?.UserId ?? default;
@@ -178,7 +177,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             {
                 return;
             }
-            var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.Status != EnumResultStatus.Unfinished)
+            var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
                                                                    .OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
 
             var unitResultDones = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.Status == EnumResultStatus.Done)

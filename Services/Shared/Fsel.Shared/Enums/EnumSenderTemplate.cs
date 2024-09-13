@@ -25,6 +25,18 @@ namespace Fsel.Shared.Enums
         MailPaymentForStudent,
         MailPaymentForCustomer,
         MailFromLandingPage,
-        CreateAccountFromCRM
+        MailPaymentWithVoucher,
+        CreateAccountFromCRM,
+
+        #region event
+
+        CreateAccountWithEventSuccess,
+        SignUpEventSuccess,
+        WasInAnotherEvent,
+        LearnedOnThePlatform,
+        NotEligibleToParticipate,
+        MailRegisterEvent
+
+        #endregion event
     }
 }

@@ -188,7 +188,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
         private async Task UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, CancellationToken cancellationToken)
         {
-            _sectionGroupResultRepository.Update(sectionGroupResult);
+            _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
             await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
         }
 
@@ -218,7 +218,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     }
                 }
 
-                _sectionGroupResultRepository.Update(sectionGroupResult);
+                _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
             return tokenHistorys;
@@ -439,7 +439,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         break;
                 }
             }
-            _sectionGroupResultRepository.Update(sectionGroupResult);
+            _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
             await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             return tokenHistorys;
         }

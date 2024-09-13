@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.ValueSettings;
+    using Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
@@ -15,54 +16,91 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class BaseInternalLessonResultEventHandler : BaseInternalEventHandler
     {
         private const int PercentOccupyHomeWork = 30;
         private const int PercentOccupyVideo = 40;
         private const int PercentOccupyClassForum = 30;
-
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly ILogger<BaseInternalLessonResultEventHandler> _logger;
 
-        public BaseInternalLessonResultEventHandler(ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonNoteRepository lessonNoteRepository, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository)
+        public BaseInternalLessonResultEventHandler(ISystemService systemService,
+            AppSetting appSetting,
+            ICourseUnitMockTestRepository courseUnitMockTestRepository,
+            IMediator mediator,
+            IUserService userService,
+            ILogger<BaseInternalLessonResultEventHandler> logger,
+            ILessonResultRepository lessonResultRepository,
+            SaveUserCourseSettingPublisher saveUserCourseSettingPublisher,
+            IVideoResultRepository videoResultRepository,
+            IClassForumResultRepository classForumResultRepository,
+            IUnitResultRepository unitResultRepository,
+            ICourseResultRepository courseResultRepository,
+            ICourseRepository courseRepository,
+            IUnitRepository unitRepository,
+            IFinalTestResultRepository finalTestResultRepository,
+            IMockTestResultRepository mockTestResultRepository,
+            IHomeWorkResultRepository homeWorkResultRepository,
+            QuestBoardPublisher questBoardPublisher,
+            IOrderService orderService,
+            ILessonNoteRepository lessonNoteRepository) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository)
         {
             _lessonResultRepository = lessonResultRepository;
+            _logger = logger;
         }
 
         public async Task UpdateLessonResultAsync(LessonResult? lessonResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(lessonResult);
-            var isHomeWorksDone = lessonResult.HomeWorkResults.Any() && lessonResult.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done);
-            var isClassForumDone = lessonResult.ClassForumResults.Any() && lessonResult.ClassForumResults.Any(x => x.Status != EnumClassForumResultStatus.Draft);
-            if (isClassForumDone && isHomeWorksDone && lessonResult.Status != EnumResultStatus.Done)
+            try
             {
-                var courseId = lessonResult.CourseId;
-                var userId = lessonResult.CreatedUserId;
-                // await DoQuestBoard(userId, courseId, cancellationToken);
+                var isHomeWorksDone = lessonResult.HomeWorkResults.Any() && lessonResult.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done);
+                var isClassForumDone = lessonResult.ClassForumResults.Any() && lessonResult.ClassForumResults.Any(x => x.Status != EnumClassForumResultStatus.Draft);
+                if (isClassForumDone && isHomeWorksDone && lessonResult.Status != EnumResultStatus.Done)
+                {
+                    // var courseId = lessonResult.CourseId;
+                    // var userId = lessonResult.CreatedUserId;
+                    // await DoQuestBoard(userId, courseId, cancellationToken);
 
-                lessonResult.Status = EnumResultStatus.Done;
-                await UpdateAsync(lessonResult, cancellationToken).ConfigureAwait(false);
+                    lessonResult.Status = EnumResultStatus.Done;
+                    await UpdateAsync(lessonResult, cancellationToken).ConfigureAwait(false);
+                    await _mediator.Send(new CreateLuckyTicketCommand() { LessonResultId = lessonResult.Id }, cancellationToken).ConfigureAwait(false);
+                }
+                else if (lessonResult.Status == EnumResultStatus.Done)
+                {
+                    await UpdateAsync(lessonResult, cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    _lessonResultRepository.Update(lessonResult);
+                    await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
             }
-            else if (lessonResult.Status == EnumResultStatus.Done)
+            catch (Exception ex)
             {
-                await UpdateAsync(lessonResult, cancellationToken).ConfigureAwait(false);
-            }
-            else
-            {
-                _lessonResultRepository.Update(lessonResult);
-                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                _logger.LogWarning($"Log Trigger LessonResult : {ex.Message} ");
             }
         }
 
         private async Task UpdateAsync(LessonResult lessonResult, CancellationToken cancellationToken)
         {
             var baseScoreResult = await GetLessonResult(lessonResult, cancellationToken);
-            lessonResult.CorrectCount = (int)baseScoreResult.CorrectCount;
-            lessonResult.CorrectTotal = (int)baseScoreResult.CorrectTotal;
-            lessonResult.Percent = baseScoreResult.Percent;
-            lessonResult.SkillScores = baseScoreResult.SkillScores;
-            _lessonResultRepository.Update(lessonResult);
-            await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+            try
+            {
+                lessonResult.CorrectCount = (int)baseScoreResult.CorrectCount;
+                lessonResult.CorrectTotal = (int)baseScoreResult.CorrectTotal;
+                lessonResult.Percent = baseScoreResult.Percent;
+                lessonResult.SkillScores = baseScoreResult.SkillScores;
+                _lessonResultRepository.Update(lessonResult);
+                await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Trigger Save LessonResult : {ex.Message} ");
+            }
         }
 
         private async Task<BaseScoreResultModule> GetLessonResult(LessonResult lessonResult, CancellationToken cancellationToken)

@@ -2,7 +2,6 @@ using Fsel.Notification.Domain.IRepositories;
 using Fsel.Notification.Domain.Model.EntityModels;
 using Fsel.Notification.Domain.Model.QueryModels;
 using Fsel.Common.ActionResults;
-using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -11,14 +10,16 @@ using Fsel.Core.Base;
 using Fsel.Notification.Application.Services;
 using Fsel.Notification.Application.Services.Models;
 using AutoMapper;
+using Fsel.Core.Base.BaseModels;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Notification.Application.Queries
 {
-    public class GetListNotificationQuery : SearchNotificationModel, IRequest<MethodResult<PagingItemsModel<NotificationMessageModel>>>
+    public class GetListNotificationQuery : SearchNotificationModel, IRequest<MethodResult<PagingItemsNotificationModel>>
     {
     }
 
-    public class GetListNotificationQueryQueryHandler : IRequestHandler<GetListNotificationQuery, MethodResult<PagingItemsModel<NotificationMessageModel>>>
+    public class GetListNotificationQueryQueryHandler : IRequestHandler<GetListNotificationQuery, MethodResult<PagingItemsNotificationModel>>
     {
         private readonly INotificationsRepository _notificationsRepository;
         private readonly AuthContext _authContext;
@@ -33,12 +34,13 @@ namespace Fsel.Notification.Application.Queries
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<PagingItemsModel<NotificationMessageModel>>> Handle(GetListNotificationQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsNotificationModel>> Handle(GetListNotificationQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<PagingItemsModel<NotificationMessageModel>>();
+            var methodResult = new MethodResult<PagingItemsNotificationModel>();
 
             var notificationQuery = _notificationsRepository.Queryable.Include(x => x.NotificationType)
+                                                                      .Include(x => x.Translations)
                                                                       .Where(x => x.UserId == _authContext.CurrentUserId);
             var notificationSenderIds = await notificationQuery.Where(p => p.SenderId.HasValue).Select(x => x.SenderId ?? default).Distinct().ToListAsync(cancellationToken);
 
@@ -52,6 +54,11 @@ namespace Fsel.Notification.Application.Queries
             }
 
             int totalItem = await notificationQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            int totalRead = await notificationQuery.Where(m => m.Status == EnumNotificationStatus.Read).CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            int totalSent = await notificationQuery.Where(m => m.Status == EnumNotificationStatus.Sent).CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+
             var notificationResults = await notificationQuery
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
@@ -59,6 +66,8 @@ namespace Fsel.Notification.Application.Queries
                     .ConfigureAwait(false);
 
             var lists = notificationResults.Select(x => _mapper.Map<NotificationMessageModel>(x)).ToList();
+
+
 
             // Gán lại AvatarPath cho các notificationMessage có người gửi
             if (listSenderInfo != null)
@@ -71,7 +80,15 @@ namespace Fsel.Notification.Application.Queries
                 }
             }
 
-            methodResult.Result = new PagingItemsModel<NotificationMessageModel>(lists, request, totalItem);
+            var result = new PagingItemsModel<NotificationMessageModel>(lists, request, totalItem);
+
+            methodResult.Result = new PagingItemsNotificationModel
+            {
+                Items = result.Items,
+                PagingInfo = result.PagingInfo,
+                TotalRead = totalRead,
+                TotalSent = totalSent
+            };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

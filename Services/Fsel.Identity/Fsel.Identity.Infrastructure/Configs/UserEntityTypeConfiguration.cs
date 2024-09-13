@@ -19,6 +19,8 @@ namespace Fsel.Identity.Infrastructure.Configs
                  .HasConversion(
                     v => v.HasValue ? v.ToString() : null,
                     v => v.EnumParse<EnumGender>());
+
+            //builder.Metadata.RemoveIndex(builder.HasIndex(u => u.NormalizedUserName).Metadata.Properties);
         }
     }
 }

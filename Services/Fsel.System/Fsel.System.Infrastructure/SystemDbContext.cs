@@ -1,5 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base;
@@ -13,8 +11,6 @@ using Fsel.System.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Fsel.System.Infrastructure
 {
@@ -59,6 +55,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new TechieEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TechieActionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentTechieEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LuckyTicketEntityTypeConfigConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -92,6 +89,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<TechieAction> TechieActions { get; set; }
         public DbSet<StudentTechie> StudentTechies { get; set; }
         public DbSet<UserConfig> UserConfigs { get; set; }
+        public DbSet<LuckyTicket> LuckyTickets { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

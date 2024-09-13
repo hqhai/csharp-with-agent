@@ -39,8 +39,9 @@ namespace Fsel.Identity.Application.Commands.UserOtpCmd
         public async Task<MethodResult<UserOtp>> Handle(ConfirmOtpCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<UserOtp>();
-            var userOtpCode = await _userOtpCodeRepository.Queryable
+            MethodResult<UserOtp> methodResult = new MethodResult<UserOtp>();
+            var userOtpCode = await _userOtpCodeRepository.Queryable.Include(x => x.User)
+                                   .Where(x => string.IsNullOrEmpty(request.Email) || (x.User != null && x.User.Email == request.Email))
                                    .FirstOrDefaultAsync(x => x.Status == EnumUserOtpStatus.New && !x.IsDeleted && x.Otp == request.Otp, cancellationToken);
             if (!string.IsNullOrEmpty(request.Email) && request.Otp == _otpDefault && (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)))
             {

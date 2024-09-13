@@ -87,6 +87,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     FullName = order.FullName,
                     OrderCode = order.Code,
                     PaymentMethod = order.PaymentMethod.ToString(),
+                    Discount = order.DiscountPrice,
                     CreatedDate = updatedDate,
                     ExpiredDate = expiredDate,
                     Package = GetPackageName(order.Package),

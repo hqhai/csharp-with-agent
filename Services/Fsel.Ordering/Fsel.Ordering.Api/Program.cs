@@ -44,6 +44,7 @@ builder.Services.AddScoped<INotificationProcessor, NotificationProcessor>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IPackageEventRepository, PackageEventRepository>();
 builder.Services.AddScoped<IGooglePlayBillingService, GooglePlayBillingService>();
+builder.Services.AddScoped<IUserVoucherLockRepository, UserVoucherLockRepository>();
 builder.Services.AddScoped<VnPayLibrary>();
 
 // Publisher
@@ -51,6 +52,7 @@ builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<AddExpiredDateForStudentPublisher>();
 builder.Services.AddScoped<ChangeStatusOrderPublisher>();
+builder.Services.AddScoped<AddFeatureMissionPublisher>();
 
 //Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -69,8 +71,8 @@ builder.Services.AddRefitClient<IAppStoreService>().ConfigureHttpClient(x =>
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.OrderingQueue.NameQueue.NoticePayment, typeof(NoticePaymentConsumer) },
-    { QueueSettings.OrderingQueue.NameQueue.JobActiveEvent, typeof(JobActiveEventConsumer) }
+    { QueueSettings.OrderingQueue.NameQueue.NoticePayment, typeof(NoticePaymentConsumer) }
+    //{ QueueSettings.OrderingQueue.NameQueue.JobActiveEvent, typeof(JobActiveEventConsumer) }
 });
 //builder.AddMassTransit(appSetting,
 //queues: new Dictionary<string, Type>

@@ -1474,6 +1474,81 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.ToTable("LogActions");
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.LuckyTicket", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid>("LessonResultId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Ticket")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("nvarchar(6)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<DateTime?>("WinningDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LuckyTickets");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoards.QuestBoard", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1635,6 +1710,22 @@ namespace Fsel.System.Infrastructure.Migrations
                         },
                         new
                         {
+                            Id = new Guid("6942432d-f45c-45de-a72c-002c0a04cc8c"),
+                            Category = "CompletedSurvey",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Hoàn thành Khảo sát thông tin",
+                            ImagePath = "",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Tân thủ V",
+                            TargetValue = 1,
+                            Token = 20,
+                            Type = "BeginnerQuests"
+                        },
+                        new
+                        {
                             Id = new Guid("9069f184-fd45-413e-b56a-79852879282e"),
                             Category = "CompleteFocusModeFirst",
                             CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -1644,7 +1735,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             ImagePath = "",
                             IsActive = true,
                             IsDeleted = false,
-                            Name = "Tân thủ V",
+                            Name = "Tân thủ VI",
                             TargetValue = 1,
                             Token = 20,
                             Type = "BeginnerQuests"
@@ -1660,7 +1751,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             ImagePath = "",
                             IsActive = true,
                             IsDeleted = false,
-                            Name = "Tân thủ VI",
+                            Name = "Tân thủ VII",
                             TargetValue = 1,
                             Token = 20,
                             Type = "BeginnerQuests"
@@ -2033,7 +2124,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            TargetValue = 6,
+                            TargetValue = 7,
                             Token = 40,
                             Type = "BeginnerQuests"
                         },
@@ -4309,6 +4400,9 @@ namespace Fsel.System.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
+
+                    b.Property<string>("ConfigDataStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConfigStr")
                         .HasColumnType("nvarchar(max)");

@@ -11,6 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double ExecutionTime { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
         private string? _audioPath;
+        public double Version { get; set; }
 
         public string? AudioPath
         {

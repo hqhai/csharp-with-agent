@@ -80,6 +80,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
             #endregion validate
 
+            studentIds = await _courseResultRepository.Queryable.Where(x =>
+               x.Status != EnumResultStatus.Unfinished &&
+               x.Status != EnumResultStatus.New &&
+               x.WorkingStatus == EnumWorkingStatus.Active &&
+               studentIds.Contains(x.StudentId)).Select(x => x.StudentId).ToListAsync(cancellationToken);
+
             #region Progress
 
             var classStudentResults = await _trainingService.GetListClassBySpecificStudentIdsAsync(new GetClassListBySpecificStudentIdsModel { StudentIds = request.StudentIds });
@@ -88,14 +94,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             if (classStudentResultsContent != null && classStudentResultsContent.Any())
             {
                 var courseIds = classStudentResultsContent.Select(x => x.CourseId).ToList();
-                var studentCourseIds = classStudentResultsContent.Select(x => x.StudentId).ToList();
+                var studentCourseIds = classStudentResultsContent.Select(x => x.StudentId).Distinct().ToList();
                 var courses = await _courseRepository.GetByIdsAsync(courseIds);
                 if (courses == null || !courses.Any())
                 {
                     methodResult.StatusCode = StatusCodes.Status200OK;
                     return methodResult;
                 }
-                var courseQuery = _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentCourseIds.Contains(x.StudentId)).ToList();
+                var courseQuery = _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentCourseIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).ToList();
 
                 foreach (var (item, studentId) in courses.SelectMany(course => studentCourseIds.Select(sid => (course, sid))))
                 {
@@ -126,6 +132,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     courseStudentProgress.CourseName = item.Code;
                     courseStudentProgress.CourseId = item.Id;
                     courseStudentProgress.StudentId = studentId;
+                    courseStudentProgress.CourseResultId = courseResult.Id;
                     courseProgress.Add(courseStudentProgress);
                 }
             }
@@ -248,7 +255,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                               CourseId = progress.CourseId,
                               CourseName = progress.CourseName,
                               ContentCompleted = progress.ContentCompleted,
-                              TotalScore = NumberHelper.RoundNumberDouble(overall.TotalScore)
+                              TotalScore = NumberHelper.RoundNumberDouble(overall.TotalScore),
+                              CourseResultId = progress.CourseResultId,
                           }).ToList();
 
             #endregion Result

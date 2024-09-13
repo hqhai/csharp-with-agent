@@ -4,7 +4,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.StudentCompetitionSnapShot
 {
     public class CreateStudentCompetitionSnapShotModel
     {
-        public string? SchoolCode { get; set; }
+        public string? EventCode { get; set; }
 
         public string? WeekCompetitionData { get; set; }
 

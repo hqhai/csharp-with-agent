@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using System;
-    using System.Globalization;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
@@ -69,6 +68,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             }
             var teacher = teacherResults.Content?.Result;
 
+            var result = new ReviewTeacherRatingDetailSearchModel
+            {
+                FullName = teacher?.User?.FullName
+            };
+
             var videoResultQuery = from baseQ in _videoResultRepository.Queryable
                                    join v in _videoRepository.Queryable on baseQ.VideoId equals v.Id
                                    join lr in _lessonResultRepository.Queryable on baseQ.LessonResultId equals lr.Id
@@ -126,6 +130,14 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                 };
 
             var query = mockTestQuery.AsEnumerable().Union(classFormQuery.AsEnumerable()).Union(videoResultQuery.AsEnumerable());
+            var userIds = query.Select(x => x.CreatedUserId).Distinct().ToList();
+            var userResults = await _userService.GetUsersByUserIdsAsync(userIds);
+            var users = userResults?.Content?.Result;
+            foreach (var item in query)
+            {
+                item.CreatedFullName = users?.FirstOrDefault(x => x.Id == item.CreatedUserId)?.FullName ?? item.CreatedFullName;
+            }
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 query = query.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
@@ -136,11 +148,13 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             }
             int totalItem = query.Count();
             var lists = query.ApplySortAndPaging(request).ToList();
+
             foreach (var item in lists)
             {
                 item.Stars = NumberHelper.ConvertRound(item.Stars);
             }
-            methodResult.Result = new ReviewTeacherRatingDetailSearchModel { FullName = teacher?.User?.FullName, PagingItemsModel = new PagingItemsModel<ReviewTeacherRatingDetailModel>(lists, request, totalItem) };
+            result.PagingItemsModel = new PagingItemsModel<ReviewTeacherRatingDetailModel>(lists, request, totalItem);
+            methodResult.Result = result;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

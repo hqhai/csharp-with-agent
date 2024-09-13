@@ -17,11 +17,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Lms.Application.Services.InteractionService;
-    using Fsel.Course.Lms.Application.Services.InteractionService.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Course.Lms.Application.Services.UserServices.CommandModels;
-    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -43,7 +39,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly ILogger<GetPlacementTestByLevelQuery> _logger;
-        private readonly IInteractionService _interactionService;
         private readonly IPlacementTestRepository _placementTestRepository;
 
         public GetPlacementTestByLevelQueryHandler(AuthContext authContext
@@ -52,7 +47,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             , IUserService userService
             , IMapper mapper
             , ILogger<GetPlacementTestByLevelQuery> logger
-            , IInteractionService interactionService
             , IPlacementTestRepository placementTestRepository)
         {
             _authContext = authContext;
@@ -60,8 +54,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             _placementTestResultRepository = placementTestResultRepository;
             _userService = userService;
             _mapper = mapper;
-            _logger = logger;
-            _interactionService = interactionService;
             _logger = logger;
             _placementTestRepository = placementTestRepository;
         }
@@ -88,7 +80,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 return methodResult;
             }
 
-            await UpdateSurveyCompleteAsync(student);
             int age = DateTimeHelper.GetYearOld(student.User.Birthday);
             if (!student.CourseLevel.HasValue)
             {
@@ -121,42 +112,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 _logger.LogInformation($"Logger PT Done : {methodResult.Result.Serialize()}");
             }
             return methodResult;
-        }
-
-        private async Task UpdateSurveyCompleteAsync(StudentModel student)
-        {
-            var isSurveyResult = await _interactionService.IsSurveyCompleted(_authContext.CurrentUserId);
-            var isSurvey = isSurveyResult.Content?.Result;
-            if (!isSurveyResult.IsSuccessStatusCode || !isSurvey.HasValue || isSurvey.Value)
-            {
-                return;
-            }
-            if (student.User != null && string.IsNullOrEmpty(student.User.Code))
-            {
-                student.User.Birthday = new DateTime(DateTime.Now.Year - ValueSettings.AgeMilestone.StudentAge, DateTime.Now.Month, DateTime.Now.Day);
-                await _userService.UpdateCodeStudentAsync(new UpdateCodeStudentCommandModel
-                {
-                    Birthday = student.User.Birthday,
-                    UserId = _authContext.CurrentUserId,
-                    Gender = EnumGender.Male
-                }).ConfigureAwait(false);
-            }
-            else
-            {
-                await _interactionService.CreateSurveyAsync(new CreateCustomerSurveyCommandModel
-                {
-                    Email = student.User?.Email,
-                    UserId = _authContext.CurrentUserId,
-                    Answers = new List<CreateSurveyCommandModel>
-                    {
-                        new CreateSurveyCommandModel
-                        {
-                            Id = Guid.Parse("492D8BB9-CDBE-42E7-AA16-35A1915C3621"),
-                            Answer = new { Id = 1,Content = "Google",Image = "gmail-icon.svg"},
-                        }
-                    }
-                }).ConfigureAwait(false);
-            }
         }
 
         private async Task<PlacementTestDtoModel> GetPlacmentTestAsync(PlacementTest placementTest, PlacementTestResult placementTestResult)
@@ -197,6 +152,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                     }
                     catch (Exception ex)
                     {
+                        placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == studentId && x.Level == level).FirstOrDefaultAsync(cancellationToken);
                         _logger.LogWarning($"Log Duplicate PlacementTestResult : {ex.Message}");
                     }
                 }

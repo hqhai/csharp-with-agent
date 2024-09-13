@@ -9,8 +9,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
-    using Fsel.Identity.Application.Services.InteractionService;
-    using Fsel.Identity.Application.Services.InteractionService.Models;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
@@ -33,18 +31,18 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private readonly IStudentRepository _studentRepository;
         private readonly ISystemService _systemService;
         private readonly IMapper _mapper;
-        private readonly IInteractionService _interactionService;
 
-        public UpdateCodeStudentCommandHandler(UserManager<User> userManager, AuthContext authContext, IStudentRepository studentRepository,
+        public UpdateCodeStudentCommandHandler(UserManager<User> userManager,
+            AuthContext authContext,
+            IStudentRepository studentRepository,
             ISystemService systemService,
-            IMapper mapper, IInteractionService interactionService)
+            IMapper mapper)
         {
             _userManager = userManager;
             _authContext = authContext;
             _studentRepository = studentRepository;
             _systemService = systemService;
             _mapper = mapper;
-            _interactionService = interactionService;
         }
 
         public async Task<MethodResult<UserModel>> Handle(UpdateCodeStudentCommand request, CancellationToken cancellationToken)
@@ -113,25 +111,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
             _mapper.Map(request, user);
             await _userManager.UpdateAsync(user);
-
-            var isSurveyResult = await _interactionService.IsSurveyCompleted(user.Id);
-            var isSurvey = isSurveyResult.Content?.Result;
-            if (isSurveyResult.IsSuccessStatusCode && isSurvey.HasValue && isSurvey == false)
-            {
-                var createSurveyResult = await _interactionService.CreateSurvey(new CreateCustomerSurveyCommandModel
-                {
-                    Email = user.Email,
-                    UserId = user.Id,
-                    Answers = new List<CreateSurveyCommandModel>
-                {
-                    new CreateSurveyCommandModel
-                    {
-                        Id = Guid.Parse("492D8BB9-CDBE-42E7-AA16-35A1915C3621"),
-                        Answer = new { Id = 1,Content = "Google",Image = "gmail-icon.svg"},
-                    }
-                }
-                });
-            }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);

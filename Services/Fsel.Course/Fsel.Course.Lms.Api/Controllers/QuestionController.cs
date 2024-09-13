@@ -4,17 +4,18 @@
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd;
     using Fsel.Course.Lms.Application.Queries.QuestionQuery;
+    using Fsel.Shared.Attributes;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Shared.Constants;
-    using Fsel.Shared.Attributes;
-    using Asp.Versioning;
-    using Fsel.Common.Attributes;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [ApiController]
@@ -41,6 +42,32 @@ namespace Fsel.Course.Lms.Api.Controllers
         {
             MethodResult<IList<QuestionModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get SubQuestion
+        /// </summary>
+        [HttpGet("sub-questions")]
+        [ProducesResponseType(typeof(MethodResult<IList<SubQuestionModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSubQuestion([FromQuery] GetSubQuestionsByMockTestQuery query)
+        {
+            MethodResult<IList<SubQuestionModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Question
+        /// </summary>
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
+        [HttpPost("error-report-explanation-question")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateErrorReportExplanation([FromBody] CreateQuestionExplanationErrorCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

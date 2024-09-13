@@ -19,6 +19,9 @@ namespace Fsel.Shared.Constants
             public const string ReviewFselJob = "ReviewFselJob";
             public const string NoticeAccessTime = "NoticeAccessTime";
             public const string ActiveEvent = "ActiveEvent";
+            public const string UpdateVouchersStatus = "UpdateVouchersStatus";
+            public const string RunEvents = "RunEvents";
+            public const string CheckUserDeletionJob = "CheckUserDeletion";
         }
     }
 }

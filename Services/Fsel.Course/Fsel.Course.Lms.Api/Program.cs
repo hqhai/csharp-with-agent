@@ -109,6 +109,8 @@ builder.Services.AddScoped<IClassForumDetailResultRepository, ClassForumDetailRe
 builder.Services.AddScoped<IProsodyScoreRepository, ProsodyScoreRepository>();
 builder.Services.AddScoped<ISpeakingAIService, SpeakingAIService>();
 builder.Services.AddScoped<ISpeakingEvaluationAIService, SpeakingEvaluationAIService>();
+builder.Services.AddScoped<IQuestionExplanationErrorRepository, QuestionExplanationErrorRepository>();
+builder.Services.AddScoped<IQuestionExplanationLogRepository, QuestionExplanationLogRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
@@ -116,6 +118,8 @@ builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<SetTimeRetryMockTestPublisher>();
 builder.Services.AddScoped<SetTimeRetryClassForumPublisher>();
 builder.Services.AddScoped<TechieActionPublisher>();
+builder.Services.AddScoped<CreateLuckyTicketPublisher>();
+builder.Services.AddScoped<AddFeatureMissionPublisher>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
@@ -158,6 +162,8 @@ builder.Services.AddScoped<DisconnectSocketCalculateTimePublisher>();
 builder.Services.AddScoped<SubmitAiSpeakingAnswerPublisher>();
 builder.Services.AddScoped<GetTimeModulePublisher>();
 builder.Services.AddScoped<SubmitSpeakingAIPublisher>();
+builder.Services.AddScoped<StudentRankingEventsPublisher>();
+builder.Services.AddScoped<RankedStudentPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -192,6 +198,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
     { QueueSettings.LmsQueue.NameQueue.RetryClassForumAction, typeof(RetryClassForumConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SpeakingAI, typeof(SpeakingAIEvaluationConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.RankedStudent, typeof(RankedStudentConsumer) },
 });
 
 var app = builder.Build();

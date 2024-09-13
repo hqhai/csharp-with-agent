@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -87,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
             if (students != null && students.Any())
             {
-                var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId)).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
+                var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
 
                 foreach (var student in students)
                 {
@@ -108,7 +109,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     {
                         var courseType = courseResult.Course?.CourseType;
                         var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit)
-                                                                            .Where(x => x.StudentId == courseResult.StudentId && x.Status != EnumResultStatus.Unfinished)
+                                                                            .Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
                                                                             .OrderByDescending(x => x.CreatedDate)
                                                                             .FirstOrDefaultAsync(cancellationToken);
                         if (unitResult != null)

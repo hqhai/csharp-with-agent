@@ -27,6 +27,9 @@ namespace Fsel.Shared.Constants
                 public const string SendNotification = $"{KeyQueue}_SendNotification";
                 public const string CreateTokenHistory = $"{KeyQueue}_CreateTokenHistory";
                 public const string AddExpiredDateForStudent = $"{KeyQueue}_AddExpiredDateForStudent";
+                public const string AddFeatureMission = $"{KeyQueue}_AddFeatureMission";
+                public const string JobRunEvents = $"{KeyQueue}_JobRunEvents";
+                public const string CheckUserDeletion = $"{KeyQueue}_CheckUserDeletion";
             }
         }
 
@@ -110,6 +113,8 @@ namespace Fsel.Shared.Constants
                 public const string SaveUserCourseSetting = $"{KeyQueue}_SaveUserCourseSetting";
                 public const string SpeakingAI = $"{KeyQueue}_SpeakingAI";
                 public const string Techie = $"{KeyQueue}_Techie";
+                public const string StudentRankingEvent = $"{KeyQueue}_StudentRankingEvent";
+                public const string RankedStudent = $"{KeyQueue}_RankedStudent";
             }
         }
 
@@ -126,6 +131,7 @@ namespace Fsel.Shared.Constants
                 public const string ReviewFsel = $"{KeyQueue}_ReviewFsel";
                 public const string NoticeAccessTime = $"{KeyQueue}_NoticeAccessTime";
                 public const string Techie = $"{KeyQueue}_Techie";
+                public const string CreateLuckyTicket = $"{KeyQueue}_CreateLuckyTicket";
             }
         }
 
@@ -151,6 +157,7 @@ namespace Fsel.Shared.Constants
                 public const string NoticePayment = $"{KeyQueue}_NoticePayment";
                 public const string JobActiveEvent = $"{KeyQueue}_JobActiveEvent";
                 public const string ChangeStatusOrder = $"{KeyQueue}_ChangeStatusOrder";
+                public const string JobUpdateVouchersStatus = $"{KeyQueue}_JobUpdateVouchersStatus";
             }
         }
 

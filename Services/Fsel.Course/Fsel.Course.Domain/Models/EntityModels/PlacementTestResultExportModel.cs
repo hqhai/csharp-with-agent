@@ -16,9 +16,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         [EpplusTableColumn(Header = "Email")]
         public string? Email { get; set; }
 
-        [EpplusTableColumn(Header = "LastModulePT")]
-        public EnumCourseLevel? CourseLevel { get; set; }
-
         [EpplusTableColumn(Header = "Level students choose")]
         public EnumCourseLevel? CurrentLevel { get; set; }
 
@@ -28,8 +25,14 @@ namespace Fsel.Course.Domain.Models.EntityModels
         [EpplusTableColumn(Header = "The student's student level achieved")]
         public EnumCourseLevel? LevelCompleted { get; set; }
 
+        [EpplusTableColumn(Header = "LastModulePT")]
+        public EnumCourseLevel? CourseLevel { get; set; }
+
         [EpplusTableColumn(Header = "Percentage of final PT")]
         public double Percent { get; set; }
+
+        [EpplusTableColumn(Header = "Placement Test Completed")]
+        public bool IsPTdone { get; set; }
 
         [EpplusTableColumn(Header = "Finish day", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
         public DateTime? UpdatedDate { get; set; }

@@ -35,6 +35,8 @@ builder.Services.AddScoped<RetryMockTestPublisher>();
 builder.Services.AddScoped<RetryClassForumPublisher>();
 builder.Services.AddScoped<UpdateClassForumResultToExpiredTimePublisher>();
 builder.Services.AddScoped<JobActiveEventPublisher>();
+builder.Services.AddScoped<JobRunEventsPublisher>();
+builder.Services.AddScoped<CheckUserDeletionPublisher>();
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
@@ -42,7 +44,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.SetTimeRetryMockTest, typeof(SetTimeToRetryMockTestConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SetTimeRetryClassForum, typeof(SetTimeToRetryClassForumConsumer) },
     { QueueSettings.SystemQueue.NameQueue.SetCompleteApprovalPostTimeOut, typeof(SetTimeToCompleteApprovalConsumer) },
-    { QueueSettings.UserQueue.NameQueue.SetTimeToSendReviewFsel, typeof(SetTimeToReviewFselConsumer) },
+    //{ QueueSettings.UserQueue.NameQueue.SetTimeToSendReviewFsel, typeof(SetTimeToReviewFselConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SetTimeClassForumDone, typeof(SetTimeToClassForumApprovalConsumer) },
 });
 var app = builder.Build();

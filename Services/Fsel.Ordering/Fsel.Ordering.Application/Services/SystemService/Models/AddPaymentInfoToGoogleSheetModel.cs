@@ -13,5 +13,6 @@ namespace Fsel.Ordering.Application.Services.SystemService.Models
         public string? CompanyName { get; set; }
         public string? CompanyAddress { get; set; }
         public string? CompanyTaxCode { get; set; }
+        public string? CompanyEmail { get; set; }
     }
 }
