@@ -25,6 +25,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
+    using Fsel.Ordering.Infrastructure.Repositories;
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -53,6 +54,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly ISystemService _systemService;
         private readonly IMediator _mediator;
         private readonly IPackageEventRepository _packageEventRepository;
+        private readonly IUserVoucherLockRepository _userVoucherLockRepository;
 
         public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository
             , ITrainingService trainingService
@@ -68,7 +70,8 @@ AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher,
 ISystemService systemService,
 IMediator mediator,
 IPackageEventRepository packageEventRepository,
-ChangeStatusOrderPublisher changeStatusOrderPublisher)
+ChangeStatusOrderPublisher changeStatusOrderPublisher,
+IUserVoucherLockRepository userVoucherLockRepository)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
@@ -85,6 +88,7 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
             _systemService = systemService;
             _mediator = mediator;
             _packageEventRepository = packageEventRepository;
+            _userVoucherLockRepository = userVoucherLockRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeStatusOrderCommand request, CancellationToken cancellationToken)
@@ -234,6 +238,8 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                     {
                         await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
                     }
+
+                    await ResetUserVoucherLockAsync(order.UserId, cancellationToken).ConfigureAwait(false);
                 }
 
                 #endregion Gửi mail thanh toán
@@ -296,6 +302,19 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
         private bool IsInteger(double number)
         {
             return number == (int)number;
+        }
+
+        private async Task ResetUserVoucherLockAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            var userVoucherLock = await _userVoucherLockRepository.Queryable.FirstOrDefaultAsync(p => p.CreatedUserId == userId, cancellationToken);
+            if (userVoucherLock != null)
+            {
+                userVoucherLock.Count = 0;
+                userVoucherLock.ExpiredDate = null;
+                userVoucherLock.IsLockForever = false;
+                _userVoucherLockRepository.Update(userVoucherLock);
+                await _userVoucherLockRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 }
