@@ -198,17 +198,36 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
             #region ClassForum
 
-            var classForumResultQuery = _classForumResultRepository.Queryable.Include(x => x.ClassForumScores).Where(x => studentIds.Contains(x.StudentId) && x.ClassForum != null).Select(x =>
+            var courseOfClassForumIds = courseProgress.Select(x => x.CourseId).Distinct().ToList();
+
+            var classForumResultQuery = _classForumResultRepository.Queryable.Include(x => x.ClassForum).ThenInclude(x => x.Lesson).ThenInclude(x => x.LessonResults).
+               Where(x => studentIds.Contains(x.StudentId) && x.ClassForum != null
+            ).Select(x =>
             new
             {
                 ClassForumScores = x.ClassForumScores,
+                CorrectCount = x.CorrectCount,
+                CorrectTotal = x.CorrectTotal,
                 StudentId = x.StudentId,
+                CourseId = x.LessonResult.CourseId
             }
            ).ToList();
 
-            int countClassForumDistinct = classForumResultQuery.Select(x => x.StudentId).Count();
+            var joinedClassForumResults = (from courseId in courseOfClassForumIds
+                                           join forumResult in classForumResultQuery
+                                                       on courseId equals forumResult.CourseId
+                                           select new
+                                           {
+                                               forumResult.ClassForumScores,
+                                               forumResult.CorrectCount,
+                                               forumResult.CorrectTotal,
+                                               forumResult.StudentId,
+                                               forumResult.CourseId
+                                           }).ToList();
 
-            var classForumResults = classForumResultQuery
+            int countClassForumDistinct = joinedClassForumResults.Select(x => x.StudentId).Count();
+
+            var classForumResults = joinedClassForumResults
                      .GroupBy(x => x.StudentId) // Nhóm theo StudentId
                      .Select(group =>
                          new StudentCompetitionAverageScore
@@ -216,7 +235,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                              StudentId = group.Key,
                              LearnRatio = countClassForumDistinct == 0 ? 0 : classForumRatio / group.Count(),
                              TotalRecords = group.Count(),
-                             AverageScoreByType = group.Sum(x => x.ClassForumScores.Sum(score => score.Score) / ClassForumDominator),
+                             AverageScoreByType = group.Sum(x => x.CorrectTotal == 0 ? 0 : (double)x.CorrectCount / x.CorrectTotal),
                              LearnType = EnumLearnType.ClassForum
                          })
                      .ToList();
