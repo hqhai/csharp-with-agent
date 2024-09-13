@@ -44,5 +44,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Get("/v1/feature-access-time/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetListFeatureAccessTime([FromQuery] BaseQueryModel model);
+
+        [Post("/v1/google-sheet/add-error-report-explanation-question")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> AddErrorReportExplanationQuestionToGoogleSheet([FromBody] AddErrorReportExplanationQuestionModel model);
     }
 }
