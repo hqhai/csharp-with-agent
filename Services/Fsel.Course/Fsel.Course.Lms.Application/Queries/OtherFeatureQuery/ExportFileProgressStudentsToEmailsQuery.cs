@@ -21,10 +21,10 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Nest;
 
     public class ExportFileProgressStudentsToEmailsQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
+        public string? EventCode { get; set; }
     }
 
     public class ExportFileProgressStudentsToEmailsQueryHandler : IRequestHandler<ExportFileProgressStudentsToEmailsQuery, MethodResult<Stream>>
@@ -115,7 +115,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             var studentRankingResults = await _userService.GetLeaderBoardDataAsync(new GetStudentCompetitionByEventCodeQueryModel
             {
                 WeekNumber = 1,
-                EventCode = "EVTH01_2024"
+                EventCode = request.EventCode
             });
             if (!studentRankingResults.IsSuccessStatusCode)
             {
