@@ -5,17 +5,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using Fsel.Shared.Enums;
     using OfficeOpenXml.Attributes;
 
-    public class QuestionExplanationErrorExportModel
+    public class QuestionExplanationLogExportModel
     {
-        [EpplusTableColumn(Header = "VideoId")]
-        public Guid VideoId { get; set; }
-
-        [EpplusTableColumn(Header = "CourseLevel")]
-        public EnumCourseLevel CourseLevel { get; set; }
-
-        [EpplusTableColumn(Header = "DisplayTime")]
-        public double DisplayTime { get; set; }
-
         [EpplusTableColumn(Header = "QuestionId")]
         public Guid QuestionId { get; set; }
 
@@ -28,7 +19,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
         [EpplusTableColumn(Header = "Explanation")]
         public string? Explanation { get; set; }
 
-        [EpplusTableColumn(Header = "User Feedback")]
-        public string? Feedback { get; set; }
+        [EpplusTableColumn(Header = "PromptRequest")]
+        public string? PromptRequest { get; set; }
+
+        [EpplusTableColumn(Header = "PromptResponse")]
+        public string? PromptResponse { get; set; }
     }
 }
