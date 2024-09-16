@@ -109,5 +109,17 @@ namespace Fsel.System.Api.Controllers
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Add Prompt Explanation Question  To GoogleSheet
+        /// </summary>
+        [HttpPost("add-prompt-explanation-question")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddPromptExplanationToGoogleSheet([FromBody] AddQuestionExplanationPromptCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
