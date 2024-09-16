@@ -23,6 +23,11 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
         public async Task<User> GenerateUserDataAsync(User user, EnumRoleRegister role)
         {
+            if (user == null)
+            {
+                return new User();
+            }
+
             var currentDate = DateTime.UtcNow;
             var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
 

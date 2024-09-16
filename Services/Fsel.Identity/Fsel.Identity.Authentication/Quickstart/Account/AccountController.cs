@@ -30,6 +30,7 @@ using Fsel.Core.Base.Managers;
 using Fsel.Common.Constants;
 using Microsoft.Extensions.Localization;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Identity.Authentication.Quickstart.Account
 {
@@ -384,6 +385,12 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     return View(request);
                 }
 
+                if (!string.IsNullOrEmpty(request.PhoneNumber) && await _userManager.Users.AnyAsync(x => x.PhoneNumber == request.PhoneNumber && x.Id != (user != null ? user.Id : Guid.Empty)))
+                {
+                    ModelState.AddModelError(nameof(request.Email), _localizer["i18n_phone_number_already_system"]);
+                    return View(request);
+                }
+
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     if (user == null)
@@ -706,9 +713,11 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 var lastName = info.Principal.FindFirstValue(ClaimTypes.Surname);
                 var birthday = info.Principal.FindFirstValue(ClaimTypes.DateOfBirth)?.ConvertDateTimeFormat("MM/dd/yyyy");
                 var gender = info.Principal.FindFirstValue(ClaimTypes.Gender);
+                var phoneNumber = info.Principal.FindFirstValue(ClaimTypes.MobilePhone);
                 var externalLogin = new ExternalLoginModel
                 {
                     Email = email,
+                    PhoneNumber = phoneNumber,
                     FirstName = firstName,
                     LastName = lastName,
                     DayBirthday = birthday?.Day,
@@ -760,6 +769,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     user = new User
                     {
                         Email = request.Email,
+                        PhoneNumber = request.PhoneNumber,
                         UserName = request.Email,
                         FirstName = request.FirstName,
                         LastName = request.LastName,

@@ -12,6 +12,7 @@
   const $steps = $(".section-survey");
   const $signUpButton = $(".sign-up-btn");
   const $emailInput = $("#email");
+  const $phoneNumberInput = $("#phoneNumber");
   const $firstNameInput = $("#firstName");
   const $lastNameInput = $("#lastName");
   const $newPasswordInput = $("#password");
@@ -44,6 +45,18 @@
       return true;
     } else {
       $emailInput.addClass("content-border-danger");
+      return false;
+    }
+  }
+
+  function validatePhoneNumber() {
+    const phone = $phoneNumberInput.val().trim();
+    const phonePattern = /^\+?\d{7,15}$/;
+    if (phone === "" || phonePattern.test(phone)) {
+      $phoneNumberInput.removeClass("content-border-danger");
+      return true;
+    } else {
+      $phoneNumberInput.addClass("content-border-danger");
       return false;
     }
   }
@@ -254,6 +267,7 @@
     const isValidFirstName = validateFirstName();
     const isValidLastName = validateLastName();
     const isValidEmail = validateEmail();
+    const isValidPhoneNumber = validatePhoneNumber();
     const isValidGender = validateGender();
     const isValidDay = validateDay();
     const isValidMonth = validateMonth();
@@ -264,6 +278,7 @@
     if (!isValidFirstName) isDoneAllValidate = false;
     if (!isValidLastName) isDoneAllValidate = false;
     if (!isValidEmail) isDoneAllValidate = false;
+    if (!isValidPhoneNumber) isDoneAllValidate = false;
     if (!isValidGender) isDoneAllValidate = false;
     if (!isValidDay || !isValidMonth || !isValidYear) isDoneAllValidate = false;
     if (!isValidPassword) isDoneAllValidate = false;
@@ -293,6 +308,7 @@
 
   // Event listeners
   $emailInput.on("input", validateEmail);
+  $phoneNumberInput.on("input", validatePhoneNumber);
   $firstNameInput.on("input", validateFirstName);
   $lastNameInput.on("input", validateLastName);
   $newPasswordInput.on("input", validateNewPassword);
@@ -408,14 +424,17 @@
       });
   });
 
-  monthOptions.forEach(function (option, index) {
-    $("<div>").addClass("dropdown-option")
-      .text(option)
-      .appendTo($monthDropdownContent)
-      .on("click", function () {
-        selectOptionMonth('Month', 'MonthBirthday', option, index + 1);
-        validateMonth();
-      });
+  $('.MonthBirthday-values').each(function () {
+    var months = $(this).attr('data-values').split(',');
+    months.forEach(function (option, index) {
+      $("<div>").addClass("dropdown-option")
+        .text(option)
+        .appendTo($monthDropdownContent)
+        .on("click", function () {
+          selectOptionMonth('Month', 'MonthBirthday', option, index + 1);
+          validateMonth();
+        });
+    });
   });
 
   yearOptions.forEach(function (option) {

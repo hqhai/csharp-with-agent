@@ -5,6 +5,8 @@
 
 @{
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    var months = string.Join(",", new[] { "i18n_Jan", "i18n_Feb", "i18n_Mar", "i18n_Apr", "i18n_May", "i18n_Jun", "i18n_Jul", "i18n_Aug", "i18n_Sep", "i18n_Oct", "i18n_Nov", "i18n_Dec" }
+                    .Select(x => Localizer[x].ToString()));
     // ViewData["Title"] = "Register";
 }
 
@@ -77,6 +79,21 @@
                 </div>
                 <div class="row">
                     <div class="col-sm-12">
+                        <div class="float-input float-input-validate">
+                            <input class="text-input"
+                                   type="text"
+                                   name="PhoneNumber"
+                                   id="phoneNumber"
+                                   placeholder=""
+                                   autocomplete="off"
+                                   asp-for="PhoneNumber" />
+                            <label for="Email" class="input-label">@Localizer["i18n_phone_number"]</label>
+                        </div>
+                        @Html.CustomValidationMessageFor(model => model.PhoneNumber, Localizer, "", new { @class = "content-text-danger" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
                         <div class="float-input float-input-validate option-birthday">
                             <div class="name-option">
                                 <span>@Localizer["i18nSignUpLabelBirthday"]</span>
@@ -114,6 +131,8 @@
                                     <label for="MonthBirthday" class="input-label">@Localizer["i18n_month"]</label>
                                     <div class="dropdown-content"
                                          id="monthDropdownContent"></div>
+                                </div>
+                                <div class="MonthBirthday-values hidden" data-values="@months">
                                 </div>
 
                                 <div class="float-input float-input-validate">

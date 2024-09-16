@@ -595,11 +595,10 @@ input {
   /* transform: translateX(-50%); */
   font-size: 2.2rem;
   line-height: 1.27;
-  margin-top: 24px;
+  margin: 15px 0px 15px;
   font-weight: 600;
   color: var(--white-color);
   white-space: nowrap;
-  margin-bottom: 24px;
 }
 
   .text-footer a {
@@ -814,7 +813,7 @@ form {
 
 @media (max-width: 580px) {
   .text-footer {
-    margin-top: 24px;
+    margin-top: 15px;
   }
 }
 

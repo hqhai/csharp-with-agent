@@ -13,6 +13,9 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
         [Required(ErrorMessage = "i18n_Email_cannot_be_empty")]
         public string? Email { get; set; }
 
+        [PhoneValid(ErrorMessage = "i18n_number_phone_invalid")]
+        public string? PhoneNumber { get; set; }
+
         [Required(ErrorMessage = "i18n_First_name_cannot_be_empty")]
         public string? FirstName { get; set; }
 

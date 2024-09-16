@@ -236,8 +236,12 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     PostLogoutRedirectUris = { "https://lms-testing.fsel.edu.vn/auth/login", "http://lms-testing.fsel.edu.vn/auth/login", "fsel-uat://lms-testing.fsel.edu.vn" },
 
                     AllowOfflineAccess = true,
-                    RequireConsent = false,
+                    AccessTokenLifetime = 120,
                     AllowAccessTokensViaBrowser = true,
+                    UpdateAccessTokenClaimsOnRefresh = true,
+                    RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
+                    RefreshTokenExpiration = TokenExpiration.Sliding, // Cấu hình thời gian sống của refresh token
+                    SlidingRefreshTokenLifetime = 1209600, // Cấu hình thời gian sống cho refresh token
                     AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
                 },
                 new Client
