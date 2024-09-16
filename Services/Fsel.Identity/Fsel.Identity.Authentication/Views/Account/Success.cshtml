@@ -19,5 +19,5 @@
         @ViewBag.Message
     </p>
 
-    <a href="@Url.Action("Login", "Account", new { Model.ReturnUrl })">@Localizer["i18n_login_now"]</a>
+    <a href="@Url.Action("Login", "Account", new { ViewBag.ReturnUrl })">@Localizer["i18n_login_now"]</a>
 </div>

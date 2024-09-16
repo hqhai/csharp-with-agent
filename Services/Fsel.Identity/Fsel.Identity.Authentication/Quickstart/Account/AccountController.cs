@@ -230,7 +230,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         public IActionResult ForgotPassword(string? returnUrl)
         {
             var vm = GetFromTempData(nameof(ForgotPasswordModel))?.ToString().Deserialize<ForgotPasswordModel>();
-            ViewBag.ReturnUrl = returnUrl;
+            vm ??= new ForgotPasswordModel();
+            vm.ReturnUrl = returnUrl;
             return View(vm);
         }
 
