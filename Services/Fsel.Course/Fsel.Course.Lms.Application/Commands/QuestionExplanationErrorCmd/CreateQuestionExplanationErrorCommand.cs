@@ -1,7 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Microsoft.EntityFrameworkCore;
+
 namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
 {
+    using System.Linq;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -9,8 +12,10 @@ namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.QuestionExplanationErrors;
+    using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -26,13 +31,27 @@ namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
         private readonly IQuestionExplanationErrorRepository _questionExplanationErrorRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly ISystemService _systemService;
+        private readonly IExerciseQuestionRepository _exerciseQuestionRepository;
+        private readonly IExerciseRepository _exerciseRepository;
+        private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
+        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
+        private readonly IVideoRepository _videoRepository;
+        private readonly IQuestionExplanationLogRepository _questionExplanationLogRepository;
 
         public CreateQuestionExplanationErrorCommandHandler(IMapper mapper,
             IQuestionRepository questionRepository,
             IVideoResultRepository videoResultRepository,
             IQuestionExplanationErrorRepository questionExplanationErrorRepository,
             AuthContext authContext,
-            IUserService userService)
+            IUserService userService,
+            ISystemService systemService,
+            IExerciseQuestionRepository exerciseQuestionRepository,
+            IExerciseRepository exerciseRepository,
+            ITimeCodeExerciseRepository timeCodeExerciseRepository,
+            IVideoTimeCodeRepository videoTimeCodeRepository,
+            IVideoRepository videoRepository,
+            IQuestionExplanationLogRepository questionExplanationLogRepository)
         {
             _mapper = mapper;
             _questionRepository = questionRepository;
@@ -40,6 +59,13 @@ namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
             _questionExplanationErrorRepository = questionExplanationErrorRepository;
             _authContext = authContext;
             _userService = userService;
+            _systemService = systemService;
+            _exerciseQuestionRepository = exerciseQuestionRepository;
+            _exerciseRepository = exerciseRepository;
+            _timeCodeExerciseRepository = timeCodeExerciseRepository;
+            _videoTimeCodeRepository = videoTimeCodeRepository;
+            _videoRepository = videoRepository;
+            _questionExplanationLogRepository = questionExplanationLogRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateQuestionExplanationErrorCommand request, CancellationToken cancellationToken)
@@ -72,7 +98,13 @@ namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
                 return methodResult;
             }
-            var questionExplanationError = _mapper.Map<QuestionExplanationError>(request);
+            var questionExplanationError = await _questionExplanationErrorRepository.Queryable.Where(x => x.QuestionId == question.Id && x.VideoResultId == videoResult.Id).FirstOrDefaultAsync(cancellationToken);
+            if (questionExplanationError != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(questionExplanationError));
+                return methodResult;
+            }
+            questionExplanationError = _mapper.Map<QuestionExplanationError>(request);
             questionExplanationError.StudentId = student.Id;
             if (!questionExplanationError.IsValid())
             {
@@ -87,8 +119,38 @@ namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
                 methodResult.Result = true;
                 return methodResult;
             });
-
+            await AddGoogleSheetErrorReportAsync(request).ConfigureAwait(false);
             return methodResult;
+        }
+
+        private async Task AddGoogleSheetErrorReportAsync(CreateQuestionExplanationErrorCommand request)
+        {
+            var question = await (from baseQ in _questionRepository.Queryable
+                                  join eq in _exerciseQuestionRepository.Queryable on baseQ.Id equals eq.QuestionId
+                                  join e in _exerciseRepository.Queryable on eq.ExerciseId equals e.Id
+                                  join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
+                                  join vtc in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vtc.Id
+                                  join v in _videoRepository.Queryable on vtc.VideoId equals v.Id
+                                  where baseQ.Id == request.QuestionId
+                                  select new AddErrorReportExplanationQuestionModel
+                                  {
+                                      VideoId = v.Id,
+                                      DisplayTime = vtc.DisplayTime,
+                                      QuestionId = request.QuestionId,
+                                      CourseLevel = v.CourseLevel,
+                                      Config = baseQ.Config,
+                                      Explanation = baseQ.Explanation,
+                                      QuestionType = baseQ.QuestionType,
+                                      Feedback = request.Feedback ?? request.FeedbackExplanation.ToString(),
+                                  }).FirstOrDefaultAsync();
+            if (question == null)
+            {
+                return;
+            }
+            var logExplanations = await _questionExplanationLogRepository.Queryable.Where(x => x.QuestionId == question.QuestionId).OrderBy(x => x.CreatedDate).ToListAsync();
+            question.PromptRequest = string.Join("\n", logExplanations.Select(x => x.PromptRequest).ToList());
+            question.PromptResponse = string.Join("\n", logExplanations.Select(x => x.PromptResponse).ToList());
+            await _systemService.AddErrorReportExplanationQuestionToGoogleSheet(question).ConfigureAwait(false);
         }
     }
 }
