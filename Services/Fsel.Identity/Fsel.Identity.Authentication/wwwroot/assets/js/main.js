@@ -23,7 +23,7 @@
 
   setTimeout(function () {
     $(".message-error").hide();
-  }, 3000);
+  }, 5000);
 
   $('.validation-message-text').each(function () {
     var field = $(this).attr('data-field');
