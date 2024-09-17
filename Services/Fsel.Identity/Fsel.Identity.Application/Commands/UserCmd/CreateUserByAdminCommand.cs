@@ -6,8 +6,10 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.UserReferrals;
+    using Fsel.Identity.Application.Queries.UserReferrals;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
@@ -42,6 +44,22 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
                 return methodResult;
+            }
+
+            if (!request.Email.IsValidEmail())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
+                return methodResult;
+            }
+
+            if (!string.IsNullOrEmpty(request.ReferralCode))
+            {
+                var referral = await _mediator.Send(new CheckReferralCodeQuery() { ReferralCode = request.ReferralCode }, cancellationToken);
+                if (referral.Result == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                    return methodResult;
+                }
             }
 
             var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
@@ -110,6 +128,9 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     return methodResult;
                 }
             }
+
+            await _mediator.Send(new SendMailCreateUserCommand() { UserName = request.Email, Password = DefaultPassword }, cancellationToken);
+
             return methodResult;
         }
     }

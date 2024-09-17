@@ -70,7 +70,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 Email = request.Email,
                 MonthNumber = request.MonthNumber,
                 IsRevenue = request.IsRevenue,
-                IsSendMail = false,
+                IsSendMail = request.IsSendMail,
                 VoucherCode = request.VoucherCode,
                 EventCode = request.EventCode,
             });
