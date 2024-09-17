@@ -150,6 +150,8 @@
 
     if (newPassword) {
       $ruleList.css("display", "grid");
+    } else {
+      $meterText.text("");
     }
 
     if (isValidNewPassword !== 100) {

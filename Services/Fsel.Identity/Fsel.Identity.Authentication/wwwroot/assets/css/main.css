@@ -325,6 +325,13 @@ input {
   font-family: Inter, sans-serif;
 }
 
+.icon-input-date {
+  position: absolute;
+  right: 10px;
+  top: 19px;
+  z-index: 9
+}
+
 .float-input {
   width: 100%;
   position: relative;
@@ -345,6 +352,7 @@ input {
     color: var(--disable-text-color);
     transition: all 0.3s;
     pointer-events: none;
+    z-index: 999;
   }
 
   .float-input .text-input {
@@ -359,6 +367,13 @@ input {
     -webkit-text-security: none;
     -moz-text-security: none;
   }
+
+    .float-input .text-input.text-input-date {
+      position: relative;
+      z-index: 99;
+      padding-right: 30px;
+      cursor: pointer;
+    }
 
   .float-input .input-label {
     color: var(--disable-text-color);
@@ -598,7 +613,7 @@ input {
   margin: 15px 0px 15px;
   font-weight: 600;
   color: var(--white-color);
-  white-space: nowrap;
+  /*white-space: nowrap;*/
 }
 
   .text-footer a {
@@ -722,7 +737,7 @@ input {
 
   .text-and-btn .btn-action {
     display: flex;
-    width: 300px;
+    min-width: 300px;
     padding: 10px 24px;
     justify-content: center;
     align-items: center;
@@ -786,7 +801,7 @@ form {
 
 @media (max-width: 1200px) {
   .content-right {
-    animation: smoth-close 0.3s ease-in-out forwards !important;
+    animation: smoth-close 0s ease-in-out forwards !important;
   }
 
   .content {
@@ -801,19 +816,28 @@ form {
 
   .text-and-btn {
     opacity: 0;
-    animation: smoth-close 0.3s ease-in-out forwards !important;
+    animation: smoth-close 0s ease-in-out forwards !important;
+  }
+}
+
+
+@media (max-width: 580px) {
+  form {
+    padding: 0 20px;
+  }
+
+  .text-footer {
+    margin-top: 15px;
   }
 }
 
 @media (max-width: 458px) {
+  form {
+    padding: 0 15px;
+  }
+
   .content {
     width: 100vw;
-  }
-}
-
-@media (max-width: 580px) {
-  .text-footer {
-    margin-top: 15px;
   }
 }
 
@@ -862,9 +886,34 @@ a:hover {
 }
 
 @media (max-width: 430px) {
+  form {
+    padding: 0 10px;
+  }
+
   .option-gender,
   .birthday {
-    flex-direction: column;
-    gap: 25px !important;
+    /* flex-direction: column; */
+    gap: 10px !important;
+  }
+
+  .checkbox label{
+      display: block;
+  }
+
+  .content form section {
+    margin-left: 12px;
+    margin-right: 12px;
+    margin-top: 10px;
+  }
+
+  .option-gender .option {
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .log {
+    margin-bottom: 32px;
+    margin-top: 45px;
+    height: 76px;
   }
 }

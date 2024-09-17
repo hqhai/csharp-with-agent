@@ -4,6 +4,7 @@
 
 @{
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    var isError = ViewContext.ModelState.IsValid;
     // ViewData["Title"] = "Register";
 }
 
@@ -44,13 +45,13 @@
             @Html.AntiForgeryToken()
 
             <div>
-                <div class="number-list">
+                <div class="number-list @(ViewContext.ModelState.IsValid ? "" : "number-list-error")">
                     <input @* onkeydown="moveToNext(event, this, 'otp-1', 'otp-2')"
                            onpaste="autoFill(event, this)" *@
                            class="number-item"
                            type="password"
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                           required
+                           @* required  *@
                            maxlength="1"
                            id="otp-1"
                            autocomplete="off"
@@ -61,7 +62,7 @@
                            class="number-item"
                            type="password"
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                           required
+                           @* required *@
                            maxlength="1"
                            name="otp-2" />
                     <input id="otp-3"
@@ -70,7 +71,7 @@
                            class="number-item"
                            type="password"
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                           required
+                           @* required *@
                            maxlength="1"
                            autocomplete="off"
                            name="otp-3" />
@@ -80,7 +81,7 @@
                            class="number-item"
                            type="password"
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                           required
+                           @* required *@
                            maxlength="1"
                            autocomplete="off"
                            name="otp-4" />
@@ -90,7 +91,7 @@
                            class="number-item"
                            type="password"
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                           required
+                           @* required *@
                            maxlength="1"
                            autocomplete="off"
                            name="otp-5" />
@@ -100,7 +101,7 @@
                            class="number-item"
                            type="password"
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                           required
+                           @* required *@
                            maxlength="1"
                            autocomplete="off"
                            name="otp-6" />
@@ -111,23 +112,48 @@
                            id="otp"
                            placeholder=" "
                            autocomplete="off"
-                           required
                            asp-for="Otp" />
+                    @* <input type="hidden"
+                           name="Otp"
+                           id="otp"
+                           placeholder=" "
+                           autocomplete="off"
+                           required
+                           asp-for="Otp" /> *@
                     @* @Html.CustomValidationMessageFor(model => model.Otp, Localizer, "", new { @class = "content-text-danger" }) *@
                 </div>
+
+                @if (!ViewContext.ModelState.IsValid)
+                {
+                    foreach (var item in ViewContext.ModelState.Values.SelectMany(x => x.Errors).Select(x => x.ErrorMessage))
+                    {
+                        <div class="message-otp-error mt-4">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 width="24"
+                                 height="24"
+                                 viewBox="0 0 24 24"
+                                 fill="none">
+                                <path d="M11.9952 22.0518C17.4761 22.0518 22 17.5256 22 12.0518C22 6.57787 17.4664 2.05176 11.9855 2.05176C6.51426 2.05176 2 6.57787 2 12.0518C2 17.5256 6.52392 22.0518 11.9952 22.0518ZM11.9952 13.7055C11.4248 13.7055 11.0962 13.3864 11.0768 12.8061L10.9415 7.98019C10.9222 7.38058 11.3475 6.96472 11.9855 6.96472C12.6042 6.96472 13.0585 7.39025 13.0391 7.98986L12.8845 12.8061C12.8652 13.3961 12.5462 13.7055 11.9952 13.7055ZM11.9952 17.0518C11.3378 17.0518 10.7965 16.5779 10.7965 15.9396C10.7965 15.3013 11.3282 14.8274 11.9952 14.8274C12.6525 14.8274 13.1841 15.3013 13.1841 15.9396C13.1841 16.5875 12.6428 17.0518 11.9952 17.0518Z"
+                                      fill="#C54E59" />
+                            </svg>
+                            @item
+                        </div>
+                    }
+                }
+
             </div>
             <button type="submit" class="btn">@Localizer["i18n_verify"]</button>
         </form>
 
         <div class="resend-otp">
-            @Localizer["i18n_did_not_a_code"]?
+            @Localizer["i18n_did_not_a_code"]
             <a href="@Url.Action("ResendOtp", "Account", new { Model.ReturnUrl, type = Model.Type })">@Localizer["i18n_resend_otp"]</a>
         </div>
     </div>
 
     @await Component.InvokeAsync("RightBanner", new { Model.ReturnUrl })
 
-    <partial class="mt-3" name="_ValidationSummary" />
+    @* <partial class="mt-3" name="_ValidationSummary" /> *@
 </div>
 
 @section scripts {

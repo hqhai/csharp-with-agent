@@ -59,6 +59,7 @@ namespace Fsel.Identity.Authentication.Quickstart
             var errorMessage = htmlHelper.ViewData.ModelMetadata.GetErrorMessageFromDataAnnotations(propertyName);
 
             var tagBuilder = new TagBuilder("div");
+            tagBuilder.AddCssClass("line-height-20");
             tagBuilder.InnerHtml.AppendHtml(validationMessage);
 
             if (!string.IsNullOrEmpty(errorMessage))

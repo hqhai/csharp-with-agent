@@ -2,11 +2,9 @@
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
 {
-    using System.ComponentModel.DataAnnotations;
-
     public class VerifyOtpModel
     {
-        [Required(ErrorMessage = "i18n_OTP_cannot_be_empty")]
+        //[Required(ErrorMessage = "i18n_OTP_cannot_be_empty")]
         public string? Otp { get; set; }
 
         public string? ReturnUrl { get; set; }

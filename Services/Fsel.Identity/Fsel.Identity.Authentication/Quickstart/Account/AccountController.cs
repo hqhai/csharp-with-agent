@@ -151,6 +151,10 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     {
                         ModelState.AddModelError(string.Empty, _localizer["i18n_User_has_been_confirmed"]);
                     }
+                    else if (string.IsNullOrEmpty(request.Otp))
+                    {
+                        ModelState.AddModelError(string.Empty, _localizer["i18n_OTP_cannot_be_empty"]);
+                    }
                     else
                     {
                         var verify = await VerifyOtpAsync(user, request.Otp);
@@ -195,6 +199,10 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     else if (user == null || !user.EmailConfirmed)
                     {
                         ModelState.AddModelError(string.Empty, _localizer["i18n_User_does_not_exist"]);
+                    }
+                    else if (string.IsNullOrEmpty(request.Otp))
+                    {
+                        ModelState.AddModelError(string.Empty, _localizer["i18n_OTP_cannot_be_empty"]);
                     }
                     else
                     {

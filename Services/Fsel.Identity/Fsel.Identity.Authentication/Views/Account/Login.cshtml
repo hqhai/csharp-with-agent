@@ -35,13 +35,13 @@
                                autocomplete="off"
                                asp-for="Username" autofocus />
                         @* <input class="text-input"
-                    type="text"
-                    name="username"
-                    id="username"
-                    placeholder=" "
-                    autocomplete="off"
-                    pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$"
-                    required/> *@
+                                type="text"
+                                name="username"
+                                id="username"
+                                placeholder=" "
+                                autocomplete="off"
+                                pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$"
+                                required/> *@
                         <label for="username" class="input-label">@Localizer["i18n_username"]</label>
                     </div>
                     @Html.CustomValidationMessageFor(model => model.Username, Localizer, "", new { @class = "content-text-danger" })

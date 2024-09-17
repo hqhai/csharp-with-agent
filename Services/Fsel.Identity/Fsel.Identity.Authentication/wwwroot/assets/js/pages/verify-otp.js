@@ -30,6 +30,8 @@
           otpValue += $(this).val();
       });
       $("#otp").val(otpValue);
+      $(".message-otp-error").remove();
+      $(".number-list").removeClass("number-list-error");
   }
 
   function moveToNext(event, currentInput, previousInputId, nextInputId) {
