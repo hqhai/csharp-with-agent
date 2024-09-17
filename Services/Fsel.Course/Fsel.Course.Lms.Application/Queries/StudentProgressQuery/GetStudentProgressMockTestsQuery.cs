@@ -106,7 +106,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                             from mrGroup in mrGroupG.DefaultIfEmpty()
                             join ms in _mockTestScoreRepository.Queryable on mrGroup.Id equals ms.MockTestResultId into msGroupG
                             from msGroup in msGroupG.DefaultIfEmpty()
-                            where baseQ.Id == item.MockTestId && mrGroup.StudentId == request.StudentId
+                            where baseQ.Id == item.MockTestId && mrGroup.Id == item.Id
                             group new { sg, mrGroup, msGroup } by new { sg.CourseSkill } into g
                             select new
                             {
