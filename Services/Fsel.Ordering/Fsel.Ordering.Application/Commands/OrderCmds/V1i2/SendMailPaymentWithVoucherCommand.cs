@@ -65,7 +65,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
 
             var expiredDate = !student.ExpiredDate.HasValue ? string.Empty : student.ExpiredDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
-            var updatedDate = !order.UpdatedDate.HasValue ? string.Empty : order.UpdatedDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+            var updatedDate = !order.UpdatedDate.HasValue ? order.CreatedDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : order.UpdatedDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
             var price = order.Price.ToString("C", new CultureInfo("vi-VN"));
 

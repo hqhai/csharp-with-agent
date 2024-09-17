@@ -28,5 +28,8 @@ namespace Fsel.Ordering.Application.Services.UserService
 
         [Put("/v1/student-trial-registration")]
         Task<IApiResponse<MethodResult<StudentRegistrationModel>>> UpdateStudentTrialRegistration([Body] UpdateStudentTrialRegistrationModel command);
+
+        [Get("/v1/student/get-student-by-email")]
+        Task<IApiResponse<MethodResult<StudentModel?>>> GetStudentByEmail([Query] string email);
     }
 }
