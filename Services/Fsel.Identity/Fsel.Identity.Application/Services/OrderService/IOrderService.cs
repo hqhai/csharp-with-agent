@@ -29,7 +29,7 @@ namespace Fsel.Identity.Application.Services.OrderService
         [Post("/v1/admin/order/create-order-for-student")]
         Task<IApiResponse<MethodResult<OrderModel>>> CreateOrderForStudentAsync([Body] CreateOrderByUserIdCommandModel command);
 
-        [Post("/v1/order/get-order-by-status")]
+        [Post("/v1/order/integration-order")]
         Task<IApiResponse<MethodResult<IList<OrderSearchModel>>>> GetOrderByStatusAsync([Body] GetOrderByStatusQueryModel query);
 
         [Delete("/v1/admin/order/delete-student/{id}")]
