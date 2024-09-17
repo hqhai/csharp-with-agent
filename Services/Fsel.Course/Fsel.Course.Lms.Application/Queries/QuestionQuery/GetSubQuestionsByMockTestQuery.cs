@@ -58,22 +58,43 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                                                         .Where(x => x.QuestionId.HasValue)
                                                         .Select(x => x.QuestionId!.Value)
                                                         .ToListAsync(cancellationToken);
+            var listSubQuestion = new List<SubQuestionModel>();
+
             var questions = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
-            var subQuestions = questions.SelectMany(x => GetConfigQuestion(x.Config, x.QuestionType)).ToList();
-            foreach (var subQuestion in subQuestions)
+
+            foreach (var item in questions)
             {
-                var isExact = configAnswers.FirstOrDefault(x => x.Id == subQuestion.Id)?.IsExact;
-                if (sectionGroupResult.Status == EnumResultStatus.Done)
+                var subQuestions = GetConfigQuestion(item.Config, item.QuestionType);
+                if (item.QuestionType == EnumQuestionType.CheckListV1)
                 {
-                    subQuestion.Status = isExact.HasValue && isExact.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
+                    var answerConfigIds = item.Config.Deserialize<CheckListQuestionV1>()?.Answers.Select(x => x.Id).ToList();
+                    var answers = configAnswers.Where(x => answerConfigIds != null && answerConfigIds.Contains(x.Id)).ToList();
+                    subQuestions = subQuestions.Select((x, index) =>
+                    {
+                        if (answers.Count > index)
+                        {
+                            x.Status = EnumCorrectStatus.Process;
+                        }
+                        return x;
+                    }).ToList();
                 }
-                else
+                foreach (var subQuestion in subQuestions)
                 {
-                    subQuestion.Status = isExact.HasValue ? EnumCorrectStatus.Process : EnumCorrectStatus.New;
+                    var isExact = configAnswers.FirstOrDefault(x => x.Id == subQuestion.Id)?.IsExact;
+                    if (sectionGroupResult.Status == EnumResultStatus.Done)
+                    {
+                        subQuestion.Status = isExact.HasValue && isExact.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
+                    }
+                    else
+                    {
+                        subQuestion.Status = isExact.HasValue || subQuestion.Status == EnumCorrectStatus.Process ? EnumCorrectStatus.Process : EnumCorrectStatus.New;
+                    }
                 }
+                listSubQuestion.AddRange(subQuestions);
             }
+
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = subQuestions;
+            methodResult.Result = listSubQuestion;
             return methodResult;
         }
 
@@ -88,7 +109,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 case EnumQuestionType.MultichoiceV1:
                     var multichoiceV1 = config.Deserialize<MultipleChoiceQuestionV1>();
-                    var subQuestionMultichoices = multichoiceV1?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
+                    var subQuestionMultichoices = multichoiceV1?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty, QuestionType = questionType }).ToList();
                     if (subQuestionMultichoices == null)
                     {
                         return new List<SubQuestionModel>();
@@ -97,7 +118,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
                 case EnumQuestionType.YesNoNotGivenDropDown:
                     var yesNoNotGivenDropDown = config.Deserialize<MatchingTaskQuestion>();
-                    var subQuestionYesNoNotGivens = yesNoNotGivenDropDown?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
+                    var subQuestionYesNoNotGivens = yesNoNotGivenDropDown?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty, QuestionType = questionType }).ToList();
                     if (subQuestionYesNoNotGivens == null)
                     {
                         return new List<SubQuestionModel>();
@@ -106,7 +127,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
                 case EnumQuestionType.TrueFalseNotGivenDropDown:
                     var trueFalseNotGivenDropDown = config.Deserialize<MatchingTaskQuestion>();
-                    var subQuestionTrueFalseNotGivens = trueFalseNotGivenDropDown?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
+                    var subQuestionTrueFalseNotGivens = trueFalseNotGivenDropDown?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty, QuestionType = questionType }).ToList();
                     if (subQuestionTrueFalseNotGivens == null)
                     {
                         return new List<SubQuestionModel>();
@@ -115,7 +136,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
                 case EnumQuestionType.MapLabelingDropDown:
                     var mapLabelingDropDown = config.Deserialize<MatchingTaskQuestion>();
-                    var subQuestionMapLabelings = mapLabelingDropDown?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
+                    var subQuestionMapLabelings = mapLabelingDropDown?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty, QuestionType = questionType }).ToList();
                     if (subQuestionMapLabelings == null)
                     {
                         return new List<SubQuestionModel>();
@@ -124,7 +145,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
                 case EnumQuestionType.SummaryCompletionDropDown:
                     var summaryCompletionDropDown = config.Deserialize<MatchingTaskQuestion>();
-                    var subQuestionSummaryCompletions = summaryCompletionDropDown?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
+                    var subQuestionSummaryCompletions = summaryCompletionDropDown?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty, QuestionType = questionType }).ToList();
                     if (subQuestionSummaryCompletions == null)
                     {
                         return new List<SubQuestionModel>();
@@ -133,7 +154,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
                 case EnumQuestionType.MatchingParagraphInfo:
                     var matchingTask = config.Deserialize<MatchingTaskQuestion>();
-                    var subQuestionMatchingParagraphs = matchingTask?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
+                    var subQuestionMatchingParagraphs = matchingTask?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty, QuestionType = questionType }).ToList();
                     if (subQuestionMatchingParagraphs == null)
                     {
                         return new List<SubQuestionModel>();
@@ -142,7 +163,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
                 case EnumQuestionType.MatchingHeading:
                     var matchingHeading = config.Deserialize<MatchingTaskQuestion>();
-                    var subQuestionMatchingHeadings = matchingHeading?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
+                    var subQuestionMatchingHeadings = matchingHeading?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty, QuestionType = questionType }).ToList();
                     if (subQuestionMatchingHeadings == null)
                     {
                         return new List<SubQuestionModel>();
@@ -151,7 +172,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
                 case EnumQuestionType.CheckListV1:
                     var checkList = config.Deserialize<CheckListQuestionV1>();
-                    var subQuestionCheckLists = checkList?.Answers.Where(x => x.IsCorrect.HasValue && x.IsCorrect.Value).Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
+                    var subQuestionCheckLists = checkList?.Answers.Where(x => x.IsCorrect.HasValue && x.IsCorrect.Value).Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty, QuestionType = questionType }).ToList();
                     if (subQuestionCheckLists == null)
                     {
                         return new List<SubQuestionModel>();
@@ -160,7 +181,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
                 case EnumQuestionType.SummaryCompletionGapFill:
                     var summaryCompletionGapFill = config.Deserialize<CheckListQuestionV1>();
-                    var subQuestionSummaryCompletionGapFills = summaryCompletionGapFill?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
+                    var subQuestionSummaryCompletionGapFills = summaryCompletionGapFill?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty, QuestionType = questionType }).ToList();
                     if (subQuestionSummaryCompletionGapFills == null)
                     {
                         return new List<SubQuestionModel>();
@@ -169,7 +190,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
                 case EnumQuestionType.CompletionDiagrams:
                     var completionDiagrams = config.Deserialize<CheckListQuestionV1>();
-                    var subQuestionCompletionDiagrams = completionDiagrams?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
+                    var subQuestionCompletionDiagrams = completionDiagrams?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty, QuestionType = questionType }).ToList();
                     if (subQuestionCompletionDiagrams == null)
                     {
                         return new List<SubQuestionModel>();
@@ -178,7 +199,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
                 case EnumQuestionType.TableCompletion:
                     var tableCompletion = config.Deserialize<TableCompletionQuestion>();
-                    var subQuestionTableCompletions = tableCompletion?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
+                    var subQuestionTableCompletions = tableCompletion?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty, QuestionType = questionType }).ToList();
                     if (subQuestionTableCompletions == null)
                     {
                         return new List<SubQuestionModel>();
@@ -187,7 +208,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
                 case EnumQuestionType.FlowChartCompletion:
                     var flowChartCompletion = config.Deserialize<CheckListQuestionV1>();
-                    var subQuestionFlowChartCompletions = flowChartCompletion?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty }).ToList();
+                    var subQuestionFlowChartCompletions = flowChartCompletion?.Answers.Select(x => new SubQuestionModel { Id = x.Id ?? Guid.Empty, QuestionType = questionType }).ToList();
                     if (subQuestionFlowChartCompletions == null)
                     {
                         return new List<SubQuestionModel>();

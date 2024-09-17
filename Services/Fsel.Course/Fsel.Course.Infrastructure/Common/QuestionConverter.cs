@@ -43,12 +43,12 @@ namespace Fsel.Course.Infrastructure.Common
             return methodResult;
         }
 
-        public MethodResult<Question> HandleQuestion(Question question, bool isUseTypeExercisePreparation = false)
+        public MethodResult<Question> HandleQuestion(Question question, bool isUseTypeExercisePreparation = false, bool isCreated = true)
         {
             ArgumentNullException.ThrowIfNull(question);
             var methodResult = new MethodResult<Question>();
             var isShowCorrectTotal = (isUseTypeExercisePreparation || question.QuestionType != EnumQuestionType.ExercisePreparation);
-            (question.Config, question.CorrectTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isShowCorrectTotal);
+            (question.Config, question.CorrectTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isShowCorrectTotal, false, isCreated);
             if (question.Config == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), new Error[]{

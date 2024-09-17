@@ -8,5 +8,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public Guid Id { get; set; }
         public EnumCorrectStatus Status { get; set; }
+        public EnumQuestionType QuestionType { get; set; }
     }
 }

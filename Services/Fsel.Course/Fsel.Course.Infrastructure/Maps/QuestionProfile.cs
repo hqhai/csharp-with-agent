@@ -12,8 +12,10 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public QuestionProfile()
         {
-            CreateMap<Question, QuestionModel>().IgnoreAllNonExisting();
+            CreateMap<Question, QuestionModel>()
+                .ForMember(x => x.IsReportExplanation, x => x.MapFrom(n => n.QuestionExplanationErrors.Any()));
             CreateMap<CreateQuestionCommandModel, Question>().IgnoreAllNonExisting();
+            CreateMap<Question, QuestionExplanationLogExportModel>().IgnoreAllNonExisting();
         }
     }
 }

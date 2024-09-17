@@ -55,7 +55,9 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
             }
 
             var eventModel = _mapper.Map<EventModel>(@event);
-            var packages = await _packageRepository.Queryable.Where(p => p.Status == EnumPackageStatus.Active).ToListAsync(cancellationToken);
+            var packages = await _packageRepository.Queryable.ToListAsync(cancellationToken);
+
+            @event.PackageEvents = @event.PackageEvents.Where(p => p.Status == EnumEventPackageStatus.Active).ToList();
 
             foreach (var item in @event.PackageEvents)
             {

@@ -509,6 +509,9 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("IncentivesWhenPurchasing")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -536,8 +539,10 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasDefaultValue("Active");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -571,7 +576,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             Price = 500000m,
                             PriceMonth = 500000m,
                             ReferToken = 50000,
-                            Status = "InActive"
+                            Status = "Active"
                         },
                         new
                         {
@@ -679,6 +684,11 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<decimal>("PriceMonth")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("SuggestStr")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
@@ -718,6 +728,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             PackageId = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"),
                             Price = 500000m,
                             PriceMonth = 500000m,
+                            Status = "Active",
                             SuggestStr = "null"
                         },
                         new
@@ -733,6 +744,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             PackageId = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"),
                             Price = 2400000m,
                             PriceMonth = 320000m,
+                            Status = "Active",
                             SuggestStr = "[\"BestSeller\"]"
                         },
                         new
@@ -748,6 +760,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             PackageId = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"),
                             Price = 3600000m,
                             PriceMonth = 240000m,
+                            Status = "Active",
                             SuggestStr = "[\"Recommend\"]"
                         });
                 });
@@ -1086,6 +1099,71 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.HasIndex("VoucherId");
 
                     b.ToTable("UserVouchers");
+                });
+
+            modelBuilder.Entity("Fsel.Ordering.Domain.Entities.UserVoucherLock", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<DateTime?>("ExpiredDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<bool>("IsLockForever")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserVoucherLocks");
                 });
 
             modelBuilder.Entity("Fsel.Ordering.Domain.Entities.Voucher", b =>

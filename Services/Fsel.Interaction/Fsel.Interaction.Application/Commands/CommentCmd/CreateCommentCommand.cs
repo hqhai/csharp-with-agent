@@ -12,6 +12,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Application.Services.CourseServices.Models;
+    using Fsel.Interaction.Application.Services.CourseServices.QueryModel;
     using Fsel.Interaction.Application.Services.SystemService;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Application.Services.UserServices.Models;
@@ -133,13 +134,22 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             break;
                         }
 
-                        var lesson = await _courseService.GetLessonResult(classForumResult.LessonResultId ?? default);
+                        FeatureModuleQuery query = new FeatureModuleQuery
+                        {
+                            FeatureModule = EnumFeatureModule.ClassForumResult,
+                            ObjectId = classForumResult.Id
+                        };
+
+                        var moduleResult = await _courseService.GetModuleModel(query);
+                        var featureModuleModel = moduleResult?.Content?.Result;
+
+
                         paramLinksValue = new List<object>
                                      {
-                                        lesson?.Content?.Result?.Id ?? default,
-                                        classForumResult?.CourseId ?? default,
-                                        classForumResult?.UnitId ?? default,
-                                        classForumResult?.Id ?? default,
+                                        featureModuleModel?.CourseId ?? default,
+                                        featureModuleModel?.UnitId ?? default,
+                                        featureModuleModel?.LessonId ?? default,
+                                        featureModuleModel?.ClassForumResultId ?? default,
                                      };
 
                         await PublishNotification(paramLinksValue, request.ObjectId, EnumNotificationContent.Comment, EnumNotificationType.LinkComment, new List<Guid>() { postOwner.CreatedUserId }, cancellationToken);
@@ -207,15 +217,24 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                                 IncludePaths = new List<string> { "LessonResult" }
                             });
                             var classForumResultOfCommentOwner = classForumResultOfCommentOwnerResult.Content?.Result;
-                            var lessonOfCommentOwner = await _courseService.GetLessonResult(classForumResultOfCommentOwner?.LessonResultId ?? default);
+
+                            FeatureModuleQuery queryReply = new FeatureModuleQuery
+                            {
+                                FeatureModule = EnumFeatureModule.ClassForumResult,
+                                ObjectId = classForumResultOfCommentOwner?.Id ?? default
+                            };
+
+                            var moduleResultReply = await _courseService.GetModuleModel(queryReply);
+                            var featureModuleReplyModel = moduleResultReply?.Content?.Result;
+
 
                             paramLinksValue = new List<object>
-                                    {
-                                        lessonOfCommentOwner?.Content?.Result?.Id ?? default,
-                                        classForumResultOfCommentOwner?.CourseId ?? default,
-                                        classForumResultOfCommentOwner?.UnitId ?? default,
-                                        classForumResultOfCommentOwner?.Id ?? default,
-                                    };
+                                     {
+                                        featureModuleReplyModel?.CourseId ?? default,
+                                        featureModuleReplyModel?.UnitId ?? default,
+                                        featureModuleReplyModel?.LessonId ?? default,
+                                        featureModuleReplyModel?.ClassForumDetailResultId ?? default,
+                                     };
 
                             await PublishNotification(paramLinksValue, request.ObjectId, EnumNotificationContent.ReplyComment, EnumNotificationType.LinkComment, new List<Guid> { commentOwner!.CreatedUserId }, cancellationToken);
                         }

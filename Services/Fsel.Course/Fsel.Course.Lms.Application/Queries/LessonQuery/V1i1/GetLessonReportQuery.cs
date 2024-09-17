@@ -65,7 +65,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
                 return methodResult;
             }
             methodResult.Result = GetLessonReport(video, videoResult);
-
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
@@ -81,6 +80,9 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
             lessonReport.Percent = NumberHelper.GetPercent(lessonReport.CorrectCount, lessonReport.CorrectTotal);
             lessonReport.HighestStreak = videoResult.HighestStreak;
             lessonReport.TimeCodeHighestStreak = videoResult.TimeCodeHighestStreak;
+            lessonReport.StatusVideoResult = videoResult.Status;
+            lessonReport.IsShowToken = videoResult.IsShowToken;
+            lessonReport.TotalToken = videoResult.TotalToken;
             return lessonReport;
         }
     }
