@@ -211,7 +211,8 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             {
                 CourseId = learn.CourseResult?.CourseId,
                 UnitId = learn.UnitResult?.UnitId,
-                LessonId = learn.LessonResult?.LessonId
+                LessonId = learn.LessonResult?.LessonId,
+                LessonResulId = learn.LessonResult?.Id
             };
 
             if (learn.LessonResult != null)
@@ -242,6 +243,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 CourseId = learn.CourseResult?.CourseId,
                 UnitId = learn.UnitResult?.UnitId,
                 LessonId = learn.LessonResult?.LessonId,
+                LessonResulId = learn.LessonResult?.Id,
                 ClassForumId = learn.ClassForumResult?.ClassForumId,
             };
 
@@ -278,6 +280,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 CourseId = learn.CourseResult?.CourseId,
                 UnitId = learn.UnitResult?.UnitId,
                 LessonId = learn.LessonResult?.LessonId,
+                LessonResulId = learn.LessonResult?.Id,
                 ClassForumId = learn.ClassForumResult?.ClassForumId
             };
 
@@ -339,6 +342,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 CourseId = learn.CourseResult?.CourseId,
                 UnitId = learn.UnitResult?.UnitId,
                 LessonId = learn.LessonResult?.LessonId,
+                LessonResulId = learn.LessonResult?.Id,
                 ClassForumId = learn.ClassForumResult?.ClassForumId,
                 HomeWorkId = learn.HomeWorkResult?.HomeWorkId
             };
