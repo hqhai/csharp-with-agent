@@ -9,13 +9,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
     using Fsel.Ordering.Application.Commands.VoucherCmds;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.IRepositories;
-    using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i2;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateVoucherAndSendMailCommand : CreateVoucherAndSendMailCommandModels, IRequest<MethodResult<bool>>
+    public class CreateVoucherAndSendMailCommand : IRequest<MethodResult<bool>>
     {
+        public IList<string>? Emails { get; set; }
     }
 
     public class CreateVoucherAndSendMailCommandHandler : IRequestHandler<CreateVoucherAndSendMailCommand, MethodResult<bool>>
@@ -38,19 +38,19 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            if (request.UserVoucher == null || request.UserVoucher.Count == 0)
+            if (request.Emails == null || request.Emails.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
-            foreach (var item in request.UserVoucher)
+            foreach (var item in request.Emails)
             {
-                if (string.IsNullOrEmpty(item.Email))
+                if (string.IsNullOrEmpty(item))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                     return methodResult;
                 }
-                var studentResult = await _userService.GetStudentByEmail(item.Email);
+                var studentResult = await _userService.GetStudentByEmail(item);
                 if (!studentResult.IsSuccessStatusCode)
                 {
                     methodResult.AddError(studentResult.Error);
@@ -62,16 +62,18 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                     return methodResult;
                 }
-                var package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.MonthNumber == item.MonthNumber, cancellationToken);
-                if (package == null)
+
+                var order = await _orderRepository.Queryable.Where(p => !p.IsTrial && p.Status == EnumOrderStatus.Payment && !p.VoucherId.HasValue && p.UserId == student.Human.UserId && p.DiscountPrice == 0).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+                if (order == null || !order.PackageId.HasValue)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                     return methodResult;
                 }
+
                 var voucherResult = await _mediator.Send(new CreateVoucherForRetailCommand()
                 {
                     UserId = student.Human.UserId ?? default,
-                    PackageId = package.Id,
+                    PackageId = order.PackageId.Value,
                 }, cancellationToken).ConfigureAwait(false);
                 if (!voucherResult.IsOK)
                 {
@@ -79,14 +81,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                     return methodResult;
                 }
                 var voucherId = voucherResult.Result?.Id ?? default;
-
-                var order = await _orderRepository.Queryable.Where(p => p.DiscountPrice == 0 && !p.VoucherId.HasValue && !p.IsTrial && p.Status == EnumOrderStatus.Payment && p.UserId == student.Human.UserId).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-
-                if (order == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                    return methodResult;
-                }
 
                 await _mediator.Send(new SendMailPaymentWithVoucherCommand() { OrderId = order.Id, VoucherId = voucherId }, cancellationToken).ConfigureAwait(false);
             }
