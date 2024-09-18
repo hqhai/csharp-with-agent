@@ -21,7 +21,7 @@
     *@
 
     <div class="message-error">
-        @foreach (var item in ViewContext.ModelState.Values.SelectMany(x => x.Errors).Select(x => x.ErrorMessage))
+        @foreach (var item in ViewContext.ModelState.Where(x => string.IsNullOrEmpty(x.Key) && x.Value != null).SelectMany(x => x.Value!.Errors).Select(x => x.ErrorMessage))
         {
             <div class="message mt-3">
                 <svg xmlns="http://www.w3.org/2000/svg"

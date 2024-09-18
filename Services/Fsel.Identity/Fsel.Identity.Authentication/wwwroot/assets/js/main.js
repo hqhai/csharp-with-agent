@@ -27,8 +27,9 @@
 
   $('.validation-message-text').each(function () {
     var field = $(this).attr('data-field');
+    var validate = $(this).attr('data-validate');
     if (field) {
-      $(`[name="${field}"]`).attr("data-val-required", $(this).html());
+      $(`[name="${field}"]`).attr(validate, $(this).html());
     }
   });
 

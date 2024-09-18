@@ -9,11 +9,11 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
 
     public class UserRegisterModel
     {
-        [EmailValid(ErrorMessage = "i18n_Email_is_not_valid")]
+        [RegularExpression(Common.Helpers.RegexHelper.EmailValid, ErrorMessage = "i18n_Email_is_not_valid")]
         [Required(ErrorMessage = "i18n_Email_cannot_be_empty")]
         public string? Email { get; set; }
 
-        [PhoneValid(ErrorMessage = "i18n_number_phone_invalid")]
+        [RegularExpression(Common.Helpers.RegexHelper.PhoneNumberValid, ErrorMessage = "i18n_number_phone_invalid")]
         public string? PhoneNumber { get; set; }
 
         [Required(ErrorMessage = "i18n_First_name_cannot_be_empty")]
@@ -47,7 +47,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
         }
 
         [DataType(DataType.Password)]
-        [RegexValid(ErrorMessage = "i18n_Password_is_not_valid", Regex = RegexSettings.Password)]
+        [RegularExpression(RegexSettings.Password, ErrorMessage = "i18n_Password_is_not_valid")]
         [Required(ErrorMessage = "i18n_Password_cannot_be_empty")]
         public string? Password { get; set; }
 

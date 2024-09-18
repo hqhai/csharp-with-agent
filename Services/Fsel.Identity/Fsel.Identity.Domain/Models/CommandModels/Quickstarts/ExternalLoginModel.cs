@@ -4,16 +4,16 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
 {
     using System.ComponentModel.DataAnnotations;
     using System.Security.Claims;
-    using Fsel.Common.Attributes;
+    using Fsel.Identity.Domain.Constants;
     using Fsel.Shared.Enums;
 
     public class ExternalLoginModel
     {
-        [EmailValid(ErrorMessage = "i18n_Email_is_not_valid")]
+        [RegularExpression(RegexSettings.Password, ErrorMessage = "i18n_Password_is_not_valid")]
         [Required(ErrorMessage = "i18n_Email_cannot_be_empty")]
         public string? Email { get; set; }
 
-        [PhoneValid(ErrorMessage = "i18n_number_phone_invalid")]
+        [RegularExpression(Common.Helpers.RegexHelper.PhoneNumberValid, ErrorMessage = "i18n_number_phone_invalid")]
         public string? PhoneNumber { get; set; }
 
         [Required(ErrorMessage = "i18n_First_name_cannot_be_empty")]

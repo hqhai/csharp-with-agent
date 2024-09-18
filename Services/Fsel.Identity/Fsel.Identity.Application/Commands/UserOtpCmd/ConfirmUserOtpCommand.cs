@@ -37,7 +37,6 @@ namespace Fsel.Identity.Application.Commands.UserOtpCmd
             var userOtp = await _userOtpRepository.Queryable.FirstOrDefaultAsync(x =>
             (x.UserId == request.UserId || x.VerifyId == request.VerifyId) &&
             x.Status == EnumUserOtpStatus.New &&
-            x.ExpiredTime >= DateTime.UtcNow &&
             x.Otp == request.Otp, cancellationToken);
 
             if (userOtp == null)

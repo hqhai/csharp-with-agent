@@ -2,39 +2,99 @@
 
 namespace Fsel.Identity.Authentication.Quickstart
 {
-    using Amazon.SimpleEmail.Model;
-    using Fsel.Common.Helpers;
     using Microsoft.AspNetCore.Html;
     using Microsoft.AspNetCore.Mvc.ModelBinding;
     using Microsoft.AspNetCore.Mvc.Rendering;
     using Microsoft.Extensions.Localization;
-    using Nest;
     using System.ComponentModel.DataAnnotations;
     using System.Globalization;
     using System.Linq.Expressions;
     using System.Reflection;
-    using System.Text.RegularExpressions;
 
     public static class CustomHtmlHelperExtensions
     {
-        private static string? GetErrorMessageFromDataAnnotations(this ModelMetadata metadata, string propertyName)
+        private static Dictionary<string, string> GetErrorMessageFromDataAnnotations(this ModelMetadata metadata, string propertyName)
         {
+            var messages = new Dictionary<string, string>();
             var property = metadata.ModelType.GetProperty(propertyName);
             if (property == null)
             {
-                return string.Empty;
+                return messages;
             }
 
             var attributes = property.GetCustomAttributes<ValidationAttribute>(true);
-            foreach (var attribute in attributes)
+            if (attributes != null)
             {
-                if (!string.IsNullOrEmpty(attribute.ErrorMessage))
+                foreach (var attribute in attributes)
                 {
-                    return attribute.ErrorMessage;
+                    switch (attribute)
+                    {
+                        case RequiredAttribute requiredAttribute:
+                            messages.Add("data-val-required", requiredAttribute.ErrorMessage ?? string.Empty);
+                            break;
+
+                        case RegularExpressionAttribute regexAttribute:
+                            messages.Add("data-val-regex", regexAttribute.ErrorMessage ?? string.Empty);
+                            //messages.Add("data-val-regex-pattern", regexAttribute.Pattern ?? string.Empty);
+                            break;
+
+                        case MaxLengthAttribute maxLengthAttribute:
+                            //messages.Add("data-val-length-max", maxLengthAttribute.Length.ToString(CultureInfo.InvariantCulture));
+                            messages.Add("data-val-length", maxLengthAttribute.ErrorMessage ?? string.Empty);
+                            break;
+
+                        case MinLengthAttribute minLengthAttribute:
+                            //messages.Add("data-val-length-min", minLengthAttribute.Length.ToString(CultureInfo.InvariantCulture));
+                            messages.Add("data-val-length", minLengthAttribute.ErrorMessage ?? string.Empty);
+                            break;
+
+                        case RangeAttribute rangeAttribute:
+                            messages.Add("data-val-range", rangeAttribute.ErrorMessage ?? string.Empty);
+                            //messages.Add("data-val-range-min", rangeAttribute.Minimum.ToString() ?? string.Empty);
+                            //messages.Add("data-val-range-max", rangeAttribute.Maximum.ToString() ?? string.Empty);
+                            break;
+
+                        case EmailAddressAttribute emailAttribute:
+                            messages.Add("data-val-email", emailAttribute.ErrorMessage ?? string.Empty);
+                            break;
+
+                        case PhoneAttribute phoneAttribute:
+                            messages.Add("data-val-phone", phoneAttribute.ErrorMessage ?? string.Empty);
+                            break;
+
+                        case CompareAttribute compareAttribute:
+                            messages.Add("data-val-equalto", compareAttribute.ErrorMessage ?? string.Empty);
+                            //messages.Add("data-val-equalto-other", compareAttribute.OtherProperty);
+                            break;
+
+                        case StringLengthAttribute stringLengthAttribute:
+                            if (stringLengthAttribute.MaximumLength > 0)
+                            {
+                                //messages.Add("data-val-length-max", stringLengthAttribute.MaximumLength.ToString(CultureInfo.InvariantCulture));
+                            }
+                            if (stringLengthAttribute.MinimumLength > 0)
+                            {
+                                //messages.Add("data-val-length-min", stringLengthAttribute.MinimumLength.ToString(CultureInfo.InvariantCulture));
+                            }
+                            messages.Add("data-val-length", stringLengthAttribute.ErrorMessage ?? string.Empty);
+                            break;
+
+                        case CreditCardAttribute creditCardAttribute:
+                            messages.Add("data-val-creditcard", creditCardAttribute.ErrorMessage ?? string.Empty);
+                            break;
+
+                        case UrlAttribute urlAttribute:
+                            messages.Add("data-val-url", urlAttribute.ErrorMessage ?? string.Empty);
+                            break;
+
+                        default:
+                            break;
+                    }
                 }
+
             }
 
-            return string.Empty;
+            return messages;
         }
 
         public static IHtmlContent CustomValidationMessageFor<TModel, TResult>(
@@ -56,15 +116,18 @@ namespace Fsel.Identity.Authentication.Quickstart
             ArgumentNullException.ThrowIfNull(memberExpression);
 
             var propertyName = memberExpression.Member.Name;
-            var errorMessage = htmlHelper.ViewData.ModelMetadata.GetErrorMessageFromDataAnnotations(propertyName);
+            var errorMessages = htmlHelper.ViewData.ModelMetadata.GetErrorMessageFromDataAnnotations(propertyName);
 
             var tagBuilder = new TagBuilder("div");
             tagBuilder.AddCssClass("line-height-20");
             tagBuilder.InnerHtml.AppendHtml(validationMessage);
 
-            if (!string.IsNullOrEmpty(errorMessage))
+            foreach (var errorMessage in errorMessages)
             {
-                tagBuilder.InnerHtml.AppendHtml($"<div class=\"validation-message-text hidden\" data-field=\"{propertyName}\">{stringLocalizer[errorMessage]}</div>");
+                if (!string.IsNullOrEmpty(errorMessage.Key) && !string.IsNullOrEmpty(errorMessage.Value))
+                {
+                    tagBuilder.InnerHtml.AppendHtml($"<div class=\"validation-message-text hidden\" data-field=\"{propertyName}\" data-validate=\"{errorMessage.Key}\">{stringLocalizer[errorMessage.Value]}</div>");
+                }
             }
 
             return tagBuilder;

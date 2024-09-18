@@ -171,7 +171,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                             if (result.Succeeded)
                             {
                                 ViewBag.Success = _localizer["i18n_User_successfuly_added"];
-                                return RedirectToAction(nameof(Login), new { request.ReturnUrl });
+                                return await LoginWithoutPassword(user, request.ReturnUrl);
                             }
 
                             foreach (var error in result.Errors)
@@ -276,7 +276,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
                         if (result.Succeeded)
                         {
-                            return RedirectToAction(nameof(Login), new { request.ReturnUrl });
+                            return await LoginWithoutPassword(user, request.ReturnUrl);
                         }
 
                         foreach (var error in result.Errors)
@@ -318,7 +318,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 var sendResult = await SendOtpAsync(user);
                 if (!sendResult.IsOK)
                 {
-                    ModelState.AddModelError(nameof(request.Email), _localizer["i18n_Failed_to_send_OTP"]);
+                    ModelState.AddModelError(string.Empty, _localizer["i18n_Failed_to_send_OTP"]);
                     return View(request);
                 }
 
@@ -357,7 +357,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             var sendResult = await SendOtpAsync(user);
             if (!sendResult.IsOK)
             {
-                ModelState.AddModelError(nameof(user.Email), _localizer["i18n_Failed_to_send_OTP"]);
+                ModelState.AddModelError(string.Empty, _localizer["i18n_Failed_to_send_OTP"]);
             }
 
             return RedirectToAction(nameof(VerifyOtp), new { returnUrl, type });
@@ -369,7 +369,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         /// <returns></returns>
         public IActionResult Register(string? returnUrl)
         {
-            var vm = new UserRegisterModel
+            var vm = GetFromTempData(nameof(UserRegisterModel))?.ToString().Deserialize<UserRegisterModel>();
+            vm ??= new UserRegisterModel
             {
                 ReturnUrl = returnUrl
             };
@@ -383,7 +384,6 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             ArgumentNullException.ThrowIfNull(request);
 
             TempData[nameof(UserRegisterModel)] = request.Serialize();
-
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
@@ -395,7 +395,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
                 if (!string.IsNullOrEmpty(request.PhoneNumber) && await _userManager.Users.AnyAsync(x => x.PhoneNumber == request.PhoneNumber && x.Id != (user != null ? user.Id : Guid.Empty)))
                 {
-                    ModelState.AddModelError(nameof(request.Email), _localizer["i18n_phone_number_already_system"]);
+                    ModelState.AddModelError(nameof(request.PhoneNumber), _localizer["i18n_phone_number_already_system"]);
                     return View(request);
                 }
 
@@ -413,7 +413,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                             scope.Dispose();
                             result.Errors.ForEach(x =>
                             {
-                                ModelState.AddModelError(x.Code, x.Description);
+                                ModelState.AddModelError(string.Empty, x.Description);
                             });
                             return View(request);
                         }
@@ -423,7 +423,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     if (!sendResult.IsOK)
                     {
                         scope.Dispose();
-                        ModelState.AddModelError(nameof(request.Email), _localizer["i18n_Failed_to_send_OTP"]);
+                        ModelState.AddModelError(string.Empty, _localizer["i18n_Failed_to_send_OTP"]);
                         return View(request);
                     }
 
@@ -555,6 +555,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         {
                             props = new AuthenticationProperties
                             {
+                                // Check cookies có lưu lại thông tin sau khi đăng nhập
                                 IsPersistent = true,
                                 ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
                             };
@@ -610,6 +611,43 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             var vm = await BuildLoginViewModelAsync(model);
 
             return View(vm);
+        }
+
+        private async Task<IActionResult> LoginWithoutPassword(User? user, string? returnUrl)
+        {
+            var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+            if (user is not null)
+            {
+                var props = new AuthenticationProperties
+                {
+                    // Check cookies có lưu lại thông tin sau khi đăng nhập
+                    IsPersistent = false,
+                };
+                await _signInManager.SignInAsync(user, props);
+
+                await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id.ToString(), user.UserName, clientId: context?.Client.ClientId));
+
+                // issue authentication cookie with subject ID and username
+                var isuser = new IdentityServerUser(user.Id.ToString())
+                {
+                    DisplayName = user.UserName
+                };
+
+                await HttpContext.SignInAsync(isuser, props);
+
+                if (context != null && context.IsNativeClient())
+                {
+                    return this.LoadingPage("Redirect", returnUrl ?? string.Empty);
+                }
+
+                // request for a local page
+                if (Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+            }
+
+            return RedirectToAction(nameof(Login), new { returnUrl });
         }
 
         /// <summary>
