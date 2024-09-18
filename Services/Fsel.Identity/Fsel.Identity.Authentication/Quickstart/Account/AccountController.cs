@@ -29,8 +29,8 @@ using Fsel.Identity.Domain.IRepositories;
 using Fsel.Core.Base.Managers;
 using Fsel.Common.Constants;
 using Microsoft.Extensions.Localization;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using Fsel.Identity.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Identity.Authentication.Quickstart.Account
 {
@@ -158,7 +158,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     else
                     {
                         var verify = await VerifyOtpAsync(user, request.Otp);
-                        if (verify)
+                        if (verify.Result)
                         {
                             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                             var result = await _userManager.ConfirmEmailAsync(user, token);
@@ -171,12 +171,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                             if (result.Succeeded)
                             {
                                 ViewBag.Success = _localizer["i18n_User_successfuly_added"];
-
-                                return RedirectToAction(nameof(Success), new
-                                {
-                                    request.ReturnUrl,
-                                    message = _localizer["i18n_Congratulations_your_account_has_been_successfully_created"]
-                                });
+                                return RedirectToAction(nameof(Login), new { request.ReturnUrl });
                             }
 
                             foreach (var error in result.Errors)
@@ -184,9 +179,13 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                                 ModelState.AddModelError(string.Empty, error.Description);
                             }
                         }
-                        else
+                        else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpErrorCode.OtpInvalid)))
                         {
                             ModelState.AddModelError(nameof(request.Otp), _localizer["i18n_OTP_is_not_valid"]);
+                        }
+                        else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpErrorCode.OtpExpired)))
+                        {
+                            ModelState.AddModelError(nameof(request.Otp), _localizer["i18n_OTP_has_expired"]);
                         }
                     }
                 }
@@ -207,7 +206,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     else
                     {
                         var verify = await VerifyOtpAsync(user, request.Otp);
-                        if (verify)
+                        if (verify.Result)
                         {
                             TempData[nameof(ForgotPasswordModel)] = new ForgotPasswordModel
                             {
@@ -217,9 +216,13 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                             }.Serialize();
                             return RedirectToAction(nameof(ForgotPassword), new { request.ReturnUrl });
                         }
-                        else
+                        else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpErrorCode.OtpInvalid)))
                         {
                             ModelState.AddModelError(nameof(request.Otp), _localizer["i18n_OTP_is_not_valid"]);
+                        }
+                        else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpErrorCode.OtpExpired)))
+                        {
+                            ModelState.AddModelError(nameof(request.Otp), _localizer["i18n_OTP_has_expired"]);
                         }
                     }
                 }
@@ -273,11 +276,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
                         if (result.Succeeded)
                         {
-                            return RedirectToAction(nameof(Success), new
-                            {
-                                request.ReturnUrl,
-                                message = _localizer["i18n_Congratulations_your_account_password_has_been_successfully_changed"]
-                            });
+                            return RedirectToAction(nameof(Login), new { request.ReturnUrl });
                         }
 
                         foreach (var error in result.Errors)
@@ -457,12 +456,11 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             return sendResult;
         }
 
-        private async Task<bool> VerifyOtpAsync(User user, string? otp)
+        private async Task<MethodResult<bool>> VerifyOtpAsync(User user, string? otp)
         {
             //var verify = await _userManager.VerifyUserTokenAsync(user, DataProtectionTokenProvider.TotpProviderName, DataProtectionTokenProvider.TotpProviderName, otp ?? string.Empty);
 
-            var otpResult = await _mediator.Send(new ConfirmUserOtpCommand { UserId = user.Id, Otp = otp }).ConfigureAwait(false);
-            return otpResult?.Result ?? false;
+            return await _mediator.Send(new ConfirmUserOtpCommand { UserId = user.Id, Otp = otp }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -691,13 +689,13 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         //[ValidateAntiForgeryToken]
         public IActionResult ExternalLogin(string provider, string? returnUrl = null)
         {
-            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
+            var redirectUrl = Url.Action(nameof(ExternalLoginConfirmation), "Account", new { returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return Challenge(properties, provider);
         }
 
         [HttpGet]
-        public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null)
+        public async Task<IActionResult> ExternalLoginConfirmation(string? returnUrl = null)
         {
             returnUrl ??= string.Empty;
 
@@ -742,23 +740,23 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginModel request)
+        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginModel request, string? returnUrl = null)
         {
             ArgumentNullException.ThrowIfNull(request);
             var externalLogin = GetFromTempData(nameof(ExternalLoginModel))?.ToString().Deserialize<ExternalLoginModel>();
 
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null || externalLogin == null)
+            {
+                return View(request);
+            }
+
+            request.Email = externalLogin.Email;
             if (!ModelState.IsValid)
             {
                 return View(request);
             }
 
-            var info = await _signInManager.GetExternalLoginInfoAsync();
-            if (info == null || externalLogin == null)
-            {
-                return View(nameof(Error));
-            }
-
-            request.Email = externalLogin.Email;
             var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
             Microsoft.AspNetCore.Identity.IdentityResult result;
 
@@ -768,7 +766,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 if (result.Succeeded)
                 {
                     await _signInManager.SignInAsync(user, isPersistent: false);
-                    return Redirect(request.ReturnUrl ?? string.Empty);
+                    return Redirect(request.ReturnUrl ?? returnUrl ?? string.Empty);
                 }
             }
             else
@@ -799,7 +797,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                             await _signInManager.SignInAsync(user, isPersistent: false);
 
                             scope.Complete();
-                            return Redirect(request.ReturnUrl ?? string.Empty);
+                            return Redirect(request.ReturnUrl ?? returnUrl ?? string.Empty);
                         }
                     }
 
@@ -812,7 +810,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 ModelState.TryAddModelError(error.Code, error.Description);
             }
 
-            return View(nameof(ExternalLoginConfirmation), request);
+            return View(request);
         }
 
         [HttpGet]

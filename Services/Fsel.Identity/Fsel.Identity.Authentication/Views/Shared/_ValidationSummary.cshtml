@@ -43,7 +43,7 @@
 }
 
 @* successfully *@
-@if (false)
+@if (ViewBag.Success != null && !string.IsNullOrEmpty(ViewBag.Success))
 {
     <div class="message-successfully">
         <div class="message mt-3">
@@ -58,7 +58,7 @@
                       fill="#F1FAF1" />
             </svg>
             <span>
-                successfully
+                @ViewBag.Success
             </span>
         </div>
     </div>

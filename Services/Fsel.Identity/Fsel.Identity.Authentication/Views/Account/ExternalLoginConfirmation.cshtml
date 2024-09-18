@@ -23,7 +23,7 @@
         </div>
 
         <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
-        <form id="form-ExternalLogin" asp-route="ExternalLoginConfirmation">
+        <form id="form-ExternalLogin" asp-action="ExternalLoginConfirmation">
             <input type="hidden" asp-for="ReturnUrl" />
             @Html.AntiForgeryToken()
 
@@ -69,7 +69,7 @@
                                    placeholder=""
                                    autocomplete="off"
                                    required
-                                   disabled
+                                   readonly
                                    asp-for="Email" />
                             <label for="Email" class="input-label">@Localizer["i18n_email"]</label>
                         </div>
