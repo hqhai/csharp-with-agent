@@ -538,7 +538,10 @@ namespace Fsel.Course.Infrastructure.Common
                                                    }).ToList();
                     sectionDto.CountQuestion = section.SectionQuestions.SelectMany(x => x.MockTestAnswers)
                         .Select(x => x.Answer.Deserialize<MultipleChoiceAnswerV1>())
-                        .Where(x => x != null && x.Answers != null && x.Answers.Any()).Sum(x => x.Answers.Count);
+                        .Where(x => x != null && x.Answers != null && x.Answers.Any())
+                        .SelectMany(x => x.Answers)
+                        .Where(y => !string.IsNullOrEmpty(y.Key) || !string.IsNullOrEmpty(y.Content))
+                        .Count();
                 }
             }
             return sectionDto;
