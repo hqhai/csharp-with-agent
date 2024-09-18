@@ -10,6 +10,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid? UnitId { get; set; }
 
+        public string? NameUnit { get; set; }
+
+        public int? DisplayOrder { get; set; }
+
         public Guid? LessonId { get; set; }
 
         public Guid? LessonResulId { get; set; }
