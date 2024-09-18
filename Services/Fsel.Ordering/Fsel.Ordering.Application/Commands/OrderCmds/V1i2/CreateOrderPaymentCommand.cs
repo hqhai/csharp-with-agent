@@ -159,6 +159,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
 
             var newOrder = _mapper.Map<Order>(request);
             newOrder.PackageId = package.Id;
+            newOrder.PaymentMethod = EnumPaymentMethodStatus.BankTransfer;
             newOrder.EventId = @event.Id;
             newOrder.Price = packageEvent.Price;
             newOrder.Code = code;
@@ -186,17 +187,20 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             {
                 newOrder = _orderRepository.Add(newOrder);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
+                {
+                    StudentId = student!.Id,
+                    Month = package.MonthNumber + packageEvent.MonthBonus,
+                    Day = packageEvent.DayBonus,
+                    ExpiredDate = null,
+                }, cancellationToken);
+
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 return methodResult;
             });
 
-            await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
-            {
-                StudentId = student!.Id,
-                Month = package.MonthNumber + packageEvent.MonthBonus,
-                Day = packageEvent.DayBonus,
-                ExpiredDate = null,
-            }, cancellationToken);
+            Thread.Sleep(3000);
 
             if (request.IsSendMail)
             {
