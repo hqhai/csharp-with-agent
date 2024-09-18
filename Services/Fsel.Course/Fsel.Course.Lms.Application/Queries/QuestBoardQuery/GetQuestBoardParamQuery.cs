@@ -212,7 +212,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 CourseId = learn.CourseResult?.CourseId,
                 UnitId = learn.UnitResult?.UnitId,
                 NameUnit = learn.UnitResult?.Unit?.Name,
-                DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
+                DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.CourseId == learn.CourseResult?.CourseId && x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
                 LessonId = learn.LessonResult?.LessonId,
                 LessonResulId = learn.LessonResult?.Id
             };
@@ -253,7 +253,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 CourseId = learn.CourseResult?.CourseId,
                 UnitId = learn.UnitResult?.UnitId,
                 NameUnit = learn.UnitResult?.Unit?.Name,
-                DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
+                DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.CourseId == learn.CourseResult?.CourseId && x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
                 LessonId = learn.LessonResult?.LessonId,
                 LessonResulId = learn.LessonResult?.Id,
                 ClassForumId = learn.ClassForumResult?.ClassForumId,
@@ -298,7 +298,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 CourseId = learn.CourseResult?.CourseId,
                 UnitId = learn.UnitResult?.UnitId,
                 NameUnit = learn.UnitResult?.Unit?.Name,
-                DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
+                DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.CourseId == learn.CourseResult?.CourseId && x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
                 LessonId = learn.LessonResult?.LessonId,
                 LessonResulId = learn.LessonResult?.Id,
                 ClassForumId = learn.ClassForumResult?.ClassForumId
@@ -342,7 +342,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 CourseId = learn.CourseResult?.CourseId,
                 UnitId = learn.UnitResult?.UnitId,
                 NameUnit = learn.UnitResult?.Unit?.Name,
-                DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
+                DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.CourseId == learn.CourseResult?.CourseId && x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
             };
 
             if (learn.UnitResult != null)
@@ -369,7 +369,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 CourseId = learn.CourseResult?.CourseId,
                 UnitId = learn.UnitResult?.UnitId,
                 NameUnit = learn.UnitResult?.Unit?.Name,
-                DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
+                DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.CourseId == learn.CourseResult?.CourseId && x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
                 LessonId = learn.LessonResult?.LessonId,
                 LessonResulId = learn.LessonResult?.Id,
                 ClassForumId = learn.ClassForumResult?.ClassForumId,
