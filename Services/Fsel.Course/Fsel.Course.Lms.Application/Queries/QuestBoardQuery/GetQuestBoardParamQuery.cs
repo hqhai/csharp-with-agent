@@ -214,13 +214,13 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 NameUnit = learn.UnitResult?.Unit?.Name,
                 DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.CourseId == learn.CourseResult?.CourseId && x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
                 LessonId = learn.LessonResult?.LessonId,
-                LessonResulId = learn.LessonResult?.Id
+                LessonResultId = learn.LessonResult?.Id
             };
 
 
             if (learn.LessonResult != null && learn.LessonResult.Status == EnumResultStatus.New)
             {
-                newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Lesson;
+                newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Unit;
             }
 
             else if (learn.LessonResult != null)
@@ -255,7 +255,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 NameUnit = learn.UnitResult?.Unit?.Name,
                 DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.CourseId == learn.CourseResult?.CourseId && x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
                 LessonId = learn.LessonResult?.LessonId,
-                LessonResulId = learn.LessonResult?.Id,
+                LessonResultId = learn.LessonResult?.Id,
                 ClassForumId = learn.ClassForumResult?.ClassForumId,
             };
 
@@ -266,7 +266,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
 
             else if (learn.LessonResult != null && learn.LessonResult.Status == EnumResultStatus.New)
             {
-                newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Lesson;
+                newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Unit;
             }
 
             else if (learn.LessonResult != null)
@@ -300,7 +300,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 NameUnit = learn.UnitResult?.Unit?.Name,
                 DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.CourseId == learn.CourseResult?.CourseId && x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
                 LessonId = learn.LessonResult?.LessonId,
-                LessonResulId = learn.LessonResult?.Id,
+                LessonResultId = learn.LessonResult?.Id,
                 ClassForumId = learn.ClassForumResult?.ClassForumId
             };
 
@@ -311,7 +311,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
 
             else if (learn.LessonResult != null && learn.LessonResult.Status == EnumResultStatus.New)
             {
-                newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Lesson;
+                newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Unit;
             }
 
             else if (learn.LessonResult != null)
@@ -371,7 +371,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 NameUnit = learn.UnitResult?.Unit?.Name,
                 DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.CourseId == learn.CourseResult?.CourseId && x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
                 LessonId = learn.LessonResult?.LessonId,
-                LessonResulId = learn.LessonResult?.Id,
+                LessonResultId = learn.LessonResult?.Id,
                 ClassForumId = learn.ClassForumResult?.ClassForumId,
                 HomeWorkId = learn.HomeWorkResult?.HomeWorkId
             };
@@ -405,7 +405,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
 
             else if (learn.LessonResult != null && learn.LessonResult.Status == EnumResultStatus.New)
             {
-                newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Lesson;
+                newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Unit;
             }
 
             else if (learn.LessonResult != null)
