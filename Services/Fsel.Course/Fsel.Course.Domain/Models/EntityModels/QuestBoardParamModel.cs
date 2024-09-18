@@ -16,7 +16,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid? LessonId { get; set; }
 
-        public Guid? LessonResulId { get; set; }
+        public Guid? LessonResultId { get; set; }
 
         public Guid? ClassForumId { get; set; }
 
