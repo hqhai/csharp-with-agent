@@ -107,6 +107,36 @@ namespace Fsel.Shared.Helpers
             return weekDays;
         }
 
+        public static string ConvertSecondsToTimeString(long totalSeconds)
+        {
+            int hours = (int)totalSeconds / 3600;
+            int minutes = (int)(totalSeconds % 3600) / 60;
+            return string.Format(CultureInfo.InvariantCulture, "{0}h{1:D2}'", hours, minutes);
+        }
+
+        public static int ConvertSecondsToHours(long seconds)
+        {
+            return (int)seconds / 3600;
+        }
+
+        public static int ConvertSecondsToHoursRoundUp(long seconds)
+        {
+            int hours = (int)seconds / 3600;
+            if (seconds % 3600 > 0)
+            {
+                hours += 1;
+            }
+            return hours;
+        }
+
+        public static string ConvertSecondsToHoursAndMinutes(long seconds)
+        {
+            int hours = (int)seconds / 3600;
+            int minutes = (int)(seconds % 3600) / 60;
+
+            return $"{hours} giờ {minutes:D2} phút";
+        }
+
         public static (DateTime Monday, DateTime Sunday) GetMondayAndSunday(DateTime date)
         {
             // Tìm ngày Thứ Hai
@@ -117,6 +147,22 @@ namespace Fsel.Shared.Helpers
             DateTime sunday = monday.AddDays(6).Date;
 
             return (monday, sunday);
+        }
+
+        public static bool IsCurrentDateInRange(DateTime? startDate, DateTime? endDate)
+        {
+            var currentDate = DateTime.UtcNow;
+
+            if (endDate.HasValue && startDate.HasValue && startDate.Value.Date <= currentDate && endDate.Value.Date >= currentDate.Date)
+            {
+                return true;
+            }
+            else if (!endDate.HasValue && startDate.HasValue && startDate.Value.Date <= currentDate)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

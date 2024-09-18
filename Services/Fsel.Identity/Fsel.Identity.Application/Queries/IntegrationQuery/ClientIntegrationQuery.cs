@@ -241,11 +241,12 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                         EndDate = order.ExpireDate ?? default,
                         Program = courseName,
                         CourseLevel = order.CourseName.ToString(),
-                        CoursePackage = order.MonthNumber,
+                        CoursePackage = order.MonthNumber ?? default,
                         PaymentMethod = order.PaymentMethod ?? default,
                         DiscountPrice = order.DiscountPrice,
                         TotalPrice = order.TotalPrice,
-                        Status = order.StatusCourseResult
+                        Status = order.StatusCourseResult,
+                        RevenueType = order.RevenueType
                     };
                     orderIntegrations.Add(orderIntegration);
                 }

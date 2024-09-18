@@ -12,6 +12,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.UserCmd;
+    using Fsel.Identity.Application.Commands.UserReferrals;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Domain.Entities;
@@ -212,7 +213,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                     if (!string.IsNullOrEmpty(student.ReferralCode))
                     {
-                        var updateReferralCodeResult = await _mediator.Send(new UpdateReferralCodeStudentCommand { ReferralCode = student.ReferralCode, UserId = user.Id }, cancellationToken).ConfigureAwait(false);
+                        var updateReferralCodeResult = await _mediator.Send(new CreateUserReferralCommand { ReferralCode = student.ReferralCode, ReceiverId = user.Id }, cancellationToken).ConfigureAwait(false);
                         if (!updateReferralCodeResult.IsOK)
                         {
                             methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);

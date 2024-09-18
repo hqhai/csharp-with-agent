@@ -187,6 +187,25 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 return methodResult;
             }
 
+            // lấy client
+            queryOrder.Status = true;
+            var clientUsers = await _orderService.GetOrderByStatusAsync(queryOrder);
+            if (!clientUsers.IsSuccessStatusCode)
+            {
+                methodResult.AddError(clientUsers.Error);
+                return methodResult;
+            }
+            var clientUserResults = clientUsers.Content?.Result;
+            if (clientUserResults == null)
+            {
+                methodResult.AddError(clientUsers.Error);
+                return methodResult;
+            }
+
+            var clientUserResultIds = clientUserResults.Select(x => x.UserId).ToList();
+
+            distinctFinalUserIds = distinctFinalUserIds.Where(x => !clientUserResultIds.Contains(x)).ToList();
+
             // lấy all user từ list hợp nhất
             var userCombines = await _humanRepository.Queryable
                                                      .Include(x => x.User)

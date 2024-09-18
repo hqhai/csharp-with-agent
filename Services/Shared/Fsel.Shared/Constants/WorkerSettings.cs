@@ -22,6 +22,7 @@ namespace Fsel.Shared.Constants
             public const string NoticeAccessTime = "NoticeAccessTime";
             public const string NoticeExtendPackage = "NoticeExtendPackage";
             public const string ActiveEvent = "ActiveEvent";
+            public const string UpdateVouchersStatus = "UpdateVouchersStatus";
         }
     }
 }

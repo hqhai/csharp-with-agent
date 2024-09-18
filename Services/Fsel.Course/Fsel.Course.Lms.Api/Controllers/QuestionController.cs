@@ -11,13 +11,15 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Attributes;
+    using Asp.Versioning;
+    using Fsel.Common.Attributes;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
-    [Route(Settings.APIDefaultRoute + "/question")]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [ApiController]
+    [Route(Settings.APIDefaultRoute + "/question")]
+    [Permission(role: nameof(EnumRole.Student))]
     public class QuestionController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -30,6 +32,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get Question
         /// </summary>
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<QuestionModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]

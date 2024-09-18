@@ -51,6 +51,7 @@ builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<AddExpiredDateForStudentPublisher>();
 builder.Services.AddScoped<ChangeStatusOrderPublisher>();
+builder.Services.AddScoped<AddFeatureMissionPublisher>();
 
 //Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);

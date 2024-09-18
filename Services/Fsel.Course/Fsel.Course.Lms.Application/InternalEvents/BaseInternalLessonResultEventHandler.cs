@@ -24,7 +24,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentOccupyClassForum = 30;
 
         private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly QuestBoardPublisher _questBoardPublisher;
 
         public BaseInternalLessonResultEventHandler(ISystemService systemService,
             AppSetting appSetting,
@@ -43,7 +42,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             IMockTestResultRepository mockTestResultRepository,
             IHomeWorkResultRepository homeWorkResultRepository,
             QuestBoardPublisher questBoardPublisher,
-            IOrderService orderService, NotificationMessagePublisher notificationMessagePublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, notificationMessagePublisher)
+            IOrderService orderService,
+            ILessonNoteRepository lessonNoteRepository,NotificationMessagePublisher notificationMessagePublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository, notificationMessagePublisher)
         {
             _lessonResultRepository = lessonResultRepository;
         }
