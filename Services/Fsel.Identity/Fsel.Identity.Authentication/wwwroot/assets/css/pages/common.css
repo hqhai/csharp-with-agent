@@ -41,7 +41,8 @@
 }
 
   .message-successfully .message {
-    height: 5vh;
+    word-wrap: break-word;
+    min-height: 4vh;
     background-color: #212c48;
     color: #fff;
     display: flex;
@@ -58,7 +59,8 @@
   }
 
   .message-error .message {
-    height: 5vh;
+    word-wrap: break-word;
+    min-height: 4vh;
     background-color: #212c48;
     color: #fff;
     display: flex;

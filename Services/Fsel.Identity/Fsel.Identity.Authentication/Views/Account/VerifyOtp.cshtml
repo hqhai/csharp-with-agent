@@ -146,6 +146,7 @@
         </form>
 
         <div class="resend-otp">
+            @* @Localizer["i18n_send_otp_after"] *@
             @Localizer["i18n_did_not_a_code"]
             <a href="@Url.Action("ResendOtp", "Account", new { Model.ReturnUrl, type = Model.Type })">@Localizer["i18n_resend_otp"]</a>
         </div>

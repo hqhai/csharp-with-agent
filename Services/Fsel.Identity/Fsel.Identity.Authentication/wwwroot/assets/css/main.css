@@ -897,7 +897,7 @@ a:hover {
   }
 
   .checkbox label{
-      display: block;
+      /*display: block;*/
   }
 
   .content form section {
