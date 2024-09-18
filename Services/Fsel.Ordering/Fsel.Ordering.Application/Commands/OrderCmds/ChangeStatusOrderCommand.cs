@@ -174,13 +174,18 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                     var course = courseResults.Content?.Result?.FirstOrDefault();
                     if (course != null)
                     {
+                        EnumNotificationContent content = EnumNotificationContent.OrderChangeStatus;
+                        if (order != null && order.Package != null && order.Package.MonthNumber == 24)
+                        {
+                            content = EnumNotificationContent.ExtendSuccessfully;
+                        }
                         await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
                         {
                             UserIds = new List<Guid>() { order.UserId },
                             ObjectId = order.Id,
                             ParamsMessage = new List<object> { course.Name ?? string.Empty },
                             Type = EnumNotificationType.Text,
-                            Content = EnumNotificationContent.OrderChangeStatus,
+                            Content = content,
                             SenderId = _authContext.CurrentUserId,
                             PlatformCode = EnumPlatformCode.LMS
                         }, cancellationToken);

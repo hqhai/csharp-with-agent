@@ -30,6 +30,29 @@ namespace Fsel.Shared.Enums
         CommentPost,
         LikePost,
         ReplyCommentPost,
-        CourseChange
+        CourseChange,
+        LuckyTicket,
+
+        //Version 1.1
+        CompletedStreakLogin,
+        CompleteCourse,
+        UpgradeOrder,
+        SubcriptionNotice,
+        NoticeTrialExpired,
+        PlanWeekExtend,
+        PlanDayExtend,
+        ExtendSuccessfully,
+        FirstStudyNotice,
+        SecondStudyNotice,
+        ThirdStudyNotice,
+        FourthStudyNotice,
+        FifthStudyNotice,
+        StopBothering,
+        TreasureExploration,
+        EnergyCollecting,
+        FriendCompletedExam,
+        FriendCompleteUnitOne,
+        FriendPaymentSuccessfully,
+
     }
 }

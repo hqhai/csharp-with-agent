@@ -8,7 +8,7 @@ namespace Fsel.Notification.Domain.Entities
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
 
-    public class NotificationType : Entity
+    public class NotificationType : Entity, IMultiLingualObject<NotificationTypeTranslation>
     {
         public string? Icon { get; set; }
 
