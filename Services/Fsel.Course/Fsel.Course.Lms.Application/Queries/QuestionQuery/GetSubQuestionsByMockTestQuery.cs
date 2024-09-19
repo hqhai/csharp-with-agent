@@ -49,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             var configAnswers = sectionGroupResult.MockTestAnswers
                                                 .Select(x => GetConfigAnswer(x.Answer))
                                                 .Where(x => x != null && x.Answers != null && x.Answers.Any())
-                                                .SelectMany(x => x.Answers)
+                                                .SelectMany(x => x!.Answers)
                                                 .ToList();
 
             var questionIds = await _sectionGroupRepository.Queryable.Include(x => x.Sections).ThenInclude(x => x.SectionQuestions)
@@ -80,14 +80,19 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                 }
                 foreach (var subQuestion in subQuestions)
                 {
-                    var isExact = configAnswers.FirstOrDefault(x => x.Id == subQuestion.Id)?.IsExact;
+                    var configAnswer = configAnswers.FirstOrDefault(x => x.Id == subQuestion.Id);
+                    var isExact = configAnswer?.IsExact;
                     if (sectionGroupResult.Status == EnumResultStatus.Done)
                     {
                         subQuestion.Status = isExact.HasValue && isExact.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
                     }
+                    else if (subQuestion.Status == EnumCorrectStatus.Process)
+                    {
+                        continue;
+                    }
                     else
                     {
-                        subQuestion.Status = isExact.HasValue || subQuestion.Status == EnumCorrectStatus.Process ? EnumCorrectStatus.Process : EnumCorrectStatus.New;
+                        subQuestion.Status = !(string.IsNullOrEmpty(configAnswer?.Content) && string.IsNullOrEmpty(configAnswer?.Key)) || isExact.HasValue ? EnumCorrectStatus.Process : EnumCorrectStatus.New;
                     }
                 }
                 listSubQuestion.AddRange(subQuestions);
