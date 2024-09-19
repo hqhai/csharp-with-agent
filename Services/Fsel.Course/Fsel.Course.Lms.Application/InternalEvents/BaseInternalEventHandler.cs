@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             IHomeWorkResultRepository homeWorkResultRepository,
             QuestBoardPublisher questBoardPublisher,
             IOrderService orderService
-, ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository,
+, ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository
 , NotificationMessagePublisher notificationMessagePublisher)
         {
             _videoResultRepository = videoResultRepository;
