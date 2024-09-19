@@ -78,20 +78,15 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
 
             if (student.StudentDailyStreaks.Any())
             {
-                if (countStudentDaily == 3)
-                {
-                    await SendNotification(countStudentDaily, cancellationToken);
-                }
-                else if (countStudentDaily == 7)
+                if (countStudentDaily == 7)
                 {
                     studentDailyStreak.LevelOfGift = 1;
+                    await SendNotification(countStudentDaily, cancellationToken);
+
                 }
                 else if (countStudentDaily == 14)
                 {
                     studentDailyStreak.LevelOfGift = 2;
-                }
-                else if (countStudentDaily == 15)
-                {
                     await SendNotification(countStudentDaily, cancellationToken);
                 }
                 else if (countStudentDaily == endDay)

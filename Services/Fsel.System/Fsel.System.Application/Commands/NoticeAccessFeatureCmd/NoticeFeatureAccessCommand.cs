@@ -18,6 +18,12 @@ namespace Fsel.System.Application.Commands.NoticeAccessFeatureCmd
     {
         private readonly IFeatureAccessTimeRepository _featureAccessTimeRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private const int One_Day_Off = 1;
+        private const int Two_Days_Off = 2;
+        private const int Three_Days_Off = 3;
+        private const int Four_Days_Off = 4;
+        private const int Five_Days_Off = 5;
+        private const int Fifteen_Days_Off = 15;
 
         public NoticeFeatureAccessCommandHandler(IFeatureAccessTimeRepository featureAccessTimeRepository, NotificationMessagePublisher notificationMessagePublisher)
         {
@@ -30,22 +36,28 @@ namespace Fsel.System.Application.Commands.NoticeAccessFeatureCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            await CheckStudentsNoActionForSomeDays(1, EnumNotificationContent.FirstStudyNotice, cancellationToken); //1 ngày không đăng nhập
-            await CheckStudentsNoActionForSomeDays(2, EnumNotificationContent.SecondStudyNotice, cancellationToken); //2 ngày không đăng nhập
-            await CheckStudentsNoActionForSomeDays(3, EnumNotificationContent.ThirdStudyNotice, cancellationToken); //3 ngày không đăng nhập
-            await CheckStudentsNoActionForSomeDays(4, EnumNotificationContent.FourthStudyNotice, cancellationToken);  //4 ngày không đăng nhập
-            await CheckStudentsNoActionForSomeDays(5, EnumNotificationContent.FifthStudyNotice, cancellationToken); //5 ngày không đăng nhập
-            await CheckStudentsNoActionForSomeDays(15, EnumNotificationContent.StopBothering, cancellationToken); //15 ngày không đăng nhập
+            var notifications = new Dictionary<int, EnumNotificationContent>
+                                {
+                                    { One_Day_Off, EnumNotificationContent.FirstStudyNotice },
+                                    { Two_Days_Off, EnumNotificationContent.SecondStudyNotice },
+                                    { Three_Days_Off, EnumNotificationContent.ThirdStudyNotice },
+                                    { Four_Days_Off, EnumNotificationContent.FourthStudyNotice },
+                                    { Five_Days_Off, EnumNotificationContent.FifthStudyNotice },
+                                    { Fifteen_Days_Off, EnumNotificationContent.StopBothering }
+                                };
 
-            //await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
-            //{
-            //    UserIds = listUserNoAction.Select(x => x.CreatedUserId).ToList(),
-            //    Content = EnumNotificationContent.DiscussionBoardInActive,
+            // Tạo danh sách các task để gửi thông báo cho các mốc thời gian khác nhau
+            var tasks = notifications.Select(notification =>
+                CheckStudentsNoActionForSomeDays(notification.Key, notification.Value, cancellationToken)).ToList();
 
-            //    Type = EnumNotificationType.LinkPage,
-            //    PlatformCode = EnumPlatformCode.LMS,
-            //    ObjectId = Guid.NewGuid(),
-            //}, cancellationToken);
+            try
+            {
+                // Thực hiện tất cả các task đồng thời
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+            }
 
             return methodResult;
         }

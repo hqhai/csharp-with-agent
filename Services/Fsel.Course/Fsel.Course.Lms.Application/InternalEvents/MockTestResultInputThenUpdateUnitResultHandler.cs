@@ -21,13 +21,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     public class MockTestResultInputThenUpdateUnitResultHandler : BaseInternalUnitResultEventHandler,
         INotificationHandler<EntityChangedEvent<MockTestResult>>
     {
-        private readonly ILogger<MockTestResultInputThenUpdateUnitResultHandler> _logger;
         private readonly IMockTestRepository _mockTestRepository;
 
         public MockTestResultInputThenUpdateUnitResultHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, ILessonResultRepository lessonResultRepository, IMockTestRepository mockTestRepository, IOrderService orderService, ILessonNoteRepository noteRepository, ILogger<BaseInternalUnitResultEventHandler> logger, NotificationMessagePublisher notificationMessagePublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, lessonResultRepository, orderService, noteRepository, logger, notificationMessagePublisher)
         {
             _mockTestRepository = mockTestRepository;
-            _logger = logger;
         }
 
         public async Task Handle(EntityChangedEvent<MockTestResult> notification, CancellationToken cancellationToken)
