@@ -13,9 +13,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateVoucherAndSendMailCommand : IRequest<MethodResult<bool>>
+    public class CreateVoucherAndSendMailCommandModelModel
     {
         public IList<string>? Emails { get; set; }
+    }
+
+    public class CreateVoucherAndSendMailCommand : CreateVoucherAndSendMailCommandModelModel, IRequest<MethodResult<bool>>
+    {
     }
 
     public class CreateVoucherAndSendMailCommandHandler : IRequestHandler<CreateVoucherAndSendMailCommand, MethodResult<bool>>
