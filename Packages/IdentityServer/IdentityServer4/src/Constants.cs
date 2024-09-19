@@ -187,6 +187,7 @@ namespace IdentityServer4
             public static class DefaultRoutePaths
             {
                 public const string Login = "/account/login";
+                public const string Register = "/account/register";
                 public const string Logout = "/account/logout";
                 public const string Consent = "/consent";
                 public const string Error = "/home/error";
@@ -328,6 +329,11 @@ namespace IdentityServer4
         public static class AuthorizationParamsStore
         {
             public const string MessageStoreIdParameterName = "authzId";
+        }
+
+        public static class AuthorizationParamsHeader
+        {
+            public const string IsRegister = "IsRegister";
         }
 
         public static class CurveOids

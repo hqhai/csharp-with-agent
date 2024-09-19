@@ -17,6 +17,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         public string? OSName { get; set; }
         public string? DeviceId { get; set; }
         public string? DeviceName { get; set; }
+        public bool IsRegister { get; set; }
 
         public IEnumerable<ExternalProvider> ExternalProviders { get; set; } = Enumerable.Empty<ExternalProvider>();
         public IEnumerable<ExternalProvider> VisibleExternalProviders => ExternalProviders.Where(x => !String.IsNullOrWhiteSpace(x.DisplayName));

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
+// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System;
@@ -31,6 +31,7 @@ namespace IdentityServer4.Endpoints
         private readonly IAuthorizeInteractionResponseGenerator _interactionGenerator;
 
         private readonly IAuthorizeRequestValidator _validator;
+        private readonly IIdentityServerInteractionService _interaction;
 
         protected AuthorizeEndpointBase(
             IEventService events,
@@ -39,7 +40,8 @@ namespace IdentityServer4.Endpoints
             IAuthorizeRequestValidator validator,
             IAuthorizeInteractionResponseGenerator interactionGenerator,
             IAuthorizeResponseGenerator authorizeResponseGenerator,
-            IUserSession userSession)
+            IUserSession userSession,
+            IIdentityServerInteractionService interaction)
         {
             _events = events;
             _options = options;
@@ -48,6 +50,7 @@ namespace IdentityServer4.Endpoints
             _interactionGenerator = interactionGenerator;
             _authorizeResponseGenerator = authorizeResponseGenerator;
             UserSession = userSession;
+            _interaction = interaction;
         }
 
         protected ILogger Logger { get; private set; }
@@ -89,7 +92,7 @@ namespace IdentityServer4.Endpoints
             }
             if (interactionResult.IsLogin)
             {
-                return new LoginPageResult(request);
+                return new LoginPageResult(request, _interaction);
             }
             if (interactionResult.IsConsent)
             {

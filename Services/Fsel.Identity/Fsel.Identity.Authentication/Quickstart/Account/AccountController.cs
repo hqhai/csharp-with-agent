@@ -885,6 +885,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 OSName = context?.Parameters[Settings.RequestHeader.OSName],
                 DeviceId = context?.Parameters[Settings.RequestHeader.DeviceId],
                 DeviceName = context?.Parameters[Settings.RequestHeader.DeviceName],
+                IsRegister = bool.TryParse(context?.Parameters[RequestHeaderSetting.IsRegister], out var isRegister) && isRegister,
             };
 
             if (context?.IdP != null && await _schemeProvider.GetSchemeAsync(context.IdP) != null)

@@ -13,6 +13,8 @@ using IdentityServer4.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using IdentityServer4.Stores;
 using IdentityServer4.Models;
+using IdentityServer4.Services;
+using static IdentityServer4.Constants;
 
 namespace IdentityServer4.Endpoints.Results
 {
@@ -23,22 +25,26 @@ namespace IdentityServer4.Endpoints.Results
     public class LoginPageResult : IEndpointResult
     {
         private readonly ValidatedAuthorizeRequest _request;
+        private readonly IIdentityServerInteractionService _interaction;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LoginPageResult"/> class.
         /// </summary>
         /// <param name="request">The request.</param>
+        /// <param name="interaction">IIdentityServerInteractionService.</param>
         /// <exception cref="System.ArgumentNullException">request</exception>
-        public LoginPageResult(ValidatedAuthorizeRequest request)
+        public LoginPageResult(ValidatedAuthorizeRequest request, IIdentityServerInteractionService interaction)
         {
             _request = request ?? throw new ArgumentNullException(nameof(request));
+            _interaction = interaction ?? throw new ArgumentNullException(nameof(interaction));
         }
 
         internal LoginPageResult(
             ValidatedAuthorizeRequest request,
             IdentityServerOptions options,
-            IAuthorizationParametersMessageStore authorizationParametersMessageStore = null) 
-            : this(request)
+            IIdentityServerInteractionService interaction,
+            IAuthorizationParametersMessageStore authorizationParametersMessageStore = null)
+            : this(request, interaction)
         {
             _options = options;
             _authorizationParametersMessageStore = authorizationParametersMessageStore;
@@ -74,15 +80,22 @@ namespace IdentityServer4.Endpoints.Results
                 returnUrl = returnUrl.AddQueryString(_request.Raw.ToQueryString());
             }
 
-            var loginUrl = _options.UserInteraction.LoginUrl;
-            if (!loginUrl.IsLocalUrl())
+            var pageUrl = _options.UserInteraction.LoginUrl;
+
+            var authContext = await _interaction.GetAuthorizationContextAsync(returnUrl);
+            if (bool.TryParse(authContext?.Parameters[AuthorizationParamsHeader.IsRegister], out var isRegister) && isRegister)
+            {
+                pageUrl = _options.UserInteraction.RegisterUrl;
+            }
+
+            if (!pageUrl.IsLocalUrl())
             {
                 // this converts the relative redirect path to an absolute one if we're 
                 // redirecting to a different server
                 returnUrl = context.GetIdentityServerHost().EnsureTrailingSlash() + returnUrl.RemoveLeadingSlash();
             }
 
-            var url = loginUrl.AddQueryString(_options.UserInteraction.LoginReturnUrlParameter, returnUrl);
+            var url = pageUrl.AddQueryString(_options.UserInteraction.LoginReturnUrlParameter, returnUrl);
             context.Response.RedirectToAbsoluteUrl(url);
         }
     }
