@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -37,7 +37,6 @@ namespace Fsel.Notification.Infrastructure.Migrations
                     { new Guid("0026c94f-7e1f-4cab-ab54-e0bf751f0f92"), "CompletedStreakLogin", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/home-chart/daily-checkin", "Bạn đã hoàn thành nhiệm vụ {0} ngày đăng nhập trong tháng. Nhấn để nhận quà cho sự chăm chỉ của mình nào!", "LinkPage", null, null, null },
                     { new Guid("0dd30706-69c5-403b-a488-7b555e47bb60"), "FifthStudyNotice", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "", "Thông báo quan trọng! Đã 5 ngày kể từ khi bạn truy cập ứng dụng học cuối cùng. Đừng bỏ lỡ cơ hội học tập. Hãy quay lại và tiếp tục hành trình học tập của bạn ngay bây giờ!", "LinkPage", null, null, null },
                     { new Guid("1d44814a-847e-4736-8a95-323148e11f45"), "CompleteCourse", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "", "Chúc mừng bạn đã hoàn thành khoá học {0}. Nhấn để xem lại hành trình của bạn theo góc nhìn tổng quan nhé.", "LinkPage", null, null, null },
-                    { new Guid("2a138a4c-6b3c-4a86-bbc2-3aa845e70c21"), "LuckyTicket", new DateTime(2024, 8, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "{0}", "Bạn đã nhận được Mã đổi thưởng: {0}. Hãy truy cập leaderboard.fsel.vn để đổi thưởng ngay nào!", "LinkPopup", null, null, null },
                     { new Guid("30f3dce8-e8c0-4231-a2b1-8b97e9551129"), "ExtendSuccessfully", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "", "Chào mừng bạn đến với FSEL! Hãy chuẩn bị sẵn sàng cho hành trình học tập trong vòng 24 tháng tới nhé!", "LinkPage", null, null, null },
                     { new Guid("3c924341-55de-425d-94e1-c4d090e118a4"), "ThirdStudyNotice", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "", "Thông báo quan trọng! Đã 3 ngày kể từ lần cuối bạn tham gia vào học tập trên ứng dụng. Hãy dành một ít thời gian mỗi ngày để tiếp tục nâng cao kiến thức của bạn!", "LinkPage", null, null, null },
                     { new Guid("4539a934-7f9a-4f09-8b84-b853092d156d"), "EnergyCollecting", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "", "Chúng ta chỉ còn một ngày duy nhất để thu thập năng lượng hành tinh và mở ra hành tinh kho báu! Đừng bỏ lỡ cơ hội nhận những phần quà vô cùng hấp dẫn. Hãy bắt đầu ngay bây giờ!", "LinkPage", null, null, null },
@@ -396,11 +395,6 @@ namespace Fsel.Notification.Infrastructure.Migrations
                 table: "NotificationTypeTranslations",
                 keyColumn: "Id",
                 keyValue: new Guid("fcf43e61-7a49-4978-b547-85de6aea5363"));
-
-            migrationBuilder.DeleteData(
-                table: "NotificationTypes",
-                keyColumn: "Id",
-                keyValue: new Guid("2a138a4c-6b3c-4a86-bbc2-3aa845e70c21"));
 
             migrationBuilder.DeleteData(
                 table: "NotificationTypes",
