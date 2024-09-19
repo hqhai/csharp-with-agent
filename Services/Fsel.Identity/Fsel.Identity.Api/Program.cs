@@ -85,6 +85,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.UserQueue.NameQueue.AddExpiredDateForStudent, typeof(AddExpiredDateForStudentConsumer) },
     { QueueSettings.LmsQueue.NameQueue.StudentRankingEvent, typeof(StudentRankingEventsConsumer) },
     { QueueSettings.UserQueue.NameQueue.AddFeatureMission, typeof(AddFeatureMissionConsumer) },
+    { QueueSettings.UserQueue.NameQueue.NoticeExtend, typeof(NoticeExtendPackageConsumer) },
+    { QueueSettings.UserQueue.NameQueue.WeeklyNotice, typeof(WeeklyNoticeConsumer) },
     { QueueSettings.UserQueue.NameQueue.JobRunEvents, typeof(JobRunEventsConsumer) },
     { QueueSettings.UserQueue.NameQueue.CheckUserDeletion, typeof(CheckUserDeletionConsumer) }
 });
