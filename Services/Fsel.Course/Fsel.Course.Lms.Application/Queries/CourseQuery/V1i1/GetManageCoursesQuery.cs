@@ -169,6 +169,16 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                     courseManager.IsChangeLevel = userCourseSettings.HasRemainingAttempts(EnumUserCourseType.ChangeLevel);
                     courseManager.IsResetCourse = userCourseSettings.HasRemainingAttempts(EnumUserCourseType.ResetAndLearnAgain, courseResult.Course?.CourseLevel);
                 }
+                if (courseManager.CourseType == EnumCourseType.Ielts && courseManager.CourseLevel.HasValue)
+                {
+                    var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && !x.UnitId.HasValue)
+                                                                                  .OrderByDescending(x => x.CreatedDate)
+                                                                                  .ThenByDescending(x => x.UpdatedDate)
+                                                                                  .FirstOrDefaultAsync(cancellationToken);
+                    var mockTestResultModel = _mapper.Map<MockTestResultModel>(mockTestResult);
+                    courseManager.BandScores = courseManager.CourseLevel.Value.GetBandScore();
+                    courseManager.TargetBandScores = mockTestResultModel.Scores;
+                }
                 courseManager.IsCheckPercentColor = await IsColorToPercentAsync(courseResult);
                 courseManagers.Add(courseManager);
             }
