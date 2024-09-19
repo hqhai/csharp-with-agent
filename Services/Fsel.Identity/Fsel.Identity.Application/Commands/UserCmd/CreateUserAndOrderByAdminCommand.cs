@@ -45,6 +45,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     FullName = request.FullName,
                     Email = request.Email,
                     School = request.School,
+                    SchoolId = request.SchoolId,
                     DateOfBirth = request.DateOfBirth,
                     ReferralCode = request.ReferralCode,
                 }, cancellationToken);
