@@ -30,6 +30,23 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
 
         public int? YearBirthday { get; set; }
 
+        [RegularExpression(nameof(BirthdayStr), ErrorMessage = "i18n_Invalid_birthday")]
+        public string? BirthdayStr
+        {
+            get
+            {
+                if (DayBirthday.HasValue && MonthBirthday.HasValue && YearBirthday.HasValue && Birthday.HasValue)
+                {
+                    return nameof(BirthdayStr);
+                }
+                else if (DayBirthday.HasValue && MonthBirthday.HasValue && YearBirthday.HasValue && !Birthday.HasValue)
+                {
+                    return nameof(Birthday);
+                }
+                return null;
+            }
+        }
+
         [Required(ErrorMessage = "i18n_Birth_day_cannot_be_empty")]
         public DateTime? Birthday
         {

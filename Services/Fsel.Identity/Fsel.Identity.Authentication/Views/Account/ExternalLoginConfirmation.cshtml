@@ -93,6 +93,8 @@
                 </div>
                 <div class="row">
                     <div class="col-sm-12">
+                        <input type="text" asp-for="BirthdayStr" class="text-input-hidden" />
+                        <input type="text" asp-for="Birthday" class="text-input-hidden" />
                         <div class="float-input float-input-validate option-birthday">
                             <div class="name-option">
                                 <span>@Localizer["i18nSignUpLabelBirthday"]</span>
@@ -125,6 +127,7 @@
                                            placeholder=""
                                            class="text-input"
                                            id="Month"
+                                           value="@Model.MonthBirthday"
                                            autocomplete="off"
                                            readonly />
                                     <label for="MonthBirthday" class="input-label">@Localizer["i18n_month"]</label>
@@ -149,6 +152,8 @@
                                 </div>
                             </div>
                         </div>
+                        @Html.CustomValidationMessageFor(model => model.BirthdayStr, Localizer, "", new { @class = "content-text-danger" })
+                        @Html.CustomValidationMessageFor(model => model.Birthday, Localizer, "", new { @class = "content-text-danger" })
                     </div>
                 </div>
                 <div class="row">
@@ -201,8 +206,8 @@
                 <div class="checkbox">
                     <input type="checkbox" name="policy" id="policy" hidden />
                     <label for="policy" class="service-policy">
-                        @Localizer["i18n_i_agree"] <a target="_blank" href="https://lms.fsel.edu.vn/term-condition">@Localizer["i18n_term_of_services"]</a> @Localizer["i18n_and"]
-                        <a target="_blank" href="https://lms.fsel.edu.vn/policy">@Localizer["i18n_privacy_policy"]</a>
+                        @Localizer["i18n_i_agree"] <a target="_blank" href="https://term-condition.fsel.edu.vn">@Localizer["i18n_term_of_services"]</a> @Localizer["i18n_and"]
+                        <a target="_blank" href="https://policy.fsel.edu.vn">@Localizer["i18n_privacy_policy"]</a>
                     </label>
                 </div>
             </div>

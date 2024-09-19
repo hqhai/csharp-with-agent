@@ -30,8 +30,38 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
 
         public int? YearBirthday { get; set; }
 
+        [RegularExpression(nameof(BirthdayStr), ErrorMessage = "i18n_Invalid_birthday")]
+        public string? BirthdayStr
+        {
+            get
+            {
+                if (DayBirthday.HasValue && MonthBirthday.HasValue && YearBirthday.HasValue && Birthday.HasValue)
+                {
+                    return nameof(BirthdayStr);
+                }
+                else if (DayBirthday.HasValue && MonthBirthday.HasValue && YearBirthday.HasValue && !Birthday.HasValue)
+                {
+                    return nameof(Birthday);
+                }
+                return null;
+            }
+        }
+
         [Required(ErrorMessage = "i18n_Birth_day_cannot_be_empty")]
-        public DateTime? Birthday => DayBirthday.HasValue && MonthBirthday.HasValue && YearBirthday.HasValue ? new DateTime(YearBirthday.Value, MonthBirthday.Value, DayBirthday.Value) : null;
+        public DateTime? Birthday
+        {
+            get
+            {
+                try
+                {
+                    return DayBirthday.HasValue && MonthBirthday.HasValue && YearBirthday.HasValue ? new DateTime(YearBirthday.Value, MonthBirthday.Value, DayBirthday.Value) : null;
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
 
         public string? Provider { get; set; }
 

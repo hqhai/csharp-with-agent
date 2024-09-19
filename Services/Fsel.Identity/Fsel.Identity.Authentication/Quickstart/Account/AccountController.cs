@@ -369,8 +369,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         /// <returns></returns>
         public IActionResult Register(string? returnUrl)
         {
-            var vm = GetFromTempData(nameof(UserRegisterModel))?.ToString().Deserialize<UserRegisterModel>();
-            vm ??= new UserRegisterModel
+            var vm = new UserRegisterModel
             {
                 ReturnUrl = returnUrl
             };
@@ -601,10 +600,17 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                             // user might have clicked on a malicious link - should be logged
                         }
                     }
+                    else if (userLogin.IsLockedOut)
+                    {
+                        ModelState.AddModelError(string.Empty, _localizer["i18n_account_locked"]);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, _localizer["ERROR_CODE.UserNameAndPasswordIncorrect"]);
+                    }
                 }
 
                 await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, _localizer["i18n_Invalid_Credentials"], clientId: context?.Client.ClientId));
-                ModelState.AddModelError(string.Empty, _localizer["ERROR_CODE.UserNameAndPasswordIncorrect"]);
             }
 
             // something went wrong, show form with error

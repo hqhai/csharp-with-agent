@@ -6,6 +6,10 @@
   line-height: 20px;
 }
 
+.text-input-hidden {
+  position: absolute;
+}
+
 .loading {
   width: 100vw !important;
   height: 100vh !important;

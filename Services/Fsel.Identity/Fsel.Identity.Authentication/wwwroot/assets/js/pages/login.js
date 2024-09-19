@@ -13,7 +13,7 @@
   const loginButton = $("#loginButton");
 
   emailInput.on("input", validateEmail);
-  passwordInput.on("input", validatePasswordFormat);
+  //passwordInput.on("input", validatePasswordFormat);
 
   function validateEmail() {
     const email = emailInput.val().trim();
@@ -54,10 +54,10 @@
 
     // Validate each field
     const isValidEmail = validateEmail();
-    const isValidPassword = validatePasswordFormat() === 100;
+    //const isValidPassword = validatePasswordFormat() === 100;
 
     if (!isValidEmail) isDoneAllValidate = false;
-    if (!isValidPassword) isDoneAllValidate = false;
+    //if (!isValidPassword) isDoneAllValidate = false;
 
     return isDoneAllValidate;
   }

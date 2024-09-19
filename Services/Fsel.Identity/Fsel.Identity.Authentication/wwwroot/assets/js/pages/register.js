@@ -252,11 +252,17 @@
         $yearInput.removeClass("content-border-danger");
         $monthInput.removeClass("content-border-danger");
         $dayInput.removeClass("content-border-danger");
+        $("input.text-input-hidden[name='Birthday']").attr("value", `${year}-${month}-${day}`)
+        $("input.text-input-hidden[name='Birthday']").valid();
+        $("input.text-input-hidden[name='BirthdayStr']").attr("value", "BirthdayStr");
+        $("input.text-input-hidden[name='BirthdayStr']").valid();
       }
       else {
         $yearInput.addClass("content-border-danger");
         $monthInput.addClass("content-border-danger");
         $dayInput.addClass("content-border-danger");
+        $("input.text-input-hidden[name='BirthdayStr']").attr("value", "Birthday");
+        $("input.text-input-hidden[name='BirthdayStr']").valid();
       }
     }
     return true;
@@ -429,6 +435,11 @@
   $('.MonthBirthday-values').each(function () {
     var months = $(this).attr('data-values').split(',');
     months.forEach(function (option, index) {
+      var curMonth = $("#Month").attr("value");
+      if (curMonth && curMonth == index + 1){
+        $("#Month").attr("value", option);
+      }
+
       $("<div>").addClass("dropdown-option")
         .text(option)
         .appendTo($monthDropdownContent)
@@ -458,5 +469,10 @@
     // Kiểm tra xem radio button giới tính đã được chọn chưa
     return $genderRadios.is(":checked");
   }
+
+  $(window).on('pageshow', function () {
+    $genderRadios.prop('checked', false);
+    $policyCheckbox.prop('checked', false);
+  });
 
 }(jQuery));	
