@@ -92,7 +92,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                     }
                     else
                     {
-                        subQuestion.Status = isExact.HasValue || !(string.IsNullOrEmpty(configAnswer?.Content) && string.IsNullOrEmpty(configAnswer?.Key)) ? EnumCorrectStatus.Process : EnumCorrectStatus.New;
+                        subQuestion.Status = !(string.IsNullOrEmpty(configAnswer?.Content) && string.IsNullOrEmpty(configAnswer?.Key)) || isExact.HasValue ? EnumCorrectStatus.Process : EnumCorrectStatus.New;
                     }
                 }
                 listSubQuestion.AddRange(subQuestions);
