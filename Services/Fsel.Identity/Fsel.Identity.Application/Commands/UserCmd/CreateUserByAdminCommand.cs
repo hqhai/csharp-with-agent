@@ -87,6 +87,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                         CreatedByParent = false,
                         Occupation = "Student",
                         School = request.School,
+                        SchoolId = request.SchoolId,
                     }
                 },
                 UserPlatforms = new List<UserPlatform>()
