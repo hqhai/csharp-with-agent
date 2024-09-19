@@ -177,6 +177,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         }
 
         /// <summary>
+        /// Create user by admin
+        /// </summary>
+        [HttpPost("create-user-by-admin")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateUserAndOrder([FromBody] CreateUserByAdminCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Create user and order
         /// </summary>
         [HttpPost("create-user-and-order")]
