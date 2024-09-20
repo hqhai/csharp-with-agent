@@ -19,11 +19,11 @@ namespace Fsel.System.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/location")]
     [ApiController]
-    public class LocationControllerController : BaseController
+    public class LocationController : BaseController
     {
         private readonly IMediator _mediator;
 
-        public LocationControllerController(IMediator mediator)
+        public LocationController(IMediator mediator)
         {
             _mediator = mediator;
         }
