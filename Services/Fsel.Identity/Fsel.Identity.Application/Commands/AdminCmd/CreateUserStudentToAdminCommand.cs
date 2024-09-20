@@ -34,6 +34,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         public string? Email { get; set; }
         public bool IsTrialRegistration { get; set; }
         public Guid CourseId { get; set; }
+        public DateTime? ExpireDate { get; set; }
+        public EnumPaymentRevenueType PaymentRevenueType { get; set; }
     }
 
     public class CreateUserStudentToAdminCommandHandler : IRequestHandler<CreateUserStudentToAdminCommand, MethodResult<UserModel>>
@@ -169,7 +171,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             var student = user.Human?.Student;
 
             await _lmsCourseService.SavePlacementTestDoneAsync(new SavePlacementTestDoneCommandModel { CourseLevel = GetCourseLevel(course.CourseLevel), StudentId = student?.Id ?? default });
-            var orderResult = await SaveOrderAsync(user, course, request.IsTrialRegistration);
+            var orderResult = await SaveOrderAsync(user, course, request);
             if (!orderResult.IsOK)
             {
                 methodResult.AddErrorBadRequest(orderResult.ErrorMessages);
@@ -201,7 +203,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
         }
 
-        private async Task<VoidMethodResult> SaveOrderAsync(User user, CourseModel course, bool isTrialRegistration)
+        private async Task<VoidMethodResult> SaveOrderAsync(User user, CourseModel course, CreateUserStudentToAdminCommand request)
         {
             var methodResult = new VoidMethodResult();
             var packagesResult = await _orderService.GetPackages();
@@ -225,7 +227,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
                 CourseId = course.Id,
                 PackageId = package.Id,
-                IsTrialRegistration = isTrialRegistration
+                IsTrialRegistration = request.IsTrialRegistration,
+                ExpireDate = request.ExpireDate,
+                PaymentRevenueType = request.PaymentRevenueType
             });
             if (!createOrderResult.IsSuccessStatusCode)
             {

@@ -9,8 +9,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.Net.Http.Headers;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Net.Http.Headers;
 
     public class CreateUserStudentsToAdminCommand : CreateUserStudentsToAdminCommandModel, IRequest<MethodResult<IList<UserModel>>>
     {
