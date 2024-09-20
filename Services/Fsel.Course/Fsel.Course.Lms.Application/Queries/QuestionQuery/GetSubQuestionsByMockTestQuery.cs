@@ -61,7 +61,6 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             var listSubQuestion = new List<SubQuestionModel>();
 
             var questions = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
-
             foreach (var item in questions)
             {
                 var subQuestions = GetConfigQuestion(item.Config, item.QuestionType);
@@ -82,6 +81,8 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                 {
                     var configAnswer = configAnswers.FirstOrDefault(x => x.Id == subQuestion.Id);
                     var isExact = configAnswer?.IsExact;
+                    subQuestion.QuestionId = item.Id;
+                    subQuestion.IndexSubQuestion = item.SubQuestionIndexs?[subQuestions.IndexOf(subQuestion)] ?? 0;
                     if (sectionGroupResult.Status == EnumResultStatus.Done)
                     {
                         subQuestion.Status = isExact.HasValue && isExact.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
