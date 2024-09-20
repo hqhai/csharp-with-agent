@@ -16,7 +16,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
         private readonly IHubContext<NotificationHub> _notificationHubContext;
         private readonly IQueueProvider _queueProvider;
 
-        public NotificationConsumer(IHubContext<NotificationHub> notificationHubContext, IQueueProvider queueProvider, AuthContext authContext) : base(authContext)
+        public NotificationConsumer(IHubContext<NotificationHub> notificationHubContext, IQueueProvider queueProvider, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _notificationHubContext = notificationHubContext;
             _queueProvider = queueProvider;
@@ -27,7 +27,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             if (message != null && message.UserIds != null)
             {
                 var userIds = message.UserIds;
-                await _notificationHubContext.GetGroups(userIds.Select(x => x.ToString()).ToList()).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, message);
+                await _notificationHubContext.GetGroups(userIds.Distinct().Select(x => x.ToString()).ToList()).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, message);
             }
         }
     }

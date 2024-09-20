@@ -10,7 +10,7 @@ namespace Fsel.Training.Application.Queues.Consumers
     {
         private readonly IMediator _mediator;
 
-        public UpdateClassLiveAssignmentConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
+        public UpdateClassLiveAssignmentConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }

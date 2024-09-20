@@ -13,6 +13,8 @@ namespace Fsel.Identity.Application.Services.LmsCourseService.Model
 
         public EnumCourseLevel? Level { get; set; }
 
+        public DateTime? DateEdit { get; set; }
+
         public IList<IntegrationPlacementTestResultModels>? PlacementTestResults { get; set; }
     }
 }

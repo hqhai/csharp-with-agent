@@ -33,4 +33,11 @@ namespace Fsel.Shared.Models.ShareModels
 
         public Guid MockTestResultId { get; set; }
     }
+
+    public class SpeakingAIEvaluationModel
+    {
+        public Guid MockTestResultId { get; set; }
+
+        public Guid SectionGroupId { get; set; }
+    }
 }

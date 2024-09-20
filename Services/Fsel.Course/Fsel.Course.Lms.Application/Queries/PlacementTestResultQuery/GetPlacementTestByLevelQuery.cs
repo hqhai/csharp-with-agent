@@ -1,5 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Common.Helpers;
+
 namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
 {
     using System;
@@ -16,12 +18,14 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class GetPlacementTestByLevelQuery : IRequest<MethodResult<PlacementTestDtoModel>>
     {
@@ -34,6 +38,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly ILogger<GetPlacementTestByLevelQuery> _logger;
         private readonly IPlacementTestRepository _placementTestRepository;
 
         public GetPlacementTestByLevelQueryHandler(AuthContext authContext
@@ -41,6 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             , IPlacementTestResultRepository placementTestResultRepository
             , IUserService userService
             , IMapper mapper
+            , ILogger<GetPlacementTestByLevelQuery> logger
             , IPlacementTestRepository placementTestRepository)
         {
             _authContext = authContext;
@@ -48,6 +54,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             _placementTestResultRepository = placementTestResultRepository;
             _userService = userService;
             _mapper = mapper;
+            _logger = logger;
             _placementTestRepository = placementTestRepository;
         }
 
@@ -62,13 +69,26 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 return methodResult;
             }
             var student = studentResult?.Content?.Result;
-            var studentId = student?.Id ?? default;
-            int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
-            var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId)
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+            if (student.Human == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+
+            int age = DateTimeHelper.GetYearOld(student.Human.Birthday);
+            if (!student.CourseLevel.HasValue)
+            {
+                student.CourseLevel = age >= ValueSettings.AgeMilestone.StudentAge ? EnumCourseLevel.B1 : EnumCourseLevel.A2;
+            }
+            var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
                                                                           .OrderByDescending(x => x.CreatedDate)
                                                                           .FirstOrDefaultAsync(cancellationToken);
-            var placementTestResultInitial = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == studentId).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-
+            var placementTestResultInitial = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == student.Id).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
             if (placementTestResultDone != null)
             {
                 var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age));
@@ -78,14 +98,19 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                     return methodResult;
                 }
             }
-            var (placementTest, placementTestResult) = await AddPlacementTestResultAndGetPlacementTest(student!.CourseLevel.GetPlacementTestLevelByCourseLevel(), studentId, cancellationToken);
+            var (placementTest, placementTestResult) = await AddPlacementTestResultAndGetPlacementTest(student.CourseLevel.Value.GetPlacementTestLevelByCourseLevel(), student.Id, cancellationToken);
             if (placementTest == null || placementTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
+
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = await GetPlacmentTestAsync(placementTest, placementTestResult);
+            if (placementTestResult.Status == EnumResultStatus.Done)
+            {
+                _logger.LogInformation($"Logger PT Done : {methodResult.Result.Serialize()}");
+            }
             return methodResult;
         }
 
@@ -120,7 +145,16 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 {
                     placementTestResult = new PlacementTestResult { Level = placementTest.Level, PlacementTestId = placementTest.Id, StudentId = studentId };
                     _placementTestResultRepository.Add(placementTestResult);
-                    await _placementTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                    try
+                    {
+                        await _placementTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == studentId && x.Level == level).FirstOrDefaultAsync(cancellationToken);
+                        _logger.LogWarning($"Log Duplicate PlacementTestResult : {ex.Message}");
+                    }
                 }
             }
             else

@@ -23,7 +23,7 @@ stages:
 ".build-image-gitlab-registry":
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -35,17 +35,17 @@ stages:
 build-dev-auth:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
-    DOCKERFILE: "./Environments/Testing/Auth.Development.Dockerfile"
+    DOCKERFILE: "./Environments/Development/Auth.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
@@ -57,7 +57,7 @@ build-dev-auth:
 build-test-auth:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -79,7 +79,7 @@ build-test-auth:
 build-staging-auth:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -101,7 +101,7 @@ build-staging-auth:
 build-prod-auth:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -125,16 +125,16 @@ build-prod-auth:
 build-dev-gateway:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
     DOCKERFILE: "./Environments/Development/Gateway.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -147,7 +147,7 @@ build-dev-gateway:
 build-test-gateway:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -169,7 +169,7 @@ build-test-gateway:
 build-staging-gateway:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -191,7 +191,7 @@ build-staging-gateway:
 build-prod-gateway:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -210,21 +210,20 @@ build-prod-gateway:
     if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: always
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: never
 
 build-dev-hangfire:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
     DOCKERFILE: "./Environments/Development/Hangfire.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -237,7 +236,7 @@ build-dev-hangfire:
 build-test-hangfire:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -259,7 +258,7 @@ build-test-hangfire:
 build-staging-hangfire:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -281,7 +280,7 @@ build-staging-hangfire:
 build-prod-hangfire:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -305,16 +304,16 @@ build-prod-hangfire:
 build-dev-interaction:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
     DOCKERFILE: "./Environments/Development/Interaction.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -327,7 +326,7 @@ build-dev-interaction:
 build-test-interaction:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -349,7 +348,7 @@ build-test-interaction:
 build-staging-interaction:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -371,7 +370,7 @@ build-staging-interaction:
 build-prod-interaction:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -395,16 +394,16 @@ build-prod-interaction:
 build-dev-lcmsapi:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
     DOCKERFILE: "./Environments/Development/Lcms.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -417,7 +416,7 @@ build-dev-lcmsapi:
 build-test-lcmsapi:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -439,7 +438,7 @@ build-test-lcmsapi:
 build-staging-lcmsapi:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -461,7 +460,7 @@ build-staging-lcmsapi:
 build-prod-lcmsapi:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -485,16 +484,16 @@ build-prod-lcmsapi:
 build-dev-lmsapi:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
     DOCKERFILE: "./Environments/Development/Lms.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -507,7 +506,7 @@ build-dev-lmsapi:
 build-test-lmsapi:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -529,7 +528,7 @@ build-test-lmsapi:
 build-staging-lmsapi:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -551,7 +550,7 @@ build-staging-lmsapi:
 build-prod-lmsapi:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -575,16 +574,16 @@ build-prod-lmsapi:
 build-dev-notification:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
     DOCKERFILE: "./Environments/Development/Notification.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -597,7 +596,7 @@ build-dev-notification:
 build-test-notification:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -619,7 +618,7 @@ build-test-notification:
 build-staging-notification:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -641,7 +640,7 @@ build-staging-notification:
 build-prod-notification:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -665,16 +664,16 @@ build-prod-notification:
 build-dev-ordering:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
     DOCKERFILE: "./Environments/Development/Ordering.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -687,7 +686,7 @@ build-dev-ordering:
 build-test-ordering:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -709,7 +708,7 @@ build-test-ordering:
 build-staging-ordering:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -731,7 +730,7 @@ build-staging-ordering:
 build-prod-ordering:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -755,16 +754,16 @@ build-prod-ordering:
 build-dev-realtime:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
     DOCKERFILE: "./Environments/Development/Realtime.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -777,7 +776,7 @@ build-dev-realtime:
 build-test-realtime:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -799,7 +798,7 @@ build-test-realtime:
 build-staging-realtime:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -821,7 +820,7 @@ build-staging-realtime:
 build-prod-realtime:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -845,16 +844,16 @@ build-prod-realtime:
 build-dev-sender:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
     DOCKERFILE: "./Environments/Development/Sender.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -867,7 +866,7 @@ build-dev-sender:
 build-test-sender:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -889,7 +888,7 @@ build-test-sender:
 build-staging-sender:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -911,7 +910,7 @@ build-staging-sender:
 build-prod-sender:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -935,16 +934,16 @@ build-prod-sender:
 build-dev-storage:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
     DOCKERFILE: "./Environments/Development/Storage.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -957,7 +956,7 @@ build-dev-storage:
 build-test-storage:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -979,7 +978,7 @@ build-test-storage:
 build-staging-storage:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -1001,7 +1000,7 @@ build-staging-storage:
 build-prod-storage:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -1025,16 +1024,16 @@ build-prod-storage:
 build-dev-system:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
     DOCKERFILE: "./Environments/Development/System.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -1047,7 +1046,7 @@ build-dev-system:
 build-test-system:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -1069,7 +1068,7 @@ build-test-system:
 build-staging-system:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -1091,7 +1090,7 @@ build-staging-system:
 build-prod-system:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -1115,16 +1114,16 @@ build-prod-system:
 build-dev-training:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
     DOCKERFILE: "./Environments/Development/Training.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -1137,7 +1136,7 @@ build-dev-training:
 build-test-training:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -1159,7 +1158,7 @@ build-test-training:
 build-staging-training:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -1181,7 +1180,7 @@ build-staging-training:
 build-prod-training:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -1205,16 +1204,16 @@ build-prod-training:
 build-dev-identity:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
     DOCKERFILE: "./Environments/Development/User.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -1227,7 +1226,7 @@ build-dev-identity:
 build-test-identity:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -1249,7 +1248,7 @@ build-test-identity:
 build-staging-identity:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -1271,7 +1270,7 @@ build-staging-identity:
 build-prod-identity:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -1292,19 +1291,19 @@ build-prod-identity:
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: never
 
-build-dev-cms:
+build-dev-cms-planetdefender:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
     DOCKERFILE: "./Environments/Development/Cms.PlanetDefender.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -1317,7 +1316,7 @@ build-dev-cms:
 build-test-cms-planetdefender:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -1339,7 +1338,7 @@ build-test-cms-planetdefender:
 build-staging-cms-planetdefender:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:
@@ -1361,7 +1360,7 @@ build-staging-cms-planetdefender:
 build-prod-cms-planetdefender:
   stage: build-image
   tags:
-  - atlantic-k8s
+  - docker-runner
   retry:
     max: 2
   script:

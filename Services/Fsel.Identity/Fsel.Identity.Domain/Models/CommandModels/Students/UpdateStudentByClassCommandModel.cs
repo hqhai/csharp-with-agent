@@ -8,8 +8,9 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Students
     {
         public Guid ClassId { get; set; }
         public Guid StudentId { get; set; }
+        public Guid CourseId { get; set; }
         public Guid? PackageId { get; set; }
-        public int NumberOfShield { get; set; }
+        public int? NumberOfShield { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
     }
 }

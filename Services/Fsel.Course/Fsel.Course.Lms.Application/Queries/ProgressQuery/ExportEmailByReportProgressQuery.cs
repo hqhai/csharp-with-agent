@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
@@ -32,6 +33,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private readonly IUserService _userService;
         private readonly IOrderService _orderService;
         private readonly ICourseRepository _courseRepository;
+        private readonly ManagerProgressHelper _managerProgressHelper;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
@@ -42,6 +44,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             IUserService userService,
             IOrderService orderService,
             ICourseRepository courseRepository,
+            ManagerProgressHelper managerProgressHelper,
             ILessonResultRepository lessonResultRepository,
             IUnitResultRepository unitResultRepository,
             IPlacementTestResultRepository placementTestResultRepository,
@@ -51,6 +54,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             _userService = userService;
             _orderService = orderService;
             _courseRepository = courseRepository;
+            _managerProgressHelper = managerProgressHelper;
             _lessonResultRepository = lessonResultRepository;
             _unitResultRepository = unitResultRepository;
             _placementTestResultRepository = placementTestResultRepository;
@@ -90,8 +94,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
             if (students != null && students.Any())
             {
-                var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId)).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
-
+                var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
                 foreach (var student in students)
                 {
                     var userId = student.Human?.UserId ?? default;
@@ -108,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                         SchoolName = student?.School
                     };
                     (reportProgress.PTStatus, reportProgress.PTLevel) = await GetStatusPTAsync(student, courseResult != null, cancellationToken);
-                    var orderResult = await _orderService.GetOrderAsync(userId);
+                    var orderResult = await _orderService.GetOrderTrialAsync(userId);
                     if (orderResult.IsSuccessStatusCode)
                     {
                         var order = orderResult.Content?.Result;
@@ -117,6 +120,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                             reportProgress.StartTrial = order.UpdatedDate ?? order.CreatedDate;
                             reportProgress.EndTrial = order.ExpireDate;
                         }
+                    }
+                    var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { UserId = student?.Human?.UserId ?? default });
+                    if (featureAccessTimeResult.IsSuccessStatusCode)
+                    {
+                        reportProgress.LastEntry = featureAccessTimeResult.Content?.Result?.LastVisited;
                     }
                     await SetProgressStudentAsync(reportProgress, courseResult, cancellationToken);
                     if (courseResult != null)
@@ -141,7 +149,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                             {
                                 reportProgress.TotalAccess = featureAccessTime.Visit;
                                 reportProgress.TotalTime = featureAccessTime.AccessTime;
-                                reportProgress.UpdatedDate = featureAccessTime.LastVisited;
+                                reportProgress.FinalStudyPeriod = featureAccessTime.LastVisited;
                             }
                             var courseResultModel = new CourseResultModel
                             {
@@ -149,7 +157,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                                 CourseId = courseResult.CourseId,
                                 StudentId = courseResult.StudentId
                             };
-                            var (currentProgress, progress) = await _courseRepository.GetContentComplete(courseResultModel);
+                            var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResultModel);
                             reportProgress.LessonCompleted = string.Format("{0} / {1}", currentProgress, progress);
                         }
                     }
@@ -169,7 +177,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             {
                 return;
             }
-            var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.Status != EnumResultStatus.Unfinished)
+            var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
                                                                    .OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
 
             var unitResultDones = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.Status == EnumResultStatus.Done)

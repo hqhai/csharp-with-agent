@@ -1,0 +1,495 @@
+[
+  {
+    "id": "2B6FCF1F-4DF4-4182-BC3E-6B1A7B7A0744",
+    "config": {
+      "startTime": 12,
+      "endTime": 17,
+      "value": "string"
+    },
+    "templateMessage": "🚀 Chào buổi chiều, {0}! Buổi chiều đến rồi, hãy khám phá thêm nhiều bí mật của vũ trụ tri thức nhé! 🌇🌟",
+    "createdDate": "2024-06-04",
+    "priority": 3,
+    "icon": "string",
+    "image": "string",
+    "action": "GoodAfternoon",
+    "feature": "Greeting",
+    "techieId": "6D9CB3CC-8B96-4C93-8D67-CDA597E6E5EB",
+    "translations": [
+      {
+        "id": "3FA8733D-4EBB-4C58-9351-81ED69A6FB3E",
+        "createdDate": "2024-06-04",
+        "techieActionId": "2B6FCF1F-4DF4-4182-BC3E-6B1A7B7A0744",
+        "templateMessage": "🚀 Chào buổi chiều, {0}! Buổi chiều đến rồi, hãy khám phá thêm nhiều bí mật của vũ trụ tri thức nhé! 🌇🌟",
+        "language": "vi-VN"
+      },
+      {
+        "id": "EF99E614-167B-4411-B674-6693E5380C25",
+        "createdDate": "2024-06-04",
+        "techieActionId": "2B6FCF1F-4DF4-4182-BC3E-6B1A7B7A0744",
+        "templateMessage": "🚀 Good afternoon, {0}! The afternoon has arrived, let's uncover more secrets of the knowledge universe! 🌇🌟",
+        "language": "en-US"
+      }
+    ]
+  },
+  {
+    "id": "78BC6ADC-9A25-4B9D-8376-89A75123224E",
+    "config": {
+      "startTime": 7,
+      "endTime": 11,
+      "value": "string"
+    },
+    "templateMessage": "🚀 Chào buổi sáng, {0}! Hãy để buổi sáng này bắt đầu với những khám phá mới trong vũ trụ tri thức nhé! 🌞🪐",
+    "createdDate": "2024-06-04",
+    "priority": 3,
+    "icon": "string",
+    "image": "string",
+    "action": "GoodMorning",
+    "feature": "Greeting",
+    "techieId": "6D9CB3CC-8B96-4C93-8D67-CDA597E6E5EB",
+    "translations": [
+      {
+        "id": "8DB87C55-D96C-4D53-B762-3F783A62F620",
+        "createdDate": "2024-06-04",
+        "techieActionId": "78BC6ADC-9A25-4B9D-8376-89A75123224E",
+        "templateMessage": "🚀 Chào buổi sáng, {0}! Hãy để buổi sáng này bắt đầu với những khám phá mới trong vũ trụ tri thức nhé! 🌞🪐",
+        "language": "vi-VN"
+      },
+      {
+        "id": "66A44E42-66CD-4EB6-823C-2BAC5246D659",
+        "createdDate": "2024-06-04",
+        "techieActionId": "78BC6ADC-9A25-4B9D-8376-89A75123224E",
+        "templateMessage": "🚀 Good morning, {0}! Let's start this morning with new discoveries in the universe of knowledge! 🌞🪐",
+        "language": "en-US"
+      }
+    ]
+  },
+
+  {
+    "id": "983AA2F9-218F-45AD-82B5-8528BCAC363A",
+    "config": {
+      "startTime": 12,
+      "endTime": 17,
+      "value": "string"
+    },
+    "templateMessage": "Chào ngày mới, {0}! 🌅🚀Wow, dậy sớm thế này, bạn chắc chắn là người đầu tiên ngắm mặt trời mọc đó. Thật chăm chỉ quá đi!",
+    "createdDate": "2024-06-04",
+    "priority": 3,
+    "icon": "string",
+    "image": "string",
+    "action": "GoodEarlyMorning",
+    "feature": "Greeting",
+    "techieId": "6D9CB3CC-8B96-4C93-8D67-CDA597E6E5EB",
+    "translations": [
+      {
+        "id": "287AA284-5F84-40CB-9AF5-0269D0ECD8E1",
+        "createdDate": "2024-06-04",
+        "techieActionId": "983AA2F9-218F-45AD-82B5-8528BCAC363A",
+        "templateMessage": "Chào ngày mới, {0}! 🌅🚀Wow, dậy sớm thế này, bạn chắc chắn là người đầu tiên ngắm mặt trời mọc đó. Thật chăm chỉ quá đi!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "0164E974-EF84-4745-B2D4-7E949625176F",
+        "createdDate": "2024-06-04",
+        "techieActionId": "983AA2F9-218F-45AD-82B5-8528BCAC363A",
+        "templateMessage": "Good morning, {0}! 🌅🚀 Wow, you're up early! You must be the first to see the sunrise. Such dedication!",
+        "language": "en-US"
+      }
+    ]
+  },
+
+  {
+    "id": "358A5E9E-F7F1-471E-B402-53EF27688746",
+    "config": {
+      "startTime": 18,
+      "endTime": 21,
+      "value": "string"
+    },
+    "templateMessage": "🚀 Chào buổi tối, {0}! Hãy thắp sáng ngọn lửa tri thức và khám phá vũ trụ nhé! 🌟✨",
+    "createdDate": "2024-06-04",
+    "priority": 3,
+    "icon": "string",
+    "image": "string",
+    "action": "GoodEvening",
+    "feature": "Greeting",
+    "techieId": "6D9CB3CC-8B96-4C93-8D67-CDA597E6E5EB",
+    "translations": [
+      {
+        "id": "66797936-1421-462A-BD0C-6E6AC893A4F3",
+        "createdDate": "2024-06-04",
+        "techieActionId": "358A5E9E-F7F1-471E-B402-53EF27688746",
+        "templateMessage": "🚀 Good evening, {0}! Ignite the flame of knowledge and explore the universe! 🌟✨",
+        "language": "vi-VN"
+      },
+      {
+        "id": "3EE73930-5D3E-4B53-BF2D-A02BC9F094E0",
+        "createdDate": "2024-06-04",
+        "techieActionId": "358A5E9E-F7F1-471E-B402-53EF27688746",
+        "templateMessage": "🚀 Good evening, {0}! Ignite the flame of knowledge and explore the universe! 🌟✨",
+        "language": "en-US"
+      }
+    ]
+  },
+
+  {
+    "id": "B34CFDC1-5BC0-4A00-8D53-B5B88E932A1D",
+    "config": {
+      "startTime": 22,
+      "endTime": 2,
+      "value": "string"
+    },
+    "templateMessage": "Chào buổi đêm, {0}! 🌙🚀 Đêm khuya rồi mà bạn vẫn học ư?? Sự nỗ lực của bạn đang toả sáng như các ngôi sao trên bầu trời đó! Hãy tiếp tục tỏa sáng và khám phá thêm nhiều điều thú vị nhé! 🌟📚✨",
+    "createdDate": "2024-06-04",
+    "priority": 3,
+    "icon": "string",
+    "image": "string",
+    "action": "GoodLateNight",
+    "feature": "Greeting",
+    "techieId": "6D9CB3CC-8B96-4C93-8D67-CDA597E6E5EB",
+    "translations": [
+      {
+        "id": "51AF7570-FC5B-42B1-BCBA-47740D579639",
+        "createdDate": "2024-06-04",
+        "techieActionId": "B34CFDC1-5BC0-4A00-8D53-B5B88E932A1D",
+        "templateMessage": "Chào buổi đêm, {0}! 🌙🚀 Đêm khuya rồi mà bạn vẫn học ư?? Sự nỗ lực của bạn đang toả sáng như các ngôi sao trên bầu trời đó! Hãy tiếp tục tỏa sáng và khám phá thêm nhiều điều thú vị nhé! 🌟📚✨",
+        "language": "vi-VN"
+      },
+      {
+        "id": "50F53F4C-4CDF-4B46-8644-5613A5C28A7E",
+        "createdDate": "2024-06-04",
+        "techieActionId": "B34CFDC1-5BC0-4A00-8D53-B5B88E932A1D",
+        "templateMessage": "Good night, {0}! 🌙🚀 Still studying late into the night? Your effort shines like the stars in the sky! Keep shining and discover more fascinating things! 🌟📚✨",
+        "language": "en-US"
+      }
+    ]
+  },
+
+  {
+    "id": "93ABBB9B-2B2A-4B2A-B926-20576BE9F69D",
+    "config": {
+      "startTime": 0,
+      "endTime": 0,
+      "value": "15"
+    },
+    "templateMessage": "Xuất sắc! {0}/{0}! 🌟✅",
+    "createdDate": "2024-06-04",
+    "priority": 3,
+    "icon": "string",
+    "image": "string",
+    "action": "StreakFifTeenTimeCode",
+    "feature": "Cheer",
+    "techieId": "6D9CB3CC-8B96-4C93-8D67-CDA597E6E5EB",
+    "translations": [
+      {
+        "id": "70EA4C4B-E71C-44D2-9A68-94919324742A",
+        "createdDate": "2024-06-04",
+        "techieActionId": "93ABBB9B-2B2A-4B2A-B926-20576BE9F69D",
+        "templateMessage": "Xuất sắc! {0}/{0}! 🌟✅",
+        "language": "vi-VN"
+      },
+      {
+        "id": "CAF06CFA-4080-4242-85B5-43553A26A019",
+        "createdDate": "2024-06-04",
+        "techieActionId": "93ABBB9B-2B2A-4B2A-B926-20576BE9F69D",
+        "templateMessage": "Excellent! {0}/{0}! 🌟✅",
+        "language": "en-US"
+      }
+    ]
+  },
+
+  {
+    "id": "365768FB-DF0D-4BBA-8AEF-0FFAADA02CCD",
+    "config": {
+      "startTime": 0,
+      "endTime": 0,
+      "value": "5"
+    },
+    "templateMessage": "{0} timecode liên tiếp! Cậu đang bùng cháy! 🔥🚀",
+    "createdDate": "2024-06-04",
+    "priority": 3,
+    "icon": "string",
+    "image": "string",
+    "action": "StreakFiveTimeCode",
+    "feature": "Cheer",
+    "techieId": "6D9CB3CC-8B96-4C93-8D67-CDA597E6E5EB",
+    "translations": [
+      {
+        "id": "72B29AEE-4091-49DA-8476-9A26136527FE",
+        "createdDate": "2024-06-04",
+        "techieActionId": "365768FB-DF0D-4BBA-8AEF-0FFAADA02CCD",
+        "templateMessage": "{0} timecode liên tiếp! Cậu đang bùng cháy! 🔥🚀",
+        "language": "vi-VN"
+      },
+      {
+        "id": "5B065C13-DC80-419F-A5DC-CF11E7BAD5A6",
+        "createdDate": "2024-06-04",
+        "techieActionId": "365768FB-DF0D-4BBA-8AEF-0FFAADA02CCD",
+        "templateMessage": "{0} correct timecodes in a row! You're on fire! 🔥🚀",
+        "language": "en-US"
+      }
+    ]
+  },
+
+  {
+    "id": "3FDEECE5-0526-4BA5-9DC5-D8C91D172E94",
+    "config": {
+      "startTime": 0,
+      "endTime": 0,
+      "value": "10"
+    },
+    "templateMessage": "{0} Time code đúng liên tiếp! Tiếp tục tiến lên! 🚀🌌",
+    "createdDate": "2024-06-04",
+    "priority": 3,
+    "icon": "string",
+    "image": "string",
+    "action": "StreakTenTimeCode",
+    "feature": "Cheer",
+    "techieId": "6D9CB3CC-8B96-4C93-8D67-CDA597E6E5EB",
+    "translations": [
+      {
+        "id": "B79BB94D-1A79-4D53-B705-B19773C4D716",
+        "createdDate": "2024-06-04",
+        "techieActionId": "3FDEECE5-0526-4BA5-9DC5-D8C91D172E94",
+        "templateMessage": "{0} Time code đúng liên tiếp! Tiếp tục tiến lên! 🚀🌌",
+        "language": "vi-VN"
+      },
+      {
+        "id": "FDCB7157-06EA-4D5A-8D19-883F17B1941C",
+        "createdDate": "2024-06-04",
+        "techieActionId": "3FDEECE5-0526-4BA5-9DC5-D8C91D172E94",
+        "templateMessage": "{0} correct timecodes in a row! Keep pushing forward! 🚀🌌",
+        "language": "en-US"
+      }
+    ]
+  },
+
+  {
+    "id": "7B3784B0-DA4D-4DDD-9E1F-FF2806D12105",
+    "config": {
+      "startTime": 0,
+      "endTime": 0,
+      "value": "20"
+    },
+    "templateMessage": "{0} timecode đúng liên tiếp! Cậu không thể ngăn cản! 🚀🌌",
+    "createdDate": "2024-06-04",
+    "priority": 3,
+    "icon": "string",
+    "image": "string",
+    "action": "StreakTwentyTimeCode",
+    "feature": "Cheer",
+    "techieId": "6D9CB3CC-8B96-4C93-8D67-CDA597E6E5EB",
+    "translations": [
+      {
+        "id": "00BEE779-AC7D-4457-B702-901684EAFF2B",
+        "createdDate": "2024-06-04",
+        "techieActionId": "7B3784B0-DA4D-4DDD-9E1F-FF2806D12105",
+        "templateMessage": "{0} timecode đúng liên tiếp! Cậu không thể ngăn cản! 🚀🌌",
+        "language": "vi-VN"
+      },
+      {
+        "id": "70D5F258-41C3-4EA6-8392-FAEDEEFA5D12",
+        "createdDate": "2024-06-04",
+        "techieActionId": "7B3784B0-DA4D-4DDD-9E1F-FF2806D12105",
+        "templateMessage": "{0} correct timecodes in a row! You're unstoppable! 🚀🌌",
+        "language": "en-US"
+      }
+    ]
+  },
+
+  {
+    "id": "7A14752C-FD0A-43E2-9625-97B7CA4438D4",
+    "config": {
+      "startTime": 0,
+      "endTime": 0,
+      "value": "25"
+    },
+    "templateMessage": "Xuất sắc! {0}/{0}! 🌟✅",
+    "createdDate": "2024-06-04",
+    "priority": 3,
+    "icon": "string",
+    "image": "string",
+    "action": "StreakTwentyFiveTimeCode",
+    "feature": "Cheer",
+    "techieId": "6D9CB3CC-8B96-4C93-8D67-CDA597E6E5EB",
+    "translations": [
+      {
+        "id": "B1C8BDA5-F279-40B6-BFA5-E3D8DC440597",
+        "createdDate": "2024-06-04",
+        "techieActionId": "7A14752C-FD0A-43E2-9625-97B7CA4438D4",
+        "templateMessage": "Xuất sắc! {0}/{0}! 🌟✅",
+        "language": "vi-VN"
+      },
+      {
+        "id": "645EA67C-460B-4619-821A-36E9657E0B62",
+        "createdDate": "2024-06-04",
+        "techieActionId": "7A14752C-FD0A-43E2-9625-97B7CA4438D4",
+        "templateMessage": "Superb! {0}/{0}! 🌟✅",
+        "language": "en-US"
+      }
+    ]
+  },
+
+  {
+    "id": "C90FCC08-4E4F-45D9-A8AA-3A147091CD38",
+    "config": {
+      "startTime": 0,
+      "endTime": 0,
+      "value": "30"
+    },
+    "templateMessage": "{0} timecode liên tiếp! Phi thường! 🌟🚀",
+    "createdDate": "2024-06-04",
+    "priority": 3,
+    "icon": "string",
+    "image": "string",
+    "action": "StreakThirtyTimeCode",
+    "feature": "Cheer",
+    "techieId": "6D9CB3CC-8B96-4C93-8D67-CDA597E6E5EB",
+    "translations": [
+      {
+        "id": "DF298010-6C86-43F8-AF5E-EF7596FCF66F",
+        "createdDate": "2024-06-04",
+        "techieActionId": "C90FCC08-4E4F-45D9-A8AA-3A147091CD38",
+        "templateMessage": "{0} timecode liên tiếp! Phi thường! 🌟🚀",
+        "language": "vi-VN"
+      },
+      {
+        "id": "2616C223-14C2-424F-B772-446869DE15C1",
+        "createdDate": "2024-06-04",
+        "techieActionId": "C90FCC08-4E4F-45D9-A8AA-3A147091CD38",
+        "templateMessage": "{0} correct timecodes in a row! Extraordinary! 🌟🚀",
+        "language": "en-US"
+      }
+    ]
+  },
+
+  {
+    "id": "F23CDC48-3D66-43B6-8B35-1FFA696BD5E7",
+    "config": {
+      "startTime": 0,
+      "endTime": 0,
+      "value": "35"
+    },
+    "templateMessage": "Kỳ diệu! {0} timecode đúng! 🌟💥",
+    "createdDate": "2024-06-04",
+    "priority": 3,
+    "icon": "string",
+    "image": "string",
+    "action": "StreakThirtyFiveTimeCode",
+    "feature": "Cheer",
+    "techieId": "6D9CB3CC-8B96-4C93-8D67-CDA597E6E5EB",
+    "translations": [
+      {
+        "id": "2E434057-6B06-4536-A0D5-851AB71CC55B",
+        "createdDate": "2024-06-04",
+        "techieActionId": "F23CDC48-3D66-43B6-8B35-1FFA696BD5E7",
+        "templateMessage": "Kỳ diệu! {0} timecode đúng! 🌟💥",
+        "language": "vi-VN"
+      },
+      {
+        "id": "16A3CF13-3CF3-4104-A716-DCF3DEE037C8",
+        "createdDate": "2024-06-04",
+        "techieActionId": "F23CDC48-3D66-43B6-8B35-1FFA696BD5E7",
+        "templateMessage": "Amazing! {0} correct timecodes! 🌟💥",
+        "language": "en-US"
+      }
+    ]
+  },
+
+  {
+    "id": "9656F061-1504-4B25-BB55-834AD90EA88F",
+    "config": {
+      "startTime": 0,
+      "endTime": 0,
+      "value": "40"
+    },
+    "templateMessage": "{0} timecode liên tiếp! Cậu là một siêu sao! 🌌✨",
+    "createdDate": "2024-06-04",
+    "priority": 3,
+    "icon": "string",
+    "image": "string",
+    "action": "StreakFourtyTimeCode",
+    "feature": "Cheer",
+    "techieId": "6D9CB3CC-8B96-4C93-8D67-CDA597E6E5EB",
+    "translations": [
+      {
+        "id": "5C02E53D-0CD2-4550-AC64-508335703BE6",
+        "createdDate": "2024-06-04",
+        "techieActionId": "9656F061-1504-4B25-BB55-834AD90EA88F",
+        "templateMessage": "{0} timecode liên tiếp! Cậu là một siêu sao! 🌌✨",
+        "language": "vi-VN"
+      },
+      {
+        "id": "EACCCFEC-6C04-4889-8FC3-48C98EA243B1",
+        "createdDate": "2024-06-04",
+        "techieActionId": "9656F061-1504-4B25-BB55-834AD90EA88F",
+        "templateMessage": "{0} correct timecodes in a row! You're a superstar! 🌌✨",
+        "language": "en-US"
+      }
+    ]
+  },
+
+  {
+    "id": "0B7C3774-BF42-4475-BA43-779D8BEEE88B",
+    "config": {
+      "startTime": 0,
+      "endTime": 0,
+      "value": "45"
+    },
+    "templateMessage": "Xuất sắc! {0}/{0}! 🌟✅",
+    "createdDate": "2024-06-04",
+    "priority": 3,
+    "icon": "string",
+    "image": "string",
+    "action": "StreakFourtyFiveTimeCode",
+    "feature": "Cheer",
+    "techieId": "6D9CB3CC-8B96-4C93-8D67-CDA597E6E5EB",
+    "translations": [
+      {
+        "id": "BE65682B-433C-4ED7-84BB-BDEB73838FF5",
+        "createdDate": "2024-06-04",
+        "techieActionId": "0B7C3774-BF42-4475-BA43-779D8BEEE88B",
+        "templateMessage": "{0} timecode liên tiếp! Cậu là một siêu sao! 🌌✨",
+        "language": "vi-VN"
+      },
+      {
+        "id": "40C64B95-E760-4617-9AA5-021F74669C75",
+        "createdDate": "2024-06-04",
+        "techieActionId": "0B7C3774-BF42-4475-BA43-779D8BEEE88B",
+        "templateMessage": "Outstanding! {0}/{0}! 🌟✅",
+        "language": "en-US"
+      }
+    ]
+  },
+  {
+    "id": "162C976A-E869-45C9-9206-123820FA04C2",
+    "config": {
+      "startTime": 0,
+      "endTime": 0,
+      "value": "50"
+    },
+    "templateMessage": "Không thể tin được! {0} timecode đúng liên tiếp! 🌠✨",
+    "createdDate": "2024-06-04",
+    "priority": 3,
+    "icon": "string",
+    "image": "string",
+    "action": "StreakFiftyTimeCode",
+    "feature": "Cheer",
+    "techieId": "6D9CB3CC-8B96-4C93-8D67-CDA597E6E5EB",
+    "translations": [
+      {
+        "id": "E28494B0-F034-48AF-9951-CDC3CD3D64A4",
+        "createdDate": "2024-06-04",
+        "techieActionId": "162C976A-E869-45C9-9206-123820FA04C2",
+        "templateMessage": "Không thể tin được! {0} timecode đúng liên tiếp! 🌠✨",
+        "language": "vi-VN"
+      },
+      {
+        "id": "5A72A596-0390-4F85-A3C2-A16EAEE9D883",
+        "createdDate": "2024-06-04",
+        "techieActionId": "162C976A-E869-45C9-9206-123820FA04C2",
+        "templateMessage": "Unbelievable! {0} correct timecodes in a row! 🌠✨",
+        "language": "en-US"
+      }
+    ]
+  }
+
+]
