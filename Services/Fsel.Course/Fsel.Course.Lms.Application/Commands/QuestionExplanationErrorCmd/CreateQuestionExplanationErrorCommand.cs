@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
     using Fsel.Course.Domain.Models.CommandModels.QuestionExplanationErrors;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -98,7 +99,7 @@ namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
                 return methodResult;
             }
-            var questionExplanationError = await _questionExplanationErrorRepository.Queryable.Where(x => x.QuestionId == question.Id && x.VideoResultId == videoResult.Id).FirstOrDefaultAsync(cancellationToken);
+            var questionExplanationError = await _questionExplanationErrorRepository.Queryable.Where(x => x.QuestionId == question.Id && x.VideoResultId == videoResult.Id && x.Status == EnumProcessedStatus.NotProcessed).FirstOrDefaultAsync(cancellationToken);
             if (questionExplanationError != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(questionExplanationError));
