@@ -48,7 +48,14 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             var listUser = new List<UserModel>();
             foreach (var email in request.Emails)
             {
-                var userResult = await _mediator.Send(new CreateUserStudentToAdminCommand { CourseId = request.CourseId, Email = email, IsTrialRegistration = request.IsTrialRegistration }, cancellationToken);
+                var userResult = await _mediator.Send(new CreateUserStudentToAdminCommand
+                {
+                    CourseId = request.CourseId,
+                    Email = email,
+                    IsTrialRegistration = request.IsTrialRegistration,
+                    ExpireDate = request.ExpireDate,
+                    PaymentRevenueType = request.PaymentRevenueType
+                }, cancellationToken);
                 if (!userResult.IsOK)
                 {
                     methodResult.AddErrorBadRequest(userResult.ErrorMessages);
