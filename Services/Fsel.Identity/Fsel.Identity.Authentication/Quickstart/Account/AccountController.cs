@@ -609,6 +609,10 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         ModelState.AddModelError(string.Empty, _localizer["ERROR_CODE.UserNameAndPasswordIncorrect"]);
                     }
                 }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, _localizer["ERROR_CODE.UserNameAndPasswordIncorrect"]);
+                }
 
                 await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, _localizer["i18n_Invalid_Credentials"], clientId: context?.Client.ClientId));
             }
