@@ -104,7 +104,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     user.Human.Student.School = schoolResults.Content?.Result?.FirstOrDefault()?.Name;
                 }
             }
-            else
+            else if (!string.IsNullOrEmpty(request.SchoolName))
             {
                 user.Human.Student.School = request.SchoolName;
             }

@@ -21,7 +21,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/user")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class UserController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -143,12 +142,32 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// Create Students
         /// </summary>
         [HttpPost("create-students")]
-        [ProducesResponseType(typeof(MethodResult<IList<UserModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateStudents([FromBody] CreateUserStudentsToAdminCommand command)
+        public async Task<IActionResult> CreateStudents([FromQuery] CreateUserStudentsToAdminCommand command)
         {
-            MethodResult<IList<UserModel>> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
+            MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "user_import.xlsx");
+        }
+
+        /// <summary>
+        /// Create Students
+        /// </summary>
+        [HttpPost("export-template-create-students")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportTemplate()
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(new ExportTemplateCreateStudentCommand()).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "export_template_create_student.xlsx");
         }
 
         /// <summary>

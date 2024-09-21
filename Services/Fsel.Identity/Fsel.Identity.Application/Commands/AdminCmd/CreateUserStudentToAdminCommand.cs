@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Application.Commands.AdminCmd
 {
+    using System.Globalization;
     using System.Threading;
     using System.Transactions;
     using AutoMapper;
@@ -19,20 +20,20 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Domain.Models.CommandModels.Admins;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Net.Http.Headers;
 
-    public class CreateUserStudentToAdminCommand : IRequest<MethodResult<UserModel>>
+    public class CreateUserStudentToAdminCommand : CreateUserStudentToAdminCommandModel, IRequest<MethodResult<UserModel>>
     {
-        public string? Email { get; set; }
         public bool IsTrialRegistration { get; set; }
+        public Guid? PackageId { get; set; }
         public Guid CourseId { get; set; }
         public DateTime? ExpireDate { get; set; }
         public EnumPaymentRevenueType PaymentRevenueType { get; set; }
@@ -85,12 +86,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
                 return methodResult;
             }
-            var countUser = await _userManager.Users.Where(x => x.CreatedUserId == _authContext.CurrentUserId && x.CreatedDate.Date == DateTime.UtcNow.Date).CountAsync(cancellationToken);
-            if (countUser > TotalUserDateNow)
-            {
-                methodResult.AddErrorBadRequest("exceeding 50 Users created");
-                return methodResult;
-            }
+            //var countUser = await _userManager.Users.Where(x => x.CreatedUserId == _authContext.CurrentUserId && x.CreatedDate.Date == DateTime.UtcNow.Date).CountAsync(cancellationToken);
+            //if (countUser > TotalUserDateNow)
+            //{
+            //    methodResult.AddErrorBadRequest("exceeding 50 Users created");
+            //    return methodResult;
+            //}
 
             #region Get Course
 
@@ -122,13 +123,14 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     user = new User();
                     user.UserName = request.Email;
                     user.Email = request.Email;
-                    user.FullName = request.Email;
+                    user.FullName = request.FullName ?? request.Email;
                     user.EmailConfirmed = true;
+                    user.PhoneNumber = request.PhoneNumber;
                     user.UserSettings = new List<UserSetting>()
                         {
                             new UserSetting(true)
                         };
-                    user = CreateHumanToUser(user);
+                    user = CreateHumanToUser(user, request, course.CourseLevel);
                     await UpdatePlatformToUserAsync(user, cancellationToken);
 
                     if (!user.IsValid())
@@ -161,8 +163,19 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Authorization] = "Bearer " + tokenResult.Result?.AccessToken;
             }
-
-            var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = GetBirthdayToCourseLevel(course.CourseLevel) }, cancellationToken);
+            EnumGender gender = EnumGender.Male;
+            if (!Enum.TryParse(request.Gender, out gender))
+            {
+                gender = EnumGender.Male;
+            }
+            var updateCode = await _mediator.Send(new UpdateCodeStudentCommand
+            {
+                UserId = user.Id,
+                Gender = gender,
+                Birthday = user.Human?.Birthday,
+                SchoolName = request.School,
+                SchoolId = request.SchoolId
+            }, cancellationToken);
             if (!updateCode.IsOK)
             {
                 methodResult.AddErrorBadRequest(updateCode.ErrorMessages);
@@ -212,7 +225,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError));
                 return methodResult;
             }
-            var package = packagesResult.Content?.Result?.FirstOrDefault(p => p.Code == EnumPackageCode.BASIC.ToString());
+            var packages = packagesResult.Content?.Result?.OrderBy(x => x.Price);
+            var package = packages?.FirstOrDefault(p => request.PackageId.HasValue && p.Id == request.PackageId);
+            if (package == null)
+            {
+                package = packages?.FirstOrDefault(p => p.Code == EnumPackageCode.BASIC.ToString());
+            }
             if (package == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
@@ -247,18 +265,35 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             return methodResult;
         }
 
-        private static User CreateHumanToUser(User user)
+        private static User CreateHumanToUser(User user, CreateUserStudentToAdminCommand request, EnumCourseLevel level)
         {
+            EnumGender gender = EnumGender.Male;
+            if (!Enum.TryParse(request.Gender, out gender))
+            {
+                gender = EnumGender.Male;
+            }
             Human human = new();
             human.Email = user.Email;
             human.FullName = user.FullName;
-            human.Gender = EnumGender.Male;
+            human.Gender = gender;
+            if (string.IsNullOrEmpty(request.DateOfBirth))
+            {
+                human.Birthday = GetBirthdayToCourseLevel(level);
+            }
+            else
+            {
+                DateTime.TryParse(request.DateOfBirth, new CultureInfo("vi-VN"), DateTimeStyles.None, out DateTime dateOfBirth);
+                human.Birthday = dateOfBirth;
+            }
+            human.PhoneNumber = request.PhoneNumber;
             human.UserId = user.Id;
             human.Student = new Student
             {
                 HumanId = human.Id,
-                CreatedByParent = false,
-                Occupation = RoleStudent
+                Occupation = RoleStudent,
+                SchoolId = request.SchoolId,
+                School = request.School,
+                CourseId = request.CourseId,
             };
             user.Human = human;
             return user;
