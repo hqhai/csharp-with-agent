@@ -60,7 +60,7 @@ namespace Fsel.Ordering.Application.Commands.Events
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.MissingVersionOfPackage), EnumEventErrorCode.MissingVersionOfPackage.GetDescription());
                 return;
             }
-            if (request.Translations == null || request.Translations.Count != 0)
+            if (request.Translations == null || request.Translations.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.MissingVersionOfTranslation), EnumEventErrorCode.MissingVersionOfTranslation.GetDescription());
                 return;
