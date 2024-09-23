@@ -32,6 +32,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IClassForumRepository _classForumRepository;
+        private readonly IVideoResultRepository _videoResultRepository;
 
         public GetQuestBoardParamQueryHandler(ICourseResultRepository courseResultRepository,
                                               AuthContext authContext,
@@ -41,7 +42,8 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                                               IHomeWorkResultRepository homeWorkResultRepository,
                                               IFinalTestResultRepository finalTestResultRepository,
                                               IMockTestResultRepository mockTestResultRepository,
-                                              IClassForumRepository classForumRepository)
+                                              IClassForumRepository classForumRepository,
+                                              IVideoResultRepository videoResultRepository)
         {
             _courseResultRepository = courseResultRepository;
             _authContext = authContext;
@@ -52,6 +54,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             _finalTestResultRepository = finalTestResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _classForumRepository = classForumRepository;
+            _videoResultRepository = videoResultRepository;
         }
 
         public async Task<MethodResult<QuestBoardParamModel>> Handle(GetQuestBoardParamQuery request, CancellationToken cancellationToken)
@@ -460,8 +463,13 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
 
                 if (currentLesson != null)
                 {
-                    var currentCLassForum = await _classForumRepository.Queryable
-                                                                       .FirstOrDefaultAsync(x => x.LessonId == currentLesson.LessonId);
+                    if (await _videoResultRepository.Queryable.AnyAsync(x => x.LessonResultId == currentLesson.Id && x.Status == EnumResultStatus.Done))
+                    {
+                        var currentCLassForum = await _classForumRepository.Queryable
+                                                                           .FirstOrDefaultAsync(x => x.LessonId == currentLesson.LessonId);
+
+                        classForum = currentCLassForum;
+                    }
 
                     var currentHomeWork = await _homeWorkResultRepository.Queryable
                                                                          .Where(x => x.StudentId == studentId && x.LessonResultId == currentLesson.Id && (x.Status == EnumResultStatus.Process || x.Status == EnumResultStatus.New))
@@ -469,7 +477,6 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                                                                          .ThenByDescending(x => x.UpdatedDate)
                                                                          .FirstOrDefaultAsync();
 
-                    classForum = currentCLassForum;
                     homeWorkResult = currentHomeWork;
                 }
 
