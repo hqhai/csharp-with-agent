@@ -154,13 +154,14 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 GetFeatureModuleQuery query = new GetFeatureModuleQuery
                 {
                     FeatureModule = EnumFeatureModule.ClassForumResult,
-                    ObjectId = classForumResult?.Id ?? default
+                    ObjectId = classForumResult?.Id ?? default,
+                    UserId = userId ?? default
                 };
 
                 var featureModule = await _mediator.Send(query).ConfigureAwait(false);
                 var featureModuleResult = featureModule?.Result;
 
-                List<object> paramLinksValue = new List<object> { featureModuleResult?.CourseId.ToString() ?? string.Empty, featureModuleResult?.UnitId.ToString() ?? string.Empty, featureModuleResult?.LessonId.ToString() ?? string.Empty };
+                List<object> paramLinksValue = new List<object> { featureModuleResult?.CourseId.ToString() ?? string.Empty, featureModuleResult?.UnitId.ToString() ?? string.Empty, featureModuleResult?.LessonId.ToString() ?? string.Empty, featureModuleResult?.ClassForumDetailResultId.ToString() ?? string.Empty };
 
                 NotificationSendingQueueModel model = new NotificationSendingQueueModel()
                 {

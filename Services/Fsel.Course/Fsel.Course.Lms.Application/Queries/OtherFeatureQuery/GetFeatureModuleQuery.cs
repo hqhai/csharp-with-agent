@@ -23,6 +23,8 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
     {
         public EnumFeatureModule FeatureModule { get; set; }
         public Guid ObjectId { get; set; }
+
+        public Guid? UserId { get; set; }
     }
 
     public class GetFeatureModuleQueryHandler : IRequestHandler<GetFeatureModuleQuery, MethodResult<FeatureModuleModel>>
@@ -110,7 +112,8 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<FeatureModuleModel> methodResult = new MethodResult<FeatureModuleModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var userId = request.UserId == null ? _authContext.CurrentUserId : request.UserId;
+            var studentResult = await _userService.GetStudentByUserIdAsync(userId ?? default);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
