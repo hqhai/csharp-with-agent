@@ -132,7 +132,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bạn đã mua gói {0} thành công. Hãy bắt đầu học nào!",
-    "templateLink": "/learn",
+    "templateLink": "",
     "createdDate": "2023-08-28",
     "translations": [
       {
