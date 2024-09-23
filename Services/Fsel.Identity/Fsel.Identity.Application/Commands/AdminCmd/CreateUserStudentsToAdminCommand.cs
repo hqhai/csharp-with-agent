@@ -9,14 +9,17 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Common.Helpers;
     using Fsel.Common.Models.Excels;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Services.LmsCourseService;
+    using Fsel.Identity.Application.Services.LmsCourseService.Model;
+    using Fsel.Identity.Application.Services.LmsCourseService.QueryModels;
+    using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.CommandModels.Admins;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
-    using Kros.Extensions;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Net.Http.Headers;
 
@@ -24,7 +27,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     {
         public bool IsTrialRegistration { get; set; }
         public Guid? PackageId { get; set; }
-        public Guid CourseId { get; set; }
         public DateTime? ExpireDate { get; set; }
         public EnumPaymentRevenueType PaymentRevenueType { get; set; }
     }
@@ -34,14 +36,23 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly IMediator _mediator;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IHostEnvironment _environment;
-        private readonly UserManager<User> _userManager;
+        private readonly Microsoft.AspNetCore.Identity.UserManager<User> _userManager;
+        private readonly ILmsCourseService _lmsCourseService;
+        private readonly IOrderService _orderService;
 
-        public CreateUserStudentsToAdminCommandHandler(IMediator mediator, IHttpContextAccessor httpContextAccessor, IHostEnvironment environment, UserManager<User> userManager)
+        public CreateUserStudentsToAdminCommandHandler(IMediator mediator,
+            IHttpContextAccessor httpContextAccessor,
+            IHostEnvironment environment,
+            Microsoft.AspNetCore.Identity.UserManager<User> userManager,
+            ILmsCourseService lmsCourseService,
+            IOrderService orderService)
         {
             _mediator = mediator;
             _httpContextAccessor = httpContextAccessor;
             _environment = environment;
             _userManager = userManager;
+            _lmsCourseService = lmsCourseService;
+            _orderService = orderService;
         }
 
         public async Task<MethodResult<Stream>> Handle(CreateUserStudentsToAdminCommand request, CancellationToken cancellationToken)
@@ -59,7 +70,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddError(nameof(EnumSystemErrorCode.ImportFileRequired));
                 return methodResult;
             }
-
             var result = request.FormFile.ImportAndValidateExcel(async (CreateUserStudentToAdminCommandModel x, IList<CreateUserStudentToAdminCommandModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
                 if (string.IsNullOrEmpty(x.FullName))
@@ -82,26 +92,113 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = "Date of birth is null or malformed" });
                 }
-                if (string.IsNullOrEmpty(x.School))
+                if (string.IsNullOrEmpty(x.CourseLevel) && string.IsNullOrEmpty(x.CourseId))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.School), Message = "School not exist" });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Course is null or malformed" });
+                }
+                if (!string.IsNullOrEmpty(x.CourseLevel) && !Enum.TryParse(x.CourseLevel, out EnumCourseLevel _))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = $"CourseLevel is {EnumSystemErrorCode.InValidFormat}" });
+                }
+                if (!string.IsNullOrEmpty(x.CourseId) && !Guid.TryParse(x.CourseId, out _))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = $"CourseId is {EnumSystemErrorCode.InValidFormat}" });
+                }
+                if (!string.IsNullOrEmpty(x.SchoolId) && !Guid.TryParse(x.SchoolId, out _))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = $"SchoolId is {EnumSystemErrorCode.InValidFormat}" });
+                }
+                if (!string.IsNullOrEmpty(x.Password))
+                {
+                    foreach (IPasswordValidator<User> passwordValidator in _userManager.PasswordValidators)
+                    {
+                        var resultData = await passwordValidator.ValidateAsync(_userManager, new User(), x.Password);
+                        if (!resultData.Succeeded)
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Password), Message = $"Password is {EnumSystemErrorCode.InValidFormat}" });
+                        }
+                    }
                 }
                 return await Task.FromResult(errors.Count == 0);
             });
-
             var duplicateEmails = result.Datas.GroupBy(user => user.Email).Where(group => group.Count() > 1).Select(group => group.Key);
-
             if (duplicateEmails.Any())
             {
                 methodResult.AddErrorBadRequest("Duplicate Emails");
                 return methodResult;
             }
-
             if (result.Stream != null)
             {
                 methodResult.Result = result.Stream;
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
+            }
+            if (result.Datas.Any(x => !string.IsNullOrEmpty(x.CourseLevel)))
+            {
+                var courseLevels = result.Datas.Where(x => !string.IsNullOrEmpty(x.CourseLevel)).Select(x => x.CourseLevel).Distinct().ToList();
+                var courseResults = await _lmsCourseService.GetCoursesByLevelsAsync(new GetCoursesByCourseLevelsQueryModel { CourseLevels = string.Join(",", courseLevels) });
+                if (!courseResults.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(courseResults.Error);
+                    return methodResult;
+                }
+                var courses = courseResults?.Content?.Result ?? new List<CourseModel>();
+                result = request.FormFile.ImportAndValidateExcel(async (CreateUserStudentToAdminCommandModel x, IList<CreateUserStudentToAdminCommandModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
+                {
+                    if (!string.IsNullOrEmpty(x.CourseLevel) && !Enum.TryParse(x.CourseLevel, out EnumCourseLevel courseLevel) && courses.Any(y => y.CourseLevel != courseLevel))
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = $"CourseLevel is not Active" });
+                    }
+                    return await Task.FromResult(errors.Count == 0);
+                });
+            }
+
+            if (result.Datas.Any(x => !string.IsNullOrEmpty(x.CourseId)))
+            {
+                var courseIds = result.Datas.Where(x => !string.IsNullOrEmpty(x.CourseId)).Select(x =>
+                {
+                    if (Guid.TryParse(x.CourseId, out Guid courseId))
+                    {
+                        return courseId;
+                    }
+                    return new Guid(x.CourseId ?? string.Empty);
+                }).Distinct().ToList();
+                var courseResults = await _lmsCourseService.GetCoursesByIdsAsync(courseIds);
+                if (!courseResults.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(courseResults.Error);
+                    return methodResult;
+                }
+                var courses = courseResults?.Content?.Result ?? new List<CourseModel>();
+                result = request.FormFile.ImportAndValidateExcel(async (CreateUserStudentToAdminCommandModel x, IList<CreateUserStudentToAdminCommandModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
+                {
+                    if (!string.IsNullOrEmpty(x.CourseId) && !Guid.TryParse(x.CourseId, out Guid courseId) && courses.Any(y => y.Id != courseId && y.Status != EnumCourseStatus.New && y.Status != EnumCourseStatus.Clone))
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = $"CourseId is not Active" });
+                    }
+                    return await Task.FromResult(errors.Count == 0);
+                });
+            }
+            if (result.Stream != null)
+            {
+                methodResult.Result = result.Stream;
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
+            if (request.PackageId.HasValue)
+            {
+                var packageResults = await _orderService.GetPackages();
+                if (!packageResults.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(packageResults.Error);
+                    return methodResult;
+                }
+                var package = packageResults.Content?.Result?.FirstOrDefault(x => x.Id == request.PackageId);
+                if (package == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package), request.PackageId);
+                    return methodResult;
+                }
             }
 
             var tokenAdmin = _httpContextAccessor.HttpContext?.Request.Headers[HeaderNames.Authorization].ToString();
@@ -110,7 +207,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 var userResult = await _mediator.Send(new CreateUserStudentToAdminCommand
                 {
-                    CourseId = request.CourseId,
+                    CourseId = item.CourseId,
                     Email = item.Email,
                     IsTrialRegistration = request.IsTrialRegistration,
                     ExpireDate = request.ExpireDate,
@@ -121,7 +218,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     FullName = item.FullName,
                     Gender = item.Gender,
                     PackageId = request.PackageId,
-                    SchoolId = item.SchoolId
+                    SchoolId = item.SchoolId,
+                    CourseLevel = item.CourseLevel,
+                    Password = item.Password,
                 }, cancellationToken);
                 if (!userResult.IsOK)
                 {

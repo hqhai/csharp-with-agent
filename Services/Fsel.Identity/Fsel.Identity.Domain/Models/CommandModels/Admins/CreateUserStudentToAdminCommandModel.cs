@@ -21,10 +21,19 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Admins
         [EpplusTableColumn(Header = "Giới tính")]
         public string? Gender { get; set; }
 
-        [EpplusTableColumn(Header = "Trường ")]
+        [EpplusTableColumn(Header = "Level")]
+        public string? CourseLevel { get; set; }
+
+        [EpplusTableColumn(Header = "CourseId")]
+        public string? CourseId { get; set; }
+
+        [EpplusTableColumn(Header = "Trường")]
         public string? School { get; set; }
 
         [EpplusTableColumn(Header = "Trường Id")]
-        public Guid? SchoolId { get; set; }
+        public string? SchoolId { get; set; }
+
+        [EpplusTableColumn(Header = "Password")]
+        public string? Password { get; set; }
     }
 }

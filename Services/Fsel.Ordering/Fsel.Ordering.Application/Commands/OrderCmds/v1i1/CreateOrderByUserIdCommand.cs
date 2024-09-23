@@ -125,9 +125,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             {
                 newOrder = _mapper.Map<Order>(request);
             }
-            newOrder.EventId = _eventRepository.Queryable.FirstOrDefault()?.Id;
+            newOrder.EventId = _eventRepository.Queryable.Include(x => x.PackageEvents).FirstOrDefault(x => x.PackageEvents.Any(y => y.PackageId == package.Id))?.Id;
             AddDataIntoOrder(newOrder, code, package.Price, existsOrder?.CourseId ?? course!.Id, student);
-
             if (!newOrder.IsValid())
             {
                 methodResult.AddErrorBadRequest(newOrder.ErrorMessages);
