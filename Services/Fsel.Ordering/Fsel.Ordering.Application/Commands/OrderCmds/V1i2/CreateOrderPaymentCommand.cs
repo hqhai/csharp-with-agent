@@ -66,12 +66,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             }
             var student = studentResult.Content?.Result;
 
-            if (await _orderRepository.Queryable.AnyAsync(p => !p.IsTrial && p.Status == EnumOrderStatus.Payment && p.UserId == request.UserId, cancellationToken))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
-                return methodResult;
-            }
-
             if (string.IsNullOrEmpty(request.FullName) || string.IsNullOrEmpty(request.Email))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));

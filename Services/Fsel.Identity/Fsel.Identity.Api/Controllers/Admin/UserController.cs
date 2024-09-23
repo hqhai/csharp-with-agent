@@ -211,10 +211,10 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// <summary>
         /// Create user and order
         /// </summary>
-        [HttpPost("create-user-and-order")]
+        [HttpPost("create-users-and-orders")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateUserAndOrder([FromBody] CreateUserAndOrderByAdminCommand command)
+        public async Task<IActionResult> CreateUserAndOrder([FromBody] CreateUsersAndOrdersByAdminCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

@@ -2,6 +2,13 @@
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Users
 {
+    using System.Collections.Generic;
+
+    public class CreateUsersAndOrdersByAdminCommandModel
+    {
+        public IList<CreateUserAndOrderByAdminCommandModel>? Users { get; set; }
+    }
+
     public class CreateUserAndOrderByAdminCommandModel
     {
         public string? FullName { get; set; }
