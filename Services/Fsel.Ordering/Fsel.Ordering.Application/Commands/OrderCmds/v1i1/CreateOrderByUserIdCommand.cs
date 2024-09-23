@@ -61,6 +61,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OrderModel>();
 
+            #region Validate Student
+
             var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -90,6 +92,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
 
+            #endregion Validate Student
+
             var package = await _packageRepository.GetByIdAsync(request.PackageId ?? default);
             if (package == null)
             {
@@ -98,7 +102,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             }
 
             var existsOrder = await _orderRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(x => x.UserId == request.UserId && x.Status == EnumOrderStatus.Payment, cancellationToken);
-
             var courseResult = await _courseService.GetCourseByIdAsync(request.CourseId);
             if (!courseResult.IsSuccessStatusCode)
             {
@@ -108,15 +111,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             var course = courseResult.Content?.Result;
             var newOrder = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == request.UserId && p.Status == EnumOrderStatus.New, cancellationToken);
             var isOrderEmpty = newOrder == null;
-
-            var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student.Human?.Code }, cancellationToken).ConfigureAwait(false);
-            string code = codeSend.Result ?? string.Empty;
-
-            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken) && newOrder != null && newOrder.Code != code)
+            string code = string.Empty;
+            do
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(code));
-                return methodResult;
-            }
+                var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student.Human?.Code }, cancellationToken).ConfigureAwait(false);
+                code = codeSend.Result ?? string.Empty;
+            } while (await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken) && (newOrder == null || newOrder.Code != code));
             if (newOrder != null)
             {
                 newOrder = _mapper.Map(request, newOrder);
@@ -125,10 +125,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             {
                 newOrder = _mapper.Map<Order>(request);
             }
-            newOrder.EventId = _eventRepository.Queryable.FirstOrDefault()?.Id;
-
+            newOrder.EventId = _eventRepository.Queryable.Include(x => x.PackageEvents).FirstOrDefault(x => x.PackageEvents.Any(y => y.PackageId == package.Id))?.Id;
             AddDataIntoOrder(newOrder, code, package.Price, existsOrder?.CourseId ?? course!.Id, student);
-
             if (!newOrder.IsValid())
             {
                 methodResult.AddErrorBadRequest(newOrder.ErrorMessages);
@@ -139,11 +137,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 newOrder.IsTrial = request.IsTrialRegistration;
                 newOrder.ExpireDate = DateTime.UtcNow.AddDays(ValueSettings.AmountTrialDays);
                 newOrder.Status = EnumOrderStatus.Payment;
-                newOrder.Price = 0;
-                newOrder.DiscountPercent = 0;
-                newOrder.DiscountPrice = 0;
-                newOrder.TotalPrice = 0;
-                newOrder.UserId = request.UserId;
                 newOrder.RevenueType = EnumPaymentRevenueType.NotRevenue;
                 await _userService.CreateStudentTrialRegistration();
             }
@@ -177,7 +170,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     OrderId = newOrder.Id,
                     OrderStatus = EnumOrderStatus.Payment,
                     Type = EnumOrderTransactionType.BankTransfer,
-                    RevenueType = null
+                    RevenueType = request.RevenueType
                 }, cancellationToken);
 
                 if (!changeStatusOrderResult.IsOK)
@@ -198,7 +191,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             order.UserId = student.Human?.UserId ?? default;
             order.Code = code;
             order.Price = price;
-            order.DiscountPercent = 0;
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
             order.CourseId = courseId;
