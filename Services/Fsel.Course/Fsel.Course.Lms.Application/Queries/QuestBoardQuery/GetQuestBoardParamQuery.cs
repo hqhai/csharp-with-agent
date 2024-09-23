@@ -293,10 +293,11 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.CourseId == learn.CourseResult?.CourseId && x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
                 LessonId = learn.LessonResult?.LessonId,
                 LessonResultId = learn.LessonResult?.Id,
-                ClassForumId = learn.ClassForum?.Id
+                ClassForumId = learn.ClassForum?.Id,
+                HomeWorkId = learn.HomeWorkResult?.HomeWorkId
             };
 
-            if (learn.ClassForum != null)
+            if (learn.HomeWorkResult != null)
             {
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.HomeWork;
             }
@@ -497,7 +498,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                                                                    .FirstOrDefaultAsync();
 
             var currentFullMockTest = await _mockTestResultRepository.Queryable
-                                                                     .Where(x => x.StudentId == studentId && x.CourseId == currentCourse.CourseId && (x.Status == EnumResultStatus.Process || x.Status == EnumResultStatus.New))
+                                                                     .Where(x => x.StudentId == studentId && x.CourseId == currentCourse.CourseId && !x.UnitId.HasValue && (x.Status == EnumResultStatus.Process || x.Status == EnumResultStatus.New))
                                                                      .OrderByDescending(x => x.CreatedDate)
                                                                      .ThenByDescending(x => x.UpdatedDate)
                                                                      .FirstOrDefaultAsync();
