@@ -76,5 +76,29 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Course By Level
+        /// </summary>
+        [HttpGet("get-course-by-level/{courseLevel}")]
+        [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCourseByLevel([FromRoute] EnumCourseLevel courseLevel)
+        {
+            var commandResult = await _mediator.Send(new GetCourseByCourseLevelQuery { CourseLevel = courseLevel }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Courses By Levels
+        /// </summary>
+        [HttpGet("get-courses-by-levels")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCoursesByLevels([FromQuery] GetCoursesByCourseLevelsQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
