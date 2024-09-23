@@ -138,6 +138,8 @@
   .message-error {
     width: calc(100% - 52px);
     right: 26px;
+    bottom: 0px;
+    top: 15px;
   }
 
   .message-successfully,
