@@ -15,7 +15,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Admins
         [EpplusTableColumn(Header = "Số điện thoại")]
         public string? PhoneNumber { get; set; }
 
-        [EpplusTableColumn(Header = "Năm sinh")]
+        [EpplusTableColumn(Header = "Ngày sinh")]
         public string? DateOfBirth { get; set; }
 
         [EpplusTableColumn(Header = "Giới tính")]
