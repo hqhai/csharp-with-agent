@@ -28,30 +28,30 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
         private readonly IUserService _userService;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly IClassForumRepository _classForumRepository;
 
         public GetQuestBoardParamQueryHandler(ICourseResultRepository courseResultRepository,
                                               AuthContext authContext,
                                               IUserService userService,
                                               IUnitResultRepository unitResultRepository,
                                               ILessonResultRepository lessonResultRepository,
-                                              IClassForumResultRepository classForumResultRepository,
                                               IHomeWorkResultRepository homeWorkResultRepository,
                                               IFinalTestResultRepository finalTestResultRepository,
-                                              IMockTestResultRepository mockTestResultRepository)
+                                              IMockTestResultRepository mockTestResultRepository,
+                                              IClassForumRepository classForumRepository)
         {
             _courseResultRepository = courseResultRepository;
             _authContext = authContext;
             _userService = userService;
             _unitResultRepository = unitResultRepository;
             _lessonResultRepository = lessonResultRepository;
-            _classForumResultRepository = classForumResultRepository;
             _homeWorkResultRepository = homeWorkResultRepository;
             _finalTestResultRepository = finalTestResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
+            _classForumRepository = classForumRepository;
         }
 
         public async Task<MethodResult<QuestBoardParamModel>> Handle(GetQuestBoardParamQuery request, CancellationToken cancellationToken)
@@ -250,10 +250,10 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.CourseId == learn.CourseResult?.CourseId && x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
                 LessonId = learn.LessonResult?.LessonId,
                 LessonResultId = learn.LessonResult?.Id,
-                ClassForumId = learn.ClassForumResult?.ClassForumId,
+                ClassForumId = learn.ClassForum?.Id,
             };
 
-            if (learn.ClassForumResult != null)
+            if (learn.ClassForum != null)
             {
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.ClassForum;
             }
@@ -290,10 +290,10 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.CourseId == learn.CourseResult?.CourseId && x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
                 LessonId = learn.LessonResult?.LessonId,
                 LessonResultId = learn.LessonResult?.Id,
-                ClassForumId = learn.ClassForumResult?.ClassForumId
+                ClassForumId = learn.ClassForum?.Id
             };
 
-            if (learn.ClassForumResult != null)
+            if (learn.ClassForum != null)
             {
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.HomeWork;
             }
@@ -354,7 +354,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.CourseId == learn.CourseResult?.CourseId && x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
                 LessonId = learn.LessonResult?.LessonId,
                 LessonResultId = learn.LessonResult?.Id,
-                ClassForumId = learn.ClassForumResult?.ClassForumId,
+                ClassForumId = learn.ClassForum?.Id,
                 HomeWorkId = learn.HomeWorkResult?.HomeWorkId,
                 MockTestId = learn.SkillMockTestResult?.MockTestId
             };
@@ -371,7 +371,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.HomeWork;
             }
 
-            else if (learn.ClassForumResult != null)
+            else if (learn.ClassForum != null)
             {
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.ClassForum;
             }
@@ -420,12 +420,12 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             return methodResult;
         }
 
-        private async Task<(CourseResult? CourseResult, UnitResult? UnitResult, LessonResult? LessonResult, MockTestResult? SkillMockTestResult, ClassForumResult? ClassForumResult, HomeWorkResult? HomeWorkResult, FinalTestResult? FinalTestResult, MockTestResult? FullMockTestResult)> CurrenLearn(Guid studentId)
+        private async Task<(CourseResult? CourseResult, UnitResult? UnitResult, LessonResult? LessonResult, MockTestResult? SkillMockTestResult, ClassForum? ClassForum, HomeWorkResult? HomeWorkResult, FinalTestResult? FinalTestResult, MockTestResult? FullMockTestResult)> CurrenLearn(Guid studentId)
         {
             CourseResult? courseResult = null;
             UnitResult? unitResult = null;
             LessonResult? lessonResult = null;
-            ClassForumResult? classForumResult = null;
+            ClassForum? classForum = null;
             HomeWorkResult? homeWorkResult = null;
             FinalTestResult? finalTestResult = null;
             MockTestResult? fullMockTestResult = null;
@@ -460,11 +460,8 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
 
                 if (currentLesson != null)
                 {
-                    var currentCLassForum = await _classForumResultRepository.Queryable
-                                                                             .Where(x => x.StudentId == studentId && x.LessonResultId == currentLesson.Id)
-                                                                             .OrderByDescending(x => x.CreatedDate)
-                                                                             .ThenByDescending(x => x.UpdatedDate)
-                                                                             .FirstOrDefaultAsync();
+                    var currentCLassForum = await _classForumRepository.Queryable
+                                                                       .FirstOrDefaultAsync(x => x.LessonId == currentLesson.LessonId);
 
                     var currentHomeWork = await _homeWorkResultRepository.Queryable
                                                                          .Where(x => x.StudentId == studentId && x.LessonResultId == currentLesson.Id && (x.Status == EnumResultStatus.Process || x.Status == EnumResultStatus.New))
@@ -472,7 +469,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                                                                          .ThenByDescending(x => x.UpdatedDate)
                                                                          .FirstOrDefaultAsync();
 
-                    classForumResult = currentCLassForum;
+                    classForum = currentCLassForum;
                     homeWorkResult = currentHomeWork;
                 }
 
@@ -503,7 +500,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             finalTestResult = currentFinalTest;
             fullMockTestResult = currentFullMockTest;
 
-            return (courseResult, unitResult, lessonResult, skillMockTestResult, classForumResult, homeWorkResult, finalTestResult, fullMockTestResult);
+            return (courseResult, unitResult, lessonResult, skillMockTestResult, classForum, homeWorkResult, finalTestResult, fullMockTestResult);
         }
     }
 }
