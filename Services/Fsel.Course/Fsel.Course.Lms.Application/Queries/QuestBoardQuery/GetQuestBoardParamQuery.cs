@@ -151,6 +151,8 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
 
                 case EnumQuestBoardCategory.JourneyOfKnowledge:
 
+
+
                     var journeyOfKnowledge = await ExploreTheLearningGalaxyHandler(student.Content.Result.Id);
                     if (!journeyOfKnowledge.IsOK)
                     {
@@ -161,6 +163,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                     methodResult.Result = journeyOfKnowledge.Result;
 
                     break;
+
                 case EnumQuestBoardCategory.MessagesFromAI:
 
                     var messagesFromAI = await CompleteTheFirstClassForumHandler(student.Content.Result.Id);
@@ -220,12 +223,12 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 LessonResultId = learn.LessonResult?.Id
             };
 
-            if (learn.LessonResult != null)
+            if (learn.LessonResult != null && learn.LessonResult.Status == EnumResultStatus.Process)
             {
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Video;
             }
 
-            else if (learn.UnitResult != null)
+            else if (learn.UnitResult != null && learn.UnitResult.Status == EnumResultStatus.Process)
             {
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Lesson;
             }
@@ -261,15 +264,16 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.ClassForum;
             }
 
-            else if (learn.LessonResult != null)
+            else if (learn.LessonResult != null && learn.LessonResult.Status == EnumResultStatus.Process)
             {
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Video;
             }
 
-            else if (learn.UnitResult != null)
+            else if (learn.UnitResult != null && learn.UnitResult.Status == EnumResultStatus.Process)
             {
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Lesson;
             }
+
             else
             {
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Course;
@@ -302,12 +306,12 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.HomeWork;
             }
 
-            else if (learn.LessonResult != null)
+            else if (learn.LessonResult != null && learn.LessonResult.Status == EnumResultStatus.Process)
             {
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Video;
             }
 
-            else if (learn.UnitResult != null)
+            else if (learn.UnitResult != null && learn.UnitResult.Status == EnumResultStatus.Process)
             {
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Lesson;
             }
@@ -380,7 +384,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.ClassForum;
             }
 
-            else if (learn.LessonResult != null || learn.SkillMockTestResult != null)
+            else if ((learn.LessonResult != null && learn.LessonResult.Status == EnumResultStatus.Process) || (learn.SkillMockTestResult != null))
             {
                 newQuestBoardParamModel.FeatureModule = type == EnumCourseType.Academic ? EnumFeatureModule.Video : EnumFeatureModule.Lesson;
             }
@@ -410,7 +414,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 LessonResultId = learn.LessonResult?.Id
             };
 
-            if (learn.LessonResult != null)
+            if (learn.LessonResult != null && learn.LessonResult.Status == EnumResultStatus.Process)
             {
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Video;
             }
