@@ -83,4 +83,22 @@
 
       event.preventDefault(); // Ngăn không cho việc dán mặc định xảy ra
   }
+
+  let remainSeconds = parseInt($("#RemainSecond").attr("data-value"));
+  function startCountdown() {
+    if (remainSeconds > 0) {
+      remainSeconds--;
+      var text = $(".resend-otp-1").attr("data-value");
+      text = text.replace("{{timeResetOtp}}", "<a>" + remainSeconds) + "</a>";
+      $(".resend-otp-1").html(text);
+      $(".resend-otp-1").removeClass("hidden");
+      $(".resend-otp-2").addClass("hidden");
+    } else {
+      $(".resend-otp-2").removeClass("hidden");
+      $(".resend-otp-1").addClass("hidden");
+      clearInterval(countdownInterval); // Dừng countdown
+    }
+  }
+  let countdownInterval = setInterval(startCountdown, 1000);
+
 }(jQuery));	

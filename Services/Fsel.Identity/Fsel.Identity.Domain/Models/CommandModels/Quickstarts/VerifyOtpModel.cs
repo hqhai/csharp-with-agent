@@ -10,5 +10,21 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
         public string? ReturnUrl { get; set; }
 
         public string? Type { get; set; }
+
+        public DateTime? ExpiredTime { get; set; }
+
+        public long? RemainSecond
+        {
+            get
+            {
+                var dateNow = DateTime.UtcNow;
+                if (ExpiredTime.HasValue && ExpiredTime.Value > dateNow)
+                {
+                    return (long)(ExpiredTime.Value - dateNow).TotalSeconds;
+                }
+
+                return default;
+            }
+        }
     }
 }

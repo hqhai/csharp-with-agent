@@ -16,11 +16,6 @@
     color: rgb(217, 140, 147) !important;
   }
 
-@media only screen and (max-width: 576px) {
-  .number-list {
-    gap: 10px;
-  }
-}
 .number-list .number-item {
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -57,8 +52,9 @@
 }
 
 .resend-otp {
-  margin-top: 32px;
-  font-size: 1.6rem;
+  text-align: center;
+  /*margin-top: 32px;*/
+  font-size: 2.2rem;
   line-height: 1.5;
   color: var(--white-color);
 }
@@ -66,5 +62,18 @@
   color: var(--secondary-color);
   font-weight: 600;
 }
+.resend-otp button {
+  color: var(--secondary-color);
+  font-weight: 600;
+}
 
+@media only screen and (max-width: 576px) {
+  .number-list {
+    gap: 10px;
+  }
+
+  .resend-otp {
+    font-size: 1.6rem;
+  }
+}
 /*# sourceMappingURL=verify-otp.css.map */

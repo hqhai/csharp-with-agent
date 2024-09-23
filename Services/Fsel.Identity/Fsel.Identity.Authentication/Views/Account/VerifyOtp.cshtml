@@ -42,6 +42,7 @@
 
             <input type="hidden" asp-for="ReturnUrl" />
             <input type="hidden" asp-for="Type" />
+            <div class="hidden" id="RemainSecond" data-value="@Model.RemainSecond"></div>
             @Html.AntiForgeryToken()
 
             <div>
@@ -143,13 +144,19 @@
 
             </div>
             <button type="submit" class="btn">@Localizer["i18n_verify"]</button>
-        </form>
 
-        <div class="resend-otp">
-            @* @Localizer["i18n_send_otp_after"] *@
-            @Localizer["i18n_did_not_a_code"]
-            <a href="@Url.Action("ResendOtp", "Account", new { Model.ReturnUrl, type = Model.Type })">@Localizer["i18n_resend_otp"]</a>
-        </div>
+            <div class="resend-otp">
+                <div class="resend-otp-1 @(Model.RemainSecond.HasValue ? "" : "hidden")" data-value="@Localizer["i18n_send_otp_after"]">
+                    @Html.Raw(Model.RemainSecond.HasValue ? $"{Localizer["i18n_send_otp_after"].ToString()?.Replace("{{timeResetOtp}}", $"<a>{Model.RemainSecond.Value.ToString()}")}</a>" : "")
+                </div>
+                <div class="resend-otp-2 @(Model.RemainSecond.HasValue ? "hidden" : "")">
+                    @Localizer["i18n_did_not_a_code"]
+                    <button type="submit" class="" name="button" value="resend">@Localizer["i18n_resend_otp"]</button>
+                </div>
+
+                @* <a href="@Url.Action("ResendOtp", "Account", new { Model.ReturnUrl, type = Model.Type })">@Localizer["i18n_resend_otp"]</a> *@
+            </div>
+        </form>
     </div>
 
     @await Component.InvokeAsync("RightBanner", new { Model.ReturnUrl })

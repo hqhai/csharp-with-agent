@@ -31,6 +31,9 @@ using Fsel.Common.Constants;
 using Microsoft.Extensions.Localization;
 using Microsoft.EntityFrameworkCore;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
+using Fsel.Identity.Domain.Models.EntityModels;
+using Fsel.Core.Caching;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Fsel.Identity.Authentication.Quickstart.Account
 {
@@ -62,6 +65,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         private readonly IUserRepository _userRepository;
         private readonly Core.Base.AuthContext _languageContext;
         private readonly IStringLocalizer _localizer;
+        private readonly ICacheService<UserOtpModel> _userOtpCache;
 
         public AccountController(
             IUserSession userSession,
@@ -80,7 +84,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             IUserOtpRepository userOtpRepository,
             IUserRepository userRepository,
             Core.Base.AuthContext languageContext,
-            IStringLocalizer localizer)
+            IStringLocalizer localizer,
+            ICacheService<UserOtpModel> userOtpCache)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -103,36 +108,53 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             _userRepository = userRepository;
             _languageContext = languageContext;
             _localizer = localizer;
+            _userOtpCache = userOtpCache;
         }
 
         /// <summary>
         /// Verify otp for sample user login
         /// </summary>
         /// <returns></returns>
-        public IActionResult VerifyOtp(string? returnUrl, string? type)
+        public async Task<IActionResult> VerifyOtp(string? returnUrl, string? type)
         {
+            var userRegisterModel = GetFromTempData(nameof(UserRegisterModel))?.ToString().Deserialize<UserRegisterModel>();
+            var forgotModel = GetFromTempData(nameof(ForgotModel))?.ToString().Deserialize<ForgotModel>();
+
+            var email = userRegisterModel?.Email ?? forgotModel?.Email;
+            var user = await _userManager.FindByEmailAsync(email ?? string.Empty);
+
+            var entry = await _userOtpCache.GetAsync($"{nameof(SendOtpAsync)}.{user?.Id}");
+
             return View(new VerifyOtpModel
             {
                 Type = type,
                 ReturnUrl = returnUrl,
+                ExpiredTime = entry?.ExpiredTime
             });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> VerifyOtp(VerifyOtpModel? request)
+        public async Task<IActionResult> VerifyOtp(VerifyOtpModel? request, string? button)
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            if (ModelState.IsValid)
+            if (!string.IsNullOrEmpty(button))
+            {
+                await ResendOtp(request);
+            }
+            else if (ModelState.IsValid)
             {
                 //var type = GetFromTempData(nameof(VerifyOtp))?.ToString();
                 var userRegisterModel = GetFromTempData(nameof(UserRegisterModel))?.ToString().Deserialize<UserRegisterModel>();
                 var forgotModel = GetFromTempData(nameof(ForgotModel))?.ToString().Deserialize<ForgotModel>();
 
                 var email = userRegisterModel?.Email ?? forgotModel?.Email;
-
                 var user = await _userManager.FindByEmailAsync(email ?? string.Empty);
+
+                var entry = await _userOtpCache.GetAsync($"{nameof(SendOtpAsync)}.{user?.Id}");
+                request.ExpiredTime = entry?.ExpiredTime;
+
                 if (request.Type == nameof(Register))
                 {
                     if (userRegisterModel == null)
@@ -231,6 +253,47 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             return View(request);
         }
 
+        /// <summary>
+        /// ResendOtp
+        /// </summary>
+        /// <returns></returns>
+        private async Task ResendOtp(VerifyOtpModel? request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            User? user;
+
+            if (request.Type == nameof(Register))
+            {
+                var userRegister = GetFromTempData(nameof(UserRegisterModel))?.ToString().Deserialize<UserRegisterModel>();
+                user = await _userManager.FindByEmailAsync(userRegister?.Email ?? string.Empty);
+                if (user == null)
+                {
+                    ModelState.AddModelError(string.Empty, _localizer["i18n_User_does_not_exist"]);
+                }
+            }
+            else
+            {
+                var forgotModel = GetFromTempData(nameof(ForgotModel))?.ToString().Deserialize<ForgotModel>();
+                user = await _userManager.FindByEmailAsync(forgotModel?.Email ?? string.Empty);
+                if (user == null || !user.EmailConfirmed)
+                {
+                    ModelState.AddModelError(string.Empty, _localizer["i18n_User_does_not_exist"]);
+                }
+            }
+
+            if (user != null)
+            {
+                var sendResult = await SendOtpAsync(user);
+                if (!sendResult.IsOK)
+                {
+                    ModelState.AddModelError(string.Empty, _localizer[sendResult.ErrorMessages.Select(x => x.ErrorCode).FirstOrDefault() ?? string.Empty]);
+                }
+
+                var entry = await _userOtpCache.GetAsync($"{nameof(SendOtpAsync)}.{user.Id}");
+                request.ExpiredTime = entry?.ExpiredTime;
+            }
+        }
+
         public IActionResult Success(string? returnUrl, string? message = null)
         {
             ViewBag.Message = message;
@@ -318,7 +381,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 var sendResult = await SendOtpAsync(user);
                 if (!sendResult.IsOK)
                 {
-                    ModelState.AddModelError(string.Empty, _localizer["i18n_Failed_to_send_OTP"]);
+                    ModelState.AddModelError(string.Empty, _localizer[sendResult.ErrorMessages.Select(x => x.ErrorCode).FirstOrDefault() ?? string.Empty]);
                     return View(request);
                 }
 
@@ -326,41 +389,6 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             }
 
             return View(request);
-        }
-
-        /// <summary>
-        /// ResendOtp
-        /// </summary>
-        /// <returns></returns>
-        public async Task<IActionResult> ResendOtp(string? returnUrl, string? type)
-        {
-            User? user;
-
-            if (type == nameof(Register))
-            {
-                var userRegister = GetFromTempData(nameof(UserRegisterModel))?.ToString().Deserialize<UserRegisterModel>();
-                user = await _userManager.FindByEmailAsync(userRegister?.Email ?? string.Empty);
-                if (user == null)
-                {
-                    return RedirectToAction(nameof(VerifyOtp), new { returnUrl, type });
-                }
-            }
-            else
-            {
-                var forgotModel = GetFromTempData(nameof(ForgotModel))?.ToString().Deserialize<ForgotModel>();
-                user = await _userManager.FindByEmailAsync(forgotModel?.Email ?? string.Empty);
-                if (user == null || !user.EmailConfirmed)
-                {
-                    return RedirectToAction(nameof(VerifyOtp), new { returnUrl, type });
-                }
-            }
-            var sendResult = await SendOtpAsync(user);
-            if (!sendResult.IsOK)
-            {
-                ModelState.AddModelError(string.Empty, _localizer["i18n_Failed_to_send_OTP"]);
-            }
-
-            return RedirectToAction(nameof(VerifyOtp), new { returnUrl, type });
         }
 
         /// <summary>
@@ -422,7 +450,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     if (!sendResult.IsOK)
                     {
                         scope.Dispose();
-                        ModelState.AddModelError(string.Empty, _localizer["i18n_Failed_to_send_OTP"]);
+                        ModelState.AddModelError(string.Empty, _localizer[sendResult.ErrorMessages.Select(x => x.ErrorCode).FirstOrDefault() ?? string.Empty]);
                         return View(request);
                     }
 
@@ -439,11 +467,57 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
         private async Task<MethodResult<bool>> SendOtpAsync(User user)
         {
+            var methodResult = new MethodResult<bool>();
+
+            var keyCache = $"{nameof(SendOtpAsync)}.{user.Id}";
+            var entry = await _userOtpCache.GetAsync(keyCache);
+            if (entry != null)
+            {
+                methodResult.AddErrorBadRequest("i18n_OTP_waiting_sent_again");
+                return methodResult;
+            }
+
+            var otpResult = await CreateAndSendMailOtpAsync(user).ConfigureAwait(false);
+            if (!otpResult.IsOK)
+            {
+                return methodResult;
+            }
+
+            var timeCache = otpResult?.Result?.ExpiredTime - DateTime.UtcNow;
+            if (otpResult?.Result != null && timeCache.HasValue)
+            {
+                await _userOtpCache.SetAsync(keyCache, otpResult.Result, timeCache.Value);
+            }
+
+            return methodResult;
+        }
+
+        private async Task<MethodResult<UserOtpModel>> CreateAndSendMailOtpAsync(User user)
+        {
+            var methodResult = new MethodResult<UserOtpModel>();
+
             //var otp = await _userManager.GenerateUserTokenAsync(user, DataProtectionTokenProvider.TotpProviderName, DataProtectionTokenProvider.TotpProviderName);
-
             var otpResult = await _mediator.Send(new CreateUserOtpCommand { UserId = user.Id }).ConfigureAwait(false);
-            var otp = otpResult?.Result;
+            if (!otpResult.IsOK)
+            {
+                methodResult.AddErrorBadRequest("i18n_Failed_to_send_OTP");
+                return methodResult;
+            }
 
+            // Send OTP via email
+            var sendResult = await SendMailOtpAsync(user, otpResult?.Result?.Otp);
+            if (!sendResult.IsOK)
+            {
+                methodResult.AddErrorBadRequest("i18n_Failed_to_send_OTP");
+                return methodResult;
+            }
+
+            methodResult.Result = otpResult?.Result;
+            return methodResult;
+        }
+
+        private async Task<MethodResult<bool>> SendMailOtpAsync(User user, string? otp)
+        {
             var param = new
             {
                 OtpCode = otp,
@@ -729,8 +803,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 return SignOut(new AuthenticationProperties { RedirectUri = url }, vm.ExternalAuthenticationScheme);
             }
 
-            return Redirect(vm.PostLogoutRedirectUri);
-            //return View("LoggedOut", vm);  
+            //return Redirect(vm.PostLogoutRedirectUri);
+            return View("LoggedOut", vm);
         }
 
         //[HttpPost]
