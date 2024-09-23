@@ -62,7 +62,7 @@ namespace Fsel.Ordering.Application.Queries.Events
                 });
             }
 
-            query = query.OrderByDescending(p => p.IsDefault).ThenByDescending(p => p.EventStatus = true).ThenByDescending(p => p.CreatedDate).ToList();
+            query = query.OrderByDescending(p => p.IsDefault).ThenByDescending(p => p.EventStatus).ThenByDescending(p => p.CreatedDate).ToList();
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
