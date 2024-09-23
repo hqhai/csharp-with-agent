@@ -881,7 +881,7 @@ namespace Fsel.Course.Infrastructure.Common
             foreach (var item in dataAnswer.Answers)
             {
                 var answerQuestion = dataQuestion?.Answers.FirstOrDefault(x => x.Id == item.Id);
-                if (answerQuestion != null)
+                if (!string.IsNullOrEmpty(item.Content) && answerQuestion != null)
                 {
                     answerQuestion.Content ??= answerQuestion.Key;
                     if (_linQAnswerHelper.CheckAnswer(answerQuestion.Content, item.Content))
@@ -966,7 +966,7 @@ namespace Fsel.Course.Infrastructure.Common
             foreach (var item in dataAnswer.Answers)
             {
                 var answerQuestion = dataQuestion?.Answers.FirstOrDefault(x => x.Id == item.Id);
-                if (answerQuestion != null)
+                if (!string.IsNullOrEmpty(item.Content) && answerQuestion != null)
                 {
                     answerQuestion.Content ??= answerQuestion.Key;
                     if (_linQAnswerHelper.CheckAnswer(answerQuestion.Content, item.Content))
@@ -1009,7 +1009,7 @@ namespace Fsel.Course.Infrastructure.Common
             foreach (var item in dataAnswer.Answers)
             {
                 var answerQuestion = dataQuestion?.Answers.FirstOrDefault(x => x.Id == item.Id);
-                if (answerQuestion != null)
+                if (!string.IsNullOrEmpty(item.Key) && answerQuestion != null)
                 {
                     if (_linQAnswerHelper.CheckAnswer(answerQuestion.Key, item.Key))
                     {

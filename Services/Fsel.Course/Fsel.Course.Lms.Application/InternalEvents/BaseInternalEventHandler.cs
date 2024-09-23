@@ -52,6 +52,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         protected readonly IOrderService _orderService;
         private readonly ILessonNoteRepository _lessonNoteRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        protected readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private const int PercentClassForumAcademic = 20;
         private const int PercentClassForumIELST = 32;
@@ -81,7 +82,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             IHomeWorkResultRepository homeWorkResultRepository,
             QuestBoardPublisher questBoardPublisher,
             IOrderService orderService
-, ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository)
+, ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository
+, NotificationMessagePublisher notificationMessagePublisher)
         {
             _videoResultRepository = videoResultRepository;
             _classForumResultRepository = classForumResultRepository;
@@ -103,6 +105,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _orderService = orderService;
             _lessonNoteRepository = lessonNoteRepository;
             _lessonResultRepository = lessonResultRepository;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         private async Task<(List<SkillScores>, double)> GetCourseResult(Course course, IList<Guid> unitIds, Guid studentId, Guid? finalTestId)
@@ -495,6 +498,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 if (courseResult.Status != EnumResultStatus.Done)
                 {
+                    await SendStudentCompleteCourse(studentId, course.Id, courseResult, cancellationToken);
+
+                    await SendNotificationMessage(courseResult.CreatedUserId, course.Name, cancellationToken);
                     await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel
                     {
                         BaseCourseLevel = course.CourseLevel,
@@ -518,7 +524,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     courseResult.CompletionDate = DateTime.UtcNow;
                 }
 
-                courseResult.Status = EnumResultStatus.Done;
+               
                 courseResult.Status = EnumResultStatus.Done;
                 _courseResultRepository.Update(courseResult);
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -834,6 +840,22 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 };
                 await _userService.UpdateTrialRegistrationStatusAsync(model);
             }
+        }
+
+        private async Task SendNotificationMessage(Guid userId, string courseName, CancellationToken cancellationToken)
+        {
+
+            NotificationSendingQueueModel model = new NotificationSendingQueueModel()
+            {
+                ObjectId = Guid.Empty,
+                UserIds = new List<Guid>() { userId },
+                SenderId = Guid.Empty,
+                ParamsMessage = new List<object> { courseName ?? string.Empty, },
+                Type = EnumNotificationType.LinkPage,
+                Content = EnumNotificationContent.CompleteCourse
+            };
+
+            await _notificationMessagePublisher.Publish(model, cancellationToken).ConfigureAwait(false);
         }
     }
 }

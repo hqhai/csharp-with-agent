@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 {
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -28,13 +29,17 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IUserService _userService;
+        private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly IMapper _mapper;
 
         public GetOverallScoreQueryHandler(AuthContext authContext
             , ICourseRepository courseRepository
             , ICourseResultRepository courseResultRepository
             , IPlacementTestResultRepository placementTestResultRepository
             , IUnitResultRepository unitResultRepository
-            , IUserService userService)
+            , IUserService userService
+            , IMockTestResultRepository mockTestResultRepository
+            , IMapper mapper)
         {
             _authContext = authContext;
             _courseRepository = courseRepository;
@@ -42,6 +47,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             _placementTestResultRepository = placementTestResultRepository;
             _unitResultRepository = unitResultRepository;
             _userService = userService;
+            _mockTestResultRepository = mockTestResultRepository;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<OverallScoreModel>> Handle(GetOverallScoreQuery request, CancellationToken cancellationToken)
@@ -73,7 +80,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             if (courseResult != null && courseResult.Status == EnumResultStatus.Done)
             {
                 overallScoreModel.SkillScores = courseResult.SkillScores;
-                overallScoreModel.IsPlacement = false;
                 overallScoreModel.Percent = courseResult.Percent;
                 overallScoreModel.NextCourseLevel = EnumCourseLevelHelper.GetEnumNextCourseLevel(course.CourseType, course.CourseLevel);
             }
@@ -96,7 +102,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                             CountQuestion = x.Sum(x => x.CountQuestion),
                             TotalQuestion = x.Sum(x => x.TotalQuestion),
                         }).ToList();
-                    overallScoreModel.IsPlacement = false;
                     overallScoreModel.Percent = NumberHelper.ConvertRound(unitResults.Any() ? unitResults.Average(x => x.Percent) : default);
                 }
                 else
@@ -114,6 +119,17 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             }
             overallScoreModel.CourseLevel = course.CourseLevel;
             overallScoreModel.CourseType = course.CourseType;
+            if (course.CourseType == Shared.Enums.EnumCourseType.Ielts)
+            {
+                var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.StudentId == studentId && x.CourseId == course.Id && !x.UnitId.HasValue)
+                                                                              .OrderByDescending(x => x.CreatedDate)
+                                                                              .ThenByDescending(x => x.UpdatedDate)
+                                                                              .FirstOrDefaultAsync(cancellationToken);
+                var mockTestResultModel = _mapper.Map<MockTestResultModel>(mockTestResult);
+                overallScoreModel.BandScores = course.CourseLevel.GetBandScore();
+                overallScoreModel.TargetBandScores = mockTestResultModel.Scores;
+            }
+
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = overallScoreModel;
             return methodResult;

@@ -49,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             var configAnswers = sectionGroupResult.MockTestAnswers
                                                 .Select(x => GetConfigAnswer(x.Answer))
                                                 .Where(x => x != null && x.Answers != null && x.Answers.Any())
-                                                .SelectMany(x => x.Answers)
+                                                .SelectMany(x => x!.Answers)
                                                 .ToList();
 
             var questionIds = await _sectionGroupRepository.Queryable.Include(x => x.Sections).ThenInclude(x => x.SectionQuestions)
@@ -61,7 +61,6 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             var listSubQuestion = new List<SubQuestionModel>();
 
             var questions = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
-
             foreach (var item in questions)
             {
                 var subQuestions = GetConfigQuestion(item.Config, item.QuestionType);
@@ -80,14 +79,21 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                 }
                 foreach (var subQuestion in subQuestions)
                 {
-                    var isExact = configAnswers.FirstOrDefault(x => x.Id == subQuestion.Id)?.IsExact;
+                    var configAnswer = configAnswers.FirstOrDefault(x => x.Id == subQuestion.Id);
+                    var isExact = configAnswer?.IsExact;
+                    subQuestion.QuestionId = item.Id;
+                    subQuestion.IndexSubQuestion = item.SubQuestionIndexs?[subQuestions.IndexOf(subQuestion)] ?? 0;
                     if (sectionGroupResult.Status == EnumResultStatus.Done)
                     {
                         subQuestion.Status = isExact.HasValue && isExact.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
                     }
+                    else if (subQuestion.Status == EnumCorrectStatus.Process)
+                    {
+                        continue;
+                    }
                     else
                     {
-                        subQuestion.Status = isExact.HasValue || subQuestion.Status == EnumCorrectStatus.Process ? EnumCorrectStatus.Process : EnumCorrectStatus.New;
+                        subQuestion.Status = !(string.IsNullOrEmpty(configAnswer?.Content) && string.IsNullOrEmpty(configAnswer?.Key)) || isExact.HasValue ? EnumCorrectStatus.Process : EnumCorrectStatus.New;
                     }
                 }
                 listSubQuestion.AddRange(subQuestions);
