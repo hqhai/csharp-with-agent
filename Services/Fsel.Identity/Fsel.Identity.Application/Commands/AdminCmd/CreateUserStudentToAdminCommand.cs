@@ -36,7 +36,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         public bool IsTrialRegistration { get; set; }
         public Guid? PackageId { get; set; }
         public DateTime? ExpireDate { get; set; }
-        public EnumPaymentRevenueType PaymentRevenueType { get; set; }
+        public EnumPaymentRevenueType RevenueType { get; set; }
     }
 
     public class CreateUserStudentToAdminCommandHandler : IRequestHandler<CreateUserStudentToAdminCommand, MethodResult<UserModel>>
@@ -322,7 +322,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 PackageId = package.Id,
                 IsTrialRegistration = request.IsTrialRegistration,
                 ExpireDate = request.ExpireDate,
-                PaymentRevenueType = request.PaymentRevenueType
+                RevenueType = request.RevenueType
             });
             if (!createOrderResult.IsSuccessStatusCode)
             {

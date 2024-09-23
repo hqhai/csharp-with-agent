@@ -28,7 +28,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         public bool IsTrialRegistration { get; set; }
         public Guid? PackageId { get; set; }
         public DateTime? ExpireDate { get; set; }
-        public EnumPaymentRevenueType PaymentRevenueType { get; set; }
+        public EnumPaymentRevenueType RevenueType { get; set; }
     }
 
     public class CreateUserStudentsToAdminCommandHandler : IRequestHandler<CreateUserStudentsToAdminCommand, MethodResult<Stream>>
@@ -211,7 +211,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     Email = item.Email,
                     IsTrialRegistration = request.IsTrialRegistration,
                     ExpireDate = request.ExpireDate,
-                    PaymentRevenueType = request.PaymentRevenueType,
+                    RevenueType = request.RevenueType,
                     PhoneNumber = item.PhoneNumber,
                     School = item.School,
                     DateOfBirth = item.DateOfBirth,

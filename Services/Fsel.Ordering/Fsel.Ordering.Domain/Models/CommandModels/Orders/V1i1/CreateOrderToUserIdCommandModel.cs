@@ -17,6 +17,6 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1
         public Guid? DistrictId { get; set; }
         public Guid CourseId { get; set; }
         public bool IsTrialRegistration { get; set; }
-        public EnumPaymentRevenueType PaymentRevenueType { get; set; }
+        public EnumPaymentRevenueType RevenueType { get; set; }
     }
 }
