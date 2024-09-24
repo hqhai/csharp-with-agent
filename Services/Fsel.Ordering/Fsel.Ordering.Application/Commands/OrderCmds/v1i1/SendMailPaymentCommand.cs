@@ -72,30 +72,34 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 Template = EnumSenderTemplate.MailPaymentForStudent
             });
 
-            var updatedDate = !order.UpdatedDate.HasValue ? string.Empty : order.UpdatedDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
-
-            var price = order.Price.ToString("C", new CultureInfo("vi-VN"));
-
-            var totalPrice = order.TotalPrice.ToString("C", new CultureInfo("vi-VN"));
-
-            await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
+            if (!string.IsNullOrEmpty(order.Email) && !string.IsNullOrEmpty(student.Human?.Email) && order.Email.ToLower(CultureInfo.InvariantCulture) != student.Human?.Email.ToLower(CultureInfo.InvariantCulture))
             {
-                ToEmails = new List<string> { order.Email ?? string.Empty },
-                Subject = "Biên nhận của bạn từ FSEL",
-                Params = new
+                var updatedDate = !order.UpdatedDate.HasValue ? string.Empty : order.UpdatedDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+
+                var price = order.Price.ToString("C", new CultureInfo("vi-VN"));
+
+                var totalPrice = order.TotalPrice.ToString("C", new CultureInfo("vi-VN"));
+
+                await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
                 {
-                    FullName = order.FullName,
-                    OrderCode = order.Code,
-                    PaymentMethod = order.PaymentMethod.ToString(),
-                    CreatedDate = updatedDate,
-                    ExpiredDate = expiredDate,
-                    Package = GetPackageName(order.Package),
-                    Price = price.ToString(CultureInfo.InvariantCulture),
-                    TotalPrice = totalPrice.ToString(CultureInfo.InvariantCulture),
-                    ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
-                },
-                Template = EnumSenderTemplate.MailPaymentForCustomer
-            });
+                    ToEmails = new List<string> { order.Email ?? string.Empty },
+                    Subject = "Biên nhận của bạn từ FSEL",
+                    Params = new
+                    {
+                        FullName = order.FullName,
+                        OrderCode = order.Code,
+                        PaymentMethod = order.PaymentMethod.ToString(),
+                        CreatedDate = updatedDate,
+                        ExpiredDate = expiredDate,
+                        Package = GetPackageName(order.Package),
+                        Price = price.ToString(CultureInfo.InvariantCulture),
+                        TotalPrice = totalPrice.ToString(CultureInfo.InvariantCulture),
+                        ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
+                    },
+                    Template = EnumSenderTemplate.MailPaymentForCustomer
+                });
+            }
+
             return methodResult;
         }
 
