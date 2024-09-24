@@ -7,10 +7,13 @@ namespace Fsel.Course.Infrastructure.Common
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Units;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
 
     public class UnitHelper
@@ -31,29 +34,49 @@ namespace Fsel.Course.Infrastructure.Common
             _mockTestRepository = mockTestRepository;
         }
 
-        public async Task<VoidMethodResult> Validate(dynamic unit, UpdateUnitCommandModel? request)
+        public async Task<VoidMethodResult> Validate(UpdateUnitCommandModel? request)
         {
             ArgumentNullException.ThrowIfNull(request);
             VoidMethodResult methodResult = new VoidMethodResult();
 
-            if (!unit.IsValid())
-            {
-                methodResult.AddErrorBadRequest(unit.ErrorMessages);
-                return methodResult;
-            }
-
-            if (request.LessonIds == null || request.LessonIds.Count == 0)
+            var countLesson = request.LessonIds?.Count ?? default;
+            if (request.LessonIds == null || countLesson == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonIds));
                 return methodResult;
             }
-
-            if (_lessonRepository.IsIdsInValid(request.LessonIds))
+            switch (request.CourseLevel.GetEnumCourseType())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonIds));
+                case EnumCourseType.Ielts:
+                    if (countLesson > 4)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.InvalidLessonQuantity), nameof(request.LessonIds), countLesson);
+                        return methodResult;
+                    }
+                    break;
+
+                case EnumCourseType.Academic:
+                    if (countLesson > 6)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.InvalidLessonQuantity), nameof(request.LessonIds), countLesson);
+                        return methodResult;
+                    }
+                    break;
+
+                case EnumCourseType.AdultFoundation:
+                    if (countLesson > 5)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.InvalidLessonQuantity), nameof(request.LessonIds), countLesson);
+                        return methodResult;
+                    }
+                    break;
+            }
+            if (!_lessonRepository.IsIdsInValid(request.LessonIds))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
             }
-            if (request.MockTestId != null)
+            if (request.MockTestId.HasValue)
             {
                 var mockTest = await _mockTestRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestType == EnumMockTestType.SkillMockTest && x.Id == request.MockTestId);
                 if (mockTest == null)
@@ -64,11 +87,32 @@ namespace Fsel.Course.Infrastructure.Common
             }
             if (await _unitRepository.Queryable.AnyAsync(x => x.Code == request.Code && x.CourseLevel == request.CourseLevel && (request.Id == Guid.Empty || x.Id != request.Id)))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
                 return methodResult;
             }
 
             return methodResult;
+        }
+
+        public void SetUnitData(Unit? unit, UpdateUnitCommandModel? request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(unit);
+            unit.UnitLessons = request.LessonIds?.Select((x, index) => new UnitLesson
+            {
+                DisplayOrder = index + 1,
+                LessonId = x
+            }).ToList() ?? new List<UnitLesson>();
+            if (request.MockTestId.HasValue && unit.UnitSkillMockTests.Any(x => x.MockTestId != request.MockTestId.Value))
+            {
+                unit.UnitSkillMockTests = new List<UnitSkillMockTest>
+                {
+                    new UnitSkillMockTest
+                    {
+                        MockTestId = request.MockTestId.Value
+                    }
+                };
+            }
         }
     }
 }

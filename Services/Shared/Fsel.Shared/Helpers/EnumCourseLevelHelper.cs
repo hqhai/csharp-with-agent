@@ -23,6 +23,9 @@ namespace Fsel.Shared.Helpers
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS1),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS2),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS3),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.AdultFoundation, EnumCourseLevel.AF1),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.AdultFoundation, EnumCourseLevel.AF2),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.AdultFoundation, EnumCourseLevel.AF3),
         };
 
         private static Dictionary<EnumCourseLevel, EnumCourseLevel> s_levelMapping = new Dictionary<EnumCourseLevel, EnumCourseLevel>
