@@ -102,7 +102,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                         ExpiredDate = expiredDate,
                         ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
                     },
-                    Template = EnumSenderTemplate.MailPaymentForStudent
+                    Template = EnumSenderTemplate.MailPaymentForStudent 
                 });
             }
             return methodResult;
