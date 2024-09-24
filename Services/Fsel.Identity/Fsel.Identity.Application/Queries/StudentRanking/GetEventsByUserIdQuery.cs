@@ -47,7 +47,9 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 .Where(x => student != null && x.StudentId == student.Id)
                 .ToListAsync(cancellationToken);
 
-            var competitionEvents = studentRankingEvents.Where(x => x.CompetitionEvents != null && x.CompetitionEvents.EventContent != null)
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+            var competitionEvents = studentRankingEvents.Where(x => x.CompetitionEvents != null && x.CompetitionEvents.EventContent != null && ((!x.CompetitionEvents.EventContent.StartDate.HasValue && !x.CompetitionEvents.EventContent.EndDate.HasValue) || (x.CompetitionEvents.EventContent.StartDate.HasValue && x.CompetitionEvents.EventContent.EndDate.HasValue && x.CompetitionEvents.EventContent.StartDate.Value.Date <= currentDate.Date && x.CompetitionEvents.EventContent.EndDate.Value.Date >= currentDate.Date)))
                 .Select(x => x.CompetitionEvents);
 
             if (request.Action.HasValue)
