@@ -133,7 +133,6 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                     order.RevenueType = request.RevenueType;
 
                     allowOpenNextUnit = true;
-
                     var packageEvent = await _packageEventRepository.Queryable.FirstOrDefaultAsync(p => p.PackageId == package.Id && p.EventId == order.EventId, cancellationToken);
 
                     if (packageEvent == null)
@@ -141,16 +140,25 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                         methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventNotExist), nameof(packageEvent));
                         return methodResult;
                     }
-
-                    order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber + packageEvent.MonthBonus);
-                    order.ExpireDate = order.ExpireDate.Value.AddDays(packageEvent.DayBonus);
-
-                    await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
+                    if (!order.ExpireDate.HasValue)
                     {
-                        StudentId = student!.Id,
-                        Month = package.MonthNumber + packageEvent.MonthBonus,
-                        Day = packageEvent.DayBonus
-                    }, cancellationToken);
+                        order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber + packageEvent.MonthBonus);
+                        order.ExpireDate = order.ExpireDate.Value.AddDays(packageEvent.DayBonus);
+                        await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
+                        {
+                            StudentId = student!.Id,
+                            Month = package.MonthNumber + packageEvent.MonthBonus,
+                            Day = packageEvent.DayBonus
+                        }, cancellationToken);
+                    }
+                    else
+                    {
+                        await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
+                        {
+                            StudentId = student!.Id,
+                            ExpiredDate = order.ExpireDate
+                        }, cancellationToken);
+                    }
 
                     if (order.IsInvoice)
                     {
