@@ -15,7 +15,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.CommandModels.Admins;
-    using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -94,19 +93,19 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 }
                 if (string.IsNullOrEmpty(x.CourseLevel) && string.IsNullOrEmpty(x.CourseId))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Course is null or malformed" });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.CourseLevel), Message = "Course is null or malformed" });
                 }
                 if (!string.IsNullOrEmpty(x.CourseLevel) && !Enum.TryParse(x.CourseLevel, out EnumCourseLevel _))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = $"CourseLevel is {EnumSystemErrorCode.InValidFormat}" });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.CourseLevel), Message = $"CourseLevel is {EnumSystemErrorCode.InValidFormat}" });
                 }
                 if (!string.IsNullOrEmpty(x.CourseId) && !Guid.TryParse(x.CourseId, out _))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = $"CourseId is {EnumSystemErrorCode.InValidFormat}" });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.CourseId), Message = $"CourseId is {EnumSystemErrorCode.InValidFormat}" });
                 }
                 if (!string.IsNullOrEmpty(x.SchoolId) && !Guid.TryParse(x.SchoolId, out _))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = $"SchoolId is {EnumSystemErrorCode.InValidFormat}" });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.SchoolId), Message = $"SchoolId is {EnumSystemErrorCode.InValidFormat}" });
                 }
                 if (!string.IsNullOrEmpty(x.Password))
                 {
@@ -121,12 +120,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 }
                 return await Task.FromResult(errors.Count == 0);
             });
-            var duplicateEmails = result.Datas.GroupBy(user => user.Email).Where(group => group.Count() > 1).Select(group => group.Key);
-            if (duplicateEmails.Any())
-            {
-                methodResult.AddErrorBadRequest("Duplicate Emails");
-                return methodResult;
-            }
             if (result.Stream != null)
             {
                 methodResult.Result = result.Stream;
@@ -147,7 +140,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 {
                     if (!string.IsNullOrEmpty(x.CourseLevel) && !Enum.TryParse(x.CourseLevel, out EnumCourseLevel courseLevel) && courses.Any(y => y.CourseLevel != courseLevel))
                     {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = $"CourseLevel is not Active" });
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.CourseLevel), Message = $"CourseLevel is not Active" });
                     }
                     return await Task.FromResult(errors.Count == 0);
                 });
@@ -174,7 +167,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 {
                     if (!string.IsNullOrEmpty(x.CourseId) && !Guid.TryParse(x.CourseId, out Guid courseId) && courses.Any(y => y.Id != courseId && y.Status != EnumCourseStatus.New && y.Status != EnumCourseStatus.Clone))
                     {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = $"CourseId is not Active" });
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.CourseId), Message = $"CourseId is not Active" });
                     }
                     return await Task.FromResult(errors.Count == 0);
                 });
@@ -202,9 +195,17 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
 
             var tokenAdmin = _httpContextAccessor.HttpContext?.Request.Headers[HeaderNames.Authorization].ToString();
-            var listUser = new List<UserModel>();
+            var listUser = new List<CreateUserStudentToAdminCommandModel>();
             foreach (var item in result.Datas)
             {
+                if (!string.IsNullOrEmpty(item.Email))
+                {
+                    var user = await _userManager.FindByEmailAsync(item.Email);
+                    if (user != null)
+                    {
+                        listUser.Add(item);
+                    }
+                }
                 var userResult = await _mediator.Send(new CreateUserStudentToAdminCommand
                 {
                     CourseId = item.CourseId,
@@ -224,12 +225,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 }, cancellationToken);
                 if (!userResult.IsOK)
                 {
-                    methodResult.AddErrorBadRequest(userResult.ErrorMessages);
-                    return methodResult;
-                }
-                if (userResult.Result != null)
-                {
-                    listUser.Add(userResult.Result);
+                    listUser.Add(item);
                 }
                 if (_httpContextAccessor.HttpContext != null)
                 {
