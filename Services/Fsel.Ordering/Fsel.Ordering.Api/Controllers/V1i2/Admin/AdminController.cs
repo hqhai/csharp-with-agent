@@ -15,6 +15,8 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
     using Fsel.Core.Base.BaseModels;
     using Fsel.Ordering.Domain.Models.EntityModels.V1i2;
     using Fsel.Ordering.Application.Queries.OrderQuery.V1i2;
+    using Fsel.Ordering.Application.Queries.VoucherQuery;
+    using Fsel.Ordering.Domain.Models.EntityModels;
 
     [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/admin/order")]
@@ -63,6 +65,30 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         public async Task<IActionResult> Search([FromRoute] Guid id)
         {
             var queryResult = await _mediator.Send(new GetOrderByIdQuery() { Id = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// create order payment
+        /// </summary>
+        [HttpPost("create-order-payment")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<SearchOrderModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateOrderPayment([FromBody] CreateOrderPaymentCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search history voucher
+        /// </summary>
+        [HttpPost("create-voucher-and-send-mail")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUserVoucherLockByUser([FromBody] CreateVoucherAndSendMailCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
