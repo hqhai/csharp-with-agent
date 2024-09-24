@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
     public class GetEventsByUserIdQuery : IRequest<MethodResult<IList<CompetitionEventsModel>>>
     {
         public Guid? UserId { get; set; }
+        public EnumSchoolEventRuleAction? Action { get; set; }
     }
 
     public class GetEventsByUserIdQueryHandler : IRequestHandler<GetEventsByUserIdQuery, MethodResult<IList<CompetitionEventsModel>>>
@@ -47,6 +49,11 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
             var competitionEvents = studentRankingEvents.Where(x => x.CompetitionEvents != null && x.CompetitionEvents.EventContent != null)
                 .Select(x => x.CompetitionEvents);
+
+            if (request.Action.HasValue)
+            {
+                competitionEvents = competitionEvents.Where(p => p.EventContent != null && p.EventContent.Actions != null && p.EventContent.Actions.Any(x => x == request.Action));
+            }
 
             methodResult.Result = _mapper.Map<IList<CompetitionEventsModel>>(competitionEvents);
             methodResult.StatusCode = StatusCodes.Status200OK;
