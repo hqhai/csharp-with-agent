@@ -209,9 +209,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
                 #region Gửi mail thanh toán
 
-                if (order.Status == EnumOrderStatus.Payment && request.IsSendEmail)
+                if (order.Status == EnumOrderStatus.Payment)
                 {
-                    await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
+                    if (request.IsSendEmail)
+                    {
+                        await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
+                    }
                     await _mediator.Send(new AddFeatureMissionCommand()
                     {
                         ReceiverId = order.UserId,
