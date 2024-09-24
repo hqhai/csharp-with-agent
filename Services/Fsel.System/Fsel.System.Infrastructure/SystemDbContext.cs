@@ -56,6 +56,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new TechieActionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentTechieEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LuckyTicketEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseTargetConfigEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new CourseSuggestConfigEntityTypeConfigConfiguration());
             base.OnModelCreating(modelBuilder);
         }
@@ -91,6 +92,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<StudentTechie> StudentTechies { get; set; }
         public DbSet<UserConfig> UserConfigs { get; set; }
         public DbSet<LuckyTicket> LuckyTickets { get; set; }
+        public DbSet<CourseTargetConfig> CourseTargetConfigs { get; set; }
 
         public DbSet<CourseSuggestConfig> CourseSuggestConfigs { get; set; }
 
