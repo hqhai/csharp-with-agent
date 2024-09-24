@@ -147,6 +147,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 methodResult.AddError(addStudentIntoClassResult.Error);
                 return methodResult;
             }
+
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
                 if (isOrderEmpty)
@@ -170,7 +171,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     OrderId = newOrder.Id,
                     OrderStatus = EnumOrderStatus.Payment,
                     Type = EnumOrderTransactionType.BankTransfer,
-                    RevenueType = request.RevenueType
+                    RevenueType = request.RevenueType,
+                    IsSendEmail = request.IsSendEmail
                 }, cancellationToken);
 
                 if (!changeStatusOrderResult.IsOK)
