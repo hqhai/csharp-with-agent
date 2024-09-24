@@ -40,7 +40,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<VoidMethodResult>();
 
-            var order = await _orderRepository.Queryable.Include(p => p.Package).FirstOrDefaultAsync(p => p.Id == request.OrderId, cancellationToken);
+            var order = await _orderRepository.Queryable.Include(p => p.Package).FirstOrDefaultAsync(p => p.Id == request.OrderId && p.Status == EnumOrderStatus.Payment && !p.IsTrial, cancellationToken);
             if (order == null)
             {
                 return methodResult;
@@ -56,7 +56,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
 
-            var expiredDate = !student.ExpiredDate.HasValue ? string.Empty : student.ExpiredDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+            var expiredDate = !student.ExpiredDate.HasValue ? (order.ExpireDate.HasValue ? order.ExpireDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty) : student.ExpiredDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
             await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
             {
