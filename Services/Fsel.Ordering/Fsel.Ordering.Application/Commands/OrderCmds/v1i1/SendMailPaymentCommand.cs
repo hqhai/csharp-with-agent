@@ -72,7 +72,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 Template = EnumSenderTemplate.MailPaymentForStudent
             });
 
-            var updatedDate = !order.UpdatedDate.HasValue ? string.Empty : order.UpdatedDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+            var updatedDate = !order.UpdatedDate.HasValue ? order.CreatedDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : order.UpdatedDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
             var price = order.Price.ToString("C", new CultureInfo("vi-VN"));
 
