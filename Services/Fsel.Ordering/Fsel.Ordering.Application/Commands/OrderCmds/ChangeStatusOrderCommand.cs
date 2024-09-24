@@ -222,7 +222,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
                 #region Gửi mail thanh toán
 
-                if (order.Status == EnumOrderStatus.Payment && request.IsSendEmail)
+                if (order.Status == EnumOrderStatus.Payment)
                 {
                     await _mediator.Send(new AddFeatureMissionCommand()
                     {
@@ -234,23 +234,24 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                     var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
                     Guid voucherId = default;
-
-                    if (!order.VoucherId.HasValue && _appSetting.VoucherConfigs?.VoucherForRetail?.StartDate <= createDate && _appSetting.VoucherConfigs.VoucherForRetail.EndDate >= createDate && currentDate < _appSetting.VoucherConfigs.VoucherForRetail.ExpiredDate)
+                    if (request.IsSendEmail)
                     {
-                        var voucher = await _mediator.Send(new CreateVoucherForRetailCommand()
+                        if (!order.VoucherId.HasValue && _appSetting.VoucherConfigs?.VoucherForRetail?.StartDate <= createDate && _appSetting.VoucherConfigs.VoucherForRetail.EndDate >= createDate && currentDate < _appSetting.VoucherConfigs.VoucherForRetail.ExpiredDate)
                         {
-                            UserId = order.UserId,
-                            PackageId = order.PackageId ?? default,
-                        }, cancellationToken).ConfigureAwait(false);
-                        voucherId = voucher.Result?.Id ?? default;
+                            var voucher = await _mediator.Send(new CreateVoucherForRetailCommand()
+                            {
+                                UserId = order.UserId,
+                                PackageId = order.PackageId ?? default,
+                            }, cancellationToken).ConfigureAwait(false);
+                            voucherId = voucher.Result?.Id ?? default;
 
-                        await _mediator.Send(new SendMailPaymentWithVoucherCommand() { OrderId = order.Id, VoucherId = voucherId }).ConfigureAwait(false);
+                            await _mediator.Send(new SendMailPaymentWithVoucherCommand() { OrderId = order.Id, VoucherId = voucherId }).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
+                        }
                     }
-                    else
-                    {
-                        await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
-                    }
-
                     await ResetUserVoucherLockAsync(order.UserId, cancellationToken).ConfigureAwait(false);
                 }
 
