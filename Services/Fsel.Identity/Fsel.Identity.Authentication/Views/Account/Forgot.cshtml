@@ -20,7 +20,7 @@
         <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
         <h1 class="title">@Localizer["i18n_forgot_password"]</h1>
 
-        <form asp-route="Forgot">
+        <form id="form-Forgot" asp-route="Forgot">
             <input type="hidden" asp-for="ReturnUrl" />
             @Html.AntiForgeryToken()
 
@@ -50,5 +50,6 @@
 @section scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script src="~/assets/js/pages/forgot.js"></script>
     }
 }
