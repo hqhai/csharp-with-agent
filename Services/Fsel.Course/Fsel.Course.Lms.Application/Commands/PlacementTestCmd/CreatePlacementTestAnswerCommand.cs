@@ -77,11 +77,21 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 return methodResult;
             }
             var student = studentResult?.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
+                return methodResult;
+            }
+            if (!student.CourseLevel.HasValue)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
+                return methodResult;
+            }
             if (request.Level != EnumPlacementTestLevel.IELTS)
             {
-                request.Level = student?.CourseLevel.GetPlacementTestLevelByCourseLevel() ?? default;
+                request.Level = student.CourseLevel.Value.GetPlacementTestLevelByCourseLevel();
             }
-            var studentId = student?.Id;
+            var studentId = student.Id;
             var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId)
                                                                            .OrderByDescending(x => x.CreatedDate)
                                                                            .FirstOrDefaultAsync(cancellationToken);
@@ -90,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                                                                       .OrderBy(x => x.CreatedDate)
                                                                       .FirstOrDefaultAsync(cancellationToken);
 
-            int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
+            int age = DateTimeHelper.GetYearOld(student.Human?.Birthday);
             if (placementTestResultDone != null)
             {
                 var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age));
@@ -99,7 +109,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestLock), nameof(isLock));
                     return methodResult;
                 }
-                if (levelNext != student?.CourseLevel)
+                if (levelNext != student.BaseCourseLevel)
                 {
                     methodResult.AddErrorBadRequest(nameof(levelNext));
                     return methodResult;
@@ -119,7 +129,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 {
                     Status = EnumResultStatus.Process,
                     Level = request.Level,
-                    StudentId = studentId ?? default
+                    StudentId = studentId
                 };
             }
             else if (placementTestResult.Status == EnumResultStatus.Done)
@@ -204,7 +214,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 var updateStudent = new UpdateStudentByLevelModel
                 {
                     Id = _authContext.CurrentUserId,
-                    Level = currentLevel.Value
+                    CourseLevel = currentLevel.Value,
+                    BaseCourseLevel = currentLevel.Value
                 };
                 var isCheckResult = await _userService.UpdateStudentByLevelAsync(updateStudent);
                 if (!isCheckResult.IsSuccessStatusCode)

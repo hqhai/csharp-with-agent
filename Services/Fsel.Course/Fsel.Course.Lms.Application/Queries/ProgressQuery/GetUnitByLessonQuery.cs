@@ -23,19 +23,16 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     public class GetUnitByLessonQueryHandler : IRequestHandler<GetUnitByLessonQuery, MethodResult<OverallScoreReportModel>>
     {
         private readonly AuthContext _authContext;
-        private readonly IVideoRepository _videoRepository;
         private readonly VideoConverter _videoConverter;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IUserService _userService;
 
         public GetUnitByLessonQueryHandler(AuthContext authContext
-            , IVideoRepository videoRepository
             , VideoConverter videoConverter
             , IVideoResultRepository videoResultRepository
             , IUserService userService)
         {
             _authContext = authContext;
-            _videoRepository = videoRepository;
             _videoConverter = videoConverter;
             _videoResultRepository = videoResultRepository;
             _userService = userService;
@@ -52,7 +49,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
                 return methodResult;
             }
-            var studentId = studentResult?.Content?.Result?.Id;
+            var student = studentResult?.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+            var studentId = student.Id;
             var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == request.LessonResultId, cancellationToken);
             if (videoResult == null)
             {

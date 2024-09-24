@@ -49,7 +49,7 @@ namespace Fsel.Ordering.Application.Queries.UserRefferalQuery
                                         ReceiverId = x.ReceiverId,
                                     }).ToListAsync(cancellationToken);
 
-            var listUser = await _userService.GetStudentsByIdsAsync(userReferral.Select(x => x.ReceiverId.ToString()).ToList());
+            var listUser = await _userService.GetStudentsByIdsAsync(userReferral.Select(x => x.ReceiverId).ToList());
             var userResult = listUser.Content?.Result;
 
             foreach (var item in userReferral)

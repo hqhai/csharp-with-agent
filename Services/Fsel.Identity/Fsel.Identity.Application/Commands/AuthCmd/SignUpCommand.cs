@@ -6,8 +6,8 @@ using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
-using Fsel.Identity.Application.Commands.StudentCmd;
 using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
+using Fsel.Identity.Application.Commands.UserReferrals;
 using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
@@ -19,7 +19,6 @@ using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Models.SenderTemplates;
-using Fsel.Shared.Models.ShareModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -114,10 +113,19 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 await _roleManager.CreateAsync(role);
                             }
 
+                            var passwordValidator = new Microsoft.AspNetCore.Identity.PasswordValidator<User>();
                             Microsoft.AspNetCore.Identity.IdentityResult result;
                             if (user != null)
                             {
                                 _mapper.Map(request, user);
+
+                                var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password);
+                                if (!validPassword.Succeeded)
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIsNotValid));
+                                    return methodResult;
+                                }
+
                                 user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, request.Password ?? string.Empty);
                                 user.UserName = request.Email;
                                 if (!user.IsValid())
@@ -126,6 +134,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     return methodResult;
                                 }
                                 result = await _userManager.UpdateAsync(user);
+                                if (!result.Succeeded)
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
+                                    return methodResult;
+                                }
                             }
                             else
                             {
@@ -152,6 +165,22 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                                 #endregion Add Platform to User
 
+                                #region add user setting
+
+                                user.UserSettings = new List<UserSetting>()
+                                    {
+                                        new UserSetting(true)
+                                    };
+
+                                #endregion add user setting
+
+                                var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password);
+                                if (!validPassword.Succeeded)
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIsNotValid));
+                                    return methodResult;
+                                }
+
                                 result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
                                 if (!result.Succeeded)
                                 {
@@ -159,17 +188,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     return methodResult;
                                 }
                                 await _userManager.AddToRoleAsync(user, request.Role.ToString() ?? string.Empty);
-                            }
-                            if (!string.IsNullOrEmpty(request.ReferralCode))
-                            {
-                                var updateReferralCodeResult = await _mediator.Send(new UpdateReferralCodeStudentCommand { ReferralCode = request.ReferralCode, UserId = user.Id }, cancellationToken).ConfigureAwait(false);
-                                if (!updateReferralCodeResult.IsOK)
-                                {
-                                    methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);
-                                    return methodResult;
-                                }
-                                // làm nhiệm vụ
-                                // await DoQuestBoard(request.ReferralCode, cancellationToken);
                             }
 
                             #region Send Code OTP
@@ -186,7 +204,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             ArgumentNullException.ThrowIfNull(request);
                             if (!string.IsNullOrEmpty(request.Email))
                             {
-                                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
+                                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, IsCCEmailDefault = true, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
                             }
                             else if (!string.IsNullOrEmpty(request.PhoneNumber))
                             {
@@ -221,36 +239,19 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 }
             }
 
+            if (!string.IsNullOrEmpty(request.ReferralCode))
+            {
+                var updateReferralCodeResult = await _mediator.Send(new CreateUserReferralCommand { ReferralCode = request.ReferralCode, ReceiverId = user.Id, UserReferralType = EnumUserReferralType.Link }, cancellationToken).ConfigureAwait(false);
+                if (!updateReferralCodeResult.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);
+                    return methodResult;
+                }
+            }
+
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;
-        }
-
-        public async Task DoQuestBoard(string code, CancellationToken cancellationToken)
-        {
-            var humanId = _humanRepository!.Queryable!.FirstOrDefault(x => x.Code == code)!.Id;
-
-            var humanInfo = await _humanRepository.GetIncludeByIdAsync(humanId);
-            if (humanInfo?.Student != null)
-            {
-                IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SuccessfulIntroduceCode };
-                var studentId = humanInfo!.Student!.Id;
-                var classModel = await _trainingService.GetClassByStudentId(studentId!);
-
-                if (classModel?.Content?.Result != null && classModel?.Content?.Result.CourseId != null)
-                {
-                    var courseId = classModel.Content!.Result!.CourseId;
-                    QuestBoardQueueModel questBoardQueueModel = new QuestBoardQueueModel
-                    {
-                        StudentId = studentId!,
-                        Categories = categories,
-                        AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
-                        CourseId = courseId
-                    };
-
-                    await _questBoardPublisher.Publish(questBoardQueueModel, cancellationToken);
-                }
-            }
         }
     }
 }

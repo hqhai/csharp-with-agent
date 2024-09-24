@@ -13,7 +13,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.StudentFocusTime;
     using Fsel.Identity.Domain.Models.EntityModels;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -51,6 +50,10 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<StudentFocusTimeModel> methodResult = new MethodResult<StudentFocusTimeModel>();
 
+            if (_authContext.CurrentUserId == Guid.Empty)
+            {
+                _authContext.CurrentUserId = request.UserId;
+            }
             var student = _studentRepository.Queryable.Include(x => x.Human).FirstOrDefault(x => x.Human!.UserId == _authContext.CurrentUserId);
             if (student == null)
             {
@@ -58,6 +61,8 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 return methodResult;
             }
             var studentFocusTime = _studentFocusTimeRepository.Queryable.FirstOrDefault(x => x.StudentId == student.Id && x.CreatedDate.Date == DateTime.UtcNow.Date);
+
+            var studentFocusTimeNeareast = _studentFocusTimeRepository.Queryable.FirstOrDefault(x => x.StudentId == student.Id && x.CreatedDate.Date == DateTime.UtcNow.Date.AddDays(-1));
 
             var systemConfig = await _systemService.GetFocusTimeConfig();
             var systemConfigResult = systemConfig?.Content?.Result;
@@ -73,7 +78,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 if (studentFocusTime == null)
                 {
                     studentFocusTime = _mapper.Map<StudentFocusTime>(request);
-                    studentFocusTime.TargetTime = request.TargetTime;
+                    studentFocusTime.TargetTime = studentFocusTimeNeareast != null ? studentFocusTimeNeareast.TargetTime : request.TargetTime;
                     studentFocusTime.StudentId = student.Id;
                     studentFocusTime.IsEstablished = false;
 
@@ -82,8 +87,8 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 else
                 {
                     // Set targetTime
-                    bool confitionChangeTarget = studentFocusTime.TargetTime == 0 && request.TargetTime != 0;
-                    if (!studentFocusTime.IsEstablished && confitionChangeTarget)
+                    bool confitionChangeTarget = !studentFocusTime!.IsEstablished && request.TargetTime != studentFocusTime.TargetTime && request.TargetTime != 0;
+                    if (confitionChangeTarget)
                     {
                         studentFocusTime.TargetTime = request.TargetTime;
                         studentFocusTime.IsEstablished = confitionChangeTarget;
@@ -91,7 +96,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
                     // Set AccessTime And NumberOfToken
                     var systemConfigMap = systemConfigResult!.FirstOrDefault(x => x.TargetTime == studentFocusTime.TargetTime);
-                    studentFocusTime.ExecuteTime = request.ExecuteTime;
+                    studentFocusTime.ExecuteTime += request.ExecuteTime;
 
                     _studentFocusTimeRepository.Update(studentFocusTime);
                 }

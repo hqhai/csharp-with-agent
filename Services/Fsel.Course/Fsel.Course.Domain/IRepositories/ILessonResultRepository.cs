@@ -10,7 +10,7 @@ namespace Fsel.Course.Domain.IRepositories
     {
         Task<List<LessonResult>?> GetListAsync(IList<Guid>? ids);
 
-        Task<List<LessonResult>?> GetListAsync(IList<Guid>? lessonIds, Guid? studentId, Guid unitId);
+        Task<List<LessonResult>?> GetListAsync(IList<Guid>? lessonIds, Guid courseId, Guid unitId, Guid? studentId);
 
         Task<LessonResult?> GetAsync(Guid? courseId, Guid? unitId, Guid? lessonId, Guid? studentId);
 

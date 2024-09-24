@@ -12,8 +12,8 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["Services/Fsel.Hangfire/Fsel.Hangfire.Host/Fsel.Hangfire.Host.csproj", "Services/Fsel.Hangfire/Fsel.Hangfire.Host/"]
 COPY ["Services/Fsel.Hangfire/Fsel.Hangfire.Application/Fsel.Hangfire.Application.csproj", "Services/Fsel.Hangfire/Fsel.Hangfire.Application/"]
-COPY ["Services/Fsel.Realtime/Fsel.Realtime.Infrastructure/Fsel.Realtime.Infrastructure.csproj", "Services/Fsel.Realtime/Fsel.Realtime.Infrastructure/"]
-COPY ["Services/Fsel.Realtime/Fsel.Realtime.Domain/Fsel.Realtime.Domain.csproj", "Services/Fsel.Realtime/Fsel.Realtime.Domain/"]
+COPY ["Services/Fsel.Hangfire/Fsel.Hangfire.Infrastructure/Fsel.Hangfire.Infrastructure.csproj", "Services/Fsel.Hangfire/Fsel.Hangfire.Infrastructure/"]
+COPY ["Services/Fsel.Hangfire/Fsel.Hangfire.Domain/Fsel.Hangfire.Domain.csproj", "Services/Fsel.Hangfire/Fsel.Hangfire.Domain/"]
 COPY ["Services/Shared/Fsel.Shared/Fsel.Shared.csproj", "Services/Shared/Fsel.Shared/"]
 RUN dotnet restore "Services/Fsel.Hangfire/Fsel.Hangfire.Host/Fsel.Hangfire.Host.csproj"
 COPY . .

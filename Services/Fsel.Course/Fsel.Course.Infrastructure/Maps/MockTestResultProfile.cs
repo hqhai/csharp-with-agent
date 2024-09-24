@@ -16,17 +16,17 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<MockTestResult, MockTestResultModel>()
                 .ForMember(m => m.MockTestScores, opt => opt.Ignore())
-                .ForMember(x => x.Scores, p => p.MapFrom(o => o.SkillScores != null && o.SkillScores.Any() ? NumberHelper.RoundNumberDouble(o.SkillScores.Average(x => x.Scores), false) : default))
+                .ForMember(x => x.Scores, p => p.MapFrom(o => o.SkillScores != null && o.SkillScores.Any() ? NumberHelper.RoundNumberDouble(o.SkillScores.Average(x => x.Scores)) : default))
                 .ForMember(x => x.ProgressPercent, p => p.MapFrom(x => x.MockTest != null ? NumberHelper.GetPercent(x.SectionGroupResults.Where(y => y.Status == EnumResultStatus.Done).Count(), x.MockTest.MockTestSections.Count) : default));
 
             CreateMap<MockTestResult, TestResultRankingModel>()
-                .ForMember(x => x.Score, p => p.MapFrom(o => o.SkillScores != null && o.SkillScores.Any() ? NumberHelper.RoundNumberDouble(o.SkillScores.Average(x => x.Scores), false) : default));
+                .ForMember(x => x.Score, p => p.MapFrom(o => o.SkillScores != null && o.SkillScores.Any() ? NumberHelper.RoundNumberDouble(o.SkillScores.Average(x => x.Scores)) : default));
 
             CreateMap<MockTestResult, MockTestResultReportModel>()
-              .ForMember(x => x.Score, p => p.MapFrom(o => o.SkillScores != null && o.SkillScores.Any() ? NumberHelper.RoundNumberDouble(o.SkillScores.Average(x => x.Scores), false) : default));
+              .ForMember(x => x.Score, p => p.MapFrom(o => o.SkillScores != null && o.SkillScores.Any() ? NumberHelper.RoundNumberDouble(o.SkillScores.Average(x => x.Scores)) : default));
 
             CreateMap<MockTestResult, LessonMockTestResultModel>()
-            .ForMember(x => x.Scores, p => p.MapFrom(o => o.SkillScores != null && o.SkillScores.Any() ? NumberHelper.RoundNumberDouble(o.SkillScores.Average(x => x.Scores), false) : default))
+            .ForMember(x => x.Scores, p => p.MapFrom(o => o.SkillScores != null && o.SkillScores.Any() ? NumberHelper.RoundNumberDouble(o.SkillScores.Average(x => x.Scores)) : default))
             .ForMember(x => x.Type, p => p.MapFrom(o => nameof(EnumMockTestType.SkillMockTest)))
             .ForMember(x => x.ObjectId, p => p.MapFrom(o => o.MockTestId));
 

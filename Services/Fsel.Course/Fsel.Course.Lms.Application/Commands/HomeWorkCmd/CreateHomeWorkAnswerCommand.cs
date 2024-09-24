@@ -15,11 +15,9 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -109,10 +107,11 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkQuestion));
                     return methodResult;
                 }
+                correctTotal += correctCount;
+
                 var homeWorkAnswer = await _homeWorkAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.HomeWorkQuestionId == homeWorkQuestion.Id && x.HomeWorkResultId == request.HomeWorkResultId, cancellationToken);
                 if (homeWorkAnswer == null)
                 {
-                    correctTotal += correctCount;
                     homeWorkAnswers.Add(new HomeWorkAnswer
                     {
                         Answer = answerConfig,
@@ -124,7 +123,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                 }
                 else
                 {
-                    correctTotal += correctCount;
                     homeWorkAnswer.Answer = answerConfig;
                     homeWorkAnswer.CorrectCount = correctCount;
                     homeWorkAnswer.IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null;
@@ -182,7 +180,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
                 if (homeWorkAnswers.Any())
                 {
-                    await DoDailyQuest(cancellationToken);
                     _homeWorkAnswerRepository.UpdateList(homeWorkAnswers);
                     await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
@@ -193,53 +190,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             });
 
             return methodResult;
-        }
-
-        public async Task DoDailyQuest(CancellationToken cancellationToken)
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CompleteHomeWorkAtLeastFiftyPercent };
-
-            var checkHomeWorkDoneAtLeastFiftyPercent = _homeWorkResultRepository.Queryable.Any(x => x.CreatedUserId == _authContext.CurrentUserId && x.CreatedDate.Date == DateTime.UtcNow.Date && x.CreatedDate.Month == DateTime.UtcNow.Month && x.CreatedDate.Year == DateTime.UtcNow.Year && x.Percent >= FIFTY_PERCENT_DONE);
-
-            var homeWorkResultDaily = _homeWorkResultRepository.Queryable.FirstOrDefault(x => x.CreatedUserId == _authContext.CurrentUserId);
-
-            var courseId = homeWorkResultDaily?.LessonResult?.CourseId;
-            var studentId = homeWorkResultDaily?.StudentId;
-
-            if (checkHomeWorkDoneAtLeastFiftyPercent && homeWorkResultDaily != null)
-            {
-                QuestBoardQueueModel questBoardModel = new QuestBoardQueueModel()
-                {
-                    StudentId = homeWorkResultDaily.StudentId!,
-                    Categories = categories,
-                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
-                    ObjectId = homeWorkResultDaily.Id,
-                    CourseId = homeWorkResultDaily.LessonResult!.CourseId,
-                };
-
-                await _questBoardPublisher.Publish(questBoardModel, cancellationToken);
-            }
-        }
-
-        private async Task DoQuestBoard(Guid courseId, int correctCount, CancellationToken cancellationToken)
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneHomeworkMiniProject };
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var studentId = student?.Content?.Result?.Id;
-
-            //Chỉ bài finaltest đầu tiên hoàn thành của khóa mới được tính là hoàn thành nhiệm vụ
-            bool checkFirstHomeWorkDone = _homeWorkResultRepository.Queryable.Any(h => h.CorrectCount == correctCount && h.Status == EnumResultStatus.Done);
-
-            if (!checkFirstHomeWorkDone)
-            {
-                await _questBoardPublisher.Publish(new QuestBoardQueueModel
-                {
-                    StudentId = (Guid)studentId!,
-                    Categories = categories,
-                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
-                    CourseId = courseId
-                }, cancellationToken);
-            }
         }
     }
 }

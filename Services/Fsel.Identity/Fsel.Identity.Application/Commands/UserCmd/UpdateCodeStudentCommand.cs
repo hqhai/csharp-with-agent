@@ -9,8 +9,8 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -29,14 +29,19 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private readonly UserManager<User> _userManager;
         private readonly AuthContext _authContext;
         private readonly IStudentRepository _studentRepository;
+        private readonly ISystemService _systemService;
         private readonly IMapper _mapper;
 
-        public UpdateCodeStudentCommandHandler(UserManager<User> userManager, AuthContext authContext, IStudentRepository studentRepository,
+        public UpdateCodeStudentCommandHandler(UserManager<User> userManager,
+            AuthContext authContext,
+            IStudentRepository studentRepository,
+            ISystemService systemService,
             IMapper mapper)
         {
             _userManager = userManager;
             _authContext = authContext;
             _studentRepository = studentRepository;
+            _systemService = systemService;
             _mapper = mapper;
         }
 
@@ -50,7 +55,11 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
-
+            if (user.Human == null || user.Human.Student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user.Human));
+                return methodResult;
+            }
             if (request.Birthday == null && request.YearBirthday == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Birthday));
@@ -69,24 +78,36 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             var lastOfBirthDay = request.Birthday!.Value.Year % 100;
             var number = request.Gender == EnumGender.Male ? 0 : request.Gender == EnumGender.Female ? 1 : 2;
             var code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfBirthDay}{stt:000}";
-            if (await _studentRepository.Queryable.Include(x => x.Human).AnyAsync(x => x!.Human!.Code == code, cancellationToken))
+            if (await _studentRepository.Queryable.Include(x => x.Human).AnyAsync(x => x.Human != null && x.Human.Code == code, cancellationToken))
             {
                 code = $"HN_{weekNumber}{lastDigitOfYear}{number}{2}{lastOfBirthDay}{stt:000}";
             }
-            user.Human!.Code = code;
+            user.Human.Code = code;
             int age = DateTimeHelper.GetYearOld(request.Birthday);
             if (age <= 13)
             {
-                user.Human!.Student!.CourseLevel = EnumCourseLevel.A2;
+                user.Human.Student.CourseLevel = EnumCourseLevel.A2;
             }
             else if (age >= 14)
             {
-                user.Human!.Student!.CourseLevel = EnumCourseLevel.B1;
+                user.Human.Student.CourseLevel = EnumCourseLevel.B1;
             }
 
-            user.Human.Student!.ProvinceId = request.ProvinceId;
+            user.Human.Student.ProvinceId = request.ProvinceId;
             user.Human.Student.DistrictId = request.DistrictId;
             user.Human.Student.SchoolId = request.SchoolId;
+            if (request.SchoolId.HasValue)
+            {
+                var schoolResults = await _systemService.GetSchoolsAsync(new List<Guid> { request.SchoolId.Value });
+                if (schoolResults.IsSuccessStatusCode)
+                {
+                    user.Human.Student.School = schoolResults.Content?.Result?.FirstOrDefault()?.Name;
+                }
+            }
+            else
+            {
+                user.Human.Student.School = request.SchoolName;
+            }
 
             _mapper.Map(request, user.Human);
             await _userManager.UpdateAsync(user);

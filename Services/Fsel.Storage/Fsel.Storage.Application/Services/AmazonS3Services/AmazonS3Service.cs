@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Diagnostics;
+using System.Globalization;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
@@ -10,13 +11,11 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Helpers;
-using Fsel.Storage.Domain.Enums;
 using Fsel.Storage.Domain.Enums.ErrorCodes;
 using Fsel.Storage.Infrastructure.ValueSettings;
 using Humanizer.Bytes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Nest;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Processing;
@@ -34,13 +33,15 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
         private readonly float _targetHeightResize = 180F;
         private readonly double _partSize = ByteSize.FromMegabytes(100).Bytes; // Size of each part (100 MB)
         private readonly ICognitiveProvider _cognitiveProvider;
+        private readonly RandomSecureHelper _randomSecure;
 
         private readonly Dictionary<EnumFolderType, double> _maximumCapacity = new Dictionary<EnumFolderType, double>
         {
-            { EnumFolderType.Fsis, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (1 GB)
+            { EnumFolderType.Fsis, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (5 GB)
             { EnumFolderType.AG, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (5 GB)
+            { EnumFolderType.HRM, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (5 GB)
             { EnumFolderType.Videos, ByteSize.FromGigabytes(5).Bytes }, //maximum video size (5 GB)
-            { EnumFolderType.Files, ByteSize.FromMegabytes(6).Bytes }, //maximum file size (6 MB)
+            { EnumFolderType.Files, ByteSize.FromGigabytes(5).Bytes }, //maximum file size (5 GB)
             { EnumFolderType.Questions, ByteSize.FromMegabytes(6).Bytes }, //maximum question size (6 MB)
             { EnumFolderType.Images, ByteSize.FromMegabytes(500).Bytes } //maximum image size (500 MB)
         };
@@ -60,6 +61,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             _systemFileProvider = systemFileProvider;
             _logger = logger;
             _cognitiveProvider = cognitiveProvider;
+            _randomSecure = new RandomSecureHelper();
         }
 
         private async Task<string> UploadFileAsync(EnumBucketType? bucketType, Stream? stream, string? key)
@@ -275,7 +277,8 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 return default;
             }
 
-            var key = PathHelper.Combine(folder, file.FileName.ReplaceSpecialChars().AddSuffix());
+            var randomValue = _randomSecure.Next(9999).ToString(CultureInfo.InvariantCulture);
+            var key = PathHelper.Combine(folder, file.FileName.ReplaceSpecialChars().AddSuffix(randomValue, DateTime.UtcNow));
             Stream stream;
             if (isResize)
             {
@@ -371,9 +374,11 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             // Generate M3U8 playlists with multiple quality options for each video
             var qualities = new[]
             {
+                new { Name = "240p", Resolution = "426x240", Bitrate = "300k" },
                 new { Name = "360p", Resolution = "640x360", Bitrate = "400k" },
                 new { Name = "480p", Resolution = "854x480", Bitrate = "800k" },
-                new { Name = "720p", Resolution = "1280x720", Bitrate = "1500k" }
+                new { Name = "720p", Resolution = "1280x720", Bitrate = "1500k" },
+                new { Name = "1080p", Resolution = "1920x1080", Bitrate = "3000k" }
                 // Add more quality options as needed
             };
 
@@ -382,7 +387,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             foreach (var quality in qualities)
             {
                 string outputM3U8 = Path.Combine(rootFolderPath, $"{quality.Name}.m3u8");
-                string ffmpegArgs = $"-i \"{inputPath}\" -c:v libx264 -preset ultrafast -b:v {quality.Bitrate} -vf \"scale={quality.Resolution}\" -c:a aac -b:a 128k -hls_time 120 -hls_list_size 0 -f hls \"{outputM3U8}\"";
+                string ffmpegArgs = $"-i \"{inputPath}\" -c:v libx264 -preset ultrafast -b:v {quality.Bitrate} -vf \"scale={quality.Resolution}\" -c:a aac -b:a 128k -hls_time 10 -hls_list_size 0 -f hls \"{outputM3U8}\"";
 
                 await FfmpegStart(ffmpegArgs);
             }

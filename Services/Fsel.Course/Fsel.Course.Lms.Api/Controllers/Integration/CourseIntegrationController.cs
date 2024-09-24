@@ -3,16 +3,15 @@
 namespace Fsel.Course.Lms.Api.Controllers.Integration
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Lms.Application.Queries.IntegrationQuery;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/course-integration")]
     [ApiController]
     public class CourseIntegrationController : ControllerBase
@@ -27,10 +26,10 @@ namespace Fsel.Course.Lms.Api.Controllers.Integration
         /// <summary>
         /// Integration Placement Test Result
         /// </summary>
-        [HttpGet("integration-placement-test-results")]
+        [HttpPost("integration-placement-test-results")]
         [ProducesResponseType(typeof(MethodResult<IList<object>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetIntegrationPlacementTestResult([FromQuery] IntegrationPlacementTestResultsQuery query)
+        public async Task<IActionResult> GetIntegrationPlacementTestResult([FromBody] IntegrationPlacementTestResultsQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -39,22 +38,10 @@ namespace Fsel.Course.Lms.Api.Controllers.Integration
         /// <summary>
         /// Integration Unit
         /// </summary>
-        [HttpGet("integration-unit-results")]
+        [HttpPost("integration-unit-results")]
         [ProducesResponseType(typeof(MethodResult<IList<object>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetIntegrationUnitResults([FromQuery] IntegrationUnitResultsQuery query)
-        {
-            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Integration Lesson
-        /// </summary>
-        [HttpGet("integration-lesson-results")]
-        [ProducesResponseType(typeof(MethodResult<IList<LessonIntegration>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetIntegrationLessonResults([FromQuery] IntegrationLessonResultsQuery query)
+        public async Task<IActionResult> GetIntegrationUnitResults([FromBody] IntegrationUnitResultsQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

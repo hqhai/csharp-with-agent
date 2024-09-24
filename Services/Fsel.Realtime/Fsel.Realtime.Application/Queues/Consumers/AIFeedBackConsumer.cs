@@ -1,3 +1,4 @@
+using Fsel.Core.Base;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Extensions;
 using Fsel.Realtime.Application.Hubs;
@@ -8,27 +9,27 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Fsel.Realtime.Application.Queues.Consumers
 {
-    public class AIFeedBackConsumer : IConsumer<SubmitAIResponseModel>
+    public class AIFeedBackConsumer : BaseConsumer<SubmitAIResponseModel>
     {
         private readonly IHubContext<ClassForumAIFeedBackHub> _classForumFeedBackHubContext;
         private readonly IQueueProvider _queueProvider;
 
-        public AIFeedBackConsumer(IHubContext<ClassForumAIFeedBackHub> classForumAIFeedBackHubContext, IQueueProvider queueProvider)
+        public AIFeedBackConsumer(IHubContext<ClassForumAIFeedBackHub> classForumAIFeedBackHubContext, IQueueProvider queueProvider, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _classForumFeedBackHubContext = classForumAIFeedBackHubContext;
             _queueProvider = queueProvider;
         }
 
-        public async Task Consume(ConsumeContext<SubmitAIResponseModel> context)
+        public override async Task ConsumeQueue(SubmitAIResponseModel? message)
         {
-            if (context != null)
+            if (message != null)
             {
-                var classForumResultId = context.Message.ClassForumResultId.ToString();
-                await _classForumFeedBackHubContext.GetGroup(classForumResultId!).SendAsync(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, context.Message);
+                var classForumResultId = message.ClassForumResultId.ToString();
+                await _classForumFeedBackHubContext.GetGroup(classForumResultId!).SendAsync(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, message);
 
                 try
                 {
-                    _queueProvider.Publish(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, classForumResultId, context.Message);
+                    _queueProvider.Publish(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, classForumResultId, message);
                 }
                 catch { }
             }

@@ -18,7 +18,8 @@ namespace Fsel.Training.Api.Controllers.Admin
     using Asp.Versioning;
     using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/class")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
@@ -190,6 +191,18 @@ namespace Fsel.Training.Api.Controllers.Admin
         public async Task<IActionResult> UpdateStudentStatusInClass([FromRoute] Guid id)
         {
             MethodResult<bool> commandResult = await _mediator.Send(new UpdateStudentStatusInClassCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// delete
+        /// </summary>
+        [HttpDelete("delete-student-from-class/{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> DeleteStudentFromClass([FromRoute] Guid id)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteStudentFromClassCommand { UserId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

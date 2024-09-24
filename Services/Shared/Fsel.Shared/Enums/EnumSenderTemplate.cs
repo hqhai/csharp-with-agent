@@ -21,6 +21,19 @@ namespace Fsel.Shared.Enums
         StudentCompletePT,
         SendMailMidCourseAcademic,
         SendMailMidCourseIELT,
-        PaymentApproval
+        PaymentApproval,
+        MailPaymentForStudent,
+        MailPaymentForCustomer,
+        MailFromLandingPage,
+
+        #region event
+
+        CreateAccountWithEventSuccess,
+        SignUpEventSuccess,
+        WasInAnotherEvent,
+        LearnedOnThePlatform,
+        NotEligibleToParticipate
+
+        #endregion event
     }
 }

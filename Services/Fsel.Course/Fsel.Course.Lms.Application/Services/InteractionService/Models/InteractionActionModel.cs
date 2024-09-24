@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Services.InteractionService.Models
 {
     using System;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
 
     public class InteractionActionModel : BaseModel
     {
@@ -18,5 +19,7 @@ namespace Fsel.Course.Lms.Application.Services.InteractionService.Models
         public bool IsDisable { get; set; }
 
         public bool IsLiked { get; set; }
+        public EnumInteractionType? BusinessType { get; set; }
+        public EnumInteractionActionType Type { get; set; }
     }
 }

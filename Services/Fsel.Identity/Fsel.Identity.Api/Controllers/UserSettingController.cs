@@ -13,7 +13,8 @@ namespace Fsel.Identity.Api.Controllers
     using Asp.Versioning;
     using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/user-setting")]
     [ApiController]
     public class UserSettingController : ControllerBase
@@ -46,6 +47,15 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> Get()
         {
             MethodResult<UserSettingModel> commandResult = await _mediator.Send(new GetUserSettingQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpPost("users")]
+        [ProducesResponseType(typeof(MethodResult<UserSettingModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUsers([FromBody] GetListUserSettingsQuery query)
+        {
+            MethodResult<List<UserSettingModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

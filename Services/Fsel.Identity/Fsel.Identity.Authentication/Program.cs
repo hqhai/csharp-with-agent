@@ -18,12 +18,13 @@ var builder = WebApplication.CreateBuilder(args);
 var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
-//builder.AddAuthenticationJwtBearers(appSetting);
+builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<UserDbContext>();
 
 builder.AddIdentity<User, Role, UserDbContext>();
-builder.AddAuthenticationIdentity(appSetting);
+builder.AddAuthenticationIdentity();
 
+//Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserTokenRepository, UserTokenRepository>();
 builder.Services.AddScoped<IHumanRepository, HumanRepository>();
@@ -40,16 +41,23 @@ builder.Services.AddScoped<IUserPlatformRepository, UserPlatformRepository>();
 builder.Services.AddScoped<IStudentDailyStreakRepository, StudentDailyStreakRepository>();
 builder.Services.AddScoped<IStudentRankingRepository, StudentRankingRepository>();
 builder.Services.AddScoped<IStudentTrialRegistrationRepository, StudentTrialRegistrationRepository>();
+builder.Services.AddScoped<IUserCourseSettingRepository, UserCourseSettingRepository>();
+builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeRepository>();
+builder.Services.AddScoped<IStudentCompetitionSnapShotRepository, StudentCompetitionSnapShotRepository>();
+builder.Services.AddScoped<ICompetitionEventsRepository, CompetitionEventsRepository>();
+builder.Services.AddScoped<IStudentCompetitionEventsRepository, StudentCompetitionEventRepository>();
+builder.Services.AddScoped<IStudentRankingEventRepository, StudentRankingEventRepository>();
+builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
+builder.Services.AddScoped<IEventRegistrationRepository, EventRegistrationRepository>();
 
 // Queue
 builder.Services.AddScoped<LeaderBoardPublisher>();
-builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
-builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeRepository>();
-
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 
+//Refit
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);

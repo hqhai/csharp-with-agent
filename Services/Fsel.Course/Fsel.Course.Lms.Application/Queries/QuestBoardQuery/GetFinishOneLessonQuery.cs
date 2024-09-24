@@ -72,13 +72,13 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             {
                 videoResult = videoResults.FirstOrDefault(x => !x.UpdatedDate.HasValue || x.UpdatedDate.Value > request.StartDate);
             }
-            else if (request.RepeatType == EnumRepeatType.Day)
+            else if (request.RepeatType == EnumRepeatType.Daily)
             {
                 DateTime startOfDay = currentDate.Date.AddHours(8);
                 DateTime endOfDay = currentDate.Date.AddDays(1);
                 videoResult = videoResults.FirstOrDefault(x => !x.UpdatedDate.HasValue || (x.UpdatedDate.Value > startOfDay && x.UpdatedDate.Value < endOfDay) || (x.UpdatedDate.Value < endOfDay));
             }
-            else if (request.RepeatType == EnumRepeatType.Week)
+            else if (request.RepeatType == EnumRepeatType.Weekly)
             {
                 DateTime startOfWeek = currentDate.AddDays(-(int)currentDate.DayOfWeek);
                 DateTime endOfWeek = startOfWeek.AddDays(6);

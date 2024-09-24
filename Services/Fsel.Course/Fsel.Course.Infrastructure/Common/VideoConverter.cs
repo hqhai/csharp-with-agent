@@ -37,6 +37,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly LinQHelper _linQHelper;
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly IMapper _mapper;
+        private const int NumberOfQuestion = 1;
 
         public VideoConverter(IVideoRepository videoRepository
             , IQuestionRepository questionRepository
@@ -288,32 +289,48 @@ namespace Fsel.Course.Infrastructure.Common
             var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoTimeCode)
                 .Where(x => x.VideoResultId == videoResult.Id)
                 .ToListAsync(cancellationToken);
-            var answers = videoTimeCodeResults.Where(x => x.CorrectTotal > 0 && x.SkillScores != null && x.SkillScores.Any())
-                .GroupBy(x => new { x.VideoTimeCode!.TimeCodeType })
-                .SelectMany(g => g.SelectMany(x => x.SkillScores!).GroupBy(x => new { x.Skill, g.Key.TimeCodeType }).Select(x => new
-                {
-                    Type = x.Key.TimeCodeType,
-                    Skill = x.Key.Skill,
-                    CorrectCount = x.Sum(y => y.CorrectCount),
-                    TotalAnswer = x.Sum(y => y.CountQuestion)
-                })).ToList();
 
-            var questionQuery = from baseQ in _videoRepository.Queryable
-                                join vt in _videoTimeCodeRepository.Queryable on baseQ.Id equals vt.VideoId
-                                join te in _timeCodeExerciseRepository.Queryable on vt.Id equals te.VideoTimeCodeId
-                                join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
-                                join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
-                                join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
-                                where baseQ.Id == videoResult.VideoId && !q.Ungraded && q.QuestionType != EnumQuestionType.ExercisePreparation
-                                group new { vt, q } by new { vt.TimeCodeType, e.CourseSkill } into g
-                                select new
-                                {
-                                    Type = g.Key.TimeCodeType,
-                                    Skill = g.Key.CourseSkill,
-                                    TotalCount = g.Sum(x => x.q.CorrectTotal),
-                                    TotalQuestion = g.Select(x => x.q).Count()
-                                };
-            var questions = await questionQuery.ToListAsync(cancellationToken);
+            var answers = videoTimeCodeResults.Where(x => x.CorrectTotal > 0 && x.SkillScores != null && x.SkillScores.Any())
+                            .GroupBy(x => new { x.VideoTimeCode!.TimeCodeType })
+                            .SelectMany(g => g.SelectMany(x => x.SkillScores!).GroupBy(x => new { x.Skill, g.Key.TimeCodeType }).Select(x => new
+                            {
+                                Type = x.Key.TimeCodeType,
+                                Skill = x.Key.Skill,
+                                CorrectCount = x.Sum(y => y.CorrectCount),
+                                TotalAnswer = x.Sum(y => y.CountQuestion)
+                            })).ToList();
+            var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Include(x => x.TimeCodeExercises)
+                                    .ThenInclude(x => x.Exercise)
+                                    .ThenInclude(x => x!.ExerciseQuestions)
+                                    .ThenInclude(x => x.Question)
+                                    .Where(x => x.VideoId == videoResult.VideoId)
+                                    .ToListAsync(cancellationToken);
+            var listGroupVideoTimeCode = videoTimeCodes.GroupBy(x => x.TimeCodeType)
+                                        .Select(x =>
+                                            x.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise)
+                                            .GroupBy(x => x!.CourseSkill)
+                                            .Select(y => new
+                                            {
+                                                Type = x.Key,
+                                                Skill = y.Key,
+                                                Questions = y.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question)
+                                                            .Where(x => !x!.Ungraded && x.QuestionType != EnumQuestionType.ExercisePreparation)
+                                                            .Select(x => new
+                                                            {
+                                                                TotalCount = x!.CorrectTotal,
+                                                                TotalQuestion = NumberOfQuestion
+                                                            })
+                                            }))
+                                        .ToList();
+
+            var listGroupQuestion = listGroupVideoTimeCode.SelectMany(x => x).Where(x => x.Questions.Any()).Select(x => new
+            {
+                Type = x.Type,
+                Skill = x.Skill,
+                TotalCount = x.Questions.Sum(x => x.TotalCount),
+                TotalQuestion = x.Questions.Sum(x => x.TotalQuestion)
+            });
+
             var skills = Enum.GetValues(typeof(EnumCourseSkill)).Cast<EnumCourseSkill>();
             var types = Enum.GetValues(typeof(EnumTimeCodeType)).Cast<EnumTimeCodeType>();
             var scoreQuery = from type in types
@@ -321,7 +338,7 @@ namespace Fsel.Course.Infrastructure.Common
                              {
                                  Type = type,
                                  SkillScores = (from skill in skills
-                                                join questionTimeCodeQ in questions on skill equals questionTimeCodeQ.Skill into questionTimeCodeQ_jointable
+                                                join questionTimeCodeQ in listGroupQuestion on skill equals questionTimeCodeQ.Skill into questionTimeCodeQ_jointable
                                                 from questionTimeCodeQJ in questionTimeCodeQ_jointable.DefaultIfEmpty()
                                                 join answerTimeCodeQ in answers.AsQueryable() on skill equals answerTimeCodeQ.Skill into answerTimeCodeQ_jointable
                                                 from answerTimeCodeQJ in answerTimeCodeQ_jointable.DefaultIfEmpty()
@@ -335,7 +352,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                     CountQuestion = answerTimeCodeQJ != null ? answerTimeCodeQJ.TotalAnswer : default,
                                                 }).ToList()
                              };
-            return (scoreQuery.ToList(), questions.Sum(x => x.TotalQuestion) != answers.Sum(x => x.TotalAnswer));
+            return (scoreQuery.ToList(), listGroupQuestion.Sum(x => x.TotalQuestion) != answers.Sum(x => x.TotalAnswer));
         }
 
         public async Task<int> GetHighestStreak(VideoResult videoResult)
@@ -452,7 +469,7 @@ namespace Fsel.Course.Infrastructure.Common
                         remainingTime = videoTimeCodeResult.RetryWorkingTime == default ? videoTimeCodeResult.WorkingTime : videoTimeCodeResult.RetryWorkingTime;
                     }
                 }
-                videoTimeCodeResult.RemainingTime = _dateTimeConverter.GetRemainingTime(videoTimeCode.ExecutionTime, remainingTime);
+                videoTimeCodeResult.RemainingTime = _dateTimeConverter.SetRemainingTime(videoTimeCode.ExecutionTime, remainingTime);
             }
             return videoTimeCodeResult;
         }
@@ -472,6 +489,11 @@ namespace Fsel.Course.Infrastructure.Common
             var videoTimeCodeAnswer = question.VideoTimeCodeAnswers.FirstOrDefault();
             var isCheck = videoTimeCodeAnswer?.Status == EnumAnswerStatus.Done;
             var questionModel = _mapper.Map<QuestionModel>(question);
+            if (!isCheck)
+            {
+                questionModel.Explanations = null;
+                questionModel.Explanation = null;
+            }
             questionModel.CorrectStatus = GetCorrectStatus(videoTimeCodeAnswer);
             questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
             if (videoTimeCodeAnswer != null)

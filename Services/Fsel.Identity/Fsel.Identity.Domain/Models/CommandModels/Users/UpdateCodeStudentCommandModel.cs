@@ -3,7 +3,7 @@
 namespace Fsel.Identity.Domain.Models.CommandModels.Users
 {
     using System;
-    using Fsel.Identity.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class UpdateCodeStudentCommandModel
     {
@@ -14,5 +14,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
         public Guid? SchoolId { get; set; }
+        public string? SchoolName { get; set; }
     }
 }

@@ -3,27 +3,102 @@
     "id": "42d7ddb2-9f36-4f86-badc-67dc16bb722b",
     "code": "BASIC",
     "name": "Fsel_1_Month",
-    "price": 650000,
+    "price": 500000,
+    "priceMonth": 500000,
     "monthNumber": 1,
-    "descriptionStr": "[{\"content\":\"Giá trên đã bao gồm Chi phí chính sách Cambridge: 150,000 VND\",\"status\":true}]",
-    "createdDate": "2023-07-24"
+    "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
+    "referToken": 50000,
+    "createdDate": "2024-06-04",
+    "translations": [
+      {
+        "id": "81c2c7d2-9b05-485c-9659-e7f8896955a8",
+        "createdDate": "2024-06-04",
+        "packageId": "42d7ddb2-9f36-4f86-badc-67dc16bb722b",
+        "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
+        "language": "vi-VN"
+      },
+      {
+        "id": "bb9cdf82-74aa-456b-9f8b-ac4902a908cf",
+        "createdDate": "2024-06-04",
+        "packageId": "42d7ddb2-9f36-4f86-badc-67dc16bb722b",
+        "incentivesWhenPurchasing": "Free copyright fee from Cambridge University Press",
+        "language": "en-US"
+      },
+      {
+        "id": "cc63e0ed-c6ed-480a-9f32-4952d296ef29",
+        "createdDate": "2024-06-04",
+        "packageId": "42d7ddb2-9f36-4f86-badc-67dc16bb722b",
+        "incentivesWhenPurchasing": "Faire don des droits d'auteur des Éditions de l'Université de Cambridge",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "daa6fc87-6461-49d4-b3a5-c9e4cc30bc59",
-    "code": "BASIC",
+    "code": "STANDARD",
     "name": "Fsel_6_Months",
-    "price": 2100000,
+    "price": 2400000,
+    "priceMonth": 320000,
     "monthNumber": 6,
-    "descriptionStr": "[{\"content\":\"Giá trên đã bao gồm Chi phí chính sách Cambridge: 150,000 VND\",\"status\":true}]",
-    "createdDate": "2023-07-24"
+    "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
+    "referToken": 240000,
+    "createdDate": "2024-06-04",
+    "translations": [
+      {
+        "id": "dc09719c-78d6-45a3-bd11-1ee9b3fe8814",
+        "createdDate": "2024-06-04",
+        "packageId": "daa6fc87-6461-49d4-b3a5-c9e4cc30bc59",
+        "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
+        "language": "vi-VN"
+      },
+      {
+        "id": "ec9b607c-055e-43f6-a705-f8a0258b4136",
+        "createdDate": "2024-06-04",
+        "packageId": "daa6fc87-6461-49d4-b3a5-c9e4cc30bc59",
+        "incentivesWhenPurchasing": "Free copyright fee from Cambridge University Press",
+        "language": "en-US"
+      },
+      {
+        "id": "86f466db-ff5a-4aa7-846d-52e25ab1f38f",
+        "createdDate": "2024-06-04",
+        "packageId": "daa6fc87-6461-49d4-b3a5-c9e4cc30bc59",
+        "incentivesWhenPurchasing": "Faire don des droits d'auteur des Éditions de l'Université de Cambridge",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "d13ee4ab-785a-425c-bd70-b74b61df42eb",
-    "code": "BASIC",
+    "code": "PREMIUM",
     "name": "Fsel_12_Months",
-    "price": 3100000,
+    "price": 3600000,
+    "priceMonth": 240000,
     "monthNumber": 12,
-    "descriptionStr": "[{\"content\":\"Giá trên đã bao gồm Chi phí chính sách Cambridge: 150,000 VND\",\"status\":true}]",
-    "createdDate": "2023-07-24"
+    "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
+    "referToken": 360000,
+    "createdDate": "2024-06-04",
+    "translations": [
+      {
+        "id": "edb73176-e5bd-4e13-9954-7eacf5968bb8",
+        "createdDate": "2024-06-04",
+        "packageId": "d13ee4ab-785a-425c-bd70-b74b61df42eb",
+        "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
+        "language": "vi-VN"
+      },
+      {
+        "id": "b8a900bd-269a-410c-b8bd-22cc32623a38",
+        "createdDate": "2024-06-04",
+        "packageId": "d13ee4ab-785a-425c-bd70-b74b61df42eb",
+        "incentivesWhenPurchasing": "Free copyright fee from Cambridge University Press",
+        "language": "en-US"
+      },
+      {
+        "id": "5f1edb1d-ca8b-4006-b13f-797ffea98973",
+        "createdDate": "2024-06-04",
+        "packageId": "d13ee4ab-785a-425c-bd70-b74b61df42eb",
+        "incentivesWhenPurchasing": "Faire don des droits d'auteur des Éditions de l'Université de Cambridge",
+        "language": "fr-FR"
+      }
+    ]
   }
 ]

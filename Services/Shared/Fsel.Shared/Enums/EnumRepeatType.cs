@@ -4,8 +4,8 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumRepeatType
     {
-        Day,
-        Week,
+        Daily,
+        Weekly,
         Month
     }
 }

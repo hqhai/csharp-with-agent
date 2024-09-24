@@ -1,22 +1,21 @@
+using Fsel.Core.Base;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Ordering.Application.Commands.OrderCmds;
-using MassTransit;
 using MediatR;
 
 namespace Fsel.Ordering.Application.Queues.Consumers
 {
-    public class NoticePaymentConsumer : IConsumer<BaseQueueModel>
+    public class NoticePaymentConsumer : BaseConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public NoticePaymentConsumer(IMediator mediator)
+        public NoticePaymentConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueModel> context)
+        public override async Task ConsumeQueue(BaseQueueModel? message)
         {
-            var message = context?.Message;
             if (message == null)
             {
                 return;

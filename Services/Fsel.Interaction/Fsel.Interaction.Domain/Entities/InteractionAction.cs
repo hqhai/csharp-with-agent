@@ -13,6 +13,6 @@ namespace Fsel.Interaction.Domain.Entities
 
         public Guid UserId { get; set; }
 
-        public EnumInteractionType? BusinessType { get; set; }
+        public EnumInteractionType BusinessType { get; set; }
     }
 }

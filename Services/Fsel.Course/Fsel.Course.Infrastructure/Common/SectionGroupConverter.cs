@@ -12,16 +12,18 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class SectionGroupConverter
     {
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
+        private readonly ILogger<SectionGroupConverter> _logger;
+        private readonly DateTimeConverter _dateTimeConverter;
         private readonly IStudentFeedbackRepository _studentFeedbackRepository;
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly ISectionQuestionRepository _sectionQuestionRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IMapper _mapper;
-        private readonly DateTimeConverter _dateTimeConverter;
         private readonly IQuestionRepository _questionRepository;
         private readonly LinQHelper _linQHelper;
         private readonly ISectionRepository _sectionRepository;
@@ -31,15 +33,16 @@ namespace Fsel.Course.Infrastructure.Common
 
         #region Clean Code
 
-        public SectionGroupConverter(ISectionGroupResultRepository sectionGroupResultRepository, IStudentFeedbackRepository studentFeedbackRepository, AnswerTypeConverter answerTypeConverter, ISectionQuestionRepository sectionQuestionRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper, DateTimeConverter dateTimeConverter, IQuestionRepository questionRepository, LinQHelper linQHelper, ISectionRepository sectionRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, IMockTestAnswerRepository mockTestAnswerRepository)
+        public SectionGroupConverter(ISectionGroupResultRepository sectionGroupResultRepository, ILogger<SectionGroupConverter> logger, DateTimeConverter dateTimeConverter, IStudentFeedbackRepository studentFeedbackRepository, AnswerTypeConverter answerTypeConverter, ISectionQuestionRepository sectionQuestionRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper, IQuestionRepository questionRepository, LinQHelper linQHelper, ISectionRepository sectionRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, IMockTestAnswerRepository mockTestAnswerRepository)
         {
             _sectionGroupResultRepository = sectionGroupResultRepository;
+            _logger = logger;
+            _dateTimeConverter = dateTimeConverter;
             _studentFeedbackRepository = studentFeedbackRepository;
             _answerTypeConverter = answerTypeConverter;
             _sectionQuestionRepository = sectionQuestionRepository;
             _questionTypeConverter = questionTypeConverter;
             _mapper = mapper;
-            _dateTimeConverter = dateTimeConverter;
             _questionRepository = questionRepository;
             _linQHelper = linQHelper;
             _sectionRepository = sectionRepository;
@@ -79,7 +82,6 @@ namespace Fsel.Course.Infrastructure.Common
             sectionGroupResult.CorrectTotal = (int)skillScore.TotalCount;
             sectionGroupResult.Status = EnumResultStatus.Done;
             sectionGroupResult.HighestStreak = await GetHighestStreak(sectionGroupResult, sectionGroup);
-            sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroup.ExecutionTime, sectionGroupResult.CreatedDate);
             if (sectionGroup.CourseSkill != EnumCourseSkill.Writing)
             {
                 if (sectionGroupResult.SkillScores != null && sectionGroupResult.SkillScores.Any())
@@ -91,8 +93,9 @@ namespace Fsel.Course.Infrastructure.Common
                     sectionGroupResult.SkillScores = new List<SkillScores> { skillScore };
                 }
             }
-            _sectionGroupResultRepository.Update(sectionGroupResult);
-            await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+
+            _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
+            await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             return sectionGroupResult;
         }
 
@@ -263,77 +266,101 @@ namespace Fsel.Course.Infrastructure.Common
         public async Task UpdateUnansweredQuestions(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
         {
             var questionIds = await GetUnansweredQuestionIds(sectionGroup, sectionGroupResult);
-            if (questionIds != null && questionIds.Any())
+            if (questionIds == null || !questionIds.Any())
             {
-                if (sectionGroupResult.MockTestResultId.HasValue)
-                {
-                    var mockTestAnswers = new List<MockTestAnswer>();
-                    if (sectionGroup.CourseSkill == EnumCourseSkill.Reading || sectionGroup.CourseSkill == EnumCourseSkill.Listening)
-                    {
-                        var questions = await _sectionQuestionRepository.Queryable.Include(x => x.Question).Where(x => questionIds.Contains(x.Id)).Select(x => new
-                        {
-                            SectionQuestionId = x.Id,
-                            QuestionType = x.Question!.QuestionType
-                        }).ToListAsync();
-                        mockTestAnswers = questions.Select(x => new MockTestAnswer
-                        {
-                            Answer = _answerTypeConverter.GetConfigEmpty(x.QuestionType),
-                            SectionGroupResultId = sectionGroupResult.Id,
-                            MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
-                            IsCorrect = null,
-                            Status = EnumAnswerStatus.Done,
-                            SectionQuestionId = x.SectionQuestionId
-                        }).ToList();
-                    }
-                    else
-                    {
-                        mockTestAnswers = questionIds.Select(x => new MockTestAnswer
-                        {
-                            Answer = null,
-                            SectionGroupResultId = sectionGroupResult.Id,
-                            MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
-                            IsCorrect = null,
-                            Status = EnumAnswerStatus.Done,
-                            SectionId = sectionGroup.CourseSkill == EnumCourseSkill.Writing ? x : null,
-                            SectionTimeCodeId = sectionGroup.CourseSkill == EnumCourseSkill.Speaking ? x : null
-                        }).ToList();
-                    }
-
-                    await _mockTestAnswerRepository.AddList(mockTestAnswers);
-                    await _mockTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
-                }
-                else
+                return;
+            }
+            if (sectionGroupResult.MockTestResultId.HasValue)
+            {
+                var mockTestAnswers = new List<MockTestAnswer>();
+                if (sectionGroup.CourseSkill == EnumCourseSkill.Reading || sectionGroup.CourseSkill == EnumCourseSkill.Listening)
                 {
                     var questions = await _sectionQuestionRepository.Queryable.Include(x => x.Question).Where(x => questionIds.Contains(x.Id)).Select(x => new
                     {
                         SectionQuestionId = x.Id,
                         QuestionType = x.Question!.QuestionType
                     }).ToListAsync();
-                    if (sectionGroupResult.FinalTestResultId.HasValue)
+                    mockTestAnswers = questions.Select(x => new MockTestAnswer
                     {
-                        await _finalTestAnswerRepository.AddList(questions.Select(x => new FinalTestAnswer
-                        {
-                            Answer = _answerTypeConverter.GetConfigEmpty(x.QuestionType),
-                            SectionQuestionId = x.SectionQuestionId,
-                            SectionGroupResultId = sectionGroupResult.Id,
-                            FinalTestResultId = sectionGroupResult.FinalTestResultId ?? default,
-                            IsCorrect = null,
-                            Status = EnumAnswerStatus.Done
-                        }).ToList());
-                        await _finalTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                        Answer = _answerTypeConverter.GetConfigEmpty(x.QuestionType),
+                        SectionGroupResultId = sectionGroupResult.Id,
+                        MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
+                        IsCorrect = null,
+                        Status = EnumAnswerStatus.Done,
+                        SectionQuestionId = x.SectionQuestionId
+                    }).ToList();
+                }
+                else
+                {
+                    mockTestAnswers = questionIds.Select(x => new MockTestAnswer
+                    {
+                        Answer = null,
+                        SectionGroupResultId = sectionGroupResult.Id,
+                        MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
+                        IsCorrect = null,
+                        Status = EnumAnswerStatus.Done,
+                        SectionId = sectionGroup.CourseSkill == EnumCourseSkill.Writing ? x : null,
+                        SectionTimeCodeId = sectionGroup.CourseSkill == EnumCourseSkill.Speaking ? x : null
+                    }).ToList();
+                }
+
+                await _mockTestAnswerRepository.AddList(mockTestAnswers);
+                try
+                {
+                    await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Log Duplicate MockTestAnswer : {ex.Message}");
+                }
+            }
+            else
+            {
+                var questions = await _sectionQuestionRepository.Queryable.Include(x => x.Question).Where(x => questionIds.Contains(x.Id)).Select(x => new
+                {
+                    SectionQuestionId = x.Id,
+                    QuestionType = x.Question!.QuestionType
+                }).ToListAsync();
+                if (sectionGroupResult.FinalTestResultId.HasValue)
+                {
+                    await _finalTestAnswerRepository.AddList(questions.Select(x => new FinalTestAnswer
+                    {
+                        Answer = _answerTypeConverter.GetConfigEmpty(x.QuestionType),
+                        SectionQuestionId = x.SectionQuestionId,
+                        SectionGroupResultId = sectionGroupResult.Id,
+                        FinalTestResultId = sectionGroupResult.FinalTestResultId ?? default,
+                        IsCorrect = null,
+                        Status = EnumAnswerStatus.Done
+                    }).ToList());
+
+                    try
+                    {
+                        await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
                     }
-                    else if (sectionGroupResult.PlacementTestResultId.HasValue)
+                    catch (Exception ex)
                     {
-                        await _placementTestAnswerRepository.AddList(questions.Select(x => new PlacementTestAnswer
-                        {
-                            Answer = _answerTypeConverter.GetConfigEmpty(x.QuestionType),
-                            SectionQuestionId = x.SectionQuestionId,
-                            SectionGroupResultId = sectionGroupResult.Id,
-                            PlacementTestResultId = sectionGroupResult.PlacementTestResultId ?? default,
-                            IsCorrect = null,
-                            Status = EnumAnswerStatus.Done
-                        }).ToList());
-                        await _placementTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                        _logger.LogWarning($"Log Duplicate FinalTestAnswer : {ex.Message}");
+                    }
+                }
+                else if (sectionGroupResult.PlacementTestResultId.HasValue)
+                {
+                    await _placementTestAnswerRepository.AddList(questions.Select(x => new PlacementTestAnswer
+                    {
+                        Answer = _answerTypeConverter.GetConfigEmpty(x.QuestionType),
+                        SectionQuestionId = x.SectionQuestionId,
+                        SectionGroupResultId = sectionGroupResult.Id,
+                        PlacementTestResultId = sectionGroupResult.PlacementTestResultId ?? default,
+                        IsCorrect = null,
+                        Status = EnumAnswerStatus.Done
+                    }).ToList());
+
+                    try
+                    {
+                        await _placementTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"Log Duplicate PlacementTestAnswer : {ex.Message}");
                     }
                 }
             }
@@ -350,7 +377,7 @@ namespace Fsel.Course.Infrastructure.Common
                    x.Status = EnumAnswerStatus.Done;
                    return x;
                }).ToList());
-                await _finalTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
             else if (sectionGroupResult.PlacementTestResultId.HasValue)
             {
@@ -360,7 +387,7 @@ namespace Fsel.Course.Infrastructure.Common
                    x.Status = EnumAnswerStatus.Done;
                    return x;
                }).ToList());
-                await _placementTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                await _placementTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
             else
             {
@@ -370,7 +397,7 @@ namespace Fsel.Course.Infrastructure.Common
                    x.Status = EnumAnswerStatus.Done;
                    return x;
                }).ToList());
-                await _mockTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -387,18 +414,26 @@ namespace Fsel.Course.Infrastructure.Common
 
         #endregion Clean Code
 
-        public IList<SectionGroupModel> GetSectionGroups(IList<SectionGroup>? sectionGroups, Guid objectResultId, string? objectResultType)
+        public async Task<IList<SectionGroupModel>> GetSectionGroupsAsync(IList<SectionGroup>? sectionGroups, Guid objectResultId, string? objectResultType)
         {
             ArgumentNullException.ThrowIfNull(sectionGroups);
+            sectionGroups = sectionGroups.OrderBy(x => x.CourseSkill).ToList();
             var indexProcess = GetIndexProcess(sectionGroups, objectResultId, objectResultType);
-            return sectionGroups.Select(x =>
+            var sectionGroupModels = new List<SectionGroupModel>();
+            foreach (var x in sectionGroups)
             {
                 var index = sectionGroups.IndexOf(x);
                 var sectionGroup = _mapper.Map<SectionGroupModel>(x);
+                sectionGroup.TotalQuestion = GetTotalQuestion(x);
                 sectionGroup.Status = GetResultStatus(indexProcess, index);
-                sectionGroup.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(x.SectionGroupResults.FirstOrDefault());
-                return sectionGroup;
-            }).ToList();
+                var sectionGroupResult = x.SectionGroupResults.FirstOrDefault();
+                if (sectionGroupResult != null)
+                {
+                    sectionGroup.SectionGroupResult = await GetSectionGroupResult(sectionGroupResult);
+                }
+                sectionGroupModels.Add(sectionGroup);
+            };
+            return sectionGroupModels;
         }
 
         private static EnumResultStatus GetResultStatus(int? indexProcess, int index)
@@ -428,12 +463,10 @@ namespace Fsel.Course.Infrastructure.Common
 
         #region Code Chưa Clearn
 
-        private async Task<SectionGroupResultModel> GetSectionGroupResult(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup)
+        private async Task<SectionGroupResultModel> GetSectionGroupResult(SectionGroupResult sectionGroupResult)
         {
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
-            var remainingTime = sectionGroup.ExecutionTime - sectionGroupResult.WorkingTime;
             sectionGroupResultDto.IsFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == sectionGroupResult.Id);
-            sectionGroupResultDto.RemainingTime = remainingTime > 0 ? remainingTime : default;
             return sectionGroupResultDto;
         }
 
@@ -445,7 +478,7 @@ namespace Fsel.Course.Infrastructure.Common
             var isSectionGroupResultDone = sectionGroupResult.Status == EnumResultStatus.Done;
             var sectonGroupDetail = _mapper.Map<SectionGroupDtoModel>(sectionGroup);
             sectonGroupDetail.TotalQuestion = totalCount;
-            sectonGroupDetail.SectionGroupResult = await GetSectionGroupResult(sectionGroupResult, sectionGroup);
+            sectonGroupDetail.SectionGroupResult = await GetSectionGroupResult(sectionGroupResult);
             if (sectionGroupResult.MockTestResultId.HasValue)
             {
                 sectonGroupDetail.Sections = sections.Select(x => GetSectionByMockTest(x, sectionGroup.CourseSkill, isSectionGroupResultDone)).ToList();

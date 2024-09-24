@@ -24,5 +24,8 @@ namespace Fsel.Identity.Application.Services.TrainingService
 
         [Post("/v1/admin/class/user-class-by-csoids")]
         Task<IApiResponse<MethodResult<List<UserClassModel>>>> GetUserClassByCSOIdsAsync([FromBody] IList<Guid> ids);
+
+        [Delete("/admin/student/delete-student/{id}")]
+        Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
     }
 }

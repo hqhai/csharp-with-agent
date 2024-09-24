@@ -79,6 +79,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Student)
                                                    .ThenInclude(x => x!.ParentStudents)
+                                                   .Include(p => p.Receiver).ThenInclude(p => p.Sender).ThenInclude(p => p.Human)
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 var student = userView?.Human?.Student;
                 if (student != null && student.ParentStudents != null && student.ParentStudents.Count > 0)
@@ -88,6 +89,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                   .ThenInclude(x => x!.ParentStudents)
                                                   .ThenInclude(x => x!.Parent)
                                                   .ThenInclude(x => x!.Human)
+                                                  .Include(p => p.Receiver).ThenInclude(p => p.Sender).ThenInclude(p => p.Human)
                                                   .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 }
             }
@@ -137,8 +139,27 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                             methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError), nameof(classStudent));
                             return methodResult;
                         }
+
+                        //if (student.SchoolId != null)
+                        //{
+                        //    var schoolResult = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
+                        //    {
+                        //        Filters = new List<GenericFilterModel>() { new GenericFilterModel { Property = "Id", Operator = Common.Enums.EnumFilterOperator.Equal, Value = student.SchoolId } },
+                        //        IncludePaths = new List<string>() { "School" }
+                        //    });
+                        //    if (!schoolResult.IsSuccessStatusCode || schoolResult.Content?.Result == null)
+                        //    {
+                        //        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                        //        return methodResult;
+                        //    }
+                        //    student.School = schoolResult.Content?.Result?.FirstOrDefault(x => x.Id == student.SchoolId)?.Name;
+                        //}
+
                         _mapper.Map(student, userModel);
                         userModel.CodeClass = classStudent.Content?.Result?.Code;
+                        userModel.School = student.School?.ToString();
+                        userModel.SchoolName = student.School?.ToString();
+
                         if (student.ParentStudents.Count > 0)
                         {
                             var parent = student.ParentStudents.FirstOrDefault()?.Parent;
@@ -170,6 +191,15 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                         });
                         var school = schoolResult.Content?.Result;
                         userModel.SchoolName = school?.FirstOrDefault(x => x.Id == student.SchoolId)?.Name;*/
+                    }
+                    if (userView?.Receiver?.Sender != null)
+                    {
+                        userModel.Sender = new SenderModel()
+                        {
+                            SenderId = userView.Receiver.Sender.Id,
+                            FullName = userView.Receiver.Sender.FullName,
+                            Code = userView.Receiver.Sender.Human?.Code
+                        };
                     }
                 }
             }

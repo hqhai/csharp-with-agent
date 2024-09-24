@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
     using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
+    using Amazon.Runtime.Internal.Util;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
     using Fsel.Common.Models;
@@ -23,6 +24,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
     using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class WeeklyReportCommand : IRequest<MethodResult<bool>>
     {
@@ -41,8 +43,9 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IMediator _mediator;
         private readonly AppSetting _appSetting;
+        private readonly ILogger<WeeklyReportCommandHandler> _logger;
 
-        public WeeklyReportCommandHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting)
+        public WeeklyReportCommandHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting, ILogger<WeeklyReportCommandHandler> logger)
         {
             _userService = userService;
             _finalTestResultRepository = finalTestResultRepository;
@@ -52,12 +55,17 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             _unitResultRepository = unitResultRepository;
             _mediator = mediator;
             _appSetting = appSetting;
+            _logger = logger;
         }
 
         public async Task<MethodResult<bool>> Handle(WeeklyReportCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
+
+            _logger.LogWarning($"Call WeeklyReportCommand - {DateTime.UtcNow} - body: " + Common.Helpers.ConvertHelper.Serialize(request));
+
+            return methodResult;
 
             var students = new List<StudentModel>();
 
@@ -76,6 +84,22 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             {
                 return methodResult;
             }
+            students = students.Where(p => p.Human?.Email?.ToLower(CultureInfo.CurrentCulture) == "nguyenhuukhoa5462@gmail.com").ToList();
+            //UserSettingQuery query = new UserSettingQuery
+            //{
+            //    UserIds = students!.Select(x => x.Human!.UserId).ToList(),
+            //};
+
+            ////Lấy những học sinh bật thông báo Gửi Email hàng tuần
+            //var studentFilter = await _userService.GetListUserSetting(query);
+            //var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
+
+            //if (studentFilterResult == null || studentFilterResult.Count == 0)
+            //{
+            //    return methodResult;
+            //}
+            ////filter những học sinh bật thông báo email.
+            //students = students.Where(x => studentFilterResult.Contains(x.Human!.UserId)).ToList();
 
             DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value.AddDays(1).Date : DateTime.UtcNow.Date;
 
@@ -208,7 +232,6 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                         .Where(p => p.UpdatedDate.HasValue && p.UpdatedDate.Value.Date >= lastFridayAt13.Date && p.UpdatedDate.Value.Date < currentDate.Date)
                         .Where(x => x.ClassForumResults.Any(x => x.Status == EnumClassForumResultStatus.Graded))
                         .OrderBy(n => n.CreatedDate).ToListAsync(cancellationToken);
-                    int index = 1;
 
                     if (lessonResultsDone.Count > 0)
                     {
@@ -246,7 +269,6 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                                 var html = string.Format(CultureInfo.InvariantCulture, skillScoresHtml, icon, skillName, ls.Percent, ls.Percent < 100 ? SendMailSetting.NoBorderRight : SendMailSetting.Border, color, 100 - ls.Percent, ls.Percent > 0 ? SendMailSetting.NoBorderLeft : SendMailSetting.Border, ls.Percent + "%");
                                 unitName += html;
                             }
-                            index++;
                         }
                         weeklyReport.IsLessonDone = SendMailSetting.Display;
                     }
@@ -397,7 +419,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             if (lessonResult != null)
             {
                 counts.Add(lessonResult.VideoResult?.Status == EnumResultStatus.Done ? 1 : 0);
-                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == studentId).Count());
+                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && (x.Status == EnumClassForumResultStatus.Denied || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == studentId).Count());
                 counts.Add(lessonResult.HomeWorkResults.Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == studentId).GroupBy(x => x.LessonResultId).Count());
             }
             if (counts.Count == 0)
@@ -432,7 +454,8 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 Params = model,
                 Template = model.SenderTemplate,
                 CcEmail = parentEmail,
-                IsCCEmail = true
+                IsCCEmail = true,
+                IsCCEmailDefault = true,
             }, cancellationToken).ConfigureAwait(false);
         }
 

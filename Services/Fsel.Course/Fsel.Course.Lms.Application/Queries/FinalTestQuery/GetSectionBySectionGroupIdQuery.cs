@@ -5,21 +5,17 @@ using Microsoft.EntityFrameworkCore;
 namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
 {
     using System.Threading;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Logging;
@@ -32,29 +28,21 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
 
     public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupDtoModel>>
     {
-        private readonly ISectionRepository _sectionRepository;
-        private readonly DateTimeConverter _dateTimeConverter;
-        private readonly GetTimeToCompleteTestPublisher _getTimeToCompleteTestPublisher;
         private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
-        private readonly IMapper _mapper;
         private readonly ISectionGroupRepository _sectionGroupRepository;
-        private readonly ILogger<object> _logger;
+        private readonly ILogger<GetSectionBySectionGroupIdQuery> _logger;
 
-        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, DateTimeConverter dateTimeConverter, GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IFinalTestResultRepository finalTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISectionGroupRepository sectionGroupRepository, ILogger<object> logger)
+        public GetSectionBySectionGroupIdQueryHandler(SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IFinalTestResultRepository finalTestResultRepository, AuthContext authContext, IUserService userService, ISectionGroupRepository sectionGroupRepository, ILogger<GetSectionBySectionGroupIdQuery> logger)
         {
-            _sectionRepository = sectionRepository;
-            _dateTimeConverter = dateTimeConverter;
-            _getTimeToCompleteTestPublisher = getTimeToCompleteTestPublisher;
             _sectionGroupConverter = sectionGroupConverter;
             _sectionGroupResultRepository = sectionGroupResultRepository;
             _finalTestResultRepository = finalTestResultRepository;
             _authContext = authContext;
             _userService = userService;
-            _mapper = mapper;
             _sectionGroupRepository = sectionGroupRepository;
             _logger = logger;
         }
@@ -94,7 +82,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 return methodResult;
             }
 
-            var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId, sectionGroup);
+            var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId);
             methodResult.Result = await _sectionGroupConverter.GetSectionGroupDto(sectionGroup, sectionGroupResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
@@ -107,32 +95,25 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             await _finalTestResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        private async Task<SectionGroupResult> GetAndAddSectionGroupResult(GetSectionBySectionGroupIdQuery request, Guid studentId, SectionGroup sectionGroup)
+        private async Task<SectionGroupResult> GetAndAddSectionGroupResult(GetSectionBySectionGroupIdQuery request, Guid studentId)
         {
-            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.SectionGroupId == request.SectionGroupId && x.FinalTestResultId == request.FinalTestResultId && x.StudentId == studentId).FirstOrDefaultAsync();
+            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(x => x.SectionGroupId == request.SectionGroupId && x.FinalTestResultId == request.FinalTestResultId && x.StudentId == studentId).FirstOrDefaultAsync();
             if (sectionGroupResult == null)
             {
-                var requestInfo = new
-                {
-                    Timestamp = DateTimeOffset.UtcNow.ToString("o"),
-                    Request = ConvertHelper.Serialize(request)
-                };
                 _logger.LoggerRequest(request);
-
                 sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, FinalTestResultId = request.FinalTestResultId, Status = EnumResultStatus.New });
-                await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
-                await _getTimeToCompleteTestPublisher.Publish(new SetTimeToCompleteTestModel
+                try
                 {
-                    ExecutionTime = sectionGroup.ExecutionTime,
-                    ObjectResultId = sectionGroupResult.Id,
-                    ObjectResultType = nameof(FinalTest)
-                },
-                CancellationToken.None).ConfigureAwait(false);
+                    await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Log Duplicate SectionGroupResult FinalTest : {ex.Message}");
+                }
             }
             else if (sectionGroupResult.Status != EnumResultStatus.Done)
             {
                 sectionGroupResult.Status = EnumResultStatus.Process;
-                sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroup.ExecutionTime, sectionGroupResult.CreatedDate);
                 sectionGroupResult = _sectionGroupResultRepository.Update(sectionGroupResult);
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }

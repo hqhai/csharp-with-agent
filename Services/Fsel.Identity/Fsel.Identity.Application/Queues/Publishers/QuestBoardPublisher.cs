@@ -22,11 +22,10 @@ namespace Fsel.Identity.Application.Queues.Publishers
 
             await _queueProvider.Publish(QueueSettings.SystemQueue.NameQueue.QuestBoard, new QuestBoardQueueModel
             {
-                StudentId = model.StudentId,
-                AchievedPoint = model.AchievedPoint,
-                Categories = model.Categories,
-                ObjectId = model.ObjectId,
-                CourseId = model.CourseId,
+                StudentID = model.StudentID,
+                Type = model.Type,
+                Category = model.Category,
+                Value = model.Value,
             }, cancellationToken);
         }
     }

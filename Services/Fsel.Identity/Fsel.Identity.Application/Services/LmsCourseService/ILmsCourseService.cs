@@ -32,6 +32,8 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
         [Get("/v1/course/get-course-studied")]
         Task<IApiResponse<MethodResult<CourseModel>>> GetCourseStudied();
 
+        [Delete("/v1/admin/student/delete-student/{id}")]
+        Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
         [Post("/v1/progress/students-competition")]
         Task<IApiResponse<MethodResult<IList<CompetitionStudentProgressModel>>>> GetStudentProgress([FromQuery] StudentCompetitionStatQueryModel query);
 
@@ -41,13 +43,17 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
         [Post("/v1/placement-test/admin/save-done")]
         Task<IApiResponse<MethodResult<bool>>> SavePlacementTestDoneAsync([FromBody] SavePlacementTestDoneCommandModel command);
 
-        [Get("/v1/course-integration/integration-placement-test-results")]
-        Task<IApiResponse<MethodResult<IList<PlacementTestResultModel>>>> GetPalcementTestResults([FromQuery] GetPTTestModel query);
+        [Post("/v1/course-integration/integration-placement-test-results")]
+        Task<IApiResponse<MethodResult<IList<PlacementTestResultModel>>>> GetPalcementTestResults([FromBody] CourseIntegrationQueryModel query);
 
-        [Get("/v1/course-integration/integration-unit-results")]
-        Task<IApiResponse<MethodResult<IList<UnitResultModel>>>> GetUnitResults([FromQuery] GetPTTestModel query);
+        [Post("/v1/course-integration/integration-unit-results")]
+        Task<IApiResponse<MethodResult<IList<UnitResultModel>>>> GetUnitResults([FromBody] CourseIntegrationQueryModel query);
 
         [Get("/v1/course-integration/integration-lesson-results")]
-        Task<IApiResponse<MethodResult<IList<LessonResultModel>>>> GetLessonResults([FromQuery] GetPTTestModel query);
+        Task<IApiResponse<MethodResult<IList<LessonResultModel>>>> GetLessonResults([FromQuery] CourseIntegrationQueryModel query);
+
+
+        [Post("/v1/dashboard/active-course-result")]
+        Task<IApiResponse<MethodResult<IList<Guid>>>> GetActiveCourseResultByStudentId([FromBody] ActiveCourseResultModel query);
     }
 }

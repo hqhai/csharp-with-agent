@@ -6,25 +6,10 @@ namespace Fsel.Shared.Enums
 
     public enum EnumQuestBoardType
     {
-        [Description("Nhiệm vụ chính")]
-        MainQuests,
+        [Description("Beginner Quests")]
+        BeginnerQuests,
 
-        [Description("Nhiệm vụ hàng ngày")]
-        DailyQuests,
-
-        [Description("Nhiệm vụ phụ")]
-        SideQuests,
-
-        [Description("Nhiệm vụ cao cấp")]
-        PremiumQuests,
-
-        [Description("Nhiệm vụ sự kiện")]
-        EventQuests,
-
-        [Description("Thợ săn kho báu")]
-        TreasureHunters,
-
-        [Description("Thử Thách Vui Nhộn")]
-        FunChallenges
+        [Description("Learning Quests")]
+        LearningQuests
     }
 }

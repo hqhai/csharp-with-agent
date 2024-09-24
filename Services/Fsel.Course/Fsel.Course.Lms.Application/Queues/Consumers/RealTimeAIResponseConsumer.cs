@@ -3,40 +3,41 @@
 namespace Fsel.Course.Lms.Application.Queues.Consumers
 {
     using Fsel.Course.Lms.Application.Commands.AiCmd;
-    using MassTransit;
     using MediatR;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
+    using Fsel.Core.Base;
 
-    public class RealTimeAIResponseConsumer : IConsumer<ClassForumAIResponseModel>
+    public class RealTimeAIResponseConsumer : BaseConsumer<ClassForumAIResponseModel>
     {
         private readonly IMediator _mediator;
 
-        public RealTimeAIResponseConsumer(IMediator mediator)
+        public RealTimeAIResponseConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<ClassForumAIResponseModel> context)
+        public override async Task ConsumeQueue(ClassForumAIResponseModel? message)
         {
-            if (context == null)
+            if (message == null)
             {
                 return;
             }
-            var data = context.Message;
 
-            await _mediator.Send(new SubmitClassforumAICommand
+            await _mediator.Send(new SubmitClassForumAICommand
             {
-                UserAIConfig = data.UserAIConfig,
-                ClassForumResultId = data.ClassForumResultId,
-                SystemRoleAlConfig = data.SystemRoleAlConfig,
-                SettingWordMaxLength = data.SettingWordMaxLength,
-                SettingTopP = data.SettingTopP,
-                SettingTemperature = data.SettingTemperature,
-                SettingPresence = data.SettingPresence,
-                SettingFrequecy = data.SettingFrequecy,
-                SettingModel = data.SettingModel,
-                WordContent = data.WordContent,
-                IsRetry = data.IsRetry,
+                UserAIConfig = message.UserAIConfig,
+                ClassForumResultId = message.ClassForumResultId,
+                ClassForumDetailResultId = message.ClassForumDetailResultId,
+                SystemRoleAlConfig = message.SystemRoleAlConfig,
+                SettingWordMaxLength = message.SettingWordMaxLength,
+                SettingTopP = message.SettingTopP,
+                SettingTemperature = message.SettingTemperature,
+                SettingPresence = message.SettingPresence,
+                SettingFrequecy = message.SettingFrequecy,
+                SettingModel = message.SettingModel,
+                WordContent = message.WordContent,
+                IsRetry = message.IsRetry,
+                SubmissionCount = message.SubmissionCount,
             }).ConfigureAwait(false);
         }
     }

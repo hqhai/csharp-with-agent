@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Fsel.Core.Base;
 using Fsel.Notification.Application.Services;
-using Fsel.Notification.Application.Services.UserServices;
 using Fsel.Notification.Application.Services.Models;
 using AutoMapper;
 
@@ -67,6 +66,8 @@ namespace Fsel.Notification.Application.Queries
                 foreach (var notify in lists)
                 {
                     notify.AvatarPath = listSenderInfo.FirstOrDefault(x => notify.SenderId.HasValue && x.UserId == notify.SenderId)?.AvatarPath;
+                    notify.Content = notify.NotificationType?.Content ?? default;
+                    notify.Type = notify.NotificationType?.Type ?? default;
                 }
             }
 

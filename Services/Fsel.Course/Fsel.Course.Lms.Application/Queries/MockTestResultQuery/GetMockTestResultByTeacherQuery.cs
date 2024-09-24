@@ -49,7 +49,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<MockTestModel> methodResult = new MethodResult<MockTestModel>();
 
-            var mockTestResult = await _mockTestResultRepository.GetByIdAsync(request.MockTestResultId);
+
+            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).FirstOrDefaultAsync(x => x.Id == request.MockTestResultId,cancellationToken);
             if (mockTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
@@ -113,6 +114,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             var courseUnitMockTests = mockTest.UnitSkillMockTests.Where(x => x.UnitId == mockTestResult.UnitId).Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests);
             mockTestResultDto.UnitDisplayOrder = displayOrder;
             mockTestResultDto.CourseCode = code;
+            mockTestResultDto.MockTestScores = mockTestResult.MockTestScores;
             return mockTestResultDto;
         }
 

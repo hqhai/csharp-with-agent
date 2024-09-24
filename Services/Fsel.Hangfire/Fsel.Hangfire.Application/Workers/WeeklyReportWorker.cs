@@ -5,26 +5,19 @@ namespace Fsel.Hangfire.Application.Workers
     using System.Threading.Tasks;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Hangfire.Application.Queues.Publishers;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.Extensions.Hosting;
 
-    public class WeeklyReportWorker : IWorker
+    public class WeeklySnapShotLeaderBoardWorker : IWorker
     {
-        private readonly WeeklyReportPublisher _weeklyReportPublisher;
-        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly WeeklySnapShotLeaderBoardPublisher _weeklySnapShotPublisher;
 
-        public WeeklyReportWorker(WeeklyReportPublisher weeklyReportPublisher, IWebHostEnvironment webHostEnvironment)
+        public WeeklySnapShotLeaderBoardWorker(WeeklySnapShotLeaderBoardPublisher weeklySnapShotPublisher)
         {
-            _weeklyReportPublisher = weeklyReportPublisher;
-            _webHostEnvironment = webHostEnvironment;
+            _weeklySnapShotPublisher = weeklySnapShotPublisher;
         }
 
         public async Task RunAsync()
         {
-            if (_webHostEnvironment.IsProduction())
-            {
-                await _weeklyReportPublisher.Publish(CancellationToken.None);
-            }
+            await _weeklySnapShotPublisher.Publish(CancellationToken.None);
         }
     }
 }

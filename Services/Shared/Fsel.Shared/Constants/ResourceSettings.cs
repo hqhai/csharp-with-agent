@@ -5,7 +5,8 @@ namespace Fsel.Shared.Constants
     public static class ResourceSettings
     {
         public const string NotificationType = "Resources//NotificationType.json";
-        public const string QuestBoardFileName = "Resources//QuestBoardConfig.json";
+        public const string QuestBoardFileName = "Resources//QuestBoard.json";
+        public const string QuestBoardOverallFileName = "Resources//QuestBoardOverall.json";
         public const string ApprovalTimeFileName = "Resources//ApprovalTimeConfig.json";
         public const string FocusTimeFileName = "Resources//FocusTimeConfig.json";
         public const string GameCenterFileName = "Resources//GameCenterConfig.json";
@@ -20,6 +21,10 @@ namespace Fsel.Shared.Constants
         public const string RoleFileName = "Resources//Role.json";
 
         public const string PackageFileName = "Resources//Packages.json";
+        public const string TechieActionFileName = "Resources//TechieAction.json";
+        public const string TechieFileName = "Resources//Techie.json";
+
+        public const string EventFileName = "Resources//Events.json";
         public const string WheelOfBuffType = "Resources//WheelOfBuffConfig.json";
 
         public const string ZMatter = "Resources//ZMatter.json";
@@ -34,6 +39,7 @@ namespace Fsel.Shared.Constants
         public const string PrivateKeyDevUrBox = "Resources//UrBox//Development//private_key_rsa";
         public const string PrivateKeyProdUrBox = "Resources//UrBox//Production//private_key_rsa";
         public const string I18NCredentialsFilePath = "Resources//file-i18n.json";
+        public const string StudentCredentialsFilePath = "Resources//file-student-credential.json";
 
         public const string BandScoreFileName = "Resources//BandScores.json";
         public const string LeaderBoardPercentFileName = "Resources//LeaderBoardScorePercentage.json";
@@ -41,11 +47,34 @@ namespace Fsel.Shared.Constants
         public const string IELTDescription = "Resources//IELTDescription.json";
 
         public const string ChatbotUnitInfo = "Resources//Chatbots//UnitInfo.xml";
-        public const string AppStore = "Resources//AppStore//PrivateKey.txt";
+        public const string AppStore = "Resources//InAppPurchase//AppStore//PrivateKey.txt";
+        public const string AndroidPrivateKey = "Resources//InAppPurchase//GooglePlay//GooglePlayConfig-Testing.json";
+
+        public const string GrammarInstruction = "Resources//Chatbots//Instruction//GrammarInstruction.txt";
+        public const string VocabularyInstruction = "Resources//Chatbots//Instruction//VocabularyInstruction.txt";
+        public const string ListeningInstruction = "Resources//Chatbots//Instruction//ListeningInstruction.txt";
+        public const string SpeakingInstruction = "Resources//Chatbots//Instruction//SpeakingInstruction.txt";
+        public const string ReadingInstruction = "Resources//Chatbots//Instruction//ReadingInstruction.txt";
+        public const string WritingInstruction = "Resources//Chatbots//Instruction//WritingInstruction.txt";
+
+        public const string GrammarRole = "Resources//Chatbots//Role//GrammarRole.txt";
+        public const string VocabularyRole = "Resources//Chatbots//Role//VocabularyRole.txt";
+        public const string ListeningRole = "Resources//Chatbots//Role//ListeningRole.txt";
+        public const string SpeakingRole = "Resources//Chatbots//Role//SpeakingRole.txt";
+        public const string ReadingRole = "Resources//Chatbots//Role//ReadingRole.txt";
+        public const string WritingRole = "Resources//Chatbots//Role//WritingRole.txt";
+
+        public const string SpeakingGrammarRole = "Resources//SpeakingAiConfig//Role//GrammarRangeRole.txt";
+        public const string SpeakingFluencyRole = "Resources//SpeakingAiConfig//Role//FluencyRole.txt";
+        public const string SpeakingLexicalRole = "Resources//SpeakingAiConfig//Role//LexicalResourceRole.txt";
+
+        public const string SpeakingGrammar = "Resources//SpeakingAiConfig//GrammarRangeConfig.txt";
+        public const string SpeakingFluency = "Resources//SpeakingAiConfig//FluencyConfig.txt";
+        public const string SpeakingLexical = "Resources//SpeakingAiConfig//LexicalResourceConfig.txt";
 
         public const string IeltsStudentResult = "Resources//IeltsStudentsResult.json";
         public const string AcademicStudentsResult = "Resources//AcademicStudentsResult.json";
-
+        public const string SchoolEventRules = "Resources//SchoolEventRules.json";
 
     }
 }

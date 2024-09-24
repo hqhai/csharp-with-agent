@@ -3,26 +3,45 @@
 namespace Fsel.Interaction.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Interaction.Application.Commands.CommentCmd;
     using Fsel.Interaction.Application.Queries.CommentQuery;
+    using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/comment")]
     [ApiController]
-    public class CommentController : ControllerBase
+    public class CommentController : BaseController
     {
         private readonly IMediator _mediator;
+        private readonly ICommentRepository _commentRepository;
 
-        public CommentController(IMediator mediator)
+        public CommentController(IMediator mediator, ICommentRepository commentRepository)
         {
             _mediator = mediator;
+            _commentRepository = commentRepository;
+        }
+
+        /// <summary>
+        /// Execute-list-query
+        /// </summary>
+        [HttpGet("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<IList<CommentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExecuteList([FromQuery] BaseQueryModel query)
+        {
+            SetQuery(query);
+            var result = await _commentRepository.GetListResultAsync<CommentModel>(query);
+            return result.GetActionResult();
         }
 
         /// <summary>

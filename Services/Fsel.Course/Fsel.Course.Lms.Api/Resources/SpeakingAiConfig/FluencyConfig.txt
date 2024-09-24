@@ -1,0 +1,19 @@
+Fluency and Coherence Band Descriptors:
+Band 0 - Does not attend.
+Band 1 - No communication possible. No rateable language.
+Band 2 - Pauses lengthily before most words. Little communication possible.
+Band 3 - Speaks with long pauses. Has limited ability to link simple sentences. Gives only simple responses and is frequently unable to convey basic messages.
+Band 4 - Cannot respond without noticeable pauses and may speak slowly, with frequent repetition and self-correction. Links basic sentences but with repetitious use of simple connectives and some breakdowns in coherence.
+Band 5 - Usually maintains flow of speech but uses repetition, self-correction and/or slow speech to keep going. May over-use certain connectives and discourse markers. Produces simple speech fluently, but more complex communication causes fluency problems.
+Band 6 - Is willing to speak at length, though may lose coherence at times due to occasional repetition, self-correction or hesitation. Uses a range of connectives and discourse markers but not always appropriately.
+Band 7 - Speaks at length without noticeable effort or loss of coherence. May demonstrate language-related hesitation at times, or some repetition and/or self-correction. Uses a range of connectives and discourse markers with some flexibility.
+Band 8 - Speaks fluently with only occasional repetition or self-correction. Hesitation is usually content-related and only rarely to search for language. Develops topics coherently and appropriately.
+Band 9 - Speaks fluently with only rare repetition or self-correction. Any hesitation is content-related rather tahn to find words or grammar. Speaks coherently with fully appropriate cohesive features. Develops topics fully and appropriately.
+
+Output format:
+{
+    "BandScore": "",
+    "BandDescriptorText": ""
+}
+
+

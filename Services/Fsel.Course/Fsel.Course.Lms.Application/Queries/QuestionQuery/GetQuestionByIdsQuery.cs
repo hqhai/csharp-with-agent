@@ -172,15 +172,14 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
         private static EnumCorrectStatus? GetCorrectStatus(BaseAnswer? answer)
         {
             EnumCorrectStatus? status = null;
-            if (answer != null && answer.IsCorrect.HasValue)
+            if (answer != null)
             {
                 status = EnumCorrectStatus.Process;
                 if (answer.Status == EnumAnswerStatus.Done)
                 {
-                    status = answer.IsCorrect.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
+                    status = answer.IsCorrect.HasValue && answer.IsCorrect.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
                 }
             }
-
             return status;
         }
     }

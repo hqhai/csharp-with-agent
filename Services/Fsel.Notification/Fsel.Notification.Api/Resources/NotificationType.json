@@ -40,6 +40,36 @@
     "createdDate": "2023-08-28"
   },
   {
+    "id": "10C2D5F8-1316-45E4-8FA1-E512EC1510C0",
+    "type": "LinkComment",
+    "content": "CommentPost",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "{0} vừa bình luận bài viết của bạn.",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "B09FA1F2-3936-4E52-AA9C-D3A354F1C566",
+    "type": "LinkPage",
+    "content": "LikePost",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "{0} vừa thích bài viết của bạn.",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "6A55C6BD-0494-4FE9-8A72-911210C8A215",
+    "type": "LinkComment",
+    "content": "ReplyCommentPost",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "{0} vừa trả lời bình luận của bạn.",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
     "id": "9E983172-DBA2-4CA7-B602-372C011ECB99",
     "type": "LinkComment",
     "content": "ReplyComment",
@@ -115,7 +145,7 @@
     "content": "AIFeedBack",
     "icon": "",
     "priority": 1,
-    "templateMessage": "Bài viết của bạn đã được hệ thống AI ChatGPT nhận xét. Nhấn để xem chi tiết",
+    "templateMessage": "Bài đăng của bạn đã được chấm bởi hệ thống AI của FSEL. Nhấn để xem chi tiết",
     "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}?type=aiFeedback",
     "createdDate": "2023-08-28"
   },
@@ -227,6 +257,16 @@
     "priority": 1,
     "templateMessage": "Khóa học của bạn sẽ kết thúc trong 2 ngày tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
     "templateLink": "/pricing-plan",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "6F75034F-4D9B-4471-B5A4-A226979B5AB3",
+    "type": "LinkPage",
+    "content": "CourseChange",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Yay! Bạn đã đổi trình độ sang khóa học {0} thành công! Hãy cùng Techie và Fsel bắt đầu hành trình học tập thú vị ngay thôi nào!",
+    "templateLink": "",
     "createdDate": "2023-08-28"
   }
 ]

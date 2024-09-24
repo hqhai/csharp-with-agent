@@ -18,7 +18,7 @@ namespace Fsel.Course.Domain.Entities
         public virtual string? AnswerStr { get; set; }
 
         [NotMapped]
-        public object? Answer
+        public virtual object? Answer
         {
             get { return ConvertHelper.Deserialize<object>(AnswerStr); }
             set { AnswerStr = ConvertHelper.Serialize(value); }

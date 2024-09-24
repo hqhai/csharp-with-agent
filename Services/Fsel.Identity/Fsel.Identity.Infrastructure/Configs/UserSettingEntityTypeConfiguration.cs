@@ -10,12 +10,16 @@ namespace Fsel.Identity.Infrastructure.Configs
     public class UserSettingEntityTypeConfiguration : IEntityTypeConfiguration<UserSetting>
     {
         public void Configure(EntityTypeBuilder<UserSetting> builder)
+
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.HasOne(a => a.User)
                  .WithMany(b => b.UserSettings)
                  .HasForeignKey(p => p.UserId)
                  .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(a => a.NotifiEmail)
+                .HasDefaultValue(true);
 
             builder.HasIndex(x => x.UserId).IsUnique(false);
         }

@@ -6,93 +6,78 @@ namespace Fsel.Shared.Enums
 
     public enum EnumQuestBoardCategory
     {
-        [Description("Kết thúc một bài học")]
-        FinishOneLesson,
+        #region BeginnerQuests
 
-        [Description("Hoàn thành một bài tập về nhà/dự án nhỏ")]
-        FinishOneHomeworkMiniProject,
+        [Description("Hoàn thành bài kiểm tra đầu tiên của bạn")]
+        CompleteTheFirstTest,
 
-        [Description("Hoàn thành một bài kiểm tra Đơn vị")]
-        FinishOneUnitTest,
+        [Description("Hoàn thành Video bài học đầu tiên")]
+        CompleteTheFirstVideoLesson,
 
-        [Description("Hoàn thành một đơn vị")]
-        FinishOneUnit,
+        [Description("Hoàn thành Diễn đàn lớp học đầu tiên")]
+        CompleteTheFirstClassForum,
 
-        [Description("Kết thúc bài kiểm tra cuối kỳ đầu tiên")]
-        FinishOneFinalTest,
+        [Description("Hoàn thành Bài tập về nhà đầu tiên")]
+        CompleteHomeworkFirst,
 
-        [Description("Hoàn thành Cấp độ đầu tiên (Đạt)")]
-        FinishOneLevelPass,
+        [Description("Hoàn thành Khảo sát thông tin")]
+        CompletedSurvey,
 
-        [Description("Post một bài class forum")]
-        FinishOneClassForumPost,
+        [Description("Hoàn thành Focus Mode đầu tiên")]
+        CompleteFocusModeFirst,
 
-        [Description("Bình luận vào một bài class forum của học sinh khác")]
-        CommentOnOtherPost,
+        [Description("Hoàn thành Unit đầu tiên")]
+        CompleteTheFirstUnit,
 
-        [Description("Xem phản 5 hồi giáo viên")]
-        SeeFiveTeacherReview,
+        #endregion BeginnerQuests
 
-        [Description("Xem phản 10 hồi giáo viên")]
-        SeeTenTeacherReview,
-
-        [Description("Xem phản all hồi giáo viên")]
-        SeeAllTeacherReview,
-
-        [Description("Viết 1 bài discussion board")]
-        PostOneDiscussionBoard,
-
-        [Description("Viết 3 bài discussion board")]
-        PostThreeDiscussionBoard,
-
-        [Description("Viết 5 bài discussion board")]
-        PostFiveDiscussionBoard,
-
-        [Description("Điểm tham gia")]
-        ParticipationScore,
-
-        [Description("Focus Mode I: Bạn cần lựa chọn mốc tập trung 30 phút và hoàn thành mốc tập trung này một lần")]
-        ThirtyMinutesFocusMode,
-
-        [Description("Focus Mode II: Bạn cần lựa chọn mốc tập trung 60 phút và hoàn thành mốc tập trung này một lần")]
-        SixtyMinutesFocusMode,
-
-        [Description("Focus Mode III: Bạn cần lựa chọn mốc tập trung 90 phút và hoàn thành mốc tập trung này một lần")]
-        NinetyMinutesFocusMode,
-
-        [Description("Focus Mode IV: Bạn cần lựa chọn mốc tập trung 120 phút và hoàn thành mốc tập trung này một lần")]
-        OneHundredTwentytyMinutesFocusMode,
-
-        [Description("Focus Mode V: Bạn cần lựa chọn mốc tập trung 180 phút và hoàn thành mốc tập trung này một lần")]
-        OneHundredEightyMinutesFocusMode,
-
-        [Description("Tương tác (Comment/React) trong Discussion Board ")]
-        DiscussionBoardInteract,
-
-        [Description("Hoàn thành mốc Focus Mode hôm nay")]
-        FinishDailyFocusMode,
+        #region LearningQuests
 
         [Description("Tương tác tính năng \"Học\" trong 20 phút")]
-        LearnInteractTwentyMinutes,
+        ExploreTheLearningGalaxy,
 
-        [Description("Comment on two of the classmates' submissions for the Newest lesson")]
-        CommentOnNewLessonOfTwoClassMate,
+        [Description("Nhận xét hoặc Thích một bài viết trong Diễn đàn chung")]
+        InterstellarInteractions,
 
-        [Description("Complete your homework with an overall score of (a score of 50%) or over ")]
-        CompleteHomeWorkAtLeastFiftyPercent,
+        [Description("Hoàn thành mốc tập trung của hôm nay")]
+        CompleteMissionDay,
 
-        [Description("Revise your notes")]
-        ReviseYourNotes,
-        [Description("Mã giới thiệu của bạn được nhập thành công 1 lần")]
-        SuccessfulIntroduceCode,
+        [Description("Hoàn thành 1 bài tập về nhà với điểm tổng kết trên 50%")]
+        ConqueringAsteroids,
 
-        [Description("Đánh giá và viết nhận xét về khóa học")]
-        RateAndComment,
+        [Description("Đăng tải bình luận trên bài viết thuộc Diễn đàn lớp học gần nhất")]
+        ConnectingAllies,
 
-        [Description("Xem X(ALL) đánh giá phản hồi của giáo viên về bài của bạn (Mock Test/Class Forum)")]
-        SeeAllReviewsAndFeedback,
+        [Description("Xem lại nôi dung bạn đã ghi chú")]
+        BackupNotes,
 
-        [Description("Tương tác tính năng \"Học\" trong 20 phút")]
-        LearnInTwentyMinutes
+        [Description("Tạo một bài đăng trên Diễn đàn chung")]
+        SharedRocketLaunch,
+
+        [Description("Tạo một ghi chú mới")]
+        GalaxyNotes,
+
+        [Description("Hoàn thành một câu hỏi trong Video bài học")]
+        DecodingTheNebula,
+
+        [Description("Xem lại một Video bài học đã hoàn thành")]
+        HistoryOfDiscovery,
+
+        [Description("Thời gian truy cập tính năng \"Học\" đạt 120 phút")]
+        LearningSpaceship,
+
+        [Description("Hoàn thành 20 câu hỏi trong Video bài học")]
+        JourneyOfKnowledge,
+
+        [Description("Xem phản hồi của AI cho bài đăng Class Forum của bạn")]
+        MessagesFromAI,
+
+        [Description("Hoàn thành 7 lần Focus Mode")]
+        InfinityFocusMode,
+
+        [Description("Hoàn thành 10 bài tập về nhà")]
+        TheMysteryOfTheStars
+
+        #endregion LearningQuests
     }
 }

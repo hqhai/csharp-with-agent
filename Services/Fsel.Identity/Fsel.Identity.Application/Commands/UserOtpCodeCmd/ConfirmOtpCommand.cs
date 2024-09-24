@@ -28,6 +28,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     {
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IHostEnvironment _environment;
+        private readonly string _otpDefault = "123456";
 
         public ConfirmOtpCommandHandler(IUserOtpCodeRepository userOtpCodeRepository, IHostEnvironment environment)
         {
@@ -41,7 +42,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             MethodResult<UserOtpCode> methodResult = new MethodResult<UserOtpCode>();
             var userOtpCode = await _userOtpCodeRepository.Queryable
                                    .FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.Otp, cancellationToken);
-            if (!string.IsNullOrEmpty(request.Email) && (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)))
+            if (!string.IsNullOrEmpty(request.Email) && request.Otp == _otpDefault && (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)))
             {
                 if (!request.Email.IsValidEmail())
                 {

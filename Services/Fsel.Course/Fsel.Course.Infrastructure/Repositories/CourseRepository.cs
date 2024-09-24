@@ -97,7 +97,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable.Include(x => x.CourseUnitMockTests)
+                return await Queryable.Include(x => x.CourseUnitMockTests.OrderBy(x => x.DisplayOrder))
                                       .Include(x => x.CourseResults.Where(x => x.StudentId == studentId))
                                       .FirstOrDefaultAsync(x => x.Id == id);
             }
@@ -184,7 +184,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             if (unitResult != null)
             {
                 displayOrderUnit = unitResult.Unit?.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder ?? default;
-                var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId).ToListAsync();
+                var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.UnitId == unitResult.UnitId && x.CourseId == courseResult.CourseId).ToListAsync();
                 if (lessonResults != null && lessonResults.Any())
                 {
                     if (lessonResults.All(x => x.Status == EnumResultStatus.Done))
@@ -198,50 +198,6 @@ namespace Fsel.Course.Infrastructure.Repositories
                 }
             }
             return (displayOrderUnit, displayOrderLesson);
-        }
-
-        public async Task<(int, int)> GetContentComplete(CourseResultModel courseResult)
-        {
-            ArgumentNullException.ThrowIfNull(courseResult);
-            var lessonIds = new List<Guid>();
-            var counts = new List<int>();
-            var countTests = new List<(int, int)>();
-            var course = await Queryable.Include(x => x.CourseUnitMockTests).Where(x => x.Id == courseResult.CourseId).FirstOrDefaultAsync();
-            var unitIds = course?.CourseUnitMockTests.Where(x => x.UnitId != null).Select(x => x.UnitId ?? default).ToList();
-            if (unitIds != null && unitIds.Any())
-            {
-                var units = await _unitRepository.Queryable.Include(x => x.UnitSkillMockTests).Include(x => x.UnitLessons).Where(x => unitIds.Contains(x.Id)).ToListAsync();
-                if (units != null && units.Any())
-                {
-                    lessonIds = units.SelectMany(x => x.UnitLessons).Select(x => x.LessonId).ToList();
-                    var mockTestIds = units.SelectMany(x => x.UnitSkillMockTests).Select(x => x.MockTestId).ToList();
-                    var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.UnitId != null && x.CourseId == courseResult.CourseId).ToListAsync();
-                    countTests.Add((mockTestResults.Where(x => x.Status == EnumResultStatus.Done).Count(), mockTestIds?.Count ?? default));
-                }
-            }
-
-            var lessonResults = await _lessonResultRepository.GetListAsync(courseResult);
-            if (lessonResults != null && lessonResults.Any())
-            {
-                var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
-                counts.Add(lessonResults.Select(x => x.VideoResult).Where(x => x != null && x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).Count());
-                counts.Add(lessonResults.SelectMany(x => x.ClassForumResults).Where(x => x != null && (x.Status == EnumClassForumResultStatus.Graded || x.Status == EnumClassForumResultStatus.PendingForGrading) && lessonResultIds.Contains(x.LessonResultId)).Count());
-                counts.Add(lessonResults.Select(x =>
-                {
-                    return x.HomeWorkResults.Any() && x.HomeWorkResults.All(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == courseResult.StudentId) ? 1 : 0;
-                }).Sum());
-            }
-            if (courseResult.CourseType == EnumCourseType.Academic)
-            {
-                var finalTestResult = await _finalTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId).FirstOrDefaultAsync();
-                countTests.Add((finalTestResult?.Status == EnumResultStatus.Done ? 1 : 0, 1));
-            }
-            else
-            {
-                var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.UnitId == null && x.CourseId == courseResult.CourseId).ToListAsync();
-                countTests.Add((mockTestResults.Where(x => x.Status == EnumResultStatus.Done).Count(), mockTestResults?.Count ?? default));
-            }
-            return (counts.Sum() + countTests.Sum(x => x.Item1), (lessonIds?.Count ?? default) * 3 + countTests.Sum(x => x.Item2));
         }
     }
 }

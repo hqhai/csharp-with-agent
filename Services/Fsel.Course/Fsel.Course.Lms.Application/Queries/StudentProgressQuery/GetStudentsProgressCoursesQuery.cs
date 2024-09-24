@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Fsel.Shared.Constants;
@@ -34,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     public class GetStudentsProgressCoursesQueryHandler : IRequestHandler<GetStudentsProgressCoursesQuery, MethodResult<IList<CompetitionStudentProgressModel>>>
     {
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly ManagerProgressHelper _managerProgressHelper;
         private readonly ICourseRepository _courseRepository;
         private readonly ITrainingService _trainingService;
         private readonly IVideoResultRepository _videoResultRepository;
@@ -44,9 +46,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private const int TotalProcessIelsts = 106; // tổng số tiến trình hiện có của Ielts
         private const int ClassForumDominator = 36;
 
-        public GetStudentsProgressCoursesQueryHandler(ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, ITrainingService trainingService, IVideoResultRepository videoResultRepository, IHomeWorkResultRepository homeWorkResultRepository, IFinalTestResultRepository finalTestResultRepository, IClassForumResultRepository classForumResultRepository)
+        public GetStudentsProgressCoursesQueryHandler(ICourseResultRepository courseResultRepository, ManagerProgressHelper managerProgressHelper, ICourseRepository courseRepository, ITrainingService trainingService, IVideoResultRepository videoResultRepository, IHomeWorkResultRepository homeWorkResultRepository, IFinalTestResultRepository finalTestResultRepository, IClassForumResultRepository classForumResultRepository)
         {
             _courseResultRepository = courseResultRepository;
+            _managerProgressHelper = managerProgressHelper;
             _courseRepository = courseRepository;
             _trainingService = trainingService;
             _videoResultRepository = videoResultRepository;
@@ -68,28 +71,37 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var studentIds = request.StudentIds;
 
             #region validate
+
             if (studentIds == null || studentIds.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentIds));
                 return methodResult;
             }
-            #endregion
+
+            #endregion validate
+
+            studentIds = await _courseResultRepository.Queryable.Where(x =>
+               x.Status != EnumResultStatus.Unfinished &&
+               x.Status != EnumResultStatus.New &&
+               x.WorkingStatus == EnumWorkingStatus.Active &&
+               studentIds.Contains(x.StudentId)).Select(x => x.StudentId).ToListAsync(cancellationToken);
 
             #region Progress
+
             var classStudentResults = await _trainingService.GetListClassBySpecificStudentIdsAsync(new GetClassListBySpecificStudentIdsModel { StudentIds = request.StudentIds });
 
             var classStudentResultsContent = classStudentResults?.Content?.Result;
             if (classStudentResultsContent != null && classStudentResultsContent.Any())
             {
                 var courseIds = classStudentResultsContent.Select(x => x.CourseId).ToList();
-                var studentCourseIds = classStudentResultsContent.Select(x => x.StudentId).ToList();
+                var studentCourseIds = classStudentResultsContent.Select(x => x.StudentId).Distinct().ToList();
                 var courses = await _courseRepository.GetByIdsAsync(courseIds);
                 if (courses == null || !courses.Any())
                 {
                     methodResult.StatusCode = StatusCodes.Status200OK;
                     return methodResult;
                 }
-                var courseQuery = _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentCourseIds.Contains(x.StudentId)).ToList();
+                var courseQuery = _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentCourseIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).ToList();
 
                 foreach (var (item, studentId) in courses.SelectMany(course => studentCourseIds.Select(sid => (course, sid))))
                 {
@@ -107,7 +119,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         CourseId = courseResult.CourseId,
                         StudentId = studentId
                     };
-                    var (currentProgress, progress) = await _courseRepository.GetContentComplete(courseResultModel);
+                    var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResultModel);
 
                     double progressPercentage = ((float)currentProgress / TotalProcessIelsts) * 100;
                     // Update số lượng process do trên dữ liệu chưa nhập đủ
@@ -120,16 +132,21 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     courseStudentProgress.CourseName = item.Code;
                     courseStudentProgress.CourseId = item.Id;
                     courseStudentProgress.StudentId = studentId;
+                    courseStudentProgress.CourseResultId = courseResult.Id;
                     courseProgress.Add(courseStudentProgress);
                 }
             }
-            #endregion
+
+            #endregion Progress
 
             #region Video
+
             var videoResults = CompetitionAverageScores(_videoResultRepository, videoLessonRatio, studentIds, EnumLearnType.Video);
-            #endregion
+
+            #endregion Video
 
             #region UnitsTest
+
             var videoResultCompetition = _videoResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && studentIds.Contains(x.StudentId));
             var unitTestGroupByStudentId = request.CourseType == EnumCourseType.Ielts ? new List<StudentCompetitionAverageScore>() : videoResultCompetition
                 .GroupBy(vr => vr.StudentId)
@@ -148,9 +165,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         LearnType = EnumLearnType.UnitTests
                     };
                 }).ToList();
-            #endregion
+
+            #endregion UnitsTest
 
             #region SkillsTest
+
             var skillTestGroupByStudentId = request.CourseType == EnumCourseType.Ielts ? new List<StudentCompetitionAverageScore>() : videoResultCompetition
                 .GroupBy(vr => vr.StudentId)
                 .AsEnumerable()
@@ -169,13 +188,16 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     };
                 }).ToList();
 
-            #endregion
+            #endregion SkillsTest
 
             #region HomeWork
+
             var homeWorkResults = CompetitionAverageScores(_homeWorkResultRepository, homeWorkRatio, studentIds, EnumLearnType.HomeWork);
-            #endregion
+
+            #endregion HomeWork
 
             #region ClassForum
+
             var classForumResultQuery = _classForumResultRepository.Queryable.Include(x => x.ClassForumScores).Where(x => studentIds.Contains(x.StudentId) && x.ClassForum != null).Select(x =>
             new
             {
@@ -199,10 +221,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                          })
                      .ToList();
 
-
-            #endregion
+            #endregion ClassForum
 
             #region FinalTest
+
             var finalResults = request.CourseType == EnumCourseType.Ielts ? new List<StudentCompetitionAverageScore>() : CompetitionAverageScores(_finalTestResultRepository, ValueSettings.AcademicStudentResultRatio.FinalTestRatio, studentIds, EnumLearnType.FinalTest);
 
             List<List<StudentCompetitionAverageScore>> allResults = new List<List<StudentCompetitionAverageScore>>
@@ -218,7 +240,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             List<StudentCompetitionOverallModel> overallResults = new List<StudentCompetitionOverallModel>();
 
             overallResults = CalculateOverallOfAcademicStudent(studentIds, allResults);
-            #endregion
+
+            #endregion FinalTest
 
             #region Result
 
@@ -232,18 +255,19 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                               CourseId = progress.CourseId,
                               CourseName = progress.CourseName,
                               ContentCompleted = progress.ContentCompleted,
-                              TotalScore = NumberHelper.RoundNumberDouble(overall.TotalScore)
+                              TotalScore = NumberHelper.RoundNumberDouble(overall.TotalScore),
+                              CourseResultId = progress.CourseResultId,
                           }).ToList();
-            #endregion
+
+            #endregion Result
 
             methodResult.Result = result;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-
-
         #region Caculatator
+
         private static double CountOverralUnitSkillTest(List<string>? listStr, EnumTimeCodeType timCodeType)
         {
             double overallScore = 0;
@@ -352,10 +376,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return joinedList;
         }
 
-        #endregion
-
+        #endregion Caculatator
 
         #region QueryResult
+
         private static List<StudentCompetitionAverageScore> CompetitionAverageScores<T>(IRepository<T> repository, double ratioResult, IList<Guid>? studentIds, EnumLearnType learnType)
             where T : BaseResult
         {
@@ -396,10 +420,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return query;
         }
 
-
-
-        #endregion
+        #endregion QueryResult
     }
-
 }
-

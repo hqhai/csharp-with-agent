@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.Model;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -17,12 +18,12 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ReceiveTokensStudentCommand : IRequest<MethodResult<bool>>
+    public class ReceiveTokensStudentCommand : IRequest<MethodResult<double?>>
     {
         public Guid Id { get; set; }
     }
 
-    public class ReceiveTokensStudentCommandHandler : IRequestHandler<ReceiveTokensStudentCommand, MethodResult<bool>>
+    public class ReceiveTokensStudentCommandHandler : IRequestHandler<ReceiveTokensStudentCommand, MethodResult<double?>>
     {
         private readonly IStudentRepository _studentRepository;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
@@ -41,22 +42,22 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             _systemService = systemService;
         }
 
-        public async Task<MethodResult<bool>> Handle(ReceiveTokensStudentCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<double?>> Handle(ReceiveTokensStudentCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<bool>();
+            var methodResult = new MethodResult<double?>();
             var student = await _studentRepository.Queryable.Include(x => x.StudentDailyStreaks).Include(x => x.Human)
                                                   .FirstOrDefaultAsync(x => x.Human != null && x.Human.UserId == _authContext.CurrentUserId, cancellationToken: cancellationToken);
             if (student == null)
             {
-                methodResult.Result = false;
+                methodResult.Result = default;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var studentDailyStreak = student.StudentDailyStreaks.FirstOrDefault(x => x.Id == request.Id && x.LevelOfGift != null && !x.IsGiftReceive);
+            var studentDailyStreak = student.StudentDailyStreaks.FirstOrDefault(x => x.Id == request.Id && x.LevelOfGift.HasValue && !x.IsGiftReceive);
             if (studentDailyStreak == null)
             {
-                methodResult.Result = false;
+                methodResult.Result = default;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -80,9 +81,10 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             var tokenConfigResult = tokenConfig.Content?.Result;
 
             var tokenConfigDailyCheckIns = tokenConfigResult.GetTokenConfig<List<TokenConfigDailyCheckIns>>();
+            long targetNumber = default;
             if (tokenConfigResult != null && tokenConfigDailyCheckIns != null)
             {
-                var targetNumber = tokenConfigDailyCheckIns.Where(x => x.Level == studentDailyStreak.LevelOfGift).Max(x => x.BaseValue);
+                targetNumber = tokenConfigDailyCheckIns.Where(x => x.Level == studentDailyStreak.LevelOfGift).Max(x => x.BaseValue);
                 await _createTokenHistoryPublisher.Publish(new List<TokenHistoryQueueModel>
                 {
                     new TokenHistoryQueueModel
@@ -91,7 +93,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                         VolatileToken = targetNumber,
                         Type = EnumTokenHistoryType.Recevived,
                         Feature = EnumTokenFeature.DailyCheckin,
-                        Mission = EnumTokenMission.DailyCheckin,
+                        Mission = GetTokenMission(studentDailyStreak),
                         UserId = _authContext.CurrentUserId,
                     }
                 }, cancellationToken).ConfigureAwait(false);
@@ -102,10 +104,27 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                 _studentDailyStreakRepository.Update(studentDailyStreak);
                 await _studentDailyStreakRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = true;
+                methodResult.Result = targetNumber;
                 return methodResult;
             });
             return methodResult;
+        }
+
+        private static EnumTokenMission? GetTokenMission(StudentDailyStreak studentDailyStreak)
+        {
+            if (!studentDailyStreak.LevelOfGift.HasValue)
+            {
+                return default;
+            }
+            if (studentDailyStreak.LevelOfGift == 1)
+            {
+                return EnumTokenMission.DailyCheckinLevelOne;
+            }
+            else if (studentDailyStreak.LevelOfGift == 2)
+            {
+                return EnumTokenMission.DailyCheckinLevelTwo;
+            }
+            return EnumTokenMission.DailyCheckinLevelThree;
         }
     }
 }

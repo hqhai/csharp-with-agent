@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -35,8 +36,9 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<CourseModel>();
-            var courseResult = await _courseResultRepository.Queryable.Include(x => x.Course).Where(p => p.CreatedUserId == _authContext.CurrentUserId && p.Status == EnumResultStatus.Process)
-                                                            .FirstOrDefaultAsync(cancellationToken);
+            var courseResult = await _courseResultRepository.Queryable.Include(x => x.Course)
+                                        .Where(p => p.CreatedUserId == _authContext.CurrentUserId && p.Status == EnumResultStatus.Process && p.WorkingStatus == EnumWorkingStatus.Active)
+                                        .FirstOrDefaultAsync(cancellationToken);
             methodResult.Result = _mapper.Map<CourseModel>(courseResult?.Course);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

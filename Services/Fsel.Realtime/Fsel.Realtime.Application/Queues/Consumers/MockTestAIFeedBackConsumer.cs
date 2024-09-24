@@ -1,3 +1,5 @@
+using Fsel.Core.Base;
+using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
 using Fsel.Realtime.Application.Hubs;
 using Fsel.Shared.Constants;
@@ -7,21 +9,21 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Fsel.Realtime.Application.Queues.Consumers
 {
-    public class MockTestAIFeedBackConsumer : IConsumer<SubmitMockTestResponseModel>
+    public class MockTestAIFeedBackConsumer : BaseConsumer<SubmitMockTestResponseModel>
     {
         private readonly IHubContext<MockTestWritingHub> _classForumFeedBackHubContext;
 
-        public MockTestAIFeedBackConsumer(IHubContext<MockTestWritingHub> classForumAIFeedBackHubContext)
+        public MockTestAIFeedBackConsumer(IHubContext<MockTestWritingHub> classForumAIFeedBackHubContext, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _classForumFeedBackHubContext = classForumAIFeedBackHubContext;
         }
 
-        public async Task Consume(ConsumeContext<SubmitMockTestResponseModel> context)
+        public override async Task ConsumeQueue(SubmitMockTestResponseModel? message)
         {
-            if (context != null)
+            if (message != null)
             {
-                var mockTestResultId = context.Message.MockTestResultId.ToString();
-                await _classForumFeedBackHubContext.GetGroup(mockTestResultId!).SendAsync(RealtimeSettings.MockTestWritingAIFeedBackHub.Methods.MockTestWritingAIFeedBack, context.Message);
+                var mockTestResultId = message?.MockTestResultId.ToString();
+                await _classForumFeedBackHubContext.GetGroup(mockTestResultId!).SendAsync(RealtimeSettings.MockTestWritingAIFeedBackHub.Methods.MockTestWritingAIFeedBack, message);
             }
         }
     }

@@ -9,5 +9,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForumResults
         public IList<string>? FilePaths { get; set; }
         public bool IsSubmit { get; set; }
         public string? WordContent { get; set; }
+        public Guid? ClassForumDetailResultId { get; set; }
     }
 }

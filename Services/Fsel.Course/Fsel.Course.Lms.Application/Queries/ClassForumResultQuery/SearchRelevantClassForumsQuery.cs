@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -66,30 +67,51 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
 
-            IList<Guid>? classStudentIds = new List<Guid>();
-            var currentClass = await _trainingService.GetClassByStudentId(student!.Id);
-            classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
-
+            var currentClass = await _trainingService.GetClassByStudentId(student.Id);
+            var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
+            if (classStudentIds == null || classStudentIds.Count == 0)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
             var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
-
             if (lessonResult == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
+            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumDetailResults).FirstOrDefaultAsync(x => x.Id == request.ClassForumResultId, cancellationToken);
+            if (classForumResult == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            if (classForumResult.ClassForumDetailResults.Any() && classForumResult.ClassForumDetailResults.Any(x => x.SubmissionCount == EnumSubmissionCount.FirstSubmit && x.Status == EnumClassForumResultStatus.Draft))
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
 
-            var classForum = await _classForumRepository.Queryable.Where(x => x.LessonId == lessonResult!.LessonId).FirstOrDefaultAsync(cancellationToken);
+            var classForum = await _classForumRepository.Queryable.Where(x => x.LessonId == lessonResult.LessonId).FirstOrDefaultAsync(cancellationToken);
+            if (classForum == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
 
             var classForumResults = _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
-                .Where(x => x.ClassForumId == classForum!.Id
-                && x.Status != EnumClassForumResultStatus.Draft
-                && x.Status != EnumClassForumResultStatus.Pending
-                && x.Status != EnumClassForumResultStatus.Denied
+                .Where(x => x.ClassForumId == classForum.Id
+                && x.Status == EnumClassForumResultStatus.Graded
                 && x.Id != request.ClassForumResultId
-                && classStudentIds!.Contains(x.StudentId))
+                && classStudentIds.Contains(x.StudentId))
                 .Select(x => new ClassForumResultModel
                 {
                     Id = x.Id,
@@ -98,6 +120,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     CheckStartDate = x.CheckStartDate,
                     ClassForumId = x.ClassForumId,
                     Content = x.Content,
+                    CorrectCount = x.CorrectCount,
+                    CorrectTotal = x.CorrectTotal,
+                    SkillScores = x.SkillScores,
                     WordCount = x.WordCount,
                     WordContent = x.WordContent,
                     UpdatedUserId = x.UpdatedUserId,
@@ -105,13 +130,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     UpdatedDate = x.UpdatedDate,
                     TimeCount = x.TimeCount,
                     StudentId = x.StudentId,
-                    RetryWordContent = x.RetryWordContent,
-                    RetryGradingAlFeedBack = x.RetryGradingAlFeedBack,
-                    RetryContent = x.RetryContent,
                     LessonResultId = x.LessonResultId,
                     GradingStartDate = x.GradingStartDate,
                     CreatedDate = x.CreatedDate,
                     CreatedFullName = x.CreatedFullName,
+                    CreatedUserId = x.CreatedUserId,
                     ClassForumScores = _mapper.Map<IList<ClassForumScoreModel>>(x.ClassForumScores.OrderBy(x => x.CreatedDate)),
                     ClassForumResultFiles = _mapper.Map<IList<ClassForumResultFileModel>>(x.ClassForumResultFiles),
                     TokenLastTime = x.TokenLastTime,
@@ -138,17 +161,22 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var notificationRemind = await _notificationService.GetListNotificationRemind(query);
             var notificationTurnOff = notificationRemind.Content?.Result;
             List<ClassForumResultModel> classForumResultModels = new List<ClassForumResultModel>();
+
+            var userResults = await _userService.GetUsersByUserIdsAsync(lists.Select(x => x.CreatedUserId).ToList());
+            var users = userResults?.Content?.Result;
             if (actions != null)
             {
                 classForumResultModels = lists.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
                 foreach (var item in classForumResultModels)
                 {
+                    var user = users?.FirstOrDefault(x => x.Id == item.CreatedUserId);
                     var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
                     item.CommentNumber = action?.CommentNumber;
                     item.LikeNumber = action?.LikeNumber;
                     item.IsLiked = action?.IsLiked;
+                    item.CreatedFullName = user?.FullName;
                     item.IsTurnedOffNotification = notificationTurnOff!.Any(x => x.ObjectId == item.Id);
-                    item.CourseLevel = student?.CourseLevel ?? default;
+                    item.CourseLevel = student.CourseLevel;
                 }
             }
 

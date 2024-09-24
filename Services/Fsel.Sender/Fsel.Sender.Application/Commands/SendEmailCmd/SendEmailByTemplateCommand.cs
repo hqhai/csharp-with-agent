@@ -4,7 +4,9 @@ using System.Globalization;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Sender.Domain.Models.Commands;
+using Fsel.Sender.Domain.ValueSettings;
 using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -17,10 +19,12 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
     public class SendEmailByTemplateCommandHandler : IRequestHandler<SendEmailByTemplateCommand, MethodResult<bool>>
     {
         private readonly IMediator _mediator;
+        private readonly AppSetting _appSetting;
 
-        public SendEmailByTemplateCommandHandler(IMediator mediator)
+        public SendEmailByTemplateCommandHandler(IMediator mediator, AppSetting appSetting)
         {
             _mediator = mediator;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<bool>> Handle(SendEmailByTemplateCommand request, CancellationToken cancellationToken)
@@ -54,6 +58,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
                 CcEmails = request.CcEmails,
                 Content = body,
                 IsCCEmail = request.IsCCEmail,
+                IsCCEmailDefault = request.IsCCEmailDefault,
             }, cancellationToken);
 
             #endregion Validation

@@ -15,7 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
 
     public class GetLevelsByStudentQuery : IRequest<MethodResult<object>>
     {
-        public EnumCourseType? CourseType { get; set; }
+        public EnumCourseType CourseType { get; set; }
     }
 
     public class GetLevelsByStudentQueryHandler : IRequestHandler<GetLevelsByStudentQuery, MethodResult<object>>

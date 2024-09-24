@@ -2,24 +2,25 @@
 
 namespace Fsel.System.Application.Queues.Consumers
 {
+    using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Application.Commands.TokenHistoryCmd;
     using global::System.Threading.Tasks;
     using MassTransit;
     using MediatR;
 
-    public class CreateTokenHistoryConsumer : IConsumer<TokenHistoryQueuesModel>
+    public class CreateTokenHistoryConsumer : BaseConsumer<TokenHistoryQueuesModel>
     {
         private readonly IMediator _mediator;
 
-        public CreateTokenHistoryConsumer(IMediator mediator)
+        public CreateTokenHistoryConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<TokenHistoryQueuesModel> context)
+        public override async Task ConsumeQueue(TokenHistoryQueuesModel? message)
         {
-            var message = context?.Message;
             if (message == null)
             {
                 return;

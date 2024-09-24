@@ -2,50 +2,49 @@
 
 namespace Fsel.Course.Lms.Application.Queues.Consumers
 {
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Lms.Application.Commands.SectionGroupCmd;
     using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1;
     using Fsel.Shared.Models.ShareModels;
-    using MassTransit;
     using MediatR;
 
-    public class CompleteTestWhenTimeOutConsumer : IConsumer<CompleteTestWhenTimeOutModel>
+    public class CompleteTestWhenTimeOutConsumer : BaseConsumer<CompleteTestWhenTimeOutModel>
     {
         private readonly IMediator _mediator;
 
-        public CompleteTestWhenTimeOutConsumer(IMediator mediator)
+        public CompleteTestWhenTimeOutConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<CompleteTestWhenTimeOutModel> context)
+        public override async Task ConsumeQueue(CompleteTestWhenTimeOutModel? message)
         {
-            if (context == null)
+            if (message == null)
             {
                 return;
             }
-            var messeger = context.Message;
-            switch (messeger.ObjectResultType)
+            switch (message.ObjectResultType)
             {
                 case nameof(MockTest):
-                    await _mediator.Send(new UpdateSectionGroupByResultIdCommand { ObjectResultId = messeger.ObjectResultId, ObjectResultType = messeger.ObjectResultType }).ConfigureAwait(false);
+                    await _mediator.Send(new UpdateSectionGroupByResultIdCommand { ObjectResultId = message.ObjectResultId, ObjectResultType = message.ObjectResultType }).ConfigureAwait(false);
                     break;
 
                 case nameof(PlacementTest):
-                    await _mediator.Send(new UpdateSectionGroupByResultIdCommand { ObjectResultId = messeger.ObjectResultId, ObjectResultType = messeger.ObjectResultType }).ConfigureAwait(false);
+                    await _mediator.Send(new UpdateSectionGroupByResultIdCommand { ObjectResultId = message.ObjectResultId, ObjectResultType = message.ObjectResultType }).ConfigureAwait(false);
                     break;
 
                 case nameof(FinalTest):
-                    await _mediator.Send(new UpdateSectionGroupByResultIdCommand { ObjectResultId = messeger.ObjectResultId, ObjectResultType = messeger.ObjectResultType }).ConfigureAwait(false);
+                    await _mediator.Send(new UpdateSectionGroupByResultIdCommand { ObjectResultId = message.ObjectResultId, ObjectResultType = message.ObjectResultType }).ConfigureAwait(false);
                     break;
 
                 case nameof(EnumTimeCodeType.SkillTest):
-                    await _mediator.Send(new UpdateVideoTimeCodeByResultIdCommand { ObjectResultId = messeger.ObjectResultId, ObjectResultType = messeger.ObjectResultType }).ConfigureAwait(false);
+                    await _mediator.Send(new UpdateVideoTimeCodeByResultIdCommand { ObjectResultId = message.ObjectResultId, ObjectResultType = message.ObjectResultType }).ConfigureAwait(false);
                     break;
 
                 case nameof(EnumTimeCodeType.UnitTest):
-                    await _mediator.Send(new UpdateVideoTimeCodeByResultIdCommand { ObjectResultId = messeger.ObjectResultId, ObjectResultType = messeger.ObjectResultType }).ConfigureAwait(false);
+                    await _mediator.Send(new UpdateVideoTimeCodeByResultIdCommand { ObjectResultId = message.ObjectResultId, ObjectResultType = message.ObjectResultType }).ConfigureAwait(false);
                     break;
             }
         }

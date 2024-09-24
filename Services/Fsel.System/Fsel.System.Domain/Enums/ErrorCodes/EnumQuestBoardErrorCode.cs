@@ -2,21 +2,9 @@
 
 namespace Fsel.System.Domain.Enums.ErrorCodes
 {
-    public enum EnumQuestBoardErrorcode
+    public enum EnumQuestBoardErrorCode
     {
-        /// <summary>
-        /// StartDate Must More than DateNow
-        /// </summary>
-        StartDateMustMorethanDateNow,
-
-        /// <summary>
-        /// EndtDate Must More than StartDate
-        /// </summary>
-        EndtDateMustMorethanStartDate,
-
-        /// <summary>
-        /// QuestBoardStudent Status Done
-        /// </summary>
-        QuestBoardStudentStatusDone
+        HaveNotCompletedTheTask,
+        TokensHaveBeenReceived
     }
 }

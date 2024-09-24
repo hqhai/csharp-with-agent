@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class StudentProgressModel
     {
         public string? FullName { get; set; }
+        public string? Email { get; set; }
         public DateTime CreatedDate { get; set; }
         public Guid StudentId { get; set; }
         public Guid CourseId { get; set; }

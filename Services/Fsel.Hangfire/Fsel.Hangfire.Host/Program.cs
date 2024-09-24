@@ -5,7 +5,6 @@ using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Hangfire.Application.Queues.Consumers;
 using Fsel.Hangfire.Application.Queues.Publishers;
-using Fsel.Hangfire.Application.Workers;
 using Fsel.Hangfire.Host.Jobs;
 using Fsel.Shared.Constants;
 using Hangfire;
@@ -30,13 +29,21 @@ builder.Services.AddScoped<CompleteTestWhenTimeOutPublisher>();
 builder.Services.AddScoped<ReviewFselPublisher>();
 builder.Services.AddScoped<NoticeAccessTimePublisher>();
 builder.Services.AddScoped<WeeklyReportPublisher>();
+builder.Services.AddScoped<WeeklySnapShotLeaderBoardPublisher>();
 builder.Services.AddScoped<UpdateStatusTrialStudentPublisher>();
+builder.Services.AddScoped<RetryMockTestPublisher>();
+builder.Services.AddScoped<RetryClassForumPublisher>();
+builder.Services.AddScoped<UpdateClassForumResultToExpiredTimePublisher>();
+builder.Services.AddScoped<JobActiveEventPublisher>();
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
     { QueueSettings.LmsQueue.NameQueue.SetTimeToCompleteTest, typeof(SetTimeToCompleteTestConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.SetTimeRetryMockTest, typeof(SetTimeToRetryMockTestConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.SetTimeRetryClassForum, typeof(SetTimeToRetryClassForumConsumer) },
     { QueueSettings.SystemQueue.NameQueue.SetCompleteApprovalPostTimeOut, typeof(SetTimeToCompleteApprovalConsumer) },
-    { QueueSettings.UserQueue.NameQueue.SetTimeToSendReviewFsel, typeof(SetTimeToReviewFselConsumer) },
+    //{ QueueSettings.UserQueue.NameQueue.SetTimeToSendReviewFsel, typeof(SetTimeToReviewFselConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.SetTimeClassForumDone, typeof(SetTimeToClassForumApprovalConsumer) },
 });
 var app = builder.Build();
 

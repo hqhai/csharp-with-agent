@@ -181,6 +181,90 @@ namespace Fsel.System.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.ChatBot.ChatBot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("ContentStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("LastestAnswerStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastestQuestionStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("RemainToken")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Skill")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("UnitId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ChatBots");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.Chatbots.ChatbotConfig", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1390,7 +1474,82 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.ToTable("LogActions");
                 });
 
-            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoard", b =>
+            modelBuilder.Entity("Fsel.System.Domain.Entities.LuckyTicket", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid>("LessonResultId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Ticket")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("nvarchar(6)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<DateTime?>("WinningDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LuckyTickets");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoards.QuestBoard", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1429,15 +1588,12 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<Guid?>("DependentId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
+                    b.Property<int?>("Energy")
+                        .HasColumnType("int");
 
                     b.Property<string>("ImagePath")
                         .HasMaxLength(1000)
@@ -1450,30 +1606,20 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<bool>("IsLifeTime")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsRequired")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<int>("NumberOfStars")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PackageIdsStr")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("RepeatType")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("TargetValue")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Token")
+                        .HasColumnType("int");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -1496,19 +1642,398 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("QuestBoards");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("2b4498eb-e566-438b-8c0d-2f8ac240a400"),
+                            Category = "CompleteTheFirstTest",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Hoàn thành bài kiểm tra đầu tiên của bạn",
+                            ImagePath = "",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Tân thủ I",
+                            TargetValue = 1,
+                            Token = 20,
+                            Type = "BeginnerQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("6cee1462-2590-420f-bd50-d47981f88a21"),
+                            Category = "CompleteTheFirstVideoLesson",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Hoàn thành Video bài học đầu tiên",
+                            ImagePath = "",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Tân thủ II",
+                            TargetValue = 1,
+                            Token = 20,
+                            Type = "BeginnerQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("1483c74d-d798-46e7-b152-51afd03ff88e"),
+                            Category = "CompleteTheFirstClassForum",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Hoàn thành Diễn đàn lớp học đầu tiên",
+                            ImagePath = "",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Tân thủ III",
+                            TargetValue = 1,
+                            Token = 20,
+                            Type = "BeginnerQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("8cc59caa-05f4-4735-9787-9d1e3cbd8864"),
+                            Category = "CompleteHomeworkFirst",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Hoàn thành Bài tập về nhà đầu tiên",
+                            ImagePath = "",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Tân thủ IV",
+                            TargetValue = 1,
+                            Token = 20,
+                            Type = "BeginnerQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("6942432d-f45c-45de-a72c-002c0a04cc8c"),
+                            Category = "CompletedSurvey",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Hoàn thành Khảo sát thông tin",
+                            ImagePath = "",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Tân thủ V",
+                            TargetValue = 1,
+                            Token = 20,
+                            Type = "BeginnerQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("9069f184-fd45-413e-b56a-79852879282e"),
+                            Category = "CompleteFocusModeFirst",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Hoàn thành Focus Mode đầu tiên",
+                            ImagePath = "",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Tân thủ VI",
+                            TargetValue = 1,
+                            Token = 20,
+                            Type = "BeginnerQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("c77a4195-ee46-4639-990e-6aa6e25284fa"),
+                            Category = "CompleteTheFirstUnit",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Hoàn thành Unit đầu tiên",
+                            ImagePath = "",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Tân thủ VII",
+                            TargetValue = 1,
+                            Token = 20,
+                            Type = "BeginnerQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("73421144-de83-4b9f-9eea-d0b2c8dc6530"),
+                            Category = "ExploreTheLearningGalaxy",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Tương tác tính năng 'Học' trong 20 phút",
+                            Energy = 2,
+                            ImagePath = "",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Khám Phá Thiên Hà Học Tập",
+                            RepeatType = "Daily",
+                            TargetValue = 20,
+                            Token = 2,
+                            Type = "LearningQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("9f57609b-1f81-4a42-a104-5aa2dca21b2e"),
+                            Category = "InterstellarInteractions",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Nhận xét hoặc Thích một bài viết trong Diễn đàn chung",
+                            Energy = 2,
+                            ImagePath = "",
+                            IsActive = false,
+                            IsDeleted = false,
+                            Name = "Tương tác liên sao",
+                            RepeatType = "Daily",
+                            TargetValue = 1,
+                            Token = 2,
+                            Type = "LearningQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("1a467647-049c-47c7-a596-8ff5bf33ff10"),
+                            Category = "CompleteMissionDay",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Hoàn thành mốc tập trung của hôm nay",
+                            Energy = 2,
+                            ImagePath = "",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Hoàn Thành Sứ Mệnh Ngày",
+                            RepeatType = "Daily",
+                            TargetValue = 1,
+                            Token = 2,
+                            Type = "LearningQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("418e49eb-54ff-4e8a-b87a-368b9428d74b"),
+                            Category = "ConqueringAsteroids",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Hoàn thành 1 bài tập về nhà với điểm tổng kết trên 50%",
+                            Energy = 2,
+                            ImagePath = "",
+                            IsActive = false,
+                            IsDeleted = false,
+                            Name = "Chinh Phục Tiểu Hành Tinh",
+                            RepeatType = "Daily",
+                            TargetValue = 1,
+                            Token = 2,
+                            Type = "LearningQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("540839db-2511-4074-990f-d69a3b75fb90"),
+                            Category = "ConnectingAllies",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Đăng tải bình luận trên bài viết thuộc Diễn đàn lớp học gần nhất",
+                            Energy = 2,
+                            ImagePath = "",
+                            IsActive = false,
+                            IsDeleted = false,
+                            Name = "Kết Nối Đồng Minh",
+                            RepeatType = "Daily",
+                            TargetValue = 1,
+                            Token = 2,
+                            Type = "LearningQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("7372c5a5-4e53-4da4-a6f2-7c992abb014a"),
+                            Category = "BackupNotes",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Xem lại nôi dung bạn đã ghi chú",
+                            Energy = 2,
+                            ImagePath = "",
+                            IsActive = false,
+                            IsDeleted = false,
+                            Name = "Sao Lưu Ghi Chú",
+                            RepeatType = "Daily",
+                            TargetValue = 1,
+                            Token = 2,
+                            Type = "LearningQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("eec844f3-2574-4a0d-a6a6-6b12f07264dd"),
+                            Category = "SharedRocketLaunch",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Tạo một bài đăng trên Diễn đàn chung",
+                            Energy = 2,
+                            ImagePath = "",
+                            IsActive = false,
+                            IsDeleted = false,
+                            Name = "Phóng Tên Lửa Chia Sẻ",
+                            RepeatType = "Daily",
+                            TargetValue = 1,
+                            Token = 2,
+                            Type = "LearningQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("932ed712-dc2b-42dd-a700-de944018ad0e"),
+                            Category = "GalaxyNotes",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Tạo một ghi chú mới",
+                            Energy = 2,
+                            ImagePath = "",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Ghi Chú Thiên Hà",
+                            RepeatType = "Daily",
+                            TargetValue = 1,
+                            Token = 2,
+                            Type = "LearningQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("91ef56a9-3638-4994-b136-019c9ec51120"),
+                            Category = "DecodingTheNebula",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Hoàn thành một câu hỏi trong Video bài học",
+                            Energy = 2,
+                            ImagePath = "",
+                            IsActive = false,
+                            IsDeleted = false,
+                            Name = "Giải Mã Tinh Vân",
+                            RepeatType = "Daily",
+                            TargetValue = 1,
+                            Token = 2,
+                            Type = "LearningQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("393dcd7e-9b4b-4a69-a222-6981c3cc1967"),
+                            Category = "HistoryOfDiscovery",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Xem lại một Video bài học đã hoàn thành",
+                            Energy = 2,
+                            ImagePath = "",
+                            IsActive = false,
+                            IsDeleted = false,
+                            Name = "Lịch sử khám phá",
+                            RepeatType = "Daily",
+                            TargetValue = 1,
+                            Token = 2,
+                            Type = "LearningQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("0ac5668a-1d21-4c05-96b6-94012d183ae6"),
+                            Category = "LearningSpaceship",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Thời gian truy cập tính năng 'Học' đạt 120 phút",
+                            Energy = 20,
+                            ImagePath = "",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Phi Thuyền Học Tập",
+                            RepeatType = "Weekly",
+                            TargetValue = 120,
+                            Token = 5,
+                            Type = "LearningQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("d33f9400-adf9-431c-b97c-e679321f4f17"),
+                            Category = "JourneyOfKnowledge",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Hoàn thành 20 câu hỏi trong Video bài học",
+                            Energy = 20,
+                            ImagePath = "",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Hành Trình Tri Thức",
+                            RepeatType = "Weekly",
+                            TargetValue = 20,
+                            Token = 5,
+                            Type = "LearningQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("b6be6e8b-3317-4f25-96b7-8ad1fa151793"),
+                            Category = "MessagesFromAI",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Xem phản hồi của AI cho bài đăng Class Forum của bạn",
+                            Energy = 20,
+                            ImagePath = "",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Thông Điệp Từ AI",
+                            RepeatType = "Weekly",
+                            TargetValue = 1,
+                            Token = 5,
+                            Type = "LearningQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("909cee82-d102-4eaa-8f51-519f4e4740f1"),
+                            Category = "InfinityFocusMode",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Hoàn thành 7 lần Focus Mode",
+                            Energy = 20,
+                            ImagePath = "",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Chế Độ Tập Trung Vô Cực",
+                            RepeatType = "Weekly",
+                            TargetValue = 7,
+                            Token = 5,
+                            Type = "LearningQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("e6fc1b44-57aa-44bc-989f-5e34d4152b9d"),
+                            Category = "TheMysteryOfTheStars",
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Hoàn thành 10 bài tập về nhà",
+                            Energy = 20,
+                            ImagePath = "",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Bí Ẩn Của Vì Sao",
+                            RepeatType = "Weekly",
+                            TargetValue = 10,
+                            Token = 5,
+                            Type = "LearningQuests"
+                        });
                 });
 
-            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoardConfig", b =>
+            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoards.QuestBoardOverall", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -1537,25 +2062,15 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<string>("DisplayType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<int>("MaxPoints")
+                    b.Property<int>("TargetValue")
                         .HasColumnType("int");
 
-                    b.Property<string>("Operator")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("TaskPageUrl")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Token")
+                        .HasColumnType("int");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -1577,387 +2092,61 @@ namespace Fsel.System.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("QuestBoardConfigs");
+                    b.ToTable("QuestBoardOveralls");
 
                     b.HasData(
                         new
                         {
-                            Id = new Guid("68bd35d3-c09b-45f3-9a05-0e10691f7c42"),
-                            Category = "FinishOneLesson",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Id = new Guid("8f32d29f-1787-42fe-9f0d-e5e40eab7e31"),
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
                             IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "MainQuests"
+                            TargetValue = 2,
+                            Token = 10,
+                            Type = "BeginnerQuests"
                         },
                         new
                         {
-                            Id = new Guid("72933280-e14b-4715-a802-dcd88e031e79"),
-                            Category = "FinishOneHomeworkMiniProject",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Id = new Guid("47742457-c637-4244-a8f4-32e8820acd40"),
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
                             IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "MainQuests"
+                            TargetValue = 4,
+                            Token = 20,
+                            Type = "BeginnerQuests"
                         },
                         new
                         {
-                            Id = new Guid("cfce3f4b-66d5-467d-8f57-50a089257bcb"),
-                            Category = "FinishOneLesson",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Id = new Guid("59c4f992-cc12-4cfc-baf8-4929de320bc2"),
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
                             IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "MainQuests"
+                            TargetValue = 7,
+                            Token = 40,
+                            Type = "BeginnerQuests"
                         },
                         new
                         {
-                            Id = new Guid("7b436441-ef2f-4a83-be79-ee5ec5f18355"),
-                            Category = "FinishOneUnit",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Id = new Guid("fead115f-827a-4468-b8a2-9ded08323a5e"),
+                            CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
                             IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "MainQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("64c0a3a5-849c-412d-86b6-3f5e4809cc84"),
-                            Category = "FinishOneFinalTest",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "MainQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("bb35cdbf-98a7-4ce7-9b71-f457b386d64c"),
-                            Category = "FinishOneLevelPass",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "MainQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("1b35cdbf-98a7-4ce7-9b71-f457b386d62c"),
-                            Category = "FinishOneClassForumPost",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "MainQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("9935cdbf-98a7-4ce7-9b71-f457b386d64c"),
-                            Category = "CommentOnOtherPost",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "MainQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("8333c5e5-e853-45fb-8abf-1a09336af78e"),
-                            Category = "SeeFiveTeacherReview",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 5,
-                            Operator = "Equal",
-                            Type = "PremiumQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("ac0f0c74-cc2a-41a2-a82f-748ed5f2c75c"),
-                            Category = "SeeTenTeacherReview",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 10,
-                            Operator = "Equal",
-                            Type = "PremiumQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("7a37fa61-1a04-4d70-8590-90fa3d563d8e"),
-                            Category = "SeeAllTeacherReview",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Percent",
-                            IsDeleted = false,
-                            MaxPoints = 100,
-                            Operator = "Equal",
-                            Type = "PremiumQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("f31d44ff-226e-4244-a9a0-a06ed397368a"),
-                            Category = "PostOneDiscussionBoard",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "PremiumQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("0c1633d5-f145-44c7-80c3-a167c0bbd1a1"),
-                            Category = "PostThreeDiscussionBoard",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 3,
-                            Operator = "Equal",
-                            Type = "PremiumQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("85659470-7d45-4ddf-8b3c-dba6458bf4f4"),
-                            Category = "PostFiveDiscussionBoard",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 5,
-                            Operator = "Equal",
-                            Type = "PremiumQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("0407d174-a779-46e9-bbe4-5f27ae6075b6"),
-                            Category = "ParticipationScore",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Percent",
-                            IsDeleted = false,
-                            MaxPoints = 80,
-                            Operator = "GreaterThan",
-                            Type = "PremiumQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("0aee60ff-65bc-4277-803c-8a21c38b2b84"),
-                            Category = "ThirtyMinutesFocusMode",
-                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "SideQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("d34cf82a-8582-4dd8-b76b-e89857f4c910"),
-                            Category = "NinetyMinutesFocusMode",
-                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "SideQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("e0608ce3-6514-4fd2-88f6-f62db89e5fa7"),
-                            Category = "OneHundredTwentytyMinutesFocusMode",
-                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "SideQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("e527e048-f02e-4a22-bec4-427b67c93d63"),
-                            Category = "OneHundredEightyMinutesFocusMode",
-                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "SideQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("f62373aa-3fde-4848-8fef-7567fd0c7e8b"),
-                            Category = "SixtyMinutesFocusMode",
-                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "SideQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("c3c2c8aa-fc4a-4b01-8d55-1026062a47c6"),
-                            Category = "SuccessfulIntroduceCode",
-                            CreatedDate = new DateTime(2023, 11, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "SideQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("0417a848-1cd0-4aef-ae33-2757652701d0"),
-                            Category = "RateAndComment",
-                            CreatedDate = new DateTime(2023, 11, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "SideQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("012a3990-47bc-436f-8d7d-10fd824bd579"),
-                            Category = "SeeAllReviewsAndFeedback",
-                            CreatedDate = new DateTime(2023, 11, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "PremiumQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("38045664-20f8-4780-9c62-9736c2bce90c"),
-                            Category = "FinishDailyFocusMode",
-                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "DailyQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("31c2d3aa-ec1d-4ebb-99d1-5a8a2ae391c7"),
-                            Category = "LearnInteractTwentyMinutes",
-                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "DailyQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("2ea59046-ea24-4f3f-b390-36d9629ae11e"),
-                            Category = "CommentOnNewLessonOfTwoClassMate",
-                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 2,
-                            Operator = "Equal",
-                            Type = "DailyQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("9d333771-8c0d-481c-95e7-542a12002684"),
-                            Category = "CompleteHomeWorkAtLeastFiftyPercent",
-                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "DailyQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("f8c5416c-118e-45dc-942c-f61e985b9827"),
-                            Category = "ReviseYourNotes",
-                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "DailyQuests"
+                            TargetValue = 140,
+                            Token = 100,
+                            Type = "LearningQuests"
                         });
                 });
 
-            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoardStudent", b =>
+            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoards.QuestBoardOverallStudent", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
-
-                    b.Property<float>("AchievedPoints")
-                        .HasColumnType("real");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -1972,6 +2161,9 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<Guid>("CreatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
+
+                    b.Property<int>("CurrentValue")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
@@ -1990,10 +2182,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<Guid?>("ObjectId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("QuestBoardId")
+                    b.Property<Guid>("QuestBoardOverallId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Status")
@@ -2003,6 +2192,90 @@ namespace Fsel.System.Infrastructure.Migrations
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Token")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestBoardOverallId");
+
+                    b.ToTable("QuestBoardOverallStudents");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoards.QuestBoardStudent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<int>("CurrentValue")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<int?>("Energy")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid>("QuestBoardId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("QuestBoardOverallStudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Token")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -2020,6 +2293,8 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("QuestBoardId");
+
+                    b.HasIndex("QuestBoardOverallStudentId");
 
                     b.ToTable("QuestBoardStudents");
                 });
@@ -2222,6 +2497,76 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.ToTable("Schools");
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.StudentTechie", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("ConfigStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TechieActionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TechieActionId");
+
+                    b.ToTable("StudentTechies");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.TeachingCost", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2290,6 +2635,814 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TeachingCosts");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.Techie", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("Icon")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Techie");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("6d9cb3cc-8b96-4c93-8d67-cda597e6e5eb"),
+                            Code = "Techie-01",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Techie"
+                        });
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.TechieAction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ConfigStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("Feature")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Icon")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TechieId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("TemplateMessage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TechieId");
+
+                    b.ToTable("TechieActions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("2b6fcf1f-4df4-4182-bc3e-6b1a7b7a0744"),
+                            Action = "GoodAfternoon",
+                            ConfigStr = "{\"startTime\":12,\"endTime\":17,\"value\":\"string\"}",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "Greeting",
+                            Icon = "string",
+                            Image = "string",
+                            IsDeleted = false,
+                            Priority = 3,
+                            TechieId = new Guid("6d9cb3cc-8b96-4c93-8d67-cda597e6e5eb"),
+                            TemplateMessage = "🚀 Chào buổi chiều, {0}! Buổi chiều đến rồi, hãy khám phá thêm nhiều bí mật của vũ trụ tri thức nhé! 🌇🌟"
+                        },
+                        new
+                        {
+                            Id = new Guid("78bc6adc-9a25-4b9d-8376-89a75123224e"),
+                            Action = "GoodMorning",
+                            ConfigStr = "{\"startTime\":7,\"endTime\":11,\"value\":\"string\"}",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "Greeting",
+                            Icon = "string",
+                            Image = "string",
+                            IsDeleted = false,
+                            Priority = 3,
+                            TechieId = new Guid("6d9cb3cc-8b96-4c93-8d67-cda597e6e5eb"),
+                            TemplateMessage = "🚀 Chào buổi sáng, {0}! Hãy để buổi sáng này bắt đầu với những khám phá mới trong vũ trụ tri thức nhé! 🌞🪐"
+                        },
+                        new
+                        {
+                            Id = new Guid("983aa2f9-218f-45ad-82b5-8528bcac363a"),
+                            Action = "GoodEarlyMorning",
+                            ConfigStr = "{\"startTime\":12,\"endTime\":17,\"value\":\"string\"}",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "Greeting",
+                            Icon = "string",
+                            Image = "string",
+                            IsDeleted = false,
+                            Priority = 3,
+                            TechieId = new Guid("6d9cb3cc-8b96-4c93-8d67-cda597e6e5eb"),
+                            TemplateMessage = "Chào ngày mới, {0}! 🌅🚀Wow, dậy sớm thế này, bạn chắc chắn là người đầu tiên ngắm mặt trời mọc đó. Thật chăm chỉ quá đi!"
+                        },
+                        new
+                        {
+                            Id = new Guid("358a5e9e-f7f1-471e-b402-53ef27688746"),
+                            Action = "GoodEvening",
+                            ConfigStr = "{\"startTime\":18,\"endTime\":21,\"value\":\"string\"}",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "Greeting",
+                            Icon = "string",
+                            Image = "string",
+                            IsDeleted = false,
+                            Priority = 3,
+                            TechieId = new Guid("6d9cb3cc-8b96-4c93-8d67-cda597e6e5eb"),
+                            TemplateMessage = "🚀 Chào buổi tối, {0}! Hãy thắp sáng ngọn lửa tri thức và khám phá vũ trụ nhé! 🌟✨"
+                        },
+                        new
+                        {
+                            Id = new Guid("b34cfdc1-5bc0-4a00-8d53-b5b88e932a1d"),
+                            Action = "GoodLateNight",
+                            ConfigStr = "{\"startTime\":22,\"endTime\":2,\"value\":\"string\"}",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "Greeting",
+                            Icon = "string",
+                            Image = "string",
+                            IsDeleted = false,
+                            Priority = 3,
+                            TechieId = new Guid("6d9cb3cc-8b96-4c93-8d67-cda597e6e5eb"),
+                            TemplateMessage = "Chào buổi đêm, {0}! 🌙🚀 Đêm khuya rồi mà bạn vẫn học ư?? Sự nỗ lực của bạn đang toả sáng như các ngôi sao trên bầu trời đó! Hãy tiếp tục tỏa sáng và khám phá thêm nhiều điều thú vị nhé! 🌟📚✨"
+                        },
+                        new
+                        {
+                            Id = new Guid("93abbb9b-2b2a-4b2a-b926-20576be9f69d"),
+                            Action = "StreakFifTeenTimeCode",
+                            ConfigStr = "{\"startTime\":0,\"endTime\":0,\"value\":\"15\"}",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "Cheer",
+                            Icon = "string",
+                            Image = "string",
+                            IsDeleted = false,
+                            Priority = 3,
+                            TechieId = new Guid("6d9cb3cc-8b96-4c93-8d67-cda597e6e5eb"),
+                            TemplateMessage = "Xuất sắc! {0}/{0}! 🌟✅"
+                        },
+                        new
+                        {
+                            Id = new Guid("365768fb-df0d-4bba-8aef-0ffaada02ccd"),
+                            Action = "StreakFiveTimeCode",
+                            ConfigStr = "{\"startTime\":0,\"endTime\":0,\"value\":\"5\"}",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "Cheer",
+                            Icon = "string",
+                            Image = "string",
+                            IsDeleted = false,
+                            Priority = 3,
+                            TechieId = new Guid("6d9cb3cc-8b96-4c93-8d67-cda597e6e5eb"),
+                            TemplateMessage = "{0} timecode liên tiếp! Cậu đang bùng cháy! 🔥🚀"
+                        },
+                        new
+                        {
+                            Id = new Guid("3fdeece5-0526-4ba5-9dc5-d8c91d172e94"),
+                            Action = "StreakTenTimeCode",
+                            ConfigStr = "{\"startTime\":0,\"endTime\":0,\"value\":\"10\"}",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "Cheer",
+                            Icon = "string",
+                            Image = "string",
+                            IsDeleted = false,
+                            Priority = 3,
+                            TechieId = new Guid("6d9cb3cc-8b96-4c93-8d67-cda597e6e5eb"),
+                            TemplateMessage = "{0} Time code đúng liên tiếp! Tiếp tục tiến lên! 🚀🌌"
+                        },
+                        new
+                        {
+                            Id = new Guid("7b3784b0-da4d-4ddd-9e1f-ff2806d12105"),
+                            Action = "StreakTwentyTimeCode",
+                            ConfigStr = "{\"startTime\":0,\"endTime\":0,\"value\":\"20\"}",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "Cheer",
+                            Icon = "string",
+                            Image = "string",
+                            IsDeleted = false,
+                            Priority = 3,
+                            TechieId = new Guid("6d9cb3cc-8b96-4c93-8d67-cda597e6e5eb"),
+                            TemplateMessage = "{0} timecode đúng liên tiếp! Cậu không thể ngăn cản! 🚀🌌"
+                        },
+                        new
+                        {
+                            Id = new Guid("7a14752c-fd0a-43e2-9625-97b7ca4438d4"),
+                            Action = "StreakTwentyFiveTimeCode",
+                            ConfigStr = "{\"startTime\":0,\"endTime\":0,\"value\":\"25\"}",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "Cheer",
+                            Icon = "string",
+                            Image = "string",
+                            IsDeleted = false,
+                            Priority = 3,
+                            TechieId = new Guid("6d9cb3cc-8b96-4c93-8d67-cda597e6e5eb"),
+                            TemplateMessage = "Xuất sắc! {0}/{0}! 🌟✅"
+                        },
+                        new
+                        {
+                            Id = new Guid("c90fcc08-4e4f-45d9-a8aa-3a147091cd38"),
+                            Action = "StreakThirtyTimeCode",
+                            ConfigStr = "{\"startTime\":0,\"endTime\":0,\"value\":\"30\"}",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "Cheer",
+                            Icon = "string",
+                            Image = "string",
+                            IsDeleted = false,
+                            Priority = 3,
+                            TechieId = new Guid("6d9cb3cc-8b96-4c93-8d67-cda597e6e5eb"),
+                            TemplateMessage = "{0} timecode liên tiếp! Phi thường! 🌟🚀"
+                        },
+                        new
+                        {
+                            Id = new Guid("f23cdc48-3d66-43b6-8b35-1ffa696bd5e7"),
+                            Action = "StreakThirtyFiveTimeCode",
+                            ConfigStr = "{\"startTime\":0,\"endTime\":0,\"value\":\"35\"}",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "Cheer",
+                            Icon = "string",
+                            Image = "string",
+                            IsDeleted = false,
+                            Priority = 3,
+                            TechieId = new Guid("6d9cb3cc-8b96-4c93-8d67-cda597e6e5eb"),
+                            TemplateMessage = "Kỳ diệu! {0} timecode đúng! 🌟💥"
+                        },
+                        new
+                        {
+                            Id = new Guid("9656f061-1504-4b25-bb55-834ad90ea88f"),
+                            Action = "StreakFourtyTimeCode",
+                            ConfigStr = "{\"startTime\":0,\"endTime\":0,\"value\":\"40\"}",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "Cheer",
+                            Icon = "string",
+                            Image = "string",
+                            IsDeleted = false,
+                            Priority = 3,
+                            TechieId = new Guid("6d9cb3cc-8b96-4c93-8d67-cda597e6e5eb"),
+                            TemplateMessage = "{0} timecode liên tiếp! Cậu là một siêu sao! 🌌✨"
+                        },
+                        new
+                        {
+                            Id = new Guid("0b7c3774-bf42-4475-ba43-779d8beee88b"),
+                            Action = "StreakFourtyFiveTimeCode",
+                            ConfigStr = "{\"startTime\":0,\"endTime\":0,\"value\":\"45\"}",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "Cheer",
+                            Icon = "string",
+                            Image = "string",
+                            IsDeleted = false,
+                            Priority = 3,
+                            TechieId = new Guid("6d9cb3cc-8b96-4c93-8d67-cda597e6e5eb"),
+                            TemplateMessage = "Xuất sắc! {0}/{0}! 🌟✅"
+                        },
+                        new
+                        {
+                            Id = new Guid("162c976a-e869-45c9-9206-123820fa04c2"),
+                            Action = "StreakFiftyTimeCode",
+                            ConfigStr = "{\"startTime\":0,\"endTime\":0,\"value\":\"50\"}",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "Cheer",
+                            Icon = "string",
+                            Image = "string",
+                            IsDeleted = false,
+                            Priority = 3,
+                            TechieId = new Guid("6d9cb3cc-8b96-4c93-8d67-cda597e6e5eb"),
+                            TemplateMessage = "Không thể tin được! {0} timecode đúng liên tiếp! 🌠✨"
+                        });
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.TechieActionTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Language")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("TechieActionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("TemplateMessage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TechieActionId");
+
+                    b.ToTable("TechieActionTranslation");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("3fa8733d-4ebb-4c58-9351-81ed69a6fb3e"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            TechieActionId = new Guid("2b6fcf1f-4df4-4182-bc3e-6b1a7b7a0744"),
+                            TemplateMessage = "🚀 Chào buổi chiều, {0}! Buổi chiều đến rồi, hãy khám phá thêm nhiều bí mật của vũ trụ tri thức nhé! 🌇🌟"
+                        },
+                        new
+                        {
+                            Id = new Guid("ef99e614-167b-4411-b674-6693e5380c25"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            TechieActionId = new Guid("2b6fcf1f-4df4-4182-bc3e-6b1a7b7a0744"),
+                            TemplateMessage = "🚀 Good afternoon, {0}! The afternoon has arrived, let's uncover more secrets of the knowledge universe! 🌇🌟"
+                        },
+                        new
+                        {
+                            Id = new Guid("8db87c55-d96c-4d53-b762-3f783a62f620"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            TechieActionId = new Guid("78bc6adc-9a25-4b9d-8376-89a75123224e"),
+                            TemplateMessage = "🚀 Chào buổi sáng, {0}! Hãy để buổi sáng này bắt đầu với những khám phá mới trong vũ trụ tri thức nhé! 🌞🪐"
+                        },
+                        new
+                        {
+                            Id = new Guid("66a44e42-66cd-4eb6-823c-2bac5246d659"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            TechieActionId = new Guid("78bc6adc-9a25-4b9d-8376-89a75123224e"),
+                            TemplateMessage = "🚀 Good morning, {0}! Let's start this morning with new discoveries in the universe of knowledge! 🌞🪐"
+                        },
+                        new
+                        {
+                            Id = new Guid("287aa284-5f84-40cb-9af5-0269d0ecd8e1"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            TechieActionId = new Guid("983aa2f9-218f-45ad-82b5-8528bcac363a"),
+                            TemplateMessage = "Chào ngày mới, {0}! 🌅🚀Wow, dậy sớm thế này, bạn chắc chắn là người đầu tiên ngắm mặt trời mọc đó. Thật chăm chỉ quá đi!"
+                        },
+                        new
+                        {
+                            Id = new Guid("0164e974-ef84-4745-b2d4-7e949625176f"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            TechieActionId = new Guid("983aa2f9-218f-45ad-82b5-8528bcac363a"),
+                            TemplateMessage = "Good morning, {0}! 🌅🚀 Wow, you're up early! You must be the first to see the sunrise. Such dedication!"
+                        },
+                        new
+                        {
+                            Id = new Guid("66797936-1421-462a-bd0c-6e6ac893a4f3"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            TechieActionId = new Guid("358a5e9e-f7f1-471e-b402-53ef27688746"),
+                            TemplateMessage = "🚀 Good evening, {0}! Ignite the flame of knowledge and explore the universe! 🌟✨"
+                        },
+                        new
+                        {
+                            Id = new Guid("3ee73930-5d3e-4b53-bf2d-a02bc9f094e0"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            TechieActionId = new Guid("358a5e9e-f7f1-471e-b402-53ef27688746"),
+                            TemplateMessage = "🚀 Good evening, {0}! Ignite the flame of knowledge and explore the universe! 🌟✨"
+                        },
+                        new
+                        {
+                            Id = new Guid("51af7570-fc5b-42b1-bcba-47740d579639"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            TechieActionId = new Guid("b34cfdc1-5bc0-4a00-8d53-b5b88e932a1d"),
+                            TemplateMessage = "Chào buổi đêm, {0}! 🌙🚀 Đêm khuya rồi mà bạn vẫn học ư?? Sự nỗ lực của bạn đang toả sáng như các ngôi sao trên bầu trời đó! Hãy tiếp tục tỏa sáng và khám phá thêm nhiều điều thú vị nhé! 🌟📚✨"
+                        },
+                        new
+                        {
+                            Id = new Guid("50f53f4c-4cdf-4b46-8644-5613a5c28a7e"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            TechieActionId = new Guid("b34cfdc1-5bc0-4a00-8d53-b5b88e932a1d"),
+                            TemplateMessage = "Good night, {0}! 🌙🚀 Still studying late into the night? Your effort shines like the stars in the sky! Keep shining and discover more fascinating things! 🌟📚✨"
+                        },
+                        new
+                        {
+                            Id = new Guid("70ea4c4b-e71c-44d2-9a68-94919324742a"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            TechieActionId = new Guid("93abbb9b-2b2a-4b2a-b926-20576be9f69d"),
+                            TemplateMessage = "Xuất sắc! {0}/{0}! 🌟✅"
+                        },
+                        new
+                        {
+                            Id = new Guid("caf06cfa-4080-4242-85b5-43553a26a019"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            TechieActionId = new Guid("93abbb9b-2b2a-4b2a-b926-20576be9f69d"),
+                            TemplateMessage = "Excellent! {0}/{0}! 🌟✅"
+                        },
+                        new
+                        {
+                            Id = new Guid("72b29aee-4091-49da-8476-9a26136527fe"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            TechieActionId = new Guid("365768fb-df0d-4bba-8aef-0ffaada02ccd"),
+                            TemplateMessage = "{0} timecode liên tiếp! Cậu đang bùng cháy! 🔥🚀"
+                        },
+                        new
+                        {
+                            Id = new Guid("5b065c13-dc80-419f-a5dc-cf11e7bad5a6"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            TechieActionId = new Guid("365768fb-df0d-4bba-8aef-0ffaada02ccd"),
+                            TemplateMessage = "{0} correct timecodes in a row! You're on fire! 🔥🚀"
+                        },
+                        new
+                        {
+                            Id = new Guid("b79bb94d-1a79-4d53-b705-b19773c4d716"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            TechieActionId = new Guid("3fdeece5-0526-4ba5-9dc5-d8c91d172e94"),
+                            TemplateMessage = "{0} Time code đúng liên tiếp! Tiếp tục tiến lên! 🚀🌌"
+                        },
+                        new
+                        {
+                            Id = new Guid("fdcb7157-06ea-4d5a-8d19-883f17b1941c"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            TechieActionId = new Guid("3fdeece5-0526-4ba5-9dc5-d8c91d172e94"),
+                            TemplateMessage = "{0} correct timecodes in a row! Keep pushing forward! 🚀🌌"
+                        },
+                        new
+                        {
+                            Id = new Guid("00bee779-ac7d-4457-b702-901684eaff2b"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            TechieActionId = new Guid("7b3784b0-da4d-4ddd-9e1f-ff2806d12105"),
+                            TemplateMessage = "{0} timecode đúng liên tiếp! Cậu không thể ngăn cản! 🚀🌌"
+                        },
+                        new
+                        {
+                            Id = new Guid("70d5f258-41c3-4ea6-8392-faedeefa5d12"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            TechieActionId = new Guid("7b3784b0-da4d-4ddd-9e1f-ff2806d12105"),
+                            TemplateMessage = "{0} correct timecodes in a row! You're unstoppable! 🚀🌌"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1c8bda5-f279-40b6-bfa5-e3d8dc440597"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            TechieActionId = new Guid("7a14752c-fd0a-43e2-9625-97b7ca4438d4"),
+                            TemplateMessage = "Xuất sắc! {0}/{0}! 🌟✅"
+                        },
+                        new
+                        {
+                            Id = new Guid("645ea67c-460b-4619-821a-36e9657e0b62"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            TechieActionId = new Guid("7a14752c-fd0a-43e2-9625-97b7ca4438d4"),
+                            TemplateMessage = "Superb! {0}/{0}! 🌟✅"
+                        },
+                        new
+                        {
+                            Id = new Guid("df298010-6c86-43f8-af5e-ef7596fcf66f"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            TechieActionId = new Guid("c90fcc08-4e4f-45d9-a8aa-3a147091cd38"),
+                            TemplateMessage = "{0} timecode liên tiếp! Phi thường! 🌟🚀"
+                        },
+                        new
+                        {
+                            Id = new Guid("2616c223-14c2-424f-b772-446869de15c1"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            TechieActionId = new Guid("c90fcc08-4e4f-45d9-a8aa-3a147091cd38"),
+                            TemplateMessage = "{0} correct timecodes in a row! Extraordinary! 🌟🚀"
+                        },
+                        new
+                        {
+                            Id = new Guid("2e434057-6b06-4536-a0d5-851ab71cc55b"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            TechieActionId = new Guid("f23cdc48-3d66-43b6-8b35-1ffa696bd5e7"),
+                            TemplateMessage = "Kỳ diệu! {0} timecode đúng! 🌟💥"
+                        },
+                        new
+                        {
+                            Id = new Guid("16a3cf13-3cf3-4104-a716-dcf3dee037c8"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            TechieActionId = new Guid("f23cdc48-3d66-43b6-8b35-1ffa696bd5e7"),
+                            TemplateMessage = "Amazing! {0} correct timecodes! 🌟💥"
+                        },
+                        new
+                        {
+                            Id = new Guid("5c02e53d-0cd2-4550-ac64-508335703be6"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            TechieActionId = new Guid("9656f061-1504-4b25-bb55-834ad90ea88f"),
+                            TemplateMessage = "{0} timecode liên tiếp! Cậu là một siêu sao! 🌌✨"
+                        },
+                        new
+                        {
+                            Id = new Guid("eacccfec-6c04-4889-8fc3-48c98ea243b1"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            TechieActionId = new Guid("9656f061-1504-4b25-bb55-834ad90ea88f"),
+                            TemplateMessage = "{0} correct timecodes in a row! You're a superstar! 🌌✨"
+                        },
+                        new
+                        {
+                            Id = new Guid("be65682b-433c-4ed7-84bb-bdeb73838ff5"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            TechieActionId = new Guid("0b7c3774-bf42-4475-ba43-779d8beee88b"),
+                            TemplateMessage = "{0} timecode liên tiếp! Cậu là một siêu sao! 🌌✨"
+                        },
+                        new
+                        {
+                            Id = new Guid("40c64b95-e760-4617-9aa5-021f74669c75"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            TechieActionId = new Guid("0b7c3774-bf42-4475-ba43-779d8beee88b"),
+                            TemplateMessage = "Outstanding! {0}/{0}! 🌟✅"
+                        },
+                        new
+                        {
+                            Id = new Guid("e28494b0-f034-48af-9951-cdc3cd3d64a4"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            TechieActionId = new Guid("162c976a-e869-45c9-9206-123820fa04c2"),
+                            TemplateMessage = "Không thể tin được! {0} timecode đúng liên tiếp! 🌠✨"
+                        },
+                        new
+                        {
+                            Id = new Guid("5a72a596-0390-4f85-a3c2-a16eaee9d883"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            TechieActionId = new Guid("162c976a-e869-45c9-9206-123820fa04c2"),
+                            TemplateMessage = "Unbelievable! {0} correct timecodes in a row! 🌠✨"
+                        });
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.TokenConfig", b =>
@@ -3251,6 +4404,9 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<string>("ConfigStr")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("CourseResultId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
@@ -3334,6 +4490,68 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.ToTable("TokenHistories");
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.UserConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<bool>("IsViewNewFeature")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserConfigs");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.ApprovalLog", b =>
                 {
                     b.HasOne("Fsel.System.Domain.Entities.ApprovalTimeConfig", "ApprovalTimeConfig")
@@ -3409,15 +4627,33 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoardStudent", b =>
+            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoards.QuestBoardOverallStudent", b =>
                 {
-                    b.HasOne("Fsel.System.Domain.Entities.QuestBoard", "QuestBoard")
+                    b.HasOne("Fsel.System.Domain.Entities.QuestBoards.QuestBoardOverall", "QuestBoardOverall")
+                        .WithMany("QuestBoardOverallStudents")
+                        .HasForeignKey("QuestBoardOverallId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("QuestBoardOverall");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoards.QuestBoardStudent", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.QuestBoards.QuestBoard", "QuestBoard")
                         .WithMany("QuestBoardStudents")
                         .HasForeignKey("QuestBoardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Fsel.System.Domain.Entities.QuestBoards.QuestBoardOverallStudent", "QuestBoardOverallStudent")
+                        .WithMany("QuestBoardStudents")
+                        .HasForeignKey("QuestBoardOverallStudentId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.Navigation("QuestBoard");
+
+                    b.Navigation("QuestBoardOverallStudent");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.School", b =>
@@ -3428,6 +4664,39 @@ namespace Fsel.System.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Location");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.StudentTechie", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.TechieAction", "TechieAction")
+                        .WithMany("StudentTechies")
+                        .HasForeignKey("TechieActionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TechieAction");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.TechieAction", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.Techie", "Techie")
+                        .WithMany("TechieActions")
+                        .HasForeignKey("TechieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Techie");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.TechieActionTranslation", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.TechieAction", "TechieAction")
+                        .WithMany("Translations")
+                        .HasForeignKey("TechieActionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TechieAction");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.TokenHistory", b =>
@@ -3471,9 +4740,31 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Navigation("Schools");
                 });
 
-            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoard", b =>
+            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoards.QuestBoard", b =>
                 {
                     b.Navigation("QuestBoardStudents");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoards.QuestBoardOverall", b =>
+                {
+                    b.Navigation("QuestBoardOverallStudents");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoards.QuestBoardOverallStudent", b =>
+                {
+                    b.Navigation("QuestBoardStudents");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.Techie", b =>
+                {
+                    b.Navigation("TechieActions");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.TechieAction", b =>
+                {
+                    b.Navigation("StudentTechies");
+
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.TokenConfig", b =>

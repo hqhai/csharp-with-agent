@@ -2,6 +2,8 @@
 
 namespace Fsel.Sender.Domain.Models.Commands
 {
+    using Microsoft.AspNetCore.Http;
+
     public class SendEmailCommandModel
     {
         public IList<string> ToEmails { get; set; } = new List<string>();
@@ -9,6 +11,8 @@ namespace Fsel.Sender.Domain.Models.Commands
         public IList<string> CcEmails { get; set; } = new List<string>();
         public string? Subject { get; set; }
         public string? Content { get; set; }
+        public IList<IFormFile>? Attachments { get; set; }
         public bool? IsCCEmail { get; set; }
+        public bool? IsCCEmailDefault { get; set; }
     }
 }

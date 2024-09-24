@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -14,6 +15,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
     using Fsel.Course.Domain.Models.CommandModels.VideoResults;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -29,18 +33,21 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
         private readonly IMapper _mapper;
         private readonly VideoConverter _videoConverter;
         private readonly IVideoRepository _videoRepository;
+        private readonly QuestBoardPublisher _questBoardPublisher;
 
         public ReviewLessonVideoCommandHandler(IVideoResultRepository videoResultRepository,
             IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
             IMapper mapper,
             VideoConverter videoConverter,
-            IVideoRepository videoRepository)
+            IVideoRepository videoRepository,
+            QuestBoardPublisher questBoardPublisher)
         {
             _videoResultRepository = videoResultRepository;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _mapper = mapper;
             _videoConverter = videoConverter;
             _videoRepository = videoRepository;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<VideoResultModel>> Handle(ReviewLessonVideoCommand request, CancellationToken cancellationToken)
@@ -80,11 +87,19 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodesNotCompleted), nameof(videoTimeCodeResults));
                 return methodResult;
             }
+            if (videoResult.Status != EnumResultStatus.Done)
+            {
+                await DoQuestBoard(videoResult.StudentId, cancellationToken);
+            }
+
             videoResult = await GetVideoResult(videoResult, cancellationToken);
+
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {
                 videoResult = _videoResultRepository.Update(videoResult);
                 await _videoResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                //Xếp hạng học sinh
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<VideoResultModel>(videoResult);
                 return methodResult;
@@ -112,6 +127,17 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             videoResult.Status = EnumResultStatus.Done;
             videoResult.VideoSkillScores = method.Item1;
             return videoResult;
+        }
+
+        private async Task DoQuestBoard(Guid studentId, CancellationToken cancellationToken)
+        {
+            await _questBoardPublisher.Publish(new QuestBoardQueueModel()
+            {
+                StudentID = studentId,
+                Type = EnumQuestBoardType.BeginnerQuests,
+                Category = EnumQuestBoardCategory.CompleteTheFirstVideoLesson,
+                Value = 1
+            }, cancellationToken);
         }
     }
 }

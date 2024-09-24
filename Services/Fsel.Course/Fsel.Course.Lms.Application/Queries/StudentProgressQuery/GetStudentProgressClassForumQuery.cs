@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -48,15 +49,20 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassForumStudentProgressModel> methodResult = new MethodResult<ClassForumStudentProgressModel>();
             ClassForumStudentProgressModel classForumStudentProgress = new ClassForumStudentProgressModel();
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId });
-            if (!studentResults.IsSuccessStatusCode)
+            var studentResult = await _userService.GetUserByStudentId(request.StudentId);
+            if (!studentResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                return methodResult;
+            }
+            var student = studentResult.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
 
-            var student = studentResults?.Content?.Result?.FirstOrDefault();
-            var userId = student?.Human?.UserId ?? default;
+            var userId = student.Human?.UserId ?? default;
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.LessonId == request.LessonId && x.StudentId == request.StudentId, cancellationToken);
             if (lessonResult == null || lessonResult.Status == EnumResultStatus.Unfinished)
             {
@@ -75,52 +81,38 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumScores).FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId, cancellationToken);
-            if (classForumResult != null)
+            var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel
             {
-                var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel
-                {
-                    UserId = userId,
-                    UnitId = request.UnitId,
-                    LessonId = request.LessonId,
-                    CourseId = request.CourseId,
-                    EnumFeature = EnumFeature.ClassForum,
-                    ObjectId = classForum.Id
-                });
-                if (!featureAccessTimeResult.IsSuccessStatusCode)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(featureAccessTimeResult));
-                    return methodResult;
-                }
-                var featureAccessTime = featureAccessTimeResult.Content?.Result;
-                if (featureAccessTime != null)
-                {
-                    classForumStudentProgress.LastVisited = featureAccessTime.LastVisited ?? null;
-                    classForumStudentProgress.Visit = featureAccessTime.Visit;
-                    classForumStudentProgress.TimeSpent = featureAccessTime.AccessTime;
-                }
+                UserId = userId,
+                UnitId = request.UnitId,
+                LessonId = request.LessonId,
+                CourseId = request.CourseId,
+                EnumFeature = EnumFeature.ClassForum,
+                ObjectId = classForum.Id
+            });
+            if (!featureAccessTimeResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(featureAccessTimeResult));
+                return methodResult;
             }
+            var featureAccessTime = featureAccessTimeResult.Content?.Result;
+            if (featureAccessTime != null)
+            {
+                classForumStudentProgress.LastVisited = featureAccessTime.LastVisited ?? null;
+                classForumStudentProgress.Visit = featureAccessTime.Visit;
+                classForumStudentProgress.TimeSpent = featureAccessTime.AccessTime;
+            }
+            var classForumResult = await _classForumResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId, cancellationToken);
             classForumStudentProgress.SkillScores = new SkillScores
             {
                 Skill = classForum.CourseSkill,
-                TotalCount = 36,
-                CorrectCount = classForumResult?.ClassForumScores.Sum(x => x.Score) ?? default,
+                TotalCount = classForumResult?.CorrectTotal ?? default,
+                CorrectCount = classForumResult?.CorrectCount ?? default,
             };
             classForumStudentProgress.ClassForumId = classForum.Id;
             if (videoResult.Status == EnumResultStatus.Done)
             {
-                classForumStudentProgress.Status = EnumResultStatus.New;
-                if (classForumResult != null)
-                {
-                    if (classForumResult.Status == EnumClassForumResultStatus.PendingForGrading || classForumResult.Status == EnumClassForumResultStatus.Graded)
-                    {
-                        classForumStudentProgress.Status = EnumResultStatus.Done;
-                    }
-                    else
-                    {
-                        classForumStudentProgress.Status = EnumResultStatus.Process;
-                    }
-                }
+                classForumStudentProgress.Status = classForumResult != null ? classForumResult.Status.HasValue ? EnumResultStatus.Done : EnumResultStatus.Process : EnumResultStatus.New;
             }
             else
             {

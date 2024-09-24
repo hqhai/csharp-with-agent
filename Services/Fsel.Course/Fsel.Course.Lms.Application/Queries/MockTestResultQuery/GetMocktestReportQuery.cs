@@ -94,9 +94,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 mockTestResultModel.IsTeacherGraded = await _sectionGroupConverter.IsTeacherGraded(mockTestResult, mockTest.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList());
             }
 
-            //await DoQuestBoard(request.MockTestResultId, mockTestResult.CourseId, cancellationToken).ConfigureAwait(false);
-            //await DoQuestBoardAllReviewsAndFeedback(request.MockTestResultId, mockTestResult.CourseId, cancellationToken).ConfigureAwait(false);
-
             methodResult.Result = mockTestResultModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
@@ -121,51 +118,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                         }).ToList();
 
             return mockTestResult;
-        }
-
-        public async Task DoQuestBoard(Guid mockTestResultId, Guid courseId, CancellationToken cancellationToken)
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SeeFiveTeacherReview, EnumQuestBoardCategory.SeeTenTeacherReview };
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var studentId = student?.Content?.Result?.Id;
-
-            var mockTestResultsViewed = await _mockTestResultRepository.Queryable
-                            .Where(x => x.Id == mockTestResultId && x.IsViewed && x.StudentId == studentId)
-                            .ToListAsync(cancellationToken);
-            var mockTestResultsViewedCount = mockTestResultsViewed.Count;
-
-            await _questBoardPublisher.Publish(new QuestBoardQueueModel
-            {
-                StudentId = (Guid)studentId!,
-                Categories = categories,
-                AchievedPoint = mockTestResultsViewedCount,
-                ObjectId = mockTestResultId,
-                CourseId = courseId
-            }, cancellationToken);
-        }
-
-        public async Task DoQuestBoardAllReviewsAndFeedback(Guid mockTestResultId, Guid courseId, CancellationToken cancellationToken)
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SeeAllReviewsAndFeedback };
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var studentId = student?.Content?.Result?.Id;
-
-            var mockTestResults = await _mockTestResultRepository.Queryable
-                            .Where(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done)
-                            .ToListAsync(cancellationToken);
-
-            double checkViewedAllRatio = (double)mockTestResults.Count(x => x.IsViewed) / mockTestResults.Count;
-            if (checkViewedAllRatio == Standard_Ratio)
-            {
-                await _questBoardPublisher.Publish(new QuestBoardQueueModel
-                {
-                    StudentId = (Guid)studentId!,
-                    Categories = categories,
-                    AchievedPoint = Default_Achieved_Point,
-                    ObjectId = mockTestResultId,
-                    CourseId = courseId
-                }, cancellationToken);
-            }
         }
     }
 }

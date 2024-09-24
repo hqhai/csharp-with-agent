@@ -3,6 +3,7 @@
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Base;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Entities.SkillScoresConfigs;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
@@ -27,18 +28,27 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private readonly IUnitRepository _unitRepository;
         private readonly IClassForumRepository _classForumRepository;
         private readonly ICourseRepository _courseRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IUserService _userService;
 
         public GetOverallScoreByClassForumQueryHandler(AuthContext authContext
             , IUnitRepository unitRepository
             , IClassForumRepository classForumRepository
             , ICourseRepository courseRepository
+            , ICourseResultRepository courseResultRepository
+            , ILessonResultRepository lessonResultRepository
+            , IClassForumResultRepository classForumResultRepository
             , IUserService userService)
         {
             _authContext = authContext;
             _unitRepository = unitRepository;
             _classForumRepository = classForumRepository;
             _courseRepository = courseRepository;
+            _courseResultRepository = courseResultRepository;
+            _lessonResultRepository = lessonResultRepository;
+            _classForumResultRepository = classForumResultRepository;
             _userService = userService;
         }
 
@@ -47,15 +57,60 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<OverallScoreReportModel> methodResult = new MethodResult<OverallScoreReportModel>();
             OverallScoreReportModel overallScoreReport = new OverallScoreReportModel();
+            var method = await Validate(request, cancellationToken);
+            if (!method.IsOK)
+            {
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                return methodResult;
+            }
+            var courseResult = method.Result!;
+            var lessonResultIds = await GetLessonResultIdsAsync(request, courseResult.StudentId);
+            var classForumIds = await GetClassForumIdsAsync(request);
+            var groupClassForum = await _classForumRepository.Queryable.Where(x => classForumIds.Contains(x.Id))
+                                                                   .GroupBy(x => x.CourseSkill)
+                                                                   .Select(x => new { x.Key, ClassFourmIds = x.Select(x => x.Id).ToList() })
+                                                                   .ToListAsync(cancellationToken);
+            if (groupClassForum == null || !groupClassForum.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(groupClassForum));
+                return methodResult;
+            }
+            var skillScores = new List<SkillScores>();
+            foreach (var item in groupClassForum)
+            {
+                var skillScoreClassFourm = await GetClassForumResultsAsync(request, item.ClassFourmIds, courseResult.StudentId);
+                skillScores.Add(new SkillScores
+                {
+                    Skill = item.Key,
+                    CorrectCount = skillScoreClassFourm.CorrectCount,
+                    CountQuestion = skillScoreClassFourm.CountQuestion,
+                    TotalCount = skillScoreClassFourm.TotalCount,
+                    TotalQuestion = item.ClassFourmIds.Count
+                });
+            }
+            skillScores = skillScores.OrderBy(x => x.Skill).ToList();
+            overallScoreReport.SkillScores = skillScores;
+            overallScoreReport.CourseSkills = skillScores.Select(x => x.Skill).ToList();
+            methodResult.Result = overallScoreReport;
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
 
+        private async Task<MethodResult<CourseResult>> Validate(GetOverallScoreByClassForumQuery request, CancellationToken cancellationToken)
+        {
+            var methodResult = new MethodResult<CourseResult>();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
                 return methodResult;
             }
-            var studentId = studentResult?.Content?.Result?.Id;
-
+            var student = studentResult?.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
@@ -67,40 +122,47 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotTypeAcademic), nameof(course));
                 return methodResult;
             }
-
-            var units = await _unitRepository.Queryable.Include(x => x.UnitLessons)
-                  .ThenInclude(x => x.Lesson)
-                  .ThenInclude(x => x!.ClassForum)
-                  .Include(x => x.CourseUnitMockTests)
-                  .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
-                  .ToListAsync(cancellationToken);
-            if (units == null || units.Count == 0)
+            var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.StudentId == student.Id, cancellationToken);
+            if (courseResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courseResult));
                 return methodResult;
             }
-            var classForumIds = units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson).Select(x => x!.ClassForum).Select(x => x!.Id).ToList();
-
-            var classForums = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                                                                         .ThenInclude(x => x.ClassForumScores)
-                                                                         .Where(x => classForumIds.Contains(x.Id))
-                                                                         .ToListAsync(cancellationToken);
-            if (classForums == null || classForums.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
-                return methodResult;
-            }
-            var skillScores = classForums.GroupBy(x => x.CourseSkill).Select(x => new SkillScores
-            {
-                Skill = x.Key,
-                CorrectCount = x.SelectMany(x => x.ClassForumResults).SelectMany(x => x.ClassForumScores).Sum(x => x.Score),
-                TotalCount = 36,
-            }).ToList();
-            overallScoreReport.SkillScores = skillScores;
-            overallScoreReport.CourseSkills = classForums.Select(x => x.CourseSkill).Distinct().ToList();
-            methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = overallScoreReport;
+            methodResult.Result = courseResult;
             return methodResult;
+        }
+
+        private async Task<IList<Guid>> GetLessonResultIdsAsync(GetOverallScoreByClassForumQuery request, Guid studentId)
+        {
+            return await _lessonResultRepository.Queryable.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId).Select(x => x.Id).ToListAsync();
+        }
+
+        private async Task<SkillScores> GetClassForumResultsAsync(GetOverallScoreByClassForumQuery request, IList<Guid> classForumIds, Guid studentId)
+        {
+            var lessonResultIds = await GetLessonResultIdsAsync(request, studentId);
+            var classForumResults = await _classForumResultRepository.Queryable.Include(x => x.ClassForumScores).Where(x => lessonResultIds.Contains(x.LessonResultId) && classForumIds.Contains(x.ClassForumId)).ToListAsync();
+
+            return new SkillScores
+            {
+                CountQuestion = classForumResults.Count,
+                CorrectCount = classForumResults.Sum(x => x.CorrectCount),
+                TotalCount = classForumResults.Sum(x => x.CorrectTotal)
+            };
+        }
+
+        private async Task<IList<Guid>> GetLessonIdsAsync(GetOverallScoreByClassForumQuery request)
+        {
+            return await _unitRepository.Queryable.Include(x => x.UnitLessons)
+                                                  .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
+                                                  .SelectMany(x => x.UnitLessons)
+                                                  .Select(x => x.LessonId)
+                                                  .ToListAsync();
+        }
+
+        private async Task<IList<Guid>> GetClassForumIdsAsync(GetOverallScoreByClassForumQuery request)
+        {
+            var lessonIds = await GetLessonIdsAsync(request);
+            return await _classForumRepository.Queryable.Where(x => lessonIds.Contains(x.LessonId)).Select(x => x.Id).ToListAsync();
         }
     }
 }

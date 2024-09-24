@@ -4,7 +4,6 @@ namespace Fsel.Course.Domain.Entities
 {
     using System;
     using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Shared.Helpers;
@@ -31,10 +30,11 @@ namespace Fsel.Course.Domain.Entities
             set { _timeCount = value; }
         }
 
-        public bool IsRetry { get; set; }
+        public Guid? ClassForumDetailResultId { get; set; }
 
-        public Guid ClassForumResultId { get; set; }
+        public Guid? ClassForumResultId { get; set; }
 
+        public ClassForumDetailResult? ClassForumDetailResult { get; set; }
         public ClassForumResult? ClassForumResult { get; set; }
     }
 }

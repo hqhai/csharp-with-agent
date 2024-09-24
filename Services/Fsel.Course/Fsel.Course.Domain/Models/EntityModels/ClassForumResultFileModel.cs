@@ -6,9 +6,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class ClassForumResultFileModel
     {
-        public bool IsRetry { get; set; }
-
         private string? _filePath;
+
         public string? FilePath
         {
             set { _filePath = value; }

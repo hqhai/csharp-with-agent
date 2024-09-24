@@ -30,6 +30,8 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumResultStatus>());
+
+            builder.HasIndex(c => new { c.CourseId, c.FinalTestId, c.StudentId }).IsUnique();
         }
     }
 }

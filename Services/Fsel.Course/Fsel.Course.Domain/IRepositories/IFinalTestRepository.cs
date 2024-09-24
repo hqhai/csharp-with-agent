@@ -9,7 +9,5 @@ namespace Fsel.Course.Domain.IRepositories
     public interface IFinalTestRepository : IRepository<FinalTest>
     {
         Task<FinalTestModel?> GetIncludeAllAsync(Guid? id);
-
-        Task<FinalTest?> GetAsync(Guid id, Guid? studentId);
     }
 }

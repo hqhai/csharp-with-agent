@@ -34,9 +34,15 @@ namespace Fsel.System.Application.Queries.SchoolQuery
             {
                 query = query.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
+
             if (request.LocationId != null)
             {
                 query = query.Where(m => m.LocationId == request.LocationId);
+            }
+
+            if (request.EducationLevel != null)
+            {
+                query = query.Where(m => m.EducationLevel == request.EducationLevel);
             }
 
             var methodResult = await _schoolRepository.GetListByPageResultAsync<SchoolModel>(query, request, cancellationToken);

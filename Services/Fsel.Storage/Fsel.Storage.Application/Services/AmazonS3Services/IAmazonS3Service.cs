@@ -1,7 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.ActionResults;
-using Fsel.Storage.Domain.Enums;
+using Fsel.Shared.Enums;
 using Microsoft.AspNetCore.Http;
 
 namespace Fsel.Storage.Application.Services.AmazonS3Services

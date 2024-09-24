@@ -191,7 +191,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 var courseId = finalTestResult.CourseId;
 
                 // làm nhiệm vụ
-               // await DoQuestBoard(courseId, cancellationToken);
+                // await DoQuestBoard(courseId, cancellationToken);
 
                 finalTestResult = _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -202,27 +202,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             });
 
             return methodResult;
-        }
-
-        private async Task DoQuestBoard(Guid courseId, CancellationToken cancellationToken)
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneFinalTest };
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var studentId = student?.Content?.Result?.Id;
-
-            //Chỉ bài finaltest đầu tiên hoàn thành của khóa mới được tính là hoàn thành nhiệm vụ
-            bool checkFirstFinalTestDone = _finalTestResultRepository.Queryable.Any(f => f.CourseId == courseId && f.Status == EnumResultStatus.Done);
-
-            if (!checkFirstFinalTestDone)
-            {
-                await _questBoardPublisher.Publish(new QuestBoardQueueModel
-                {
-                    StudentId = (Guid)studentId!,
-                    Categories = categories,
-                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
-                    CourseId = courseId
-                }, cancellationToken);
-            }
         }
     }
 }

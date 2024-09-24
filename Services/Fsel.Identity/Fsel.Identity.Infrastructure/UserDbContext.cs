@@ -42,9 +42,16 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new UserSettingEntityTypeConfiguration());
             builder.ApplyConfiguration(new PlatformEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserPlatformEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserCourseSettingEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudenrRankingEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentFocusTimeEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentTrialRegistrationEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentCompetitionEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentCompetitionEventsEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentRankingEventEntityTypeConfiguration());
+            builder.ApplyConfiguration(new CompetitionEventsEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserReferralEntityTypeConfiguration());
+            builder.ApplyConfiguration(new EventRegistrationEntityTypeConfiguration());
             base.OnModelCreating(builder);
         }
 
@@ -62,11 +69,18 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<ParentStudent> ParentStudents { get; set; }
         public DbSet<UserOtpCode> UserOtpCodes { get; set; }
         public DbSet<UserSetting> UserSettings { get; set; }
+        public DbSet<UserCourseSetting> UserCourseSettings { get; set; }
         public DbSet<Platform> Platform { get; set; }
         public DbSet<UserPlatform> UserPlatforms { get; set; }
         public DbSet<StudentRanking> StudentRankings { get; set; }
         public DbSet<StudentFocusTime> StudentFocusTimes { get; set; }
         public DbSet<StudentTrialRegistration> StudentTrialRegistrations { get; set; }
+        public DbSet<StudentCompetitionSnapShot> StudentCompetitionSnapShots { get; set; }
+        public DbSet<StudentCompetitionEvent> StudentCompetitionEvents { get; set; }
+        public DbSet<StudentRankingEvent> StudentRankingEvents { get; set; }
+        public DbSet<CompetitionEvent> CompetitionEvents { get; set; }
+        public DbSet<UserReferral> UserReferrals { get; set; }
+        public DbSet<EventRegistration> EventRegistrations { get; set; }
 
         #endregion Db Set
 

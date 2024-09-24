@@ -2,10 +2,10 @@
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Users
 {
-    using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Models.CommandModels.Parents;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Identity.Domain.Models.CommandModels.TeacherBankAccount;
+    using Fsel.Shared.Enums;
 
     public class UpdateUserProfileCommandModel
     {
@@ -20,6 +20,9 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
         public string? UniversityDegreePath { get; set; }
         public string? CertificationPath { get; set; }
         public string? PoliceClearancePath { get; set; }
+
+        public string? PhoneNumber { get; set; }
+
         public IList<UpdateStudentProfileCommandModel>? Students { get; set; }
         public UpdateParentCommandModel? Parent { get; set; }
         public UpdateTeacherBankAccountCommandModel? TeacherBankAccount { get; set; }

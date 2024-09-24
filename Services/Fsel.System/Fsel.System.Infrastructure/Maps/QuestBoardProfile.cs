@@ -4,8 +4,7 @@ namespace Fsel.System.Infrastructure.Maps
 {
     using AutoMapper;
     using Fsel.Core.Extensions;
-    using Fsel.System.Domain.Entities;
-    using Fsel.System.Domain.Models.CommandModels.QuestBoards;
+    using Fsel.System.Domain.Entities.QuestBoards;
     using Fsel.System.Domain.Models.EntityModels;
 
     public class QuestBoardProfile : Profile
@@ -13,7 +12,7 @@ namespace Fsel.System.Infrastructure.Maps
         public QuestBoardProfile()
         {
             CreateMap<QuestBoard, QuestBoardModel>().IgnoreAllNonExisting();
-            CreateMap<CreateQuestBoardCommandModel, QuestBoard>().IgnoreAllNonExisting();
+            CreateMap<QuestBoardStudent, QuestBoardStudentModel>().IgnoreAllNonExisting();
         }
     }
 }

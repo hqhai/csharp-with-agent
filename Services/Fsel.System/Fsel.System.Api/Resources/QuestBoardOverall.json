@@ -1,0 +1,30 @@
+[
+  {
+    "id": "8f32d29f-1787-42fe-9f0d-e5e40eab7e31",
+    "type": "BeginnerQuests",
+    "targetValue": 2,
+    "token": 10,
+    "createdDate": "2024-05-24"
+  },
+  {
+    "id": "47742457-c637-4244-a8f4-32e8820acd40",
+    "type": "BeginnerQuests",
+    "targetValue": 4,
+    "token": 20,
+    "createdDate": "2024-05-24"
+  },
+  {
+    "id": "59c4f992-cc12-4cfc-baf8-4929de320bc2",
+    "type": "BeginnerQuests",
+    "targetValue": 7,
+    "token": 40,
+    "createdDate": "2024-05-24"
+  },
+  {
+    "id": "fead115f-827a-4468-b8a2-9ded08323a5e",
+    "type": "LearningQuests",
+    "targetValue": 140,
+    "token": 100,
+    "createdDate": "2024-05-24"
+  }
+]

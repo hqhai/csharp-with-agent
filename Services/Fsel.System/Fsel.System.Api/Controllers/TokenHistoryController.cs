@@ -5,6 +5,7 @@ namespace Fsel.System.Api.Controllers
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
     using Fsel.System.Application.Queries.TokenHistoryQuery;
     using Fsel.System.Domain.Models.EntityModels;
@@ -29,7 +30,7 @@ namespace Fsel.System.Api.Controllers
         /// Search Token History
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<IList<TokenHistoryModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<TokenHistoryListModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetList([FromQuery] SearchTokenHistoryQuery query)
         {
@@ -41,7 +42,7 @@ namespace Fsel.System.Api.Controllers
         /// Get User Token History
         /// </summary>
         [HttpGet("user-token-history")]
-        [ProducesResponseType(typeof(MethodResult<IList<CurrentUserTokenHistoryModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<CurrentUserTokenHistoryModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUserTokenHistory([FromQuery] GetCurrentUserTokenHistoryQuery query)
         {

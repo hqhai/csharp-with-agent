@@ -1,0 +1,17 @@
+Grammatical Range and Accuracy Band Descriptors:
+Band 0 - Does not attend.
+Band 1 - No communication possible. No rateable language.
+Band 2 - Cannot produce basic sentence forms.
+Band 3 - Attempts basic sentence forms but with limited success, or relies on apparently memorised utterances. Makes numerous errors except in memorised expressions.
+Band 4 - Produces basic sentence forms and some correct simple sentences but subordinate structures are rare. Errors are frequent and may lead to misunderstanding.
+Band 5 - Produces basic sentence forms with reasonable accuracy. Uses a limited range of more complex structures, but these usually contain errors and may cause some comprehension problems.
+Band 6 - Uses a mix of simple and complex structures, but with limited flexibility. May make frequent mistakes with complex structures, though these rarely cause comprehension problems.
+Band 7 - Uses a range of complex structures with some flexibility. Frequently produces error-free sentences, though some grammatical mistakes persist.
+Band 8 - Uses a wide range of structures flexibly. Produces a majority of error-free sentences with only very occasional inappropriacies or basic/nonsystematic errors.
+Band 9 - Uses a full range of structures naturally and appropriately. Produces consistently accurate structures apart from ‘slips’ characteristic of native speaker speech.
+
+Output format:
+{
+    "BandScore": "",
+    "BandDescriptorText": ""
+}

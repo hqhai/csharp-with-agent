@@ -8,6 +8,10 @@ namespace Fsel.Shared.Enums
         Placement,
         Trial,
         Miss,
-        Payment
+        Payment,
+        Expired,
+        Fail,
+        New,
+        Reject
     }
 }

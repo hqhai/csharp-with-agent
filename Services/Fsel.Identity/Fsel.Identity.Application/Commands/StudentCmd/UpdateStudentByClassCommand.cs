@@ -10,7 +10,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class UpdateStudentByClassCommand : UpdateStudentByClassCommandModel, IRequest<MethodResult<StudentModel>>
     {
@@ -34,18 +33,24 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<StudentModel> methodResult = new MethodResult<StudentModel>();
 
-            var student = await _studentRepository.Queryable.Include(x => x.Human)
-                                                  .FirstOrDefaultAsync(x => x.Id == request.StudentId, cancellationToken: cancellationToken);
-
+            var student = await _studentRepository.GetByIdAsync(request.StudentId);
             if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
+
             student.CourseLevel = request.CourseLevel;
             student.ClassId = request.ClassId;
-            student.PackageId = request.PackageId;
-            student.NumberOfShield += request.NumberOfShield;
+            student.CourseId = request.CourseId;
+            if (request.PackageId.HasValue)
+            {
+                student.PackageId = request.PackageId.Value;
+            }
+            if (request.NumberOfShield.HasValue)
+            {
+                student.NumberOfShield += request.NumberOfShield.Value;
+            }
             await _studentRepository.ExecuteTransactionAsync(async () =>
             {
                 student = _studentRepository.Update(student);

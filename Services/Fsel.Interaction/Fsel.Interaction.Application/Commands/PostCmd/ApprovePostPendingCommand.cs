@@ -69,18 +69,12 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
             {
                 var classResult = await _trainingService.GetClassByStudentId(student.Id);
                 var courseId = classResult.Content?.Result?.CourseId;
-
-                if (courseId != null)
-                {
-                    //   await DoQuestBoard(post.Id, (Guid)courseId, post.CreatedUserId, cancellationToken);
-                }
             }
 
             await _postRepository.ExecuteTransactionAsync(async () =>
             {
                 post.Status = request.IsApprove ? EnumPostStatus.Active : EnumPostStatus.Reject;
                 _postRepository.Update(post);
-
 
                 await CompleteApprovalPost(post, cancellationToken);
                 await _postRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -90,32 +84,6 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
             });
 
             return methodResult;
-        }
-
-        public async Task DoQuestBoard(Guid postId, Guid courseId, Guid userId, CancellationToken cancellationToken)
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>()
-            {
-                EnumQuestBoardCategory.PostOneDiscussionBoard,
-                EnumQuestBoardCategory.PostThreeDiscussionBoard,
-                EnumQuestBoardCategory.PostFiveDiscussionBoard
-            };
-
-            var student = await _userService.GetStudentByUserIdAsync(userId);
-            var studentId = student?.Content?.Result?.Id;
-            var post = await _postRepository.Queryable.Where(c => c.CreatedUserId == userId && c.Status != EnumPostStatus.Pending && c.Status != EnumPostStatus.Draft).ToListAsync(cancellationToken);
-
-            if (post != null && post.Count > 0)
-            {
-                await _questBoardPublisher.Publish(new QuestBoardQueueModel
-                {
-                    StudentId = (Guid)studentId!,
-                    Categories = categories,
-                    AchievedPoint = post.Count,
-                    ObjectId = postId,
-                    CourseId = courseId
-                }, cancellationToken);
-            }
         }
 
         public async Task CompleteApprovalPost(Post post, CancellationToken cancellationToken)

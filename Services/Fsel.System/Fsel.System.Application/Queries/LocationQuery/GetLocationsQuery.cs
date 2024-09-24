@@ -55,6 +55,7 @@ namespace Fsel.System.Application.Queries.LocationQuery
 
             var lists = await locations
                     .ApplySortAndPaging(request)
+                    .OrderBy(x => x.Name)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);

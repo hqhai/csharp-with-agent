@@ -99,34 +99,5 @@ namespace Fsel.Course.Infrastructure.Repositories
                 throw;
             }
         }
-
-        public async Task<MockTest?> GetAsync(Guid mockTestId, Guid? studentId)
-        {
-            try
-            {
-                return await Queryable.Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
-                                       .ThenInclude(x => x.SectionGroup)
-                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
-                                       .ThenInclude(x => x.SectionTimeCodes.Where(y => !y.IsDeleted))
-                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
-                                       .ThenInclude(x => x.SectionGroup)
-                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
-                                       .ThenInclude(x => x.SectionParts.Where(y => !y.IsDeleted))
-                                       .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
-                                       .ThenInclude(x => x.Question)
-                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
-                                       .ThenInclude(x => x.SectionGroup)
-                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
-                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
-                                       .ThenInclude(x => x.SectionGroup).ThenInclude(x => x!.SectionGroupResults.Where(x => x.StudentId == studentId))
-                                       .Where(x => x.Id == mockTestId)
-                                       .AsNoTracking()
-                                       .FirstOrDefaultAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
     }
 }

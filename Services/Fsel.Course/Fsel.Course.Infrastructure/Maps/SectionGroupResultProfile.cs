@@ -11,7 +11,7 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public SectionGroupResultProfile()
         {
-            CreateMap<SectionGroupResult, SectionGroupResultModel>().IgnoreAllNonExisting();
+            CreateMap<SectionGroupResult, SectionGroupResultModel>().ForMember(p => p.RemainingTime, x => x.MapFrom(n => n.SectionGroup != null && n.SectionGroup.ExecutionTime - n.WorkingTime > 0 ? n.SectionGroup.ExecutionTime - n.WorkingTime : default));
         }
     }
 }

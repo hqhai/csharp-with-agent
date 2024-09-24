@@ -3,20 +3,22 @@
 namespace Fsel.Ordering.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
+    using Fsel.Core.Base.Interfaces;
     using Fsel.Core.Entities;
-    using Fsel.Ordering.Domain.Entities.PackageConfigs;
     using Fsel.Shared.Enums;
 
-    public class Package : Entity
+    public class Package : Entity, IMultiLingualObject<PackageTranslation>
     {
         /// <summary>
         /// Code
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public EnumPackageCode? Code { get; set; }
+
+        /// <summary>
+        /// Name
+        /// </summary>
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(100)]
@@ -29,23 +31,45 @@ namespace Fsel.Ordering.Domain.Entities
         public decimal Price { get; set; }
 
         /// <summary>
+        /// Giá trên tháng
+        /// </summary>
+
+        [Range(0, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public decimal PriceMonth { get; set; }
+
+        /// <summary>
         /// Thời gian Khóa Học
         /// </summary>
         [Range(1, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int MonthNumber { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public string? DescriptionStr { get; set; }
+        /// <summary>
+        /// Gợi ý
+        /// </summary>
 
-        [NotMapped]
-        public IList<PackageConfig>? Description
-        {
-            get { return ConvertHelper.Deserialize<IList<PackageConfig>>(DescriptionStr); }
-            set { DescriptionStr = ConvertHelper.Serialize(value); }
-        }
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public string? IncentivesWhenPurchasing { get; set; }
+
+        public int ReferToken { get; set; }
 
         public ICollection<Order> Orders { get; set; } = new List<Order>();
 
         public ICollection<VoucherPackage> VoucherPackages { get; set; } = new List<VoucherPackage>();
+
+        public ICollection<PackageTranslation> Translations { get; set; } = new List<PackageTranslation>();
+
+        public ICollection<PackageEvent> PackageEvents { get; set; } = new List<PackageEvent>();
+    }
+
+    public class PackageTranslation : Entity, ITranslationObject
+    {
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public string? IncentivesWhenPurchasing { get; set; }
+
+        public Guid PackageId { get; set; }
+
+        public Package? Package { get; set; }
+
+        public string? Language { get; set; }
     }
 }

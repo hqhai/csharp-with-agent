@@ -53,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     }
                 }
             });
-            var action = actionResult.Content?.Result;
+            var action = actionResult.Content?.Result?.FirstOrDefault();
 
             var classForumResult = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)

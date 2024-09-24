@@ -9,6 +9,7 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Microsoft.AspNetCore.Cors.Infrastructure;
     using Microsoft.EntityFrameworkCore;
 
     public class FinalTestRepository : BaseRepository<FinalTest>, IFinalTestRepository
@@ -77,27 +78,6 @@ namespace Fsel.Course.Infrastructure.Repositories
                                               }).ToList(),
                                           }).ToList(),
                                       }).FirstOrDefaultAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<FinalTest?> GetAsync(Guid id, Guid? studentId)
-        {
-            try
-            {
-                return await Queryable.Include(x => x.FinalTestSections.Where(n => !n.IsDeleted))
-                                    .ThenInclude(x => x.SectionGroup)
-                                    .ThenInclude(x => x!.Sections.Where(n => !n.IsDeleted))
-                                    .ThenInclude(x => x!.SectionQuestions.Where(n => !n.IsDeleted))
-                                    .ThenInclude(x => x.Question)
-                                    .Include(x => x.FinalTestSections.Where(n => !n.IsDeleted))
-                                    .ThenInclude(x => x.SectionGroup)
-                                    .ThenInclude(x => x!.SectionGroupResults.Where(x => x.StudentId == studentId))
-                                    .Include(x => x.FinalTestResults.Where(x => x.StudentId == studentId))
-                                    .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
             {

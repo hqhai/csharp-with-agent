@@ -9,6 +9,9 @@ namespace Fsel.Course.Lms.Application.Queries.LessonNoteQuery
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -22,11 +25,13 @@ namespace Fsel.Course.Lms.Application.Queries.LessonNoteQuery
     {
         private readonly ILessonNoteRepository _lessonNoteRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly QuestBoardPublisher _questBoardPublisher;
 
-        public GetListLessonNoteQueryHandler(ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository)
+        public GetListLessonNoteQueryHandler(ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository, QuestBoardPublisher questBoardPublisher)
         {
             _lessonNoteRepository = lessonNoteRepository;
             _lessonResultRepository = lessonResultRepository;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<LessonNoteListModel>> Handle(GetListLessonNoteQuery request, CancellationToken cancellationToken)
@@ -52,12 +57,30 @@ namespace Fsel.Course.Lms.Application.Queries.LessonNoteQuery
             if (lessonResult != null)
             {
                 lessonNoteListModel.SummaryNote = lessonResult.SummaryNote;
+
+                #region Do QuestBoard
+
+                await DoQuestBoard(lessonResult.StudentId, cancellationToken);
+
+                #endregion Do QuestBoard
             }
             lessonNoteListModel.LessonResultId = request.LessonResultId;
             lessonNoteListModel.LessonNotes = lessonNotes;
             methodResult.Result = lessonNoteListModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
+
             return methodResult;
+        }
+
+        private async Task DoQuestBoard(Guid studentId, CancellationToken cancellationToken)
+        {
+            await _questBoardPublisher.Publish(new QuestBoardQueueModel()
+            {
+                StudentID = studentId,
+                Type = EnumQuestBoardType.LearningQuests,
+                Category = EnumQuestBoardCategory.BackupNotes,
+                Value = 1
+            }, cancellationToken);
         }
     }
 }

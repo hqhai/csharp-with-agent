@@ -6,6 +6,7 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Shared.Constants;
+    using Fsel.System.Application.Commands.GoogleSheets;
     using Fsel.System.Application.Queries.GoogleSheets;
     using Fsel.System.Application.Services.GoogleSheetServices.Models;
     using global::System.Net;
@@ -38,6 +39,42 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
+        /// Get data from file i18n
+        /// </summary>
+        [HttpPost("add-payment-info-to-google-sheet")]
+        [ProducesResponseType(typeof(MethodResult<VoidMethodResult>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddPaymentInfoToGoogleSheet([FromBody] AddPaymentInfoToGoogleSheetCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Add Contact Info To Google Sheet File
+        /// </summary>
+        [HttpPost("add-contact-info-to-google-sheet-file")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddData([FromBody] AddContactInfoToGoogleSheetFileCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Add Contact Info From Landing Page FSEL To GoogleSheet
+        /// </summary>
+        [HttpPost("add-contact-info-from-landing-page")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddContactInfoFromLPFSELToGoogleSheet([FromBody] AddContactInfoFromLPFSELToGoogleSheetCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get CC emails
         /// </summary>
         [HttpGet("get-cc-email")]
@@ -46,6 +83,18 @@ namespace Fsel.System.Api.Controllers
         public async Task<IActionResult> GetCCEmail()
         {
             var commandResult = await _mediator.Send(new GetCCEmailsAccordingToStudentsQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Add Contact Info From Landing Page FSEL To GoogleSheet
+        /// </summary>
+        [HttpPost("register-student-for-event")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RegisterStudentForEvent([FromBody] RegisterStudentForEventCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

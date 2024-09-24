@@ -8,15 +8,32 @@ namespace Fsel.Shared.Helpers
 
     public static class NumberHelper
     {
-        public static double RoundNumberDouble(double number, bool roundUp = false)
+        //public static double RoundNumberDouble(double number, bool roundUp = false)
+        //{
+        //    if (roundUp)
+        //    {
+        //        return Math.Ceiling(number * 2) / 2;
+        //    }
+        //    else
+        //    {
+        //        return Math.Floor(number * 2) / 2;
+        //    }
+        //}
+
+        public static double RoundNumberDouble(double number)
         {
-            if (roundUp)
+            double fractionalPart = number - Math.Floor(number);
+            if (fractionalPart < 0.25)
             {
-                return Math.Ceiling(number * 2) / 2;
+                return Math.Floor(number);
+            }
+            else if (fractionalPart < 0.75)
+            {
+                return Math.Floor(number) + 0.5;
             }
             else
             {
-                return Math.Floor(number * 2) / 2;
+                return Math.Ceiling(number);
             }
         }
 
@@ -77,6 +94,19 @@ namespace Fsel.Shared.Helpers
         public static double GetPercent(this int correctCount, int correctTotal)
         {
             return correctTotal > 0 ? ConvertPercentDouble((double)correctCount / correctTotal) : default;
+        }
+
+        public static long CalculateAverage(ICollection<long> secondsList)
+        {
+            if (secondsList == null || secondsList.Count == 0)
+            {
+                return 0;
+            }
+
+            long totalSeconds = secondsList.Sum();
+            int count = secondsList.Count;
+
+            return totalSeconds / count;
         }
     }
 }
