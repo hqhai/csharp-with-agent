@@ -80,6 +80,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
                 var totalPrice = order.TotalPrice.ToString("C", new CultureInfo("vi-VN"));
 
+                var discount = order.DiscountPrice.ToString("C", new CultureInfo("vi-VN"));
+
                 await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
                 {
                     ToEmails = new List<string> { order.Email ?? string.Empty },
@@ -93,6 +95,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                         ExpiredDate = expiredDate,
                         Package = GetPackageName(order.Package),
                         Price = price.ToString(CultureInfo.InvariantCulture),
+                        Discount = discount.ToString(CultureInfo.InvariantCulture),
                         TotalPrice = totalPrice.ToString(CultureInfo.InvariantCulture),
                         ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
                     },
