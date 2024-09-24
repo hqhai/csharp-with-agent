@@ -12,5 +12,6 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders
         public EnumPaymentRevenueType? RevenueType { get; set; }
         public EnumOrderTransactionType? Type { get; set; }
         public string? Receipt { get; set; }
+        public bool IsSendEmail { get; set; } = true;
     }
 }

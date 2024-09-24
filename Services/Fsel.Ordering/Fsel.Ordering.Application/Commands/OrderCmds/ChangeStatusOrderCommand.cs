@@ -58,14 +58,14 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             , ILmsCourseService lmsCourseService
             , NotificationMessagePublisher notificationMessagePublisher
             , AuthContext authContext
-            , ILmsCourseService courseService,
-ISenderServices senderServices,
-AppSetting appSetting,
-AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher,
-ISystemService systemService,
-IMediator mediator,
-IPackageEventRepository packageEventRepository,
-ChangeStatusOrderPublisher changeStatusOrderPublisher)
+            , ILmsCourseService courseService
+            , ISenderServices senderServices
+            , AppSetting appSetting
+            , AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher
+            , ISystemService systemService
+            , IMediator mediator
+            , IPackageEventRepository packageEventRepository
+            , ChangeStatusOrderPublisher changeStatusOrderPublisher)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
@@ -131,7 +131,6 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
                     order.RevenueType = request.RevenueType;
-
                     allowOpenNextUnit = true;
                     var packageEvent = await _packageEventRepository.Queryable.FirstOrDefaultAsync(p => p.PackageId == package.Id && p.EventId == order.EventId, cancellationToken);
 
@@ -210,7 +209,7 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
 
                 #region Gửi mail thanh toán
 
-                if (order.Status == EnumOrderStatus.Payment)
+                if (order.Status == EnumOrderStatus.Payment && request.IsSendEmail)
                 {
                     await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
                     await _mediator.Send(new AddFeatureMissionCommand()
