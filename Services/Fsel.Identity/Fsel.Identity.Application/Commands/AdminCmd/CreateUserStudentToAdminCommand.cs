@@ -323,7 +323,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 IsTrialRegistration = request.IsTrialRegistration,
                 ExpireDate = request.ExpireDate,
                 RevenueType = request.RevenueType,
-                IsSendEmail = request.IsSendMail
+                IsSendEmail = bool.TryParse(request.IsSendMail, out bool isSendMail) && isSendMail,
             });
             if (!createOrderResult.IsSuccessStatusCode)
             {
