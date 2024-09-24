@@ -63,15 +63,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             , ILmsCourseService lmsCourseService
             , NotificationMessagePublisher notificationMessagePublisher
             , AuthContext authContext
-            , ILmsCourseService courseService,
-ISenderServices senderServices,
-AppSetting appSetting,
-AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher,
-ISystemService systemService,
-IMediator mediator,
-IPackageEventRepository packageEventRepository,
-ChangeStatusOrderPublisher changeStatusOrderPublisher,
-IUserVoucherLockRepository userVoucherLockRepository)
+            , ILmsCourseService courseService
+            , ISenderServices senderServices
+            , AppSetting appSetting
+            , AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher
+            , ISystemService systemService
+            , IMediator mediator
+            , IPackageEventRepository packageEventRepository
+            , ChangeStatusOrderPublisher changeStatusOrderPublisher
+            , IUserVoucherLockRepository userVoucherLockRepository)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
@@ -138,7 +138,6 @@ IUserVoucherLockRepository userVoucherLockRepository)
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
                     order.RevenueType = request.RevenueType;
-
                     allowOpenNextUnit = true;
                     var packageEvent = await _packageEventRepository.Queryable.FirstOrDefaultAsync(p => p.PackageId == package.Id && p.EventId == order.EventId, cancellationToken);
 
@@ -235,23 +234,24 @@ IUserVoucherLockRepository userVoucherLockRepository)
                     var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
                     Guid voucherId = default;
-
-                    if (!order.VoucherId.HasValue && _appSetting.VoucherConfigs?.VoucherForRetail?.StartDate <= createDate && _appSetting.VoucherConfigs.VoucherForRetail.EndDate >= createDate && currentDate < _appSetting.VoucherConfigs.VoucherForRetail.ExpiredDate)
+                    if (request.IsSendEmail)
                     {
-                        var voucher = await _mediator.Send(new CreateVoucherForRetailCommand()
+                        if (!order.VoucherId.HasValue && _appSetting.VoucherConfigs?.VoucherForRetail?.StartDate <= createDate && _appSetting.VoucherConfigs.VoucherForRetail.EndDate >= createDate && currentDate < _appSetting.VoucherConfigs.VoucherForRetail.ExpiredDate)
                         {
-                            UserId = order.UserId,
-                            PackageId = order.PackageId ?? default,
-                        }, cancellationToken).ConfigureAwait(false);
-                        voucherId = voucher.Result?.Id ?? default;
+                            var voucher = await _mediator.Send(new CreateVoucherForRetailCommand()
+                            {
+                                UserId = order.UserId,
+                                PackageId = order.PackageId ?? default,
+                            }, cancellationToken).ConfigureAwait(false);
+                            voucherId = voucher.Result?.Id ?? default;
 
-                        await _mediator.Send(new SendMailPaymentWithVoucherCommand() { OrderId = order.Id, VoucherId = voucherId }).ConfigureAwait(false);
+                            await _mediator.Send(new SendMailPaymentWithVoucherCommand() { OrderId = order.Id, VoucherId = voucherId }).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
+                        }
                     }
-                    else
-                    {
-                        await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
-                    }
-
                     await ResetUserVoucherLockAsync(order.UserId, cancellationToken).ConfigureAwait(false);
                 }
 
