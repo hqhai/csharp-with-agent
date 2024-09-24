@@ -639,12 +639,14 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
                         if (context != null)
                         {
-                            //if (context.IsNativeClient())
-                            //{
-                            //    // The client is native, so this change in how to
-                            //    // return the response is for better UX for the end user.
-                            //    return this.LoadingPage("Redirect", model.ReturnUrl ?? string.Empty);
-                            //}
+                            if (context.IsNativeClient())
+                            {
+                                Thread.Sleep(1000);
+
+                                // The client is native, so this change in how to
+                                // return the response is for better UX for the end user.
+                                //return this.LoadingPage("Redirect", model.ReturnUrl ?? string.Empty);
+                            }
 
                             // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
                             return Redirect(model.ReturnUrl ?? string.Empty);
@@ -794,8 +796,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 return SignOut(new AuthenticationProperties { RedirectUri = url }, vm.ExternalAuthenticationScheme);
             }
 
-            //return Redirect(vm.PostLogoutRedirectUri);
-            return View("LoggedOut", vm);
+            return Redirect(vm.PostLogoutRedirectUri);
+            //return View("LoggedOut", vm);
         }
 
         //[HttpPost]
