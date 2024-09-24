@@ -11,6 +11,7 @@ using Fsel.Identity.Application.Queries.UserQuery;
 using Fsel.Identity.Application.Queries.UserReferrals;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,6 +21,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/user")]
     [ApiController]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class UserController : ControllerBase
     {
         private readonly IMediator _mediator;
