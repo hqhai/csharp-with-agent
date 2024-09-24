@@ -191,6 +191,32 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNameIsExist), nameof(request.Name), request.Name);
                 return methodResult;
             }
+            switch (request.CourseLevel.GetEnumCourseType())
+            {
+                case EnumCourseType.Academic:
+                    break;
+
+                case EnumCourseType.Ielts:
+                    if (request.VideoTimeCodes.Any(x => x.TimeCodeType != EnumTimeCodeType.Standalone))
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.IeltsAcceptsStandalone),
+                            nameof(request.VideoTimeCodes),
+                            request.VideoTimeCodes.Where(x => x.TimeCodeType != EnumTimeCodeType.Standalone).Select(x => x.DisplayTime));
+                        return methodResult;
+                    }
+                    break;
+
+                case EnumCourseType.AdultFoundation:
+                    if (request.VideoTimeCodes.Any(x => x.TimeCodeType == EnumTimeCodeType.SkillTest))
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.AdultFoundationNotAcceptsSkillTest),
+                            nameof(request.VideoTimeCodes),
+                            request.VideoTimeCodes.Where(x => x.TimeCodeType != EnumTimeCodeType.Standalone).Select(x => x.DisplayTime));
+                        return methodResult;
+                    }
+                    break;
+            }
+
             var method = AddTimeCodeToVideo(video, request.VideoTimeCodes);
             if (!method.IsOK)
             {
