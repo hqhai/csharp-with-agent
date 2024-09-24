@@ -98,6 +98,10 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.CourseId), Message = $"CourseId is {EnumSystemErrorCode.InValidFormat}" });
                 }
+                if (!string.IsNullOrEmpty(x.IsSendMail) && !bool.TryParse(x.IsSendMail, out _))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.IsSendMail), Message = $"IsSendMail is {EnumSystemErrorCode.InValidFormat}" });
+                }
                 if (!string.IsNullOrEmpty(x.SchoolId) && !Guid.TryParse(x.SchoolId, out _))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.SchoolId), Message = $"SchoolId is {EnumSystemErrorCode.InValidFormat}" });
