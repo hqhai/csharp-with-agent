@@ -322,7 +322,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 PackageId = package.Id,
                 IsTrialRegistration = request.IsTrialRegistration,
                 ExpireDate = request.ExpireDate,
-                RevenueType = request.RevenueType
+                RevenueType = request.RevenueType,
+                IsSendEmail = bool.TryParse(request.IsSendMail, out bool isSendMail) && isSendMail,
             });
             if (!createOrderResult.IsSuccessStatusCode)
             {
@@ -361,9 +362,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 human.Birthday = GetBirthdayToCourseLevel(level);
             }
-            else
+            else if (DateTime.TryParse(request.DateOfBirth, out DateTime dateOfBirth))
             {
-                DateTime.TryParse(request.DateOfBirth, new CultureInfo("vi-VN"), DateTimeStyles.None, out DateTime dateOfBirth);
                 human.Birthday = dateOfBirth;
             }
             user.Human = human;

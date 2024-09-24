@@ -33,6 +33,9 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Admins
         [EpplusTableColumn(Header = "Trường Id")]
         public string? SchoolId { get; set; }
 
+        [EpplusTableColumn(Header = "Gửi email")]
+        public string? IsSendMail { get; set; }
+
         [EpplusTableColumn(Header = "Password")]
         public string? Password { get; set; }
     }
