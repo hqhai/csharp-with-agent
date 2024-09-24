@@ -5,6 +5,7 @@ namespace Fsel.Shared.Enums
     public enum EnumCourseType
     {
         Academic,
-        Ielts
+        Ielts,
+        AdultFoundation
     }
 }
