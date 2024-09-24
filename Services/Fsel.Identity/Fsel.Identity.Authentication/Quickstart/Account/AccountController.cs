@@ -378,6 +378,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     return View(request);
                 }
 
+                await _userOtpCache.RemoveAsync($"{nameof(SendOtpAsync)}.{user.Id}");
                 var sendResult = await SendOtpAsync(user);
                 if (!sendResult.IsOK)
                 {
@@ -446,6 +447,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         }
                     }
 
+                    await _userOtpCache.RemoveAsync($"{nameof(SendOtpAsync)}.{user.Id}");
                     var sendResult = await SendOtpAsync(user);
                     if (!sendResult.IsOK)
                     {
