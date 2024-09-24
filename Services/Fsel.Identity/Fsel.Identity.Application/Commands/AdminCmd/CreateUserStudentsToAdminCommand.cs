@@ -2,7 +2,6 @@
 
 namespace Fsel.Identity.Application.Commands.AdminCmd
 {
-    using System.Globalization;
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -83,11 +82,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null or malformed" });
                 }
-                else if (_userManager.Users.Any(p => p.Email == x.Email || p.UserName == x.Email))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email Already exist" });
-                }
-                if (string.IsNullOrEmpty(x.DateOfBirth) || (!string.IsNullOrEmpty(x.DateOfBirth) && !DateTime.TryParse(x.DateOfBirth, new CultureInfo("vi-VN"), DateTimeStyles.None, out DateTime dob)))
+                if (string.IsNullOrEmpty(x.DateOfBirth) || (!string.IsNullOrEmpty(x.DateOfBirth) && !DateTime.TryParse(x.DateOfBirth, out DateTime dob)))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = "Date of birth is null or malformed" });
                 }
@@ -204,6 +199,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     if (user != null)
                     {
                         listUser.Add(item);
+                        continue;
                     }
                 }
                 var userResult = await _mediator.Send(new CreateUserStudentToAdminCommand
@@ -222,6 +218,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     SchoolId = item.SchoolId,
                     CourseLevel = item.CourseLevel,
                     Password = item.Password,
+                    IsSendMail = item.IsSendMail
                 }, cancellationToken);
                 if (!userResult.IsOK)
                 {
