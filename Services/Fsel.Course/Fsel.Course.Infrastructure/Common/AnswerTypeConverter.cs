@@ -794,11 +794,6 @@ namespace Fsel.Course.Infrastructure.Common
                 configAnswer = dataAnswer;
                 return (default, isAnswerMissing, false);
             }
-            if (dataAnswer.Answers.GroupBy(x => x.Id).Any(x => x.Count() > 1))
-            {
-                configAnswer = dataAnswer;
-                return (default, isAnswerMissing, false);
-            }
             foreach (var item in dataAnswer.Answers)
             {
                 var question = dataQuestion?.Answers.FirstOrDefault(x => x.Id == item.Id);
@@ -838,6 +833,11 @@ namespace Fsel.Course.Infrastructure.Common
             int number = 0;
             bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.Answers, EnumQuestionType.CheckListV1, isSubmit, isMandatoryAnswer);
             if (((dataAnswer == null || dataAnswer.Answers == null) || !dataAnswer.Answers.Any()) || (isMandatoryAnswer && isAnswerMissing))
+            {
+                configAnswer = dataAnswer;
+                return (default, isAnswerMissing, false);
+            }
+            if (dataAnswer.Answers.Count > dataQuestion?.Answers.Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value))
             {
                 configAnswer = dataAnswer;
                 return (default, isAnswerMissing, false);
