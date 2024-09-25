@@ -113,7 +113,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 user.EmailConfirmed = false;
                 var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
-
                 var param = new SendOtpTemplateModel
                 {
                     OtpCode = userOtpCode.Result,
