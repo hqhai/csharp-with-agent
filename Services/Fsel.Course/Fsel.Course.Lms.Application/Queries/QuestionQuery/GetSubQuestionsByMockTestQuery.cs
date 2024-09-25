@@ -63,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             var questions = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
             foreach (var item in questions)
             {
-                var subQuestions = GetConfigQuestion(item.Config, item.QuestionType);
+                var subQuestions = GetConfigQuestion(item.Config, item.QuestionType); // List SubQuestion với IsExact = true // 3
                 if (item.QuestionType == EnumQuestionType.CheckListV1)
                 {
                     var answerConfigIds = item.Config.Deserialize<CheckListQuestionV1>()?.Answers.Select(x => x.Id).ToList();
@@ -91,7 +91,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                     {
                         continue;
                     }
-                    else
+                    else if (item.QuestionType != EnumQuestionType.CheckListV1)
                     {
                         subQuestion.Status = !(string.IsNullOrEmpty(configAnswer?.Content) && string.IsNullOrEmpty(configAnswer?.Key)) || isExact.HasValue ? EnumCorrectStatus.Process : EnumCorrectStatus.New;
                     }

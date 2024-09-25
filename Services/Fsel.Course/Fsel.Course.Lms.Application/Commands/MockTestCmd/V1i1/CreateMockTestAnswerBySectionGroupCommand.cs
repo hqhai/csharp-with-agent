@@ -18,7 +18,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
     using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
@@ -157,7 +156,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             {
                 if (request.Answers != null && request.Answers.Any())
                 {
-                    var answerResult = await SaveAnswerAsync(request, sectionGroup, sectionGroupResult);
+                    var answerResult = await SaveAnswerAsync(request, sectionGroup, sectionGroupResult, mockTestResult);
                     if (!answerResult.IsOK)
                     {
                         methodResult.AddErrorBadRequest(answerResult.ErrorMessages);
@@ -168,6 +167,12 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit, mockTestResult.MockTest?.Version ?? (int)EnumVersion.V1);
                 return methodResult;
             });
+
+            if (!methodResult.IsOK)
+            {
+                return methodResult;
+            }
+
             if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && sectionGroup.Sections.Any() && request.IsSubmit)
             {
                 // await _speakingAIService.EvaluationSpeakingAI(request.MockTestResultId, request.SectionGroupId, cancellationToken);
@@ -263,7 +268,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return mockTestResult;
         }
 
-        private async Task<MethodResult<SectionGroupResult>> SaveAnswerAsync(CreateMockTestAnswerBySectionGroupCommand request, SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
+        private async Task<MethodResult<SectionGroupResult>> SaveAnswerAsync(CreateMockTestAnswerBySectionGroupCommand request, SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, MockTestResult mockTestResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             var methodResult = new MethodResult<SectionGroupResult>();
@@ -277,7 +282,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                     return methodResult;
                 }
-                anserResult = await SaveAnswer(request, questions, sectionGroupResult);
+                anserResult = await SaveAnswer(request, questions, sectionGroupResult, mockTestResult);
             }
             else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing)
             {
@@ -321,7 +326,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return methodResult;
         }
 
-        private async Task<MethodResult<(IList<MockTestAnswer>, IList<MockTestAnswer>)>> SaveAnswer(CreateMockTestAnswerBySectionGroupCommand request, IList<Question>? questions, SectionGroupResult sectionGroupResult)
+        private async Task<MethodResult<(IList<MockTestAnswer>, IList<MockTestAnswer>)>> SaveAnswer(CreateMockTestAnswerBySectionGroupCommand request, IList<Question>? questions, SectionGroupResult sectionGroupResult, MockTestResult mockTestResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             ArgumentNullException.ThrowIfNull(questions);
@@ -334,7 +339,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 foreach (var item in request.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
-                    var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit);
+                    var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit, null, false, mockTestResult.MockTest?.Version == (int)EnumVersion.V2);
                     if (!questionResult.IsOK)
                     {
                         methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
