@@ -41,25 +41,16 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             {
                 (Two_Days_Left, EnumNotificationContent.NoticeExpireAfterTwoDay),
                 (One_Week_Left, EnumNotificationContent.SubcriptionNotice),
-                (Two_Weeks_Left, EnumNotificationContent.NoticeExpireAfterTwoWeek)
-            };
-
-            // Tạo danh sách các tác vụ cho thông báo sau khi hết hạn
-            var expiredNotifications = new List<(int days, EnumNotificationContent content)>
-            {
-                (One_Day_Left, EnumNotificationContent.UpgradeOrder)
+                (Two_Weeks_Left, EnumNotificationContent.NoticeExpireAfterTwoWeek),
+                (-One_Day_Left, EnumNotificationContent.UpgradeOrder)
             };
 
             // Khởi tạo và chạy tất cả các tác vụ đồng thời
             var dueTasks = dueNotifications.Select(n =>
                 NoticeStudentsPaymentDue(n.days, n.content, cancellationToken)).ToList();
 
-            var expiredTasks = expiredNotifications.Select(n =>
-                NoticeStudentsPaymentAfterExpired(n.days, n.content, cancellationToken)).ToList();
-
             // Chờ tất cả các tác vụ hoàn thành
             await Task.WhenAll(dueTasks).ConfigureAwait(false);
-            await Task.WhenAll(expiredTasks).ConfigureAwait(false);
 
             // Tạo kết quả và trả về
             return new MethodResult<bool> { StatusCode = StatusCodes.Status200OK };
@@ -69,41 +60,35 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         {
             DateTime now = DateTime.Now;
             int currentHour = now.Hour;
-            DateTime targetDate = now.AddDays(-dayAbsent).Date;
-            DateTime dateCondition = now.AddDays(-dayAbsent + 1).Date;
+            DateTime targetDate = now.AddDays(dayAbsent).Date;
 
             var studentsAbsentIds = await _studentRepository.Queryable
-                .GroupBy(x => x.CreatedUserId)
-                .Where(g => g.All(x => x.ExpiredDate.HasValue && x.ExpiredDate.Value < dateCondition && x.CreatedUserId != Guid.Empty)
-                                    && g.Any(x => x.ExpiredDate.HasValue
+                .Where(x => x.ExpiredDate.HasValue
                                     && x.ExpiredDate.Value.Hour == currentHour
-                                    && x.ExpiredDate.Value.Date == targetDate))
-                .Select(g => g.Key)
+                                    && x.ExpiredDate.Value.Date == targetDate && x.Human != null)
+                .Select(g => (g != null && g.Human != null && g.Human.UserId != null) ? (Guid)g.Human.UserId : Guid.Empty)
                 .ToListAsync(cancellationToken);
 
             await SendNotificationMessage(studentsAbsentIds, content, cancellationToken);
 
         }
 
-        private async Task NoticeStudentsPaymentAfterExpired(int dayExpired, EnumNotificationContent content, CancellationToken cancellationToken)
-        {
-            DateTime now = DateTime.Now;
-            int currentHour = now.Hour;
-            DateTime targetDate = now.AddDays(dayExpired).Date;
-            DateTime dateCondition = now.AddDays(dayExpired - 1).Date;
+        //private async Task NoticeStudentsPaymentAfterExpired(int dayExpired, EnumNotificationContent content, CancellationToken cancellationToken)
+        //{
+        //    DateTime now = DateTime.Now;
+        //    int currentHour = now.Hour;
+        //    DateTime targetDate = now.AddDays(-dayExpired).Date;
 
-            var studentsAbsentIds = await _studentRepository.Queryable
-                .GroupBy(x => x.CreatedUserId)
-                .Where(g => g.All(x => x.ExpiredDate.HasValue && x.ExpiredDate.Value > dateCondition && x.CreatedUserId != Guid.Empty)
-                                    && g.Any(x => x.ExpiredDate.HasValue
-                                    && x.ExpiredDate.Value.Hour == currentHour
-                                    && x.ExpiredDate.Value.Date == targetDate))
-                .Select(g => g.Key)
-                .ToListAsync(cancellationToken);
+        //    var studentsAbsentIds = await _studentRepository.Queryable
+        //        .Where(x => x.ExpiredDate.HasValue && x.CreatedUserId != Guid.Empty
+        //                            && x.ExpiredDate.Value.Hour == currentHour
+        //                            && x.ExpiredDate.Value.Date == targetDate)
+        //        .Select(g => g.Human)
+        //        .ToListAsync(cancellationToken);
 
-            await SendNotificationMessage(studentsAbsentIds, content, cancellationToken);
+        //    await SendNotificationMessage(studentsAbsentIds, content, cancellationToken);
 
-        }
+        //}
 
         private async Task SendNotificationMessage(List<Guid>? userIds, EnumNotificationContent content, CancellationToken cancellationToken)
         {
