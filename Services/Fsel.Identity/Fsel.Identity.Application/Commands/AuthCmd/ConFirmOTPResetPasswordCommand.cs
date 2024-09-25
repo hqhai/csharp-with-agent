@@ -59,13 +59,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddError(method.ErrorMessages);
                 return methodResult;
             }
-            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == method.Result.UserId, cancellationToken);
+            var user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == method.Result.UserId, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
-            if (!user.EmailConfirmed)
+            if (!user.EmailConfirmed && user.Human == null)
             {
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 await _userManager.ConfirmEmailAsync(user, token);
