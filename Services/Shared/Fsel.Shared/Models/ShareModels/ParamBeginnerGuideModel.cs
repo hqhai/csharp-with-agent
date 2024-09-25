@@ -4,6 +4,7 @@ namespace Fsel.Shared.Models.ShareModels
 {
     public class ParamBeginnerGuideModel
     {
+        public Guid StudentId { get; set; }
         public bool IsDoneOnePT { get; set; }
         public bool IsDonePT { get; set; }
         public bool IsDoneVideo { get; set; }

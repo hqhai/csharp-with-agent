@@ -29,12 +29,12 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Get Param BegginnerGuide
         /// </summary>
-        [HttpGet("param-begginner-guide/{studentId}")]
-        [ProducesResponseType(typeof(MethodResult<ParamBeginnerGuideModel>), (int)HttpStatusCode.OK)]
+        [HttpGet("param-begginner-guide")]
+        [ProducesResponseType(typeof(MethodResult<IList<ParamBeginnerGuideModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetParamBegginnerGuide([FromRoute] Guid studentId)
+        public async Task<IActionResult> GetParamBegginnerGuide([FromQuery] string studentIds)
         {
-            MethodResult<ParamBeginnerGuideModel> queryResult = await _mediator.Send(new GetParamBeginnerGuideQuery { StudentId = studentId }).ConfigureAwait(false);
+            MethodResult<IList<ParamBeginnerGuideModel>> queryResult = await _mediator.Send(new GetParamBeginnerGuideQuery { StudentIds = studentIds }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

@@ -71,7 +71,7 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
         [Post("/v1.1/admin/course")]
         Task<IApiResponse<MethodResult<IList<CourseModel>>>> Get([FromBody] IList<Guid> courseIds);
 
-        [Get("/v1.1/admin/other/param-begginner-guide/{studentId}")]
-        Task<IApiResponse<MethodResult<ParamBeginnerGuideModel>>> GetParamBegginnerGuide([FromRoute] Guid studentId);
+        [Get("/v1.1/admin/other/param-begginner-guide")]
+        Task<IApiResponse<MethodResult<IList<ParamBeginnerGuideModel>>>> GetParamBegginnerGuide([FromQuery] string? studentIds);
     }
 }

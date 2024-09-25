@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Common.ActionResults;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Entities.BeginnerGuideConfigs;
     using Fsel.Identity.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -32,37 +33,58 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             var listStudent = new List<Student>();
 
             var students = await _studentRepository.Queryable.ToListAsync(cancellationToken);
+            var paramBeginnerGuidesResult = await _lmsCourseService.GetParamBegginnerGuide(string.Join(",", students.Select(x => x.Id)));
+            if (!paramBeginnerGuidesResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(paramBeginnerGuidesResult.Error);
+                return methodResult;
+            }
+
+            var paramBeginnerGuides = paramBeginnerGuidesResult.Content?.Result;
             foreach (var student in students)
             {
-                var paramBeginnerGuideResult = await _lmsCourseService.GetParamBegginnerGuide(student.Id);
-                if (!paramBeginnerGuideResult.IsSuccessStatusCode)
-                {
-                    listStudent.Add(student);
-                    continue;
-                }
-                var paramBeginnerGuide = paramBeginnerGuideResult.Content?.Result;
+                var paramBeginnerGuide = paramBeginnerGuides?.Where(x => x.StudentId == student.Id).FirstOrDefault();
                 if (paramBeginnerGuide == null)
                 {
-                    listStudent.Add(student);
                     continue;
                 }
+                var other = student.BeginnerGuide?.Other;
 
                 if (paramBeginnerGuide.IsDoneOnePT)
                 {
+                    other = GetBeginnerGuideOther(EnumCheckPoint.DoneOnePlacementTest, other);
                 }
                 if (paramBeginnerGuide.IsDonePT)
                 {
+                    other = GetBeginnerGuideOther(EnumCheckPoint.LevelSelection, other);
                 }
                 if (paramBeginnerGuide.IsDoneVideo)
                 {
+                    other = GetBeginnerGuideOther(EnumCheckPoint.DoneVideo, other);
                 }
                 if (paramBeginnerGuide.IsDoneClassForum)
                 {
+                    other = GetBeginnerGuideOther(EnumCheckPoint.DoneClassForum, other);
                 }
                 if (paramBeginnerGuide.IsDoneHomeWork)
                 {
+                    other = GetBeginnerGuideOther(EnumCheckPoint.DoneHomeWork, other);
+                }
+                if (student.BeginnerGuide != null)
+                {
+                    student.BeginnerGuide.Other = other;
+                }
+                else
+                {
+                    student.BeginnerGuide = new StudentBeginnerGuide
+                    {
+                        Other = other
+                    };
                 }
             }
+            _studentRepository.UpdateList(students);
+            await _studentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
@@ -77,44 +99,53 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             DoneHomeWork
         }
 
-        private Dictionary<EnumCheckPoint, string> datas = new Dictionary<EnumCheckPoint, string>
+        private string? GetBeginnerGuideOther(EnumCheckPoint checkPoint, string? other)
         {
-            { EnumCheckPoint.DoneOnePlacementTest, "placement-test-module"},
-            { EnumCheckPoint.DoneOnePlacementTest, "placement-test-module_2"},
-            { EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-0"},
-            { EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-1"},
-            { EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-2"},
-            { EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-3"},
-            { EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-4"},
-            { EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-5"},
-            { EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-6"},
-            { EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-7"},
-            { EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-8"},
-            { EnumCheckPoint.DoneOnePlacementTest, "placement-test-module-submit"},
-            { EnumCheckPoint.LevelSelection, "placement-test-select-level"},
-            { EnumCheckPoint.LevelSelection, "placement-test-select-level-two"},
-            { EnumCheckPoint.DoneVideo, "techie_welcome_planet"},
-            { EnumCheckPoint.DoneVideo, "i18n_techie_lesson_overview_two"},
-            { EnumCheckPoint.DoneVideo, "i18n_techie_lesson_content_step1"},
-            { EnumCheckPoint.DoneVideo, "techie_lesson_content_step2"},
-            { EnumCheckPoint.DoneVideo, "techie_lesson_content_step3"},
-            { EnumCheckPoint.DoneVideo, "techie_lesson_content_video"},
-            { EnumCheckPoint.DoneVideo, "techie_lesson_content_video_step2"},
-            { EnumCheckPoint.DoneVideo, "techie_lesson_content_video3"},
-            { EnumCheckPoint.DoneVideo, "techie_video_exercises_step1"},
-            { EnumCheckPoint.DoneVideo, "techie_video_exercises_step2"},
-            { EnumCheckPoint.DoneVideo, "techie_video_exercises_step5"},
-            { EnumCheckPoint.DoneVideo, "i18n_techie_video_exercises_step6"},
-            { EnumCheckPoint.DoneVideo, "techie_video_exercises_done_step2"},
-            { EnumCheckPoint.DoneVideo, "techie_video_exercises_step4"},
-            { EnumCheckPoint.DoneVideo, "i18n_techie_lesson_ClassForumLock_step1"},
-            { EnumCheckPoint.DoneClassForum, "i18n_techie_lesson_page_classForum_step2"},
-            { EnumCheckPoint.DoneClassForum, "techie_class_forum_welcome"},
-            { EnumCheckPoint.DoneClassForum, "i18n_beginnerGuide_classForum_step2"},
-            { EnumCheckPoint.DoneClassForum, "i18n_beginnerGuide_classForum_step3"},
-            { EnumCheckPoint.DoneClassForum, "i18n_beginnerGuide_classForum_step4"},
-            { EnumCheckPoint.DoneHomeWork, "i18n_beginnerGuide_classForum_step5"},
-            { EnumCheckPoint.DoneHomeWork, "i18n_beginnerGuide_homeWork_step1"}
+            var data = datas.Where(x => x.Key == checkPoint).Select(x => x.Value).ToList();
+            var dataOthers = other?.Split(",").ToList();
+            var others = data.Where(x => dataOthers == null || !dataOthers.Any(y => y == x)).ToList();
+            other = string.Concat(other, ",", string.Join(",", others));
+            return other;
+        }
+
+        private IList<KeyValuePair<EnumCheckPoint, string>> datas = new List<KeyValuePair<EnumCheckPoint, string>>
+        {
+             new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "placement-test-module"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "placement-test-module_2"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-0"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-1"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-2"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-3"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-4"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-5"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-6"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-7"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "placement-test-exercise-8"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "placement-test-module-submit"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.LevelSelection, "placement-test-select-level"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.LevelSelection, "placement-test-select-level-two"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "techie_welcome_planet"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "i18n_techie_lesson_overview_two"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "i18n_techie_lesson_content_step1"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "techie_lesson_content_step2"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "techie_lesson_content_step3"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "techie_lesson_content_video"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "techie_lesson_content_video_step2"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "techie_lesson_content_video3"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "techie_video_exercises_step1"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "techie_video_exercises_step2"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "techie_video_exercises_step5"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "i18n_techie_video_exercises_step6"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "techie_video_exercises_done_step2"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "techie_video_exercises_step4"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "i18n_techie_lesson_ClassForumLock_step1"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "i18n_techie_lesson_page_classForum_step2"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "techie_class_forum_welcome"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "i18n_beginnerGuide_classForum_step2"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "i18n_beginnerGuide_classForum_step3"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "i18n_beginnerGuide_classForum_step4"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneHomeWork, "i18n_beginnerGuide_classForum_step5"),
+              new KeyValuePair<EnumCheckPoint, string>(EnumCheckPoint.DoneHomeWork, "i18n_beginnerGuide_homeWork_step1")
         };
     }
 }
