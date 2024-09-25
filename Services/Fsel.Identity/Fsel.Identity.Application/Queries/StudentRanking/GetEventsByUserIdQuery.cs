@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
     using System.Collections.Generic;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -46,7 +47,6 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 .ToListAsync(cancellationToken);
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
-
             var competitionEvents = studentRankingEvents.Where(x => x.CompetitionEvents != null && x.CompetitionEvents.EventContent != null && ((!x.CompetitionEvents.EventContent.StartDate.HasValue && !x.CompetitionEvents.EventContent.EndDate.HasValue) || (x.CompetitionEvents.EventContent.StartDate.HasValue && x.CompetitionEvents.EventContent.EndDate.HasValue && x.CompetitionEvents.EventContent.StartDate.Value.Date <= currentDate.Date && x.CompetitionEvents.EventContent.EndDate.Value.Date >= currentDate.Date)))
                 .Select(x => x.CompetitionEvents);
 
