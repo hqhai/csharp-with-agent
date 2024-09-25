@@ -7,6 +7,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Entities.BeginnerGuideConfigs;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -72,13 +73,20 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 }
                 if (student.BeginnerGuide != null)
                 {
-                    student.BeginnerGuide.Other = other;
+                    student.BeginnerGuide = new StudentBeginnerGuide
+                    {
+                        Other = other,
+                        BeginnerGuides = student.BeginnerGuide.BeginnerGuides?.ToList(),
+                        QuestionTypes = student.BeginnerGuide.QuestionTypes?.ToList()
+                    };
                 }
                 else
                 {
                     student.BeginnerGuide = new StudentBeginnerGuide
                     {
-                        Other = other
+                        Other = other,
+                        BeginnerGuides = new List<EnumBeginnerGuide>(),
+                        QuestionTypes = new List<EnumQuestionType>()
                     };
                 }
             }

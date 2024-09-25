@@ -13,7 +13,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Fsel.Identity.Application.Queries.StudentQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -21,7 +20,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/student")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class StudentController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -138,6 +136,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> GetByUserId([FromRoute] Guid id)
         {
             MethodResult<StudentModel> commandResult = await _mediator.Send(new GetStudentByUserIdQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Student by UserId
+        /// </summary>
+        [HttpPut("tool-update-begginner-guide")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ToolUpdateBeginnerGuide()
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new ToolUpdateBeginnerGuideStudentCommand()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
