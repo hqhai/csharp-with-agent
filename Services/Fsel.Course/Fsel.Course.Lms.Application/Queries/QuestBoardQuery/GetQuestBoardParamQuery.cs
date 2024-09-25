@@ -33,6 +33,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IClassForumRepository _classForumRepository;
         private readonly IVideoResultRepository _videoResultRepository;
+        private readonly IClassForumResultRepository _classForumResultRepository;
 
         public GetQuestBoardParamQueryHandler(ICourseResultRepository courseResultRepository,
                                               AuthContext authContext,
@@ -43,7 +44,8 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                                               IFinalTestResultRepository finalTestResultRepository,
                                               IMockTestResultRepository mockTestResultRepository,
                                               IClassForumRepository classForumRepository,
-                                              IVideoResultRepository videoResultRepository)
+                                              IVideoResultRepository videoResultRepository,
+                                              IClassForumResultRepository classForumResultRepository)
         {
             _courseResultRepository = courseResultRepository;
             _authContext = authContext;
@@ -55,6 +57,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             _mockTestResultRepository = mockTestResultRepository;
             _classForumRepository = classForumRepository;
             _videoResultRepository = videoResultRepository;
+            _classForumResultRepository = classForumResultRepository;
         }
 
         public async Task<MethodResult<QuestBoardParamModel>> Handle(GetQuestBoardParamQuery request, CancellationToken cancellationToken)
@@ -166,7 +169,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
 
                 case EnumQuestBoardCategory.MessagesFromAI:
 
-                    var messagesFromAI = await CompleteTheFirstClassForumHandler(student.Content.Result.Id);
+                    var messagesFromAI = await MessagesFromAIHandler(student.Content.Result.Id);
                     if (!messagesFromAI.IsOK)
                     {
                         methodResult.AddErrorBadRequest(messagesFromAI.ErrorMessages.ToList());
@@ -228,7 +231,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Video;
             }
 
-            else if (learn.UnitResult != null && learn.UnitResult.Status == EnumResultStatus.Process)
+            else if (learn.CourseResult != null && learn.LessonResult != null && learn.CourseResult.Status == EnumResultStatus.Process)
             {
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Lesson;
             }
@@ -269,7 +272,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Video;
             }
 
-            else if (learn.UnitResult != null && learn.UnitResult.Status == EnumResultStatus.Process)
+            else if (learn.CourseResult != null && learn.LessonResult != null && learn.CourseResult.Status == EnumResultStatus.Process)
             {
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Lesson;
             }
@@ -311,7 +314,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Video;
             }
 
-            else if (learn.UnitResult != null && learn.UnitResult.Status == EnumResultStatus.Process)
+            else if (learn.CourseResult != null && learn.LessonResult != null && learn.CourseResult.Status == EnumResultStatus.Process)
             {
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Lesson;
             }
@@ -384,7 +387,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.ClassForum;
             }
 
-            else if ((learn.LessonResult != null && learn.LessonResult.Status == EnumResultStatus.Process) || (learn.SkillMockTestResult != null))
+            else if ((learn.LessonResult != null && learn.LessonResult.Status == EnumResultStatus.Process) || (learn.SkillMockTestResult != null && learn.CourseResult != null && learn.CourseResult.Status == EnumResultStatus.Process))
             {
                 newQuestBoardParamModel.FeatureModule = type == EnumCourseType.Academic ? EnumFeatureModule.Video : EnumFeatureModule.Lesson;
             }
@@ -428,6 +431,46 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             return methodResult;
         }
 
+        private async Task<MethodResult<QuestBoardParamModel>> MessagesFromAIHandler(Guid studentId)
+        {
+            MethodResult<QuestBoardParamModel> methodResult = new MethodResult<QuestBoardParamModel>();
+
+            var classForumResult = await _classForumResultRepository.Queryable
+                                                                    .Include(x => x.ClassForumDetailResults)
+                                                                    .Include(x => x.LessonResult)
+                                                                    .Where(x => x.StudentId == studentId && x.ClassForumDetailResults.Any(c => !string.IsNullOrEmpty(x.GradingAlFeedback)))
+                                                                    .OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
+                                                                    .FirstOrDefaultAsync();
+
+            if (classForumResult != null)
+            {
+                var newQuestBoardParamModel = new QuestBoardParamModel
+                {
+                    CourseId = classForumResult.LessonResult?.CourseId,
+                    UnitId = classForumResult.LessonResult?.UnitId,
+                    LessonId = classForumResult.LessonResult?.LessonId,
+                    LessonResultId = classForumResult.LessonResult?.Id,
+                    ClassForumId = classForumResult.ClassForumId,
+                    FeatureModule = EnumFeatureModule.ClassForum
+                };
+
+                methodResult.Result = newQuestBoardParamModel;
+            }
+            else
+            {
+                var messagesFromAI = await ExploreTheLearningGalaxyHandler(studentId);
+                if (!messagesFromAI.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(messagesFromAI.ErrorMessages.ToList());
+                    return methodResult;
+                }
+
+                methodResult.Result = messagesFromAI.Result;
+            }
+
+            return methodResult;
+        }
+
         private async Task<(CourseResult? CourseResult, UnitResult? UnitResult, LessonResult? LessonResult, MockTestResult? SkillMockTestResult, ClassForum? ClassForum, HomeWorkResult? HomeWorkResult, FinalTestResult? FinalTestResult, MockTestResult? FullMockTestResult)> CurrenLearn(Guid studentId)
         {
             CourseResult? courseResult = null;
@@ -442,8 +485,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             var currentCourse = await _courseResultRepository.Queryable
                                                              .Include(x => x.Course)
                                                              .Where(x => x.StudentId == studentId && (x.Status == EnumResultStatus.Process || x.Status == EnumResultStatus.New))
-                                                             .OrderByDescending(x => x.CreatedDate)
-                                                             .ThenByDescending(x => x.UpdatedDate)
+                                                             .OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
                                                              .FirstOrDefaultAsync();
             if (currentCourse == null)
             {
@@ -454,16 +496,14 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                                                          .Include(x => x.Unit)
                                                          .ThenInclude(x => x.CourseUnitMockTests)
                                                          .Where(x => x.StudentId == studentId && x.CourseId == currentCourse.CourseId && (x.Status == EnumResultStatus.Process || x.Status == EnumResultStatus.New))
-                                                         .OrderByDescending(x => x.CreatedDate)
-                                                         .ThenByDescending(x => x.UpdatedDate)
+                                                         .OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
                                                          .FirstOrDefaultAsync();
 
             if (currentUnit != null)
             {
                 var currentLesson = await _lessonResultRepository.Queryable
                                                                  .Where(x => x.StudentId == studentId && x.CourseId == currentCourse.CourseId && x.UnitId == currentUnit.UnitId && (x.Status == EnumResultStatus.Process || x.Status == EnumResultStatus.New))
-                                                                 .OrderByDescending(x => x.CreatedDate)
-                                                                 .ThenByDescending(x => x.UpdatedDate)
+                                                                 .OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
                                                                  .FirstOrDefaultAsync();
 
                 if (currentLesson != null)
@@ -478,8 +518,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
 
                     var currentHomeWork = await _homeWorkResultRepository.Queryable
                                                                          .Where(x => x.StudentId == studentId && x.LessonResultId == currentLesson.Id && (x.Status == EnumResultStatus.Process || x.Status == EnumResultStatus.New))
-                                                                         .OrderByDescending(x => x.CreatedDate)
-                                                                         .ThenByDescending(x => x.UpdatedDate)
+                                                                         .OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
                                                                          .FirstOrDefaultAsync();
 
                     homeWorkResult = currentHomeWork;
@@ -487,8 +526,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
 
                 var currentSkillMockTest = await _mockTestResultRepository.Queryable
                                                                           .Where(x => x.StudentId == studentId && x.CourseId == currentCourse.CourseId && x.UnitId.HasValue && x.UnitId == currentUnit.UnitId && (x.Status == EnumResultStatus.Process || x.Status == EnumResultStatus.New))
-                                                                          .OrderByDescending(x => x.CreatedDate)
-                                                                          .ThenByDescending(x => x.UpdatedDate)
+                                                                          .OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
                                                                           .FirstOrDefaultAsync();
 
                 lessonResult = currentLesson;
@@ -497,14 +535,12 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
 
             var currentFinalTest = await _finalTestResultRepository.Queryable
                                                                    .Where(x => x.StudentId == studentId && x.CourseId == currentCourse.CourseId && (x.Status == EnumResultStatus.Process || x.Status == EnumResultStatus.New))
-                                                                   .OrderByDescending(x => x.CreatedDate)
-                                                                   .ThenByDescending(x => x.UpdatedDate)
+                                                                   .OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
                                                                    .FirstOrDefaultAsync();
 
             var currentFullMockTest = await _mockTestResultRepository.Queryable
                                                                      .Where(x => x.StudentId == studentId && x.CourseId == currentCourse.CourseId && !x.UnitId.HasValue && (x.Status == EnumResultStatus.Process || x.Status == EnumResultStatus.New))
-                                                                     .OrderByDescending(x => x.CreatedDate)
-                                                                     .ThenByDescending(x => x.UpdatedDate)
+                                                                     .OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
                                                                      .FirstOrDefaultAsync();
 
             courseResult = currentCourse;
