@@ -5,7 +5,6 @@ namespace Fsel.Shared.Models.ShareModels
     public class SchoolEventRule
     {
         public bool LuckySpin { get; set; }
-        public bool IsDisableLeaderBoard { get; set; }
         public int? PaymentMonth { get; set; }
         public DateTime? PaymentDate { get; set; }
         public IList<EnumSchoolEventRuleAction>? Actions { get; set; }
@@ -27,7 +26,8 @@ namespace Fsel.Shared.Models.ShareModels
 
     public enum EnumSchoolEventRuleAction
     {
-        StopAtLevelSelection
+        StopAtLevelSelection,
+        DisableLeaderBoard
     }
 
     public enum EnumByPassPaymentType
