@@ -111,7 +111,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 return methodResult;
             }
             var course = courseResult.Result;
-            if (course == null || course.Status == EnumCourseStatus.New)
+            if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
