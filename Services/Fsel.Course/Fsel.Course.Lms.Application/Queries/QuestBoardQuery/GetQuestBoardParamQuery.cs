@@ -387,9 +387,14 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 newQuestBoardParamModel.FeatureModule = EnumFeatureModule.ClassForum;
             }
 
-            else if ((learn.LessonResult != null && learn.LessonResult.Status == EnumResultStatus.Process) || (learn.SkillMockTestResult != null && learn.CourseResult != null && learn.CourseResult.Status == EnumResultStatus.Process))
+            else if (learn.LessonResult != null && learn.LessonResult.Status == EnumResultStatus.Process)
             {
-                newQuestBoardParamModel.FeatureModule = type == EnumCourseType.Academic ? EnumFeatureModule.Video : EnumFeatureModule.Lesson;
+                newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Video;
+            }
+
+            else if ((learn.CourseResult != null && learn.CourseResult.Status == EnumResultStatus.Process) && (learn.LessonResult != null || learn.SkillMockTestResult != null))
+            {
+                newQuestBoardParamModel.FeatureModule = EnumFeatureModule.Lesson;
             }
 
             else
