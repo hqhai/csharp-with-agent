@@ -116,6 +116,11 @@ namespace Fsel.Course.Infrastructure.Common
             return (configAnswer, totalCorrect, isAnswerMissing, isAnswered);
         }
 
+        public (object?, int, bool, bool) GetTotalCorrectByAnswerType(object? configAnswer, Question question, bool isMandatoryAnswer = false)
+        {
+            return GetTotalCorrectByAnswerType(configAnswer, null, question, false, false, isMandatoryAnswer);
+        }
+
         public int GetTotalCorrectByAnswerType(Question? question, object? configAnswer)
         {
             switch (question?.QuestionType)
