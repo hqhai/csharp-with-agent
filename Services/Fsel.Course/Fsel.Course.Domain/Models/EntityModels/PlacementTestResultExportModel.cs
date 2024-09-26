@@ -22,7 +22,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         [EpplusTableColumn(Header = "Course")]
         public string? CourseName { get; set; }
 
-        [EpplusTableColumn(Header = "The student's student level achieved")]
+        [EpplusTableColumn(Header = "Suggested PT starting level")]
         public EnumCourseLevel? LevelCompleted { get; set; }
 
         [EpplusTableColumn(Header = "LastModulePT")]
