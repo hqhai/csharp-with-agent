@@ -217,7 +217,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     {
                         ModelState.AddModelError(string.Empty, _localizer["i18n_Data_does_not_exist"]);
                     }
-                    else if (user == null || !user.EmailConfirmed)
+                    else if (user == null || (!user.EmailConfirmed && (user.Student == null || user.Teacher == null || user.CSO == null || user.Parent == null)))
                     {
                         ModelState.AddModelError(string.Empty, _localizer["i18n_User_does_not_exist"]);
                     }
@@ -372,7 +372,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
-                if (user == null || !user.EmailConfirmed)
+                if (user == null || (!user.EmailConfirmed && (user.Student == null || user.Teacher == null || user.CSO == null || user.Parent == null)))
                 {
                     ModelState.AddModelError(nameof(request.Email), _localizer["i18n_Email_does_not_exist_in_the_system"]);
                     return View(request);
@@ -714,7 +714,9 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
                 if (context != null && context.IsNativeClient())
                 {
-                    return this.LoadingPage("Redirect", returnUrl ?? string.Empty);
+                    Thread.Sleep(1000);
+
+                    //return this.LoadingPage("Redirect", returnUrl ?? string.Empty);
                 }
 
                 // request for a local page

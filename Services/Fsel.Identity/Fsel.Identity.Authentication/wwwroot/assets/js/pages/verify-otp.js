@@ -85,20 +85,29 @@
   }
 
   let remainSeconds = parseInt($("#RemainSecond").attr("data-value"));
-  function startCountdown() {
-    if (remainSeconds > 0) {
-      remainSeconds--;
+  let startTime = Date.now();
+
+  function updateCountdown() {
+    let elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+    let currentSeconds = remainSeconds - elapsedTime;
+    if (currentSeconds > 0) {
       var text = $(".resend-otp-1").attr("data-value");
-      text = text.replace("{{timeResetOtp}}", "<a>" + remainSeconds) + "</a>";
+      text = text.replace("{{timeResetOtp}}", "<a>" + currentSeconds) + "</a>";
       $(".resend-otp-1").html(text);
       $(".resend-otp-1").removeClass("hidden");
       $(".resend-otp-2").addClass("hidden");
     } else {
       $(".resend-otp-2").removeClass("hidden");
       $(".resend-otp-1").addClass("hidden");
-      clearInterval(countdownInterval); // Dừng countdown
+      clearTimeout(timeoutId); // Dừng đếm ngược
     }
   }
-  let countdownInterval = setInterval(startCountdown, 1000);
+
+  function countdownStep() {
+    updateCountdown(); // Cập nhật thời gian mỗi giây
+    timeoutId = setTimeout(countdownStep, 1000); // Lặp lại sau mỗi 1 giây
+  }
+
+  let timeoutId = setTimeout(countdownStep, 1000);
 
 }(jQuery));	

@@ -3,7 +3,6 @@
 namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
 {
     using System.ComponentModel.DataAnnotations;
-    using Fsel.Common.Attributes;
     using Fsel.Identity.Domain.Constants;
     using Fsel.Shared.Enums;
 
@@ -14,6 +13,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
         public string? Email { get; set; }
 
         [RegularExpression(Common.Helpers.RegexHelper.PhoneNumberValid, ErrorMessage = "i18n_number_phone_invalid")]
+        [Required(ErrorMessage = "i18n_Phone_number_cannot_empty")]
         public string? PhoneNumber { get; set; }
 
         [Required(ErrorMessage = "i18n_First_name_cannot_be_empty")]

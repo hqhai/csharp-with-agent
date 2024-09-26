@@ -52,7 +52,7 @@
   function validatePhoneNumber() {
     const phone = $phoneNumberInput.val().trim();
     const phonePattern = /^\+?\d{7,15}$/;
-    if (phone === "" || phonePattern.test(phone)) {
+    if (phone !== "" && phonePattern.test(phone)) {
       $phoneNumberInput.removeClass("content-border-danger");
       return true;
     } else {

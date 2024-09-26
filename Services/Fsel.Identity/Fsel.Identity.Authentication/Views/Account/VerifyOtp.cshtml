@@ -151,7 +151,7 @@
                 </div>
                 <div class="resend-otp-2 @(Model.RemainSecond.HasValue ? "hidden" : "")">
                     @Localizer["i18n_did_not_a_code"]
-                    <button type="submit" class="" name="button" value="resend">@Localizer["i18n_resend_otp"]</button>
+                    <button type="submit" name="button" value="resend">@Localizer["i18n_resend_otp"]</button>
                 </div>
 
                 @* <a href="@Url.Action("ResendOtp", "Account", new { Model.ReturnUrl, type = Model.Type })">@Localizer["i18n_resend_otp"]</a> *@
