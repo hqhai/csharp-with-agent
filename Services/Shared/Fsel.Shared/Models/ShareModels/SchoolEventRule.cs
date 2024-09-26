@@ -8,6 +8,7 @@ namespace Fsel.Shared.Models.ShareModels
         public bool IsDisableLeaderBoard { get; set; }
         public int? PaymentMonth { get; set; }
         public DateTime? PaymentDate { get; set; }
+        public IList<EnumSchoolEventRuleAction>? Actions { get; set; }
         public EnumByPassPaymentType ByPassPaymentType { get; set; }
         public bool IsByPassPayment { get; set; }
         public DateTime? RegisterStartDate { get; set; }
@@ -22,6 +23,11 @@ namespace Fsel.Shared.Models.ShareModels
         public string? LuckySpinGiftImage { get; set; }
         public IList<WeekEvent>? WeekEvents { get; set; }
         public IList<WeekEvent>? LuckyStarRules { get; set; }
+    }
+
+    public enum EnumSchoolEventRuleAction
+    {
+        StopAtLevelSelection
     }
 
     public enum EnumByPassPaymentType

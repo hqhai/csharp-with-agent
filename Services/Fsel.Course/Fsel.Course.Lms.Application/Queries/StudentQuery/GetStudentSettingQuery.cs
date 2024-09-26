@@ -88,6 +88,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 settingStudentModel.IsLockPT = isLock;
                 settingStudentModel.StartPTLevel = placementTestResultInitial == null ? student.CourseLevel : placementTestResultInitial.Level.GetCourseLevelByPlacementTestLevel();
 
+                var @eventResults = await _userService.GetEventByUserId(_authContext.CurrentUserId);
+                if (@eventResults.IsSuccessStatusCode && @eventResults.Content?.Result != null)
+                {
+                    var @events = @eventResults.Content?.Result;
+                    var actions = @events?.Select(p => p.EventContent).Where(p => p.Actions != null && p.Actions.Count > 0).SelectMany(p => p.Actions!).ToList();
+                    settingStudentModel.Actions = actions;
+                }
+
                 var status = await _orderService.GetCurrentStatusAsync(_authContext.CurrentUserId);
                 if (!status.IsSuccessStatusCode)
                 {
