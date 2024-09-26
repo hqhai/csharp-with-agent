@@ -339,7 +339,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 foreach (var item in request.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
-                    var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit, null, false, mockTestResult.MockTest?.Version == (int)EnumVersion.V2);
+                    var questionResult = _questionConverter.HandleAnswerTest(question, item.Answer, request.IsSubmit, mockTestResult.MockTest?.Version == (int)EnumVersion.V2);
                     if (!questionResult.IsOK)
                     {
                         methodResult.AddErrorBadRequest(questionResult.ErrorMessages);

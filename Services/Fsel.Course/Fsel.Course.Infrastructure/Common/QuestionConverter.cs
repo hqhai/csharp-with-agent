@@ -43,6 +43,11 @@ namespace Fsel.Course.Infrastructure.Common
             return methodResult;
         }
 
+        public MethodResult<(Question, object?, int, bool)> HandleAnswerTest(Question? question, object? answer, bool isSubmit, bool isMandatoryAnswer = false)
+        {
+            return HandleQuestionAnswer(question, answer, isSubmit, default, false, isMandatoryAnswer);
+        }
+
         public MethodResult<Question> HandleQuestion(Question question, bool isUseTypeExercisePreparation = false, bool isCreated = true)
         {
             ArgumentNullException.ThrowIfNull(question);
