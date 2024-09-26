@@ -36,7 +36,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
             if (isMandatoryAnswer && isAnswerMissing)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotCompleted), nameof(question), new object[] { question.Id });
+                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotCompleted), nameof(question), new object[] { question.Id, answer ?? string.Empty });
                 return methodResult;
             }
             methodResult.Result = (question, answerConfig, correctCount, isAnswered);

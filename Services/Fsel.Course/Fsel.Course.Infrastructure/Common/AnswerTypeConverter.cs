@@ -106,9 +106,6 @@ namespace Fsel.Course.Infrastructure.Common
                     (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerMatchingTask(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<MatchingTaskQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
-                //(totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerFlowChartCompletion(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<FlowChartCompletionQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
-                //break;
-
                 case EnumQuestionType.TableCompletion:
                     (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerTableCompletion(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<TableCompletionQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
@@ -229,6 +226,8 @@ namespace Fsel.Course.Infrastructure.Common
             return result;
         }
 
+        #region GetData
+
         private static bool? IsDisableAnswers(EnumResultStatus status, bool isFirstSubmit, bool? isExact, bool isShowSubStatus, bool isDisableAnswer)
         {
             return isDisableAnswer && ((status == EnumResultStatus.Process && isFirstSubmit && isExact == true) || isShowSubStatus) ? isExact : default;
@@ -348,9 +347,11 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
+        #endregion GetData
+
         private bool IsAnswerMissing(object? dataAnswer, object? dataQuestion, EnumQuestionType type, bool isSubmit = false, bool isMandatoryAnswer = false)
         {
-            if (!isMandatoryAnswer || !isSubmit)
+            if (!isMandatoryAnswer)
             {
                 return false;
             }
@@ -794,11 +795,6 @@ namespace Fsel.Course.Infrastructure.Common
                 configAnswer = dataAnswer;
                 return (default, isAnswerMissing, false);
             }
-            if (dataAnswer.Answers.GroupBy(x => x.Id).Any(x => x.Count() > 1))
-            {
-                configAnswer = dataAnswer;
-                return (default, isAnswerMissing, false);
-            }
             foreach (var item in dataAnswer.Answers)
             {
                 var question = dataQuestion?.Answers.FirstOrDefault(x => x.Id == item.Id);
@@ -842,6 +838,11 @@ namespace Fsel.Course.Infrastructure.Common
                 configAnswer = dataAnswer;
                 return (default, isAnswerMissing, false);
             }
+            if (dataAnswer.Answers.Count > dataQuestion?.Answers.Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value))
+            {
+                configAnswer = dataAnswer;
+                return (default, true, false);
+            }
             foreach (var item in dataAnswer.Answers)
             {
                 var answerQuestion = dataQuestion?.Answers.FirstOrDefault(x => x.Id == item.Id);
@@ -884,48 +885,6 @@ namespace Fsel.Course.Infrastructure.Common
                 if (!string.IsNullOrEmpty(item.Content) && answerQuestion != null)
                 {
                     answerQuestion.Content ??= answerQuestion.Key;
-                    if (_linQAnswerHelper.CheckAnswer(answerQuestion.Content, item.Content))
-                    {
-                        number++;
-                        item.IsExact = true;
-                    }
-                    else
-                    {
-                        item.IsExact = false;
-                    }
-                }
-                else
-                {
-                    item.IsExact = default;
-                }
-                if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
-                {
-                    var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
-                    if (!(answer != null && answer.IsExact == true && answer.IsFirstSubmit))
-                    {
-                        item.IsFirstSubmit = false;
-                    }
-                }
-            }
-            configAnswer = dataAnswer;
-            return (number, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer.Answers, nameof(ConfigAnswerV1.Content)));
-        }
-
-        private (int, bool, bool) HandleAnswerFlowChartCompletion(ref object? configAnswer, MultipleChoiceAnswerV1? dataOldAnswer, FlowChartCompletionQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
-        {
-            var dataAnswer = configAnswer.Deserialize<MultipleChoiceAnswerV1>();
-            int number = 0;
-            bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.Answers, EnumQuestionType.FlowChartCompletion, isSubmit, isMandatoryAnswer);
-            if (((dataAnswer == null || dataAnswer.Answers == null) || !dataAnswer.Answers.Any()) || (isMandatoryAnswer && isAnswerMissing))
-            {
-                configAnswer = dataAnswer;
-                return (default, isAnswerMissing, false);
-            }
-            foreach (var item in dataAnswer.Answers)
-            {
-                var answerQuestion = dataQuestion?.Answers.FirstOrDefault(x => x.Id == item.Id);
-                if (answerQuestion != null)
-                {
                     if (_linQAnswerHelper.CheckAnswer(answerQuestion.Content, item.Content))
                     {
                         number++;
