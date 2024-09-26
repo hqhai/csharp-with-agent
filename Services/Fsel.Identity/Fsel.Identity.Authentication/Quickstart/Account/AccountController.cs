@@ -206,20 +206,18 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                                         }
                                     }
                                     #endregion
-
-                                    scope.Complete();
-                                    ViewBag.Success = _localizer["i18n_User_successfuly_added"];
-                                    return await LoginWithoutPassword(user, request.ReturnUrl);
                                 }
                                 else
                                 {
                                     scope.Dispose();
-                                    foreach (var error in result.Errors)
-                                    {
-                                        ModelState.AddModelError(string.Empty, error.Description);
-                                    }
+                                    result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error.Description));
+                                    return View(request);
                                 }
+
+                                scope.Complete();
                             }
+                            ViewBag.Success = _localizer["i18n_User_successfuly_added"];
+                            return await LoginWithoutPassword(user, request.ReturnUrl);
                         }
                         else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpErrorCode.OtpInvalid)))
                         {
