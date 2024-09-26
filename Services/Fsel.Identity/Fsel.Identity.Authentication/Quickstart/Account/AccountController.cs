@@ -33,7 +33,7 @@ using Microsoft.EntityFrameworkCore;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Core.Caching;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Fsel.Identity.Application.Commands.UserReferrals;
 
 namespace Fsel.Identity.Authentication.Quickstart.Account
 {
@@ -182,23 +182,43 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         var verify = await VerifyOtpAsync(user, request.Otp);
                         if (verify.Result)
                         {
-                            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                            var result = await _userManager.ConfirmEmailAsync(user, token);
-
-                            _mapper.Map(userRegisterModel, user);
-                            user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, userRegisterModel.Password);
-                            user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
-                            result = await _userManager.UpdateAsync(user);
-
-                            if (result.Succeeded)
+                            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                             {
-                                ViewBag.Success = _localizer["i18n_User_successfuly_added"];
-                                return await LoginWithoutPassword(user, request.ReturnUrl);
-                            }
+                                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                                var result = await _userManager.ConfirmEmailAsync(user, token);
 
-                            foreach (var error in result.Errors)
-                            {
-                                ModelState.AddModelError(string.Empty, error.Description);
+                                _mapper.Map(userRegisterModel, user);
+                                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, userRegisterModel.Password);
+                                user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
+                                result = await _userManager.UpdateAsync(user);
+                                if (result.Succeeded)
+                                {
+                                    #region Create User Referral
+                                    var vm = await BuildLoginViewModelAsync(request.ReturnUrl ?? string.Empty);
+                                    if (!string.IsNullOrEmpty(vm.ReferralCode))
+                                    {
+                                        var updateReferralCodeResult = await _mediator.Send(new CreateUserReferralCommand { ReferralCode = vm.ReferralCode, ReceiverId = user.Id, UserReferralType = EnumUserReferralType.Link }).ConfigureAwait(false);
+                                        if (!updateReferralCodeResult.IsOK)
+                                        {
+                                            scope.Dispose();
+                                            ModelState.AddModelError(string.Empty, _localizer["i18nSettingReferralCodeResult1"]);
+                                            return View(request);
+                                        }
+                                    }
+                                    #endregion
+
+                                    scope.Complete();
+                                    ViewBag.Success = _localizer["i18n_User_successfuly_added"];
+                                    return await LoginWithoutPassword(user, request.ReturnUrl);
+                                }
+                                else
+                                {
+                                    scope.Dispose();
+                                    foreach (var error in result.Errors)
+                                    {
+                                        ModelState.AddModelError(string.Empty, error.Description);
+                                    }
+                                }
                             }
                         }
                         else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpErrorCode.OtpInvalid)))
@@ -958,6 +978,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 OSName = context?.Parameters[Settings.RequestHeader.OSName],
                 DeviceId = context?.Parameters[Settings.RequestHeader.DeviceId],
                 DeviceName = context?.Parameters[Settings.RequestHeader.DeviceName],
+                ReferralCode = context?.Parameters[RequestHeaderSetting.ReferralCode],
                 IsRegister = bool.TryParse(context?.Parameters[RequestHeaderSetting.IsRegister], out var isRegister) && isRegister,
             };
 
