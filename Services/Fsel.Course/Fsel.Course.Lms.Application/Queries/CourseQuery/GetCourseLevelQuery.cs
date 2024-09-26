@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -32,7 +31,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         public async Task<MethodResult<CourseModel>> Handle(GetCourseLevelQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<CourseModel>();
-            var course = await _courseRepository.Queryable.Where(x => x.Id == request.CourseId && x.Status != EnumCourseStatus.New && x.Status != EnumCourseStatus.Clone).FirstOrDefaultAsync(cancellationToken);
+            var course = await _courseRepository.Queryable.Where(x => x.Id == request.CourseId).FirstOrDefaultAsync(cancellationToken);
             methodResult.Result = _mapper.Map<CourseModel>(course);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
