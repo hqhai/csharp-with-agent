@@ -392,7 +392,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 foreach (var item in request.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
-                    var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit);
+                    var questionResult = _questionConverter.HandleAnswerTest(question, item.Answer, request.IsSubmit);
                     if (!questionResult.IsOK)
                     {
                         methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
