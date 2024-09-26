@@ -37,10 +37,8 @@ namespace Fsel.System.Application.Queries.CourseTargetConfigQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<CourseTargetConfigModel>> methodResult = new MethodResult<IList<CourseTargetConfigModel>>();
 
-            var courseType = request.CourseLevel.GetEnumCourseType();
-
             var courseTargetConfigs = await _courseTargetConfigRepository.Queryable
-                                                                         .Where(x => x.CourseType == courseType)
+                                                                         .Where(x => x.CourseLevel == request.CourseLevel)
                                                                          .ToListAsync(cancellationToken);
 
             if (courseTargetConfigs == null)

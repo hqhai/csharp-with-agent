@@ -6,10 +6,14 @@ namespace Fsel.System.Domain.Enums
     {
         TitleNotNull,
 
+        TitleAlreadyExist,
+
         NonNegativeLessonNumberPerWeek,
 
         NonNegativeMaxHoursPerLesson,
 
-        CourseTagetAlreadyExist
+        CourseTagetAlreadyExist,
+
+        CourseLevelMismatchesCourseType
     }
 }

@@ -15,7 +15,9 @@ namespace Fsel.System.Application.Queries.CourseTargetConfigQuery
 
     public class GetCourseTargetConfigQuery : IRequest<MethodResult<IList<CourseTargetConfigModel>>>
     {
-        public EnumCourseType CourseType { get; set; }
+        public EnumCourseType? CourseType { get; set; }
+
+        public EnumCourseLevel? CourseLevel { get; set; }
     }
 
     public class GetCourseTargetConfigQueryHandler : IRequestHandler<GetCourseTargetConfigQuery, MethodResult<IList<CourseTargetConfigModel>>>
@@ -35,14 +37,22 @@ namespace Fsel.System.Application.Queries.CourseTargetConfigQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<CourseTargetConfigModel>> methodResult = new MethodResult<IList<CourseTargetConfigModel>>();
 
-            var courseTargetConfigs = await _courseTargetConfigRepository.Queryable
-                                                                         .Where(x => x.CourseType == request.CourseType)
-                                                                         .ToListAsync(cancellationToken);
+            var courseTargetConfigs = await _courseTargetConfigRepository.Queryable.ToListAsync(cancellationToken);
 
             if (courseTargetConfigs == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.CourseType), nameof(request.CourseType));
                 return methodResult;
+            }
+
+            if (request.CourseType != null)
+            {
+                courseTargetConfigs = courseTargetConfigs.Where(x => x.CourseType == request.CourseType).ToList();
+            }
+
+            if (request.CourseLevel != null)
+            {
+                courseTargetConfigs = courseTargetConfigs.Where(x => x.CourseLevel == request.CourseLevel).ToList();
             }
 
             methodResult.Result = _mapper.Map<IList<CourseTargetConfigModel>>(courseTargetConfigs);

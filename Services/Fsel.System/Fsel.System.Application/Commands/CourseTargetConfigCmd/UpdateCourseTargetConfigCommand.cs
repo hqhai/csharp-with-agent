@@ -5,6 +5,7 @@ namespace Fsel.System.Application.Commands.CourseTargetConfigCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Domain.Enums;
     using Fsel.System.Domain.IRepositories;
@@ -42,6 +43,12 @@ namespace Fsel.System.Application.Commands.CourseTargetConfigCmd
                 return methodResult;
             }
 
+            if (await _courseTargetConfigRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.CourseType == request.CourseType && x.CourseLevel == request.CourseLevel && x.LessonNumberPerWeek == request.LessonNumberPerWeek && x.MaxHoursPerLesson == request.MaxHoursPerLesson && x.Title.Trim().ToLower() == request.Title.Trim().ToLower(), cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseTargetConfigErrorCode.TitleAlreadyExist), nameof(request.Title), nameof(request.Title));
+                return methodResult;
+            }
+
             if (request.LessonNumberPerWeek <= 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseTargetConfigErrorCode.NonNegativeLessonNumberPerWeek), nameof(request.LessonNumberPerWeek), nameof(request.LessonNumberPerWeek));
@@ -54,7 +61,7 @@ namespace Fsel.System.Application.Commands.CourseTargetConfigCmd
                 return methodResult;
             }
 
-            if (await _courseTargetConfigRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.CourseType == request.CourseType && x.LessonNumberPerWeek == request.LessonNumberPerWeek && x.MaxHoursPerLesson == request.MaxHoursPerLesson, cancellationToken))
+            if (await _courseTargetConfigRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.CourseType == request.CourseType && x.CourseLevel == request.CourseLevel && x.LessonNumberPerWeek == request.LessonNumberPerWeek && x.MaxHoursPerLesson == request.MaxHoursPerLesson, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseTargetConfigErrorCode.CourseTagetAlreadyExist), nameof(request), nameof(request));
                 return methodResult;
@@ -64,6 +71,18 @@ namespace Fsel.System.Application.Commands.CourseTargetConfigCmd
             if (courseTargetConfig == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id), nameof(request.Id));
+                return methodResult;
+            }
+
+            if ((request.CourseLevel == EnumCourseLevel.A1 || request.CourseLevel == EnumCourseLevel.A2 || request.CourseLevel == EnumCourseLevel.B1 || request.CourseLevel == EnumCourseLevel.B1Plus || request.CourseLevel == EnumCourseLevel.B2 || request.CourseLevel == EnumCourseLevel.C1) && (request.CourseType != EnumCourseType.Academic))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseTargetConfigErrorCode.CourseLevelMismatchesCourseType), nameof(request), nameof(request));
+                return methodResult;
+            }
+
+            if ((request.CourseLevel == EnumCourseLevel.MS1 || request.CourseLevel == EnumCourseLevel.MS2 || request.CourseLevel == EnumCourseLevel.MS3) && (request.CourseType != EnumCourseType.Ielts))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseTargetConfigErrorCode.CourseLevelMismatchesCourseType), nameof(request), nameof(request));
                 return methodResult;
             }
 

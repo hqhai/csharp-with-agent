@@ -11,6 +11,8 @@ namespace Fsel.System.Domain.Entities
 
         public EnumCourseType CourseType { get; set; }
 
+        public EnumCourseLevel CourseLevel { get; set; }
+
         public int LessonNumberPerWeek { get; set; }
 
         public int MaxHoursPerLesson { get; set; }
