@@ -76,7 +76,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         if (unitResult.Status != EnumResultStatus.Done)
                         {
                             unitResult.CompletionDate = DateTime.UtcNow;
-                            await SendMail(skillScores, percent, unit, unitResult, course, lessonResults.ToList(), cancellationToken);
                         }
                         unitResult.Status = EnumResultStatus.Done;
                         // await DoQuestBoard(userId, unitId, courseId, cancellationToken);
