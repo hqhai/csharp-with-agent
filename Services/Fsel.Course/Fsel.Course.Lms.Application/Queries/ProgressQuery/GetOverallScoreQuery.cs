@@ -126,8 +126,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                                                                               .ThenByDescending(x => x.UpdatedDate)
                                                                               .FirstOrDefaultAsync(cancellationToken);
                 var mockTestResultModel = _mapper.Map<MockTestResultModel>(mockTestResult);
-                overallScoreModel.BandScores = course.CourseLevel.GetBandScore();
-                overallScoreModel.TargetBandScores = mockTestResultModel.Scores;
+                overallScoreModel.BandScores = mockTestResultModel.Scores;
+                overallScoreModel.TargetBandScores = course.CourseLevel.GetBandScore();
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
