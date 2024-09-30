@@ -90,6 +90,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                      ParamsLink = paramLinksValue,
                      ObjectId = classForumResult?.Id ?? Guid.NewGuid(),
                      PlatformCode = EnumPlatformCode.LMS,
+                     ParamsMessage = new List<object> { classForumResult?.CreatedFullName ?? string.Empty },
                      UserIds = new List<Guid>() { objectOwnerId },
                  };
 
