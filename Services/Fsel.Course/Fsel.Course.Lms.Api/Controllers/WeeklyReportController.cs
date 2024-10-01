@@ -5,17 +5,20 @@ namespace Fsel.Course.Lms.Api.Controllers
     using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Course.Lms.Application.Commands.WeeklyReportCommand;
     using Fsel.Course.Lms.Application.Queries.WeeklyReportQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/weekly-report")]
     [ApiController]
+    [Permission(role: nameof(EnumRole.Admin))]
     public class WeeklyReportController : ControllerBase
     {
         private readonly IMediator _mediator;
