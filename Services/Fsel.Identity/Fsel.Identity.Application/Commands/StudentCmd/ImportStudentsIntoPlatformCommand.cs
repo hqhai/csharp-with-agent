@@ -126,10 +126,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         UserName = student.Email,
                         Email = student.Email,
                         FullName = student.FullName,
+                        PhoneNumber = student.PhoneNumber,
                         EmailConfirmed = true,
                         Human = new Human()
                         {
                             FullName = student.FullName,
+                            PhoneNumber = student.PhoneNumber,
                             Birthday = Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture),
                             Email = student.Email,
                             Student = new Student()
