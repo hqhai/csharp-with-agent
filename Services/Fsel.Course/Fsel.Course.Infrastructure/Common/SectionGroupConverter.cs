@@ -531,7 +531,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     sectionDto.SectionParts = section.SectionParts.OrderBy(x => x.CreatedDate).Select(x => GetSectionPartMockTest(x, isDone)).ToList();
                 }
-                else
+                else if (section.SectionQuestions.Any())
                 {
                     sectionDto.QuestionTests = section.SectionQuestions.OrderBy(x => x.CreatedDate)
                                                    .Select(x => new QuestionCorrectStatusModel
