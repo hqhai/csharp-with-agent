@@ -6,6 +6,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers.V1i1;
+    using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions.V1i1;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -528,7 +529,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     sectionDto.SectionParts = section.SectionParts.OrderBy(x => x.CreatedDate).Select(x => GetSectionPartMockTest(x, isDone)).ToList();
                 }
-                else
+                else if (section.SectionQuestions.Any())
                 {
                     sectionDto.QuestionTests = section.SectionQuestions.OrderBy(x => x.CreatedDate)
                                                    .Select(x => new QuestionCorrectStatusModel
@@ -536,11 +537,16 @@ namespace Fsel.Course.Infrastructure.Common
                                                        QuestionId = x.QuestionId ?? default,
                                                        Status = GetStatus(x, isDone)
                                                    }).ToList();
+                    var subQuestionIds = section.SectionQuestions.Select(x => x.Question)
+                        .Where(x => x!.QuestionType == EnumQuestionType.CheckListV1)
+                        .Select(x => x!.Config.Deserialize<CheckListQuestionV1>())
+                        .Where(x => x != null).SelectMany(x => x!.Answers).Select(x => x.Id).ToList();
+
                     sectionDto.CountQuestion = section.SectionQuestions.SelectMany(x => x.MockTestAnswers)
                         .Select(x => x.Answer.Deserialize<MultipleChoiceAnswerV1>())
                         .Where(x => x != null && x.Answers != null && x.Answers.Any())
                         .SelectMany(x => x.Answers)
-                        .Where(y => !string.IsNullOrEmpty(y.Key) || !string.IsNullOrEmpty(y.Content))
+                        .Where(y => !string.IsNullOrEmpty(y.Key) || !string.IsNullOrEmpty(y.Content) || subQuestionIds.Any(x => x.HasValue && x == y.Id))
                         .Count();
                 }
             }
