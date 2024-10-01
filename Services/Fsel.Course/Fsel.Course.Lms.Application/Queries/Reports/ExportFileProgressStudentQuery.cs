@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
     public class ExportFileProgressStudentQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
@@ -56,26 +57,32 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 return methodResult;
             }
-            var listEmailData = new List<ImportStudentEmailModel>();
             var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentEmailModel x, IList<ImportStudentEmailModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
-                if (string.IsNullOrEmpty(x.Email))
+                if (string.IsNullOrEmpty(x.Email) || !x.Email.IsValidEmail())
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null or malformed" });
                 }
                 return await Task.FromResult(errors.Count == 0);
             });
-            listEmailData = result.Datas.ToList();
-            var fullNames = listEmailData.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).ToList();
-            var studentResultToEmail = await _userService.GetStudentByFullNamesAsync(fullNames);
+
+            if (result.Stream != null)
+            {
+                methodResult.Result = result.Stream;
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
+
+            var emails = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).Distinct().ToList();
+            var studentResultToEmail = await _userService.GetStudentByEmailsAsync(emails);
             if (!studentResultToEmail.IsSuccessStatusCode)
             {
                 methodResult.AddError(studentResultToEmail.Error);
                 return methodResult;
             }
+
             var students = studentResultToEmail.Content?.Result?.ToList();
             var studentIds = students?.Select(x => x.Id).ToList() ?? new List<Guid>();
-
             if (students != null && students.Any())
             {
                 var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
@@ -114,7 +121,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 }
             }
 
-            methodResult.Result = reportStudents.OrderBy(x => fullNames.IndexOf(x.FullName ?? string.Empty)).ToList().ExportExcel();
+            methodResult.Result = reportStudents.OrderBy(x => x.FullName).ToList().ExportExcel();
             return methodResult;
         }
 
