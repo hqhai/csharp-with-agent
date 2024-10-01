@@ -65,9 +65,10 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 }
                 return await Task.FromResult(errors.Count == 0);
             });
+
             listEmailData = result.Datas.ToList();
-            var fullNames = listEmailData.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).ToList();
-            var studentResultToEmail = await _userService.GetStudentByFullNamesAsync(fullNames);
+            var emails = listEmailData.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).ToList();
+            var studentResultToEmail = await _userService.GetStudentByEmailsAsync(emails);
             if (!studentResultToEmail.IsSuccessStatusCode)
             {
                 methodResult.AddError(studentResultToEmail.Error);
@@ -114,7 +115,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 }
             }
 
-            methodResult.Result = reportStudents.OrderBy(x => fullNames.IndexOf(x.FullName ?? string.Empty)).ToList().ExportExcel();
+            methodResult.Result = reportStudents.OrderBy(x => x.FullName).ToList().ExportExcel();
             return methodResult;
         }
 
