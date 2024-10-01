@@ -6,6 +6,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
     {
         public string? FullName { get; set; }
         public string? Email { get; set; }
+        public string? PhoneNumber { get; set; }
         public string? School { get; set; }
         public DateTime DateOfBirth { get; set; }
         public string? ReferralCode { get; set; }
