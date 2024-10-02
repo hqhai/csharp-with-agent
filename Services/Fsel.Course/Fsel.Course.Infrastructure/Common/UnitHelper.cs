@@ -71,7 +71,7 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                     break;
             }
-            if (!_lessonRepository.IsIdsInValid(request.LessonIds))
+            if (_lessonRepository.IsIdsInValid(request.LessonIds))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
@@ -112,6 +112,10 @@ namespace Fsel.Course.Infrastructure.Common
                         MockTestId = request.MockTestId.Value
                     }
                 };
+            }
+            else
+            {
+                unit.UnitSkillMockTests = new List<UnitSkillMockTest>();
             }
         }
     }
