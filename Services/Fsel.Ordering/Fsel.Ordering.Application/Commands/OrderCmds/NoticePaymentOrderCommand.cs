@@ -109,13 +109,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         /// <param name="remainDays"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        private async Task SendNotification(IList<Guid> userIds, bool isTrial, int remainDays, CancellationToken cancellationToken)
+        private async Task SendNotification(IList<Guid> userIds, CancellationToken cancellationToken)
         {
             NotificationSendingQueueModel model = new NotificationSendingQueueModel()
             {
                 UserIds = userIds,
                 Type = EnumNotificationType.LinkPage,
-                Content = isTrial ? EnumNotificationContent.NoticePayment : (remainDays == 2 ? EnumNotificationContent.NoticeExpireAfterTwoDay : EnumNotificationContent.NoticeExpireAfterTwoDay),
+                Content = EnumNotificationContent.NoticePayment,
                 PlatformCode = EnumPlatformCode.LMS
             };
             await _notificationMessagePublisher.Publish(model, cancellationToken);
