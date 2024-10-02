@@ -7,16 +7,16 @@ namespace Fsel.Hangfire.Application.Workers
 
     public class NoticeExtendPackageWorker : IWorker
     {
-        private readonly NoticeAccessTimePublisher _noticeAccessTimePublisher;
+        private readonly NoticeExtendPackagePublisher _noticeExtendPackagePublisher;
 
-        public NoticeExtendPackageWorker(NoticeAccessTimePublisher noticeAccessTimePublisher)
+        public NoticeExtendPackageWorker(NoticeExtendPackagePublisher noticeExtendPackagePublisher)
         {
-            _noticeAccessTimePublisher = noticeAccessTimePublisher;
+            _noticeExtendPackagePublisher = noticeExtendPackagePublisher;
         }
 
         public async Task RunAsync()
         {
-            await _noticeAccessTimePublisher.Publish(CancellationToken.None);
+            await _noticeExtendPackagePublisher.Publish(CancellationToken.None);
         }
     }
 }
