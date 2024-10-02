@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.Helpers;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
@@ -121,11 +120,11 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             GetFeatureModuleQuery query = new GetFeatureModuleQuery
             {
-                FeatureModule = EnumFeatureModule.ClassForumResult,
-                ObjectId = classForumDetailResult?.Id ?? default
+                FeatureModule = EnumFeatureModule.ClassForumDetailResult,
+                ObjectId = classForumDetailResult?.Id ?? default,
             };
 
-            var featureModule = await _mediator.Send(query).ConfigureAwait(false);
+            var featureModule = await _mediator.Send(query, cancellationToken);
             var featureModuleResult = featureModule?.Result;
 
             await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
