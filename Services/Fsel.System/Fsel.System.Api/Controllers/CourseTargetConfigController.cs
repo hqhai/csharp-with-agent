@@ -51,6 +51,18 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
+        /// delete-course-target-config
+        /// </summary>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(MethodResult<CourseTargetConfigModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> DeleteCourseTargetConfig([FromRoute] Guid id)
+        {
+            var commandResult = await _mediator.Send(new DeleteCourseTargetConfigCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// get-course-target-configs
         /// </summary>
         [HttpGet]
