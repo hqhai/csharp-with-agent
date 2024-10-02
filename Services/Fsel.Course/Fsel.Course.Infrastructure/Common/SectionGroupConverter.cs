@@ -537,8 +537,9 @@ namespace Fsel.Course.Infrastructure.Common
                                                        QuestionId = x.QuestionId ?? default,
                                                        Status = GetStatus(x, isDone)
                                                    }).ToList();
+
                     var subQuestionIds = section.SectionQuestions.Select(x => x.Question)
-                        .Where(x => x!.QuestionType == EnumQuestionType.CheckListV1)
+                        .Where(x => x != null && x.QuestionType == EnumQuestionType.CheckListV1)
                         .Select(x => x!.Config.Deserialize<CheckListQuestionV1>())
                         .Where(x => x != null).SelectMany(x => x!.Answers).Select(x => x.Id).ToList();
 
