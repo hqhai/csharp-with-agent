@@ -9,7 +9,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
 
     public class ExternalLoginModel
     {
-        [RegularExpression(RegexSettings.Password, ErrorMessage = "i18n_Password_is_not_valid")]
+        [RegularExpression(RegexSettings.PasswordValid, ErrorMessage = "i18n_Password_is_not_valid")]
         [Required(ErrorMessage = "i18n_Email_cannot_be_empty")]
         public string? Email { get; set; }
 
@@ -18,9 +18,13 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
         public string? PhoneNumber { get; set; }
 
         [Required(ErrorMessage = "i18n_First_name_cannot_be_empty")]
+        [MaxLength(50, ErrorMessage = "i18n_limit_number_characters")]
+        [RegularExpression(RegexSettings.FullNameValid, ErrorMessage = "i18n_First_name_is_not_valid")]
         public string? FirstName { get; set; }
 
         [Required(ErrorMessage = "i18n_Last_name_cannot_be_empty")]
+        [MaxLength(50, ErrorMessage = "i18n_limit_number_characters")]
+        [RegularExpression(RegexSettings.FullNameValid, ErrorMessage = "i18n_Last_name_is_not_valid")]
         public string? LastName { get; set; }
 
         public EnumGender? Gender { get; set; }
