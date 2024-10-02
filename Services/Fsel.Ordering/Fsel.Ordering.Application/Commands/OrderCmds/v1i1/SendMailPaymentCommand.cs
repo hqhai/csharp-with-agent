@@ -60,11 +60,14 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             var updatedDate = !order.UpdatedDate.HasValue ? string.Empty : order.UpdatedDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
-            var price = order.Price.ToString("C", new CultureInfo("vi-VN"));
+            var numberFormat = (NumberFormatInfo)CultureInfo.GetCultureInfo("vi-VN").NumberFormat.Clone();
+            numberFormat.CurrencySymbol = "";
 
-            var discount = order.DiscountPrice.ToString("C", new CultureInfo("vi-VN"));
+            var price = order.Price.ToString("C", numberFormat).Trim();
 
-            var totalPrice = order.TotalPrice.ToString("C", new CultureInfo("vi-VN"));
+            var discount = order.DiscountPrice.ToString("C", numberFormat).Trim();
+
+            var totalPrice = order.TotalPrice.ToString("C", numberFormat).Trim();
 
             await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
             {
