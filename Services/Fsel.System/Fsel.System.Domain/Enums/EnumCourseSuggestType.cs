@@ -7,12 +7,12 @@ namespace Fsel.System.Domain.Enums
         /// <summary>
         /// trình độ dễ hơn
         /// </summary>
-        Review,
+        Relaxed,
 
         /// <summary>
         /// trình độ hiện tại
         /// </summary>
-        Basic,
+        Balanced,
 
         /// <summary>
         /// trình độ cao hơn

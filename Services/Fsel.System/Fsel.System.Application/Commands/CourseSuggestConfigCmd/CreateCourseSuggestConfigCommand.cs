@@ -44,7 +44,7 @@ namespace Fsel.System.Application.Commands.CourseSuggestConfigCmd
                 return methodResult;
             }
 
-            if (request.Type == EnumCourseSuggestType.Review && request.PlacementTestLevel == EnumPlacementTestLevel.A1)
+            if (request.Type == EnumCourseSuggestType.Relaxed && request.PlacementTestLevel == EnumPlacementTestLevel.A1)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseSuggestConfigErrorCode.NoReviewTypeForA1Level), nameof(request));
                 return methodResult;
