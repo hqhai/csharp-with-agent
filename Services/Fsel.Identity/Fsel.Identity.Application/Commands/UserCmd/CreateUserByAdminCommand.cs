@@ -76,10 +76,12 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 UserName = request.Email,
                 Email = request.Email,
                 FullName = request.FullName,
+                PhoneNumber = request.PhoneNumber,
                 EmailConfirmed = true,
                 Human = new Human()
                 {
                     FullName = request.FullName,
+                    PhoneNumber = request.PhoneNumber,
                     Birthday = request.DateOfBirth,
                     Email = request.Email,
                     Student = new Student()
