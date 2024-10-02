@@ -8,7 +8,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Ordering.Application.Commands.VoucherCmds;
     using Fsel.Ordering.Domain.Entities;
+    using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i2;
     using Fsel.Ordering.Domain.Models.EntityModels;
@@ -25,11 +27,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
     {
         private readonly IMapper _mapper;
         private readonly IOrderRepository _orderRepository;
+        private readonly IVoucherRepository _voucherRepository;
+        private readonly IMediator _mediator;
 
-        public UpdateOrderCommandHandler(IMapper mapper, IOrderRepository orderRepository)
+        public UpdateOrderCommandHandler(IMapper mapper, IOrderRepository orderRepository, IVoucherRepository voucherRepository, MediatR.IMediator mediator)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
+            _voucherRepository = voucherRepository;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<OrderModel>> Handle(UpdateOrderCommand request, CancellationToken cancellationToken)
@@ -48,8 +54,35 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Package));
                 return methodResult;
             }
+            var discountPercent = 0;
 
-            AddDataIntoOrder(request.Order, request.Code, request.Package.Price, request);
+            if (!string.IsNullOrEmpty(request.VoucherCode))
+            {
+                var checkVoucher = await _mediator.Send(new CheckVoucherCommand()
+                {
+                    Code = request.VoucherCode,
+                    PackageId = request.Package.Id,
+                }, cancellationToken);
+                if (!checkVoucher.IsOK)
+                {
+                    methodResult.AddError(checkVoucher.ErrorMessages);
+                    return methodResult;
+                }
+                var voucher = await _voucherRepository.GetByIdAsync(checkVoucher.Result?.VoucherId ?? default);
+                if (voucher == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist));
+                    return methodResult;
+                }
+                discountPercent = voucher.Percent;
+                request.Order.VoucherId = voucher.Id;
+            }
+            else
+            {
+                request.Order.VoucherId = null;
+            }
+
+            AddDataIntoOrder(request.Order, request.Code, request.Package.Price, discountPercent, request);
 
             if (!request.Order.IsValid())
             {
@@ -69,7 +102,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             return methodResult;
         }
 
-        private static void AddDataIntoOrder(Order order, string? code, decimal price, UpdateOrderCommandModel request)
+        private static void AddDataIntoOrder(Order order, string? code, decimal price, int discountPercent, UpdateOrderCommandModel request)
         {
             order.Status = EnumOrderStatus.New;
             order.PaymentMethod = request.PaymentMethod;
@@ -79,7 +112,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             order.Address = request.Address;
             order.Code = code;
             order.Price = price;
-            order.DiscountPercent = 0;
+            order.DiscountPercent = discountPercent;
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
             order.PackageId = request.Package?.Id;

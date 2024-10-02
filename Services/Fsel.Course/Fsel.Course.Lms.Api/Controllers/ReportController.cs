@@ -3,17 +3,17 @@
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.Reports;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/report")]
     [ApiController]
     public class ReportController : ControllerBase
@@ -35,6 +35,22 @@ namespace Fsel.Course.Lms.Api.Controllers
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Export Report Progress Student
+        /// </summary>
+        [HttpPost("export-progress-student")]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> Export([FromForm] ExportFileProgressStudentQuery query)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Export_Progress_Student.xlsx");
         }
     }
 }

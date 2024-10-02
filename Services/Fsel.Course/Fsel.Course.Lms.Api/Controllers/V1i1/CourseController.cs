@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Net;
-using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
@@ -9,6 +8,7 @@ using Fsel.Core.Base;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Lms.Application.Commands.CourseResultCmd;
 using Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1;
+using Fsel.Shared.Attributes;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using MediatR;
@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Course.Lms.Api.Controllers.V1i1
 {
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/course")]
     [ApiController]
     [Permission(role: nameof(EnumRole.Student))]
@@ -74,6 +74,30 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         public async Task<IActionResult> RetakeCourse([FromBody] RetakeCourseResultCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Course By Level
+        /// </summary>
+        [HttpGet("get-course-by-level/{courseLevel}")]
+        [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCourseByLevel([FromRoute] EnumCourseLevel courseLevel)
+        {
+            var commandResult = await _mediator.Send(new GetCourseByCourseLevelQuery { CourseLevel = courseLevel }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Courses By Levels
+        /// </summary>
+        [HttpGet("get-courses-by-levels")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCoursesByLevels([FromQuery] GetCoursesByCourseLevelsQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

@@ -187,6 +187,25 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 return methodResult;
             }
 
+            // lấy client
+            queryOrder.Status = true;
+            var clientUsers = await _orderService.GetOrderByStatusAsync(queryOrder);
+            if (!clientUsers.IsSuccessStatusCode)
+            {
+                methodResult.AddError(clientUsers.Error);
+                return methodResult;
+            }
+            var clientUserResults = clientUsers.Content?.Result;
+            if (clientUserResults == null)
+            {
+                methodResult.AddError(clientUsers.Error);
+                return methodResult;
+            }
+
+            var clientUserResultIds = clientUserResults.Select(x => x.UserId).ToList();
+
+            distinctFinalUserIds = distinctFinalUserIds.Where(x => !clientUserResultIds.Contains(x)).ToList();
+
             // lấy all user từ list hợp nhất
             var userCombines = await _humanRepository.Queryable
                                                      .Include(x => x.User)
@@ -223,8 +242,15 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 item.CurrentUnit = unitResult?.Name;
                 item.CurrentLesson = unitResult?.CurrentLesson;
                 item.LessonCompleted = unitResult?.LessonCompleted;
-                var dateOrder = orderItem?.UpdatedDate != null ? orderItem.UpdatedDate : orderItem?.CreatedDate ?? null;
-                item.DateEdit = dateOrder > ptTestResult?.DateEdit ? dateOrder : ptTestResult?.DateEdit ?? null;
+
+                var dateOrder = orderItem?.UpdatedDate ?? orderItem?.CreatedDate;
+                var dateUser = userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.UpdatedDate != null ? userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.UpdatedDate : userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.CreatedDate;
+
+                var dateEdits = new[] { dateOrder, ptTestResult?.DateEdit, unitResult?.DateEdit, dateUser };
+                if (dateEdits != null && dateEdits.Any())
+                {
+                    item.DateEdit = dateEdits.Where(d => d.HasValue).Max(d => d.Value);
+                }
 
                 if (ptTestResult != null)
                 {

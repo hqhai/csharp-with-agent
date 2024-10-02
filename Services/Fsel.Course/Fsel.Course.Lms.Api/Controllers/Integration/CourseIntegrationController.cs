@@ -3,16 +3,15 @@
 namespace Fsel.Course.Lms.Api.Controllers.Integration
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Lms.Application.Queries.IntegrationQuery;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/course-integration")]
     [ApiController]
     public class CourseIntegrationController : ControllerBase

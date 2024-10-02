@@ -111,7 +111,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                          {
                              StudentId = studentFile.StudentId,
                              SchoolName = studentFile.SchoolName,
-                             Grade = studentFile.Grade,
+                             Grade = studentFile.Grade.ToString(),
                              Process = studentResult?.ContentCompleted ?? 0, // Thêm kiểm tra null và mặc định giá trị nếu null
                              OverallScore = studentResult?.TotalScore ?? 0, // Thêm kiểm tra null và mặc định giá trị nếu null
                              CompetitionEndDate = new DateTime(2024, 6, 15),

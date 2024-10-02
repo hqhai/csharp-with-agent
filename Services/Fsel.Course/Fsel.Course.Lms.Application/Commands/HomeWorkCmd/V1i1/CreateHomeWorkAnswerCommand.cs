@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -49,10 +50,11 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         private readonly FinishOneHomeWorkPublisher _finishOneHomeWorkPublisher;
         private readonly IQuestionRepository _questionRepository;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
-        private readonly ILogger<object> _logger;
+        private readonly ILogger<CreateHomeWorkAnswerCommand> _logger;
         private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly RankedStudentPublisher _rankedStudentPublisher;
 
-        public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository, ICourseResultRepository courseResultRepository, QuestionConverter questionConverter, IHomeWorkAnswerRepository homeWorkAnswerRepository, IHomeWorkRepository homeWorkRepository, IMediator mediator, IUserService userService, AuthContext authContext, ICourseRepository courseRepository, ILessonResultRepository lessonResultRepository, ISystemService systemService, FinishOneHomeWorkPublisher finishOneHomeWorkPublisher, IQuestionRepository questionRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILogger<object> logger, QuestBoardPublisher questionBoardPublisher)
+        public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository, ICourseResultRepository courseResultRepository, QuestionConverter questionConverter, IHomeWorkAnswerRepository homeWorkAnswerRepository, IHomeWorkRepository homeWorkRepository, IMediator mediator, IUserService userService, AuthContext authContext, ICourseRepository courseRepository, ILessonResultRepository lessonResultRepository, ISystemService systemService, FinishOneHomeWorkPublisher finishOneHomeWorkPublisher, IQuestionRepository questionRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILogger<CreateHomeWorkAnswerCommand> logger, QuestBoardPublisher questionBoardPublisher, RankedStudentPublisher rankedStudentPublisher)
         {
             _homeWorkResultRepository = homeWorkResultRepository;
             _courseResultRepository = courseResultRepository;
@@ -70,6 +72,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
             _logger = logger;
             _questBoardPublisher = questionBoardPublisher;
+            _rankedStudentPublisher = rankedStudentPublisher;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
@@ -167,12 +170,18 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             if (createHomeWorkAnswers.Any())
             {
                 await _homeWorkAnswerRepository.AddList(createHomeWorkAnswers);
-                await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
             if (updateHomeWorkAnswers.Any())
             {
                 _homeWorkAnswerRepository.UpdateList(updateHomeWorkAnswers);
-                await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            try
+            {
+                await _homeWorkAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Duplicate HomeWorkAnswer : {ex.Message}");
             }
 
             methodResult.Result = true;
@@ -278,6 +287,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             }
             _homeWorkResultRepository.Update(homeWorkResult);
             await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            await PublishRankedStudent(homeWorkResult.CreatedUserId, cancellationToken);
             methodResult.Result = true;
             return methodResult;
         }
@@ -298,7 +308,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             {
                 homeWorkResult.Status = EnumResultStatus.Done;
                 await _finishOneHomeWorkPublisher.Publish(homeWorkResult, CancellationToken.None);
-
                 #region Do QuestBoard
 
                 await DoQuestBoard(homeWorkResult.StudentId, EnumQuestBoardType.BeginnerQuests, EnumQuestBoardCategory.CompleteHomeworkFirst, CancellationToken.None);
@@ -406,6 +415,12 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 return homeWorkAnswers.Where(x => x.Status == EnumAnswerStatus.Done).Sum(x => x.CorrectCount);
             }
             return homeWorkAnswers?.Sum(x => x.CorrectCount) ?? default;
+        }
+
+        private async Task PublishRankedStudent(Guid userId, CancellationToken cancellationToken)
+        {
+            StudentRankingEventModel baseQueue = new StudentRankingEventModel { UserId = userId };
+            await _rankedStudentPublisher.Publish(baseQueue, cancellationToken);
         }
     }
 }

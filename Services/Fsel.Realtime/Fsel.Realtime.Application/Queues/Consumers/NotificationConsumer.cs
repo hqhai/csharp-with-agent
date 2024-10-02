@@ -27,7 +27,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             if (message != null && message.UserIds != null)
             {
                 var userIds = message.UserIds;
-                await _notificationHubContext.GetGroups(userIds.Select(x => x.ToString()).ToList()).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, message);
+                await _notificationHubContext.GetGroups(userIds.Distinct().Select(x => x.ToString()).ToList()).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, message);
             }
         }
     }

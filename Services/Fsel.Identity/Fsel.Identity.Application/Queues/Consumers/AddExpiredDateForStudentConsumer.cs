@@ -29,6 +29,7 @@ namespace Fsel.Identity.Application.Queues.Consumers
                 StudentId = message.StudentId,
                 Day = message.Day,
                 Month = message.Month,
+                ExpiredDate = message.ExpiredDate,
             }).ConfigureAwait(false);
         }
     }

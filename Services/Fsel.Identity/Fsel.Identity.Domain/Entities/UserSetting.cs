@@ -20,6 +20,7 @@ namespace Fsel.Identity.Domain.Entities
                 NotifiLesson = true;
                 NotifiForum = true;
                 NotifiEmail = true;
+                IsSoundEffect = true;
                 Language = "vn";
             }
         }
@@ -35,6 +36,8 @@ namespace Fsel.Identity.Domain.Entities
         public bool NotifiForum { get; set; }
 
         public bool NotifiEmail { get; set; }
+
+        public bool IsSoundEffect { get; set; }
 
         /// <summary>
         /// Tên ngôn ngữ

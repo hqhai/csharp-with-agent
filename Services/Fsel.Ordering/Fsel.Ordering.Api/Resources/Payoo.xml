@@ -5,7 +5,7 @@
         <shop_title>[ShopTitle]</shop_title>
         <shop_domain>[ShopDomain]</shop_domain>
         <shop_back_url>[ShopBackUrl]</shop_back_url>
-        <order_no>[OrderTransactionId]</order_no>
+        <order_no>[OrderCode]</order_no>
         <order_cash_amount>[OrderCashAmount]</order_cash_amount>
         <order_description>[OrderDescription]</order_description>
         <notify_url>[NotifyUrl]</notify_url>

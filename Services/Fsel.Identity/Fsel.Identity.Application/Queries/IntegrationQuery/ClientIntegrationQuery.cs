@@ -203,11 +203,18 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 item.LastDate = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item.UserId)?.LastVisited;
                 item.PTLevel = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId)?.Level;
                 item.PTLevel = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId)?.Level;
-                var dateOrder = orderResults.Where(x => x.UserId == item.UserId).Max(c => c.CreatedDate > c.UpdatedDate ? c.CreatedDate : c.UpdatedDate);
-                item.DateEdit = dateOrder > ptTestResult?.DateEdit ? dateOrder : ptTestResult?.DateEdit ?? null;
                 item.CourseLevel = unitResult?.CourseLevel;
                 item.StartCourse = unitResult?.StartCourse;
                 item.EndCourse = unitResult?.EndCourse;
+
+                var dateOrder = orderResults.Where(x => x.UserId == item.UserId).Max(c => c.CreatedDate > c.UpdatedDate ? c.CreatedDate : c.UpdatedDate);
+                var dateUser = userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.UpdatedDate != null ? userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.UpdatedDate : userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.CreatedDate;
+
+                var dateEdits = new[] { dateOrder, ptTestResult?.DateEdit, unitResult?.DateEdit, dateUser };
+                if (dateEdits != null && dateEdits.Any())
+                {
+                    item.DateEdit = dateEdits.Where(d => d.HasValue).Max(d => d.Value);
+                }
 
                 if (ptTestResult != null)
                 {
@@ -234,11 +241,12 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                         EndDate = order.ExpireDate ?? default,
                         Program = courseName,
                         CourseLevel = order.CourseName.ToString(),
-                        CoursePackage = order.MonthNumber,
+                        CoursePackage = order.MonthNumber ?? default,
                         PaymentMethod = order.PaymentMethod ?? default,
                         DiscountPrice = order.DiscountPrice,
                         TotalPrice = order.TotalPrice,
-                        Status = order.StatusCourseResult
+                        Status = order.StatusCourseResult,
+                        RevenueType = order.RevenueType
                     };
                     orderIntegrations.Add(orderIntegration);
                 }
