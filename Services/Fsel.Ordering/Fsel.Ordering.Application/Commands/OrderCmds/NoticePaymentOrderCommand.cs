@@ -78,10 +78,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
             if (listUserOnlyTrial.Count > 0 && remainDays == RemainTwoDays)
             {
-                await SendNotification(listUserOnlyTrial, true, remainDays, cancellationToken);
+                await SendNotification(listUserOnlyTrial, cancellationToken);
             }
 
-            await SendNotification(studentOrders, false, remainDays, cancellationToken);
+            await SendNotification(studentOrders, cancellationToken);
         }
 
         /// <summary>
