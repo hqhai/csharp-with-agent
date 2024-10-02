@@ -54,12 +54,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
             }
             var userCourseSettings = userCourseSettingResults?.Content?.Result;
 
-            var userCourseSettingLevel = userCourseSettings?.FirstOrDefault(x => x.Type == EnumUserCourseType.ChangeLevel);
-            if (userCourseSettingLevel != null && userCourseSettingLevel.Value <= 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(userCourseSettingLevel));
-                return methodResult;
-            }
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
