@@ -443,7 +443,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             var classForumResult = await _classForumResultRepository.Queryable
                                                                     .Include(x => x.ClassForumDetailResults)
                                                                     .Include(x => x.LessonResult)
-                                                                    .Where(x => x.StudentId == studentId && x.ClassForumDetailResults.Any(c => !string.IsNullOrEmpty(x.GradingAlFeedback)))
+                                                                    .Where(x => x.StudentId == studentId && x.ClassForumDetailResults.Any(c => !string.IsNullOrEmpty(c.GradingAlFeedback)))
                                                                     .OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
                                                                     .FirstOrDefaultAsync();
 
