@@ -653,13 +653,13 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                             DisplayName = user.UserName
                         };
 
-                        await HttpContext.SignInAsync(isuser, props);
+                        await HttpContext.SignInAsync(isuser, props).ConfigureAwait(false);
 
                         if (context != null)
                         {
                             if (context.IsNativeClient())
                             {
-                                Thread.Sleep(1000);
+                                Thread.Sleep(1300);
 
                                 // The client is native, so this change in how to
                                 // return the response is for better UX for the end user.
@@ -728,11 +728,11 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     DisplayName = user.UserName
                 };
 
-                await HttpContext.SignInAsync(isuser, props);
+                await HttpContext.SignInAsync(isuser, props).ConfigureAwait(false);
 
                 if (context != null && context.IsNativeClient())
                 {
-                    Thread.Sleep(1000);
+                    Thread.Sleep(1300);
 
                     //return this.LoadingPage("Redirect", returnUrl ?? string.Empty);
                 }
