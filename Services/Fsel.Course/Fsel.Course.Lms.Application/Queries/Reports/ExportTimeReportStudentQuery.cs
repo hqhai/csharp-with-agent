@@ -81,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     FullName = student.Human?.FullName,
                     Email = student.Human?.Email,
                 };
-                var featureAccessTimeResult = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
+                var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeToModulesAsync(new FeatureAccessTimesQueryModel
                 {
                     UserId = student.Human?.UserId ?? default,
                     FeatureAccessTimes = new List<FeatureAccessTimeQueryModel> {

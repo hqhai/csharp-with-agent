@@ -10,20 +10,20 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetFeatureAccessTimesQuery : GetFeatureAccessTimesQueryModel, IRequest<MethodResult<IList<FeatureAccessTimeModel>>>
+    public class GetFeatureAccessTimeModulesQuery : GetFeatureAccessTimesQueryModel, IRequest<MethodResult<IList<FeatureAccessTimeModel>>>
     {
     }
 
-    public class GetFeatureAccessTimesQueryHandler : IRequestHandler<GetFeatureAccessTimesQuery, MethodResult<IList<FeatureAccessTimeModel>>>
+    public class GetFeatureAccessTimeModulesQueryHandler : IRequestHandler<GetFeatureAccessTimeModulesQuery, MethodResult<IList<FeatureAccessTimeModel>>>
     {
         private readonly IFeatureAccessTimeRepository _featureAccessTimeRepository;
 
-        public GetFeatureAccessTimesQueryHandler(IFeatureAccessTimeRepository featureAccessTimeRepository)
+        public GetFeatureAccessTimeModulesQueryHandler(IFeatureAccessTimeRepository featureAccessTimeRepository)
         {
             _featureAccessTimeRepository = featureAccessTimeRepository;
         }
 
-        public async Task<MethodResult<IList<FeatureAccessTimeModel>>> Handle(GetFeatureAccessTimesQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<FeatureAccessTimeModel>>> Handle(GetFeatureAccessTimeModulesQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<FeatureAccessTimeModel>> methodResult = new MethodResult<IList<FeatureAccessTimeModel>>();
@@ -31,7 +31,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             foreach (var item in request.FeatureAccessTimes)
             {
                 FeatureAccessTimeModel? featureAccessTime;
-                var query = _featureAccessTimeRepository.Queryable.Where(x => x.CreatedUserId == request.UserId && x.CourseId == item.CourseId && x.ObjectId.HasValue);
+                var query = _featureAccessTimeRepository.Queryable.Where(x => x.CreatedUserId == request.UserId && (!item.CourseId.HasValue || x.CourseId == item.CourseId) && x.ObjectId.HasValue);
                 if (item.UnitId != null)
                 {
                     query = query.Where(x => x.UnitId == item.UnitId);
@@ -52,7 +52,17 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                     query = query.Where(x => x.EnumFeature == item.EnumFeature);
                 }
 
-                if (item.LessonId != null && item.ObjectId != null)
+                if (item.EnumFeature.HasValue && !item.CourseId.HasValue)
+                {
+                    featureAccessTime = await query.GroupBy(x => x.EnumFeature).Select(x => new FeatureAccessTimeModel
+                    {
+                        AccessTime = x.Sum(x => x.AccessTime),
+                        Visit = x.Sum(x => x.Visit),
+                        LastVisited = x.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
+                        EnumFeature = x.Key,
+                    }).FirstOrDefaultAsync(cancellationToken);
+                }
+                else if (item.LessonId != null && item.ObjectId != null)
                 {
                     featureAccessTime = await query.GroupBy(x => new { x.CourseId, x.UnitId, x.LessonId, x.ObjectId }).Select(x => new FeatureAccessTimeModel
                     {

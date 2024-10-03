@@ -26,6 +26,7 @@ namespace Fsel.System.Api.Controllers
     {
         private readonly IMediator _mediator;
         private readonly IFeatureAccessTimeRepository _featureAccessTimeRepository;
+
         public FeatureAccessTimeController(IMediator mediator, IFeatureAccessTimeRepository featureAccessTimeRepository)
         {
             _mediator = mediator;
@@ -64,6 +65,18 @@ namespace Fsel.System.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<IList<FeatureAccessTimeModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Gets([FromBody] GetFeatureAccessTimesQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Feature Access Times
+        /// </summary>
+        [HttpPost("get-to-modules")]
+        [ProducesResponseType(typeof(MethodResult<IList<FeatureAccessTimeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Gets([FromBody] GetFeatureAccessTimeModulesQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -109,7 +122,6 @@ namespace Fsel.System.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-
         /// <summary>
         /// Get feature access business
         /// </summary>
@@ -121,7 +133,5 @@ namespace Fsel.System.Api.Controllers
             var queryResult = await _mediator.Send(new GetFeatureAccessTimeByUserIdQuery { UserIds = userIds }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-
-
     }
 }
