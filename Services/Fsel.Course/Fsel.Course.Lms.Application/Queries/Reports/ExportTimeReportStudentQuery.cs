@@ -73,7 +73,6 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 return methodResult;
             }
 
-            var studentIds = students.Select(x => x.Id).ToList() ?? new List<Guid>();
             foreach (var student in students)
             {
                 var reportProgress = new ReportTimeStudentModel
@@ -81,9 +80,15 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     FullName = student.Human?.FullName,
                     Email = student.Human?.Email,
                 };
+                var userId = student.Human?.UserId ?? default;
+
+                //if (userId == new Guid("0aff08b8-0521-4ee7-aaf3-08dcbe0507e9"))
+                //{
+                //}
+
                 var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeToModulesAsync(new FeatureAccessTimesQueryModel
                 {
-                    UserId = student.Human?.UserId ?? default,
+                    UserId = userId,
                     FeatureAccessTimes = new List<FeatureAccessTimeQueryModel> {
                         new FeatureAccessTimeQueryModel
                         {
@@ -98,7 +103,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                             EnumFeature = EnumFeature.VideoLesson,
                         }
                     }
-                });
+                }).ConfigureAwait(false);
                 if (featureAccessTimeResult.IsSuccessStatusCode)
                 {
                     var featureAccessTimes = featureAccessTimeResult.Content?.Result;
