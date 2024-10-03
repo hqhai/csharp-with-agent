@@ -9,7 +9,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
 
     public class ExternalLoginModel
     {
-        [RegularExpression(RegexSettings.PasswordValid, ErrorMessage = "i18n_Password_is_not_valid")]
+        //[RegularExpression(RegexSettings.EmailValid, ErrorMessage = "i18n_Password_is_not_valid")]
         [Required(ErrorMessage = "i18n_Email_cannot_be_empty")]
         public string? Email { get; set; }
 
