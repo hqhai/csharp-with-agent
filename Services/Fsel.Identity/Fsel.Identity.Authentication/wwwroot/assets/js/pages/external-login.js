@@ -29,6 +29,7 @@
   const $monthInput = $("#Month");
   const $yearInput = $("#Year");
   const $genderRadios = $("input[name='gender']");
+  const $gender = $("#gender");
   const $policy = $(".service-policy");
   const $optionGender = $(".option");
   const $radioButtons = $(".round-radio");
@@ -363,7 +364,10 @@
   }
 
   $(window).on('pageshow', function () {
-    $genderRadios.prop('checked', false);
+    var gender = $gender.attr("value");
+    if (!gender) {
+      $genderRadios.prop('checked', false);
+    }
     $policyCheckbox.prop('checked', false);
   });
 

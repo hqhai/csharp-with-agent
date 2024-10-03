@@ -414,6 +414,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         /// Registration for sample user login
         /// </summary>
         /// <returns></returns>
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None, Duration = 0)]
         public IActionResult Register(string? returnUrl)
         {
             var vm = new UserRegisterModel
