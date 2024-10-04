@@ -57,6 +57,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             var mockTestResult = _mockTestResultRepository.Queryable
                 .Include(x => x.MockTestAnswers)
                 .ThenInclude(x => x.SectionTimeCode)
+                .Include(x => x.SectionGroupResults)
                 .FirstOrDefault(x => x.Id == mockTestResultId);
 
             if (mockTestResult == null)
