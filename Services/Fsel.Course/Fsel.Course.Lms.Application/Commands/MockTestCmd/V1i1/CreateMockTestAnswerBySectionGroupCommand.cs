@@ -200,7 +200,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             if (!methodResult.IsOK)
             {
                 return methodResult;
-            });
+            };
             try
             {
                 if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && sectionGroup.Sections.Any() && request.IsSubmit)
