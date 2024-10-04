@@ -69,5 +69,20 @@ namespace Fsel.Course.Lms.Api.Controllers
             }
             return File(queryResult.Result, Settings.Excels.ContentType, "export_file_explanation_question.xlsx");
         }
+
+        /// <summary>
+        /// Export Report Time Report
+        /// </summary>
+        [HttpPost("export-time-report")]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Export([FromForm] ExportTimeReportStudentQuery query)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Export_Time_Report_Student.xlsx");
+        }
     }
 }
