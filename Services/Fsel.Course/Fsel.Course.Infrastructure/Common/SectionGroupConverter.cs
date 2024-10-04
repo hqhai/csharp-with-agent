@@ -51,24 +51,34 @@ namespace Fsel.Course.Infrastructure.Common
             _mockTestAnswerRepository = mockTestAnswerRepository;
         }
 
-        public async Task<int> GetHighestStreak(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup)
+        public async Task<int> GetHighestStreak(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, double version = (int)EnumVersion.V1)
         {
             ArgumentNullException.ThrowIfNull(sectionGroup);
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
             var isHighestStreaks = new List<bool>();
+
             if (sectionGroupResult.MockTestResultId.HasValue && sectionGroup.CourseSkill != EnumCourseSkill.Writing && sectionGroup.CourseSkill != EnumCourseSkill.Speaking)
             {
-                isHighestStreaks = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
-                    .Include(x => x.SectionQuestion)
-                    .OrderBy(x => x.CreatedDate)
-                    .Select(x => x.IsCorrect == true).ToListAsync();
+                var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                                              .OrderBy(x => x.CreatedDate)
+                                              .ToListAsync();
+                if (version == (int)EnumVersion.V1)
+                {
+                    isHighestStreaks = mockTestAnswers.Select(x => x.IsCorrect == true).ToList();
+                }
+                else if (version == (int)EnumVersion.V2)
+                {
+                    isHighestStreaks = mockTestAnswers.Where(x => x.Answer != null).Select(x => x.Answer.Deserialize<MultipleChoiceAnswerV1>())
+                                                      .Where(x => x != null && x.Answers != null)
+                                                      .SelectMany(x => x!.Answers)
+                                                      .Select(x => x.IsExact.HasValue && x.IsExact == true)
+                                                      .ToList();
+                }
             }
             else if (sectionGroupResult.FinalTestResultId.HasValue)
             {
                 isHighestStreaks = await _finalTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
-                    .Include(x => x.SectionQuestion)
-                    .OrderBy(x => x.CreatedDate)
-                    .Select(x => x.IsCorrect == true).ToListAsync();
+                                            .Select(x => x.IsCorrect == true).ToListAsync();
             }
             return _linQHelper.GetHighestStreak(isHighestStreaks);
         }
@@ -81,7 +91,7 @@ namespace Fsel.Course.Infrastructure.Common
             sectionGroupResult.CorrectCount = (int)skillScore.CorrectCount;
             sectionGroupResult.CorrectTotal = (int)skillScore.TotalCount;
             sectionGroupResult.Status = EnumResultStatus.Done;
-            sectionGroupResult.HighestStreak = await GetHighestStreak(sectionGroupResult, sectionGroup);
+            sectionGroupResult.HighestStreak = await GetHighestStreak(sectionGroupResult, sectionGroup, version);
             if (sectionGroup.CourseSkill != EnumCourseSkill.Writing)
             {
                 if (sectionGroupResult.SkillScores != null && sectionGroupResult.SkillScores.Any())
