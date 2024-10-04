@@ -2,6 +2,8 @@
 
 namespace Fsel.Identity.Application.Services.LmsCourseService.Model
 {
+    using Fsel.Shared.Enums;
+
     public class CompetitionStudentProgressModel
     {
         public Guid CourseId { get; set; }
@@ -11,6 +13,8 @@ namespace Fsel.Identity.Application.Services.LmsCourseService.Model
         public double TotalScore { get; set; }
 
         public Guid CourseResultId { get; set; }
+
+        public EnumCourseType CourseType { get; set; }
 
     }
 }
