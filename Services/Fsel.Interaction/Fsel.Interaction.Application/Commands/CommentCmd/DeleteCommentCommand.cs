@@ -72,7 +72,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 
                 FeatureModuleQuery query = new FeatureModuleQuery
                 {
-                    FeatureModule = EnumFeatureModule.ClassForumResult,
+                    FeatureModule = EnumFeatureModule.ClassForumDetailResult,
                     ObjectId = classForumResultTemp?.Id ?? default
                 };
 
