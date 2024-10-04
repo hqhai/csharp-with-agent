@@ -801,7 +801,8 @@ form {
 
 @media (max-width: 1200px) {
   .content-right {
-    animation: smoth-close 0s ease-in-out forwards !important;
+    display: none !important;
+    /*animation: smoth-close 0s ease-in-out forwards !important;*/
   }
 
   .content {
