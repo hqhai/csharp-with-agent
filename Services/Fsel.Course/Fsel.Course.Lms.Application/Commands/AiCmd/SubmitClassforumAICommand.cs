@@ -3,6 +3,8 @@
 namespace Fsel.Course.Lms.Application.Commands.AiCmd
 {
     using System;
+    using System.Collections;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -72,11 +74,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             #region Retry
 
-            var checkDataClassForum = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
+            var checkDataClassForum = ConvertHelper.Deserialize<List<ClassForumAIModel>>(RemoveMarkdownFromJson(aIResponse ?? string.Empty));
 
             bool conditionRetry = checkDataClassForum?.All(x => x != null) ?? default;
-
-
 
             var classForumDetailResultOwner = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResult).ThenInclude(x => x.LessonResult).ThenInclude(x => x.Lesson).FirstOrDefault(x => x.Id == request.ClassForumDetailResultId);
 
@@ -104,15 +104,13 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 classForumDetailResult.RetryTime += 1;
             }
 
-
-
             #endregion Retry
 
-            var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
+            var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(RemoveMarkdownFromJson(aIResponse ?? string.Empty));
 
             if (classForumDetailResult != null)
             {
-                classForumDetailResult.GradingAlFeedback = classForumAIs != null ? ConvertHelper.Serialize(classForumAIs) : default;
+                classForumDetailResult.GradingAlFeedback = classForumAIs != null ? ConvertHelper.Serialize(GetClassForumAIs(classForumAIs)) : default;
                 _classForumDetailResultRepository.Update(classForumDetailResult);
                 await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -144,6 +142,39 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 }
             }
             return true;
+        }
+
+        private static IList<ClassForumAIModel>? GetClassForumAIs(List<ClassForumAIModel>? classForumAIs)
+        {
+            if (classForumAIs == null || !classForumAIs.Any())
+            {
+                return classForumAIs;
+            }
+
+            foreach (var item in classForumAIs)
+            {
+                item.SuccessCriteriaItemFix = ConvertDataToStrings(item.SuccessCriteriaItemFix);
+                item.SuccessCriteriaItemEvidence = ConvertDataToStrings(item.SuccessCriteriaItemEvidence);
+            }
+            return classForumAIs;
+        }
+
+        private static IList<string> ConvertDataToStrings(object? data)
+        {
+            if (data is IList list)
+            {
+                return list.Cast<string>().ToList();
+            }
+            return new List<string> { data?.ToString() ?? string.Empty };
+        }
+
+        private static string RemoveMarkdownFromJson(string json)
+        {
+            // Loại bỏ dấu ```json từ đầu và cuối chuỗi JSON
+            string cleanedJson = Regex.Replace(json, @"^```json\s*|\s*```$", "");
+
+            // Trả về chuỗi JSON đã được loại bỏ dấu ```json
+            return cleanedJson;
         }
     }
 }
