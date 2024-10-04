@@ -161,19 +161,17 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
         private static IList<string> ConvertDataToStrings(object? data)
         {
-            if (data is IList list)
+            var listStr = data.Deserialize<IList<string>>();
+            if (listStr != null)
             {
-                return list.Cast<string>().ToList();
+                return listStr.ToList();
             }
             return new List<string> { data?.ToString() ?? string.Empty };
         }
 
         private static string RemoveMarkdownFromJson(string json)
         {
-            // Loại bỏ dấu ```json từ đầu và cuối chuỗi JSON
             string cleanedJson = Regex.Replace(json, @"^```json\s*|\s*```$", "");
-
-            // Trả về chuỗi JSON đã được loại bỏ dấu ```json
             return cleanedJson;
         }
     }
