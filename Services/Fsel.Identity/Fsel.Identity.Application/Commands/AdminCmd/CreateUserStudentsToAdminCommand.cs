@@ -74,7 +74,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = "Full Name is null" });
                 }
-                if (string.IsNullOrEmpty(x.PhoneNumber) || !x.PhoneNumber.IsValidPhoneNumber())
+                if (!string.IsNullOrEmpty(x.PhoneNumber) && !x.PhoneNumber.IsValidPhoneNumber())
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = "PhoneNumber is null or malformed" });
                 }
