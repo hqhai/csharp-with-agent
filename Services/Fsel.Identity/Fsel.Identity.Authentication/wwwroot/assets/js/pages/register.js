@@ -39,7 +39,7 @@
 
   // Validation functions
   function validateEmail() {
-    const email = $emailInput.val().trim();
+    const email = $emailInput.val();
     const emailPattern = /^(?=.{1,64}@)(?=.{1,255}$)[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/;
     if (email !== "" && emailPattern.test(email)) {
       $emailInput.removeClass("content-border-danger");
