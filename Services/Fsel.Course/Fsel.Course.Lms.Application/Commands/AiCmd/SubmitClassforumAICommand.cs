@@ -18,6 +18,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using Kros.Extensions;
     using MediatR;
@@ -74,7 +75,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             #region Retry
 
-            var checkDataClassForum = ConvertHelper.Deserialize<List<ClassForumAIModel>>(RemoveMarkdownFromJson(aIResponse ?? string.Empty));
+            aIResponse = Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
+
+            var checkDataClassForum = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
 
             bool conditionRetry = checkDataClassForum?.All(x => x != null) ?? default;
 
@@ -106,7 +109,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             #endregion Retry
 
-            var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(RemoveMarkdownFromJson(aIResponse ?? string.Empty));
+            var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse));
 
             if (classForumDetailResult != null)
             {
@@ -167,12 +170,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 return listStr.ToList();
             }
             return new List<string> { data?.ToString() ?? string.Empty };
-        }
-
-        private static string RemoveMarkdownFromJson(string json)
-        {
-            string cleanedJson = Regex.Replace(json, @"^```json\s*|\s*```$", "");
-            return cleanedJson;
         }
     }
 }
