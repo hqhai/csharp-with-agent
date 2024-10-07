@@ -5,14 +5,11 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
     using System.Globalization;
     using System.IO;
     using System.Text;
-    using System.Text.RegularExpressions;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
@@ -46,7 +43,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         }
 
         #region Handle
-
 
         /// <summary>
         /// Chấm điểm speaking bằng AI
@@ -156,7 +152,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
             foreach (var item in mockTestResult.MockTestAnswers)
             {
-
                 questionArray.Add(item?.SectionTimeCode?.Name ?? string.Empty);
                 answerArray.Add(item?.SpeechTextAnswer ?? string.Empty);
                 pronScore += item != null && item.PronunciationScore.HasValue ? item.PronunciationScore.Value : 0;
@@ -170,7 +165,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             double averagePronScore = Math.Round(count > 0 ? (double)pronScore / count : 0);
             return (questionArray, answerArray, averagePronScore, count);
         }
-
 
         /// <summary>
         /// Tạo model mocktestscore tương ứng
@@ -192,7 +186,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 MockTestResultId = mockTestResultId
             };
         }
-
 
         /// <summary>
         /// Lấy dữ liệu AI
@@ -218,7 +211,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 SettingTopP = 1
             }, cancellationToken).ConfigureAwait(false);
 
-            return RemoveMarkdownFromJson(aIResponse ?? string.Empty);
+            return Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
         }
 
         /// <summary>
@@ -250,23 +243,9 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             //});
         }
 
+        #endregion Handle
 
-        #endregion
         #region Func
-        /// <summary>
-        /// Hàm loại bỏ MarkDown của chatgpt trả về
-        /// </summary>
-        /// <param name="json"></param>
-        /// <returns></returns>
-        public static string RemoveMarkdownFromJson(string json)
-        {
-            // Loại bỏ dấu ```json từ đầu và cuối chuỗi JSON
-            string cleanedJson = Regex.Replace(json, @"^```json\s*|\s*```$", "");
-
-            // Trả về chuỗi JSON đã được loại bỏ dấu ```json
-            return cleanedJson;
-        }
-
 
         /// <summary>
         /// Gửi kết quả đển websocket
@@ -278,7 +257,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         {
             foreach (var score in scores)
             {
-
                 SubmitAiSpeakingResponseModel model = new SubmitAiSpeakingResponseModel()
                 {
                     CriteriaName = score.Criteria.ToString(),
@@ -287,9 +265,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                     MockTestResultId = score.MockTestResultId,
                 };
                 await _submitAiSpeakingAnswerPublisher.Publish(model, cancellationToken);
-
             }
-
         }
 
         /// <summary>
@@ -300,7 +276,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         /// <returns></returns>
         public static (long bandScore, string? comment) GetBandScore(double averagePronScore, List<ProsodyScore>? scoreRanges)
         {
-
             if (scoreRanges == null || scoreRanges.Count == 0)
             {
                 return (0, string.Empty);
@@ -347,10 +322,8 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
             result = string.Concat(result, " ", defaultConfigByCriteria);
 
-
             return result;
         }
-
 
         /// <summary>
         /// Lấy config của AI Speaking theo tiêu chí
@@ -366,9 +339,11 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 case EnumMockTestScoreCriteria.GrammaticalRangeAndAccuracy:
                     result = isUserConfig ? File.ReadAllText(ResourceSettings.SpeakingGrammarRole) : File.ReadAllText(ResourceSettings.SpeakingGrammar);
                     break;
+
                 case EnumMockTestScoreCriteria.LexicalResource:
                     result = isUserConfig ? File.ReadAllText(ResourceSettings.SpeakingLexicalRole) : File.ReadAllText(ResourceSettings.SpeakingLexical);
                     break;
+
                 case EnumMockTestScoreCriteria.FluencyAndCoherence:
                     result = isUserConfig ? File.ReadAllText(ResourceSettings.SpeakingFluencyRole) : File.ReadAllText(ResourceSettings.SpeakingFluency);
 
@@ -377,8 +352,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
             return result;
         }
-
-
 
         /// <summary>
         /// Chuyển đổi số thành chữ
@@ -439,6 +412,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             return words;
         }
 
-        #endregion
+        #endregion Func
     }
 }
