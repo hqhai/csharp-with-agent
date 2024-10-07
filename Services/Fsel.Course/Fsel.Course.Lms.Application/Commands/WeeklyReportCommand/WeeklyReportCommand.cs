@@ -99,7 +99,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 return methodResult;
             }
             //filter những học sinh bật thông báo email.
-            students = students.Where(x => studentFilterResult.Contains(x.Human!.UserId)).ToList();
+            students = students.Where(x => x.Human != null && studentFilterResult.Contains(x.Human.UserId)).OrderBy(x => x.Human!.Email).ToList();
 
             DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value.AddDays(1).Date : DateTime.UtcNow.Date;
 
@@ -170,6 +170,8 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
             foreach (var item in students)
             {
+                _logger.LogInformation("Index {index} of {total}, Email: {email}", students.IndexOf(item) + 1, students.Count, item.Human!.Email);
+
                 var studentDailyStreaks = featureAccessTimeResults.Content?.Result?.Where(p => p.CreatedUserId == item.Human?.UserId).Where(x => x.CreatedDate.HasValue).Select(p => p.CreatedDate!.Value.Date).Distinct().ToList();
 
                 var weeklyReport = new WeeklyReportModel()

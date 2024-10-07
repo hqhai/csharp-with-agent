@@ -56,12 +56,12 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             if (string.IsNullOrEmpty(request.Email))
             {
-                var check = request.EndDate.Date - request.StartDate.Date;
-                if (check.TotalDays > 7)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumIntegrationErrorCode.TotalDaysGreater7), nameof(check));
-                    return methodResult;
-                }
+                //var check = request.EndDate.Date - request.StartDate.Date;
+                //if (check.TotalDays > 7)
+                //{
+                //    methodResult.AddErrorBadRequest(nameof(EnumIntegrationErrorCode.TotalDaysGreater7), nameof(check));
+                //    return methodResult;
+                //}
 
                 var courseIntegrationHasTimeQueryModel = new CourseIntegrationQueryModel
                 {
