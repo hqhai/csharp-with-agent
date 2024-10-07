@@ -2,6 +2,8 @@
 
 namespace Fsel.Course.Infrastructure.Common
 {
+    using Fsel.Common.Helpers;
+
     public class LinQHelper
     {
         public int GetHighestStreak(IList<bool>? data)
