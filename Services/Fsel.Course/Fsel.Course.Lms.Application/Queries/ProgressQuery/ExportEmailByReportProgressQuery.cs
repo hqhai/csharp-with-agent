@@ -181,7 +181,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             {
                 return;
             }
-            var unitResult = await GetUnitResultAsync(courseResult, cancellationToken);
+            var unitResult = await GetUnitResultProgressAsync(courseResult, cancellationToken);
 
             var unitResultDones = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.Status == EnumResultStatus.Done)
                                                        .OrderByDescending(x => x.CreatedDate).ToListAsync(cancellationToken);
@@ -202,7 +202,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             reportProgress.LessonName = lessonResult.Lesson?.Name;
         }
 
-        private async Task<UnitResult?> GetUnitResultAsync(CourseResult courseResult, CancellationToken cancellationToken)
+        private async Task<UnitResult?> GetUnitResultProgressAsync(CourseResult courseResult, CancellationToken cancellationToken)
         {
             var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit)
                                                         .Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId)

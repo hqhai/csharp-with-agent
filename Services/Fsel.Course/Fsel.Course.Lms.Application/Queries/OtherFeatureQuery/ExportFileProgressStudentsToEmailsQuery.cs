@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
 {
+    using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -12,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -37,6 +39,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly ILessonRepository _lessonRepository;
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
         public ExportFileProgressStudentsToEmailsQueryHandler(IUserService userService,
             ICourseResultRepository courseResultRepository,
@@ -45,7 +48,8 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             IUnitResultRepository unitResultRepository,
             ILessonResultRepository lessonResultRepository,
             IPlacementTestResultRepository placementTestResultRepository,
-            ILessonRepository lessonRepository)
+            ILessonRepository lessonRepository,
+            ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _userService = userService;
             _courseResultRepository = courseResultRepository;
@@ -55,6 +59,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             _lessonResultRepository = lessonResultRepository;
             _placementTestResultRepository = placementTestResultRepository;
             _lessonRepository = lessonRepository;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
         public async Task<MethodResult<Stream>> Handle(ExportFileProgressStudentsToEmailsQuery request, CancellationToken cancellationToken)
@@ -191,9 +196,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
 
         private async Task SetOverallPercentUnitAsync(StudentProgressReportModel studentProgressReport, CourseResult courseResult)
         {
-            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
-                                                         .OrderBy(x => x.CreatedDate)
-                                                         .ToListAsync();
+            var unitResults = await GetUnitResultsAsync(courseResult, CancellationToken.None);
             foreach (var unitResult in unitResults)
             {
                 var index = unitResults.IndexOf(unitResult);
@@ -205,12 +208,44 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             }
         }
 
+        private async Task<IList<UnitResult>> GetUnitResultsAsync(CourseResult courseResult, CancellationToken cancellationToken)
+        {
+            var unitIds = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == courseResult.CourseId && x.UnitId.HasValue)
+                                                                                   .OrderBy(x => x.DisplayOrder)
+                                                                                   .Select(x => x.UnitId!)
+                                                                                   .ToListAsync(cancellationToken);
+            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit)
+                                                        .Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && unitIds.Contains(x.UnitId))
+                                                        .Where(x => x.Status == EnumResultStatus.Done)
+                                                        .OrderByDescending(x => x.CreatedDate)
+                                                        .ToListAsync(cancellationToken);
+            return unitResults.OrderBy(x => unitIds.IndexOf(x.UnitId)).ToList();
+        }
+
+        private async Task<UnitResult?> GetUnitResultProgressAsync(CourseResult courseResult, CancellationToken cancellationToken)
+        {
+            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit)
+                                                        .Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId)
+                                                        .Where(x => x.Status != EnumResultStatus.Unfinished)
+                                                        .OrderByDescending(x => x.CreatedDate)
+                                                        .ToListAsync(cancellationToken);
+            var unitResult = unitResults.Where(x => x.Status != EnumResultStatus.Done).OrderByDescending(x => x.CreatedDate).FirstOrDefault();
+            if (unitResult == null)
+            {
+                var courseUnitMockTest = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == courseResult.CourseId && x.UnitId.HasValue)
+                    .OrderByDescending(x => x.DisplayOrder)
+                    .FirstOrDefaultAsync(cancellationToken);
+                if (courseUnitMockTest != null)
+                {
+                    unitResult = unitResults.FirstOrDefault(x => x.CourseId == courseResult.CourseId && x.UnitId == courseUnitMockTest.UnitId);
+                }
+            }
+            return unitResult;
+        }
+
         private async Task SetProgressModuleAsync(StudentProgressReportModel studentProgressReport, CourseResult courseResult)
         {
-            var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
-                                                        .OrderByDescending(x => x.CreatedDate)
-                                                        .ThenByDescending(x => x.UpdatedDate)
-                                                        .FirstOrDefaultAsync();
+            var unitResult = await GetUnitResultProgressAsync(courseResult, CancellationToken.None);
             if (unitResult == null)
             {
                 return;

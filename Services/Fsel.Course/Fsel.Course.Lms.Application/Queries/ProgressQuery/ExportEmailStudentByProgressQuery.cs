@@ -115,7 +115,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     if (courseResult != null)
                     {
                         var courseType = courseResult.Course?.CourseType;
-                        var unitResult = await GetUnitResultAsync(courseResult, cancellationToken);
+                        var unitResult = await GetUnitResultProgressAsync(courseResult, cancellationToken);
                         if (unitResult != null)
                         {
                             reportProgress.UnitName = unitResult.Unit?.Name;
@@ -147,7 +147,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             return methodResult;
         }
 
-        private async Task<UnitResult?> GetUnitResultAsync(CourseResult courseResult, CancellationToken cancellationToken)
+        private async Task<UnitResult?> GetUnitResultProgressAsync(CourseResult courseResult, CancellationToken cancellationToken)
         {
             var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit)
                                                         .Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId)
