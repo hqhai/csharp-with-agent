@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
@@ -39,6 +40,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly ISystemService _systemService;
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
         public ExportEmailByReportProgressQueryHandler(
             IUserService userService,
@@ -49,7 +51,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             IUnitResultRepository unitResultRepository,
             IPlacementTestResultRepository placementTestResultRepository,
             ISystemService systemService,
-            ICourseResultRepository courseResultRepository)
+            ICourseResultRepository courseResultRepository,
+            ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _userService = userService;
             _orderService = orderService;
@@ -60,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             _placementTestResultRepository = placementTestResultRepository;
             _systemService = systemService;
             _courseResultRepository = courseResultRepository;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
         public async Task<MethodResult<Stream>> Handle(ExportEmailByReportProgressQuery request, CancellationToken cancellationToken)
@@ -177,24 +181,46 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             {
                 return;
             }
-            var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
-                                                                   .OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+            var unitResult = await GetUnitResultAsync(courseResult, cancellationToken);
 
             var unitResultDones = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.Status == EnumResultStatus.Done)
                                                        .OrderByDescending(x => x.CreatedDate).ToListAsync(cancellationToken);
-            if (unitResult != null)
+            if (unitResult == null)
             {
-                reportProgress.UnitName = unitResult.Unit?.Name;
-                reportProgress.UnitAverage = unitResultDones.Any() ? unitResultDones.Average(x => x.Percent) : unitResult.Percent;
-                var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.Lesson)
-                                                  .Where(x => x.StudentId == courseResult.StudentId && x.Status != EnumResultStatus.Unfinished)
-                                                  .Where(x => x.CourseId == courseResult.CourseId && x.UnitId == unitResult.UnitId)
-                                                  .OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-                if (lessonResult != null)
+                return;
+            }
+            reportProgress.UnitName = unitResult.Unit?.Name;
+            reportProgress.UnitAverage = unitResultDones.Any() ? unitResultDones.Average(x => x.Percent) : unitResult.Percent;
+            var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.Lesson)
+                                              .Where(x => x.StudentId == courseResult.StudentId && x.Status != EnumResultStatus.Unfinished)
+                                              .Where(x => x.CourseId == courseResult.CourseId && x.UnitId == unitResult.UnitId)
+                                              .OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+            if (lessonResult == null)
+            {
+                return;
+            }
+            reportProgress.LessonName = lessonResult.Lesson?.Name;
+        }
+
+        private async Task<UnitResult?> GetUnitResultAsync(CourseResult courseResult, CancellationToken cancellationToken)
+        {
+            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit)
+                                                        .Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId)
+                                                        .Where(x => x.Status != EnumResultStatus.Unfinished)
+                                                        .OrderByDescending(x => x.CreatedDate)
+                                                        .ToListAsync(cancellationToken);
+            var unitResult = unitResults.Where(x => x.Status != EnumResultStatus.Done).OrderByDescending(x => x.CreatedDate).FirstOrDefault();
+            if (unitResult == null)
+            {
+                var courseUnitMockTest = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == courseResult.CourseId && x.UnitId.HasValue)
+                    .OrderByDescending(x => x.DisplayOrder)
+                    .FirstOrDefaultAsync(cancellationToken);
+                if (courseUnitMockTest != null)
                 {
-                    reportProgress.LessonName = lessonResult.Lesson?.Name;
+                    unitResult = unitResults.FirstOrDefault(x => x.CourseId == courseResult.CourseId && x.UnitId == courseUnitMockTest.UnitId);
                 }
             }
+            return unitResult;
         }
 
         private async Task<(EnumResultStatus?, EnumCourseLevel?)> GetStatusPTAsync(StudentModel? student, bool isLearn, CancellationToken cancellationToken)

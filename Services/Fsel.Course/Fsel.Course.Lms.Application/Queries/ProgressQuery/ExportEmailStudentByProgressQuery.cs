@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 {
+    using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Common.Models.Excels;
@@ -34,6 +35,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly IHomeWorkResultRepository _homeWorkResultRepository;
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
         public ExportEmailStudentByProgressQueryHandler(
             IUserService userService,
@@ -43,7 +46,9 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             ISystemService systemService,
             IPlacementTestResultRepository placementTestResultRepository,
             IClassForumResultRepository classForumResultRepository,
-            ICourseResultRepository courseResultRepository)
+            ICourseResultRepository courseResultRepository,
+            IHomeWorkResultRepository homeWorkResultRepository,
+            ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _userService = userService;
             _unitResultRepository = unitResultRepository;
@@ -53,6 +58,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             _placementTestResultRepository = placementTestResultRepository;
             _classForumResultRepository = classForumResultRepository;
             _courseResultRepository = courseResultRepository;
+            _homeWorkResultRepository = homeWorkResultRepository;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
         public async Task<MethodResult<Stream>> Handle(ExportEmailStudentByProgressQuery request, CancellationToken cancellationToken)
@@ -108,10 +115,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     if (courseResult != null)
                     {
                         var courseType = courseResult.Course?.CourseType;
-                        var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit)
-                                                                            .Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
-                                                                            .OrderByDescending(x => x.CreatedDate)
-                                                                            .FirstOrDefaultAsync(cancellationToken);
+                        var unitResult = await GetUnitResultAsync(courseResult, cancellationToken);
                         if (unitResult != null)
                         {
                             reportProgress.UnitName = unitResult.Unit?.Name;
@@ -143,15 +147,61 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             return methodResult;
         }
 
+        private async Task<UnitResult?> GetUnitResultAsync(CourseResult courseResult, CancellationToken cancellationToken)
+        {
+            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit)
+                                                        .Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId)
+                                                        .Where(x => x.Status != EnumResultStatus.Unfinished)
+                                                        .OrderByDescending(x => x.CreatedDate)
+                                                        .ToListAsync(cancellationToken);
+            var unitResult = unitResults.Where(x => x.Status != EnumResultStatus.Done).OrderByDescending(x => x.CreatedDate).FirstOrDefault();
+            if (unitResult == null)
+            {
+                var courseUnitMockTest = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == courseResult.CourseId && x.UnitId.HasValue)
+                    .OrderByDescending(x => x.DisplayOrder)
+                    .FirstOrDefaultAsync(cancellationToken);
+                if (courseUnitMockTest != null)
+                {
+                    unitResult = unitResults.FirstOrDefault(x => x.CourseId == courseResult.CourseId && x.UnitId == courseUnitMockTest.UnitId);
+                }
+            }
+            return unitResult;
+        }
+
         private async Task<ReportProgressStudentExportModel> SetReportProgress(LessonResult lessonResult, ReportProgressStudentExportModel reportProgressStudentExport)
         {
-            var videoResult = await _videoResultRepository.Queryable.Include(x => x.Video).FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id);
-            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForum).FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id);
-
+            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id);
+            var classForumResult = await _classForumResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id);
+            var homeWorkResults = await _homeWorkResultRepository.Queryable.Where(x => x.LessonResultId == lessonResult.Id).ToListAsync();
             reportProgressStudentExport.VideoStatus = videoResult?.Status;
             reportProgressStudentExport.ClassForumStatus = classForumResult?.Status;
-            reportProgressStudentExport.HomeWorkStatus = classForumResult != null && classForumResult.Status != EnumClassForumResultStatus.Draft ? EnumResultStatus.Process : null;
+            reportProgressStudentExport.HomeWorkStatus = GetResultStatus(homeWorkResults);
             return reportProgressStudentExport;
+        }
+
+        private static EnumResultStatus? GetResultStatus(IList<HomeWorkResult> homeWorkResults)
+        {
+            EnumResultStatus? status = null;
+            if (homeWorkResults.Any())
+            {
+                if (homeWorkResults.All(x => x.Status == EnumResultStatus.Unfinished))
+                {
+                    return EnumResultStatus.Unfinished;
+                }
+                else if (homeWorkResults.All(x => x.Status == EnumResultStatus.New))
+                {
+                    return EnumResultStatus.New;
+                }
+                else if (homeWorkResults.Any(x => x.Status == EnumResultStatus.Process))
+                {
+                    return EnumResultStatus.Process;
+                }
+                else if (homeWorkResults.All(x => x.Status == EnumResultStatus.Done))
+                {
+                    return EnumResultStatus.Done;
+                }
+            }
+            return status;
         }
     }
 }
