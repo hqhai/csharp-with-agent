@@ -27,14 +27,14 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
 
-    public class WeeklyReportCommand : IRequest<MethodResult<bool>>
+    public class AggregateDataWeeklyReportCommand : IRequest<MethodResult<bool>>
     {
         public ICollection<Guid>? StudentIds { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
     }
 
-    public class WeeklyReportCommandHandler : IRequestHandler<WeeklyReportCommand, MethodResult<bool>>
+    public class AggregateDataWeeklyReportCommandHandler : IRequestHandler<AggregateDataWeeklyReportCommand, MethodResult<bool>>
     {
         private readonly IUserService _userService;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
@@ -44,10 +44,10 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IMediator _mediator;
         private readonly AppSetting _appSetting;
-        private readonly ILogger<WeeklyReportCommandHandler> _logger;
+        private readonly ILogger<AggregateDataWeeklyReportCommandHandler> _logger;
         private readonly IWeeklyReportRepository _weeklyReportRepository;
 
-        public WeeklyReportCommandHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting, ILogger<WeeklyReportCommandHandler> logger, IWeeklyReportRepository weeklyReportRepository)
+        public AggregateDataWeeklyReportCommandHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting, ILogger<AggregateDataWeeklyReportCommandHandler> logger, IWeeklyReportRepository weeklyReportRepository)
         {
             _userService = userService;
             _finalTestResultRepository = finalTestResultRepository;
@@ -61,7 +61,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             _weeklyReportRepository = weeklyReportRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(WeeklyReportCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(AggregateDataWeeklyReportCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();

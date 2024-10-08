@@ -19,7 +19,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
 
         public override async Task ConsumeQueue(BaseQueueModel? message)
         {
-            await _mediator.Send(new WeeklyReportCommand()).ConfigureAwait(false);
+            await _mediator.Send(new AggregateDataWeeklyReportCommand()).ConfigureAwait(false);
         }
     }
 }
