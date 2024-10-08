@@ -191,23 +191,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                                 user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, userRegisterModel.Password);
                                 user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
                                 result = await _userManager.UpdateAsync(user);
-                                if (result.Succeeded)
-                                {
-                                    #region Create User Referral
-                                    var vm = await BuildLoginViewModelAsync(request.ReturnUrl ?? string.Empty);
-                                    if (!string.IsNullOrEmpty(vm.ReferralCode))
-                                    {
-                                        var updateReferralCodeResult = await _mediator.Send(new CreateUserReferralCommand { ReferralCode = vm.ReferralCode, ReceiverId = user.Id, UserReferralType = EnumUserReferralType.Link }).ConfigureAwait(false);
-                                        if (!updateReferralCodeResult.IsOK)
-                                        {
-                                            scope.Dispose();
-                                            ModelState.AddModelError(string.Empty, _localizer["i18nSettingReferralCodeResult1"]);
-                                            return View(request);
-                                        }
-                                    }
-                                    #endregion
-                                }
-                                else
+                                if (!result.Succeeded)
                                 {
                                     scope.Dispose();
                                     result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error.Description));
@@ -216,6 +200,15 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
                                 scope.Complete();
                             }
+
+                            #region Create User Referral
+                            var vm = await BuildLoginViewModelAsync(request.ReturnUrl ?? string.Empty);
+                            if (!string.IsNullOrEmpty(vm.ReferralCode))
+                            {
+                                await _mediator.Send(new CreateUserReferralCommand { ReferralCode = vm.ReferralCode, ReceiverId = user.Id, UserReferralType = EnumUserReferralType.Link }).ConfigureAwait(false);
+                            }
+                            #endregion
+
                             ViewBag.Success = _localizer["i18n_User_successfuly_added"];
                             return await LoginWithoutPassword(user, request.ReturnUrl);
                         }
