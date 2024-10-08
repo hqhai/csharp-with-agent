@@ -83,6 +83,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForumDetailResult> ClassForumDetailResults { get; set; }
         public DbSet<MockTestAICriteriaSetting> MockTestAICriteriaSettings { get; set; }
         public DbSet<ProsodyScore> ProsodyScore { get; set; }
+        public DbSet<WeeklyReport> WeeklyReports { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
