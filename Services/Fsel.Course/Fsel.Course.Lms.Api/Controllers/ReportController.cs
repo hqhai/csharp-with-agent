@@ -58,6 +58,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// </summary>
         [HttpPost("export-time-report")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> Export([FromForm] ExportTimeReportStudentQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
