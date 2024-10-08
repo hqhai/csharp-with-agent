@@ -29,7 +29,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// get video time code ranking
+        /// weekly report
         /// </summary>
         [HttpPost("weekly-report")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]

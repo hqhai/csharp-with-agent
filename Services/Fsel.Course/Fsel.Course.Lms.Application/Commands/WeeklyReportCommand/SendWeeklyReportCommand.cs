@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
     public class SendWeeklyReportCommand : IRequest<MethodResult<bool>>
@@ -47,6 +48,15 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                     IsCCEmailDefault = true,
                 }, cancellationToken).ConfigureAwait(false);
             }
+
+            await _weeklyReportRepository.ExecuteTransactionAsync(async () =>
+            {
+                await _weeklyReportRepository.DeleteListAsync(weeklyReports);
+                await _weeklyReportRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.Result = true;
+                return methodResult;
+            });
 
             return methodResult;
         }

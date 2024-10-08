@@ -103,7 +103,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 return methodResult;
             }
             //filter những học sinh bật thông báo email.
-            students = students.Where(x => studentFilterResult.Contains(x.Human!.UserId)).ToList();
+            students = students.Where(x => x.Human != null && studentFilterResult.Contains(x.Human.UserId)).OrderBy(x => x.Human!.Email).ToList();
 
             DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value.AddDays(1).Date : DateTime.UtcNow.Date;
 
@@ -172,16 +172,18 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
             var unitNameHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.UnitName, cancellationToken);
 
-            //var weeklyReports = await _weeklyReportRepository.Queryable.ToListAsync(cancellationToken);
+            var weeklyReports = await _weeklyReportRepository.Queryable.ToListAsync(cancellationToken);
 
             var weeklyReportEntities = new List<WeeklyReport>();
 
             foreach (var item in students)
             {
-                //if (weeklyReports.Any(p => p.StudentId == item.Id))
-                //{
-                //    continue;
-                //}
+                _logger.LogInformation("Index {index} of {total}, Email: {email}", students.IndexOf(item) + 1, students.Count, item.Human!.Email);
+
+                if (weeklyReports.Any(p => p.StudentId == item.Id))
+                {
+                    continue;
+                }
 
                 var studentDailyStreaks = featureAccessTimeResults.Content?.Result?.Where(p => p.CreatedUserId == item.Human?.UserId).Where(x => x.CreatedDate.HasValue).Select(p => p.CreatedDate!.Value.Date).Distinct().ToList();
 
@@ -350,14 +352,22 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                     else if (courseType == EnumCourseType.Academic)
                     {
                         var finalTestResult = await _finalTestResultRepository.Queryable.Include(fn => fn.FinalTest).Where(x => x.StudentId == item.Id && x.Status != EnumResultStatus.Done).OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
-                        weeklyReport.NextUnit = finalTestResult?.FinalTest?.Name;
+                        if (finalTestResult == null)
+                        {
+                            continue;
+                        }
+                        weeklyReport.NextUnit = finalTestResult.FinalTest?.Name;
                         weeklyReport.Weekly3Display = SendMailSetting.Display;
                         weeklyReport.SkillMockTestDisplay = SendMailSetting.Display;
                     }
                     else if (courseType == EnumCourseType.Ielts)
                     {
                         var mockTestResult = await _mockTestResultRepository.Queryable.Include(mt => mt.MockTest).Where(x => x.StudentId == item.Id && x.Status != EnumResultStatus.Done).OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
-                        weeklyReport.NextUnit = mockTestResult?.MockTest?.Name;
+                        if (mockTestResult == null)
+                        {
+                            continue;
+                        }
+                        weeklyReport.NextUnit = mockTestResult.MockTest?.Name;
                         weeklyReport.Weekly3Display = SendMailSetting.Display;
                         weeklyReport.SkillMockTestDisplay = SendMailSetting.Display;
                     }
