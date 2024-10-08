@@ -56,12 +56,12 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             if (string.IsNullOrEmpty(request.Email))
             {
-                var check = request.EndDate.Date - request.StartDate.Date;
-                if (check.TotalDays > 7)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumIntegrationErrorCode.TotalDaysGreater7), nameof(check));
-                    return methodResult;
-                }
+                //var check = request.EndDate.Date - request.StartDate.Date;
+                //if (check.TotalDays > 7)
+                //{
+                //    methodResult.AddErrorBadRequest(nameof(EnumIntegrationErrorCode.TotalDaysGreater7), nameof(check));
+                //    return methodResult;
+                //}
 
                 var courseIntegrationHasTimeQueryModel = new CourseIntegrationQueryModel
                 {
@@ -186,6 +186,25 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 methodResult.AddError(units.Error);
                 return methodResult;
             }
+
+            // lấy client
+            queryOrder.Status = true;
+            var clientUsers = await _orderService.GetOrderByStatusAsync(queryOrder);
+            if (!clientUsers.IsSuccessStatusCode)
+            {
+                methodResult.AddError(clientUsers.Error);
+                return methodResult;
+            }
+            var clientUserResults = clientUsers.Content?.Result;
+            if (clientUserResults == null)
+            {
+                methodResult.AddError(clientUsers.Error);
+                return methodResult;
+            }
+
+            var clientUserResultIds = clientUserResults.Select(x => x.UserId).ToList();
+
+            distinctFinalUserIds = distinctFinalUserIds.Where(x => !clientUserResultIds.Contains(x)).ToList();
 
             // lấy all user từ list hợp nhất
             var userCombines = await _humanRepository.Queryable

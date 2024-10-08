@@ -16,7 +16,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Shared.Enums;
@@ -60,8 +59,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
 
-            var packagesResult = await _orderService.GetPackages();
-
             var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentToPlatformModel x, IList<ImportStudentToPlatformModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
                 if (string.IsNullOrEmpty(x.FullName))
@@ -71,6 +68,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 if (string.IsNullOrEmpty(x.Email) || !x.Email.IsValidEmail())
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null or malformed" });
+                }
+                else if (_userManager.Users.Any(p => (p.Email == x.Email || p.UserName == x.Email) && !p.EmailConfirmed))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email not confirmed email" });
                 }
                 else if (_userManager.Users.Any(p => p.Email == x.Email || p.UserName == x.Email))
                 {
@@ -125,16 +126,22 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         UserName = student.Email,
                         Email = student.Email,
                         FullName = student.FullName,
+                        PhoneNumber = student.PhoneNumber,
                         EmailConfirmed = true,
                         Human = new Human()
                         {
                             FullName = student.FullName,
+                            PhoneNumber = student.PhoneNumber,
                             Birthday = Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture),
                             Email = student.Email,
                             Student = new Student()
                             {
                                 CreatedByParent = false,
-                                Occupation = "Student"
+                                Occupation = "Student",
+                                School = student.School,
+                                SchoolClass = student.SchoolClass,
+                                SchoolFaculty = student.SchoolFaculty,
+                                SchoolGrade = student.SchoolGrade
                             }
                         },
                         UserPlatforms = new List<UserPlatform>()

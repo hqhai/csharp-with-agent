@@ -16,5 +16,8 @@ namespace Fsel.Identity.Application.Services.OrderService.CommandModels
         public Guid? DistrictId { get; set; }
         public Guid CourseId { get; set; }
         public bool IsTrialRegistration { get; set; }
+        public DateTime? ExpireDate { get; set; }
+        public bool IsSendEmail { get; set; }
+        public EnumPaymentRevenueType RevenueType { get; set; }
     }
 }
