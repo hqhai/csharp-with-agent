@@ -21,7 +21,7 @@ namespace Fsel.Hangfire.Host.Jobs
             JobExtensions.SetRecurringJob<LeaderBoardWorker>(WorkerSettings.JobName.LeaderBoardJob, Cron.HourInterval(1));
             JobExtensions.SetRecurringJob<NoticeAccessTimeWorker>(WorkerSettings.JobName.NoticeAccessTime, Cron.HourInterval(1));
             JobExtensions.SetRecurringJob<NoticeExtendPackageWorker>(WorkerSettings.JobName.NoticeExtendPackage, Cron.HourInterval(1));
-            JobExtensions.SetRecurringJob<WeeklyReportWorker>(WorkerSettings.JobName.WeeklyReport, Cron.Weekly(DayOfWeek.Monday, 2, 0));
+            //JobExtensions.SetRecurringJob<WeeklyReportWorker>(WorkerSettings.JobName.WeeklyReport, Cron.Weekly(DayOfWeek.Monday, 2, 0));
             JobExtensions.SetRecurringJob<TreasureZMatterWorker>(WorkerSettings.JobName.TreasureZMatter, Cron.Weekly(DayOfWeek.Wednesday, 9, 0));
             JobExtensions.SetRecurringJob<EnergyOfPlanetWorker>(WorkerSettings.JobName.EnergyOfPlanet, Cron.Weekly(DayOfWeek.Sunday, 9, 0));
             JobExtensions.SetRecurringJob<JobActiveEventWorker>(WorkerSettings.JobName.ActiveEvent, Cron.Daily(17, 0));

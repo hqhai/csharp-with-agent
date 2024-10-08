@@ -103,7 +103,11 @@ namespace Fsel.Course.Infrastructure.Common
                 DisplayOrder = index + 1,
                 LessonId = x
             }).ToList() ?? new List<UnitLesson>();
-            if (request.MockTestId.HasValue && unit.UnitSkillMockTests.Any(x => x.MockTestId != request.MockTestId.Value))
+            if (!request.MockTestId.HasValue)
+            {
+                unit.UnitSkillMockTests = new List<UnitSkillMockTest>();
+            }
+            else if (!unit.UnitSkillMockTests.Any() || unit.UnitSkillMockTests.Any(x => x.MockTestId != request.MockTestId.Value))
             {
                 unit.UnitSkillMockTests = new List<UnitSkillMockTest>
                 {
@@ -112,10 +116,6 @@ namespace Fsel.Course.Infrastructure.Common
                         MockTestId = request.MockTestId.Value
                     }
                 };
-            }
-            else
-            {
-                unit.UnitSkillMockTests = new List<UnitSkillMockTest>();
             }
         }
     }
