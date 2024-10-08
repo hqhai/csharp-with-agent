@@ -24,12 +24,12 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ExportFileProgressStudentsToEmailsQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
+    public class ExportFileProgressStudentIELTSToEmailsQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
         public string? EventCode { get; set; }
     }
 
-    public class ExportFileProgressStudentsToEmailsQueryHandler : IRequestHandler<ExportFileProgressStudentsToEmailsQuery, MethodResult<Stream>>
+    public class ExportFileProgressStudentIELTSToEmailsQueryHandler : IRequestHandler<ExportFileProgressStudentIELTSToEmailsQuery, MethodResult<Stream>>
     {
         private readonly IUserService _userService;
         private readonly ICourseResultRepository _courseResultRepository;
@@ -40,7 +40,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly ILessonRepository _lessonRepository;
 
-        public ExportFileProgressStudentsToEmailsQueryHandler(IUserService userService,
+        public ExportFileProgressStudentIELTSToEmailsQueryHandler(IUserService userService,
             ICourseResultRepository courseResultRepository,
             ISystemService systemService,
             ManagerProgressHelper managerProgressHelper,
@@ -59,7 +59,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             _lessonRepository = lessonRepository;
         }
 
-        public async Task<MethodResult<Stream>> Handle(ExportFileProgressStudentsToEmailsQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<Stream>> Handle(ExportFileProgressStudentIELTSToEmailsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<Stream>();
