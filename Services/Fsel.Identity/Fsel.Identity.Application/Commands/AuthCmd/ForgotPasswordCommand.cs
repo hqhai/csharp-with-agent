@@ -15,6 +15,7 @@ using Fsel.Shared.Enums;
 using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
@@ -59,10 +60,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
                 return methodResult;
             }
-            var user = await _userManager.FindByEmailAsync(request.Email);
+            var user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
+                return methodResult;
+            }
+            if (!user.EmailConfirmed && user.Human == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
 
