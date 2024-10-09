@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -32,13 +33,15 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ManagerProgressHelper _managerProgressHelper;
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
         public ExportFileProgressStudentQueryHandler(ICourseResultRepository courseResultRepository,
             IUserService userService,
             ISystemService systemService,
             IUnitResultRepository unitResultRepository,
             ILessonResultRepository lessonResultRepository,
-            ManagerProgressHelper managerProgressHelper)
+            ManagerProgressHelper managerProgressHelper,
+            ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _courseResultRepository = courseResultRepository;
             _userService = userService;
@@ -46,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             _unitResultRepository = unitResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _managerProgressHelper = managerProgressHelper;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
         public async Task<MethodResult<Stream>> Handle(ExportFileProgressStudentQuery request, CancellationToken cancellationToken)
@@ -125,16 +129,34 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             return methodResult;
         }
 
+        private async Task<UnitResult?> GetUnitResultProgressAsync(CourseResult courseResult, CancellationToken cancellationToken)
+        {
+            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit)
+                                                        .Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId)
+                                                        .Where(x => x.Status != EnumResultStatus.Unfinished)
+                                                        .OrderByDescending(x => x.CreatedDate)
+                                                        .ToListAsync(cancellationToken);
+            var unitResult = unitResults.Where(x => x.Status != EnumResultStatus.Done).OrderByDescending(x => x.CreatedDate).FirstOrDefault();
+            if (unitResult == null)
+            {
+                var courseUnitMockTest = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == courseResult.CourseId && x.UnitId.HasValue)
+                    .OrderByDescending(x => x.DisplayOrder)
+                    .FirstOrDefaultAsync(cancellationToken);
+                if (courseUnitMockTest != null)
+                {
+                    unitResult = unitResults.FirstOrDefault(x => x.CourseId == courseResult.CourseId && x.UnitId == courseUnitMockTest.UnitId);
+                }
+            }
+            return unitResult;
+        }
+
         private async Task SetProgressStudentAsync(StudentProgressExportModel reportProgress, CourseResult? courseResult, CancellationToken cancellationToken)
         {
             if (courseResult == null)
             {
                 return;
             }
-            var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
-                                                                   .OrderByDescending(x => x.CreatedDate)
-                                                                   .ThenByDescending(x => x.UpdatedDate)
-                                                                   .FirstOrDefaultAsync(cancellationToken);
+            var unitResult = await GetUnitResultProgressAsync(courseResult, cancellationToken);
             if (unitResult == null)
             {
                 return;
