@@ -402,7 +402,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
         {
             if (businessType == EnumFeatureBussinessType.Learn)
             {
-                return featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.VideoLesson || p.EnumFeature == EnumFeature.HomeWork || p.EnumFeature == EnumFeature.FinalTest || p.EnumFeature == EnumFeature.MockTest).Sum(p => p.AccessTime) ?? 0;
+                return featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.VideoLesson || p.EnumFeature == EnumFeature.HomeWork || p.EnumFeature == EnumFeature.FinalTest || p.EnumFeature == EnumFeature.MockTest || p.EnumFeature == EnumFeature.ChatBot).Sum(p => p.AccessTime) ?? 0;
             }
             else if (businessType == EnumFeatureBussinessType.Social)
             {
