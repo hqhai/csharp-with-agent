@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Domain.Models.EntityModels
+namespace Fsel.Course.Lms.Application.Services.UserServices.Models
 {
     using System;
     using Fsel.Common.Helpers;
@@ -35,8 +35,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? Email { get; set; }
 
         public EnumCourseLevel Level { get; set; }
-
-        public EnumCourseType CourseType { get; set; }
 
         //Tham gia cuộc thi
         public string? SchoolName { get; set; }
