@@ -1,9 +1,6 @@
-
 namespace Fsel.Identity.Application.Queries.StudentRanking
 
 {
-    using System.Text.Json;
-    using System.Text.Json.Serialization;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -24,11 +21,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
     public class GetStudentCompetitionByEventCodeQuery : BaseQueryModel, IRequest<MethodResult<PagingItemStudentRankingModel>>
     {
         public EnumCourseType CourseType { get; set; }
-
         public string? EventCode { get; set; }
-
         public int WeekNumber { get; set; }
-
     }
 
     public class GetStudentCompetitionByEventCodeQueryHandler : IRequestHandler<GetStudentCompetitionByEventCodeQuery, MethodResult<PagingItemStudentRankingModel>>
@@ -81,7 +75,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvents.EventContent), competitionEvents.EventContent);
                 return methodResult;
             }
-            #endregion
+
+            #endregion Validate
 
             var weekEventRules = competitionEvents.EventContent.WeekEvents.FirstOrDefault(x => x.WeekNumber == request.WeekNumber);
             if (weekEventRules == null)
@@ -150,6 +145,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             #endregion
 
             #region Snapshot
+
             // Lưu Snapshot theo tuần.
             if (weekEventRules.EndDate.Date == timeNowVI && resultSnapShots == null)
             {
@@ -160,11 +156,11 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                     StartDate = weekEventRules!.StartDate,
                     EndDate = weekEventRules!.EndDate,
                     WeekNumber = request.WeekNumber,
-
                 };
                 await UpdateSnapShot(snapshotModel, cancellationToken);
             }
-            #endregion
+
+            #endregion Snapshot
 
             var lists = result.ApplyPaging(request).ToList();
             int totalItem = result.Count;
@@ -180,7 +176,6 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
-
 
         /// <summary>
         /// Lưu dữ liệu snapshot theo tuần

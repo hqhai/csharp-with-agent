@@ -32,22 +32,22 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             {
                 FeatureAccessTimeModel? featureAccessTime;
                 var query = _featureAccessTimeRepository.Queryable.Where(x => x.CreatedUserId == request.UserId && (!item.CourseId.HasValue || x.CourseId == item.CourseId) && x.ObjectId.HasValue);
-                if (item.UnitId != null)
+                if (item.UnitId.HasValue)
                 {
                     query = query.Where(x => x.UnitId == item.UnitId);
                 }
 
-                if (item.LessonId != null)
+                if (item.LessonId.HasValue)
                 {
                     query = query.Where(x => x.LessonId == item.LessonId);
                 }
 
-                if (item.ObjectId != null)
+                if (item.ObjectId.HasValue)
                 {
                     query = query.Where(x => x.ObjectId == item.ObjectId);
                 }
 
-                if (item.EnumFeature != null)
+                if (item.EnumFeature.HasValue)
                 {
                     query = query.Where(x => x.EnumFeature == item.EnumFeature);
                 }
@@ -62,75 +62,34 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                         EnumFeature = x.Key,
                     }).FirstOrDefaultAsync(cancellationToken);
                 }
-                else if (item.LessonId != null && item.ObjectId != null)
+                else if (item.EnumFeature.HasValue && item.CourseId.HasValue)
                 {
-                    featureAccessTime = await query.GroupBy(x => new { x.CourseId, x.UnitId, x.LessonId, x.ObjectId }).Select(x => new FeatureAccessTimeModel
+                    featureAccessTime = await query.GroupBy(x => new { x.EnumFeature, x.CourseId }).Select(x => new FeatureAccessTimeModel
                     {
                         AccessTime = x.Sum(x => x.AccessTime),
                         Visit = x.Sum(x => x.Visit),
                         LastVisited = x.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
+                        EnumFeature = x.Key.EnumFeature,
                         CourseId = x.Key.CourseId,
-                        UnitId = x.Key.UnitId,
-                        LessonId = x.Key.LessonId,
-                        ObjectId = x.Key.ObjectId,
                     }).FirstOrDefaultAsync(cancellationToken);
                 }
-                else if (item.UnitId != null && item.ObjectId != null)
+                else if (item.CourseId.HasValue)
                 {
-                    featureAccessTime = await query.GroupBy(x => new { x.CourseId, x.UnitId, x.ObjectId }).Select(x => new FeatureAccessTimeModel
-                    {
-                        AccessTime = x.Sum(x => x.AccessTime),
-                        Visit = x.Sum(x => x.Visit),
-                        LastVisited = x.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
-                        CourseId = x.Key.CourseId,
-                        UnitId = x.Key.UnitId,
-                        ObjectId = x.Key.ObjectId,
-                    }).FirstOrDefaultAsync(cancellationToken);
-                }
-                else if (item.ObjectId != null)
-                {
-                    featureAccessTime = await query.GroupBy(x => new { x.CourseId, x.UnitId, x.LessonId, x.ObjectId }).Select(x => new FeatureAccessTimeModel
-                    {
-                        AccessTime = x.Sum(x => x.AccessTime),
-                        Visit = x.Sum(x => x.Visit),
-                        LastVisited = x.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
-                        CourseId = x.Key.CourseId,
-                        UnitId = x.Key.UnitId,
-                        LessonId = x.Key.LessonId,
-                        ObjectId = x.Key.ObjectId,
-                    }).FirstOrDefaultAsync(cancellationToken);
-                }
-                else if (item.LessonId != null)
-                {
-                    featureAccessTime = await query.GroupBy(x => new { x.CourseId, x.UnitId, x.LessonId }).Select(x => new FeatureAccessTimeModel
-                    {
-                        AccessTime = x.Sum(x => x.AccessTime),
-                        Visit = x.Sum(x => x.Visit),
-                        LastVisited = x.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
-                        CourseId = x.Key.CourseId,
-                        UnitId = x.Key.UnitId,
-                        LessonId = x.Key.LessonId,
-                    }).FirstOrDefaultAsync(cancellationToken);
-                }
-                else if (item.UnitId != null)
-                {
-                    featureAccessTime = await query.GroupBy(x => new { x.CourseId, x.UnitId }).Select(x => new FeatureAccessTimeModel
-                    {
-                        AccessTime = x.Sum(x => x.AccessTime),
-                        Visit = x.Sum(x => x.Visit),
-                        LastVisited = x.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
-                        CourseId = x.Key.CourseId,
-                        UnitId = x.Key.UnitId,
-                    }).FirstOrDefaultAsync(cancellationToken);
-                }
-                else
-                {
-                    featureAccessTime = await query.GroupBy(x => x.CourseId).Select(x => new FeatureAccessTimeModel
+                    featureAccessTime = await query.Where(x => x.CourseId.HasValue).GroupBy(x => x.CourseId).Select(x => new FeatureAccessTimeModel
                     {
                         AccessTime = x.Sum(x => x.AccessTime),
                         Visit = x.Sum(x => x.Visit),
                         LastVisited = x.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
                         CourseId = x.Key,
+                    }).FirstOrDefaultAsync(cancellationToken);
+                }
+                else
+                {
+                    featureAccessTime = await query.OrderByDescending(x => x.LastVisited).Select(x => new FeatureAccessTimeModel
+                    {
+                        AccessTime = x.AccessTime,
+                        Visit = x.Visit,
+                        LastVisited = x.LastVisited
                     }).FirstOrDefaultAsync(cancellationToken);
                 }
                 featureAccessTimes.Add(featureAccessTime ?? new FeatureAccessTimeModel());
