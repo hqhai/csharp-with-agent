@@ -26,6 +26,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class GetCourseQuery : IRequest<MethodResult<CourseModel>>
     {
@@ -48,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
+        private readonly ILogger<object> _logger;
 
         public GetCourseQueryHandler(
             AuthContext authContext,
@@ -63,7 +65,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             IUnitResultRepository unitResultRepository,
             IMockTestResultRepository mockTestResultRepository,
             SaveUserCourseSettingPublisher saveUserCourseSettingPublisher,
-            IFinalTestResultRepository finalTestResultRepository)
+            IFinalTestResultRepository finalTestResultRepository,
+            ILogger<GetCourseQueryHandler> logger)
         {
             _courseRepository = courseRepository;
             _userService = userService;
@@ -79,6 +82,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             _mockTestResultRepository = mockTestResultRepository;
             _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _finalTestResultRepository = finalTestResultRepository;
+            _logger = logger;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(GetCourseQuery request, CancellationToken cancellationToken)
@@ -375,8 +379,15 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                     continue;
                 }
             }
-            course = _courseRepository.Update(course);
-            await _courseRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                course = _courseRepository.Update(course);
+                await _courseRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogWarning("Duplicate CourseResult : " + ex.Message);
+            }
         }
 
         public static void AddUnit(int index, IList<UnitResult>? checkUnitResultAll, IList<MockTestResult>? checkMockTestResultAll, IList<CourseUnitMockTest>? courseUnitMockTests, Course course, CourseUnitMockTest courseUnitMockTest, Guid? studentId)
