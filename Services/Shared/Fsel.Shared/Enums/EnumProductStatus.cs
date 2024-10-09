@@ -2,8 +2,8 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumOrderTransactionStatus
+    public enum EnumProductStatus
     {
-        Success, Fail, Requested, Received
+        Active, InActive
     }
 }
