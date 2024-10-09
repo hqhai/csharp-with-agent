@@ -8,6 +8,12 @@ namespace Fsel.System.Domain.Enums.ErrorCodes
 
         NoReviewTypeForA1Level,
 
-        NoChallengeTypeForIELTSLevel
+        NoChallengeTypeForIELTSLevel,
+
+        FromAgeNotGreaterThanZero,
+
+        ToAgeNotGreaterThanZero,
+
+        ToAgeNotThanFromAge
     }
 }
