@@ -242,7 +242,7 @@ namespace Fsel.Shared.Helpers
         //Kiểm tra string có chứa khoảng trắng hay kí tự đặc biệt không
         public static bool ContainsWhitespaceOrSpecialChars(string input)
         {
-            return Regex.IsMatch(input, @"[\s]|[^\x00-\x7F]");
+            return Regex.IsMatch(input, "^[a-zA-Z0-9]+$");
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Fsel.Ordering.Application.Commands.Products
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ProductModel>();
 
-            if (!string.IsNullOrEmpty(request.Code) && StringHelper.ContainsWhitespaceOrSpecialChars(request.Code))
+            if (!string.IsNullOrEmpty(request.Code) && !StringHelper.ContainsWhitespaceOrSpecialChars(request.Code))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
                 return methodResult;
@@ -63,6 +63,12 @@ namespace Fsel.Ordering.Application.Commands.Products
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                     return methodResult;
                 }
+                if (_productRepository.Queryable.Any(p => p.Code == request.Code && p.Id != request.Id))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                    return methodResult;
+                }
+
                 var quantityChanged = product.OrderTransactions.Where(p => p.Status == EnumOrderTransactionStatus.Requested || p.Status == EnumOrderTransactionStatus.Received).Count();
                 if (request.Quantity < quantityChanged)
                 {
@@ -86,6 +92,12 @@ namespace Fsel.Ordering.Application.Commands.Products
             }
             else
             {
+                if (_productRepository.Queryable.Any(p => p.Code == request.Code))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                    return methodResult;
+                }
+
                 var product = _mapper.Map<Product>(request);
                 if (!product.IsValid())
                 {
