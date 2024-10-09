@@ -202,7 +202,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
 
         private async Task SetOverallPercentUnitAsync(StudentProgressReportModel studentProgressReport, CourseResult courseResult)
         {
-            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
+            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status == EnumResultStatus.Done)
                                                          .OrderBy(x => x.CreatedDate)
                                                          .ToListAsync();
             foreach (var unitResult in unitResults)

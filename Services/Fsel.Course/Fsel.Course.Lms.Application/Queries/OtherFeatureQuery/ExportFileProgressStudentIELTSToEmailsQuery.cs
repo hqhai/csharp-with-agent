@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
 {
     using System.Threading;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -17,7 +18,6 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
-    using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -26,7 +26,6 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
 
     public class ExportFileProgressStudentIELTSToEmailsQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
-        public string? EventCode { get; set; }
     }
 
     public class ExportFileProgressStudentIELTSToEmailsQueryHandler : IRequestHandler<ExportFileProgressStudentIELTSToEmailsQuery, MethodResult<Stream>>
@@ -39,6 +38,8 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly ILessonRepository _lessonRepository;
+        private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly IMapper _mapper;
 
         public ExportFileProgressStudentIELTSToEmailsQueryHandler(IUserService userService,
             ICourseResultRepository courseResultRepository,
@@ -47,7 +48,9 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             IUnitResultRepository unitResultRepository,
             ILessonResultRepository lessonResultRepository,
             IPlacementTestResultRepository placementTestResultRepository,
-            ILessonRepository lessonRepository)
+            ILessonRepository lessonRepository,
+            IMockTestResultRepository mockTestResultRepository,
+            IMapper mapper)
         {
             _userService = userService;
             _courseResultRepository = courseResultRepository;
@@ -57,6 +60,8 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             _lessonResultRepository = lessonResultRepository;
             _placementTestResultRepository = placementTestResultRepository;
             _lessonRepository = lessonRepository;
+            _mockTestResultRepository = mockTestResultRepository;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<Stream>> Handle(ExportFileProgressStudentIELTSToEmailsQuery request, CancellationToken cancellationToken)
@@ -69,7 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.FormFile));
                 return methodResult;
             }
-            var studentProgressReports = new List<StudentProgressReportModel>();
+            var studentProgressReports = new List<StudentProgressReportIELTSModel>();
 
             var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentEmailModel x, IList<ImportStudentEmailModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
@@ -106,25 +111,13 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             }
             var schools = schoolResults.Content?.Result;
 
-            var studentRankingResults = await _userService.GetLeaderBoardDataAsync(new GetStudentCompetitionByEventCodeQueryModel
-            {
-                WeekNumber = 1,
-                EventCode = request.EventCode
-            });
-            if (!studentRankingResults.IsSuccessStatusCode)
-            {
-                methodResult.AddError(studentRankingResults.Error);
-                return methodResult;
-            }
-            var studentRankings = studentRankingResults.Content?.Result?.Items;
-
             var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course)
                 .Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active)
                 .ToListAsync(cancellationToken);
             foreach (var student in students)
             {
                 var courseResult = courseResults.FirstOrDefault(x => x.StudentId == student.Id);
-                var studentProgressReport = new StudentProgressReportModel
+                var studentProgressReport = new StudentProgressReportIELTSModel
                 {
                     FullName = student.Human?.FullName,
                     Email = student.Human?.Email,
@@ -137,9 +130,10 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 {
                     await SetProgressCourseAsync(studentProgressReport, courseResult);
                     await SetProgressModuleAsync(studentProgressReport, courseResult);
+                    await SetOverallPercentFullMockTestAsync(studentProgressReport, courseResult);
+                    await SetOverallPercentSkillMockTestAsync(studentProgressReport, courseResult);
                     await SetOverallPercentUnitAsync(studentProgressReport, courseResult);
                     await SetFeatureAccessTimeAsync(studentProgressReport, student, courseResult);
-                    studentProgressReport.LeaderboardPercent = studentRankings?.FirstOrDefault(x => x.StudentId == student.Id && x.CourseResultId == courseResult.Id)?.OverallScore ?? default;
                 }
 
                 studentProgressReports.Add(studentProgressReport);
@@ -150,7 +144,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             return methodResult;
         }
 
-        private async Task SetProgressPlacementTestAsync(StudentProgressReportModel studentProgressReport, StudentModel student, CancellationToken cancellationToken)
+        private async Task SetProgressPlacementTestAsync(StudentProgressReportIELTSModel studentProgressReport, StudentModel student, CancellationToken cancellationToken)
         {
             var placementTestResultCurrent = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == student.Id)
                                                                                               .OrderByDescending(x => x.UpdatedDate)
@@ -167,7 +161,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             studentProgressReport.StatusUser = isLock ? "Hoàn Thành PT" : "Chưa Hoàn Thành PT";
         }
 
-        private async Task SetProgressCourseAsync(StudentProgressReportModel studentProgressReport, CourseResult courseResult)
+        private async Task SetProgressCourseAsync(StudentProgressReportIELTSModel studentProgressReport, CourseResult courseResult)
         {
             var courseResultModel = new CourseResultModel
             {
@@ -181,12 +175,33 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             studentProgressReport.StatusUser = "Đang Học";
         }
 
-        private async Task SetFeatureAccessTimeAsync(StudentProgressReportModel studentProgressReport, StudentModel student, CourseResult courseResult)
+        private async Task SetFeatureAccessTimeAsync(StudentProgressReportIELTSModel studentProgressReport, StudentModel student, CourseResult courseResult)
         {
-            var featureAccessTimeResults = await _systemService.GetFeatureAccessTimeBusiness(new GetFeatureAccessTimeBusinessQueryModel
+            var featureAccessTimeResults = await _systemService.GetFeatureAccessTimeToModulesAsync(new FeatureAccessTimesQueryModel
             {
                 UserId = student.Human?.UserId ?? default,
-                CourseId = courseResult.CourseId
+                FeatureAccessTimes = new List<FeatureAccessTimeQueryModel>
+                {
+                   new FeatureAccessTimeQueryModel
+                   {
+                       EnumFeature = EnumFeature.VideoLesson,
+                       CourseId = courseResult.CourseId
+                   },
+                   new FeatureAccessTimeQueryModel
+                   {
+                       EnumFeature = EnumFeature.ClassForum,
+                       CourseId = courseResult.CourseId
+                   },
+                   new FeatureAccessTimeQueryModel
+                   {
+                       EnumFeature = EnumFeature.HomeWork,
+                       CourseId = courseResult.CourseId
+                   },
+                   new FeatureAccessTimeQueryModel
+                   {
+                       CourseId = courseResult.CourseId
+                   }
+                }
             });
 
             if (!featureAccessTimeResults.IsSuccessStatusCode)
@@ -194,13 +209,14 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 return;
             }
             var featureAccessTimes = featureAccessTimeResults.Content?.Result;
-            studentProgressReport.LearnTime = featureAccessTimes?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Learn).Sum(p => p.AccessTime) ?? default;
-            studentProgressReport.SocialTime = featureAccessTimes?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Social).Sum(p => p.AccessTime) ?? default;
-            studentProgressReport.OtherTime = featureAccessTimes?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Other).Sum(p => p.AccessTime) ?? default;
-            studentProgressReport.TotalVisit = featureAccessTimes?.Sum(x => x.TotalVisit) ?? default;
+            studentProgressReport.TotalVisit = featureAccessTimes?.FirstOrDefault(x => !x.EnumFeature.HasValue)?.Visit ?? default;
+            studentProgressReport.TotalTime = featureAccessTimes?.FirstOrDefault(x => !x.EnumFeature.HasValue)?.AccessTime ?? default;
+            studentProgressReport.TimeVideoLesson = featureAccessTimes?.FirstOrDefault(x => x.EnumFeature == EnumFeature.VideoLesson)?.AccessTime ?? default;
+            studentProgressReport.TimeClassForum = featureAccessTimes?.FirstOrDefault(x => x.EnumFeature == EnumFeature.ClassForum)?.AccessTime ?? default;
+            studentProgressReport.TimeHomeWork = featureAccessTimes?.FirstOrDefault(x => x.EnumFeature == EnumFeature.HomeWork)?.AccessTime ?? default;
         }
 
-        private async Task SetOverallPercentUnitAsync(StudentProgressReportModel studentProgressReport, CourseResult courseResult)
+        private async Task SetOverallPercentUnitAsync(StudentProgressReportIELTSModel studentProgressReport, CourseResult courseResult)
         {
             var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
                                                          .OrderBy(x => x.CreatedDate)
@@ -208,7 +224,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             foreach (var unitResult in unitResults)
             {
                 var index = unitResults.IndexOf(unitResult);
-                var unitField = typeof(StudentProgressReportModel).GetProperty($"OverallUnit{index + 1}");
+                var unitField = typeof(StudentProgressReportIELTSModel).GetProperty($"OverallUnit{index + 1}");
                 if (unitField == null)
                 {
                     continue;
@@ -217,7 +233,45 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             }
         }
 
-        private async Task SetProgressModuleAsync(StudentProgressReportModel studentProgressReport, CourseResult courseResult)
+        private async Task SetOverallPercentSkillMockTestAsync(StudentProgressReportIELTSModel studentProgressReport, CourseResult courseResult)
+        {
+            var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status == EnumResultStatus.Done)
+                                                         .Where(x => x.UnitId.HasValue)
+                                                         .OrderBy(x => x.CreatedDate)
+                                                         .ToListAsync();
+            foreach (var mockTestResult in mockTestResults)
+            {
+                var index = mockTestResults.IndexOf(mockTestResult);
+                var skillMockTestField = typeof(StudentProgressReportIELTSModel).GetProperty($"BandSkillMockTest{index + 1}");
+                if (skillMockTestField == null)
+                {
+                    continue;
+                }
+                var mockTestResultModel = _mapper.Map<MockTestResultModel>(mockTestResult);
+                skillMockTestField.SetValue(studentProgressReport, mockTestResultModel.Scores);
+            }
+        }
+
+        private async Task SetOverallPercentFullMockTestAsync(StudentProgressReportIELTSModel studentProgressReport, CourseResult courseResult)
+        {
+            var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status == EnumResultStatus.Done)
+                                                         .Where(x => !x.UnitId.HasValue)
+                                                         .OrderBy(x => x.CreatedDate)
+                                                         .ToListAsync();
+            foreach (var mockTestResult in mockTestResults)
+            {
+                var index = mockTestResults.IndexOf(mockTestResult);
+                var mockTestField = typeof(StudentProgressReportIELTSModel).GetProperty($"BandFullMockTest{index + 1}");
+                if (mockTestField == null)
+                {
+                    continue;
+                }
+                var mockTestResultModel = _mapper.Map<MockTestResultModel>(mockTestResult);
+                mockTestField.SetValue(studentProgressReport, mockTestResultModel.Scores);
+            }
+        }
+
+        private async Task SetProgressModuleAsync(StudentProgressReportIELTSModel studentProgressReport, CourseResult courseResult)
         {
             var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
                                                         .OrderByDescending(x => x.CreatedDate)
