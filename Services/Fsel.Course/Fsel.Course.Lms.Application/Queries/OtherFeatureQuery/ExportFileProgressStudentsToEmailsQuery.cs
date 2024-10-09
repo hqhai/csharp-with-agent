@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -116,18 +117,21 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 return methodResult;
             }
             var schools = schoolResults.Content?.Result;
-
-            var studentRankingResults = await _userService.GetLeaderBoardDataAsync(new GetStudentCompetitionByEventCodeQueryModel
+            var studentRankings = new List<StudentRankingModel>();
+            if (string.IsNullOrEmpty(request.EventCode))
             {
-                WeekNumber = 1,
-                EventCode = request.EventCode
-            });
-            if (!studentRankingResults.IsSuccessStatusCode)
-            {
-                methodResult.AddError(studentRankingResults.Error);
-                return methodResult;
+                var studentRankingResults = await _userService.GetLeaderBoardDataAsync(new GetStudentCompetitionByEventCodeQueryModel
+                {
+                    WeekNumber = 1,
+                    EventCode = request.EventCode
+                });
+                if (!studentRankingResults.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(studentRankingResults.Error);
+                    return methodResult;
+                }
+                studentRankings = studentRankingResults.Content?.Result?.Items?.ToList();
             }
-            var studentRankings = studentRankingResults.Content?.Result?.Items;
 
             var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course)
                 .Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active)
