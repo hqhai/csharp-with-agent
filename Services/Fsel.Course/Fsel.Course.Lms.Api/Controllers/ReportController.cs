@@ -85,5 +85,21 @@ namespace Fsel.Course.Lms.Api.Controllers
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "Export_Time_Report_Student.xlsx");
         }
+
+        /// <summary>
+        /// Export Report Time Report
+        /// </summary>
+        [HttpPost("export-progress-ielts")]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> Export([FromForm] ExportFileProgressStudentIELTSToEmailsQuery query)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Export_Student_Progress_IELTS.xlsx");
+        }
     }
 }
