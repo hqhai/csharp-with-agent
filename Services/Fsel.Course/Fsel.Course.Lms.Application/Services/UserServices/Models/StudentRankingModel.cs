@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Domain.Models.EntityModels
+namespace Fsel.Course.Lms.Application.Services.UserServices.Models
 {
     using System;
     using Fsel.Common.Helpers;
