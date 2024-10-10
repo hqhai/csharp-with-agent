@@ -11,6 +11,7 @@ using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
+using Fsel.Identity.Infrastructure.Common;
 using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 
@@ -52,6 +53,9 @@ builder.Services.AddScoped<IStudentRankingEventRepository, StudentRankingEventRe
 builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
 builder.Services.AddScoped<IEventRegistrationRepository, EventRegistrationRepository>();
 builder.Services.AddScoped<IUserDeletionRepository, UserDeletionRepository>();
+
+//Helper
+builder.Services.AddScoped<UserOtpCodeHelper>();
 
 // Queue
 builder.Services.AddScoped<LeaderBoardPublisher>();
