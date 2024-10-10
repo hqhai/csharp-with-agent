@@ -26,7 +26,8 @@ namespace Fsel.Shared.Models.ShareModels
 
     public enum EnumSchoolEventRuleAction
     {
-        StopAtLevelSelection
+        StopAtLevelSelection,
+        ShowStoreFSEL
     }
 
     public enum EnumByPassPaymentType

@@ -14,7 +14,7 @@ using Fsel.Shared.Enums;
 namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
 {
     [ApiVersions(ApiSettings.APIVersion1i2)]
-    [Route(Settings.APIDefaultRoute + "/product")]
+    [Route(Settings.APIDefaultRoute + "/admin/product")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class ProductController : ControllerBase
