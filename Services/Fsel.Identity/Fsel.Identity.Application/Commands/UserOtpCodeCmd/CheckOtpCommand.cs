@@ -5,8 +5,9 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     using System;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.UserOtpCodes;
-    using Fsel.Identity.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -16,21 +17,26 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 
     public class CheckOtpCommandHandler : IRequestHandler<CheckOtpCommand, MethodResult<bool>>
     {
-        private readonly UserOtpCodeHelper _userOtpCodeHelper;
+        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
 
-        public CheckOtpCommandHandler(UserOtpCodeHelper userOtpCodeHelper)
+        public CheckOtpCommandHandler(IUserOtpCodeRepository userOtpCodeRepository)
         {
-            _userOtpCodeHelper = userOtpCodeHelper;
+            _userOtpCodeRepository = userOtpCodeRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(CheckOtpCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-            var method = await _userOtpCodeHelper.ValidateOtp(request, cancellationToken);
-            if (!method.IsOK)
+            var userOtpCode = await _userOtpCodeRepository.GetUserOtpCodeAsync(request.Otp, request.Email);
+            if (userOtpCode == null)
             {
-                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.InvalidOTP), nameof(request.Otp), request.Otp);
+                return methodResult;
+            }
+            if (request.IsCheckExpiredTime && DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OTPExpired), nameof(request.Otp), request.Otp);
                 return methodResult;
             }
             methodResult.Result = true;
