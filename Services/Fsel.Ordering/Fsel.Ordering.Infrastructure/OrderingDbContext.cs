@@ -34,6 +34,8 @@ namespace Fsel.Ordering.Infrastructure
             modelBuilder.ApplyConfiguration(new PackageEventEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new EventTranslationEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PackageTranslationEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductTranslationEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -53,6 +55,8 @@ namespace Fsel.Ordering.Infrastructure
         public DbSet<PackageEvent> PackageEvents { get; set; }
         public DbSet<EventTranslation> EventTranslations { get; set; }
         public DbSet<PackageTranslation> PackageTranslations { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductTranslation> ProductTranslations { get; set; }
         public DbSet<UserVoucherLock> UserVoucherLocks { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

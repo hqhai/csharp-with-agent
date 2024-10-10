@@ -2,8 +2,8 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumOrderTransactionStatus
+    public enum EnumMarketPlaceType
     {
-        Success, Fail, Requested, Received
+        FSEL, UrBox
     }
 }
