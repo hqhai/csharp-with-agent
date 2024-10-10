@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
     using Fsel.Course.Lms.Application.Queries.Reports;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
@@ -54,6 +55,22 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// Export Report
+        /// </summary>
+        [HttpPost("export-overall")]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> Export([FromQuery] ExportFileProgressStudentsToEmailsQuery query)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "progress_overall_student_export.xlsx");
+        }
+
+        /// <summary>
         /// Export Report Time Report
         /// </summary>
         [HttpPost("export-time-report")]
@@ -67,6 +84,22 @@ namespace Fsel.Course.Lms.Api.Controllers
                 return commandResult.GetActionResult();
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "Export_Time_Report_Student.xlsx");
+        }
+
+        /// <summary>
+        /// Export Report Time Report
+        /// </summary>
+        [HttpPost("export-progress-ielts")]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> Export([FromForm] ExportFileProgressStudentIELTSToEmailsQuery query)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Export_Student_Progress_IELTS.xlsx");
         }
     }
 }
