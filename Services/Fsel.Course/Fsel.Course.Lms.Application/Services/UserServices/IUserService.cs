@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Lms.Application.Services.UserServices.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
     using Fsel.Shared.Models.ShareModels.EntityModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -110,5 +111,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Get("/v1/student-ranking/get-events-by-user-id")]
         Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>>>> GetEventByUserId([Query] Guid? userId);
+
+        [Get("/v1/student-ranking/school-event")]
+        Task<IApiResponse<MethodResult<PagingItemStudentRankingModel>>> GetLeaderBoardDataAsync([FromQuery] GetStudentCompetitionByEventCodeQueryModel query);
     }
 }
