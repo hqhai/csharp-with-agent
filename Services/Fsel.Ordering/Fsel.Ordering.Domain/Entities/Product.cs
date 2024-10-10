@@ -56,6 +56,16 @@ namespace Fsel.Ordering.Domain.Entities
         public EnumProductStatus Status { get; set; }
 
         /// <summary>
+        /// Loại cửa hàng
+        /// </summary>
+        public EnumMarketPlaceType MarketPlaceType { get; set; }
+
+        /// <summary>
+        /// Loại quà
+        /// </summary>
+        public EnumProductType? ProductType { get; set; }
+
+        /// <summary>
         /// link ảnh quà
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]

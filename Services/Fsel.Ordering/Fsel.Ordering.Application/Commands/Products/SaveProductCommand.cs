@@ -99,6 +99,7 @@ namespace Fsel.Ordering.Application.Commands.Products
                 }
 
                 var product = _mapper.Map<Product>(request);
+                product.MarketPlaceType = EnumMarketPlaceType.FSEL;
                 if (!product.IsValid())
                 {
                     methodResult.AddError(product.ErrorMessages);

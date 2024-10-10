@@ -45,6 +45,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     Price = table.Column<int>(type: "int", nullable: false),
                     ExpireDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    MarketPlaceType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ProductType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     ImagesStr = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EventIdsStr = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DescriptionStr = table.Column<string>(type: "nvarchar(max)", nullable: false)
