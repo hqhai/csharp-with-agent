@@ -37,19 +37,7 @@ namespace Fsel.System.Application.Commands.CourseSuggestConfigCmd
             MethodResult<CourseSuggestConfigModel> methodResult = new MethodResult<CourseSuggestConfigModel>();
 
             #region validate
-            if (request.FromAge <= 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseSuggestConfigErrorCode.FromAgeNotGreaterThanZero), nameof(request.FromAge), nameof(request.FromAge));
-                return methodResult;
-            }
-
-            if (request.ToAge <= 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseSuggestConfigErrorCode.ToAgeNotGreaterThanZero), nameof(request.ToAge), nameof(request.ToAge));
-                return methodResult;
-            }
-
-            if (request.FromAge >= request.ToAge)
+            if (request.FromAge > request.ToAge)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseSuggestConfigErrorCode.ToAgeNotThanFromAge), nameof(request.ToAge), nameof(request.ToAge), nameof(request.FromAge));
                 return methodResult;
@@ -85,6 +73,13 @@ namespace Fsel.System.Application.Commands.CourseSuggestConfigCmd
             await _courseSuggestConfigRepository.ExecuteTransactionAsync(async () =>
             {
                 var command = _mapper.Map(request, courseSuggestConfig);
+
+                if (!command.IsValid())
+                {
+                    methodResult.AddErrorBadRequest(command.ErrorMessages);
+                    return methodResult;
+                }
+
                 _courseSuggestConfigRepository.Update(command);
                 await _courseSuggestConfigRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
 
