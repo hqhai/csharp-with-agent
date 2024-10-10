@@ -2,11 +2,14 @@
 
 namespace Fsel.Identity.Domain.Models.CommandModels.UserOtpCodes
 {
+    using System.ComponentModel.DataAnnotations;
     using System.Text.Json.Serialization;
 
     public class ConfirmOtpCommandModel
     {
+        [Required]
         public string? Otp { get; set; }
+
         public string? Email { get; set; }
 
         [JsonIgnore]
