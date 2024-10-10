@@ -10,13 +10,7 @@ namespace Fsel.System.Domain.Enums.ErrorCodes
 
         NoChallengeTypeForIELTSLevel,
 
-        FromAgeNotLessThanZero,
-
-        FromAgeNotGreaterThan150,
-
-        ToAgeNotLessThanZero,
-
-        ToAgeNotGreaterThan150,
+        AgeMustBeBetweenZeroAndOneHundredFifty,
 
         ToAgeNotThanFromAge
     }

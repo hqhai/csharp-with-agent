@@ -6,12 +6,16 @@ namespace Fsel.System.Domain.Entities
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.Enums;
+    using Fsel.System.Domain.Enums.ErrorCodes;
+    using global::System.ComponentModel.DataAnnotations;
     using global::System.ComponentModel.DataAnnotations.Schema;
 
     public class CourseSuggestConfig : Entity
     {
+        [Range(0, 150, ErrorMessage = nameof(EnumCourseSuggestConfigErrorCode.AgeMustBeBetweenZeroAndOneHundredFifty))]
         public int FromAge { get; set; }
 
+        [Range(0, 150, ErrorMessage = nameof(EnumCourseSuggestConfigErrorCode.AgeMustBeBetweenZeroAndOneHundredFifty))]
         public int ToAge { get; set; }
 
         public EnumPlacementTestLevel PlacementTestLevel { get; set; }
