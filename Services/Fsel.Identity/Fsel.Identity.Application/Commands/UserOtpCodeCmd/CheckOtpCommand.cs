@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
+namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 {
     using System;
     using System.Threading.Tasks;
@@ -10,20 +10,20 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class CheckOtpQuery : ConfirmOtpCommandModel, IRequest<MethodResult<bool>>
+    public class CheckOtpCommand : ConfirmOtpCommandModel, IRequest<MethodResult<bool>>
     {
     }
 
-    public class CheckOtpQueryHandler : IRequestHandler<CheckOtpQuery, MethodResult<bool>>
+    public class CheckOtpCommandHandler : IRequestHandler<CheckOtpCommand, MethodResult<bool>>
     {
         private readonly UserOtpCodeHelper _userOtpCodeHelper;
 
-        public CheckOtpQueryHandler(UserOtpCodeHelper userOtpCodeHelper)
+        public CheckOtpCommandHandler(UserOtpCodeHelper userOtpCodeHelper)
         {
             _userOtpCodeHelper = userOtpCodeHelper;
         }
 
-        public async Task<MethodResult<bool>> Handle(CheckOtpQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(CheckOtpCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
