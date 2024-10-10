@@ -94,7 +94,7 @@ namespace Fsel.Identity.Authentication.Controllers
         [HttpPost("check-otp")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CheckOtp([FromBody] CheckOtpCommand command)
+        public async Task<IActionResult> CheckOtp([FromBody] CheckOtpQuery command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
