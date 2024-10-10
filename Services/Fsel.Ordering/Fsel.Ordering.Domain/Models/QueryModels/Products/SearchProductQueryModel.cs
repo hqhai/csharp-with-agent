@@ -7,8 +7,20 @@ namespace Fsel.Ordering.Domain.Models.QueryModels.Products
 
     public class SearchProductQueryModel : BaseQueryModel
     {
+        #region Dùng cho LMS Admin
+
         public string? Code { get; set; }
         public string? Name { get; set; }
         public EnumProductStatus? Status { get; set; }
+
+        #endregion Dùng cho LMS Admin
+
+        #region Dùng cho LMS
+
+        public IList<Guid>? EventIds { get; set; }
+        public bool? PopularOrLatest { get; set; }
+        public bool? ShowPriority { get; set; }
+
+        #endregion Dùng cho LMS
     }
 }
