@@ -41,7 +41,10 @@ namespace Fsel.Ordering.Application.Queries.Products
                 Code = p.Code,
                 Quantity = p.Quantity,
                 Status = p.Status,
-                Product = p.Status == EnumProductStatus.Active,
+                ProductStatus = p.Status == EnumProductStatus.Active,
+                MarketPlaceType = p.MarketPlaceType,
+                ProductType = p.ProductType,
+                ShowPriority = p.ShowPriority,
                 RemainingQuantity = p.Quantity - p.OrderTransactions.Count(),
             });
 

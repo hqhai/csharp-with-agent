@@ -20,6 +20,18 @@ namespace Fsel.Ordering.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumProductStatus>());
+
+            builder.Property(e => e.MarketPlaceType)
+               .HasMaxLength(100)
+               .HasConversion(
+                   v => v.ToString(),
+                   v => v.EnumParse<EnumMarketPlaceType>());
+
+            builder.Property(e => e.ProductType)
+               .HasMaxLength(100)
+               .HasConversion(
+                   v => v == null ? null : v.ToString(),
+                   v => string.IsNullOrEmpty(v) ? null : v.EnumParse<EnumProductType>());
         }
     }
 }
