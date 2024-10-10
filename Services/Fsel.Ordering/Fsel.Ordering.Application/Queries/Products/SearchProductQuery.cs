@@ -71,22 +71,16 @@ namespace Fsel.Ordering.Application.Queries.Products
                 query = query.Where(p => p.Status == request.Status).ToList();
             }
 
-            if (request.EventIds != null && request.EventIds.Count > 0)
-            {
-                query = query.Where(p => p.EventIds != null && request.EventIds.Any(x => p.EventIds.Contains(x))).ToList();
-            }
-
-            if (request.PopularOrLatest.HasValue && request.PopularOrLatest == true)
-            {
-                query = query.OrderByDescending(x => x.QuantityChanged).ToList();
-            }
-            else if (request.PopularOrLatest.HasValue && request.PopularOrLatest == false)
-            {
-                query = query.OrderByDescending(x => x.CreatedDate).ToList();
-            }
-
             if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
             {
+                if (request.PopularOrLatest.HasValue && request.PopularOrLatest == true)
+                {
+                    query = query.OrderByDescending(x => x.QuantityChanged).ToList();
+                }
+                else if (request.PopularOrLatest.HasValue && request.PopularOrLatest == false)
+                {
+                    query = query.OrderByDescending(x => x.CreatedDate).ToList();
+                }
                 query = query.Where(p => p.EventIds != null && request.EventIds != null && request.EventIds.Any(x => p.EventIds.Contains(x))).ToList();
                 query = query.Where(p => p.ExpireDate.Date >= DateTime.UtcNow.Date).ToList();
                 query = query.OrderByDescending(x => x.ShowPriority).ToList();
