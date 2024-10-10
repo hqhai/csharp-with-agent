@@ -19,7 +19,6 @@ namespace Fsel.Ordering.Domain.Models.QueryModels.Products
 
         public IList<Guid>? EventIds { get; set; }
         public bool? PopularOrLatest { get; set; }
-        public bool? ShowPriority { get; set; }
 
         #endregion Dùng cho LMS
     }

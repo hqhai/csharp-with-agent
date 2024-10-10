@@ -5,6 +5,7 @@ namespace Fsel.Ordering.Application.Queries.Products
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Ordering.Domain.IRepositories;
@@ -22,10 +23,12 @@ namespace Fsel.Ordering.Application.Queries.Products
     public class SearchProductQueryHandler : IRequestHandler<SearchProductQuery, MethodResult<PagingItemsModel<ProductModel>>>
     {
         private readonly IProductRepository _productRepository;
+        private readonly AuthContext _authContext;
 
-        public SearchProductQueryHandler(IProductRepository productRepository)
+        public SearchProductQueryHandler(IProductRepository productRepository, AuthContext authContext)
         {
             _productRepository = productRepository;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<PagingItemsModel<ProductModel>>> Handle(SearchProductQuery request, CancellationToken cancellationToken)
@@ -82,8 +85,10 @@ namespace Fsel.Ordering.Application.Queries.Products
                 query = query.OrderByDescending(x => x.CreatedDate).ToList();
             }
 
-            if (request.ShowPriority.HasValue && request.ShowPriority == true)
+            if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
             {
+                query = query.Where(p => p.EventIds != null && request.EventIds != null && request.EventIds.Any(x => p.EventIds.Contains(x))).ToList();
+                query = query.Where(p => p.ExpireDate.Date >= DateTime.UtcNow.Date).ToList();
                 query = query.OrderByDescending(x => x.ShowPriority).ToList();
             }
 
