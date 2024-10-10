@@ -21,11 +21,11 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
         public async Task<UserOtpCode?> GetUserOtpCodeAsync(string? otpCode, string? email)
         {
-            if (!string.IsNullOrEmpty(email) && _appSetting.Otp != null && otpCode == _appSetting.Otp.Key && _appSetting.Otp.ByPassOtp)
+            if (!string.IsNullOrEmpty(email) && _appSetting.Otp != null && otpCode == _appSetting.Otp.ByPassOtpValue && _appSetting.Otp.IsByPassOtp)
             {
-                return await Queryable.Include(x => x.User).FirstOrDefaultAsync(x => x.User != null && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.User.Email == email);
+                return await Queryable.Include(x => x.User).FirstOrDefaultAsync(x => x.User != null && x.Status == EnumOtpCodeStatus.New && x.User.Email == email);
             }
-            return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == otpCode);
+            return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.OTPCode == otpCode);
         }
     }
 }
