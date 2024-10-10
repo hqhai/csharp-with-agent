@@ -15,7 +15,9 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public int Price { get; set; }
         public int QuantityChanged { get; set; }
         public int RemainingQuantity { get; set; }
-        public bool Product { get; set; }
+        public bool ProductStatus { get; set; }
+        public EnumMarketPlaceType MarketPlaceType { get; set; }
+        public EnumProductType? ProductType { get; set; }
         public EnumProductStatus Status { get; set; }
         public DateTime ExpireDate { get; set; }
         public IList<string>? Images { get; set; }
