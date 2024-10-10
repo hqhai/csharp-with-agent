@@ -58,25 +58,16 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             var expiredDate = !student.ExpiredDate.HasValue ? string.Empty : student.ExpiredDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
-            await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
-            {
-                ToEmails = new List<string> { student.Human?.Email ?? string.Empty },
-                Subject = "Chào mừng bạn đến với FSEL!",
-                Params = new
-                {
-                    FullName = student.Human?.FullName,
-                    OrderCode = order.Code,
-                    ExpiredDate = expiredDate,
-                    ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
-                },
-                Template = EnumSenderTemplate.MailPaymentForStudent
-            });
-
             var updatedDate = !order.UpdatedDate.HasValue ? string.Empty : order.UpdatedDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
-            var price = order.Price.ToString("C", new CultureInfo("vi-VN"));
+            var numberFormat = (NumberFormatInfo)CultureInfo.GetCultureInfo("vi-VN").NumberFormat.Clone();
+            numberFormat.CurrencySymbol = "";
 
-            var totalPrice = order.TotalPrice.ToString("C", new CultureInfo("vi-VN"));
+            var price = order.Price.ToString("C", numberFormat).Trim();
+
+            var discount = order.DiscountPrice.ToString("C", numberFormat).Trim();
+
+            var totalPrice = order.TotalPrice.ToString("C", numberFormat).Trim();
 
             await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
             {
@@ -89,6 +80,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     PaymentMethod = order.PaymentMethod.ToString(),
                     CreatedDate = updatedDate,
                     ExpiredDate = expiredDate,
+                    Discount = discount.ToString(CultureInfo.InvariantCulture),
                     Package = GetPackageName(order.Package),
                     Price = price.ToString(CultureInfo.InvariantCulture),
                     TotalPrice = totalPrice.ToString(CultureInfo.InvariantCulture),
@@ -96,6 +88,23 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 },
                 Template = EnumSenderTemplate.MailPaymentForCustomer
             });
+
+            if (!string.IsNullOrEmpty(order.Email) && !string.IsNullOrEmpty(student.Human?.Email) && order.Email.ToLower(CultureInfo.InvariantCulture) != student.Human?.Email.ToLower(CultureInfo.InvariantCulture))
+            {
+                await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
+                {
+                    ToEmails = new List<string> { student.Human?.Email ?? string.Empty },
+                    Subject = "Chào mừng bạn đến với FSEL!",
+                    Params = new
+                    {
+                        FullName = student.Human?.FullName,
+                        OrderCode = order.Code,
+                        ExpiredDate = expiredDate,
+                        ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
+                    },
+                    Template = EnumSenderTemplate.MailPaymentForStudent
+                });
+            }
             return methodResult;
         }
 
