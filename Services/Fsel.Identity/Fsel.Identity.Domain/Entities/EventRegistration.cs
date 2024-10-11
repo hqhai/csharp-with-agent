@@ -21,7 +21,7 @@ namespace Fsel.Identity.Domain.Entities
         public string? LastName { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [RegexValid(Regex = "^(?![-])(?!.*[-]{2})(?!.*@.*\\.{2,})(?!.*@.*\\.$)[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [RegexValid(Regex = "^(?=.{1,64}@)(?=.{1,255}$)[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         [MaxLength(254, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Email { get; set; }
 
