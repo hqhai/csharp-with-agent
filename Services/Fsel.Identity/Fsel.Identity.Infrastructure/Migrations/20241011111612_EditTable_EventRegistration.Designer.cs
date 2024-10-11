@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20241010130747_EditTable_CompetitionEvent")]
-    partial class EditTable_CompetitionEvent
+    [Migration("20241011111612_EditTable_EventRegistration")]
+    partial class EditTable_EventRegistration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -265,6 +265,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnOrder(102);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ParentEventId");
 
                     b.ToTable("CompetitionEvents");
                 });
@@ -1897,6 +1899,95 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.ToTable("UserCourseSettings");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserDeletion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<DateTime>("DeletionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ReasonContent")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserDeletions");
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserOtpCode", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2329,6 +2420,16 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("Human");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.CompetitionEvent", b =>
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.CompetitionEvent", "CompetitionEventParent")
+                        .WithMany("CompetitionEvents")
+                        .HasForeignKey("ParentEventId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("CompetitionEventParent");
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Human", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
@@ -2431,6 +2532,16 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserDeletion", b =>
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
+                        .WithMany("UserDeletions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserOtpCode", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
@@ -2499,6 +2610,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.CompetitionEvent", b =>
                 {
+                    b.Navigation("CompetitionEvents");
+
                     b.Navigation("StudentCompetitionEvents");
                 });
 
@@ -2544,6 +2657,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("Senders");
 
                     b.Navigation("UserCourseSettings");
+
+                    b.Navigation("UserDeletions");
 
                     b.Navigation("UserOtpCodes");
 
