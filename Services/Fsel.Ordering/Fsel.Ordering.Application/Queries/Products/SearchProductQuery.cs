@@ -4,6 +4,7 @@ namespace Fsel.Ordering.Application.Queries.Products
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
@@ -24,11 +25,13 @@ namespace Fsel.Ordering.Application.Queries.Products
     {
         private readonly IProductRepository _productRepository;
         private readonly AuthContext _authContext;
+        private readonly IMapper _mapper;
 
-        public SearchProductQueryHandler(IProductRepository productRepository, AuthContext authContext)
+        public SearchProductQueryHandler(IProductRepository productRepository, AuthContext authContext, IMapper mapper)
         {
             _productRepository = productRepository;
             _authContext = authContext;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<ProductModel>>> Handle(SearchProductQuery request, CancellationToken cancellationToken)
@@ -36,25 +39,17 @@ namespace Fsel.Ordering.Application.Queries.Products
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<ProductModel>>();
 
-            var query = await _productRepository.Queryable.Include(p => p.OrderTransactions.Where(x => x.Status == EnumOrderTransactionStatus.Requested || x.Status == EnumOrderTransactionStatus.Received)).Select(p => new ProductModel()
+            var products = await _productRepository.Queryable.Include(p => p.OrderTransactions.Where(x => x.Status == EnumOrderTransactionStatus.Requested || x.Status == EnumOrderTransactionStatus.Received)).ToListAsync(cancellationToken);
+
+            var query = _mapper.Map<IList<ProductModel>>(products);
+
+            query.ForEach(p =>
             {
-                Id = p.Id,
-                ExpireDate = p.ExpireDate,
-                Name = p.Name,
-                Code = p.Code,
-                Quantity = p.Quantity,
-                Status = p.Status,
-                Images = p.Images,
-                Price = p.Price,
-                ProductStatus = p.Status == EnumProductStatus.Active,
-                MarketPlaceType = p.MarketPlaceType,
-                ProductType = p.ProductType,
-                ShowPriority = p.ShowPriority,
-                RemainingQuantity = p.Quantity - p.OrderTransactions.Count(),
-                QuantityChanged = p.OrderTransactions.Count(),
-                EventIds = p.EventIds,
-                CreatedDate = p.CreatedDate,
-            }).ToListAsync(cancellationToken);
+                var product = products.FirstOrDefault(x => x.Id == p.Id);
+                p.ProductStatus = p.Status == EnumProductStatus.Active;
+                p.QuantityChanged = product?.OrderTransactions.Count ?? 0;
+                p.RemainingQuantity = p.Quantity - p.QuantityChanged;
+            });
 
             if (!string.IsNullOrEmpty(request.Code))
             {
