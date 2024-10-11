@@ -7,6 +7,7 @@ namespace Fsel.Identity.Domain.Entities
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
     using Fsel.Common.Attributes;
+    using Fsel.Shared.Constants;
 
     public class EventRegistration : Entity
     {
@@ -21,7 +22,7 @@ namespace Fsel.Identity.Domain.Entities
         public string? LastName { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [RegexValid(Regex = "^(?=.{1,64}@)(?=.{1,255}$)[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [RegexValid(Regex = RegexSetting.EmailValid, ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         [MaxLength(254, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Email { get; set; }
 
