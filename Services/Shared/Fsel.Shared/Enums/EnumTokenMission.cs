@@ -154,8 +154,10 @@ namespace Fsel.Shared.Enums
 
         FriendCompletePT,
         FriendCompleteUnit1,
-        FriendCompletePayment
+        FriendCompletePayment,
 
         #endregion Friend mission
+
+        FselStore
     }
 }
