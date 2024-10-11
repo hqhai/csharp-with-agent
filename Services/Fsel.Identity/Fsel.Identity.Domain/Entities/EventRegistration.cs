@@ -69,8 +69,6 @@ namespace Fsel.Identity.Domain.Entities
 
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SchoolStudentCode { get; set; }
-
-
         public EnumEventRegistrationStatus Status { get; set; }
     }
 }
