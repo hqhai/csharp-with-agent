@@ -15,6 +15,7 @@ namespace Fsel.Ordering.Infrastructure.Maps
             CreateMap<SaveProductCommandModel, Product>().IgnoreAllNonExisting();
             CreateMap<SaveProductTranslationCommandModel, ProductTranslation>().IgnoreAllNonExisting();
             CreateMap<ProductTranslation, ProductTranslationModel>().IgnoreAllNonExisting();
+            CreateMap<SearchHistoryRedeemByAdminModel, ExportHistoryRedeemProductModel>().IgnoreAllNonExisting();
 
             CreateMap<ProductTranslation, Product>().IgnoreEntity()?.ReverseMap();
             CreateMap<Product, ProductModel>().IgnoreAllNonExisting()?.MapTranslations<Product, ProductModel, ProductTranslation>();
