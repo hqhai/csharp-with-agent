@@ -117,17 +117,25 @@ namespace Fsel.Ordering.Application.Commands.Products
                 var orderTransaction = _orderTransactionRepository.Add(new OrderTransaction() { Type = EnumOrderTransactionType.Product, Status = EnumOrderTransactionStatus.Requested, Code = code, ProductId = product.Id, RequestBody = request });
                 await _orderTransactionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
+                var configs = new List<object> { new
+                {
+                    Id = product.Id,
+                    Title = product.Name,
+                    Price = product.Price
+                }};
                 var tokenHistories = new List<TokenHistoryQueueModel>
+                {
+                    new TokenHistoryQueueModel
                     {
-                        new TokenHistoryQueueModel
-                        {
-                            ObjectId = product.Id,
-                            VolatileToken = product.Price,
-                            Feature = EnumTokenFeature.MarketPlace,
-                            Type = EnumTokenHistoryType.Exchanged,
-                            UserId = _authContext.CurrentUserId,
-                        }
-                    };
+                        ObjectId = product.Id,
+                        VolatileToken = product.Price,
+                        Feature = EnumTokenFeature.MarketPlace,
+                        Type = EnumTokenHistoryType.Exchanged,
+                        UserId = _authContext.CurrentUserId,
+                        Config = configs,
+                        Mission = EnumTokenMission.FselStore
+                    }
+                };
                 await _createTokenHistoryPublisher.Publish(tokenHistories, cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
