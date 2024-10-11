@@ -39,5 +39,8 @@ namespace Fsel.Identity.Domain.Entities
         public Guid? ParentEventId { get; set; }
 
         public ICollection<StudentCompetitionEvent> StudentCompetitionEvents { get; set; } = new List<StudentCompetitionEvent>();
+
+        public CompetitionEvent? CompetitionEventParent { get; set; }
+        public ICollection<CompetitionEvent> CompetitionEvents { get; set; } = new List<CompetitionEvent>();
     }
 }
