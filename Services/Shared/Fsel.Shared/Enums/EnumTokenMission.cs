@@ -158,6 +158,9 @@ namespace Fsel.Shared.Enums
 
         #endregion Friend mission
 
-        FselStore
+        #region
+        FselStore,
+        UrBox
+        #endregion
     }
 }
