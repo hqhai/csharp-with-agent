@@ -1,15 +1,15 @@
-using Fsel.Common.ActionResults;
 using System.Net;
+using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
-using Fsel.Shared.Attributes;
-using Fsel.Shared.Constants;
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using Fsel.Ordering.Domain.Models.EntityModels;
+using Fsel.Core.Base.BaseModels;
 using Fsel.Ordering.Application.Commands.Products;
 using Fsel.Ordering.Application.Queries.Products;
-using Fsel.Core.Base.BaseModels;
+using Fsel.Ordering.Domain.Models.EntityModels;
+using Fsel.Shared.Attributes;
+using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
 {
@@ -72,6 +72,34 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search history redeem
+        /// </summary>
+        [HttpGet("search-history-redeem")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchHistoryRedeem([FromQuery] SearchHistoryRedeemByAdminQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Export history redeem
+        /// </summary>
+        [HttpGet("export-history-redeem")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportHistoryRedeem([FromQuery] ExportHistoryRedeemProductCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Product_exchange_history.xlsx");
         }
     }
 }
