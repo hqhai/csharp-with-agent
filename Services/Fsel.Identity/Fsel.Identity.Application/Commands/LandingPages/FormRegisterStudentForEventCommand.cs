@@ -39,6 +39,9 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             var methodResult = new MethodResult<bool>();
 
             var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.EventCode.ToLower() == request.EventCode.ToLower(), cancellationToken);
+
+            var competitionEven1t = await _competitionEventsRepository.Queryable.ToListAsync(cancellationToken);
+
             if (competitionEvent == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
