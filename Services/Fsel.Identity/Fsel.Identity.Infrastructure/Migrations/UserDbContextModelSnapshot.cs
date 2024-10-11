@@ -263,6 +263,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ParentEventId");
+
                     b.ToTable("CompetitionEvents");
                 });
 
@@ -2321,6 +2323,16 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("Human");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.CompetitionEvent", b =>
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.CompetitionEvent", "CompetitionEventParent")
+                        .WithMany("CompetitionEvents")
+                        .HasForeignKey("ParentEventId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("CompetitionEventParent");
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Human", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
@@ -2487,6 +2499,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.CompetitionEvent", b =>
                 {
+                    b.Navigation("CompetitionEvents");
+
                     b.Navigation("StudentCompetitionEvents");
                 });
 

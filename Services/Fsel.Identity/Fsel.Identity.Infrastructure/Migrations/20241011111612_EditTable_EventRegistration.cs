@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class EditTable_CompetitionEvent : Migration
+    public partial class EditTable_EventRegistration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -75,6 +75,33 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 oldType: "nvarchar(max)",
                 oldNullable: true);
 
+            migrationBuilder.AddColumn<bool>(
+                name: "IsSchoolarshipAdvising",
+                table: "EventRegistrations",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AddColumn<string>(
+                name: "ParentEmail",
+                table: "EventRegistrations",
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "ParentPhoneNumber",
+                table: "EventRegistrations",
+                type: "nvarchar(12)",
+                maxLength: 12,
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "TeacherPhoneNumber",
+                table: "EventRegistrations",
+                type: "nvarchar(12)",
+                maxLength: 12,
+                nullable: true);
+
             migrationBuilder.AddColumn<Guid>(
                 name: "LocationId",
                 table: "CompetitionEvents",
@@ -86,11 +113,48 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 table: "CompetitionEvents",
                 type: "uniqueidentifier",
                 nullable: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CompetitionEvents_ParentEventId",
+                table: "CompetitionEvents",
+                column: "ParentEventId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_CompetitionEvents_CompetitionEvents_ParentEventId",
+                table: "CompetitionEvents",
+                column: "ParentEventId",
+                principalTable: "CompetitionEvents",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_CompetitionEvents_CompetitionEvents_ParentEventId",
+                table: "CompetitionEvents");
+
+            migrationBuilder.DropIndex(
+                name: "IX_CompetitionEvents_ParentEventId",
+                table: "CompetitionEvents");
+
+            migrationBuilder.DropColumn(
+                name: "IsSchoolarshipAdvising",
+                table: "EventRegistrations");
+
+            migrationBuilder.DropColumn(
+                name: "ParentEmail",
+                table: "EventRegistrations");
+
+            migrationBuilder.DropColumn(
+                name: "ParentPhoneNumber",
+                table: "EventRegistrations");
+
+            migrationBuilder.DropColumn(
+                name: "TeacherPhoneNumber",
+                table: "EventRegistrations");
+
             migrationBuilder.DropColumn(
                 name: "LocationId",
                 table: "CompetitionEvents");
