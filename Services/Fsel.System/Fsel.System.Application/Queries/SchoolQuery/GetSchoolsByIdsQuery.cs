@@ -5,10 +5,13 @@ namespace Fsel.System.Application.Queries.SchoolQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.System.Domain.Entities;
+    using Fsel.System.Domain.Enums;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetSchoolsByIdsQuery : IRequest<MethodResult<IList<SchoolModel>>>
     {
@@ -19,11 +22,13 @@ namespace Fsel.System.Application.Queries.SchoolQuery
     {
         private readonly ISchoolRepository _schoolRepository;
         private readonly IMapper _mapper;
+        private readonly ICrmLocationRepository _locationCrmRepository;
 
-        public GetSchoolsByIdsQueryHandler(ISchoolRepository schoolRepository, IMapper mapper)
+        public GetSchoolsByIdsQueryHandler(ISchoolRepository schoolRepository, IMapper mapper, ICrmLocationRepository locationCrmRepository)
         {
             _schoolRepository = schoolRepository;
             _mapper = mapper;
+            _locationCrmRepository = locationCrmRepository;
         }
 
         public async Task<MethodResult<IList<SchoolModel>>> Handle(GetSchoolsByIdsQuery request, CancellationToken cancellationToken)
@@ -35,14 +40,21 @@ namespace Fsel.System.Application.Queries.SchoolQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-
-            var schools = await _schoolRepository.GetByIdsAsync(request.Ids);
+            var schools = await _locationCrmRepository.Queryable.Where(p => request.Ids.Contains(p.GlobalId) && p.TypeName == EnumCrmLocationTypeName.School).ToListAsync(cancellationToken);
             if (schools == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(schools));
                 return methodResult;
             }
-            methodResult.Result = _mapper.Map<IList<SchoolModel>>(schools);
+            methodResult.Result = schools.Select(p => new SchoolModel
+            {
+                Id = p.GlobalId,
+                Name = p.Name,
+                LongPath = p.LongPath,
+                ShortPath = p.ShortPath,
+                IdPath = p.IdPath,
+                EducationLevel = Enum.IsDefined(typeof(EnumEducationLevel), (int?)p.TypeLevel ?? default) ? (EnumEducationLevel?)p.TypeLevel : null
+            }).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

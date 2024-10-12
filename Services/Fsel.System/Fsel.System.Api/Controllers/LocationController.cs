@@ -9,6 +9,7 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
     using Fsel.System.Application.Queries.LocationQuery;
+    using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
@@ -18,11 +19,11 @@ namespace Fsel.System.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/location")]
     [ApiController]
-    public class LocationControllerController : BaseController
+    public class LocationController : BaseController
     {
         private readonly IMediator _mediator;
 
-        public LocationControllerController(IMediator mediator)
+        public LocationController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -38,8 +39,6 @@ namespace Fsel.System.Api.Controllers
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-
-        
 
         /// <summary>
         /// Get locations by ids
