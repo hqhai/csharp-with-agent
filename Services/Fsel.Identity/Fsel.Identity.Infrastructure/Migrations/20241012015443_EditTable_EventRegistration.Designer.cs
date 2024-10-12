@@ -2425,7 +2425,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasOne("Fsel.Identity.Domain.Entities.CompetitionEvent", "CompetitionEventParent")
                         .WithMany("CompetitionEvents")
                         .HasForeignKey("ParentEventId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("CompetitionEventParent");
                 });

@@ -125,7 +125,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 column: "ParentEventId",
                 principalTable: "CompetitionEvents",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.SetNull);
+                onDelete: ReferentialAction.NoAction);
         }
 
         /// <inheritdoc />
