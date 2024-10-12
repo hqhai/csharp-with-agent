@@ -71,7 +71,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
 
             if (await _bannerStudentRepository.Queryable.AnyAsync(x => x.StudentId == student.Id && x.BannerId == banner.Id, cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.ThisStudentViewedThisBanner), nameof(request));
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
 

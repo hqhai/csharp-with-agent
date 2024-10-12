@@ -2,7 +2,6 @@
 
 namespace Fsel.System.Domain.Entities
 {
-    using Fsel.Common.Attributes;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
@@ -10,15 +9,15 @@ namespace Fsel.System.Domain.Entities
 
     public class Banner : Entity
     {
-        [RequiredIf(nameof(Code), true, ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Code { get; set; }
 
-        [RequiredIf(nameof(Name), true, ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
-        [RequiredIf(nameof(Url), true, ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Url { get; set; }
 
