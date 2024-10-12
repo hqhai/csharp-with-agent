@@ -17,6 +17,7 @@ using Fsel.System.Infrastructure;
 using Fsel.System.Infrastructure.Common;
 using Fsel.System.Infrastructure.Repositories;
 using Fsel.System.Infrastructure.ValueSettings;
+using Microsoft.EntityFrameworkCore;
 using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +28,9 @@ builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<SystemDbContext>();
+
+builder.Services.AddDbContext<CrmDbContext>(
+        options => options.UseSqlServer(appSetting?.ConnectionStrings?.CrmConnection));
 
 builder.Services.AddScoped<ILiveTimeFrameRepository, LiveTimeFrameRepository>();
 builder.Services.AddScoped<ICourseTimeConfigRepository, CourseTimeConfigRepository>();
@@ -53,6 +57,7 @@ builder.Services.AddScoped<IChatbotConfigRepository, ChatbotConfigRepository>();
 builder.Services.AddScoped<IErrorReportRepository, ErrorReportRepository>();
 builder.Services.AddScoped<ITokenHistoryRepository, TokenHistoryRepository>();
 builder.Services.AddScoped<IChatBotRepository, ChatBotRepository>();
+builder.Services.AddScoped<ICrmLocationRepository, CrmLocationRepository>();
 builder.Services.AddScoped<IUserConfigRepository, UserConfigRepository>();
 builder.Services.AddScoped<ITechieRepository, TechieRepository>();
 builder.Services.AddScoped<ITechieActionRepository, TechieActionRepository>();
