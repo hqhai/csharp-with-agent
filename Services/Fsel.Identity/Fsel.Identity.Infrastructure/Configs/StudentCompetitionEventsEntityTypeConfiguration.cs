@@ -16,7 +16,7 @@ namespace Fsel.Identity.Infrastructure.Configs
             builder.HasOne(a => a.CompetitionEvents)
                 .WithMany(b => b.StudentCompetitionEvents)
                 .HasForeignKey(p => p.CompetitionEventId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
