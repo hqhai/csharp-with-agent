@@ -1,4 +1,5 @@
 using System.Globalization;
+using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Notification.Application.Commands;
 using Fsel.Notification.Domain.IRepositories;
@@ -6,6 +7,7 @@ using Fsel.Notification.Domain.Model.CommandModels.Notification;
 using Fsel.Shared.Models.ShareModels;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Fsel.Notification.Application.Queues.Consumers
 {
@@ -14,11 +16,16 @@ namespace Fsel.Notification.Application.Queues.Consumers
         private readonly IMediator _mediator;
         private readonly INotificationTypeRepository _notificationTypeRepository;
 
-        public SendNotificationConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
+        private readonly ILogger<SendNotificationConsumer> _logger;
+
+        public SendNotificationConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor,
+            ILogger<SendNotificationConsumer> logger) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
             _notificationTypeRepository = notificationTypeRepository;
+            _logger = logger;
         }
+
         public override async Task ConsumeQueue(NotificationSendingQueueModel? message)
         {
             if (message != null)
@@ -26,7 +33,6 @@ namespace Fsel.Notification.Application.Queues.Consumers
                 var notificationType = await _notificationTypeRepository.Queryable.Include(x => x.Translations).FirstOrDefaultAsync(x => x.Type == message.Type && x.Content == message.Content);
 
                 string messageNoti = message.ParamsMessage != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateMessage ?? string.Empty, message.ParamsMessage.ToArray()) : notificationType?.TemplateMessage!;
-
 
                 List<NotificationMessageTranslationModel> notificationTranslations = new List<NotificationMessageTranslationModel>();
 
@@ -58,6 +64,10 @@ namespace Fsel.Notification.Application.Queues.Consumers
                     Message = messageNoti,
                     Link = link
                 };
+                if (message.Content == Shared.Enums.EnumNotificationContent.FselFlowFBEvent)
+                {
+                    _logger.LogInformation("Consumer Notify FselEvent :" + model.Serialize());
+                }
                 await _mediator.Send(model).ConfigureAwait(false);
             }
         }
