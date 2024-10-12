@@ -34,11 +34,11 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Execute-list-query
         /// </summary>
-        [HttpPost("execute-list-query")]
+        [HttpGet("execute-list-query")]
         [ProducesResponseType(typeof(MethodResult<IList<SchoolModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission]
-        public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel cmd)
+        public async Task<IActionResult> ExecuteList([FromQuery] BaseQueryModel cmd)
         {
             SetQuery(cmd);
             var result = await _schoolRepository.GetListResultAsync<SchoolModel>(cmd);

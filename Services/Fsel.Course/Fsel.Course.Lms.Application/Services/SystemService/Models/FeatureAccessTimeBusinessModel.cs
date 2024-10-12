@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Services.SystemService.Models
     public class FeatureAccessTimeBusinessModel
     {
         public EnumFeatureBussinessType FeatureBusinessType { get; set; }
+        public long TotalVisit { get; set; }
         public long AccessTime { get; set; }
     }
 }
