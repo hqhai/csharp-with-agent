@@ -85,7 +85,8 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
                                                      CorrectCount = c.CorrectCount,
                                                      CorrectTotal = c.CorrectTotal,
                                                      SkillScores = c.SkillScores
-                                                 }).ToList()
+                                                 }).ToList(),
+                                                 DateEdit = x.Max(c => c.CreatedDate > c.UpdatedDate ? c.CreatedDate : c.UpdatedDate)
                                              }).ToList();
 
             methodResult.Result = querys;
@@ -113,5 +114,7 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
         public string? Status { get; set; }
 
         public IList<IntegrationPlacementTestResultModels>? PlacementTestResults { get; set; }
+
+        public DateTime? DateEdit { get; set; }
     }
 }

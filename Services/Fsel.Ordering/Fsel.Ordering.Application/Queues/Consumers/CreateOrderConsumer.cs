@@ -9,7 +9,7 @@ namespace Fsel.Ordering.Application.Queues.Consumers
     {
         private readonly IMediator _mediator;
 
-        public CreateOrderConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
+        public CreateOrderConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }

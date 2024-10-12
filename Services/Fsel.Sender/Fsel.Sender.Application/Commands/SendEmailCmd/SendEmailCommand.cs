@@ -35,9 +35,15 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
+            var bccEmail = _appSetting.EmailConfig?.BCCEmail;
+            if (bccEmail != null && bccEmail.Count > 0)
+            {
+                bccEmail.ForEach(request.BccEmails.Add);
+            }
+
             #region Get CC Email
 
-            if (request.IsCCEmail.HasValue && request.IsCCEmail == true)
+            if (request.IsCCEmail.HasValue && request.IsCCEmail.Value)
             {
                 var listCCEmailResult = await _systemService.GetCCEmail();
                 if (listCCEmailResult.IsSuccessStatusCode)

@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using System.Globalization;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
@@ -43,6 +42,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 
             var courseQuery = _courseRepository.Queryable.Where(p => !p.IsArchive)
                               .Include(course => course.CourseTeachers.Where(n => !n.IsDeleted))
+                              .Where(x => !x.ParentCourseId.HasValue)
                               .Select(course => new CourseSearchModel
                               {
                                   Id = course.Id,

@@ -2,17 +2,17 @@
 
 namespace Fsel.Identity.Application.Services.OrderService.Model
 {
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class OrderModel
+    public class OrderModel : BaseModel
     {
-        public Guid Id { get; set; }
         public string? Code { get; set; }
         public string? FullName { get; set; }
         public string? Country { get; set; }
         public string? Address { get; set; }
         public EnumOrderStatus Status { get; set; }
-        public EnumPaymentMethodStatus PaymentMethod { get; set; }
+        public EnumPaymentMethodStatus? PaymentMethod { get; set; }
         public double Price { get; set; }
         public double DiscountPercent { get; set; }
         public double DiscountPrice { get; set; }

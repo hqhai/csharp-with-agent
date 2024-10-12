@@ -17,7 +17,8 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<Student, StudentModel>().IgnoreAllNonExisting();
 
             CreateMap<Student, StudentModel>()
-                .ForMember(p => p.ParentEmail, n => n.MapFrom(m => m.ParentStudents.Count > 0 ? m.ParentStudents.FirstOrDefault()!.Parent!.Human!.Email : null));
+                .ForMember(p => p.ParentEmail, n => n.MapFrom(m => m.ParentStudents.Count > 0 ? m.ParentStudents.FirstOrDefault()!.Parent!.Human!.Email : null))
+                .ForMember(x => x.SenderId, v => v.MapFrom(b => (b.Human != null && b.Human.User != null && b.Human.User.Receiver != null) ? (Guid?)b.Human.User.Receiver.SenderId : null));
 
             CreateMap<CreateStudentCommandModel, Student>().IgnoreAllNonExisting();
             CreateMap<UpdateStudentBeginnerGuideCommandModel, Student>().IgnoreAllNonExisting();

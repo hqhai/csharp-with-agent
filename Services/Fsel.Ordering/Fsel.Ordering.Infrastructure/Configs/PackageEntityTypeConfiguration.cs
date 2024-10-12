@@ -19,11 +19,6 @@ namespace Fsel.Ordering.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumPackageCode>());
-            builder.Property(e => e.Suggest)
-               .HasMaxLength(100)
-               .HasConversion(
-                   v => v == null ? null : v.ToString(),
-                   v => string.IsNullOrEmpty(v) ? null : v.EnumParse<EnumPackageSuggest>());
         }
     }
 }

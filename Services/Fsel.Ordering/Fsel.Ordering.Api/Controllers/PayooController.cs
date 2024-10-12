@@ -3,20 +3,20 @@
 namespace Fsel.Ordering.Api.Controllers
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Commands.Payoo;
     using Fsel.Ordering.Application.Services.PayooService.Models;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/payoo")]
     [ApiController]
-    public class PayooController : ControllerBase
+    public class PayooController : BaseController
     {
         private readonly IMediator _mediator;
 
@@ -41,12 +41,15 @@ namespace Fsel.Ordering.Api.Controllers
         /// notify url
         /// </summary>
         [HttpPost("notify-url")]
-        [ProducesResponseType(typeof(MethodResult<NotifyUrlModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(NotifyUrlModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> NotifyUrl([FromBody] NotifyUrlCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
+            return new ObjectResult(commandResult.Result)
+            {
+                StatusCode = commandResult.StatusCode
+            };
         }
     }
 }

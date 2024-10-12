@@ -10,7 +10,7 @@ namespace Fsel.Hangfire.Application.Queues.Consumers
 
     public class SetTimeToRetryClassForumConsumer : BaseConsumer<SetTimeRetryClassForumModel>
     {
-        public SetTimeToRetryClassForumConsumer(AuthContext authContext) : base(authContext)
+        public SetTimeToRetryClassForumConsumer(AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
         }
 

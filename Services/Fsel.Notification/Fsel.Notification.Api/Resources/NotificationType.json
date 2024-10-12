@@ -145,7 +145,7 @@
     "content": "AIFeedBack",
     "icon": "",
     "priority": 1,
-    "templateMessage": "Bài viết của bạn đã được hệ thống AI ChatGPT nhận xét. Nhấn để xem chi tiết",
+    "templateMessage": "Bài đăng của bạn đã được chấm bởi hệ thống AI của FSEL. Nhấn để xem chi tiết",
     "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}?type=aiFeedback",
     "createdDate": "2023-08-28"
   },
@@ -257,6 +257,16 @@
     "priority": 1,
     "templateMessage": "Khóa học của bạn sẽ kết thúc trong 2 ngày tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
     "templateLink": "/pricing-plan",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "6F75034F-4D9B-4471-B5A4-A226979B5AB3",
+    "type": "LinkPage",
+    "content": "CourseChange",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Yay! Bạn đã đổi trình độ sang khóa học {0} thành công! Hãy cùng Techie và Fsel bắt đầu hành trình học tập thú vị ngay thôi nào!",
+    "templateLink": "",
     "createdDate": "2023-08-28"
   }
 ]

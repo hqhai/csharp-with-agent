@@ -10,7 +10,7 @@ namespace Fsel.System.Application.Queues.Consumers
     {
         private readonly IMediator _mediator;
 
-        public NoticeAccessFeatureConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
+        public NoticeAccessFeatureConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }

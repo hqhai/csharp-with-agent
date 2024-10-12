@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Lms.Application.Services.InteractionService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -112,7 +113,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 .Where(x => x.Id == request.ClassForumResultId)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
-
+            if (classForumResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
+                return methodResult;
+            }
             var lesson = classForumResult.LessonResult?.Lesson?.UnitLessons.FirstOrDefault(y => y.UnitId == classForumResult.LessonResult.UnitId);
             var unit = classForumResult.LessonResult?.Unit?.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == classForumResult.LessonResult.CourseId);
             var course = classForumResult.LessonResult?.Course;
@@ -156,22 +161,34 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 }).ToList(),
             };
             var studentResult = await _userService.GetStudentByUserIdAsync(classForumResultModel.CreatedUserId);
-            var student = studentResult?.Content?.Result;
-            if (student?.CourseLevel != null)
+            if (!studentResult.IsSuccessStatusCode)
             {
-                classForumResultModel.CourseLevel = student.CourseLevel;
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                return methodResult;
             }
+            var student = studentResult?.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+            if (!student.CourseLevel.HasValue)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.CourseLevel));
+                return methodResult;
+            }
+            classForumResultModel.CourseLevel = student.CourseLevel.Value;
 
             List<Guid> classForumResultIds = new List<Guid>() { classForumResultModel.Id };
             var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumResultIds, UserId = _authContext.CurrentUserId });
             var actions = actionsResult.Content?.Result;
-
-            if (actions != null)
+            var action = actions?.FirstOrDefault(x => x.ObjectId == classForumResultModel.Id);
+            if (action != null)
             {
-                var action = actions.FirstOrDefault(x => x.ObjectId == classForumResultModel.Id);
-                classForumResultModel.LikeNumber = action?.LikeNumber;
-                classForumResultModel.CommentNumber = action?.CommentNumber;
-                classForumResultModel.IsLiked = action?.IsLiked;
+                classForumResultModel.CreatedFullName = student.Human?.FullName;
+                classForumResultModel.LikeNumber = action.LikeNumber;
+                classForumResultModel.CommentNumber = action.CommentNumber;
+                classForumResultModel.IsLiked = action.IsLiked;
             }
 
             methodResult.Result = classForumResultModel;

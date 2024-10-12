@@ -67,6 +67,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Time's up for the ClassForum.
         /// </summary>
-        TimeUpPostClassForum
+        TimeUpPostClassForum,
+
+        /// <summary>
+        /// Base64 In Text
+        /// </summary>
+        Base64InText
     }
 }

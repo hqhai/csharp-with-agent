@@ -2,7 +2,7 @@
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Students
 {
-    using Fsel.Identity.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class UpdateStudentProfileCommandModel
     {

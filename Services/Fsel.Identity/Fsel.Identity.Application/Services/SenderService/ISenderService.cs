@@ -22,6 +22,7 @@ namespace Fsel.Identity.Application.Services
         public IList<string> CcEmails { get; set; } = new List<string>();
         public string? Subject { get; set; }
         public string? Content { get; set; }
+        public bool? IsCCEmailDefault { get; set; }
     }
 
     public class SendEmailByTemplateCommandModel : SendEmailCommandModel

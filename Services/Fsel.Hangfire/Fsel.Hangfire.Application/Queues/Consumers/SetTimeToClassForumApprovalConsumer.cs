@@ -14,7 +14,7 @@ namespace Fsel.Hangfire.Application.Queues.Consumers
     {
         private readonly IHostEnvironment _environment;
 
-        public SetTimeToClassForumApprovalConsumer(IHostEnvironment environment, AuthContext authmessage) : base(authmessage)
+        public SetTimeToClassForumApprovalConsumer(IHostEnvironment environment, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _environment = environment;
         }

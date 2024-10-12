@@ -61,6 +61,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
+            var passwordValidator = new Microsoft.AspNetCore.Identity.PasswordValidator<Domain.Entities.User>();
+            var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password);
+            if (!validPassword.Succeeded)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIsNotValid));
+                return methodResult;
+            }
+
             var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.Password);
             user.PasswordHash = hashPassword;
             await _userManager.UpdateAsync(user);

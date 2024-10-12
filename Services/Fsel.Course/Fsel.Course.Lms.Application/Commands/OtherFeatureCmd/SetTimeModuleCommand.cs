@@ -23,11 +23,11 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IMapper _mapper;
-        private readonly ILogger<object> _logger;
+        private readonly ILogger<SetTimeModuleCommand> _logger;
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
 
-        public SetTimeModuleCommandHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, ILogger<object> logger, DateTimeConverter dateTimeConverter, ISectionGroupResultRepository sectionGroupResultRepository)
+        public SetTimeModuleCommandHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, ILogger<SetTimeModuleCommand> logger, DateTimeConverter dateTimeConverter, ISectionGroupResultRepository sectionGroupResultRepository)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _mapper = mapper;
@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 VideoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult),
                 VideoTimeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode)
             }.Serialize();
-            _logger.LogError($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync : {requestInfo}");
+            _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync : {requestInfo}");
 
             if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
             {
@@ -94,9 +94,14 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 VideoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult),
                 VideoTimeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode)
             }.Serialize();
-            _logger.LogError($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync_1 : {requestInfoUpdate}");
+            _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync_1 : {requestInfoUpdate}");
 
-            _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
+            _videoTimeCodeResultRepository.Update(videoTimeCodeResult, false
+                , x => x.SkillScoresStr, x => x.SkillScoreUngradedStr
+                , x => x.CorrectCount, x => x.CorrectTotal
+                , x => x.CorrectCountUngraded, x => x.CorrectTotalUngraded
+                , x => x.TokenFirstTime, x => x.TokenLastTime, x => x.Status, x => x.HighestStreak
+                , x => x.Percent, x => x.IsWorking);
             await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
             var requestInfoUpdate2 = new
@@ -104,7 +109,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 VideoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult),
                 VideoTimeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode)
             }.Serialize();
-            _logger.LogError($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync_2 : {requestInfoUpdate2}");
+            _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync_2 : {requestInfoUpdate2}");
         }
 
         private async Task UpdateSectionGroupResultAsync(SetTimeModuleCommand request)
@@ -115,7 +120,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             {
                 sectionGroupResult = _mapper.Map<SectionGroupResultModel>(sectionGroupResult),
             }.Serialize();
-            _logger.LogError($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync: {requestInfo}");
+            _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync: {requestInfo}");
 
             if (sectionGroupResult != null && sectionGroupResult.SectionGroup != null)
             {
@@ -125,16 +130,19 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 {
                     sectionGroupResult = _mapper.Map<SectionGroupResultModel>(sectionGroupResult),
                 }.Serialize();
-                _logger.LogError($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync_1 : {requestInfoUpdate}");
+                _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync_1 : {requestInfoUpdate}");
 
-                _sectionGroupResultRepository.Update(sectionGroupResult);
+                _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.CurrentSectionTimeCodeId
+                , x => x.CorrectCount, x => x.CorrectTotal, x => x.SkillScoresStr
+                , x => x.TokenFirstTime, x => x.TokenLastTime, x => x.Status, x => x.HighestStreak
+                , x => x.Percent);
                 await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 var requestInfoUpdate2 = new
                 {
                     sectionGroupResult = _mapper.Map<SectionGroupResultModel>(sectionGroupResult),
                 }.Serialize();
-                _logger.LogError($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync_2 : {requestInfoUpdate2}");
+                _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync_2 : {requestInfoUpdate2}");
             }
         }
     }

@@ -38,7 +38,6 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public string? I18NSheetVN { get; set; }
         public string? I18NSheetEN { get; set; }
         public string? I18NSheetFR { get; set; }
-
         public string? MailMarketingSpreadSheetId { get; set; }
         public string? MailMarketingSheet { get; set; }
         public string? LandingPageSpreadSheetId { get; set; }
@@ -47,6 +46,11 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public string? LandingPageFSELSheet { get; set; }
         public string? CCEmailSpreadSheetId { get; set; }
         public string? CCEmailSheet { get; set; }
+        public string? OrderInfoSpreadSheetId { get; set; }
+        public string? OrderInfoSheet { get; set; }
+        public string? SchoolStudentSheetId { get; set; }
+        public string? LuckyTicketSpreadSheetId { get; set; }
+        public string? RegisterStudentForEventSpreadSheetId { get; set; }
     }
 
     public class Services : BaseServices

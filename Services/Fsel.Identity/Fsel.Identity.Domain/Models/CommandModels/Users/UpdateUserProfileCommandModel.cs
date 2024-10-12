@@ -2,10 +2,10 @@
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Users
 {
-    using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Models.CommandModels.Parents;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Identity.Domain.Models.CommandModels.TeacherBankAccount;
+    using Fsel.Shared.Enums;
 
     public class UpdateUserProfileCommandModel
     {

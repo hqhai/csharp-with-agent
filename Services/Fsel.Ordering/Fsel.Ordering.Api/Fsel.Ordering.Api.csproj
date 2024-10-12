@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Resources\AppStore\PrivateKey.txt">
+    <None Update="Resources\InAppPurchase\AppStore\PrivateKey.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Payoo.xml">

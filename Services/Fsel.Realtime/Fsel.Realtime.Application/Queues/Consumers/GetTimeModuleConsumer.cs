@@ -14,7 +14,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
     {
         private readonly IHubContext<SetTimeModuleHub> _setTimeModuleHub;
 
-        public GetTimeModuleConsumer(IHubContext<SetTimeModuleHub> setTimeModuleHub, AuthContext authContext) : base(authContext)
+        public GetTimeModuleConsumer(IHubContext<SetTimeModuleHub> setTimeModuleHub, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _setTimeModuleHub = setTimeModuleHub;
         }

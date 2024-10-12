@@ -6,9 +6,11 @@ namespace Fsel.Realtime.Application.Hubs
     using Fsel.Core.Extensions;
     using Fsel.Core.Services.IpApiServices;
     using Fsel.Realtime.Application.Queues.Publishers;
+    using Fsel.Realtime.Application.Trackers;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.SignalR;
     using Microsoft.Extensions.Logging;
 
@@ -20,7 +22,7 @@ namespace Fsel.Realtime.Application.Hubs
         private readonly IHubContext<SetTimeModuleHub> _setTimeModuleHubContext;
         private readonly AuthContext _authContext;
 
-        public SetTimeModuleHub(SetTimeModulePublisher setTimeModulePublisher, ILogger<SetTimeModuleHub> logger, GetTimeModulePublisher getTimeModulePublisher, IHubContext<SetTimeModuleHub> setTimeModuleHubContext, AuthContext authContext, IIpApiService ipApiService) : base(authContext, ipApiService)
+        public SetTimeModuleHub(SetTimeModulePublisher setTimeModulePublisher, ILogger<SetTimeModuleHub> logger, GetTimeModulePublisher getTimeModulePublisher, IHubContext<SetTimeModuleHub> setTimeModuleHubContext, AuthContext authContext, IIpApiService ipApiService, IHttpContextAccessor httpContextAccessor) : base(authContext, ipApiService, httpContextAccessor)
         {
             _setTimeModulePublisher = setTimeModulePublisher;
             _logger = logger;
@@ -33,8 +35,7 @@ namespace Fsel.Realtime.Application.Hubs
         {
             string type = (Context.GetHttpContext()?.Request.Query["Type"].ToString()!);
             string objectId = Context.GetHttpContext()?.Request.Query["ObjectId"].ToString()!;
-            await Groups.AddGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString())
-                ;
+            await Groups.AddGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
             _logger.LogInformation($"Connected Socket SetTimeModule ConnectId : {Context.ConnectionId}, Type : {type}, ObjectId : {objectId}, DateTime: {DateTime.UtcNow}");
         }
 
@@ -56,7 +57,7 @@ namespace Fsel.Realtime.Application.Hubs
                 await Groups.RemoveGroupAsync(Context.ConnectionId, userId.ToString());
             }
 
-            _logger.LogInformation($"Disconnect Socket SetTimeModule ConnectId : {Context.ConnectionId}, Type : {type}, ObjectId : {objectId}, DateTime: {DateTime.UtcNow}");
+            _logger.LogInformation($"Disconnect SetTimeModule 1 : {Context.ConnectionId}, Type : {type}, ObjectId : {objectId}, DateTime: {DateTime.UtcNow}");
         }
 
         public async Task OnDisconnectedToTimeAsync(SetTimeModuleModel? setTimeModule)
@@ -74,23 +75,27 @@ namespace Fsel.Realtime.Application.Hubs
             var connectionId = ConnectionTracker.Instance.RecordConnectionEndUser(userId);
             if (connectionId != null)
             {
+                _logger.LogInformation($"Disconnect SetTimeModule 2: {connectionId}, Type : {setTimeModule.Type}, ObjectId : {setTimeModule.ObjectId}, DateTime: {DateTime.UtcNow}");
+
                 await DisConnectAsync(setTimeModule.Type, setTimeModule.ObjectId.ToString(), connectionId, setTimeModule.SubmissionCount);
 
                 await _setTimeModuleHubContext.GetGroup(userId).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "Disconnect" });
                 await _setTimeModuleHubContext.Groups.RemoveGroupAsync(connectionId, userId);
             }
 
-            _logger.LogInformation($"Disconnect Submit Socket SetTimeModule ConnectId : {connectionId}, Type : {setTimeModule.Type}, ObjectId : {setTimeModule.ObjectId}, DateTime: {DateTime.UtcNow}");
+            _logger.LogInformation($"Disconnect SetTimeModule 3: {connectionId}, Type : {setTimeModule.Type}, ObjectId : {setTimeModule.ObjectId}, DateTime: {DateTime.UtcNow}");
         }
 
         public async Task StartTime()
         {
             var userId = _authContext.CurrentUserId.ToString();
+
             ConnectionTracker.Instance.RecordConnectionStart(Context.ConnectionId);
             ConnectionTracker.Instance.RecordConnectionStartUser(Context.ConnectionId, userId);
+
             await _setTimeModuleHubContext.GetGroup(userId).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "StartTime" });
 
-            _logger.LogInformation($"StartTime Socket SetTimeModule ConnectId : {Context.ConnectionId}, UserId : {userId}, DateTime: {DateTime.UtcNow}");
+            _logger.LogInformation($"Connect SetTimeModule : {Context.ConnectionId}");
             await Task.CompletedTask;
         }
 
@@ -104,7 +109,7 @@ namespace Fsel.Realtime.Application.Hubs
 
             await DisConnectAsync(type, objectId);
             await _setTimeModuleHubContext.GetGroup(userId).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "StopTime" });
-            _logger.LogInformation($"StopTime Socket SetTimeModule ConnectId : {Context.ConnectionId}, Type : {type}, ObjectId : {objectId}, DateTime: {DateTime.UtcNow}");
+            _logger.LogInformation($"Disconnect SetTimeModule 4: {Context.ConnectionId}");
         }
 
         public async Task GetTime()
