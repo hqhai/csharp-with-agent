@@ -2,6 +2,7 @@
 
 namespace Fsel.System.Application.Commands.OtherCmd
 {
+    using Amazon.SimpleEmail.Model;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -10,6 +11,7 @@ namespace Fsel.System.Application.Commands.OtherCmd
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Application.Commands.TokenHistoryCmd;
+    using Fsel.System.Application.Queues.Publisher;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
@@ -26,12 +28,17 @@ namespace Fsel.System.Application.Commands.OtherCmd
         private readonly IUserService _userService;
         private readonly IMediator _mediator;
         private readonly ITokenHistoryRepository _tokenHistoryRepository;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
-        public ToolAddCoinToStudentsCommadHandler(IUserService userService, IMediator mediator, ITokenHistoryRepository tokenHistoryRepository)
+        public ToolAddCoinToStudentsCommadHandler(IUserService userService,
+            IMediator mediator,
+            ITokenHistoryRepository tokenHistoryRepository,
+            NotificationMessagePublisher notificationMessagePublisher)
         {
             _userService = userService;
             _mediator = mediator;
             _tokenHistoryRepository = tokenHistoryRepository;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<Stream>> Handle(ToolAddCoinToStudentsCommad request, CancellationToken cancellationToken)
@@ -50,7 +57,6 @@ namespace Fsel.System.Application.Commands.OtherCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null or malformed" });
                 }
-
                 if (string.IsNullOrEmpty(x.EventCode))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.EventCode), Message = "EventCode is null" });
@@ -58,20 +64,13 @@ namespace Fsel.System.Application.Commands.OtherCmd
                 return await Task.FromResult(errors.Count == 0);
             });
 
-            var duplicateEmails = result.Datas.GroupBy(user => user.Email).Where(group => group.Count() > 1).Select(group => group.Key);
-            if (duplicateEmails.Any())
-            {
-                methodResult.AddErrorBadRequest("Duplicate Emails");
-                return methodResult;
-            }
-
             if (result.Stream != null)
             {
                 methodResult.Result = result.Stream;
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var emails = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email ?? string.Empty).ToList();
+            var emails = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email ?? string.Empty).Distinct().ToList();
             var studentResults = await _userService.GetStudentsByEmails(emails);
             if (!studentResults.IsSuccessStatusCode)
             {
@@ -81,7 +80,7 @@ namespace Fsel.System.Application.Commands.OtherCmd
             var students = studentResults.Content?.Result;
             if (students == null || !students.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
                 return methodResult;
             }
             var resultData = request.FormFile.ImportAndValidateExcel(async (ImportCoinEventStudentModel x, IList<ImportCoinEventStudentModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
@@ -125,9 +124,11 @@ namespace Fsel.System.Application.Commands.OtherCmd
             }
 
             var tokenHistoryData = new List<TokenHistoryModel>();
+
             foreach (var student in students)
             {
                 var email = student.Human?.Email;
+                var userId = student.Human?.UserId ?? default;
                 var dataToken = result.Datas.FirstOrDefault(x => x.Email == email);
 
                 var createData = new CreateTokenHistoryCommand
@@ -138,7 +139,7 @@ namespace Fsel.System.Application.Commands.OtherCmd
                             EventCode = dataToken?.EventCode,
                             Feature = EnumTokenFeature.FselEvent,
                             Type = EnumTokenHistoryType.Recevived,
-                            UserId = student.Human?.UserId ?? default,
+                            UserId = userId,
                             VolatileToken = dataToken?.Coin ?? default,
                         }
                     }
@@ -146,7 +147,19 @@ namespace Fsel.System.Application.Commands.OtherCmd
 
                 var tokenHitoryResults = await _mediator.Send(createData, cancellationToken).ConfigureAwait(false);
                 tokenHistoryData.AddRange(tokenHitoryResults.Result?.ToList() ?? new List<TokenHistoryModel>());
+                if (dataToken != null && bool.TryParse(dataToken.IsSendNotify, out bool isSendNotify) && isSendNotify)
+                {
+                    await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
+                    {
+                        Content = EnumNotificationContent.FselFlowFBEvent,
+                        UserIds = new List<Guid>() { userId },
+                        ParamsMessage = new List<object> { dataToken.Coin },
+                        Type = EnumNotificationType.Text,
+                        PlatformCode = EnumPlatformCode.LMS,
+                    }, cancellationToken);
+                }
             }
+
             methodResult.Result = tokenHistoryData.ExportExcel();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

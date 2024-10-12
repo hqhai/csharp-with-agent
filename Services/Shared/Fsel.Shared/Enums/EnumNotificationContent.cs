@@ -30,6 +30,7 @@ namespace Fsel.Shared.Enums
         CommentPost,
         LikePost,
         ReplyCommentPost,
-        CourseChange
+        CourseChange,
+        FselFlowFBEvent
     }
 }
