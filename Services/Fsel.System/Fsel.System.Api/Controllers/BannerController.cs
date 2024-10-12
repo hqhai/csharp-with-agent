@@ -38,5 +38,17 @@ namespace Fsel.System.Api.Controllers
             MethodResult<BannerModel> commandResult = await _mediator.Send(new GetBannerQuery { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get By Student
+        /// </summary>
+        [HttpGet("banner-student")]
+        [ProducesResponseType(typeof(MethodResult<BannerModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetBannerToStudent()
+        {
+            MethodResult<BannerModel> commandResult = await _mediator.Send(new GetBannerToStudentQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

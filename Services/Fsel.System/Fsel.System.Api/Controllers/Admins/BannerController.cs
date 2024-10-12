@@ -82,7 +82,7 @@ namespace Fsel.System.Api.Controllers.Admins
         /// <summary>
         /// Delete
         /// </summary>
-        [HttpPut("{id}")]
+        [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)

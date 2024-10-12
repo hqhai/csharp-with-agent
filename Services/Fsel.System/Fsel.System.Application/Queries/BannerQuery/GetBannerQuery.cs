@@ -4,6 +4,8 @@ namespace Fsel.System.Application.Queries.BannerQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
@@ -29,8 +31,17 @@ namespace Fsel.System.Application.Queries.BannerQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<BannerModel> methodResult = new MethodResult<BannerModel>();
+
             var banner = await _bannerRepository.GetByIdAsync(request.Id);
+            if (banner == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(banner), nameof(request.Id));
+                return methodResult;
+            }
+
             methodResult.Result = _mapper.Map<BannerModel>(banner);
+            methodResult.Result.StartDate = methodResult.Result.StartDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+            methodResult.Result.EndDate = methodResult.Result.EndDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

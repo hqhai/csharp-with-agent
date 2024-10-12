@@ -3,6 +3,7 @@
 namespace Fsel.System.Application.Queries.BannerQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.System.Domain.IRepositories;
@@ -36,17 +37,16 @@ namespace Fsel.System.Application.Queries.BannerQuery
             }
             var query = _bannerRepository.Queryable.Select(x => new BannerModel
             {
+                Id = x.Id,
                 Name = x.Name,
                 Code = x.Code,
                 CreatedDate = x.CreatedDate,
                 CreatedFullName = x.CreatedFullName,
                 CreatedUserId = x.CreatedUserId,
                 Description = x.Description,
-                EndDate = x.EndDate,
                 FilePath = x.FilePath,
-                Id = x.Id,
-                StartDate = x.StartDate,
-                Status = x.Status,
+                StartDate = x.StartDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam),
+                EndDate = x.EndDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam),
                 Type = x.Type,
                 UpdatedDate = x.UpdatedDate,
                 UpdatedFullName = x.UpdatedFullName,
@@ -59,11 +59,10 @@ namespace Fsel.System.Application.Queries.BannerQuery
             }
 
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await query
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+            var lists = await query.ApplySortAndPaging(request)
+                                   .AsNoTracking()
+                                   .ToListAsync(cancellationToken: cancellationToken)
+                                   .ConfigureAwait(false);
 
             methodResult.Result = new PagingItemsModel<BannerModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

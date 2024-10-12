@@ -25,7 +25,6 @@ namespace Fsel.System.Domain.Entities
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FilePath { get; set; }
 
-        public EnumBannerStatus Status { get; set; }
         public EnumBannerType Type { get; set; }
 
         public DateTime StartDate { get; set; }

@@ -5,6 +5,7 @@ namespace Fsel.System.Application.Commands.BannerCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Enums.ErrorCodes;
@@ -36,12 +37,12 @@ namespace Fsel.System.Application.Commands.BannerCmd
             var methodResult = new MethodResult<BannerModel>();
 
             #region Validation
-
             if (request.StartDate >= request.EndDate)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.StartDateGreaterThanEndDate));
                 return methodResult;
             }
+
             if (request.Type == EnumBannerType.Popup && string.IsNullOrEmpty(request.FilePath))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(EnumBannerType.Popup), request.FilePath);
@@ -60,6 +61,8 @@ namespace Fsel.System.Application.Commands.BannerCmd
                 return methodResult;
             }
 
+            banner.StartDate = banner.StartDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
+            banner.EndDate = banner.EndDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
             #endregion Validation
 
             await _bannerRepository.ExecuteTransactionAsync(async () =>

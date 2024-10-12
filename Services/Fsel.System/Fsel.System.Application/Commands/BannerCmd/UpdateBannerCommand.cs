@@ -5,6 +5,7 @@ namespace Fsel.System.Application.Commands.BannerCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
@@ -62,12 +63,15 @@ namespace Fsel.System.Application.Commands.BannerCmd
                 return methodResult;
             }
 
+            banner.StartDate = banner.StartDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
+            banner.EndDate = banner.EndDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
+
             await _bannerRepository.ExecuteTransactionAsync(async () =>
             {
                 _bannerRepository.Update(banner);
                 await _bannerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<BannerModel>(banner);
                 return methodResult;
             });
