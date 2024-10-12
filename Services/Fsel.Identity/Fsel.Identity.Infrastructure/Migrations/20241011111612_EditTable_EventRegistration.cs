@@ -11,10 +11,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_StudentCompetitionEvents_CompetitionEvents_CompetitionEventId",
-                table: "StudentCompetitionEvents");
-
             migrationBuilder.AlterColumn<Guid>(
                 name: "SchoolId",
                 table: "EventRegistrations",
@@ -130,14 +126,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 principalTable: "CompetitionEvents",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_StudentCompetitionEvents_CompetitionEvents_CompetitionEventId",
-                table: "StudentCompetitionEvents",
-                column: "CompetitionEventId",
-                principalTable: "CompetitionEvents",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.SetNull);
         }
 
         /// <inheritdoc />
@@ -146,10 +134,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
             migrationBuilder.DropForeignKey(
                 name: "FK_CompetitionEvents_CompetitionEvents_ParentEventId",
                 table: "CompetitionEvents");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_StudentCompetitionEvents_CompetitionEvents_CompetitionEventId",
-                table: "StudentCompetitionEvents");
 
             migrationBuilder.DropIndex(
                 name: "IX_CompetitionEvents_ParentEventId",
@@ -236,14 +220,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(500)",
                 oldMaxLength: 500);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_StudentCompetitionEvents_CompetitionEvents_CompetitionEventId",
-                table: "StudentCompetitionEvents",
-                column: "CompetitionEventId",
-                principalTable: "CompetitionEvents",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
         }
     }
 }
