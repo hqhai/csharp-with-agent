@@ -4,9 +4,9 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumLocationType
     {
-        Country,
-        Province,
-        District,
-        Ward
+        Country = 0,
+        Province = 2,
+        District = 3,
+        School = 4
     }
 }
