@@ -9,10 +9,10 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
     using Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Attributes;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/cso/class-forum-score")]
     [ApiController]
     public class ClassForumScoreController : ControllerBase

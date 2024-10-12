@@ -4,7 +4,6 @@ namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Collections.Generic;
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -12,13 +11,13 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Course.Lms.Application.Queries.LessonQuery;
     using Fsel.Course.Lms.Application.Queries.ProgressQuery;
     using Fsel.Course.Lms.Application.Queries.StudentProgressQuery;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/progress")]
     [ApiController]
     public class ProgressController : ControllerBase

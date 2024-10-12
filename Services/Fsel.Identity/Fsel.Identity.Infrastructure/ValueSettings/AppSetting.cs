@@ -13,6 +13,13 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public new Services? Services { get; set; }
 
         public GoogleSheetConfig? GoogleSheetConfig { get; set; }
+        public UserReferralConfig? UserReferralConfig { get; set; }
+    }
+
+    public class UserReferralConfig
+    {
+        public int PT { get; set; }
+        public int DoneUnit1 { get; set; }
     }
 
     public class ResourceContent
@@ -25,6 +32,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     {
         public string? ConfirmOtpUrl { get; set; }
         public string? RegisterUrl { get; set; }
+        public string? LinkResetProgress { get; set; }
     }
 
     public class Services : BaseServices
@@ -41,6 +49,8 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     {
         public int StepTime { get; set; }
         public int StepDayWithAdmin { get; set; }
+        public bool IsByPassOtp { get; set; }
+        public string? ByPassOtpValue { get; set; }
     }
 
     public class Smtp

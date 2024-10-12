@@ -16,6 +16,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using Fsel.Ordering.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class CreateVoucherCommand : CreateVoucherCommandModel, IRequest<MethodResult<VoucherModel>>
     {
@@ -39,37 +40,44 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VoucherModel> methodResult = new MethodResult<VoucherModel>();
 
-            Voucher voucher = _mapper.Map<Voucher>(request);
-            if (request.StartDate > request.EndDate)
+            if (request.EndDate.HasValue && request.StartDate.Date > request.EndDate.Value.Date)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherStartTimeMustSoonerThanEndTime), nameof(request.EndDate), request.EndDate);
                 return methodResult;
             }
+            if (request.PackageIds == null || request.PackageIds.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.PackageIds));
+                return methodResult;
+            }
+            if (_packageRepository.IsIdsInValid(request.PackageIds))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.PackageIds));
+                return methodResult;
+            }
+            if (!string.IsNullOrEmpty(request.Code) && await _voucherRepository.Queryable.AnyAsync(p => p.Code.ToLower() == request.Code.ToLower(), cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code));
+                return methodResult;
+            }
+
+            Voucher voucher = _mapper.Map<Voucher>(request);
+
+            request.PackageIds.ForEach(p => voucher.VoucherPackages.Add(new VoucherPackage()
+            {
+                PackageId = p
+            }));
+
             if (!voucher.IsValid())
             {
                 methodResult.AddErrorBadRequest(voucher.ErrorMessages);
                 return methodResult;
             }
-            if (request.VoucherPackages != null && request.VoucherPackages.Count > 0)
-            {
-                if (_packageRepository.IsIdsInValid(request.VoucherPackages.Select(x => x.PackageId).ToList()))
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.VoucherPackages));
-                    return methodResult;
-                }
-                voucher.VoucherPackages = request.VoucherPackages!.Select((x) => new VoucherPackage
-                {
-                    Percentage = x.Percentage,
-                    PackageId = x.PackageId
-                }).ToList();
-            }
 
             await _voucherRepository.ExecuteTransactionAsync(async () =>
             {
-                voucher.IsGlobal = true;
                 voucher = _voucherRepository.Add(voucher);
                 await _voucherRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<VoucherModel>(voucher);
                 return methodResult;

@@ -85,5 +85,17 @@ namespace Fsel.System.Api.Controllers
             var commandResult = await _mediator.Send(new GetCCEmailsAccordingToStudentsQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Add Contact Info From Landing Page FSEL To GoogleSheet
+        /// </summary>
+        [HttpPost("register-student-for-event")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RegisterStudentForEvent([FromBody] RegisterStudentForEventCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

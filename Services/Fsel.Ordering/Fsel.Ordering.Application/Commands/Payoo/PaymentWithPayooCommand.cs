@@ -73,6 +73,8 @@ namespace Fsel.Ordering.Application.Commands.Payoo
                 orderTransaction = _orderTransactionRepository.Add(orderTransaction);
                 await _orderTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
+                var orderDescription = string.Format(CultureInfo.InvariantCulture, PaymentSetting.Payoo.OrderDescription, order.Code);
+
                 var param = new
                 {
                     UserName = _appSetting.PayooConfig?.Username,
@@ -81,10 +83,10 @@ namespace Fsel.Ordering.Application.Commands.Payoo
                     ShopDomain = _appSetting.PayooConfig?.ShopDomain,
                     ShopBackUrl = _appSetting.PayooConfig?.ShopBackUrl,
                     OrderCashAmount = order.TotalPrice,
-                    OrderDescription = PaymentSetting.Payoo.OrderDescription,
+                    OrderDescription = orderDescription,
                     NotifyUrl = _appSetting.PayooConfig?.NotifyUrl,
                     ValidityTime = validityTime,
-                    OrderTransactionId = orderTransaction.Id,
+                    OrderCode = order.Code,
                     CustomerName = student?.Human?.FullName,
                     CustomerPhone = student?.Human?.PhoneNumber,
                     CustomerAddress = student?.Human?.Address,

@@ -7,9 +7,9 @@ namespace Fsel.Identity.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class CompetitionEventsEntityTypeConfiguration : IEntityTypeConfiguration<CompetitionEvents>
+    public class CompetitionEventsEntityTypeConfiguration : IEntityTypeConfiguration<CompetitionEvent>
     {
-        public void Configure(EntityTypeBuilder<CompetitionEvents> builder)
+        public void Configure(EntityTypeBuilder<CompetitionEvent> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
         }

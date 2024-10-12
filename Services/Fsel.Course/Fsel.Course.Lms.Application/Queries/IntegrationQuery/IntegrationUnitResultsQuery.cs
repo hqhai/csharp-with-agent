@@ -44,8 +44,7 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
                 var lessonResultHasTimes = await _lessonResultRepository.Queryable
                                                                         .Include(x => x.Lesson)
                                                                         .Where(x => (x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) :
-                                                                              (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate)) &&
-                                                                              (x.Status == EnumResultStatus.New || x.Status == EnumResultStatus.Process))
+                                                                              (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate)))
                                                                         .ToListAsync(cancellationToken);
 
                 var datas = lessonResultHasTimes.GroupBy(x => x.CreatedUserId)
@@ -59,10 +58,11 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
             }
 
             var lessonResults = await _lessonResultRepository.Queryable
-                                                 .Include(x => x.Lesson)
-                                                 .Where(x => request.UserIds.Contains(x.CreatedUserId) &&
-                                                       (x.Status == EnumResultStatus.New || x.Status == EnumResultStatus.Process))
-                                                 .ToListAsync(cancellationToken);
+                                                             .Include(x => x.Lesson)
+                                                             .Where(x => request.UserIds.Contains(x.CreatedUserId))
+                                                             .GroupBy(x => x.CreatedUserId)
+                                                             .Select(x => x.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
+                                                             .ToListAsync(cancellationToken);
 
             IList<UnitResultIntegration> unitResults = new List<UnitResultIntegration>();
 
@@ -71,7 +71,9 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
             var unitQuerys = await _unitResultRepository.Queryable
                                                         .Include(x => x.Unit)
                                                         .Include(x => x.Course)
-                                                        .Where(x => userIds.Contains(x.CreatedUserId) && (x.Status == EnumResultStatus.New || x.Status == EnumResultStatus.Process))
+                                                        .Where(x => userIds.Contains(x.CreatedUserId))
+                                                        .GroupBy(x => x.CreatedUserId)
+                                                        .Select(x => x.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
                                                         .ToListAsync(cancellationToken);
 
             var courseIds = unitQuerys.Select(x => x.CourseId).Distinct().ToList();
@@ -80,6 +82,11 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
 
             foreach (var item in unitQuerys)
             {
+                if (item == null)
+                {
+                    continue;
+                }
+
                 var unitResult = new UnitResultIntegration
                 {
                     UserId = item.CreatedUserId,
