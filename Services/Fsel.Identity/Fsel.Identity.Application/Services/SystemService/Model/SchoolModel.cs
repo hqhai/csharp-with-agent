@@ -8,11 +8,10 @@ namespace Fsel.Identity.Application.Services.SystemService.Model
 
     public class SchoolModel : BaseModel
     {
-
         public string? Name { get; set; }
 
-        public EnumEducationLevel EducationLevel { get; set; }
-        public EnumSchoolType SchoolType { get; set; }
+        public EnumEducationLevel? EducationLevel { get; set; }
+        public EnumSchoolType? SchoolType { get; set; }
 
         public string? Address { get; set; }
         public string? Phone { get; set; }
@@ -38,10 +37,10 @@ namespace Fsel.Identity.Application.Services.SystemService.Model
 
         public bool IsActive { get; set; }
 
-        public Location? Location { get; set; }
+        public LocationModel? Location { get; set; }
     }
 
-    public class Location
+    public class LocationModel
     {
         public string? LongPath { get; set; }
     }

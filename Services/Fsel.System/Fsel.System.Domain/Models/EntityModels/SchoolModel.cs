@@ -31,6 +31,7 @@ namespace Fsel.System.Domain.Models.EntityModels
 
         public string? ShortPath { get; set; }
         public Guid? LocationId { get; set; }
+
         public LocationModel? Location { get; set; }
 
         public bool IsActive { get; set; }

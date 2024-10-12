@@ -5,8 +5,8 @@ namespace Fsel.System.Application.Queries.SchoolQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities;
-    using Fsel.System.Domain.Enums;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
