@@ -33,7 +33,8 @@ namespace Fsel.Shared.Enums
         SignUpEventSuccess,
         WasInAnotherEvent,
         LearnedOnThePlatform,
-        NotEligibleToParticipate
+        NotEligibleToParticipate,
+        MailRegisterEvent
 
         #endregion event
     }
