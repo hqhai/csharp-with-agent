@@ -8,8 +8,8 @@ namespace Fsel.System.Domain.Models.EntityModels
     public class SchoolModel : BaseModel
     {
         public string? Name { get; set; }
-        public EnumEducationLevel EducationLevel { get; set; }
-        public EnumSchoolType SchoolType { get; set; }
+        public EnumEducationLevel? EducationLevel { get; set; }
+        public EnumSchoolType? SchoolType { get; set; }
         public string? Address { get; set; }
         public string? Phone { get; set; }
 

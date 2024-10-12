@@ -16,7 +16,7 @@ namespace Fsel.System.Domain.Entities
         public string? LongPath { get; set; }
         public string? ShortPath { get; set; }
         public int? Level { get; set; }
-        public int? ParentID { get; set; }
+        public int? ParentId { get; set; }
         public string? LocalId { get; set; }
         public EnumCrmLocationTypeLevel? TypeLevel { get; set; }
     }

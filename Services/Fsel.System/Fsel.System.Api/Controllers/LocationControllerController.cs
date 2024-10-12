@@ -39,17 +39,5 @@ namespace Fsel.System.Api.Controllers
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-
-        /// <summary>
-        /// Get locations
-        /// </summary>
-        [HttpGet("get-locations-from-crm")]
-        [ProducesResponseType(typeof(MethodResult<IList<CrmLocation>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetLocationFromCrm([FromQuery] GetLocationFromCrmQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
     }
 }
