@@ -17,13 +17,15 @@ namespace Fsel.Notification.Application.Queues.Consumers
         private readonly INotificationTypeRepository _notificationTypeRepository;
 
         private readonly ILogger<SendNotificationConsumer> _logger;
+
         public SendNotificationConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor,
             ILogger<SendNotificationConsumer> logger) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
-            _notificationTy peRepository = notificationTypeRepository;
+            _notificationTypeRepository = notificationTypeRepository;
             _logger = logger;
         }
+
         public override async Task ConsumeQueue(NotificationSendingQueueModel? message)
         {
             if (message != null)
@@ -31,7 +33,6 @@ namespace Fsel.Notification.Application.Queues.Consumers
                 var notificationType = await _notificationTypeRepository.Queryable.Include(x => x.Translations).FirstOrDefaultAsync(x => x.Type == message.Type && x.Content == message.Content);
 
                 string messageNoti = message.ParamsMessage != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateMessage ?? string.Empty, message.ParamsMessage.ToArray()) : notificationType?.TemplateMessage!;
-
 
                 List<NotificationMessageTranslationModel> notificationTranslations = new List<NotificationMessageTranslationModel>();
 
