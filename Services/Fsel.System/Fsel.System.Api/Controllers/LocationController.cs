@@ -9,6 +9,7 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
     using Fsel.System.Application.Queries.LocationQuery;
+    using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
@@ -18,11 +19,11 @@ namespace Fsel.System.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/location")]
     [ApiController]
-    public class LocationControllerController : BaseController
+    public class LocationController : BaseController
     {
         private readonly IMediator _mediator;
 
-        public LocationControllerController(IMediator mediator)
+        public LocationController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -42,10 +43,10 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Get locations by ids
         /// </summary>
-        [HttpGet("get-by-ids")]
+        [HttpGet("detail")]
         [ProducesResponseType(typeof(MethodResult<IList<LocationModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetByIds([FromQuery] GetLocationsByIdsQuery query)
+        public async Task<IActionResult> GetDetailLocation([FromQuery] GetDetailLocationQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -54,10 +55,10 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Get locations by ids
         /// </summary>
-        [HttpGet("detail")]
+        [HttpGet("get-by-ids")]
         [ProducesResponseType(typeof(MethodResult<IList<LocationModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetDetailLocation([FromQuery] GetDetailLocationQuery query)
+        public async Task<IActionResult> GetByIds([FromQuery] GetLocationsByIdsQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
