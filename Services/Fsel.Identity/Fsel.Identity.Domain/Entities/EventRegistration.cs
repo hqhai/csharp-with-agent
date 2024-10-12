@@ -46,11 +46,13 @@ namespace Fsel.Identity.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Province { get; set; }
+
         public Guid? ProvinceId { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? District { get; set; }
+
         public Guid? DistrictId { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
@@ -63,13 +65,17 @@ namespace Fsel.Identity.Domain.Entities
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SchoolGrade { get; set; }
 
-
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SchoolClass { get; set; }
 
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SchoolStudentCode { get; set; }
+
         public EnumEventRegistrationStatus Status { get; set; }
+        public bool IsScholarshipAdvising { get; set; }
+
+        public Guid? StudentId { get; set; }
+        public Student? Student { get; set; }
     }
 }
