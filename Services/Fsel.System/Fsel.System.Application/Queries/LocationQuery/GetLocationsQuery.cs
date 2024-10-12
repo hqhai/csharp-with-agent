@@ -2,11 +2,13 @@
 
 namespace Fsel.System.Application.Queries.LocationQuery
 {
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Shared.Enums;
+    using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
@@ -21,13 +23,13 @@ namespace Fsel.System.Application.Queries.LocationQuery
 
     public class GetLocationsQueryHandler : IRequestHandler<GetLocationsQuery, MethodResult<PagingItemsModel<LocationModel>>>
     {
-        private readonly ILocationRepository _locationRepository;
+        private readonly IMapper _mapper;
         private readonly ICrmLocationRepository _locationCrmRepository;
 
-        public GetLocationsQueryHandler(ILocationRepository locationRepository, ICrmLocationRepository locationCrmRepository)
+        public GetLocationsQueryHandler(ICrmLocationRepository locationCrmRepository, IMapper mapper)
         {
-            _locationRepository = locationRepository;
             _locationCrmRepository = locationCrmRepository;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<LocationModel>>> Handle(GetLocationsQuery request, CancellationToken cancellationToken)
@@ -40,9 +42,7 @@ namespace Fsel.System.Application.Queries.LocationQuery
                 return methodResult;
             }
 
-            var level = GetLevel(request.LocationType);
-
-            var locations = _locationCrmRepository.Queryable.Where(p => p.Level == level);
+            var locations = _locationCrmRepository.Queryable.Where(p => p.Level.HasValue && p.Level == (EnumCrmLocationLevel)request.LocationType);
 
             if (request.ParentId.HasValue)
             {
@@ -61,35 +61,17 @@ namespace Fsel.System.Application.Queries.LocationQuery
                 locations = locations.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
-            var model = locations.Select(p => new LocationModel
-            {
-                Id = p.GlobalId,
-                Name = p.Name,
-            });
-
-            int totalItem = model.Count();
-            var lists = await model
+            int totalItem = await locations.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await locations
                     .ApplySortAndPaging(request)
                     .OrderBy(x => x.Name)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<LocationModel>(model.ToList(), request, totalItem);
+            methodResult.Result = new PagingItemsModel<LocationModel>(_mapper.Map<List<LocationModel>>(lists), request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        private static int GetLevel(EnumLocationType locationType)
-        {
-            if (locationType == EnumLocationType.Province)
-            {
-                return 2;
-            }
-            else
-            {
-                return 3;
-            }
         }
     }
 }

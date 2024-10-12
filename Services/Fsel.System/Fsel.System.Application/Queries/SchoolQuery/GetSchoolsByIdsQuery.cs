@@ -53,39 +53,10 @@ namespace Fsel.System.Application.Queries.SchoolQuery
                 LongPath = p.LongPath,
                 ShortPath = p.ShortPath,
                 IdPath = p.IdPath,
-                EducationLevel = GetEnumEducationLevel(p.TypeLevel)
+                EducationLevel = Enum.IsDefined(typeof(EnumEducationLevel), (int?)p.TypeLevel ?? default) ? (EnumEducationLevel?)p.TypeLevel : null
             }).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        private static EnumEducationLevel? GetEnumEducationLevel(EnumCrmLocationTypeLevel? level)
-        {
-            if (level.HasValue)
-            {
-                return null;
-            }
-
-            if (level == EnumCrmLocationTypeLevel.PrimarySchoolsType0 || level == EnumCrmLocationTypeLevel.PrimarySchools)
-            {
-                return EnumEducationLevel.Primary;
-            }
-            else if (level == EnumCrmLocationTypeLevel.SecondarySchools)
-            {
-                return EnumEducationLevel.Secondary;
-            }
-            else if (level == EnumCrmLocationTypeLevel.HighSchools)
-            {
-                return EnumEducationLevel.HighSchool;
-            }
-            else if (level == EnumCrmLocationTypeLevel.Universities)
-            {
-                return EnumEducationLevel.University;
-            }
-            else
-            {
-                return null;
-            }
         }
     }
 }

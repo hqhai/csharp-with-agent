@@ -57,7 +57,7 @@ namespace Fsel.System.Application.Queries.SchoolQuery
 
             if (request.EducationLevel != null)
             {
-                var educationLevel = GetEnumEducationLevel(request.EducationLevel.Value);
+                var educationLevel = (EnumCrmLocationTypeLevel)request.EducationLevel.Value;
                 query = query.Where(m => m.TypeLevel == educationLevel);
             }
 
@@ -81,30 +81,6 @@ namespace Fsel.System.Application.Queries.SchoolQuery
             methodResult.Result = new PagingItemsModel<SchoolModel>(model.ToList(), request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        private static EnumCrmLocationTypeLevel? GetEnumEducationLevel(EnumEducationLevel level)
-        {
-            if (level == EnumEducationLevel.Primary)
-            {
-                return EnumCrmLocationTypeLevel.PrimarySchools;
-            }
-            else if (level == EnumEducationLevel.Secondary)
-            {
-                return EnumCrmLocationTypeLevel.SecondarySchools;
-            }
-            else if (level == EnumEducationLevel.HighSchool)
-            {
-                return EnumCrmLocationTypeLevel.HighSchools;
-            }
-            else if (level == EnumEducationLevel.University)
-            {
-                return EnumCrmLocationTypeLevel.Universities;
-            }
-            else
-            {
-                return null;
-            }
         }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Fsel.System.Infrastructure.Configs.Crm
 {
+    using Fsel.Common.Helpers;
     using Fsel.System.Domain.Entities;
     using global::System;
     using Microsoft.EntityFrameworkCore;

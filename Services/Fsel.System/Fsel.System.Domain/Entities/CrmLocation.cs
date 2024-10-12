@@ -15,10 +15,11 @@ namespace Fsel.System.Domain.Entities
         public string? IdPath { get; set; }
         public string? LongPath { get; set; }
         public string? ShortPath { get; set; }
-        public int? Level { get; set; }
-        public int? ParentId { get; set; }
+        public EnumCrmLocationLevel? Level { get; set; }
         public string? LocalId { get; set; }
         public EnumCrmLocationTypeLevel? TypeLevel { get; set; }
+        public int? ParentId { get; set; }
+        public CrmLocation? Parent { get; set; }
     }
 
     public enum EnumCrmLocationTypeName
@@ -27,36 +28,33 @@ namespace Fsel.System.Domain.Entities
         School
     }
 
+    public enum EnumCrmLocationLevel
+    {
+        Country,
+        Zone,
+        Province,
+        District,
+        School
+    }
+
     public enum EnumCrmLocationTypeLevel
     {
-        /// <summary>
-        /// Primary Schools - Tiểu học
-        /// </summary>
-        [Description("Primary Schools")]
-        PrimarySchoolsType0 = 0,
+        [Description("Không xác định")]
+        Unknown,
 
-        /// <summary>
-        /// Primary Schools - Tiểu học
-        /// </summary>
-        [Description("Primary Schools")]
-        PrimarySchools = 1,
+        [Description("Tiểu học")]
+        Primary,
 
-        /// <summary>
-        /// SecondarySchools - Trung học cơ sở
-        /// </summary>
-        [Description("Secondary Schools")]
-        SecondarySchools = 2,
+        [Description("THCS")]
+        Secondary,
 
-        /// <summary>
-        /// High schools - Trung học phổ thông
-        /// </summary>
-        [Description("High Schools")]
-        HighSchools = 3,
+        [Description("THPT")]
+        HighSchool,
 
-        /// <summary>
-        /// Universities/Colleges - Đại học / Cao đẳng
-        /// </summary>
-        [Description("Universities/Colleges")]
-        Universities = 5,
+        [Description("Liên cấp")]
+        InterLevel,
+
+        [Description("Đại học")]
+        University
     }
 }

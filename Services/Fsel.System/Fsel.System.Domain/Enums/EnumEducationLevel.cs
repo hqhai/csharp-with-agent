@@ -7,7 +7,7 @@ namespace Fsel.System.Domain.Enums
     public enum EnumEducationLevel
     {
         [Description("Tiểu học")]
-        Primary,
+        Primary = 1,
 
         [Description("THCS")]
         Secondary,
@@ -15,13 +15,10 @@ namespace Fsel.System.Domain.Enums
         [Description("THPT")]
         HighSchool,
 
-        [Description("Đại học")]
-        University,
-
-        [Description("Cao đẳng")]
-        College,
-
         [Description("Liên Cấp")]
-        InterLevel
+        InterLevel,
+
+        [Description("Đại học")]
+        University
     }
 }
