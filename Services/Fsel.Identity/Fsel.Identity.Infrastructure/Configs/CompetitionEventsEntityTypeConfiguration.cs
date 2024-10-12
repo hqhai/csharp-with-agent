@@ -12,6 +12,11 @@ namespace Fsel.Identity.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<CompetitionEvent> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+
+            builder.HasOne(a => a.CompetitionEventParent)
+                .WithMany(b => b.CompetitionEvents)
+                .HasForeignKey(p => p.ParentEventId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

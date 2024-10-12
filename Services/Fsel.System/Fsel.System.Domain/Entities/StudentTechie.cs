@@ -19,7 +19,7 @@ namespace Fsel.System.Domain.Entities
 
         public Guid StudentId { get; set; }
 
-        [NotMapped]
+        [NotMapped] 
         public TechieConfig? Config
         {
             get

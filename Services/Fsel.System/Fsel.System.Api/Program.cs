@@ -58,6 +58,8 @@ builder.Services.AddScoped<ITechieRepository, TechieRepository>();
 builder.Services.AddScoped<ITechieActionRepository, TechieActionRepository>();
 builder.Services.AddScoped<IStudentTechieRepository, StudentTechieRepository>();
 builder.Services.AddScoped<ILuckyTicketRepository, LuckyTicketRepository>();
+builder.Services.AddScoped<ICourseTargetConfigRepository, CourseTargetConfigRepository>();
+builder.Services.AddScoped<ICourseSuggestConfigRepository, CourseSuggestConfigRepository>();
 builder.Services.AddScoped<IBannerRepository, BannerRepository>();
 builder.Services.AddScoped<IBannerStudentRepository, BannerStudentRepository>();
 
@@ -93,7 +95,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.SystemQueue.NameQueue.QuestBoard, typeof(DoQuestBoardConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.TechieAction, typeof(TechieConsumer) },
     { QueueSettings.LmsQueue.NameQueue.Techie, typeof(TechieConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.CreateLuckyTicket, typeof(CreateLuckyTicketConsumer) }
+    { QueueSettings.SystemQueue.NameQueue.CreateLuckyTicket, typeof(CreateLuckyTicketConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.NoticeAccessTime, typeof(NoticeAccessFeatureConsumer) },
 });
 
 var app = builder.Build();

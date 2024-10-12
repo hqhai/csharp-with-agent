@@ -49,6 +49,13 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
+
+            var disableCategories = _appSetting.UrBoxConfig?.DisableCategories;
+
+            if (disableCategories?.Count > 0)
+            {
+                categories = categories?.Where(p => !disableCategories.Contains(p.Id ?? string.Empty)).ToList();
+            }
             methodResult.Result = categories;
             return methodResult;
         }

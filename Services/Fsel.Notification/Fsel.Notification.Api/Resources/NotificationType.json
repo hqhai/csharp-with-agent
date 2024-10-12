@@ -36,8 +36,31 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} vừa bình luận bài viết của bạn.",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
-    "createdDate": "2023-08-28"
+    "templateLink": "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "02DC26AC-2D45-4983-B0E8-15B4C7CB8B90",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "810C70CA-4F3C-4D02-A194-708FA45D42EA",
+        "templateMessage": "{0} vừa bình luận bài viết của bạn.",
+        "language": "vi-VN"
+      },
+      {
+        "id": "678236D5-543B-4DD1-AB99-C2CAA99A62AF",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "810C70CA-4F3C-4D02-A194-708FA45D42EA",
+        "templateMessage": "{0} has just commented on your post.",
+        "language": "en-US"
+      },
+      {
+        "id": "0489BA9D-222F-4BEA-AE35-3D8AC36CB35F",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "810C70CA-4F3C-4D02-A194-708FA45D42EA",
+        "templateMessage": "{0} vient de commenter votre publication.",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "10C2D5F8-1316-45E4-8FA1-E512EC1510C0",
@@ -76,8 +99,31 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} vừa trả lời bình luận của bạn.",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
-    "createdDate": "2023-08-28"
+    "templateLink": "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum-user",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "0D199223-E152-4A39-9B22-C0A510033E14",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "9E983172-DBA2-4CA7-B602-372C011ECB99",
+        "templateMessage": "{0} vừa trả lời bình luận của bạn.",
+        "language": "vi-VN"
+      },
+      {
+        "id": "77C8859E-37C0-4CE9-8BF0-D9AA2CEC1D43",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "9E983172-DBA2-4CA7-B602-372C011ECB99",
+        "templateMessage": "{0} has just replied to your comment.",
+        "language": "en-US"
+      },
+      {
+        "id": "DBFDB359-CD76-443D-94C1-C73888957D56",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "9E983172-DBA2-4CA7-B602-372C011ECB99",
+        "templateMessage": "{0} vient de répondre à votre commentaire.",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "CD8A1EDB-029F-4B2D-9725-C796E6FD7E5B",
@@ -85,9 +131,32 @@
     "content": "OrderChangeStatus",
     "icon": "",
     "priority": 1,
-    "templateMessage": "Bạn đã mua khóa học {0} thành công. Hãy bắt đầu học nào!",
-    "templateLink": "/learn",
-    "createdDate": "2023-08-28"
+    "templateMessage": "Bạn đã mua gói {0} thành công. Hãy bắt đầu học nào!",
+    "templateLink": "",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "973B9F47-3BB6-4ECC-8A4F-E6482C6FB80E",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "CD8A1EDB-029F-4B2D-9725-C796E6FD7E5B",
+        "templateMessage": "Bạn đã mua gói {0} thành công. Hãy bắt đầu học nào!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "E8D53F67-68EE-4352-B134-AB47D6E9768C",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "CD8A1EDB-029F-4B2D-9725-C796E6FD7E5B",
+        "templateMessage": "You have successfully purchased the {0} package. Let's start learning!",
+        "language": "en-US"
+      },
+      {
+        "id": "F5560AAC-3AC4-4A88-9D84-A82800E1B149",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "CD8A1EDB-029F-4B2D-9725-C796E6FD7E5B",
+        "templateMessage": "Vous avez acheté avec succès le forfait {0}. Commençons à apprendre !",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "3881403A-D412-4593-AEE5-5A38F4E078F9",
@@ -106,8 +175,31 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bình luận của bạn trong bài viết của {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL.",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
-    "createdDate": "2023-08-28"
+    "templateLink": "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "876495B2-1756-4CB3-8A68-2261221A89AD",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "27007EDB-25D8-493E-84D8-85F6F9E165B2",
+        "templateMessage": "Bình luận của bạn trong bài viết của {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL.",
+        "language": "vi-VN"
+      },
+      {
+        "id": "EFB6B960-C668-4643-B433-93142DA84AD3",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "27007EDB-25D8-493E-84D8-85F6F9E165B2",
+        "templateMessage": "Your comment on {0}'s post has been removed because it violated FSEL's community standards.",
+        "language": "en-US"
+      },
+      {
+        "id": "72C38C36-FC6B-4ED6-A8E6-FC711903B5AF",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "27007EDB-25D8-493E-84D8-85F6F9E165B2",
+        "templateMessage": "Votre commentaire sur la publication de {0} a été supprimé car il enfreignait les normes de la communauté FSEL.",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "57C709A6-03BD-4A3F-AD34-F9449587E1DF",
@@ -116,8 +208,31 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bài viết của bạn trong {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
-    "createdDate": "2023-08-28"
+    "templateLink": "learn/{0}/{1}/lesson/{2}?page=class-forum",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "DFF468CF-A150-4685-B7BA-FA2D4EEB2B05",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "57C709A6-03BD-4A3F-AD34-F9449587E1DF",
+        "templateMessage": "Bài viết của bạn trong {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "D095D2C0-2266-4765-B4D4-2DA0C685336F",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "57C709A6-03BD-4A3F-AD34-F9449587E1DF",
+        "templateMessage": "Your post in {0} has been removed for violating FSEL's community standards. Please try again!",
+        "language": "en-US"
+      },
+      {
+        "id": "9BFD2B9D-EB69-4A3B-8788-6526E1B4D784",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "57C709A6-03BD-4A3F-AD34-F9449587E1DF",
+        "templateMessage": "Votre publication dans {0} a été supprimée pour non-respect des normes de la communauté FSEL. Veuillez réessayer !",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "810C70CA-4F3C-4D02-A491-708FA45D42EA",
@@ -126,8 +241,31 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} đã thích bài viết của bạn.",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
-    "createdDate": "2023-08-28"
+    "templateLink": "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "DC5DD6E3-41D5-4221-B5FF-04035926CF7D",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "810C70CA-4F3C-4D02-A491-708FA45D42EA",
+        "templateMessage": "{0} đã thích bài viết của bạn.",
+        "language": "vi-VN"
+      },
+      {
+        "id": "782036F2-E5E3-4A36-B8EA-484C7C1DB06C",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "810C70CA-4F3C-4D02-A491-708FA45D42EA",
+        "templateMessage": "{0} has liked your post!",
+        "language": "en-US"
+      },
+      {
+        "id": "48853C68-DF32-4BA2-AF20-73D47260655D",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "810C70CA-4F3C-4D02-A491-708FA45D42EA",
+        "templateMessage": "{0} a aimé votre publication !",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "3AD02DE7-A8A8-4DB6-8286-486C81390ED3",
@@ -145,9 +283,32 @@
     "content": "AIFeedBack",
     "icon": "",
     "priority": 1,
-    "templateMessage": "Bài đăng của bạn đã được chấm bởi hệ thống AI của FSEL. Nhấn để xem chi tiết",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}?type=aiFeedback",
-    "createdDate": "2023-08-28"
+    "templateMessage": "Bài đăng của bạn đã được chấm bởi hệ thống AI ChatGPT. Nhấn để xem chi tiết",
+    "templateLink": "learn/{0}/{1}/lesson/{2}?page=class-forum",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "D8977047-E977-4772-A3E0-C20CB0BC76E3",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "59942527-CA1F-4F18-A66B-CDCFE87B317E",
+        "templateMessage": "Bài đăng của bạn đã được chấm bởi hệ thống AI ChatGPT. Nhấn để xem chi tiết",
+        "language": "vi-VN"
+      },
+      {
+        "id": "760BCC15-6445-4302-B59F-07A3D4C5337A",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "59942527-CA1F-4F18-A66B-CDCFE87B317E",
+        "templateMessage": "Your submission has been graded by FSEL's AI. Click to view the results.",
+        "language": "en-US"
+      },
+      {
+        "id": "ABAB8049-4C5D-44C7-93DC-BCA5416FC87E",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "59942527-CA1F-4F18-A66B-CDCFE87B317E",
+        "templateMessage": "Votre soumission a été notée par l'IA de FSEL. Cliquez pour voir les résultats.",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "4B5173D1-3D0B-4DF6-B3CA-15CD175926A1",
@@ -207,7 +368,30 @@
     "priority": 1,
     "templateMessage": "Chúc mừng bạn đã đạt top {0} trên Bảng xếp hạng!",
     "templateLink": "/home",
-    "createdDate": "2023-08-28"
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "39DDF48B-B3BB-4898-91E0-54451A4ACCD0",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "9DA28757-2D28-40CB-B88C-CC51FC15BB43",
+        "templateMessage": "Chúc mừng bạn đã đạt top {0} trên Bảng xếp hạng!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "61A570D9-F58D-4278-863F-120680EF789B",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "9DA28757-2D28-40CB-B88C-CC51FC15BB43",
+        "templateMessage": "Congratulations on reaching top {0} on the Leaderboard!",
+        "language": "en-US"
+      },
+      {
+        "id": "1DC3D61C-00F1-434A-9700-5A1ADC423745",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "9DA28757-2D28-40CB-B88C-CC51FC15BB43",
+        "templateMessage": "Félicitations pour avoir atteint le top {0} du classement !",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "69CC9E39-82D5-4D1A-81B9-8C97EC54BFAD",
@@ -216,8 +400,31 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bài đăng của bạn đã được phê duyệt. Nhấn để xem chi tiết",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
-    "createdDate": "2023-08-28"
+    "templateLink": "learn/{0}/{1}/lesson/{2}/class-forum/{3}?page=class-forum",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "66DE6E9C-0C63-4BAD-B5E4-C52CAFE2BB7F",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "69CC9E39-82D5-4D1A-81B9-8C97EC54BFAD",
+        "templateMessage": "Bài đăng của bạn đã được phê duyệt. Nhấn để xem chi tiết",
+        "language": "vi-VN"
+      },
+      {
+        "id": "A5609E92-E166-46EC-AD23-2C0222FCB351",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "69CC9E39-82D5-4D1A-81B9-8C97EC54BFAD",
+        "templateMessage": "Your post has been approved. Click to view more details.",
+        "language": "en-US"
+      },
+      {
+        "id": "5A5954C6-B3F4-4018-8BF2-7134E09EA540",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "69CC9E39-82D5-4D1A-81B9-8C97EC54BFAD",
+        "templateMessage": "Votre publication a été approuvée. Cliquez pour voir plus de détails.",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "75540141-A6D9-409D-A3CE-90C9A7577E8A",
@@ -226,8 +433,31 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bài viết của bạn trong {0} đã bị từ chối phê duyệt do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
-    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
-    "createdDate": "2023-08-28"
+    "templateLink": "learn/{0}/{1}/lesson/{2}?page=class-forum",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "561EA827-F02C-49A8-9EA7-240994CFB8CD",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "75540141-A6D9-409D-A3CE-90C9A7577E8A",
+        "templateMessage": "Bài viết của bạn trong {0} đã bị từ chối phê duyệt do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "DE49FB73-928F-418C-A8BC-58D843FF0D42",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "75540141-A6D9-409D-A3CE-90C9A7577E8A",
+        "templateMessage": "Your post in {0} has been denied due to violating FSEL's community standards. Please try again!",
+        "language": "en-US"
+      },
+      {
+        "id": "E43E20B2-ED0A-4353-9E44-FAA7AD0F2BF0",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "75540141-A6D9-409D-A3CE-90C9A7577E8A",
+        "templateMessage": "Votre publication dans {0} a été refusée en raison de la violation des normes de la communauté FSEL. Veuillez réessayer !",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "05441907-46A9-4178-9A69-FCE295D670BE",
@@ -237,7 +467,31 @@
     "priority": 1,
     "templateMessage": "Thời gian học thử của bạn sẽ kết thúc trong vòng 2 ngày tới. Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
     "templateLink": "/pricing-plan",
-    "createdDate": "2023-08-28"
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "3F03B037-CC3E-47BF-AECC-E1BEF7F5BB5D",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "05441907-46A9-4178-9A69-FCE295D670BE",
+        "templateMessage": "Thời gian học thử của bạn sẽ kết thúc trong vòng 2 ngày tới. Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
+        "language": "vi-VN"
+      },
+      {
+        "id": "1507E30C-CA03-4370-B186-7BD367C82B7B",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "05441907-46A9-4178-9A69-FCE295D670BE",
+        "templateMessage": "Your trial learning period will end within the next 2 days. Please extend your course subscription to ensure uninterrupted continuation of your learning journey",
+        "language": "en-US"
+      },
+      {
+        "id": "381AF55C-E89B-43C6-B57C-4C6E240EA0E0",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "05441907-46A9-4178-9A69-FCE295D670BE",
+        "templateMessage": "Votre période d'apprentissage d'essai se terminera dans les 2 prochains jours. Veuillez prolonger votre abonnement au cours pour garantir la poursuite ininterrompue de votre parcours d'apprentissage.",
+        "language": "fr-FR"
+      }
+    ]
+
   },
   {
     "id": "F9D5A75F-FD55-4B1E-ADE8-A446B6465E34",
@@ -247,7 +501,30 @@
     "priority": 1,
     "templateMessage": "Khóa học của bạn sẽ kết thúc trong 2 tuần tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
     "templateLink": "/pricing-plan",
-    "createdDate": "2023-08-28"
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "A9EDCD2D-BAB1-42CF-8334-86734573EA3C",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "F9D5A75F-FD55-4B1E-ADE8-A446B6465E34",
+        "templateMessage": "Gói học của bạn sẽ kết thúc trong 2 tuần tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
+        "language": "vi-VN"
+      },
+      {
+        "id": "0BBD8DB1-48ED-4C8C-AB84-7D22EED9A4B8",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "F9D5A75F-FD55-4B1E-ADE8-A446B6465E34",
+        "templateMessage": "Your course will end in the next 2 weeks. Please extend your course subscription to ensure the continuity of your learning journey without interruption",
+        "language": "en-US"
+      },
+      {
+        "id": "C803C6CA-2979-4AA8-990C-4A1BF4297F8F",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "F9D5A75F-FD55-4B1E-ADE8-A446B6465E34",
+        "templateMessage": "Votre cours se terminera dans les 2 prochaines semaines. Veuillez prolonger votre abonnement au cours pour assurer la continuité de votre parcours d'apprentissage sans interruption.",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "A99BFAAE-4139-4766-9405-EF24332FB51A",
@@ -257,7 +534,30 @@
     "priority": 1,
     "templateMessage": "Khóa học của bạn sẽ kết thúc trong 2 ngày tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
     "templateLink": "/pricing-plan",
-    "createdDate": "2023-08-28"
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "782D79BD-8397-4CF9-81F3-F08B44B24958",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "A99BFAAE-4139-4766-9405-EF24332FB51A",
+        "templateMessage": "Gói học của bạn sẽ kết thúc trong 2 ngày tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
+        "language": "vi-VN"
+      },
+      {
+        "id": "C5717B67-138B-456C-8B22-D75B7A89CC19",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "A99BFAAE-4139-4766-9405-EF24332FB51A",
+        "templateMessage": "Your course will end in the next 2 days. Please extend your course subscription to ensure the continuity of your learning journey without interruption",
+        "language": "en-US"
+      },
+      {
+        "id": "6DEE7A96-1062-4543-A3C3-52B0477C2526",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "A99BFAAE-4139-4766-9405-EF24332FB51A",
+        "templateMessage": "Votre cours se terminera dans les 2 prochains jours. Veuillez prolonger votre abonnement au cours pour assurer la continuité de votre parcours d'apprentissage sans interruption.",
+        "language": "fr-FR"
+      }
+    ]
   },
   {
     "id": "6F75034F-4D9B-4471-B5A4-A226979B5AB3",
@@ -267,6 +567,582 @@
     "priority": 1,
     "templateMessage": "Yay! Bạn đã đổi trình độ sang khóa học {0} thành công! Hãy cùng Techie và Fsel bắt đầu hành trình học tập thú vị ngay thôi nào!",
     "templateLink": "",
-    "createdDate": "2023-08-28"
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "D114228F-71CB-4607-B50D-B0992E28C270",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "6F75034F-4D9B-4471-B5A4-A226979B5AB3",
+        "templateMessage": "Yay! Bạn đã đổi trình độ sang khóa học {0} thành công! Hãy cùng Techie và Fsel bắt đầu hành trình học tập thú vị ngay thôi nào!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "063795CD-D905-4097-8C3B-979C6830F5B0",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "6F75034F-4D9B-4471-B5A4-A226979B5AB3",
+        "templateMessage": "Yay! You've successfully changed your level to the {0} course! Let's join Techie and Fsel to start this exciting learning journey now!",
+        "language": "en-US"
+      },
+      {
+        "id": "6A98A753-D5D0-4296-A082-6C9D2DF66A70",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "6F75034F-4D9B-4471-B5A4-A226979B5AB3",
+        "templateMessage": "Yay! Vous avez réussi à changer votre niveau pour le cours {0} ! Rejoignons Techie et Fsel pour commencer ce voyage d'apprentissage passionnant maintenant",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "2a138a4c-6b3c-4a86-bbc2-3aa845e70c21",
+    "type": "LinkPopup",
+    "content": "LuckyTicket",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bạn đã nhận được Mã đổi thưởng: {0}. Hãy truy cập leaderboard.fsel.vn để đổi thưởng ngay nào!",
+    "templateLink": "{0}",
+    "createdDate": "2024-08-05"
+  },
+
+  {
+    "id": "0026C94F-7E1F-4CAB-AB54-E0BF751F0F92",
+    "type": "LinkPage",
+    "content": "CompletedStreakLogin",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bạn đã hoàn thành nhiệm vụ {0} ngày đăng nhập trong tháng. Nhấn để nhận quà cho sự chăm chỉ của mình nào!",
+    "templateLink": "/home-chart/daily-checkin",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "68E7C72B-C487-4E14-8272-518DCAAE1998",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "0026C94F-7E1F-4CAB-AB54-E0BF751F0F92",
+        "templateMessage": "Bạn đã hoàn thành nhiệm vụ {0} ngày đăng nhập trong tháng. Nhấn để nhận quà cho sự chăm chỉ của mình nào!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "F7752D4F-8B49-4F8A-B860-B1D1CEEA6B49",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "0026C94F-7E1F-4CAB-AB54-E0BF751F0F92",
+        "templateMessage": "You have completed the task {0} login days within the month. Click to receive a gift for your dedication!",
+        "language": "en-US"
+      },
+      {
+        "id": "873B1B28-F893-4C34-9158-E4581475D018",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "0026C94F-7E1F-4CAB-AB54-E0BF751F0F92",
+        "templateMessage": "Vous avez accompli la tâche de {0} jours de connexion dans le mois. Cliquez pour recevoir un cadeau pour votre dévouement !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "1D44814A-847E-4736-8A95-323148E11F45",
+    "type": "LinkPage",
+    "content": "CompleteCourse",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Chúc mừng bạn đã hoàn thành khoá học {0}. Nhấn để xem lại hành trình của bạn theo góc nhìn tổng quan nhé.",
+    "templateLink": "",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "D2921FD1-4999-4F4F-9472-F9541E55DE14",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "1D44814A-847E-4736-8A95-323148E11F45",
+        "templateMessage": "Chúc mừng bạn đã hoàn thành khoá học {0}. Nhấn để xem lại hành trình của bạn theo góc nhìn tổng quan nhé.",
+        "language": "vi-VN"
+      },
+      {
+        "id": "04F45F50-C7BF-4062-A139-23AC1983A902",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "1D44814A-847E-4736-8A95-323148E11F45",
+        "templateMessage": "Congratulations on completing the {0} course! Click to see an overview of your journey.",
+        "language": "en-US"
+      },
+      {
+        "id": "C1C64905-B7E5-454A-AC72-982588327FE2",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "1D44814A-847E-4736-8A95-323148E11F45",
+        "templateMessage": "Félicitations pour avoir terminé le cours {0} ! Cliquez pour voir un aperçu de votre parcours.",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "4A1F848C-F666-48FA-B127-C871AF142332",
+    "type": "LinkPage",
+    "content": "UpgradeOrder",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Việc học liên tục có thể giúp cải thiện các kỹ năng của bạn nhanh gấp 3 lần so với các bạn học dừng lại. Nhấn để nâng cấp ngay nào!",
+    "templateLink": "/change-level",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "81FBB72A-AB26-44B4-824A-FF28B7EDC276",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "4A1F848C-F666-48FA-B127-C871AF142332",
+        "templateMessage": "Chúc mừng bạn đã hoàn thành khoá học {0}. Nhấn để xem lại hành trình của bạn theo góc nhìn tổng quan nhé.",
+        "language": "vi-VN"
+      },
+      {
+        "id": "3172E81E-B527-488C-B87C-C75DFB6CE299",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "4A1F848C-F666-48FA-B127-C871AF142332",
+        "templateMessage": "Continuous learning can help improve your skills 3 times faster than your peers who stop studying. Click to upgrade now!",
+        "language": "en-US"
+      },
+      {
+        "id": "E4B0984E-EA8A-4C33-ABA5-4DBE7AC5F630",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "4A1F848C-F666-48FA-B127-C871AF142332",
+        "templateMessage": "L'apprentissage continu peut aider à améliorer vos compétences 3 fois plus rapidement que vos pairs qui arrêtent d'étudier. Cliquez pour mettre à niveau maintenant !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "CACA0A25-2196-4536-A778-8E08D605691F",
+    "type": "LinkPage",
+    "content": "SubcriptionNotice",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Các nội dung học thuật có thể bị khoá lại sau 7 ngày nữa. Cơ hội cuối, gia hạn gói ngay nào!",
+    "templateLink": "/account?setting=mySubscription",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "EDC69722-E530-4DB7-893C-8058226E7236",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "CACA0A25-2196-4536-A778-8E08D605691F",
+        "templateMessage": "Các nội dung học thuật có thể bị khoá lại sau 7 ngày nữa. Cơ hội cuối, gia hạn gói ngay nào!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "4D4D5989-D6C3-459A-B4DF-1A9708F5B1DD",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "CACA0A25-2196-4536-A778-8E08D605691F",
+        "templateMessage": "Your subscription will expire and the course content will be locked in 7 days. Please renew your subscription to continue learning!",
+        "language": "en-US"
+      },
+      {
+        "id": "74CEE264-6121-4403-8F1E-D770DB17E533",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "CACA0A25-2196-4536-A778-8E08D605691F",
+        "templateMessage": "Votre abonnement expirera et le contenu du cours sera verrouillé dans 7 jours. Veuillez renouveler votre abonnement pour continuer à apprendre !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "30F3DCE8-E8C0-4231-A2B1-8B97E9551129",
+    "type": "LinkPage",
+    "content": "ExtendSuccessfully",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Chào mừng bạn đến với FSEL! Hãy chuẩn bị sẵn sàng cho hành trình học tập trong vòng 24 tháng tới nhé!",
+    "templateLink": "",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "FCF43E61-7A49-4978-B547-85DE6AEA5363",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "30F3DCE8-E8C0-4231-A2B1-8B97E9551129",
+        "templateMessage": "Chào mừng bạn đến với FSEL! Hãy chuẩn bị sẵn sàng cho hành trình học tập trong vòng 24 tháng tới nhé!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "AA0BC23B-2281-4E19-BDFF-10C87DFB6152",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "30F3DCE8-E8C0-4231-A2B1-8B97E9551129",
+        "templateMessage": "Welcome to FSEL! Get ready for your learning journey over the next 3 months!",
+        "language": "en-US"
+      },
+      {
+        "id": "EBBD7083-4E2E-4F1F-BB6A-FAEBB371A3CE",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "30F3DCE8-E8C0-4231-A2B1-8B97E9551129",
+        "templateMessage": "Bienvenue chez FSEL ! Préparez-vous pour votre parcours d'apprentissage au cours des 3 prochains mois !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "66349CD9-1E02-432E-8A33-C0B652206D60",
+    "type": "LinkPage",
+    "content": "FirstStudyNotice",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Chào {0}! Chúng tôi nhận thấy bạn đã không truy cập ứng dụng học trong 1 ngày qua. Hãy quay lại và tiếp tục hành trình học tập của bạn ngay bây giờ!",
+    "templateLink": "",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "7C5B76AB-7A31-4D32-B332-B4C74D43BDBC",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "66349CD9-1E02-432E-8A33-C0B652206D60",
+        "templateMessage": "Chào {0}! Chúng tôi nhận thấy bạn đã không truy cập ứng dụng học trong 1 ngày qua. Hãy quay lại và tiếp tục hành trình học tập của bạn ngay bây giờ!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "7C42C432-D9B7-47E4-85F4-23B6ACAEDEF2",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "66349CD9-1E02-432E-8A33-C0B652206D60",
+        "templateMessage": "Hello {0}! We noticed you haven't accessed FSEL in the past day. Come back and continue your learning journey now!",
+        "language": "en-US"
+      },
+      {
+        "id": "0BF56C51-7B72-4C5E-B9CD-806EE3E9FC8E",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "66349CD9-1E02-432E-8A33-C0B652206D60",
+        "templateMessage": "Bonjour {0} ! Nous avons remarqué que vous n'avez pas accédé à FSEL depuis un jour. Revenez et continuez votre parcours d'apprentissage maintenant !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "A271BB72-D5CF-449E-A623-CFFEC444FEA8",
+    "type": "LinkPage",
+    "content": "SecondStudyNotice",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Xin chào! Đã 2 ngày kể từ khi bạn truy cập ứng dụng học lần cuối. Hãy nhớ rằng sự liên tục là chìa khóa cho việc học hiệu quả. Hãy quay lại và tiếp tục nỗ lực nào!",
+    "templateLink": "",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "67AA0A4F-F3A8-4575-AC31-4874146286DA",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "A271BB72-D5CF-449E-A623-CFFEC444FEA8",
+        "templateMessage": "Xin chào! Đã 2 ngày kể từ khi bạn truy cập ứng dụng học lần cuối. Hãy nhớ rằng sự liên tục là chìa khóa cho việc học hiệu quả. Hãy quay lại và tiếp tục nỗ lực nào!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "80CD4472-84E9-4888-9340-6CB37745DB5B",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "A271BB72-D5CF-449E-A623-CFFEC444FEA8",
+        "templateMessage": "Hello! It's been 2 days since you last accessed FSEL. Remember, consistency is key to effective learning. Let's get back and keep the momentum going!",
+        "language": "en-US"
+      },
+      {
+        "id": "AF3164DB-0B89-4A63-AB21-4956600EC1D8",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "A271BB72-D5CF-449E-A623-CFFEC444FEA8",
+        "templateMessage": "Bonjour ! Cela fait 2 jours que vous n'avez pas accédé à FSEL. N'oubliez pas, la constance est la clé d'un apprentissage efficace. Revenons et gardons l'élan !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "3C924341-55DE-425D-94E1-C4D090E118A4",
+    "type": "LinkPage",
+    "content": "ThirdStudyNotice",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Thông báo quan trọng! Đã 3 ngày kể từ lần cuối bạn tham gia vào học tập trên ứng dụng. Hãy dành một ít thời gian mỗi ngày để tiếp tục nâng cao kiến thức của bạn!",
+    "templateLink": "",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "5BEE37BD-D815-4433-8BDE-E54E7C77CA25",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "3C924341-55DE-425D-94E1-C4D090E118A4",
+        "templateMessage": "Thông báo quan trọng! Đã 3 ngày kể từ lần cuối bạn tham gia vào học tập trên ứng dụng. Hãy dành một ít thời gian mỗi ngày để tiếp tục nâng cao kiến thức của bạn!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "AD1FECC2-2420-4D89-80E5-240DC9DE051C",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "3C924341-55DE-425D-94E1-C4D090E118A4",
+        "templateMessage": "Important Notice! It's been 3 days since you last engaged with FSEL. Take a little time each day to keep expanding your knowledge!",
+        "language": "en-US"
+      },
+      {
+        "id": "14F46183-A3E8-4662-8C68-58E2C3A8F75F",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "3C924341-55DE-425D-94E1-C4D090E118A4",
+        "templateMessage": "Avis important ! Cela fait 3 jours que vous n'avez pas interagi avec FSEL. Prenez un peu de temps chaque jour pour continuer à élargir vos connaissances !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "BBBFBA53-8560-4DED-94DC-8DC3B505286C",
+    "type": "LinkPage",
+    "content": "FourthStudyNotice",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Cảnh báo! Bạn đã không học trong 4 ngày qua. Hãy dành ít nhất một chút thời gian mỗi ngày để duy trì và phát triển kiến thức của mình",
+    "templateLink": "",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "048B78E3-4FF8-4919-B5B0-990C00BF4AAA",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "BBBFBA53-8560-4DED-94DC-8DC3B505286C",
+        "templateMessage": "Cảnh báo! Bạn đã không học trong 4 ngày qua. Hãy dành ít nhất một chút thời gian mỗi ngày để duy trì và phát triển kiến thức của mình",
+        "language": "vi-VN"
+      },
+      {
+        "id": "27A848B9-C19D-4498-BEA8-100C1044BBC4",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "BBBFBA53-8560-4DED-94DC-8DC3B505286C",
+        "templateMessage": "Warning! You haven't studied in the past 4 days. Make sure to spend at least a little time each day to maintain and grow your knowledge.",
+        "language": "en-US"
+      },
+      {
+        "id": "E01358A7-EAE7-4E2E-B37B-2D73E83CA17A",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "BBBFBA53-8560-4DED-94DC-8DC3B505286C",
+        "templateMessage": "Avertissement ! Vous n'avez pas étudié au cours des 4 derniers jours. Assurez-vous de passer au moins un peu de temps chaque jour pour maintenir et développer vos connaissances.",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "0DD30706-69C5-403B-A488-7B555E47BB60",
+    "type": "LinkPage",
+    "content": "FifthStudyNotice",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Thông báo quan trọng! Đã 5 ngày kể từ khi bạn truy cập ứng dụng học cuối cùng. Đừng bỏ lỡ cơ hội học tập. Hãy quay lại và tiếp tục hành trình học tập của bạn ngay bây giờ!",
+    "templateLink": "",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "3CDA5E20-B48E-49FF-945E-6A07D4EBE495",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "0DD30706-69C5-403B-A488-7B555E47BB60",
+        "templateMessage": "Thông báo quan trọng! Đã 5 ngày kể từ khi bạn truy cập ứng dụng học cuối cùng. Đừng bỏ lỡ cơ hội học tập. Hãy quay lại và tiếp tục hành trình học tập của bạn ngay bây giờ!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "BF164374-05FA-43CE-9BBC-982FC571BEAB",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "0DD30706-69C5-403B-A488-7B555E47BB60",
+        "templateMessage": "Important Notice! It's been 5 days since you last accessed FSEL. Don't miss out on learning opportunities. Come back and continue your journey now!",
+        "language": "en-US"
+      },
+      {
+        "id": "31A6C1B5-78ED-4AE9-9911-EDDAF1ADF3A8",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "0DD30706-69C5-403B-A488-7B555E47BB60",
+        "templateMessage": "Avis important ! Cela fait 5 jours que vous n'avez pas accédé à FSEL. Ne manquez pas les opportunités d'apprentissage. Revenez et poursuivez votre parcours maintenant !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "4FA09274-1045-4DE2-A804-F5FC951A11D0",
+    "type": "LinkPage",
+    "content": "StopBothering",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Những thông báo này có vẻ không hiệu quả. Chúng tôi sẽ dừng việc gửi thông báo cho bạn...",
+    "templateLink": "",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "B05580F6-5831-4B87-9EDB-05FAAEC04CD4",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "4FA09274-1045-4DE2-A804-F5FC951A11D0",
+        "templateMessage": "Những thông báo này có vẻ không hiệu quả. Chúng tôi sẽ dừng việc gửi thông báo cho bạn...",
+        "language": "vi-VN"
+      },
+      {
+        "id": "0023C610-278D-4AFC-88D0-BD546A7EABA4",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "4FA09274-1045-4DE2-A804-F5FC951A11D0",
+        "templateMessage": "These notifications don't seem to be effective. We'll stop sending them for now...",
+        "language": "en-US"
+      },
+      {
+        "id": "0484F322-E5AD-45F0-A467-EB93B47F4AA1",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "4FA09274-1045-4DE2-A804-F5FC951A11D0",
+        "templateMessage": "Ces notifications ne semblent pas être efficaces. Nous allons arrêter de les envoyer pour le moment...",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "69B15507-EFE2-49E6-8E03-85E7F18CFDEA",
+    "type": "LinkPage",
+    "content": "TreasureExploration",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Chào {0}! Bạn đã sẵn sàng khám phá hành tinh kho báu Z-Matter của chúng tôi chưa? Thu thập năng lượng hành tinh thông qua nhiệm vụ ngày và tuần để mở ra hành tinh kho báu chứa các phần quà vô cùng hấp dẫn. Hãy khám phá ngay!",
+    "templateLink": "",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "EFE2E116-AC19-46F0-9133-607694E6B926",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "69B15507-EFE2-49E6-8E03-85E7F18CFDEA",
+        "templateMessage": "Chào {0}! Bạn đã sẵn sàng khám phá hành tinh kho báu Z-Matter của chúng tôi chưa? Thu thập năng lượng hành tinh thông qua nhiệm vụ ngày và tuần để mở ra hành tinh kho báu chứa các phần quà vô cùng hấp dẫn. Hãy khám phá ngay!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "15CC8ECE-544E-4247-95F7-1913B7588A7E",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "69B15507-EFE2-49E6-8E03-85E7F18CFDEA",
+        "templateMessage": "Hello {0}! Are you ready to explore our treasure planet Z-Matter? Collect planetary energy through daily and weekly missions to unlock the treasure planet with full of exciting rewards. Start exploring now!",
+        "language": "en-US"
+      },
+      {
+        "id": "B7B00477-9CBF-4CE6-8254-E8374AB4240A",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "69B15507-EFE2-49E6-8E03-85E7F18CFDEA",
+        "templateMessage": "Bonjour {0} ! Êtes-vous prêt à explorer notre planète aux trésors Z-Matter ? Collectez de l'énergie planétaire grâce aux missions quotidiennes et hebdomadaires pour déverrouiller la planète aux trésors remplie de récompenses excitantes. Commencez l'exploration dès maintenant !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "4539A934-7F9A-4F09-8B84-B853092D156D",
+    "type": "LinkPage",
+    "content": "EnergyCollecting",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Chúng ta chỉ còn một ngày duy nhất để thu thập năng lượng hành tinh và mở ra hành tinh kho báu! Đừng bỏ lỡ cơ hội nhận những phần quà vô cùng hấp dẫn. Hãy bắt đầu ngay bây giờ!",
+    "templateLink": "",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "AC59309D-AF2B-43D7-ADCC-C8BDFD8CDDE5",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "4539A934-7F9A-4F09-8B84-B853092D156D",
+        "templateMessage": "Chúng ta chỉ còn một ngày duy nhất để thu thập năng lượng hành tinh và mở ra hành tinh kho báu! Đừng bỏ lỡ cơ hội nhận những phần quà vô cùng hấp dẫn. Hãy bắt đầu ngay bây giờ!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "CFE34390-800D-44B7-8E11-17F5AA2DAA76",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "4539A934-7F9A-4F09-8B84-B853092D156D",
+        "templateMessage": "We have only one day left to collect planetary energy and unlock the treasure planet! Don't miss out on the amazing rewards. Let's get started now!",
+        "language": "en-US"
+      },
+      {
+        "id": "29543AF0-EA24-4E6D-A585-40640B501C7C",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "4539A934-7F9A-4F09-8B84-B853092D156D",
+        "templateMessage": "Il ne nous reste qu'un jour pour collecter l'énergie planétaire et déverrouiller la planète aux trésors ! Ne manquez pas les incroyables récompenses. Commençons maintenant !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "5E7E39F8-750A-4709-82B2-12805FC9E2E9",
+    "type": "LinkPage",
+    "content": "FriendCompletedExam",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được 100 xu, nhấn để xem chi tiết",
+    "templateLink": "",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "AB10DEE3-6D3B-4482-92EA-65DCAC210FE0",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "5E7E39F8-750A-4709-82B2-12805FC9E2E9",
+        "templateMessage": "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được 100 xu, nhấn để xem chi tiết",
+        "language": "vi-VN"
+      },
+      {
+        "id": "41150D47-6270-4420-8A08-627BF4BABD45",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "5E7E39F8-750A-4709-82B2-12805FC9E2E9",
+        "templateMessage": "{0} has completed the placement test, and you have just received 100 xu. Tap to see details.",
+        "language": "en-US"
+      },
+      {
+        "id": "593CA78C-074B-4DA6-BC31-421A672C04EC",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "5E7E39F8-750A-4709-82B2-12805FC9E2E9",
+        "templateMessage": "{0} a terminé le test de positionnement, et vous venez de recevoir 100 xu. Appuyez pour voir les détails.",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "A3D6129B-9844-448D-AA1C-D6155B89CE6B",
+    "type": "LinkPage",
+    "content": "FriendCompleteUnitOne",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "{0} đã hoàn thành unit 1,bạn vừa nhận được 500 xu, nhấn để xem chi tiết ",
+    "templateLink": "",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "22E0B002-3122-4D83-B238-7496153CBA03",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "A3D6129B-9844-448D-AA1C-D6155B89CE6B",
+        "templateMessage": "{0} đã hoàn thành unit 1,bạn vừa nhận được 500 xu, nhấn để xem chi tiết ",
+        "language": "vi-VN"
+      },
+      {
+        "id": "4ACDFDE0-273F-40CC-8F21-B05AB07921B4",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "A3D6129B-9844-448D-AA1C-D6155B89CE6B",
+        "templateMessage": "{0} has completed Unit 1, and you have just received 500 xu. Tap to see details",
+        "language": "en-US"
+      },
+      {
+        "id": "06BEEE4E-1723-4079-8CF4-EDE3F755B2F7",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "A3D6129B-9844-448D-AA1C-D6155B89CE6B",
+        "templateMessage": "{0} a terminé l'Unité 1, et vous venez de recevoir 500 xu. Appuyez pour voir les détails.",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "4E496AAD-C2CE-42A2-8971-71CD28CF3FAE",
+    "type": "LinkPage",
+    "content": "FriendPaymentSuccessfully",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "{0} đã đăng kí thành công gói học FSEL,bạn vừa nhận được {1}🟡, nhấn để xem chi tiết ",
+    "templateLink": "",
+    "createdDate": "2023-08-28",
+    "translations": [
+      {
+        "id": "5046975D-C76D-4F46-8EDE-FA4B766C6CE5",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "4E496AAD-C2CE-42A2-8971-71CD28CF3FAE",
+        "templateMessage": "{0} đã đăng kí thành công gói học FSEL,bạn vừa nhận được {1} xu, nhấn để xem chi tiết ",
+        "language": "vi-VN"
+      },
+      {
+        "id": "546D12F5-4634-44A6-9BC1-8B195A29CEA0",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "4E496AAD-C2CE-42A2-8971-71CD28CF3FAE",
+        "templateMessage": "{0} has successfully enrolled in the FSEL course package, and you have just received {1} xu. Tap to see details.",
+        "language": "en-US"
+      },
+      {
+        "id": "F674D530-9FCE-4990-95FF-82164318BF8C",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "4E496AAD-C2CE-42A2-8971-71CD28CF3FAE",
+        "templateMessage": "{0} s'est inscrit avec succès au forfait de cours FSEL, et vous venez de recevoir {1} xu. Appuyez pour voir les détails.",
+        "language": "fr-FR"
+      }
+    ]
   }
+
 ]

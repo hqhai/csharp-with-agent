@@ -11,7 +11,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -53,8 +52,24 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
         private readonly IMapper _mapper;
         private readonly ILogger<CreateFinalTestAnswerBySectionGroupCommand> _logger;
         private readonly RankedStudentPublisher _rankedStudentPublisher;
+        private readonly DisconnectSocketCalculateTimePublisher _disconnectSocketCalculateTimePublisher;
 
-        public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, ICourseResultRepository courseResultRepository, AuthContext authContext, QuestionConverter questionConverter, SectionGroupConverter sectionGroupConverter, IUserService userService, ISystemService systemService, IFinalTestResultRepository finalTestResultRepository, IFinalTestAnswerRepository finalTestAnswerRepository, ISectionGroupResultRepository sectionGroupResultRepository, ISectionGroupRepository sectionGroupRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper, RankedStudentPublisher rankedStudentPublisher, ILogger<CreateFinalTestAnswerBySectionGroupCommand> logger)
+        public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository,
+            ICourseResultRepository courseResultRepository,
+            AuthContext authContext,
+            QuestionConverter questionConverter,
+            SectionGroupConverter sectionGroupConverter,
+            IUserService userService,
+            ISystemService systemService,
+            IFinalTestResultRepository finalTestResultRepository,
+            IFinalTestAnswerRepository finalTestAnswerRepository,
+            ISectionGroupResultRepository sectionGroupResultRepository,
+            ISectionGroupRepository sectionGroupRepository,
+            CreateTokenHistoryPublisher createTokenHistoryPublisher,
+            IMapper mapper,
+            RankedStudentPublisher rankedStudentPublisher,
+            ILogger<CreateFinalTestAnswerBySectionGroupCommand> logger,
+            DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher)
         {
             _questionRepository = questionRepository;
             _courseResultRepository = courseResultRepository;
@@ -71,6 +86,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             _mapper = mapper;
             _logger = logger;
             _rankedStudentPublisher = rankedStudentPublisher;
+            _disconnectSocketCalculateTimePublisher = disconnectSocketCalculateTimePublisher;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateFinalTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -143,6 +159,15 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             }
 
             #endregion Validate
+
+            if (request.IsSubmit)
+            {
+                await _disconnectSocketCalculateTimePublisher.Publish(new SetTimeModuleModel
+                {
+                    Type = nameof(FinalTest),
+                    ObjectId = sectionGroupResult.Id
+                }, cancellationToken);
+            }
 
             await _finalTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {

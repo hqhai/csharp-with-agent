@@ -7,9 +7,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Commands.OrderCmds.v1i1;
+    using Fsel.Ordering.Application.Commands.OrderCmds.V1i2;
     using Fsel.Ordering.Application.Commands.UserRefferalCmd;
+    using Fsel.Ordering.Application.Commands.VoucherCmds;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.SenderService;
@@ -22,6 +25,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
+    using Fsel.Ordering.Infrastructure.Repositories;
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -50,6 +54,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly ISystemService _systemService;
         private readonly IMediator _mediator;
         private readonly IPackageEventRepository _packageEventRepository;
+        private readonly IUserVoucherLockRepository _userVoucherLockRepository;
 
         public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository
             , ITrainingService trainingService
@@ -65,7 +70,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             , ISystemService systemService
             , IMediator mediator
             , IPackageEventRepository packageEventRepository
-            , ChangeStatusOrderPublisher changeStatusOrderPublisher)
+            , ChangeStatusOrderPublisher changeStatusOrderPublisher
+            , IUserVoucherLockRepository userVoucherLockRepository)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
@@ -82,6 +88,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             _systemService = systemService;
             _mediator = mediator;
             _packageEventRepository = packageEventRepository;
+            _userVoucherLockRepository = userVoucherLockRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeStatusOrderCommand request, CancellationToken cancellationToken)
@@ -172,6 +179,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                             CompanyTaxCode = order.CompanyTaxCode,
                             CompanyAddress = order.CompanyAddress,
                             CompanyName = order.CompanyName,
+                            CompanyEmail = order.CompanyEmail,
                         });
                     }
 
@@ -184,13 +192,18 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                     var course = courseResults.Content?.Result?.FirstOrDefault();
                     if (course != null)
                     {
+                        EnumNotificationContent content = EnumNotificationContent.OrderChangeStatus;
+                        if (order != null && order.Package != null && order.Package.MonthNumber == 24)
+                        {
+                            content = EnumNotificationContent.ExtendSuccessfully;
+                        }
                         await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
                         {
                             UserIds = new List<Guid>() { order.UserId },
                             ObjectId = order.Id,
                             ParamsMessage = new List<object> { course.Name ?? string.Empty },
                             Type = EnumNotificationType.Text,
-                            Content = EnumNotificationContent.OrderChangeStatus,
+                            Content = content,
                             SenderId = _authContext.CurrentUserId,
                             PlatformCode = EnumPlatformCode.LMS
                         }, cancellationToken);
@@ -211,15 +224,35 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
                 if (order.Status == EnumOrderStatus.Payment)
                 {
-                    if (request.IsSendEmail)
-                    {
-                        await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
-                    }
                     await _mediator.Send(new AddFeatureMissionCommand()
                     {
                         ReceiverId = order.UserId,
                         FeatureUserReferral = EnumFeatureUserReferral.Payment
                     }, cancellationToken).ConfigureAwait(false);
+
+                    var createDate = order.CreatedDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+                    var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+                    Guid voucherId = default;
+                    if (request.IsSendEmail)
+                    {
+                        if (!order.VoucherId.HasValue && _appSetting.VoucherConfigs?.VoucherForRetail?.StartDate <= createDate && _appSetting.VoucherConfigs.VoucherForRetail.EndDate >= createDate && currentDate < _appSetting.VoucherConfigs.VoucherForRetail.ExpiredDate)
+                        {
+                            var voucher = await _mediator.Send(new CreateVoucherForRetailCommand()
+                            {
+                                UserId = order.UserId,
+                                PackageId = order.PackageId ?? default,
+                            }, cancellationToken).ConfigureAwait(false);
+                            voucherId = voucher.Result?.Id ?? default;
+
+                            await _mediator.Send(new SendMailPaymentWithVoucherCommand() { OrderId = order.Id, VoucherId = voucherId }).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
+                        }
+                    }
+                    await ResetUserVoucherLockAsync(order.UserId, cancellationToken).ConfigureAwait(false);
                 }
 
                 #endregion Gửi mail thanh toán
@@ -282,6 +315,19 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private bool IsInteger(double number)
         {
             return number == (int)number;
+        }
+
+        private async Task ResetUserVoucherLockAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            var userVoucherLock = await _userVoucherLockRepository.Queryable.FirstOrDefaultAsync(p => p.CreatedUserId == userId, cancellationToken);
+            if (userVoucherLock != null)
+            {
+                userVoucherLock.Count = 0;
+                userVoucherLock.ExpiredDate = null;
+                userVoucherLock.IsLockForever = false;
+                _userVoucherLockRepository.Update(userVoucherLock);
+                await _userVoucherLockRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 }

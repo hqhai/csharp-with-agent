@@ -28,6 +28,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
     using DateTimeHelper = Shared.Helpers.DateTimeHelper;
 
     public class BaseInternalEventHandler
@@ -42,6 +43,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         protected readonly IMockTestResultRepository _mockTestResultRepository;
         protected readonly IHomeWorkResultRepository _homeWorkResultRepository;
         protected readonly IUserService _userService;
+        protected readonly ILogger<BaseInternalEventHandler> _logger;
         protected readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         protected readonly IMediator _mediator;
         protected readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
@@ -50,6 +52,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         protected readonly IOrderService _orderService;
         private readonly ILessonNoteRepository _lessonNoteRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        protected readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private const int PercentClassForumAcademic = 20;
         private const int PercentClassForumIELST = 32;
@@ -66,6 +69,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             ICourseUnitMockTestRepository courseUnitMockTestRepository,
             IMediator mediator,
             IUserService userService,
+            ILogger<BaseInternalEventHandler> logger,
             SaveUserCourseSettingPublisher saveUserCourseSettingPublisher,
             IVideoResultRepository videoResultRepository,
             IClassForumResultRepository classForumResultRepository,
@@ -78,7 +82,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             IHomeWorkResultRepository homeWorkResultRepository,
             QuestBoardPublisher questBoardPublisher,
             IOrderService orderService
-, ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository)
+, ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository
+, NotificationMessagePublisher notificationMessagePublisher)
         {
             _videoResultRepository = videoResultRepository;
             _classForumResultRepository = classForumResultRepository;
@@ -91,6 +96,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _homeWorkResultRepository = homeWorkResultRepository;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
             _userService = userService;
+            _logger = logger;
             _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _mediator = mediator;
             _appSetting = appSetting;
@@ -99,6 +105,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _orderService = orderService;
             _lessonNoteRepository = lessonNoteRepository;
             _lessonResultRepository = lessonResultRepository;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         private async Task<(List<SkillScores>, double)> GetCourseResult(Course course, IList<Guid> unitIds, Guid studentId, Guid? finalTestId)
@@ -444,7 +451,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         public async Task<CourseResult?> UpdateCourse(Course? course, Guid studentId, CancellationToken cancellationToken)
         {
             var courseResult = course?.CourseResults.FirstOrDefault(x => x.StudentId == studentId);
-            if (course != null)
+            if (course == null)
+            {
+                return courseResult;
+            }
+            try
             {
                 var finalTestId = course.CourseUnitMockTests.Where(x => x.FinalTestId != null).FirstOrDefault()?.FinalTestId;
                 var unitIds = course.CourseUnitMockTests.Where(x => x.UnitId != null).Select(x => x.UnitId ?? default).ToList();
@@ -460,6 +471,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Trigger Update CourseResult : {ex.Message} ");
+            }
+
             return courseResult;
         }
 
@@ -478,37 +494,46 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             //var userId = courseResult.CreatedUserId;
             //await DoQuestBoard(courseId, userId, cancellationToken);
-
-            if (courseResult.Status != EnumResultStatus.Done)
+            try
             {
+                if (courseResult.Status != EnumResultStatus.Done)
+                {
+                    await SendStudentCompleteCourse(studentId, course.Id, courseResult, cancellationToken);
+
+                    await SendNotificationMessage(courseResult.CreatedUserId, course.Name, cancellationToken);
+                    await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel
+                    {
+                        BaseCourseLevel = course.CourseLevel,
+                        CourseLevel = course.CourseLevel,
+                        Id = courseResult.CreatedUserId,
+                    }).ConfigureAwait(false);
+
+                    await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
+                    {
+                        CourseLevel = course.CourseLevel,
+                        Type = EnumUserCourseType.ResetAndLearnAgain,
+                        UserId = courseResult.CreatedUserId
+                    }, cancellationToken).ConfigureAwait(false);
+
+                    await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
+                    {
+                        Type = EnumUserCourseType.ChangeLevel,
+                        UserId = courseResult.CreatedUserId
+                    }, cancellationToken).ConfigureAwait(false);
+
+                    courseResult.CompletionDate = DateTime.UtcNow;
+                }
+
+               
+                courseResult.Status = EnumResultStatus.Done;
+                _courseResultRepository.Update(courseResult);
+                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 await SendStudentCompleteCourse(studentId, course.Id, courseResult, cancellationToken);
-
-                await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel
-                {
-                    BaseCourseLevel = course.CourseLevel,
-                    CourseLevel = course.CourseLevel,
-                    Id = courseResult.CreatedUserId,
-                }).ConfigureAwait(false);
-
-                await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
-                {
-                    CourseLevel = course.CourseLevel,
-                    Type = EnumUserCourseType.ResetAndLearnAgain,
-                    UserId = courseResult.CreatedUserId
-                }, cancellationToken).ConfigureAwait(false);
-
-                await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
-                {
-                    Type = EnumUserCourseType.ChangeLevel,
-                    UserId = courseResult.CreatedUserId
-                }, cancellationToken).ConfigureAwait(false);
-
-                courseResult.CompletionDate = DateTime.UtcNow;
             }
-
-            courseResult.Status = EnumResultStatus.Done;
-            _courseResultRepository.Update(courseResult);
-            await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Trigger Update Status CourseResult : {ex.Message} ");
+            }
         }
 
         public async Task SendStudentCompleteCourse(Guid studentId, Guid courseId, CourseResult courseResult, CancellationToken cancellationToken)
@@ -697,7 +722,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                 var mockTestHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.MockTestSkill, cancellationToken);
 
-                var mockTestResults = await _mockTestResultRepository.Queryable.Where(p => p.StudentId == studentId && p.CourseId == course.Id).OrderBy(p => p.CreatedDate).ToListAsync(cancellationToken);
+                var mockTestResults = await _mockTestResultRepository.Queryable.Where(p => p.StudentId == studentId && p.CourseId == course.Id && !p.UnitId.HasValue).OrderBy(p => p.CreatedDate).ToListAsync(cancellationToken);
 
                 if (mockTestResults == null || mockTestResults.Count != 2)
                 {
@@ -815,6 +840,22 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 };
                 await _userService.UpdateTrialRegistrationStatusAsync(model);
             }
+        }
+
+        private async Task SendNotificationMessage(Guid userId, string courseName, CancellationToken cancellationToken)
+        {
+
+            NotificationSendingQueueModel model = new NotificationSendingQueueModel()
+            {
+                ObjectId = Guid.Empty,
+                UserIds = new List<Guid>() { userId },
+                SenderId = Guid.Empty,
+                ParamsMessage = new List<object> { courseName ?? string.Empty, },
+                Type = EnumNotificationType.LinkPage,
+                Content = EnumNotificationContent.CompleteCourse
+            };
+
+            await _notificationMessagePublisher.Publish(model, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -45,9 +45,10 @@ namespace Fsel.Ordering.Api.Controllers.Admin
         }
 
         /// <summary>
-        /// Search Course
+        /// change status order
         /// </summary>
         [HttpPut("change-status-order")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ChangeStatusOrder([FromBody] ChangeStatusOrderCommand query)

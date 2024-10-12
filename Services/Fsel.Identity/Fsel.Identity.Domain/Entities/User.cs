@@ -20,5 +20,6 @@ namespace Fsel.Identity.Domain.Entities
         public virtual ICollection<UserPlatform> UserPlatforms { get; set; } = new List<UserPlatform>();
         public virtual ICollection<UserReferral> Senders { get; set; } = new List<UserReferral>();
         public virtual UserReferral? Receiver { get; set; }
+        public virtual ICollection<UserDeletion> UserDeletions { get; set; } = new List<UserDeletion>();
     }
 }

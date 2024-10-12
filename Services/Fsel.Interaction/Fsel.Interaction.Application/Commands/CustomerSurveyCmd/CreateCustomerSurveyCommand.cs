@@ -104,7 +104,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 
             }
 
-            bool completedSurvey = customerSurveys.All(x => x.IsCompleted);
+            bool completedSurvey = request.Answers.All(x => x.IsCompleted);
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
             if (completedSurvey && student != null)

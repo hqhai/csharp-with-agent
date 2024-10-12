@@ -11,9 +11,9 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public ConstantUrl? ConstantUrl { get; set; }
         public ResourceContent? ResourceContent { get; set; }
         public new Services? Services { get; set; }
-
         public GoogleSheetConfig? GoogleSheetConfig { get; set; }
         public UserReferralConfig? UserReferralConfig { get; set; }
+        public UserDeletionConfig? UserDeletionConfig { get; set; }
     }
 
     public class UserReferralConfig
@@ -49,6 +49,8 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     {
         public int StepTime { get; set; }
         public int StepDayWithAdmin { get; set; }
+        public bool IsByPassOtp { get; set; }
+        public string? ByPassOtpValue { get; set; }
     }
 
     public class Smtp
@@ -63,5 +65,11 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     public class GoogleSheetConfig
     {
         public string? SchoolStudentSheetId { get; set; }
+    }
+
+    public class UserDeletionConfig
+    {
+        public int DeletionDays { get; set; }
+        public int DeletionMinutes { get; set; }
     }
 }

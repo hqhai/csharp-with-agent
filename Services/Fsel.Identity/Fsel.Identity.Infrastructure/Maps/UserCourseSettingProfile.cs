@@ -5,13 +5,13 @@ namespace Fsel.Identity.Infrastructure.Maps
     using AutoMapper;
     using Fsel.Core.Extensions;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Models.EntityModels;
 
     public class UserCourseSettingProfile : Profile
     {
         public UserCourseSettingProfile()
         {
-            CreateMap<UserCourseSetting, UserCourseSettingModel>().IgnoreAllNonExisting();
+            CreateMap<UserCourseSetting, Domain.Models.EntityModels.UserCourseSettingModel>().IgnoreAllNonExisting();
+            CreateMap<UserCourseSetting, Shared.Models.ShareModels.EntityModels.UserCourseSettingModel>().IgnoreAllNonExisting();
         }
     }
 }
