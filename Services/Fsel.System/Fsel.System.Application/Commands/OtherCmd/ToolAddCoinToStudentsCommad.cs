@@ -2,7 +2,6 @@
 
 namespace Fsel.System.Application.Commands.OtherCmd
 {
-    using Amazon.SimpleEmail.Model;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -61,6 +60,19 @@ namespace Fsel.System.Application.Commands.OtherCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.EventCode), Message = "EventCode is null" });
                 }
+                if (!string.IsNullOrEmpty(x.IsSendNotify))
+                {
+                    bool isSenNotify = false;
+                    EnumNotificationContent enumNotification = default;
+                    if (!bool.TryParse(x.IsSendNotify, out isSenNotify))
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.IsSendNotify), Message = "isSenNotify is malformed" });
+                    }
+                    else if (isSenNotify && !Enum.TryParse(x.EnumNotify, out enumNotification))
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.EnumNotify), Message = "EnumNotify is malformed" });
+                    }
+                }
                 return await Task.FromResult(errors.Count == 0);
             });
 
@@ -77,6 +89,7 @@ namespace Fsel.System.Application.Commands.OtherCmd
                 methodResult.AddError(studentResults.Error);
                 return methodResult;
             }
+
             var students = studentResults.Content?.Result;
             if (students == null || !students.Any())
             {
@@ -147,11 +160,11 @@ namespace Fsel.System.Application.Commands.OtherCmd
 
                 var tokenHitoryResults = await _mediator.Send(createData, cancellationToken).ConfigureAwait(false);
                 tokenHistoryData.AddRange(tokenHitoryResults.Result?.ToList() ?? new List<TokenHistoryModel>());
-                if (dataToken != null && bool.TryParse(dataToken.IsSendNotify, out bool isSendNotify) && isSendNotify)
+                if (dataToken != null && bool.TryParse(dataToken.IsSendNotify, out bool isSendNotify) && isSendNotify && Enum.TryParse(dataToken.EnumNotify, out EnumNotificationContent enumNotification))
                 {
                     await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
                     {
-                        Content = EnumNotificationContent.FselFlowFBEvent,
+                        Content = enumNotification,
                         UserIds = new List<Guid>() { userId },
                         ParamsMessage = new List<object> { dataToken.Coin },
                         Type = EnumNotificationType.Text,
