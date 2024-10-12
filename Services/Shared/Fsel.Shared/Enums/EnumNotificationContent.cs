@@ -32,6 +32,7 @@ namespace Fsel.Shared.Enums
         ReplyCommentPost,
         CourseChange,
         LuckyTicket,
+        FselFlowFBEvent,
 
         //Version 1.1
         CompletedStreakLogin,
@@ -53,6 +54,5 @@ namespace Fsel.Shared.Enums
         FriendCompletedExam,
         FriendCompleteUnitOne,
         FriendPaymentSuccessfully,
-
     }
 }
