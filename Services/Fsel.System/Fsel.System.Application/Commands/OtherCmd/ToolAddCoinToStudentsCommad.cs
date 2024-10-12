@@ -17,6 +17,7 @@ namespace Fsel.System.Application.Commands.OtherCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class ToolAddCoinToStudentsCommad : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
@@ -28,16 +29,19 @@ namespace Fsel.System.Application.Commands.OtherCmd
         private readonly IMediator _mediator;
         private readonly ITokenHistoryRepository _tokenHistoryRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private readonly ILogger<ToolAddCoinToStudentsCommadHandler> _logger;
 
         public ToolAddCoinToStudentsCommadHandler(IUserService userService,
             IMediator mediator,
             ITokenHistoryRepository tokenHistoryRepository,
-            NotificationMessagePublisher notificationMessagePublisher)
+            NotificationMessagePublisher notificationMessagePublisher,
+            ILogger<ToolAddCoinToStudentsCommadHandler> logger)
         {
             _userService = userService;
             _mediator = mediator;
             _tokenHistoryRepository = tokenHistoryRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
+            _logger = logger;
         }
 
         public async Task<MethodResult<Stream>> Handle(ToolAddCoinToStudentsCommad request, CancellationToken cancellationToken)
@@ -160,8 +164,12 @@ namespace Fsel.System.Application.Commands.OtherCmd
 
                 var tokenHitoryResults = await _mediator.Send(createData, cancellationToken).ConfigureAwait(false);
                 tokenHistoryData.AddRange(tokenHitoryResults.Result?.ToList() ?? new List<TokenHistoryModel>());
+                _logger.LogInformation(dataToken.Serialize());
+
                 if (dataToken != null && bool.TryParse(dataToken.IsSendNotify, out bool isSendNotify) && isSendNotify && Enum.TryParse(dataToken.EnumNotify, out EnumNotificationContent enumNotification))
                 {
+                    _logger.LogInformation("Publisher Notify FselEvent" + enumNotification);
+
                     await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
                     {
                         Content = enumNotification,
