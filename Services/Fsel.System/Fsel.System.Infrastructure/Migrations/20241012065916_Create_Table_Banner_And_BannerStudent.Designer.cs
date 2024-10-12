@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20241012031558_Create_Table_Banner_And_BannerStudent")]
+    [Migration("20241012065916_Create_Table_Banner_And_BannerStudent")]
     partial class Create_Table_Banner_And_BannerStudent
     {
         /// <inheritdoc />
@@ -192,6 +192,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnOrder(0);
 
                     b.Property<string>("Code")
+                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
@@ -238,6 +239,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
@@ -263,6 +265,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnOrder(102);
 
                     b.Property<string>("Url")
+                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
