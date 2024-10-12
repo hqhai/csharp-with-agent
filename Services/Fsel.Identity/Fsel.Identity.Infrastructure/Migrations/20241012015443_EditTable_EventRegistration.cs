@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -125,7 +125,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 column: "ParentEventId",
                 principalTable: "CompetitionEvents",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.SetNull);
         }
 
         /// <inheritdoc />
