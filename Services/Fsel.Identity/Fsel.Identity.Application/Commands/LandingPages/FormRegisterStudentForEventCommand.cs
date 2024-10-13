@@ -204,7 +204,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             return methodResult;
         }
 
-        private async Task<EventRegistration?> Register(RegisterStudentForEventCommandModel request, CompetitionEvent competitionEvent, Guid? studentId, bool isSendMail, MethodResult<bool> methodResult, CancellationToken cancellationToken)
+        private async Task<MethodResult<bool>> Register(RegisterStudentForEventCommandModel request, CompetitionEvent competitionEvent, Guid? studentId, bool isSendMail, MethodResult<bool> methodResult, CancellationToken cancellationToken)
         {
             var eventRegistration = await _eventRegistrationRepository.Queryable.FirstOrDefaultAsync(p => p.Email.ToLower() == request.Email.ToLower() && p.CompetitionEventId == competitionEvent.Id, cancellationToken);
 
@@ -225,7 +225,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             if (!eventRegistration.IsValid())
             {
                 methodResult.AddError(eventRegistration.ErrorMessages);
-                return null;
+                return methodResult;
             }
 
             await _eventRegistrationRepository.ExecuteTransactionAsync(async () =>
@@ -238,7 +238,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 }
                 return methodResult;
             });
-            return eventRegistration;
+            return methodResult;
         }
 
         private async Task SendMailInfoUser(RegisterStudentForEventCommandModel request, string password, EnumSenderTemplate senderTemplate, string subject)
