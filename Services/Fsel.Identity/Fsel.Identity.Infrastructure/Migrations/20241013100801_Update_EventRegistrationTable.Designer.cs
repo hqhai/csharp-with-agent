@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20241013071303_Update_EventRegistrationTable")]
+    [Migration("20241013100801_Update_EventRegistrationTable")]
     partial class Update_EventRegistrationTable
     {
         /// <inheritdoc />
@@ -2415,7 +2415,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasOne("Fsel.Identity.Domain.Entities.Student", "Student")
                         .WithMany("StudentDailyStreaks")
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Student");

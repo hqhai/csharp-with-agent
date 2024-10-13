@@ -52,6 +52,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new CompetitionEventsEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserReferralEntityTypeConfiguration());
             builder.ApplyConfiguration(new EventRegistrationEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentDailyStreakEntityTypeConfiguration());
             base.OnModelCreating(builder);
         }
 
