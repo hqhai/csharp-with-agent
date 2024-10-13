@@ -53,7 +53,12 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new CompetitionEventsEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserReferralEntityTypeConfiguration());
             builder.ApplyConfiguration(new EventRegistrationEntityTypeConfiguration());
+<<<<<<<<< Temporary merge branch 1
             builder.ApplyConfiguration(new UserDeletionEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentDailyStreakEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentDailyStreakEntityTypeConfiguration());
+            base.OnModelCreating(builder);
+>>>>>>>>> Temporary merge branch 2
         }
 
         #region Db Set
