@@ -165,9 +165,14 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             studentProgressReport.StatusUser = isLock ? "Hoàn Thành PT" : "Chưa Hoàn Thành PT";
         }
 
-        private static string GetPercentFormat(double percent)
+        private static string GetBandScoreFormat(double bandScore)
         {
-            return string.Format("{0:0.0}", percent);
+            return string.Format("{0:0.0}", bandScore);
+        }
+
+        private static string GetPercentFormat(double? percent)
+        {
+            return $"{percent}%";
         }
 
         private async Task SetProgressCourseAsync(StudentProgressReportIELTSModel studentProgressReport, CourseResult courseResult)
@@ -181,25 +186,25 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResultModel);
             studentProgressReport.CourseName = courseResult.Course?.Name;
             studentProgressReport.CompletedProgress = string.Format("{0} / {1}", currentProgress, progress);
-            studentProgressReport.ProgressPercent = NumberHelper.GetPercent(currentProgress, progress);
+            studentProgressReport.ProgressPercent = GetPercentFormat(NumberHelper.GetPercent(currentProgress, progress));
             studentProgressReport.StatusUser = "Đang Học";
             if (courseResult.Status == EnumResultStatus.Done)
             {
-                studentProgressReport.CourseOverall = courseResult.Percent;
+                studentProgressReport.CourseOverall = GetPercentFormat(courseResult.Percent);
             }
             else
             {
                 var unitResults = await _unitResultRepository.Queryable.Where(x => x.CourseId == courseResult.CourseId && x.StudentId == courseResult.StudentId && x.Status == EnumResultStatus.Done).ToListAsync();
                 if (unitResults.Any())
                 {
-                    studentProgressReport.CourseOverall = NumberHelper.ConvertRound(unitResults.Average(x => x.Percent));
+                    studentProgressReport.CourseOverall = GetPercentFormat(NumberHelper.ConvertRound(unitResults.Average(x => x.Percent)));
                 }
                 else
                 {
                     var placementTestScore = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.Status == EnumResultStatus.Done)
                                                                                        .OrderByDescending(x => x.CreatedDate)
                                                                                        .FirstOrDefaultAsync();
-                    studentProgressReport.CourseOverall = placementTestScore?.Percent;
+                    studentProgressReport.CourseOverall = GetPercentFormat(placementTestScore?.Percent);
                 }
             }
         }
@@ -270,7 +275,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 {
                     continue;
                 }
-                unitField.SetValue(studentProgressReport, unitResult.Percent);
+                unitField.SetValue(studentProgressReport, GetPercentFormat(unitResult.Percent));
             }
         }
 
@@ -289,7 +294,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                     continue;
                 }
                 var mockTestResultModel = _mapper.Map<MockTestResultModel>(mockTestResult);
-                skillMockTestField.SetValue(studentProgressReport, GetPercentFormat(mockTestResultModel.Scores));
+                skillMockTestField.SetValue(studentProgressReport, GetBandScoreFormat(mockTestResultModel.Scores));
             }
         }
 
@@ -329,7 +334,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                     continue;
                 }
                 var mockTestResultModel = _mapper.Map<MockTestResultModel>(mockTestResult);
-                mockTestField.SetValue(studentProgressReport, GetPercentFormat(mockTestResultModel.Scores));
+                mockTestField.SetValue(studentProgressReport, GetBandScoreFormat(mockTestResultModel.Scores));
                 SetSkillFullMockTest(studentProgressReport, mockTestResult.SkillScores, index);
             }
         }
@@ -352,7 +357,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 {
                     continue;
                 }
-                mockTestField.SetValue(studentProgressReport, GetPercentFormat(item.Scores));
+                mockTestField.SetValue(studentProgressReport, GetBandScoreFormat(item.Scores));
             }
         }
 
