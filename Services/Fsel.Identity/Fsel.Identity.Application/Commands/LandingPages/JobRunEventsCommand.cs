@@ -39,11 +39,13 @@ namespace Fsel.Identity.Application.Commands.LandingPages
 
             var @events = await _competitionEventsRepository.Queryable.ToListAsync(cancellationToken);
 
-            @events = @events.Where(p => p.EventContent != null && p.EventContent.StartDate.HasValue && p.EventContent.StartDate.Value.Date == currentDate.Date).OrderByDescending(p => p.CreatedDate).ToList();
+            @events = @events.Where(p => p.EventContent != null && p.EventContent.StartDate.HasValue && p.EventContent.StartDate.Value.Date == currentDate.Date && (p.EventContent.Actions == null || p.EventContent.Actions.Count == 0 || !p.EventContent.Actions.Any(p => p == EnumSchoolEventRuleAction.RegisterAndCreateUser))).OrderByDescending(p => p.CreatedDate).ToList();
 
             var eventIds = @events.Select(e => e.Id).ToList();
 
-            var eventRegistrations = await _eventRegistrationRepository.Queryable.Where(p => eventIds != null && eventIds.Contains(p.CompetitionEventId)).ToListAsync(cancellationToken);
+            var eventRegistrations = await _eventRegistrationRepository.Queryable.Where(p => eventIds != null &&
+            eventIds.Contains(p.CompetitionEventId) &&
+            p.StudentId == null).ToListAsync(cancellationToken);
 
             foreach (var @event in @events)
             {
