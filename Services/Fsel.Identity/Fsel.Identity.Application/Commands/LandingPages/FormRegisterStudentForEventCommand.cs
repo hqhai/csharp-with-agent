@@ -98,7 +98,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             }
             else
             {
-                await Register(request, competitionEvent, true, methodResult, cancellationToken);
+                await Register(request, competitionEvent, null, true, methodResult, cancellationToken);
             }
 
             return methodResult;
@@ -189,19 +189,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 return methodResult;
             }
 
-            var eventRegistration = await Register(request, competitionEvent, false, methodResult, cancellationToken);
-
-            if (eventRegistration != null)
-            {
-                await _eventRegistrationRepository.ExecuteTransactionAsync(async () =>
-                {
-                    eventRegistration.StudentId = user.Human.Student.Id;
-                    eventRegistration = _eventRegistrationRepository.Update(eventRegistration);
-                    await _eventRegistrationRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                    methodResult.StatusCode = StatusCodes.Status200OK;
-                    return methodResult;
-                });
-            }
+            await Register(request, competitionEvent, user.Human.Student.Id, false, methodResult, cancellationToken);
 
             await _studentCompetitionEventsRepository.ExecuteTransactionAsync(async () =>
             {
@@ -216,7 +204,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             return methodResult;
         }
 
-        private async Task<EventRegistration?> Register(RegisterStudentForEventCommandModel request, CompetitionEvent competitionEvent, bool isSendMail, MethodResult<bool> methodResult, CancellationToken cancellationToken)
+        private async Task<EventRegistration?> Register(RegisterStudentForEventCommandModel request, CompetitionEvent competitionEvent, Guid? studentId, bool isSendMail, MethodResult<bool> methodResult, CancellationToken cancellationToken)
         {
             var eventRegistration = await _eventRegistrationRepository.Queryable.FirstOrDefaultAsync(p => p.Email.ToLower() == request.Email.ToLower() && p.CompetitionEventId == competitionEvent.Id, cancellationToken);
 
@@ -224,6 +212,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             {
                 eventRegistration = _mapper.Map<EventRegistration>(request);
                 eventRegistration.CompetitionEventId = competitionEvent.Id;
+                eventRegistration.StudentId = studentId;
                 eventRegistration.Status = EnumEventRegistrationStatus.Active;
                 eventRegistration = _eventRegistrationRepository.Add(eventRegistration);
             }
