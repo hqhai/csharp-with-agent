@@ -51,6 +51,7 @@ namespace Fsel.Shared.Models.ShareModels
 
     public class WeekRule
     {
+        public string? PrizeName { get; set; }
         public string? PrizeQuantity { get; set; }
         public string? Detail { get; set; }
         public string? RewardImagine { get; set; }
