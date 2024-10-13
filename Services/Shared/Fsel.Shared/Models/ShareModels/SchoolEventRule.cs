@@ -28,6 +28,7 @@ namespace Fsel.Shared.Models.ShareModels
     {
         StopAtLevelSelection,
         ShowStoreFSEL,
+        RegisterAndCreateUser,
         DisableLeaderBoard
     }
 

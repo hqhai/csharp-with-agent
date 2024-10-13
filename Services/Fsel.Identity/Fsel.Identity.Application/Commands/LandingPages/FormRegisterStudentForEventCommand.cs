@@ -9,8 +9,11 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Services;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
@@ -27,18 +30,27 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     {
         private readonly IEventRegistrationRepository _eventRegistrationRepository;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
+        private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IMapper _mapper;
         private readonly ISenderService _senderService;
         private readonly AppSetting _appSetting;
         private const string Subject = "Thông tin đăng kí tham gia sự kiện";
+        private readonly UserManager<User> _userManager;
+        private readonly IPlatformRepository _platformRepository;
+        private readonly IMediator _mediator;
+        private const string DefaultPassword = "Fsel@2024";
 
-        public FormRegisterStudentForEventCommandHandler(IEventRegistrationRepository eventRegistrationRepository, ICompetitionEventsRepository competitionEventsRepository, IMapper mapper, ISenderService senderService, AppSetting appSetting)
+        public FormRegisterStudentForEventCommandHandler(IEventRegistrationRepository eventRegistrationRepository, ICompetitionEventsRepository competitionEventsRepository, IMapper mapper, ISenderService senderService, AppSetting appSetting, UserManager<User> userManager, IPlatformRepository platformRepository, MediatR.IMediator mediator, IStudentCompetitionEventsRepository studentCompetitionEventsRepository)
         {
             _eventRegistrationRepository = eventRegistrationRepository;
             _competitionEventsRepository = competitionEventsRepository;
             _mapper = mapper;
             _senderService = senderService;
             _appSetting = appSetting;
+            _userManager = userManager;
+            _platformRepository = platformRepository;
+            _mediator = mediator;
+            _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(FormRegisterStudentForEventCommand request, CancellationToken cancellationToken)
@@ -47,8 +59,6 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             var methodResult = new MethodResult<bool>();
 
             var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.EventCode.ToLower() == request.EventCode.ToLower(), cancellationToken);
-
-            var competitionEven1t = await _competitionEventsRepository.Queryable.ToListAsync(cancellationToken);
 
             if (competitionEvent == null)
             {
@@ -66,7 +76,148 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
                 return methodResult;
             }
+            if (!string.IsNullOrEmpty(request.ParentEmail) && !request.ParentEmail.IsValidEmail())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
+                return methodResult;
+            }
+            if (!string.IsNullOrEmpty(request.ParentPhoneNumber) && !request.ParentPhoneNumber.IsValidPhoneNumber())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
+                return methodResult;
+            }
+            if (!string.IsNullOrEmpty(request.TeacherPhoneNumber) && !request.TeacherPhoneNumber.IsValidPhoneNumber())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
+                return methodResult;
+            }
 
+            if (competitionEvent.EventContent != null && competitionEvent.EventContent.Actions != null && competitionEvent.EventContent.Actions.Any(p => p == EnumSchoolEventRuleAction.RegisterAndCreateUser))
+            {
+                await RegisterAndCreateUser(request, competitionEvent, methodResult, cancellationToken);
+            }
+            else
+            {
+                await Register(request, competitionEvent, true, methodResult, cancellationToken);
+            }
+
+            return methodResult;
+        }
+
+        private async Task<MethodResult<bool>> RegisterAndCreateUser(RegisterStudentForEventCommandModel request, CompetitionEvent competitionEvent, MethodResult<bool> methodResult, CancellationToken cancellationToken)
+        {
+            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email.ToLower() == request.Email.ToLower() || x.UserName.ToLower() == request.Email.ToLower(), cancellationToken: cancellationToken);
+            if (user != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Email), request.Email);
+                return methodResult;
+            }
+
+            var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
+            if (platform == null)
+            {
+                methodResult.AddErrorBadRequest("Platform null");
+                return methodResult;
+            }
+            Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
+            user = new User()
+            {
+                UserName = request.Email,
+                FullName = $"{request.FirstName} {request.LastName}",
+                Email = request.Email,
+                EmailConfirmed = true,
+                PhoneNumber = request.PhoneNumber,
+                PhoneNumberConfirmed = false,
+                Human = new Human()
+                {
+                    FullName = $"{request.FirstName} {request.LastName}",
+                    Birthday = request.BirthDay,
+                    PhoneNumber = request.PhoneNumber,
+                    Email = request.Email,
+                    Student = new Student()
+                    {
+                        Occupation = "Student",
+                        CourseLevel = EnumCourseLevel.A1,
+                        CreatedByParent = false,
+                        SchoolId = request.SchoolId,
+                        School = request.School,
+                        SchoolClass = request.SchoolClass,
+                        SchoolGrade = request.SchoolGrade,
+                        ProvinceId = request.ProvinceId,
+                        DistrictId = request.DistrictId
+                    }
+                },
+                UserPlatforms = new List<UserPlatform>()
+                {
+                    new UserPlatform()
+                    {
+                        PlatformId = platform.Id
+                    }
+                },
+                UserSettings = new List<UserSetting>()
+                    {
+                       new UserSetting(true)
+                    }
+            };
+
+            var passwordValidator = new Microsoft.AspNetCore.Identity.PasswordValidator<User>();
+            var validPassword = await passwordValidator.ValidateAsync(_userManager, user, DefaultPassword);
+            if (!validPassword.Succeeded)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIsNotValid));
+                return methodResult;
+            }
+
+            if (!user.IsValid())
+            {
+                methodResult.AddError(user.ErrorMessages);
+                return methodResult;
+            }
+
+            identityStudentResult = await _userManager.CreateAsync(user, DefaultPassword);
+            if (!identityStudentResult.Succeeded)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
+                return methodResult;
+            }
+            await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
+
+            var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = user.Human.Birthday, SchoolId = request.SchoolId, ProvinceId = request.ProvinceId, DistrictId = request.DistrictId }, cancellationToken);
+            if (!updateCode.IsOK)
+            {
+                methodResult.AddErrorBadRequest(updateCode.ErrorMessages);
+                return methodResult;
+            }
+
+            var eventRegistration = await Register(request, competitionEvent, false, methodResult, cancellationToken);
+
+            if (eventRegistration != null)
+            {
+                await _eventRegistrationRepository.ExecuteTransactionAsync(async () =>
+                {
+                    eventRegistration.StudentId = user.Human.Student.Id;
+                    eventRegistration = _eventRegistrationRepository.Update(eventRegistration);
+                    await _eventRegistrationRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                    return methodResult;
+                });
+            }
+
+            await _studentCompetitionEventsRepository.ExecuteTransactionAsync(async () =>
+            {
+                var studentCompetitionEvent = _studentCompetitionEventsRepository.Add(new StudentCompetitionEvent { StudentId = user.Human.Student.Id, CompetitionEventId = competitionEvent.Id });
+                await _studentCompetitionEventsRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            });
+
+            await SendMailInfoUser(request, DefaultPassword, EnumSenderTemplate.CreateUserForEventULIS, Subject);
+
+            return methodResult;
+        }
+
+        private async Task<EventRegistration?> Register(RegisterStudentForEventCommandModel request, CompetitionEvent competitionEvent, bool isSendMail, MethodResult<bool> methodResult, CancellationToken cancellationToken)
+        {
             var eventRegistration = await _eventRegistrationRepository.Queryable.FirstOrDefaultAsync(p => p.Email.ToLower() == request.Email.ToLower() && p.CompetitionEventId == competitionEvent.Id, cancellationToken);
 
             if (eventRegistration == null)
@@ -85,19 +236,66 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             if (!eventRegistration.IsValid())
             {
                 methodResult.AddError(eventRegistration.ErrorMessages);
-                return methodResult;
+                return null;
             }
 
             await _eventRegistrationRepository.ExecuteTransactionAsync(async () =>
             {
-                await _eventRegistrationRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _eventRegistrationRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                await SendMail(request, competitionEvent, EnumSenderTemplate.MailRegisterEvent, Subject, CultureInfo.InvariantCulture).ConfigureAwait(false);
+                if (isSendMail)
+                {
+                    await SendMailRegisterEvent(request, competitionEvent, EnumSenderTemplate.MailRegisterEvent, Subject, CultureInfo.InvariantCulture).ConfigureAwait(false);
+                }
                 return methodResult;
             });
+            return eventRegistration;
+        }
 
-            methodResult.Result = true;
-            return methodResult;
+        private async Task SendMailInfoUser(RegisterStudentForEventCommandModel request, string password, EnumSenderTemplate senderTemplate, string subject)
+        {
+            await _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel
+            {
+                ToEmails = new List<string>() { request.Email ?? string.Empty },
+                Template = senderTemplate,
+                Subject = subject,
+                Params = new
+                {
+                    UserName = request.Email,
+                    Password = password
+                },
+            });
+        }
+
+        private async Task SendMailRegisterEvent(RegisterStudentForEventCommandModel request, CompetitionEvent competitionEvent, EnumSenderTemplate senderTemplate, string subject, CultureInfo cultureInfo)
+        {
+            var param = new ParamSendMailEvent
+            {
+                FullName = request.FirstName + " " + request.LastName,
+                LinkLMS = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                StartDateEvent = competitionEvent.EventContent?.StartDate?.ToString("dd/MM", cultureInfo),
+                EndDateEvent = competitionEvent.EventContent?.EndDate?.ToString("dd/MM/yyyy", cultureInfo),
+                StartDateAward = competitionEvent.EventContent?.AwardStartDate?.ToString("dd/MM", cultureInfo),
+                EndDateAward = competitionEvent.EventContent?.AwardEndDate?.ToString("dd/MM/yyyy", cultureInfo),
+                Date = competitionEvent.EventContent?.StartDate?.ToString("dd/MM/yyyy", cultureInfo),
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                PhoneNumber = request.PhoneNumber,
+                BirthDay = request.BirthDay.ToString("dd/MM/yyyy", cultureInfo),
+                School = request.School,
+                SchoolStudentCode = request.SchoolStudentCode,
+                SchoolGrade = request.SchoolGrade,
+                SchoolClass = request.SchoolClass,
+                LinkLeaderBoard = competitionEvent.EventContent?.LinkLeaderBoard
+            };
+
+            await _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel
+            {
+                ToEmails = new List<string>() { request.Email ?? string.Empty },
+                Template = senderTemplate,
+                Subject = subject,
+                Params = param,
+            });
         }
 
         private async Task SendMail(RegisterStudentForEventCommandModel request, CompetitionEvent competitionEvent, EnumSenderTemplate senderTemplate, string subject, CultureInfo cultureInfo)
