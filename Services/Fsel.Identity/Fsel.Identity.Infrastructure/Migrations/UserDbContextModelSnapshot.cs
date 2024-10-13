@@ -2412,7 +2412,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasOne("Fsel.Identity.Domain.Entities.Student", "Student")
                         .WithMany("StudentDailyStreaks")
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Student");

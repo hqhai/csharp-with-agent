@@ -11,10 +11,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_StudentDailyStreak_Students_StudentId",
-                table: "StudentDailyStreak");
-
             migrationBuilder.AddColumn<Guid>(
                 name: "StudentId",
                 table: "EventRegistrations",
@@ -34,14 +30,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 column: "StudentId",
                 principalTable: "Students",
                 principalColumn: "Id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_StudentDailyStreak_Students_StudentId",
-                table: "StudentDailyStreak",
-                column: "StudentId",
-                principalTable: "Students",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
@@ -51,10 +39,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 name: "FK_EventRegistrations_Students_StudentId",
                 table: "EventRegistrations");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_StudentDailyStreak_Students_StudentId",
-                table: "StudentDailyStreak");
-
             migrationBuilder.DropIndex(
                 name: "IX_EventRegistrations_StudentId",
                 table: "EventRegistrations");
@@ -62,13 +46,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
             migrationBuilder.DropColumn(
                 name: "StudentId",
                 table: "EventRegistrations");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_StudentDailyStreak_Students_StudentId",
-                table: "StudentDailyStreak",
-                column: "StudentId",
-                principalTable: "Students",
-                principalColumn: "Id");
         }
     }
 }
