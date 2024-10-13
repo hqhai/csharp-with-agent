@@ -24,6 +24,6 @@ namespace Fsel.Shared.Models.ShareModels
         public string? TeacherPhoneNumber { get; set; }
         public string? ParentEmail { get; set; }
         public string? ParentPhoneNumber { get; set; }
-        public bool IsScholarshipAdvising { get; set; }
+        public bool IsSchoolarshipAdvising { get; set; }
     }
 }

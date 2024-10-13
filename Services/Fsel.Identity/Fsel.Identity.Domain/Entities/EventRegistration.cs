@@ -73,8 +73,6 @@ namespace Fsel.Identity.Domain.Entities
         public string? SchoolStudentCode { get; set; }
 
         public EnumEventRegistrationStatus Status { get; set; }
-        public bool IsScholarshipAdvising { get; set; }
-
         public Guid? StudentId { get; set; }
         public Student? Student { get; set; }
     }
