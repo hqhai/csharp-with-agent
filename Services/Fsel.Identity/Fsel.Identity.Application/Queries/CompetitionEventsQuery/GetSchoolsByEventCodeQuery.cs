@@ -8,13 +8,18 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.Model;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
+    using MassTransit.Initializers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetSchoolsByEventCodeQuery : IRequest<MethodResult<IList<SchoolModel>>>
     {
         public string? EventCode { get; set; }
+
+        public Guid? LocationId { get; set; }
     }
     public class GetSchoolsByEventCodeQueryHandler : IRequestHandler<GetSchoolsByEventCodeQuery, MethodResult<IList<SchoolModel>>>
     {
@@ -31,30 +36,41 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<SchoolModel>>();
 
-            var competitionEvent = _competitionEventsRepository.Queryable.FirstOrDefault(x => x.EventCode == request.EventCode);
+            CompetitionEvent? competitionEvent = new CompetitionEvent();
 
-            #region Validate
-
-            if (competitionEvent == null)
+            #region Validate Params
+            if (string.IsNullOrEmpty(request.EventCode))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent), competitionEvent);
-                return methodResult;
-            }
-
-            if (competitionEvent.SchoolIds == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent.SchoolIds), competitionEvent.SchoolIds);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.EventCode), request.EventCode);
                 return methodResult;
             }
             #endregion
 
-            IList<Guid> schoolIds = competitionEvent.SchoolIds;
 
+            if (!string.IsNullOrEmpty(request.EventCode) && request.LocationId == null)
+            {
+                competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.EventCode == request.EventCode, cancellationToken);
+
+            }
+            else
+            {
+                var parentEventId = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.EventCode == request.EventCode, cancellationToken).Select(x => x.Id);
+
+                competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.LocationId == request.LocationId && x.ParentEventId == parentEventId, cancellationToken);
+            }
+
+            if (competitionEvent == null || competitionEvent.SchoolIds == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+
+            IList<Guid> schoolIds = competitionEvent.SchoolIds;
             var listSchool = await _systemService.GetSchoolByIds(schoolIds);
 
             if (listSchool == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(listSchool), listSchool);
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
 

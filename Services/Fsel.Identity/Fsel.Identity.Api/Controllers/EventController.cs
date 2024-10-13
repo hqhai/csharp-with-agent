@@ -66,14 +66,12 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Lấy danh sách trường học theo mã sự kiện
         /// </summary>
-        [HttpGet("schools/{eventCode}")]
+        [HttpGet("schools")]
         [ProducesResponseType(typeof(MethodResult<IList<SchoolModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetSchoolsByEventCode([FromRoute] string? eventCode)
+        public async Task<IActionResult> GetSchoolsByEventCode([FromQuery] GetSchoolsByEventCodeQuery query)
         {
-            ArgumentException.ThrowIfNullOrEmpty(nameof(eventCode));
-            GetSchoolsByEventCodeQuery query = new GetSchoolsByEventCodeQuery();
-            query.EventCode = eventCode;
+            ArgumentException.ThrowIfNullOrEmpty(nameof(query));
             MethodResult<IList<SchoolModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
