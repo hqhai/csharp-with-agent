@@ -22,6 +22,7 @@ namespace Fsel.Shared.Models.ShareModels
         public string? LuckySpinGiftImage { get; set; }
         public IList<WeekEvent>? WeekEvents { get; set; }
         public IList<WeekEvent>? LuckyStarRules { get; set; }
+        public Guid? LocationId { get; set; }
     }
 
     public enum EnumSchoolEventRuleAction
@@ -51,6 +52,7 @@ namespace Fsel.Shared.Models.ShareModels
 
     public class WeekRule
     {
+        public string? PrizeName { get; set; }
         public string? PrizeQuantity { get; set; }
         public string? Detail { get; set; }
         public string? RewardImagine { get; set; }
