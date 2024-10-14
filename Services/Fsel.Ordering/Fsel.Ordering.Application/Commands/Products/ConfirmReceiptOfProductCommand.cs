@@ -32,7 +32,7 @@ namespace Fsel.Ordering.Application.Commands.Products
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            if (request.Codes == null || request.Codes.Count == 0)
+            if (request.Codes == null || request.Codes.Count == 0 || request.Codes.Any(p => string.IsNullOrEmpty(p)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
                 return methodResult;
