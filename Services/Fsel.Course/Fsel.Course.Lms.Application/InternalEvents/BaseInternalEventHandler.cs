@@ -280,8 +280,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var skillScorePercents = new List<(List<SkillScores>, double)>();
             var units = await _unitRepository.Queryable.Include(x => x.LessonResults.Where(x => x.StudentId == studentId && x.CourseId == courseId && x.Status == EnumResultStatus.Done))
                                                       .Where(x => unitIds.Contains(x.Id))
-                                                      .OrderBy(x => unitIds.IndexOf(x.Id))
                                                       .ToListAsync();
+            units = units.OrderBy(x => unitIds.IndexOf(x.Id)).ToList();
             var listLessonResultId = units.SelectMany(x => x.LessonResults).Where(x => x.StudentId == studentId && x.CourseId == courseId && x.Status == EnumResultStatus.Done)
                                        .Select(x => x.Id).ToList();
 
