@@ -25,15 +25,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(notification);
             var unitResult = notification.Data;
-            var courseResult = new CourseResult();
-            try
-            {
-                courseResult = await _courseResultRepository.Queryable.Where(x => x.CourseId == unitResult.CourseId && x.StudentId == unitResult.StudentId).FirstOrDefaultAsync(cancellationToken);
-            }
-            catch
-            {
-                courseResult = await _courseResultRepository.Queryable.Where(x => x.CourseId == unitResult.CourseId && x.StudentId == unitResult.StudentId).FirstOrDefaultAsync(cancellationToken);
-            }
+            var courseResult = await _courseResultRepository.Queryable.Where(x => x.CourseId == unitResult.CourseId && x.StudentId == unitResult.StudentId).FirstOrDefaultAsync(cancellationToken);
             if (courseResult != null)
             {
                 if (courseResult.Status == EnumResultStatus.Done)
