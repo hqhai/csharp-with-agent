@@ -10,6 +10,7 @@ namespace Fsel.Ordering.Application.Commands.Products
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
+    using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Products;
     using Fsel.Shared.Enums;
@@ -65,19 +66,19 @@ namespace Fsel.Ordering.Application.Commands.Products
 
             if (eventIds == null || eventIds.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Min));
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotPartOfTheEvent));
                 return methodResult;
             }
 
             if (product.EventIds == null || product.EventIds.Count == 0 || !product.EventIds.Any(a => eventIds.Contains(a)))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Min));
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotPartOfTheEvent));
                 return methodResult;
             }
 
             if (product.ExpireDate.Date < DateTime.UtcNow.Date)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Min));
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.ExchangeExpirationDate));
                 return methodResult;
             }
 
@@ -85,7 +86,7 @@ namespace Fsel.Ordering.Application.Commands.Products
 
             if (quantityChanged >= product.Quantity)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Min));
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.OutOfQuantity));
                 return methodResult;
             }
 
@@ -101,7 +102,7 @@ namespace Fsel.Ordering.Application.Commands.Products
 
             if (token < product.Price)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Min));
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotEnoughTokens));
                 return methodResult;
             }
 

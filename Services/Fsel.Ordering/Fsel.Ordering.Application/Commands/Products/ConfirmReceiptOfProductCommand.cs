@@ -15,7 +15,7 @@ namespace Fsel.Ordering.Application.Commands.Products
 
     public class ConfirmReceiptOfProductCommand : IRequest<MethodResult<bool>>
     {
-        public string? Code { get; set; }
+        public IList<string>? Codes { get; set; }
     }
 
     public class ConfirmReceiptOfProductCommandHandler : IRequestHandler<ConfirmReceiptOfProductCommand, MethodResult<bool>>
@@ -32,14 +32,14 @@ namespace Fsel.Ordering.Application.Commands.Products
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            if (string.IsNullOrEmpty(request.Code))
+            if (request.Codes == null || request.Codes.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
                 return methodResult;
             }
 
-            var transaction = await _orderTransactionRepository.Queryable.FirstOrDefaultAsync(p => p.Code == request.Code, cancellationToken);
-            if (transaction == null)
+            var transactions = await _orderTransactionRepository.Queryable.Where(p => !string.IsNullOrEmpty(p.Code) && request.Codes.Contains(p.Code)).ToListAsync(cancellationToken);
+            if (transactions == null || transactions.Count != request.Codes.Count)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
@@ -47,8 +47,11 @@ namespace Fsel.Ordering.Application.Commands.Products
 
             await _orderTransactionRepository.ExecuteTransactionAsync(async () =>
             {
-                transaction.Status = EnumOrderTransactionStatus.Received;
-                _orderTransactionRepository.Update(transaction);
+                transactions.ForEach(p =>
+                {
+                    p.Status = EnumOrderTransactionStatus.Received;
+                });
+                _orderTransactionRepository.UpdateList(transactions);
                 await _orderTransactionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
