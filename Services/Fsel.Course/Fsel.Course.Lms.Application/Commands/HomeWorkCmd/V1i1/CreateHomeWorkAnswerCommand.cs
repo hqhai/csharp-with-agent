@@ -308,6 +308,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             {
                 homeWorkResult.Status = EnumResultStatus.Done;
                 await _finishOneHomeWorkPublisher.Publish(homeWorkResult, CancellationToken.None);
+
                 #region Do QuestBoard
 
                 await DoQuestBoard(homeWorkResult.StudentId, EnumQuestBoardType.BeginnerQuests, EnumQuestBoardCategory.CompleteHomeworkFirst, CancellationToken.None);
