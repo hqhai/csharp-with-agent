@@ -10,6 +10,7 @@ namespace Fsel.Shared.Models.ShareModels
         public IList<EnumSchoolEventRuleAction>? Actions { get; set; }
         public EnumByPassPaymentType ByPassPaymentType { get; set; }
         public bool IsByPassPayment { get; set; }
+        public DateTime? EndDateAction { get; set; }
         public DateTime? RegisterStartDate { get; set; }
         public DateTime? RegisterEndDate { get; set; }
         public DateTime? StartDate => WeekEvents?.FirstOrDefault()?.StartDate;
