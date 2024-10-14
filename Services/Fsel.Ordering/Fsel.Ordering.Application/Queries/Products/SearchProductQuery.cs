@@ -98,7 +98,7 @@ namespace Fsel.Ordering.Application.Queries.Products
             int totalItem = queryable.Count();
 
             var lists = queryable
-                    .ApplySortAndPaging(request)
+                    .ApplyPaging(request)
                     .AsNoTracking()
                     .ToList();
 
