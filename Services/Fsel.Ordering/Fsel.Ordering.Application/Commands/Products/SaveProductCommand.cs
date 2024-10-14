@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Application.Commands.Products
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.Entities;
+    using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Products;
     using Fsel.Ordering.Domain.Models.EntityModels;
@@ -51,7 +52,7 @@ namespace Fsel.Ordering.Application.Commands.Products
 
             if (request.ExpireDate.Date < DateTime.UtcNow.Date)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Min));
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.WrongExpirationDate));
                 return methodResult;
             }
 
@@ -65,14 +66,14 @@ namespace Fsel.Ordering.Application.Commands.Products
                 }
                 if (_productRepository.Queryable.Any(p => p.Code == request.Code && p.Id != request.Id))
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                    methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.CodeAlreadyExists));
                     return methodResult;
                 }
 
                 var quantityChanged = product.OrderTransactions.Where(p => p.Status == EnumOrderTransactionStatus.Requested || p.Status == EnumOrderTransactionStatus.Received).Count();
                 if (request.Quantity < quantityChanged)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Min));
+                    methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.WrongQuantity));
                     return methodResult;
                 }
                 _mapper.Map(request, product);
