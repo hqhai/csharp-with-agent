@@ -97,10 +97,22 @@ namespace Fsel.Ordering.Application.Queries.Products
 
             int totalItem = queryable.Count();
 
-            var lists = queryable
+            var lists = new List<ProductModel>();
+
+            if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
+            {
+                lists = queryable
                     .ApplyPaging(request)
                     .AsNoTracking()
                     .ToList();
+            }
+            else
+            {
+                lists = queryable
+                    .ApplySortAndPaging(request)
+                    .AsNoTracking()
+                    .ToList();
+            }
 
             methodResult.Result = new PagingItemsModel<ProductModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

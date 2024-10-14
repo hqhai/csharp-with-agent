@@ -48,6 +48,8 @@ namespace Fsel.Ordering.Application.Queries.Products
                     Code = p.Code,
                     Type = p.Type,
                     RequestBody = p.RequestBody,
+                    CreatedDate = p.CreatedDate,
+                    UpdatedDate = p.UpdatedDate,
                     Product = p.Product != null ? _mapper.Map<ProductModel>(p.Product) : null,
                 };
                 if (p.Status == EnumOrderTransactionStatus.Requested)
@@ -59,6 +61,9 @@ namespace Fsel.Ordering.Application.Queries.Products
                     result.Received.Add(model);
                 }
             });
+
+            result.Requested = result.Requested.OrderByDescending(p => p.CreatedDate).ToList();
+            result.Received = result.Received.OrderByDescending(p => p.UpdatedDate).ToList();
 
             methodResult.Result = result;
             return methodResult;
