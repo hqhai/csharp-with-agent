@@ -90,7 +90,7 @@ namespace Fsel.Ordering.Application.Queries.Products
                     query = query.Where(x => x.Price >= request.Min && x.Price <= request.Max).ToList();
                 }
                 query = query.Where(p => p.EventIds != null && request.EventIds != null && request.EventIds.Any(x => p.EventIds.Contains(x))).ToList();
-                query = query.Where(p => p.ExpireDate.Date >= DateTime.UtcNow.Date).ToList();
+                query = query.Where(p => p.ExpireDate.Date >= DateTime.UtcNow.Date && p.RemainingQuantity > 0).ToList();
             }
 
             IQueryable<ProductModel> queryable = query.AsQueryable();
