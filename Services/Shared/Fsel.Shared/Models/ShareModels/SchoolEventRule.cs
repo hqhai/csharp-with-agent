@@ -7,10 +7,18 @@ namespace Fsel.Shared.Models.ShareModels
         public bool LuckySpin { get; set; }
         public int? PaymentMonth { get; set; }
         public DateTime? PaymentDate { get; set; }
-        public IList<EnumSchoolEventRuleAction>? Actions { get; set; }
+
+        private IList<EnumSchoolEventRuleAction>? _actions;
+
+        public IList<EnumSchoolEventRuleAction>? Actions
+        {
+            get { return _actions?.Union(ActionConfigs?.Select(x => x.Action) ?? Enumerable.Empty<EnumSchoolEventRuleAction>()).ToList(); }
+            set { _actions = value; }
+        }
+
+        public IList<ActionConfig>? ActionConfigs { get; set; }
         public EnumByPassPaymentType ByPassPaymentType { get; set; }
         public bool IsByPassPayment { get; set; }
-        public DateTime? EndDateAction { get; set; }
         public DateTime? RegisterStartDate { get; set; }
         public DateTime? RegisterEndDate { get; set; }
         public DateTime? StartDate => WeekEvents?.FirstOrDefault()?.StartDate;
@@ -38,6 +46,12 @@ namespace Fsel.Shared.Models.ShareModels
     {
         Month,
         Date
+    }
+
+    public class ActionConfig
+    {
+        public EnumSchoolEventRuleAction Action { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 
     public class WeekEvent
