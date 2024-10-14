@@ -93,13 +93,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             }
 
             videoResult = await GetVideoResult(videoResult, cancellationToken);
-
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {
                 videoResult = _videoResultRepository.Update(videoResult);
                 await _videoResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                //Xếp hạng học sinh
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<VideoResultModel>(videoResult);
                 return methodResult;
@@ -109,20 +107,14 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
 
         private async Task<VideoResult> GetVideoResult(VideoResult videoResult, CancellationToken cancellationToken)
         {
-            var method = await _videoConverter.GetVideoSkillScores(videoResult, cancellationToken);
+            var method = await _videoConverter.GetSkillScoreAndTokens(videoResult, cancellationToken);
             var skillScores = method.Item1.FirstOrDefault(x => x.Type == EnumTimeCodeType.Standalone)?.SkillScores;
-            var token = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoTimeCode).Where(x => x.VideoTimeCode != null && x.VideoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone && x.VideoResultId == videoResult.Id).GroupBy(x => x.VideoResultId).Select(x => new
-            {
-                TokenFirst = x.Where(x => x.TokenFirstTime.HasValue).Sum(x => x.TokenFirstTime),
-                TokenLast = x.Where(x => x.TokenLastTime.HasValue).Sum(x => x.TokenLastTime),
-            }).FirstOrDefaultAsync(cancellationToken);
-
             if (skillScores != null)
             {
                 videoResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
                 videoResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
-                videoResult.TokenFirstTime = token?.TokenFirst;
-                videoResult.TokenLastTime = token?.TokenLast;
+                videoResult.TokenFirstTime = method.Item2;
+                videoResult.TokenLastTime = method.Item3;
             }
             videoResult.Status = EnumResultStatus.Done;
             videoResult.VideoSkillScores = method.Item1;
