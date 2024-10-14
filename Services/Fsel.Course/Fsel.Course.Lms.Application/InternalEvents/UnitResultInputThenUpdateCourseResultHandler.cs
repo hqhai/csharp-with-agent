@@ -25,7 +25,15 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(notification);
             var unitResult = notification.Data;
-            var courseResult = await _courseResultRepository.Queryable.Where(x => x.CourseId == unitResult.CourseId && x.StudentId == unitResult.StudentId).FirstOrDefaultAsync(cancellationToken);
+            var courseResult = new CourseResult();
+            try
+            {
+                courseResult = await _courseResultRepository.Queryable.Where(x => x.CourseId == unitResult.CourseId && x.StudentId == unitResult.StudentId).FirstOrDefaultAsync(cancellationToken);
+            }
+            catch
+            {
+                courseResult = await _courseResultRepository.Queryable.Where(x => x.CourseId == unitResult.CourseId && x.StudentId == unitResult.StudentId).FirstOrDefaultAsync(cancellationToken);
+            }
             if (courseResult != null)
             {
                 if (courseResult.Status == EnumResultStatus.Done)
@@ -37,7 +45,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     await UpdateCourse(unitResult.Course, unitResult.StudentId, cancellationToken);
                 }
             }
-            Thread.Sleep(2000);
             if (unitResult.Status == EnumResultStatus.Done)
             {
                 await UpdateProcessUnit(unitResult, cancellationToken);
