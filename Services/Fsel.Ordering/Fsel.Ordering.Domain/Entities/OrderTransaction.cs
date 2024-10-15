@@ -12,6 +12,8 @@ namespace Fsel.Ordering.Domain.Entities
         public EnumOrderTransactionStatus Status { get; set; }
         public EnumOrderTransactionType Type { get; set; }
         public Guid? OrderId { get; set; }
+        public Guid? ProductId { get; set; }
+        public string? Code { get; set; }
         public string? RequestBodyStr { get; set; }
 
         [NotMapped]
@@ -31,5 +33,6 @@ namespace Fsel.Ordering.Domain.Entities
         }
 
         public Order? Order { get; set; }
+        public Product? Product { get; set; }
     }
 }

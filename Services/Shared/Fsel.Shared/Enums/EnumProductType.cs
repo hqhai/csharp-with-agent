@@ -2,8 +2,8 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumOrderTransactionStatus
+    public enum EnumProductType
     {
-        Success, Fail, Requested, Received
+        Voucher, Reward
     }
 }

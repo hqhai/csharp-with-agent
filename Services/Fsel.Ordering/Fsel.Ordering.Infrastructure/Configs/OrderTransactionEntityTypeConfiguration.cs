@@ -29,6 +29,11 @@ namespace Fsel.Ordering.Infrastructure.Configs
                   .WithMany(b => b.OrderTransactions)
                   .HasForeignKey(b => b.OrderId)
                   .OnDelete(DeleteBehavior.ClientCascade);
+
+            builder.HasOne(a => a.Product)
+               .WithMany(b => b.OrderTransactions)
+               .HasForeignKey(b => b.ProductId)
+               .OnDelete(DeleteBehavior.ClientCascade);
         }
     }
 }
