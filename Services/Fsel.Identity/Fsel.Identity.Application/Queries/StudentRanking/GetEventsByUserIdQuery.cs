@@ -54,7 +54,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
             if (request.Action.HasValue)
             {
-                competitionEvents = competitionEvents.Where(p => p != null && p.EventContent != null && p.EventContent.Actions != null && p.EventContent.Actions.Contains(request.Action.Value) && (p.EventContent.ActionConfigs == null || !p.EventContent.ActionConfigs.Any(m => m.Action == request.Action.Value && m.EndDate.HasValue && m.EndDate.Value.Date < currentDate.Date))).ToList();
+                competitionEvents = competitionEvents.Where(p => p != null && p.EventContent != null && p.EventContent.Actions != null && p.EventContent.Actions.Contains(request.Action.Value) && (p.EventContent.ActionConfigs == null || !p.EventContent.ActionConfigs.Any(m => m.Action == request.Action.Value && m.EndDate.HasValue && m.EndDate.Value < currentDate))).ToList();
             }
 
             methodResult.Result = _mapper.Map<IList<CompetitionEventsModel>>(competitionEvents);
