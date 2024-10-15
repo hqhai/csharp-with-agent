@@ -61,6 +61,11 @@ namespace Fsel.Ordering.Application.Queries.Products
                 query = query.Where(p => !string.IsNullOrEmpty(p.Name) && p.Name.Contains(request.Name, StringComparison.InvariantCultureIgnoreCase)).ToList();
             }
 
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                query = query.Where(p => !string.IsNullOrEmpty(p.Name) && p.Name.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase) || !string.IsNullOrEmpty(p.Code) && p.Code.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase)).ToList();
+            }
+
             if (request.Status.HasValue)
             {
                 query = query.Where(p => p.Status == request.Status).ToList();
@@ -76,19 +81,38 @@ namespace Fsel.Ordering.Application.Queries.Products
                 {
                     query = query.OrderByDescending(x => x.CreatedDate).ToList();
                 }
+                else
+                {
+                    query = query.OrderByDescending(x => x.ShowPriority).ToList();
+                }
+                if (request.Min.HasValue && request.Max.HasValue)
+                {
+                    query = query.Where(x => x.Price >= request.Min && x.Price <= request.Max).ToList();
+                }
                 query = query.Where(p => p.EventIds != null && request.EventIds != null && request.EventIds.Any(x => p.EventIds.Contains(x))).ToList();
-                query = query.Where(p => p.ExpireDate.Date >= DateTime.UtcNow.Date).ToList();
-                query = query.OrderByDescending(x => x.ShowPriority).ToList();
+                query = query.Where(p => p.ExpireDate.Date >= DateTime.UtcNow.Date && p.RemainingQuantity > 0).ToList();
             }
 
             IQueryable<ProductModel> queryable = query.AsQueryable();
 
             int totalItem = queryable.Count();
 
-            var lists = queryable
+            var lists = new List<ProductModel>();
+
+            if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
+            {
+                lists = queryable
+                    .ApplyPaging(request)
+                    .AsNoTracking()
+                    .ToList();
+            }
+            else
+            {
+                lists = queryable
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToList();
+            }
 
             methodResult.Result = new PagingItemsModel<ProductModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

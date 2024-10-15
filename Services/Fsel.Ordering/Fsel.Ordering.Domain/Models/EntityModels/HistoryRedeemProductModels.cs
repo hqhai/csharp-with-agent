@@ -2,6 +2,7 @@
 
 namespace Fsel.Ordering.Domain.Models.EntityModels
 {
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
     public class HistoryRedeemProductModels
@@ -10,9 +11,8 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public IList<HistoryRedeemProductModel> Received { get; set; } = new List<HistoryRedeemProductModel>();
     }
 
-    public class HistoryRedeemProductModel
+    public class HistoryRedeemProductModel : BaseModel
     {
-        public Guid Id { get; set; }
         public EnumOrderTransactionStatus Status { get; set; }
         public EnumOrderTransactionType Type { get; set; }
         public object? RequestBody { get; set; }

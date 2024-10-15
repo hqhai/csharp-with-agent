@@ -58,6 +58,8 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new LuckyTicketEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new CourseTargetConfigEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new CourseSuggestConfigEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new BannerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BannerStudentEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TokenHistoryTranslationEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
@@ -94,6 +96,8 @@ namespace Fsel.System.Infrastructure
         public DbSet<LuckyTicket> LuckyTickets { get; set; }
         public DbSet<CourseTargetConfig> CourseTargetConfigs { get; set; }
         public DbSet<CourseSuggestConfig> CourseSuggestConfigs { get; set; }
+        public DbSet<Banner> Banners { get; set; }
+        public DbSet<BannerStudent> BannerStudents { get; set; }
         public DbSet<TokenHistory> TokenHistories { get; set; }
         public DbSet<TokenHistoryTranslation> TokenHistoryTranslations { get; set; }
 
