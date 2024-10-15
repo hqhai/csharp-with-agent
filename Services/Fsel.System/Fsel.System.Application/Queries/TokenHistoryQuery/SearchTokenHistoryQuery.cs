@@ -63,11 +63,10 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
                                                     .Where(x => !request.Type.HasValue || x.Type == request.Type)
                                                     .Where(x => !request.StartDate.HasValue || x.CreatedDate.Date >= request.StartDate.Value.Date)
                                                     .Where(x => !request.EndDate.HasValue || x.CreatedDate.Date <= request.EndDate.Value.Date)
+                                                    .AsNoTracking().AsEnumerable()
                                                     .GroupBy(x => x.CreatedDate.Date);
-            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var exeQuery = await query.AsNoTracking()
-                                   .ToListAsync(cancellationToken: cancellationToken)
-                                   .ConfigureAwait(false);
+            int totalItem = query.Count();
+            var exeQuery = query.ApplySortAndPaging(request).ToList();
             var lists = exeQuery.Select(x => new TokenHistoryListModel
             {
                 Date = x.Key,
@@ -78,7 +77,7 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
                     VolatileToken = y.Sum(x => x.VolatileToken),
                     RemainToken = y.Sum(x => x.RemainToken),
                     Type = y.Select(x => x.Type).FirstOrDefault(),
-                    TokenHistories = y.Select(tokenHistory => _mapper.Map<TokenHistoryModel>(tokenHistory)).ToList(),
+                    TokenHistories = y.OrderByDescending(x => x.CreatedDate).Select(tokenHistory => _mapper.Map<TokenHistoryModel>(tokenHistory)).ToList(),
                 }).ToList(),
             }).ToList();
 
