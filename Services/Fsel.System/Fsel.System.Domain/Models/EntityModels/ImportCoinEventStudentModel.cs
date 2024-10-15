@@ -15,6 +15,9 @@ namespace Fsel.System.Domain.Models.EntityModels
         [EpplusTableColumn(Header = "EventCode")]
         public string? EventCode { get; set; }
 
+        [EpplusTableColumn(Header = "Config Language EventCode")]
+        public string? ConfigEventCode { get; set; }
+
         [EpplusTableColumn(Header = "Send Notify")]
         public string? IsSendNotify { get; set; }
 
