@@ -52,6 +52,15 @@ namespace Fsel.Shared.Models.ShareModels
     {
         public EnumSchoolEventRuleAction Action { get; set; }
         public DateTime? EndDate { get; set; }
+        public StopAtLevelSelectionConfig? StopAtLevelSelectionConfig { get; set; }
+    }
+
+    public class StopAtLevelSelectionConfig
+    {
+        public string? Image { get; set; }
+        public string? Title { get; set; }
+        public IList<string>? Content { get; set; }
+        public IList<string>? Footer { get; set; }
     }
 
     public class WeekEvent
