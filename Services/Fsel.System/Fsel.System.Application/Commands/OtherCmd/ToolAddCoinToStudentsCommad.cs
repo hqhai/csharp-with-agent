@@ -3,6 +3,7 @@
 namespace Fsel.System.Application.Commands.OtherCmd
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Constants;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Common.Models.Excels;
@@ -31,6 +32,7 @@ namespace Fsel.System.Application.Commands.OtherCmd
         private readonly ITokenHistoryRepository _tokenHistoryRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ILogger<ToolAddCoinToStudentsCommadHandler> _logger;
+        private const string pattern = "\"([^\"]+)\":\\s*\"([^\"]+)\"";
 
         public ToolAddCoinToStudentsCommadHandler(IUserService userService,
             IMediator mediator,
@@ -65,6 +67,26 @@ namespace Fsel.System.Application.Commands.OtherCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.EventCode), Message = "EventCode is null" });
                 }
+                if (string.IsNullOrEmpty(x.ConfigEventCode))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.ConfigEventCode), Message = "ConfigEventCode is null" });
+                }
+                else
+                {
+                    var matches = Regex.Matches(x.ConfigEventCode, pattern);
+                    if (!matches.Any())
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.ConfigEventCode), Message = "ConfigEventCode is malformed" });
+                    }
+                    foreach (Match match in matches)
+                    {
+                        if (match.Groups[1].Value.GetCountry() == null)
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.ConfigEventCode), Message = $"Value : {match.Groups[1].Value} is {EnumSystemErrorCode.DataNotExist}" });
+                        }
+                    }
+                }
+
                 if (!string.IsNullOrEmpty(x.IsSendNotify))
                 {
                     bool isSenNotify = false;
@@ -129,11 +151,6 @@ namespace Fsel.System.Application.Commands.OtherCmd
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.EventCode), Message = "EventCode Is Already Exist" });
                         }
                     }
-
-                    if (!string.IsNullOrEmpty(x.EventCode) && string.IsNullOrEmpty(x.ConfigEventCode))
-                    {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.ConfigEventCode), Message = "ConfigEventCode is null" });
-                    }
                 }
                 return await Task.FromResult(errors.Count == 0);
             });
@@ -197,7 +214,7 @@ namespace Fsel.System.Application.Commands.OtherCmd
             {
                 return null;
             }
-            string pattern = "\"(\\w{2})\":\\s*\"([^\"]+)\"";
+
             var matches = Regex.Matches(config, pattern);
 
             // Danh sách kết quả chứa cặp Language và Text
@@ -207,7 +224,7 @@ namespace Fsel.System.Application.Commands.OtherCmd
             {
                 result.Add(new TokenHistoryTranslationModel
                 {
-                    Language = GetLanguage(match.Groups[1].Value),
+                    Language = match.Groups[1].Value,
                     Config = new List<object>
                     {
                         new
@@ -218,24 +235,6 @@ namespace Fsel.System.Application.Commands.OtherCmd
                 });
             }
             return result;
-        }
-
-        private static string GetLanguage(string language)
-        {
-            switch (language)
-            {
-                case "EN":
-                    return "en-US";
-
-                case "VI":
-                    return "vi-VN";
-
-                case "FR":
-                    return "fr-FR";
-
-                default:
-                    return language;
-            }
         }
     }
 }
