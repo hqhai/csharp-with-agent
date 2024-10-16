@@ -31,6 +31,19 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
+        /// create lucky ticket
+        /// </summary>
+        [HttpPost("create-lucky-ticket")]
+        [ProducesResponseType(typeof(MethodResult<VoidMethodResult>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        public async Task<IActionResult> Create([FromBody] CreateLuckyTicketCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// update tickets winning
         /// </summary>
         [HttpPut("update-tickets-winning")]

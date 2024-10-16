@@ -71,6 +71,22 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// Expot File ExplanationQuestion
+        /// </summary>
+        [HttpPost("export-file-explanation-question")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportFile([FromQuery] ExportFileReportExplanationLogQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!queryResult.IsOK || queryResult.Result == null)
+            {
+                return queryResult.GetActionResult();
+            }
+            return File(queryResult.Result, Settings.Excels.ContentType, "export_file_explanation_question.xlsx");
+        }
+
+        /// <summary>
         /// Export Report Time Report
         /// </summary>
         [HttpPost("export-time-report")]

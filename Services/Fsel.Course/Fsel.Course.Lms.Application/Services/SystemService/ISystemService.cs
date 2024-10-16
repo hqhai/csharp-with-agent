@@ -4,8 +4,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Lms.Application.Services.SystemService.CommandModels;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -50,5 +50,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Post("/v1/school/get-by-ids")]
         Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolsAsync([Body] IList<Guid>? ids);
+
+        [Post("/v1/google-sheet/add-error-report-explanation-question")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> AddErrorReportExplanationQuestionToGoogleSheet([FromBody] AddErrorReportExplanationQuestionModel model);
     }
 }

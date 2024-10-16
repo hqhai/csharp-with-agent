@@ -17,9 +17,13 @@ namespace Fsel.Shared.Models.ShareModels
         public string? District { get; set; }
         public Guid? DistrictId { get; set; }
         public string? School { get; set; }
-        public Guid SchoolId { get; set; }
+        public Guid? SchoolId { get; set; }
         public string? SchoolGrade { get; set; }
         public string? SchoolClass { get; set; }
         public string? SchoolStudentCode { get; set; }
+        public string? TeacherPhoneNumber { get; set; }
+        public string? ParentEmail { get; set; }
+        public string? ParentPhoneNumber { get; set; }
+        public bool IsSchoolarshipAdvising { get; set; }
     }
 }

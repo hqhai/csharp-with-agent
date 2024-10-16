@@ -105,7 +105,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                               AvatarPath = student.Human != null ? student.Human.AvatarPath : string.Empty, // Thêm kiểm tra null và mặc định giá trị nếu null
                               UserId = student.Human != null ? student.Human.UserId : new Guid(),
                               RankingScore = studentEvent.RankingScore,
-                              CourseResultId = studentEvent.CourseResultId
+                              CourseResultId = studentEvent.CourseResultId,
+                              CourseType = studentEvent.CourseType,
                           }).OrderByDescending(x => x.RankingScore).ToList();
 
                 #region Filter
@@ -126,7 +127,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
                 result = result.DistinctBy(x => x.CourseResultId).Where(x => activeCourseResultIds.Contains(x.CourseResultId)).ToList();
 
-                #endregion Filter
+                #endregion
             }
             else
             {
@@ -140,7 +141,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 result = result.Where(x => (x.FullName != null && x.FullName.ToLower().Contains(request.Keyword.ToLower().Trim())) || (x.Email != null && x.Email.ToLower() == request.Keyword.ToLower().Trim())).ToList();
             }
 
-            #endregion Filter
+            result = result.Where(x => x.CourseType == request.CourseType).ToList();
+            #endregion
 
             #region Snapshot
 

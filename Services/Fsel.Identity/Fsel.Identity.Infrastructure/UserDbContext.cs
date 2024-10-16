@@ -30,6 +30,7 @@ namespace Fsel.Identity.Infrastructure
             SeedPlatforms(builder);
             SeedRoles(builder);
 
+            base.OnModelCreating(builder);
             builder.ApplyConfiguration(new HumanEntityTypeConfiguration());
             builder.ApplyConfiguration(new TeacherEntityTypeConfiguration());
             builder.ApplyConfiguration(new TeacherBankAccountEntityTypeConfiguration());
@@ -52,8 +53,8 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new CompetitionEventsEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserReferralEntityTypeConfiguration());
             builder.ApplyConfiguration(new EventRegistrationEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserDeletionEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentDailyStreakEntityTypeConfiguration());
-            base.OnModelCreating(builder);
         }
 
         #region Db Set
@@ -82,6 +83,7 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<CompetitionEvent> CompetitionEvents { get; set; }
         public DbSet<UserReferral> UserReferrals { get; set; }
         public DbSet<EventRegistration> EventRegistrations { get; set; }
+        public DbSet<UserDeletion> UserDeletions { get; set; }
 
         #endregion Db Set
 

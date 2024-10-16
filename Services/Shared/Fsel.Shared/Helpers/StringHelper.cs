@@ -238,5 +238,11 @@ namespace Fsel.Shared.Helpers
             }
             return Regex.IsMatch(inputString, RegexSetting.Base64Pattern, RegexOptions.Compiled);
         }
+
+        //Kiểm tra string có chứa khoảng trắng hay kí tự đặc biệt không
+        public static bool ContainsWhitespaceOrSpecialChars(string input)
+        {
+            return Regex.IsMatch(input, "^[a-zA-Z0-9]+$");
+        }
     }
 }

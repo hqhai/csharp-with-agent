@@ -233,7 +233,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
         private async Task SaveSectionGroupResultToDatabase(SectionGroupResult sectionGroupResult, CancellationToken cancellationToken)
         {
-            _sectionGroupResultRepository.Update(sectionGroupResult);
+            _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
 
             await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             //await _mockTestScoreRepository.ExecuteTransactionAsync(async () =>

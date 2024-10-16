@@ -10,6 +10,7 @@ namespace Fsel.Shared.Enums
         MockTest,
         FinalTest,
         DiscussionBoard,
+        ChatBot,
         Other
     }
 }

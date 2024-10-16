@@ -12,8 +12,9 @@ namespace Fsel.System.Infrastructure.Maps
     {
         public TokenHistoryProfile()
         {
-            CreateMap<TokenHistory, TokenHistoryModel>().IgnoreAllNonExisting();
+            CreateMap<TokenHistory, TokenHistoryModel>().MapTranslations<TokenHistory, TokenHistoryModel, TokenHistoryTranslation>();
             CreateMap<TokenHistoryQueueModel, TokenHistory>().IgnoreAllNonExisting();
+            CreateMap<TokenHistoryTranslation, TokenHistory>().IgnoreEntity()?.ReverseMap();
         }
     }
 }

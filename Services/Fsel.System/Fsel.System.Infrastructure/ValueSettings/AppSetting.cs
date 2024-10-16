@@ -13,6 +13,12 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public new Services? Services { get; set; }
 
         public OpenAiConfig? OpenAiConfig { get; set; }
+        public ConnectionStrings? ConnectionStrings { get; set; }
+    }
+
+    public class ConnectionStrings
+    {
+        public string? CrmConnection { get; set; }
     }
 
     public class OpenAiConfig
@@ -44,7 +50,10 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public string? OrderInfoSheet { get; set; }
         public string? SchoolStudentSheetId { get; set; }
         public string? LuckyTicketSpreadSheetId { get; set; }
+        public string? VoucherForMASpreadSheetId { get; set; }
         public string? RegisterStudentForEventSpreadSheetId { get; set; }
+        public string? ErrorReportExplanationQuestionId { get; set; }
+        public string? ErrorReportExplanationQuestion { get; set; }
     }
 
     public class Services : BaseServices

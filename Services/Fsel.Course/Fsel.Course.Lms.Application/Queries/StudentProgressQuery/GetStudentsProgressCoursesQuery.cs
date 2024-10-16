@@ -257,6 +257,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                               ContentCompleted = progress.ContentCompleted,
                               TotalScore = NumberHelper.RoundNumberDouble(overall.TotalScore),
                               CourseResultId = progress.CourseResultId,
+                              CourseType = request.CourseType,
                           }).ToList();
 
             #endregion Result

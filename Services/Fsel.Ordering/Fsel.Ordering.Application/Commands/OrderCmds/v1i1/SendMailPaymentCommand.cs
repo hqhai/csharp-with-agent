@@ -105,6 +105,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     Template = EnumSenderTemplate.MailPaymentForStudent
                 });
             }
+
             return methodResult;
         }
 

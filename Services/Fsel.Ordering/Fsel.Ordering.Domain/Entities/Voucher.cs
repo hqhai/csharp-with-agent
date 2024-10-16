@@ -54,6 +54,22 @@ namespace Fsel.Ordering.Domain.Entities
         public EnumVoucherType VoucherType { get; set; }
 
         /// <summary>
+        /// Nguồn voucher
+        /// </summary>
+        public EnumVoucherSource Source { get; set; }
+
+        /// <summary>
+        /// Tên nguồn
+        /// </summary>
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? SourceName { get; set; }
+
+        /// <summary>
+        /// Id người được tặng
+        /// </summary>
+        public Guid? SourceUserId { get; set; }
+
+        /// <summary>
         /// Trạng thái
         /// </summary>
         [NotMapped]
