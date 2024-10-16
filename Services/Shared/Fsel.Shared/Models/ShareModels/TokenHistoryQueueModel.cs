@@ -16,5 +16,6 @@ namespace Fsel.Shared.Models.ShareModels
         public EnumTokenHistoryType Type { get; set; }
         public string? EventCode { get; set; }
         public object? Config { get; set; }
+        public IList<TokenHistoryTranslationModel>? TokenHistoryTranslations { get; set; }
     }
 }
