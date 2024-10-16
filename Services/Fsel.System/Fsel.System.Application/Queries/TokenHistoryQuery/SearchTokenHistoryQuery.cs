@@ -66,7 +66,7 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
                                                     .AsNoTracking().AsEnumerable()
                                                     .GroupBy(x => x.CreatedDate.Date);
             int totalItem = query.Count();
-            var exeQuery = query.ApplySortAndPaging(request).ToList();
+            var exeQuery = query.OrderByDescending(x => x.Key).ApplyPaging(request).ToList();
             var lists = exeQuery.Select(x => new TokenHistoryListModel
             {
                 Date = x.Key,
