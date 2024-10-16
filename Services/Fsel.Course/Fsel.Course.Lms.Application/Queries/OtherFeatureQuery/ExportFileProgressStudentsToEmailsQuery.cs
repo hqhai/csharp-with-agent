@@ -110,7 +110,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             }
             var schools = schoolResults.Content?.Result;
             var studentRankings = new List<StudentRankingModel>();
-            if (string.IsNullOrEmpty(request.EventCode))
+            if (!string.IsNullOrEmpty(request.EventCode))
             {
                 var studentRankingResults = await _userService.GetLeaderBoardDataAsync(new GetStudentCompetitionByEventCodeQueryModel
                 {
