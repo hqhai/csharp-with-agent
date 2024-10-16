@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
+    using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -47,7 +48,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => !x.IsDeleted && x.WorkingStatus == EnumWorkingStatus.Active)
+            var query = _courseResultRepository.Queryable.Include(x => x.Course).Where(x => !x.IsDeleted && x.WorkingStatus == EnumWorkingStatus.Active)
                 .GroupBy(r => new { r.StudentId, r.CourseId })
                 .Select(group => new CourseResultModel
                 {
@@ -55,60 +56,62 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     CourseId = group.Key.CourseId,
                     CourseType = group.Select(x => x.Course).FirstOrDefault(c => c!.Id == group.Key.CourseId)!.CourseType,
                     CourseLevel = group.Select(x => x.Course).FirstOrDefault(c => c!.Id == group.Key.CourseId)!.CourseLevel,
-                    CreatedDate = group.Max(r => r.CreatedDate)
-                })
-                .OrderByDescending(x => x.CreatedDate)
-                .ToListAsync(cancellationToken);
+                    CreatedDate = group.Max(r => r.CreatedDate),
+                    UpdatedDate = group.Max(r => r.UpdatedDate),
+                });
 
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(courseResults.Select(x => x.StudentId).Distinct().ToList());
-            var students = studentResults.Content?.Result;
-            var studentProgress = new List<StudentProgressModel>();
-            foreach (var courseResult in courseResults)
-            {
-                StudentProgressModel studentProgressModel = new StudentProgressModel();
-                if (students != null && students.Any())
-                {
-                    var student = students.FirstOrDefault(x => x.Id == courseResult.StudentId);
-                    studentProgressModel.StudentId = courseResult.StudentId;
-                    studentProgressModel.FullName = student?.Human?.FullName;
-                    studentProgressModel.Email = student?.Human?.Email;
-                }
-                studentProgressModel.Level = courseResult.CourseLevel ?? default;
-                studentProgressModel.CourseType = courseResult.CourseType ?? default;
-                studentProgressModel.CourseId = courseResult.CourseId;
-                studentProgressModel.CreatedDate = courseResult.CreatedDate ?? default;
-                studentProgress.Add(studentProgressModel);
-            }
-
-            if (!string.IsNullOrEmpty(request.Keyword))
-            {
-                studentProgress = studentProgress.Where(m => (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()) || (m.Email ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim())).ToList();
-            }
             if (request.CourseType != null)
             {
-                studentProgress = studentProgress.Where(m => m.CourseType == request.CourseType).ToList();
+                query = query.Where(m => m.CourseType == request.CourseType);
             }
 
             if (request.Level != null)
             {
-                studentProgress = studentProgress.Where(m => m.Level == request.Level).ToList();
+                query = query.Where(m => m.CourseLevel == request.Level);
             }
-            int totalItem = studentProgress.Count;
-            var lists = studentProgress.ApplySortAndPaging(request).ToList();
-
-            foreach (var item in lists)
+            if (!string.IsNullOrEmpty(request.Keyword))
             {
-                var courseResult = courseResults.FirstOrDefault(x => x.CourseId == item.CourseId && x.StudentId == item.StudentId);
-                if (courseResult != null)
+                var studentKeyResult = await _userService.SearchStudentAsync(new BaseQueryModel { Keyword = request.Keyword });
+                if (studentKeyResult.IsSuccessStatusCode)
                 {
-                    var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResult);
-                    var (displayOrderUnit, displayOrderLesson) = await _courseRepository.GetDisplayOrder(courseResult);
-                    item.DisplayOrderLesson = displayOrderLesson;
-                    item.DisplayOrderUnit = displayOrderUnit;
-                    item.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
+                    var studentIds = studentKeyResult.Content?.Result?.Items?.Select(x => x.Id).ToList();
+                    query = query.Where(x => studentIds != null && studentIds.Contains(x.StudentId));
                 }
             }
-            methodResult.Result = new PagingItemsModel<StudentProgressModel>(lists, request, totalItem);
+
+            int totalItem = await query.CountAsync(cancellationToken);
+            var lists = await query.OrderByDescending(x => x.UpdatedDate)
+                                   .ThenByDescending(x => x.CreatedDate)
+                                   .ApplyPaging(request)
+                                   .AsNoTracking()
+                                   .ToListAsync(cancellationToken: cancellationToken)
+                                   .ConfigureAwait(false);
+
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).Distinct().ToList());
+            var students = studentResults.Content?.Result;
+            var studentProgress = new List<StudentProgressModel>();
+            foreach (var courseResult in lists)
+            {
+                var student = students?.FirstOrDefault(x => x.Id == courseResult.StudentId);
+                var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResult);
+                var (displayOrderUnit, displayOrderLesson) = await _courseRepository.GetDisplayOrder(courseResult);
+                StudentProgressModel studentProgressModel = new StudentProgressModel
+                {
+                    StudentId = courseResult.StudentId,
+                    FullName = student?.Human?.FullName,
+                    Email = student?.Human?.Email,
+                    Level = courseResult.CourseLevel ?? default,
+                    CourseType = courseResult.CourseType ?? default,
+                    CourseId = courseResult.CourseId,
+                    CreatedDate = courseResult.CreatedDate ?? default,
+                    UpdatedDate = courseResult.UpdatedDate ?? default,
+                    DisplayOrderLesson = displayOrderLesson,
+                    DisplayOrderUnit = displayOrderUnit,
+                    ContentProgress = string.Format("{0} / {1}", currentProgress, progress),
+                };
+                studentProgress.Add(studentProgressModel);
+            }
+            methodResult.Result = new PagingItemsModel<StudentProgressModel>(studentProgress, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
