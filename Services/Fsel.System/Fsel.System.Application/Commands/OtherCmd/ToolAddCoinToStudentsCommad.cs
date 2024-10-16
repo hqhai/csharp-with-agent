@@ -3,6 +3,7 @@
 namespace Fsel.System.Application.Commands.OtherCmd
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Constants;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Common.Models.Excels;
@@ -14,6 +15,7 @@ namespace Fsel.System.Application.Commands.OtherCmd
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
+    using global::System.Text.RegularExpressions;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -30,6 +32,7 @@ namespace Fsel.System.Application.Commands.OtherCmd
         private readonly ITokenHistoryRepository _tokenHistoryRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ILogger<ToolAddCoinToStudentsCommadHandler> _logger;
+        private const string pattern = "\"([^\"]+)\":\\s*\"([^\"]+)\"";
 
         public ToolAddCoinToStudentsCommadHandler(IUserService userService,
             IMediator mediator,
@@ -64,6 +67,26 @@ namespace Fsel.System.Application.Commands.OtherCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.EventCode), Message = "EventCode is null" });
                 }
+                if (string.IsNullOrEmpty(x.ConfigEventCode))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.ConfigEventCode), Message = "ConfigEventCode is null" });
+                }
+                else
+                {
+                    var matches = Regex.Matches(x.ConfigEventCode, pattern);
+                    if (!matches.Any())
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.ConfigEventCode), Message = "ConfigEventCode is malformed" });
+                    }
+                    foreach (Match match in matches)
+                    {
+                        if (match.Groups[1].Value.GetCountry() == null)
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.ConfigEventCode), Message = $"Value : {match.Groups[1].Value} is {EnumSystemErrorCode.DataNotExist}" });
+                        }
+                    }
+                }
+
                 if (!string.IsNullOrEmpty(x.IsSendNotify))
                 {
                     bool isSenNotify = false;
@@ -129,7 +152,6 @@ namespace Fsel.System.Application.Commands.OtherCmd
                         }
                     }
                 }
-
                 return await Task.FromResult(errors.Count == 0);
             });
 
@@ -158,6 +180,7 @@ namespace Fsel.System.Application.Commands.OtherCmd
                             Type = EnumTokenHistoryType.Recevived,
                             UserId = userId,
                             VolatileToken = dataToken?.Coin ?? default,
+                            TokenHistoryTranslations = GetTokenHistoryTranslations(dataToken?.ConfigEventCode)
                         }
                     }
                 };
@@ -168,8 +191,7 @@ namespace Fsel.System.Application.Commands.OtherCmd
 
                 if (dataToken != null && bool.TryParse(dataToken.IsSendNotify, out bool isSendNotify) && isSendNotify && Enum.TryParse(dataToken.EnumNotify, out EnumNotificationContent enumNotification))
                 {
-                    _logger.LogInformation("Publisher Notify FselEvent" + enumNotification);
-
+                    _logger.LogInformation("Publisher Notify FselEvent");
                     await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
                     {
                         Content = enumNotification,
@@ -184,6 +206,35 @@ namespace Fsel.System.Application.Commands.OtherCmd
             methodResult.Result = tokenHistoryData.ExportExcel();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private static IList<TokenHistoryTranslationModel>? GetTokenHistoryTranslations(string? config)
+        {
+            if (string.IsNullOrEmpty(config))
+            {
+                return null;
+            }
+
+            var matches = Regex.Matches(config, pattern);
+
+            // Danh sách kết quả chứa cặp Language và Text
+            List<TokenHistoryTranslationModel> result = new List<TokenHistoryTranslationModel>();
+
+            foreach (Match match in matches)
+            {
+                result.Add(new TokenHistoryTranslationModel
+                {
+                    Language = match.Groups[1].Value,
+                    Config = new List<object>
+                    {
+                        new
+                        {
+                            Title = match.Groups[2].Value
+                        }
+                    },
+                });
+            }
+            return result;
         }
     }
 }
