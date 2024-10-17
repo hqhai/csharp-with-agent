@@ -4401,6 +4401,9 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<string>("ConfigDataStr")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ConfigStr")
                         .HasColumnType("nvarchar(max)");
 
@@ -4488,6 +4491,73 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasIndex("TokenConfigId");
 
                     b.ToTable("TokenHistories");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.TokenHistoryTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("ConfigStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Language")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("TokenHistoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHistoryId");
+
+                    b.ToTable("TokenHistoryTranslations");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.UserConfig", b =>
@@ -4709,6 +4779,17 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Navigation("TokenConfig");
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.TokenHistoryTranslation", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.TokenHistory", "TokenHistory")
+                        .WithMany("Translations")
+                        .HasForeignKey("TokenHistoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TokenHistory");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.ApprovalTimeConfig", b =>
                 {
                     b.Navigation("ApprovalLogs");
@@ -4770,6 +4851,11 @@ namespace Fsel.System.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.System.Domain.Entities.TokenConfig", b =>
                 {
                     b.Navigation("TokenHistories");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.TokenHistory", b =>
+                {
+                    b.Navigation("Translations");
                 });
 #pragma warning restore 612, 618
         }
