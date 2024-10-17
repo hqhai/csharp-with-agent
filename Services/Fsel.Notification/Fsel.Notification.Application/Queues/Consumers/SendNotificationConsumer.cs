@@ -1,4 +1,5 @@
 using System.Globalization;
+using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Notification.Application.Commands;
 using Fsel.Notification.Domain.IRepositories;
@@ -6,6 +7,7 @@ using Fsel.Notification.Infrastructure.ValueSettings;
 using Fsel.Shared.Models.ShareModels;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Fsel.Notification.Application.Queues.Consumers
 {
@@ -14,12 +16,19 @@ namespace Fsel.Notification.Application.Queues.Consumers
         private readonly IMediator _mediator;
         private readonly INotificationTypeRepository _notificationTypeRepository;
         private readonly AppSetting _appSetting;
+        private readonly ILogger<SendNotificationConsumer> _logger;
 
-        public SendNotificationConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository, AppSetting appSetting, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
+        public SendNotificationConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository,
+            AppSetting appSetting,
+            AuthContext authContext,
+            Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor,
+            ILogger<SendNotificationConsumer> logger
+            ) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
             _notificationTypeRepository = notificationTypeRepository;
             _appSetting = appSetting;
+            _logger = logger;
         }
 
         public override async Task ConsumeQueue(NotificationSendingQueueModel? message)
@@ -41,6 +50,10 @@ namespace Fsel.Notification.Application.Queues.Consumers
                     Message = messageNoti,
                     Link = link
                 };
+                if (message.Content == Shared.Enums.EnumNotificationContent.FselFlowFBEvent)
+                {
+                    _logger.LogInformation("Consumer Notify FselEvent :" + model.Serialize());
+                }
                 await _mediator.Send(model).ConfigureAwait(false);
             }
         }
