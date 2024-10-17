@@ -6,6 +6,7 @@ namespace Fsel.Ordering.Application.Commands.Products
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.UserService;
@@ -117,12 +118,24 @@ namespace Fsel.Ordering.Application.Commands.Products
                 var orderTransaction = _orderTransactionRepository.Add(new OrderTransaction() { Type = EnumOrderTransactionType.Product, Status = EnumOrderTransactionStatus.Requested, Code = code, ProductId = product.Id, RequestBody = request });
                 await _orderTransactionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                var configs = new List<object> { new
+                List<TokenHistoryTranslationModel> tokenHistoryTranslations = new List<TokenHistoryTranslationModel>();
+                foreach (var item in product.Translations)
                 {
-                    Id = product.Id,
-                    Title = product.Name,
-                    Price = product.Price
-                }};
+                    tokenHistoryTranslations.Add(new TokenHistoryTranslationModel
+                    {
+                        Language = item.Language,
+                        Config = new List<object>
+                        {
+                            new
+                            {
+                                Title = item.Name
+                            }
+                        },
+                    });
+                }
+                var language = RegionHelper.GetCountry(EnumCountryKey.Vietnam)?.CultureCode;
+                var configDefault = tokenHistoryTranslations.FirstOrDefault(x => x.Language == language);
+
                 var tokenHistories = new List<TokenHistoryQueueModel>
                 {
                     new TokenHistoryQueueModel
@@ -132,7 +145,8 @@ namespace Fsel.Ordering.Application.Commands.Products
                         Feature = EnumTokenFeature.MarketPlace,
                         Type = EnumTokenHistoryType.Exchanged,
                         UserId = _authContext.CurrentUserId,
-                        Config = configs,
+                        Config = configDefault?.Config ?? tokenHistoryTranslations.FirstOrDefault()?.Config,
+                        TokenHistoryTranslations = tokenHistoryTranslations,
                         Mission = EnumTokenMission.FselStore
                     }
                 };
