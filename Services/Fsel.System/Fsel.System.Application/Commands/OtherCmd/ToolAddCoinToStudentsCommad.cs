@@ -170,7 +170,11 @@ namespace Fsel.System.Application.Commands.OtherCmd
                 var userId = student.Human?.UserId ?? default;
                 var dataToken = result.Datas.FirstOrDefault(x => x.Email == email);
 
-                var createData = new CreateTokenHistoryCommand
+                var tokenHistoryTranslations = GetTokenHistoryTranslations(dataToken?.ConfigEventCode);
+                var language = RegionHelper.GetCountry(EnumCountryKey.Vietnam)?.CultureCode;
+                var configDefault = tokenHistoryTranslations?.FirstOrDefault(x => x.Language == language)?.Config ?? tokenHistoryTranslations?.FirstOrDefault()?.Config;
+
+                var createTokenHistory = new CreateTokenHistoryCommand
                 {
                     TokenHistorys = new List<TokenHistoryQueueModel> {
                         new TokenHistoryQueueModel
@@ -179,16 +183,16 @@ namespace Fsel.System.Application.Commands.OtherCmd
                             Feature = EnumTokenFeature.FselEvent,
                             Type = EnumTokenHistoryType.Recevived,
                             UserId = userId,
+                            Config = configDefault,
                             VolatileToken = dataToken?.Coin ?? default,
-                            TokenHistoryTranslations = GetTokenHistoryTranslations(dataToken?.ConfigEventCode)
+                            TokenHistoryTranslations = tokenHistoryTranslations
                         }
                     }
                 };
 
-                var tokenHitoryResults = await _mediator.Send(createData, cancellationToken).ConfigureAwait(false);
+                var tokenHitoryResults = await _mediator.Send(createTokenHistory, cancellationToken).ConfigureAwait(false);
                 tokenHistoryData.AddRange(tokenHitoryResults.Result?.ToList() ?? new List<TokenHistoryModel>());
                 _logger.LogInformation(dataToken.Serialize());
-
                 if (dataToken != null && bool.TryParse(dataToken.IsSendNotify, out bool isSendNotify) && isSendNotify && Enum.TryParse(dataToken.EnumNotify, out EnumNotificationContent enumNotification))
                 {
                     _logger.LogInformation("Publisher Notify FselEvent");
