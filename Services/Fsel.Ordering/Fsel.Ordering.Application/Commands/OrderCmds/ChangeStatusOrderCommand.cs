@@ -202,7 +202,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                             UserIds = new List<Guid>() { order.UserId },
                             ObjectId = order.Id,
                             ParamsMessage = new List<object> { course.Name ?? string.Empty },
-                            Type = EnumNotificationType.Text,
+                            Type = EnumNotificationType.LinkPage,
                             Content = content,
                             SenderId = _authContext.CurrentUserId,
                             PlatformCode = EnumPlatformCode.LMS

@@ -51,14 +51,12 @@ namespace Fsel.System.Application.Commands.NoticeAccessFeatureCmd
                                     { Fifteen_Days_Off, EnumNotificationContent.StopBothering }
                                 };
 
-            // Tạo danh sách các task để gửi thông báo cho các mốc thời gian khác nhau
-            var tasks = notifications.Select(notification =>
-                CheckStudentsNoActionForSomeDays(notification.Key, notification.Value, cancellationToken)).ToList();
-
             try
             {
-                // Thực hiện tất cả các task đồng thời
-                await Task.WhenAll(tasks).ConfigureAwait(false);
+                foreach (var notifiaction in notifications)
+                {
+                    await CheckStudentsNoActionForSomeDays(notifiaction.Key, notifiaction.Value, cancellationToken);
+                }
             }
             catch (Exception ex)
             {
@@ -73,16 +71,20 @@ namespace Fsel.System.Application.Commands.NoticeAccessFeatureCmd
             DateTime now = DateTime.Now;
             int currentHour = now.Hour;
             DateTime targetDate = now.AddDays(-dayAbsent).Date;
-            DateTime dateCondition = now.AddDays(-dayAbsent + 1).Date;
 
             var studentsAbsentIds = await _featureAccessTimeRepository.Queryable
-                                        .GroupBy(x => x.CreatedUserId) // Nhóm các bản ghi theo CreatedUserId
-                                        .Where(g => g.All(x => x.LastVisited.HasValue && x.LastVisited.Value < dateCondition && x.CreatedUserId != Guid.Empty)
-                                                            && g.Any(x => x.LastVisited.HasValue // Kiểm tra nếu LastVisited không phải là null
-                                                            && x.LastVisited.Value.Hour == currentHour
-                                                            && x.LastVisited.Value.Date == targetDate)) // So sánh giờ, phút và ngày cách đây 48 giờ
-                                        .Select(g => g.Key) // Lấy UserId của những nhóm thỏa mãn điều kiện
-                                        .ToListAsync(cancellationToken);
+                                            .Where(x => x.CreatedUserId != Guid.Empty)
+                                            .GroupBy(x => x.CreatedUserId)
+                                            .Select(g => new
+                                            {
+                                                UserId = g.Key,
+                                                LastVisit = g.Max(x => x.LastVisited)
+                                            })
+                                            .Where(x => x.LastVisit.HasValue &&
+                                                        x.LastVisit.Value.Date == targetDate &&
+                                                        x.LastVisit.Value.Hour == currentHour)
+                                            .Select(x => x.UserId)
+                                            .ToListAsync(cancellationToken);
 
             await SendNotificationMessage(studentsAbsentIds, content, cancellationToken);
 
