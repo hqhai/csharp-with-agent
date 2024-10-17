@@ -45,12 +45,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 (-One_Day_Left, EnumNotificationContent.UpgradeOrder)
             };
 
-            // Khởi tạo và chạy tất cả các tác vụ đồng thời
-            var dueTasks = dueNotifications.Select(n =>
-                NoticeStudentsPaymentDue(n.days, n.content, cancellationToken)).ToList();
-
-            // Chờ tất cả các tác vụ hoàn thành
-            await Task.WhenAll(dueTasks).ConfigureAwait(false);
+            foreach (var dueNotification in dueNotifications)
+            {
+                await NoticeStudentsPaymentDue(dueNotification.days, dueNotification.content, cancellationToken);
+            }
 
             // Tạo kết quả và trả về
             return new MethodResult<bool> { StatusCode = StatusCodes.Status200OK };

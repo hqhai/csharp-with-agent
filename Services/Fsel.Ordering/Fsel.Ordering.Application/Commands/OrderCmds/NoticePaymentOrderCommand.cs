@@ -23,7 +23,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IOrderRepository _orderRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private const int RemainTwoDays = 2;
-        private const int RemainTwoWeeks = 14;
 
         public NoticePaymentOrderCommandHandler(IOrderRepository orderRepository, NotificationMessagePublisher notificationMessagePublisher)
         {
@@ -39,10 +38,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             // Gửi cho học sinh còn 2 ngày sử dụng
             var studentRemainTwoDays = GetOrderQuery(_orderRepository.Queryable, RemainTwoDays).ToList();
             await CreateListUserForSendNotification(studentRemainTwoDays, RemainTwoDays, cancellationToken);
-
-            // Gủi cho học sinh còn 2 tuần sử dụng
-            var studentRemainTwoWeeks = GetOrderQuery(_orderRepository.Queryable, RemainTwoWeeks).ToList();
-            await CreateListUserForSendNotification(studentRemainTwoWeeks, RemainTwoWeeks, cancellationToken);
 
             methodResult.Result = true;
             return methodResult;
@@ -73,15 +68,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private async Task CreateListUserForSendNotification(List<Order> orders, int remainDays, CancellationToken cancellationToken)
         {
             var studentTrialIds = orders.Where(x => x.IsTrial).Select(x => x.UserId).ToList(); // học sinh đã và đang học thử
-            var studentOrders = orders.Where(x => !x.IsTrial).Select(x => x.UserId).ToList(); // học sinh đã thanh toán, sắp hết hạn
             var listUserOnlyTrial = GetListStudentIsTrialing(_orderRepository.Queryable, studentTrialIds); // học sinh học thử, chưa thanh toán
 
-            if (listUserOnlyTrial.Count > 0 && remainDays == RemainTwoDays)
+            if (listUserOnlyTrial.Count > 0)
             {
                 await SendNotification(listUserOnlyTrial, cancellationToken);
             }
-
-            await SendNotification(studentOrders, cancellationToken);
         }
 
         /// <summary>
