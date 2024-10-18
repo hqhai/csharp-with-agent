@@ -90,7 +90,7 @@ namespace Fsel.Shared.Constants
 
         public static class StudentDailyStreak
         {
-            public const int CheckInGoalTime = 54000;
+            public const int CheckInGoalTime = 900;
         }
 
         public static class CustomerSupport
