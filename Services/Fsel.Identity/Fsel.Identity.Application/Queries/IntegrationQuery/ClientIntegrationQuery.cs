@@ -56,12 +56,12 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             if (string.IsNullOrEmpty(request.Email))
             {
-                var check = request.EndDate.Date - request.StartDate.Date;
-                if (check.TotalDays > 7)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumIntegrationErrorCode.TotalDaysGreater7), nameof(check));
-                    return methodResult;
-                }
+                //var check = request.EndDate.Date - request.StartDate.Date;
+                //if (check.TotalDays > 7)
+                //{
+                //    methodResult.AddErrorBadRequest(nameof(EnumIntegrationErrorCode.TotalDaysGreater7), nameof(check));
+                //    return methodResult;
+                //}
 
                 var courseIntegrationHasTimeQueryModel = new CourseIntegrationQueryModel
                 {
@@ -85,6 +85,21 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 }
                 var userPtTestHasTimeIds = ptTestResultHasTimes.Select(x => x.UserId).ToList();
 
+                // lấy course có thay đổi trong khoảng thời gian
+                var courseHasTimes = await _lmsCourseService.GetUnitResults(courseIntegrationHasTimeQueryModel);
+                if (!courseHasTimes.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(courseHasTimes.Error);
+                    return methodResult;
+                }
+                var courseHasTimeResults = courseHasTimes.Content?.Result;
+                if (courseHasTimeResults == null)
+                {
+                    methodResult.AddError(courseHasTimes.Error);
+                    return methodResult;
+                }
+                var courseHasTimeIds = courseHasTimeResults.Select(x => x.UserId).ToList();
+
                 //lấy User đăng ký trong khoảng thời gian
                 var users = await _humanRepository.Queryable
                                                   .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate))
@@ -97,7 +112,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 var userIdentityHasTimeIds = users.Select(x => x.UserId ?? Guid.Empty).ToList();
 
                 // hợp nhất UserId chưa có order
-                var userIds = userIdentityHasTimeIds.Concat(userPtTestHasTimeIds).ToList();
+                var userIds = userIdentityHasTimeIds.Concat(userPtTestHasTimeIds).Concat(courseHasTimeIds).ToList();
                 distinctUserIds = userIds.Distinct().ToList();
             }
             else

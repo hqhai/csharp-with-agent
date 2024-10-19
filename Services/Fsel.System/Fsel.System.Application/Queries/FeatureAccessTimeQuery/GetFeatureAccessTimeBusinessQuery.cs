@@ -13,6 +13,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
     public class GetFeatureAccessTimeBusinessQuery : GetFeatureAccessTimeBusinessQueryModel, IRequest<MethodResult<IList<FeatureAccessTimeBusinessModel>>>
     {
     }
+
     public class GetFeatureAccessTimeBusinessQueryHandler : IRequestHandler<GetFeatureAccessTimeBusinessQuery, MethodResult<IList<FeatureAccessTimeBusinessModel>>>
     {
         private readonly IFeatureAccessTimeRepository _featureAccessTimeRepository;
@@ -27,8 +28,9 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<FeatureAccessTimeBusinessModel>>();
 
-            var featureAccessTime = await _featureAccessTimeRepository.Queryable.Where(p => p.CreatedUserId == request.UserId).ToListAsync(cancellationToken);
-
+            var featureAccessTime = await _featureAccessTimeRepository.Queryable.Where(p => p.CreatedUserId == request.UserId)
+                                                                                .Where(x => !request.CourseId.HasValue || x.CourseId == request.CourseId)
+                                                                                .ToListAsync(cancellationToken);
             if (request.StartDate.HasValue && request.EndDate.HasValue)
             {
                 featureAccessTime = featureAccessTime.Where(p => (p.UpdatedDate ?? p.CreatedDate) >= request.StartDate && (p.UpdatedDate ?? p.CreatedDate) <= request.EndDate).ToList();
@@ -53,16 +55,19 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                 new FeatureAccessTimeBusinessModel()
                 {
                     FeatureBusinessType = EnumFeatureBussinessType.Learn,
+                    TotalVisit = learn.Sum(p => p.Visit),
                     AccessTime = learn.Sum(p => p.AccessTime),
                 },
                 new FeatureAccessTimeBusinessModel()
                 {
                     FeatureBusinessType = EnumFeatureBussinessType.Social,
+                    TotalVisit = learn.Sum(p => p.Visit),
                     AccessTime = social.Sum(p => p.AccessTime),
                 },
                 new FeatureAccessTimeBusinessModel()
                 {
                     FeatureBusinessType = EnumFeatureBussinessType.Other,
+                    TotalVisit = learn.Sum(p => p.Visit),
                     AccessTime = other.Sum(p => p.AccessTime),
                 }
             };
