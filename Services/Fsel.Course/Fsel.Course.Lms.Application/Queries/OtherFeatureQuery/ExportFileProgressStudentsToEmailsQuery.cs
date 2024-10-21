@@ -77,7 +77,11 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
 
             var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentEmailModel x, IList<ImportStudentEmailModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
-                return true;
+                if (string.IsNullOrEmpty(x.Email) || !x.Email.IsValidEmail())
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null or malformed" });
+                }
+                return await Task.FromResult(errors.Count == 0);
             });
             result.Datas = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email) && x.Email.IsValidEmail()).Distinct().ToList();
             if (result.Stream != null)
