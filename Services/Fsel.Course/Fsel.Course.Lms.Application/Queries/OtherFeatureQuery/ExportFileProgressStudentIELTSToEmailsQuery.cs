@@ -82,7 +82,11 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
 
             var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentEmailModel x, IList<ImportStudentEmailModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
-                return true;
+                if (string.IsNullOrEmpty(x.Email) || !x.Email.IsValidEmail())
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null or malformed" });
+                }
+                return await Task.FromResult(errors.Count == 0);
             });
             result.Datas = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email) && x.Email.IsValidEmail()).Distinct().ToList();
             if (result.Stream != null)
@@ -165,9 +169,14 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             studentProgressReport.StatusUser = isLock ? "Hoàn Thành PT" : "Chưa Hoàn Thành PT";
         }
 
-        private static string GetPercentFormat(double percent)
+        private static string GetBandScoreFormat(double bandScore)
         {
-            return string.Format("{0:0.0}", percent);
+            return string.Format("{0:0.0}", bandScore);
+        }
+
+        private static string GetPercentFormat(double? percent)
+        {
+            return $"{percent}%";
         }
 
         private async Task SetProgressCourseAsync(StudentProgressReportIELTSModel studentProgressReport, CourseResult courseResult)
@@ -181,25 +190,25 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResultModel);
             studentProgressReport.CourseName = courseResult.Course?.Name;
             studentProgressReport.CompletedProgress = string.Format("{0} / {1}", currentProgress, progress);
-            studentProgressReport.ProgressPercent = NumberHelper.GetPercent(currentProgress, progress);
+            studentProgressReport.ProgressPercent = GetPercentFormat(NumberHelper.GetPercent(currentProgress, progress));
             studentProgressReport.StatusUser = "Đang Học";
             if (courseResult.Status == EnumResultStatus.Done)
             {
-                studentProgressReport.CourseOverall = courseResult.Percent;
+                studentProgressReport.CourseOverall = GetPercentFormat(courseResult.Percent);
             }
             else
             {
                 var unitResults = await _unitResultRepository.Queryable.Where(x => x.CourseId == courseResult.CourseId && x.StudentId == courseResult.StudentId && x.Status == EnumResultStatus.Done).ToListAsync();
                 if (unitResults.Any())
                 {
-                    studentProgressReport.CourseOverall = NumberHelper.ConvertRound(unitResults.Average(x => x.Percent));
+                    studentProgressReport.CourseOverall = GetPercentFormat(NumberHelper.ConvertRound(unitResults.Average(x => x.Percent)));
                 }
                 else
                 {
                     var placementTestScore = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.Status == EnumResultStatus.Done)
                                                                                        .OrderByDescending(x => x.CreatedDate)
                                                                                        .FirstOrDefaultAsync();
-                    studentProgressReport.CourseOverall = placementTestScore?.Percent;
+                    studentProgressReport.CourseOverall = GetPercentFormat(placementTestScore?.Percent);
                 }
             }
         }
@@ -238,8 +247,13 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 return;
             }
             var featureAccessTimes = featureAccessTimeResults.Content?.Result;
-            studentProgressReport.TotalVisit = featureAccessTimes?.FirstOrDefault(x => !x.EnumFeature.HasValue)?.Visit ?? default;
-            studentProgressReport.TotalTime = featureAccessTimes?.FirstOrDefault(x => !x.EnumFeature.HasValue)?.AccessTime ?? default;
+
+            var featureAccessTimeCourse = featureAccessTimes?.FirstOrDefault(x => !x.EnumFeature.HasValue && x.CourseId == courseResult.CourseId);
+            if (featureAccessTimeCourse != null)
+            {
+                studentProgressReport.TotalVisit = featureAccessTimeCourse.Visit;
+                studentProgressReport.TotalTime = featureAccessTimeCourse.AccessTime;
+            }
             studentProgressReport.TimeVideoLesson = featureAccessTimes?.FirstOrDefault(x => x.EnumFeature == EnumFeature.VideoLesson)?.AccessTime ?? default;
             studentProgressReport.TimeClassForum = featureAccessTimes?.FirstOrDefault(x => x.EnumFeature == EnumFeature.ClassForum)?.AccessTime ?? default;
             studentProgressReport.TimeHomeWork = featureAccessTimes?.FirstOrDefault(x => x.EnumFeature == EnumFeature.HomeWork)?.AccessTime ?? default;
@@ -270,7 +284,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 {
                     continue;
                 }
-                unitField.SetValue(studentProgressReport, unitResult.Percent);
+                unitField.SetValue(studentProgressReport, GetPercentFormat(unitResult.Percent));
             }
         }
 
@@ -289,7 +303,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                     continue;
                 }
                 var mockTestResultModel = _mapper.Map<MockTestResultModel>(mockTestResult);
-                skillMockTestField.SetValue(studentProgressReport, GetPercentFormat(mockTestResultModel.Scores));
+                skillMockTestField.SetValue(studentProgressReport, GetBandScoreFormat(mockTestResultModel.Scores));
             }
         }
 
@@ -329,7 +343,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                     continue;
                 }
                 var mockTestResultModel = _mapper.Map<MockTestResultModel>(mockTestResult);
-                mockTestField.SetValue(studentProgressReport, GetPercentFormat(mockTestResultModel.Scores));
+                mockTestField.SetValue(studentProgressReport, GetBandScoreFormat(mockTestResultModel.Scores));
                 SetSkillFullMockTest(studentProgressReport, mockTestResult.SkillScores, index);
             }
         }
@@ -352,7 +366,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 {
                     continue;
                 }
-                mockTestField.SetValue(studentProgressReport, GetPercentFormat(item.Scores));
+                mockTestField.SetValue(studentProgressReport, GetBandScoreFormat(item.Scores));
             }
         }
 

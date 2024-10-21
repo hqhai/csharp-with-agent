@@ -25,7 +25,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? CompletedProgress { get; set; }
 
         [EpplusTableColumn(Header = "Tiến độ học tập theo %")]
-        public double ProgressPercent { get; set; }
+        public string? ProgressPercent { get; set; }
 
         [EpplusTableColumn(Header = "Vị trí học hiện tại Unit")]
         public string? CurrentPositionUnit { get; set; }
@@ -34,31 +34,43 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? CurrentPositionLesson { get; set; }
 
         [EpplusTableColumn(Header = "Unit 1 overall")]
-        public double? OverallUnit1 { get; set; }
+        public string? OverallUnit1 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 2 overall")]
-        public double? OverallUnit2 { get; set; }
+        public string? OverallUnit2 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 3 overall")]
-        public double? OverallUnit3 { get; set; }
+        public string? OverallUnit3 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 4 overall")]
-        public double? OverallUnit4 { get; set; }
+        public string? OverallUnit4 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 5 overall")]
-        public double? OverallUnit5 { get; set; }
+        public string? OverallUnit5 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 6 overall")]
-        public double? OverallUnit6 { get; set; }
+        public string? OverallUnit6 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 7 overall")]
-        public double? OverallUnit7 { get; set; }
+        public string? OverallUnit7 { get; set; }
 
         [EpplusTableColumn(Header = "Unit 8 overall")]
-        public double? OverallUnit8 { get; set; }
+        public string? OverallUnit8 { get; set; }
+
+        [EpplusTableColumn(Header = "Unit 9 overall")]
+        public string? OverallUnit9 { get; set; }
+
+        [EpplusTableColumn(Header = "Unit 10 overall")]
+        public string? OverallUnit10 { get; set; }
+
+        [EpplusTableColumn(Header = "Unit 11 overall")]
+        public string? OverallUnit11 { get; set; }
+
+        [EpplusTableColumn(Header = "Unit 12 overall")]
+        public string? OverallUnit12 { get; set; }
 
         [EpplusTableColumn(Header = "Course Overall")]
-        public double? CourseOverall { get; set; }
+        public string? CourseOverall { get; set; }
 
         [EpplusTableColumn(Header = "Single-skill Mock test 1")]
         public string? BandSkillMockTest1 { get; set; }
