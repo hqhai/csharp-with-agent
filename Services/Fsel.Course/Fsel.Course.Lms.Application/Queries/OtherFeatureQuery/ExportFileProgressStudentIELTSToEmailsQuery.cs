@@ -253,11 +253,17 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             {
                 studentProgressReport.TotalVisit = featureAccessTimeCourse.Visit;
                 studentProgressReport.TotalTime = featureAccessTimeCourse.AccessTime;
-                studentProgressReport.LastVisited = featureAccessTimeCourse.LastVisited;
             }
             studentProgressReport.TimeVideoLesson = featureAccessTimes?.FirstOrDefault(x => x.EnumFeature == EnumFeature.VideoLesson)?.AccessTime ?? default;
             studentProgressReport.TimeClassForum = featureAccessTimes?.FirstOrDefault(x => x.EnumFeature == EnumFeature.ClassForum)?.AccessTime ?? default;
             studentProgressReport.TimeHomeWork = featureAccessTimes?.FirstOrDefault(x => x.EnumFeature == EnumFeature.HomeWork)?.AccessTime ?? default;
+
+            var featureAccessTimeResultUsers = await _systemService.GetFeatureAccessTimeByUserIdsAsync(new List<Guid> { student.Human?.UserId ?? default });
+            if (!featureAccessTimeResultUsers.IsSuccessStatusCode)
+            {
+                return;
+            }
+            studentProgressReport.LastVisited = featureAccessTimeResultUsers.Content?.Result?.FirstOrDefault()?.LastVisited;
         }
 
         private async Task<IList<UnitResult>> GetUnitResultsAsync(CourseResult courseResult, CancellationToken cancellationToken)
