@@ -253,6 +253,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             {
                 studentProgressReport.TotalVisit = featureAccessTimeCourse.Visit;
                 studentProgressReport.TotalTime = featureAccessTimeCourse.AccessTime;
+                studentProgressReport.LastVisited = featureAccessTimeCourse.LastVisited;
             }
             studentProgressReport.TimeVideoLesson = featureAccessTimes?.FirstOrDefault(x => x.EnumFeature == EnumFeature.VideoLesson)?.AccessTime ?? default;
             studentProgressReport.TimeClassForum = featureAccessTimes?.FirstOrDefault(x => x.EnumFeature == EnumFeature.ClassForum)?.AccessTime ?? default;
