@@ -644,7 +644,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Chúc mừng bạn đã hoàn thành khoá học {0}. Nhấn để xem lại hành trình của bạn theo góc nhìn tổng quan nhé.",
-    "templateLink": "",
+    "templateLink": "/learn?popupType=finalReport",
     "createdDate": "2023-08-28",
     "translations": [
       {
