@@ -23,8 +23,8 @@ namespace Fsel.Identity.Application.Services.SystemService
         [Delete("/v1/admin/student/delete-student/{id}")]
         Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
 
-        [Post("/v1/school/execute-list-query")]
-        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> ExecuteListSchoolQueryAsync([Body] BaseQueryModel query);
+        [Get("/v1/school/execute-list-query")]
+        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> ExecuteListSchoolQueryAsync([Query] BaseQueryModel query);
 
         [Post("/v1/school/get-school-by-ids")]
         Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolByIds([Body] IList<Guid> ids);

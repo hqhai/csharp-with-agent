@@ -34,5 +34,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels.IntegrationModel
         public decimal TotalPrice { get; set; }
 
         public string? Status { get; set; }
+
+        public EnumPaymentRevenueType? RevenueType { get; set; }
     }
 }
