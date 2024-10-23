@@ -231,5 +231,37 @@ namespace Fsel.Identity.Api.Controllers.Admin
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Export template Admin School
+        /// </summary>
+        [HttpPost("export-template-admin-school")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Export([FromForm] ExportTemplateCreateAdminSchoolCommand command)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "export_teamplate_admin-school.xlsx");
+        }
+
+        /// <summary>
+        /// Import File Admin School
+        /// </summary>
+        [HttpPost("import-admin-school")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Import([FromForm] ImportFileAdminSchoolsCommand command)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "import_file_admin-school.xlsx");
+        }
     }
 }
