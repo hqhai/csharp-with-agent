@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -70,29 +71,18 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     query = query.Where(x => studentIds != null && studentIds.Contains(x.StudentId));
                 }
             }
-
-            var lists = new List<CourseResultModel>();
-            int totalItem = 0;
             if (request.CourseType.HasValue)
             {
-                var enumerable = query.AsEnumerable().Where(m => m.CourseType == request.CourseType);
-                totalItem = enumerable.Count();
-                lists = enumerable.OrderByDescending(x => x.UpdatedDate)
-                                  .ThenByDescending(x => x.CreatedDate)
-                                  .ApplyPaging(request)
-                                  .ToList();
+                var courseLevels = request.CourseType.GetEnumCourseLevels();
+                query = query.Where(x => x.CourseLevel.HasValue && courseLevels.Contains(x.CourseLevel.Value));
             }
-            else
-            {
-                totalItem = await query.CountAsync(cancellationToken);
-                lists = await query.OrderByDescending(x => x.UpdatedDate)
-                                   .ThenByDescending(x => x.CreatedDate)
-                                   .ApplyPaging(request)
-                                   .AsNoTracking()
-                                   .ToListAsync(cancellationToken: cancellationToken)
-                                   .ConfigureAwait(false);
-            }
-
+            var totalItem = await query.CountAsync(cancellationToken);
+            var lists = await query.OrderByDescending(x => x.UpdatedDate)
+                               .ThenByDescending(x => x.CreatedDate)
+                               .ApplyPaging(request)
+                               .AsNoTracking()
+                               .ToListAsync(cancellationToken: cancellationToken)
+                               .ConfigureAwait(false);
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).Distinct().ToList());
             var students = studentResults.Content?.Result;
             var studentProgress = new List<StudentProgressModel>();
