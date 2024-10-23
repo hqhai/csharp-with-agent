@@ -25,6 +25,7 @@ namespace Fsel.Shared.Enums
         MailPaymentForStudent,
         MailPaymentForCustomer,
         MailFromLandingPage,
+        MailPaymentWithVoucher,
         CreateUser,
         CreateUserForEventULIS,
 

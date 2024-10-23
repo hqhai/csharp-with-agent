@@ -206,6 +206,20 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 SendNotify(newOrder.Id, newOrder.UserId, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<OrderModel>(newOrder);
+                if (newOrder.TotalPrice == 0)
+                {
+                    var changeStatusOrdersResult = await _mediator.Send(new ChangeStatusOrderCommand()
+                    {
+                        OrderIds = new[] { newOrder.Id },
+                        RevenueType = EnumPaymentRevenueType.NotRevenue,
+                        Status = EnumOrderStatus.Payment
+                    });
+                    if (!changeStatusOrdersResult.IsOK)
+                    {
+                        methodResult.AddError(changeStatusOrdersResult.ErrorMessages);
+                        return methodResult;
+                    }
+                }
                 return methodResult;
             });
             return methodResult;

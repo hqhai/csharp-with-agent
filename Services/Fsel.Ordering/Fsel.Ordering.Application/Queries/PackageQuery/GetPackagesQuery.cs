@@ -12,6 +12,7 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
     using Fsel.Ordering.Application.Queries.Events;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;

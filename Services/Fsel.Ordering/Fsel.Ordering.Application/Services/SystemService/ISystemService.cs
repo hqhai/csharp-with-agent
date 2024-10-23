@@ -13,5 +13,8 @@ namespace Fsel.Ordering.Application.Services.SystemService
 
         [Post("/v1/google-sheet/add-payment-info-to-google-sheet")]
         Task<IApiResponse<MethodResult<VoidMethodResult>>> AddPaymentInfoToGoogleSheet([Body] AddPaymentInfoToGoogleSheetModel model);
+
+        [Post("/v1/google-sheet/add-vouchers-for-ma")]
+        Task<IApiResponse<MethodResult<bool>>> AddVouchersForMAIntoGGSheet([Body] AddVouchersForMAIntoGoogleSheetCommandModel model);
     }
 }
