@@ -55,9 +55,14 @@ namespace Fsel.Ordering.Application.Commands.Events
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(methodResult);
 
-            if (request.PackageEvents == null || request.PackageEvents.Count != 3 || request.Translations == null || request.Translations.Count != 3)
+            if (request.PackageEvents == null || request.PackageEvents.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.MissingVersionOfPackageEventOrTranslation), EnumEventErrorCode.MissingVersionOfPackageEventOrTranslation.GetDescription());
+                methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.MissingVersionOfPackage), EnumEventErrorCode.MissingVersionOfPackage.GetDescription());
+                return;
+            }
+            if (request.Translations == null || request.Translations.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.MissingVersionOfTranslation), EnumEventErrorCode.MissingVersionOfTranslation.GetDescription());
                 return;
             }
             if (await _eventRepository.Queryable.AnyAsync(p => p.Code.ToLower() == request.Code.ToLower(), cancellationToken))
@@ -66,7 +71,7 @@ namespace Fsel.Ordering.Application.Commands.Events
                 return;
             }
             var packageIds = request.PackageEvents.Select(x => x.PackageId).Distinct().ToList();
-            if (packageIds == null || packageIds.Count != 3)
+            if (packageIds == null || packageIds.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.PackageIdIsWrong), EnumEventErrorCode.PackageIdIsWrong.GetDescription());
                 return;
@@ -135,9 +140,14 @@ namespace Fsel.Ordering.Application.Commands.Events
             ArgumentNullException.ThrowIfNull(methodResult);
             ArgumentNullException.ThrowIfNull(request.Id);
 
-            if (request.PackageEvents == null || request.PackageEvents.Count != 3 || request.Translations == null || request.Translations.Count != 3)
+            if (request.PackageEvents == null || request.PackageEvents.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.MissingVersionOfPackage), EnumEventErrorCode.MissingVersionOfPackage.GetDescription());
+                return;
+            }
+            if (request.Translations == null || request.Translations.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.MissingVersionOfTranslation), EnumEventErrorCode.MissingVersionOfTranslation.GetDescription());
                 return;
             }
             if (await _eventRepository.Queryable.AnyAsync(p => p.Code.ToLower() == request.Code.ToLower() && p.Id != request.Id, cancellationToken))
@@ -146,7 +156,7 @@ namespace Fsel.Ordering.Application.Commands.Events
                 return;
             }
             var packageIds = request.PackageEvents.Select(x => x.PackageId).Distinct().ToList();
-            if (packageIds == null || packageIds.Count != 3)
+            if (packageIds == null || packageIds.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return;
@@ -193,14 +203,16 @@ namespace Fsel.Ordering.Application.Commands.Events
                     var translation = request.Translations.FirstOrDefault(x => x.Id == item.Id);
                     if (translation == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                        return methodResult;
+                        @event.Translations.Remove(item);
                     }
-                    UpdateTranslation(translation, item);
-                    if (!item.IsValid())
+                    else
                     {
-                        methodResult.AddError(item.ErrorMessages);
-                        return methodResult;
+                        UpdateTranslation(translation, item);
+                        if (!item.IsValid())
+                        {
+                            methodResult.AddError(item.ErrorMessages);
+                            return methodResult;
+                        }
                     }
                 }
                 foreach (var item in @event.PackageEvents)
@@ -208,14 +220,16 @@ namespace Fsel.Ordering.Application.Commands.Events
                     var packageEvent = request.PackageEvents.FirstOrDefault(x => x.Id == item.Id);
                     if (packageEvent == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                        return methodResult;
+                        @event.PackageEvents.Remove(item);
                     }
-                    UpdatePackageEvent(packageEvent, item);
-                    if (!item.IsValid())
+                    else
                     {
-                        methodResult.AddError(item.ErrorMessages);
-                        return methodResult;
+                        UpdatePackageEvent(packageEvent, item);
+                        if (!item.IsValid())
+                        {
+                            methodResult.AddError(item.ErrorMessages);
+                            return methodResult;
+                        }
                     }
                 }
                 UpdateEvent(request, @event);

@@ -17,11 +17,11 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         public EnumCourseLevel? CourseLevel { get; set; }
     }
 
-    public class GetCourseByCourseLevelQueryHandler : IRequestHandler<GetCoursesByLevelQuery, MethodResult<IList<CourseModel>>>
+    public class GetCoursesByLevelQueryHandler : IRequestHandler<GetCoursesByLevelQuery, MethodResult<IList<CourseModel>>>
     {
         private readonly ICourseRepository _courseRepository;
 
-        public GetCourseByCourseLevelQueryHandler(ICourseRepository courseRepository)
+        public GetCoursesByLevelQueryHandler(ICourseRepository courseRepository)
         {
             _courseRepository = courseRepository;
         }

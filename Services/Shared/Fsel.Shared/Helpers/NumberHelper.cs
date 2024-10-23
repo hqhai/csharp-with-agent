@@ -98,6 +98,19 @@ namespace Fsel.Shared.Helpers
             return correctTotal > 0 ? ConvertPercentDouble((double)correctCount / correctTotal) : default;
         }
 
+        public static long CalculateAverage(ICollection<long> secondsList)
+        {
+            if (secondsList == null || secondsList.Count == 0)
+            {
+                return 0;
+            }
+
+            long totalSeconds = secondsList.Sum();
+            int count = secondsList.Count;
+
+            return totalSeconds / count;
+        }
+
         public static double GetTimeSkill(this EnumCourseSkill skill, string? fileAudio)
         {
             var timeAudio = MediaHelper.GetMediaDurationAsync(fileAudio) ?? default;

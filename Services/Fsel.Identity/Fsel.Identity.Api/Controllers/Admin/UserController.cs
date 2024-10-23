@@ -8,6 +8,7 @@ using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.AdminCmd;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Application.Queries.UserQuery;
+using Fsel.Identity.Application.Queries.UserReferrals;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
@@ -142,11 +143,55 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// Create Students
         /// </summary>
         [HttpPost("create-students")]
-        [ProducesResponseType(typeof(MethodResult<IList<UserModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateStudents([FromBody] CreateUserStudentsToAdminCommand command)
+        public async Task<IActionResult> CreateStudents([FromQuery] CreateUserStudentsToAdminCommand command)
         {
-            MethodResult<IList<UserModel>> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "user_import.xlsx");
+        }
+
+        /// <summary>
+        /// Create Students
+        /// </summary>
+        [HttpPost("export-template-create-students")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportTemplate()
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(new ExportTemplateCreateStudentCommand()).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "export_template_create_student.xlsx");
+        }
+
+        /// <summary>
+        /// Search User referral
+        /// </summary>
+        [HttpGet("search-referral-code")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<SearchReferralCodeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchUserReferral([FromQuery] SearchReferralCodeQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search detail user referral
+        /// </summary>
+        [HttpGet("search-detail-referral-code")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<SearchDetailReferralCodeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchDetailUserReferral([FromQuery] SearchDetailReferralCodeQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

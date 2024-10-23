@@ -96,8 +96,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable
                             .Include(x => x.VideoResult)
                             .ThenInclude(x => x.LessonResult)
-                            .Where(x => x.VideoTimeCodeId == videoTimeCodeResult.VideoTimeCodeId && students.Select(x => x.Id).Contains(x.StudentId))
-                            .Where(x => x.Status == EnumResultStatus.Done && x.VideoResult!.LessonResult!.UnitId == lessonResult.UnitId)
+                            .Where(x => x.VideoTimeCodeId == videoTimeCodeResult.VideoTimeCodeId && x.Status == EnumResultStatus.Done && students.Select(x => x.Id).Contains(x.StudentId))
+                            .Where(x => x.VideoResult != null && x.VideoResult.LessonResult != null && x.VideoResult.LessonResult.UnitId == lessonResult.UnitId && x.VideoResult.LessonResult.CourseId == lessonResult.CourseId)
                             .ToListAsync(cancellationToken);
 
             foreach (var item in students)
@@ -164,7 +164,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                                         .Include(x => x.VideoResult)
                                         .ThenInclude(x => x!.LessonResult)
                                         .Where(x => x.VideoTimeCode != null && x.VideoTimeCode.VideoId == videoResult.VideoId && x.VideoTimeCode.TimeCodeType == type)
-                                        .Where(x => x.StudentId == item.Id && x.Status == EnumResultStatus.Done && x.VideoResult!.LessonResult!.UnitId == lessonResult.UnitId)
+                                        .Where(x => x.StudentId == item.Id && x.Status == EnumResultStatus.Done)
+                                        .Where(x => x.VideoResult != null && x.VideoResult.LessonResult != null && x.VideoResult.LessonResult.UnitId == lessonResult.UnitId && x.VideoResult.LessonResult.CourseId == lessonResult.CourseId)
                                         .GroupBy(x => x.StudentId)
                                         .Select(x => new TestResultRankingModel
                                         {

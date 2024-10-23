@@ -94,7 +94,7 @@ namespace Fsel.System.Application.Queries.LuckyTickets
 
             var luckyTickets = await _luckyTicketRepository.Queryable.Where(p => studentIds != null && studentIds.Contains(p.StudentId) && p.Status == EnumLuckyTicketStatus.Won).ToListAsync(cancellationToken);
 
-            luckyTickets = luckyTickets.Where(p => p.CreatedDate.Date >= request.StartDate.Date && p.CreatedDate.Date <= request.EndDate.Date).ToList();
+            luckyTickets = luckyTickets.Where(p => p.WinningDate.HasValue && p.WinningDate.Value.Date >= request.StartDate.Date && p.WinningDate.Value.Date <= request.EndDate.Date).ToList();
 
             foreach (var item in luckyTickets)
             {
