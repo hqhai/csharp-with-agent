@@ -50,7 +50,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
             var query = _courseResultRepository.Queryable.Include(x => x.Course).Where(x => !x.IsDeleted && x.WorkingStatus == EnumWorkingStatus.Active)
-                .Where(m => !request.Level.HasValue || (m.Course != null && m.Course.CourseLevel == request.Level))
                 .GroupBy(r => new { r.StudentId, r.CourseId })
                 .Select(group => new CourseResultModel
                 {
@@ -62,6 +61,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     UpdatedDate = group.Max(r => r.UpdatedDate),
                 });
 
+            if (request.CourseType.HasValue)
+            {
+                query = query.Where(x => x.CourseLevel.HasValue && request.CourseType.GetEnumCourseLevels().Contains(x.CourseLevel.Value));
+            }
+            if (request.Level.HasValue)
+            {
+                query = query.Where(m => m.CourseLevel == request.Level);
+            }
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 var studentKeyResult = await _userService.SearchStudentAsync(new BaseQueryModel { Keyword = request.Keyword });
@@ -71,11 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     query = query.Where(x => studentIds != null && studentIds.Contains(x.StudentId));
                 }
             }
-            if (request.CourseType.HasValue)
-            {
-                var courseLevels = request.CourseType.GetEnumCourseLevels();
-                query = query.Where(x => x.CourseLevel.HasValue && courseLevels.Contains(x.CourseLevel.Value));
-            }
+
             var totalItem = await query.CountAsync(cancellationToken);
             var lists = await query.OrderByDescending(x => x.UpdatedDate)
                                .ThenByDescending(x => x.CreatedDate)
