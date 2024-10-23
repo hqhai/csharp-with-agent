@@ -45,6 +45,7 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public string? SchoolStudentSheetId { get; set; }
         public string? LuckyTicketSpreadSheetId { get; set; }
         public string? VoucherForMASpreadSheetId { get; set; }
+        public string? RegisterStudentForEventSpreadSheetId { get; set; }
     }
 
     public class Services : BaseServices

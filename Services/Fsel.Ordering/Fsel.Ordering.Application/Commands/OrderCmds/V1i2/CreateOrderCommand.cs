@@ -86,7 +86,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             }
 
-            var package = await _packageRepository.GetByIdAsync(request.PackageId);
+            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.Id == request.PackageId && p.Status == EnumPackageStatus.Active, cancellationToken);
             if (package == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
@@ -103,7 +103,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             if (!@event.IsDefault)
             {
                 var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
-                if (@event.StartDate?.Date > currentDate.Date || @event.EndDate?.Date < currentDate.Date)
+                if (@event.StartDate > currentDate || @event.EndDate < currentDate)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventHasExpired), nameof(@event));
                     return methodResult;

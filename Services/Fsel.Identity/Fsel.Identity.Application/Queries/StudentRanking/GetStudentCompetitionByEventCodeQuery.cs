@@ -1,4 +1,3 @@
-
 namespace Fsel.Identity.Application.Queries.StudentRanking
 
 {
@@ -22,11 +21,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
     public class GetStudentCompetitionByEventCodeQuery : BaseQueryModel, IRequest<MethodResult<PagingItemStudentRankingModel>>
     {
         public EnumCourseType CourseType { get; set; }
-
         public string? EventCode { get; set; }
-
         public int WeekNumber { get; set; }
-
     }
 
     public class GetStudentCompetitionByEventCodeQueryHandler : IRequestHandler<GetStudentCompetitionByEventCodeQuery, MethodResult<PagingItemStudentRankingModel>>
@@ -34,6 +30,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
         private readonly IStudentRankingEventRepository _eventRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
+        private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IStudentCompetitionSnapShotRepository _studentCompetitionSnapShotRepository;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
@@ -42,7 +39,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
         private const double Process_Ratio = 0.75;
         private const double Overall_Ratio = 0.25;
 
-        public GetStudentCompetitionByEventCodeQueryHandler(IStudentRankingEventRepository eventRepository, IStudentRepository studentRepository, ICompetitionEventsRepository competitionEventsRepository, IMediator mediator, IMapper mapper, IStudentCompetitionSnapShotRepository studentCompetitionSnapShotRepository, ILmsCourseService lmsCourseService)
+        public GetStudentCompetitionByEventCodeQueryHandler(IStudentRankingEventRepository eventRepository, IStudentRepository studentRepository, ICompetitionEventsRepository competitionEventsRepository, IMediator mediator, IMapper mapper, IStudentCompetitionSnapShotRepository studentCompetitionSnapShotRepository, ILmsCourseService lmsCourseService, IStudentCompetitionEventsRepository studentCompetitionEventsRepository)
         {
             _eventRepository = eventRepository;
             _studentRepository = studentRepository;
@@ -51,6 +48,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             _mapper = mapper;
             _studentCompetitionSnapShotRepository = studentCompetitionSnapShotRepository;
             _lmsCourseService = lmsCourseService;
+            _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
         }
 
         public async Task<MethodResult<PagingItemStudentRankingModel>> Handle(GetStudentCompetitionByEventCodeQuery request, CancellationToken cancellationToken)
@@ -61,15 +59,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
             var timeNowVI = DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam);
 
-
-
-
-
             var competitionEvents = _competitionEventsRepository.Queryable
                                     .FirstOrDefault(x => !string.IsNullOrEmpty(x.EventContentStr) && x.EventCode == request.EventCode);
-
-
-
 
             #region Validate
 
@@ -85,13 +76,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 return methodResult;
             }
 
-            var listSchoolIds = competitionEvents.SchoolIds;
-            if (listSchoolIds == null || listSchoolIds.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(listSchoolIds), listSchoolIds);
-                return methodResult;
-            }
-            #endregion
+            #endregion Validate
 
             var weekEventRules = competitionEvents.EventContent.WeekEvents.FirstOrDefault(x => x.WeekNumber == request.WeekNumber);
             if (weekEventRules == null)
@@ -105,9 +90,9 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             if (resultSnapShots == null)
             {
                 result = (from studentEvent in _eventRepository.Queryable
-                          join student in _studentRepository.Queryable.Include(x => x.Human) on studentEvent.StudentId equals student.Id into resultGroup
+                          join studentCompetitionEvent in _studentCompetitionEventsRepository.Queryable.Where(x => x.CompetitionEventId == competitionEvents.Id) on studentEvent.StudentId equals studentCompetitionEvent.StudentId
+                          join student in _studentRepository.Queryable.Include(x => x.Human) on studentCompetitionEvent.StudentId equals student.Id into resultGroup
                           from student in resultGroup.DefaultIfEmpty()
-                          where student.SchoolId != null && listSchoolIds.Contains((Guid)student.SchoolId)
                           select new StudentRankingModel
                           {
                               StudentId = studentEvent.StudentId,
@@ -122,59 +107,62 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                               RankingScore = studentEvent.RankingScore,
                               CourseResultId = studentEvent.CourseResultId
                           }).OrderByDescending(x => x.RankingScore).ToList();
+
+                #region Filter
+
+                var eventStudentIds = result.Select(x => x.StudentId).ToList();
+                ActiveCourseResultModel query = new ActiveCourseResultModel
+                {
+                    StudentIds = eventStudentIds
+                };
+                var activeCourseResult = await _lmsCourseService.GetActiveCourseResultByStudentId(query);
+                var activeCourseResultIds = activeCourseResult?.Content?.Result;
+
+                if (activeCourseResultIds == null || activeCourseResultIds.Count == 0)
+                {
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                    return methodResult;
+                }
+
+                result = result.DistinctBy(x => x.CourseResultId).Where(x => activeCourseResultIds.Contains(x.CourseResultId)).ToList();
+
+                #endregion Filter
             }
             else
             {
-                result = ConvertHelper.Deserialize<IList<StudentRankingModel>>(resultSnapShots.WeekCompetitionData)!.ToList();
+                result = ConvertHelper.Deserialize<IList<StudentRankingModel>>(resultSnapShots.WeekCompetitionData)?.ToList() ?? new List<StudentRankingModel>();
             }
-
-
-
 
             #region Filter
-
-            var eventStudentIds = result.Select(x => x.StudentId).ToList();
-            ActiveCourseResultModel query = new ActiveCourseResultModel
-            {
-                StudentIds = eventStudentIds
-            };
-            var activeCourseResult = await _lmsCourseService.GetActiveCourseResultByStudentId(query);
-            var activeCourseResultIds = activeCourseResult?.Content?.Result;
-
-            if (activeCourseResultIds == null || activeCourseResultIds.Count == 0)
-            {
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
-
-            result = result.DistinctBy(x => x.CourseResultId).Where(x => activeCourseResultIds.Contains(x.CourseResultId)).ToList();
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 result = result.Where(x => (x.FullName != null && x.FullName.ToLower().Contains(request.Keyword.ToLower().Trim())) || (x.Email != null && x.Email.ToLower() == request.Keyword.ToLower().Trim())).ToList();
             }
 
-            var lists = result.ApplyPaging(request).ToList();
-            int totalItem = result.Count;
-            var resultPaging = new PagingItemsModel<StudentRankingModel>(lists, request, totalItem);
-            #endregion
+            #endregion Filter
 
             #region Snapshot
+
             // Lưu Snapshot theo tuần.
             if (weekEventRules.EndDate.Date == timeNowVI && resultSnapShots == null)
             {
                 StudentCompetitionSnapShotModel snapshotModel = new StudentCompetitionSnapShotModel
                 {
-                    SchoolCode = request.EventCode,
+                    EventCode = request.EventCode,
                     WeekCompetitionData = ConvertHelper.Serialize(result),
                     StartDate = weekEventRules!.StartDate,
                     EndDate = weekEventRules!.EndDate,
                     WeekNumber = request.WeekNumber,
-
                 };
                 await UpdateSnapShot(snapshotModel, cancellationToken);
             }
-            #endregion
+
+            #endregion Snapshot
+
+            var lists = result.ApplyPaging(request).ToList();
+            int totalItem = result.Count;
+            var resultPaging = new PagingItemsModel<StudentRankingModel>(lists, request, totalItem);
 
             methodResult.Result = new PagingItemStudentRankingModel
             {
@@ -186,7 +174,6 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
-
 
         /// <summary>
         /// Lưu dữ liệu snapshot theo tuần
@@ -204,7 +191,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 EndDate = modelCommand.EndDate,
                 StartDate = modelCommand.StartDate,
                 WeekCompetitionData = modelCommand.WeekCompetitionData,
-                SchoolCode = modelCommand.SchoolCode
+                EventCode = modelCommand.EventCode
             };
             await _mediator.Send(cmd, cancellationToken);
         }

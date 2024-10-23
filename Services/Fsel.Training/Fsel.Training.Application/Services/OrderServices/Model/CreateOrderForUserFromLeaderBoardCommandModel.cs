@@ -23,5 +23,6 @@ namespace Fsel.Training.Application.Services.OrderServices.Model
         public string? CompanyAddress { get; set; }
         public string? CompanyTaxCode { get; set; }
         public string? ReferralCode { get; set; }
+        public DateTime? ExpiredDate { get; set; }
     }
 }

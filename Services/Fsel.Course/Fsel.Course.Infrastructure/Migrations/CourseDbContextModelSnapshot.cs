@@ -2901,6 +2901,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
+                    b.Property<double>("Version")
+                        .HasColumnType("float");
+
                     b.HasKey("Id");
 
                     b.ToTable("MockTests");
@@ -3887,6 +3890,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(3000)
+                        .HasColumnType("nvarchar(3000)");
+
                     b.Property<string>("Explanation")
                         .HasColumnType("nvarchar(max)");
 
@@ -3898,6 +3905,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("SubQuestionIndexsStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("Ungraded")
                         .HasColumnType("bit");
