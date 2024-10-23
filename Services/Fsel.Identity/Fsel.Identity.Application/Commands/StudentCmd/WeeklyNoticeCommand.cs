@@ -57,26 +57,42 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var startOfWeek = today.AddDays(-dayOfWeek + (int)DayOfWeek.Monday);
             var endOfWeek = startOfWeek.AddDays(6);
 
-            var studentsAbsentIds = await _studentDailyStreakRepository.Queryable
-                .GroupBy(x => x.CreatedUserId)
-                .Where(g => g.All(x => x.CreatedUserId != Guid.Empty)
-                    && g.Any(x => x.DailyDate.Date >= startOfWeek
-                    && x.DailyDate.Date <= endOfWeek))
-                .Select(g => g.Key)
-                .ToListAsync(cancellationToken);
+            var studentsAbsent = await _studentDailyStreakRepository.Queryable
+                                .Include(x => x.Student)
+                                .ThenInclude(x => x.Human)
+                                .GroupBy(x => new
+                                {
+                                    x.CreatedUserId,
+                                    FullName = x.Student != null && x.Student.Human != null ? x.Student.Human.FullName : string.Empty
+                                })
+                                .Where(g => g.All(x => x.CreatedUserId != Guid.Empty)
+                                    && g.Any(x => x.DailyDate.Date >= startOfWeek
+                                    && x.DailyDate.Date <= endOfWeek
+                                    && x.Student != null
+                                    && x.Student.Human != null))
+                                .Select(g => new
+                                {
+                                    Id = g.Key.CreatedUserId,
+                                    FullName = g.Key.FullName
+                                })
+                                .ToListAsync(cancellationToken);
 
-            await SendNotificationMessage(studentsAbsentIds, content, cancellationToken);
+            foreach (var student in studentsAbsent)
+            {
+                await SendNotificationMessage(student.Id, student.FullName ?? string.Empty, content, cancellationToken);
+            }
         }
 
-        private async Task SendNotificationMessage(List<Guid>? userIds, EnumNotificationContent content, CancellationToken cancellationToken)
+        private async Task SendNotificationMessage(Guid userId, string userName, EnumNotificationContent content, CancellationToken cancellationToken)
         {
 
             NotificationSendingQueueModel model = new NotificationSendingQueueModel()
             {
                 ObjectId = Guid.Empty,
-                UserIds = userIds,
+                UserIds = new List<Guid> { userId },
                 SenderId = Guid.Empty,
                 Type = EnumNotificationType.LinkPage,
+                ParamsMessage = new List<object> { userName },
                 Content = content
             };
 
