@@ -58,7 +58,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             var expiredDate = !student.ExpiredDate.HasValue ? (order.ExpireDate.HasValue ? order.ExpireDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty) : student.ExpiredDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
-            var updatedDate = !order.UpdatedDate.HasValue ? string.Empty : order.UpdatedDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+            var updatedDate = !order.UpdatedDate.HasValue ? order.CreatedDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : order.UpdatedDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
             var numberFormat = (NumberFormatInfo)CultureInfo.GetCultureInfo("vi-VN").NumberFormat.Clone();
             numberFormat.CurrencySymbol = "";
