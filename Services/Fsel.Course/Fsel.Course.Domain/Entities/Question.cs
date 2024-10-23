@@ -82,5 +82,7 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<ExtraPracticeAnswer> ExtraPracticeAnswers { get; set; } = new List<ExtraPracticeAnswer>();
         public ICollection<HomeWorkQuestion> HomeWorkQuestions { get; set; } = new List<HomeWorkQuestion>();
         public ICollection<SectionQuestion> SectionQuestions { get; set; } = new List<SectionQuestion>();
+        public ICollection<QuestionExplanationError> QuestionExplanationErrors = new List<QuestionExplanationError>();
+        public ICollection<QuestionExplanationLog> QuestionExplanationLogs { get; set; } = new HashSet<QuestionExplanationLog>();
     }
 }

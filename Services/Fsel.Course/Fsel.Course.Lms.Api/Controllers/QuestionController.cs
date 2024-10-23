@@ -9,7 +9,9 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd;
     using Fsel.Course.Lms.Application.Queries.QuestionQuery;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -40,6 +42,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         {
             MethodResult<IList<QuestionModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Question
+        /// </summary>
+        [HttpPost("error-report-explanation-question")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateErrorReportExplanation([FromBody] CreateQuestionExplanationErrorCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
