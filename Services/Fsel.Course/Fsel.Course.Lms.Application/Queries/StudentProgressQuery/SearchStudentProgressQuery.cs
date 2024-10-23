@@ -49,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
             var query = _courseResultRepository.Queryable.Include(x => x.Course).Where(x => !x.IsDeleted && x.WorkingStatus == EnumWorkingStatus.Active)
+                .Where(m => !request.Level.HasValue || (m.Course != null && m.Course.CourseLevel == request.Level))
                 .GroupBy(r => new { r.StudentId, r.CourseId })
                 .Select(group => new CourseResultModel
                 {
@@ -60,15 +61,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     UpdatedDate = group.Max(r => r.UpdatedDate),
                 });
 
-            if (request.CourseType != null)
-            {
-                query = query.Where(m => m.CourseType == request.CourseType);
-            }
-
-            if (request.Level != null)
-            {
-                query = query.Where(m => m.CourseLevel == request.Level);
-            }
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 var studentKeyResult = await _userService.SearchStudentAsync(new BaseQueryModel { Keyword = request.Keyword });
@@ -79,13 +71,27 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 }
             }
 
-            int totalItem = await query.CountAsync(cancellationToken);
-            var lists = await query.OrderByDescending(x => x.UpdatedDate)
+            var lists = new List<CourseResultModel>();
+            int totalItem = 0;
+            if (request.CourseType.HasValue)
+            {
+                var enumerable = query.AsEnumerable().Where(m => m.CourseType == request.CourseType);
+                totalItem = enumerable.Count();
+                lists = enumerable.OrderByDescending(x => x.UpdatedDate)
+                                  .ThenByDescending(x => x.CreatedDate)
+                                  .ApplyPaging(request)
+                                  .ToList();
+            }
+            else
+            {
+                totalItem = await query.CountAsync(cancellationToken);
+                lists = await query.OrderByDescending(x => x.UpdatedDate)
                                    .ThenByDescending(x => x.CreatedDate)
                                    .ApplyPaging(request)
                                    .AsNoTracking()
                                    .ToListAsync(cancellationToken: cancellationToken)
                                    .ConfigureAwait(false);
+            }
 
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).Distinct().ToList());
             var students = studentResults.Content?.Result;
