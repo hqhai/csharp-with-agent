@@ -4,7 +4,9 @@ namespace Fsel.Shared.Helpers
 {
     using System.Text;
     using Fsel.Common.Helpers;
+    using Fsel.Shared.Enums;
     using OtpNet;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public static class NumberHelper
     {
@@ -94,6 +96,37 @@ namespace Fsel.Shared.Helpers
         public static double GetPercent(this int correctCount, int correctTotal)
         {
             return correctTotal > 0 ? ConvertPercentDouble((double)correctCount / correctTotal) : default;
+        }
+
+        public static long CalculateAverage(ICollection<long> secondsList)
+        {
+            if (secondsList == null || secondsList.Count == 0)
+            {
+                return 0;
+            }
+
+            long totalSeconds = secondsList.Sum();
+            int count = secondsList.Count;
+
+            return totalSeconds / count;
+        }
+
+        public static double GetTimeSkill(this EnumCourseSkill skill, string? fileAudio)
+        {
+            var timeAudio = MediaHelper.GetMediaDurationAsync(fileAudio) ?? default;
+            if (skill == EnumCourseSkill.Reading || skill == EnumCourseSkill.Writing)
+            {
+                return SectionGroupIELST.ExecutionTimeReading;
+            }
+            else if (skill == EnumCourseSkill.Listening)
+            {
+                return timeAudio + SectionGroupIELST.AdditionalTimeListening;
+            }
+            else if (skill == EnumCourseSkill.Speaking && !string.IsNullOrEmpty(fileAudio))
+            {
+                return timeAudio; //thời gian audio
+            }
+            return default;
         }
     }
 }

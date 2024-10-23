@@ -8,6 +8,7 @@
     "monthNumber": 1,
     "status": "InActive",
     "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
+    "referToken": 50000,
     "createdDate": "2024-06-04",
     "translations": [
       {
@@ -42,6 +43,7 @@
     "monthNumber": 6,
     "status": "Active",
     "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
+    "referToken": 240000,
     "createdDate": "2024-06-04",
     "translations": [
       {
@@ -76,6 +78,7 @@
     "monthNumber": 12,
     "status": "Active",
     "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
+    "referToken": 360000,
     "createdDate": "2024-06-04",
     "translations": [
       {

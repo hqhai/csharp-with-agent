@@ -15,6 +15,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     public class SaveUserOtpCodeCommand : IRequest<MethodResult<string>>
     {
         public Guid Id { get; set; }
+        public DateTime? ExpiredTime { get; set; }
     }
 
     public class SaveUserOtpCodeCommandHandler : IRequestHandler<SaveUserOtpCodeCommand, MethodResult<string>>
@@ -35,6 +36,9 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             var userOtpCode = await _userOtpCodeRepository.Queryable
                                  .FirstOrDefaultAsync(x => x.UserId == request.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
             var otp = await GetOtpCode();
+
+            var expiredTime = request.ExpiredTime ?? DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime);
+
             if (userOtpCode == null)
             {
                 userOtpCode = new UserOtpCode
@@ -42,14 +46,14 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     UserId = request.Id,
                     OTPCode = otp,
                     Status = EnumOtpCodeStatus.New,
-                    ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime)
+                    ExpiredTime = expiredTime
                 };
                 _userOtpCodeRepository.Add(userOtpCode);
             }
             else
             {
                 userOtpCode.OTPCode = otp;
-                userOtpCode.ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime);
+                userOtpCode.ExpiredTime = expiredTime;
                 _userOtpCodeRepository.Update(userOtpCode);
             }
             await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

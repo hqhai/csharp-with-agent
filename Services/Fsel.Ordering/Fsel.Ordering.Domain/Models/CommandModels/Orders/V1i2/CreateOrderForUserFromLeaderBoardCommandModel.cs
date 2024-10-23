@@ -7,6 +7,7 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i2
     public class CreateOrderForUserFromLeaderBoardCommandModel : CreateOrderCommandModel
     {
         public Guid UserId { get; set; }
-        public int Month { get; set; }
+        public int? Month { get; set; }
+        public DateTime? ExpiredDate { get; set; }
     }
 }

@@ -48,6 +48,7 @@ namespace Fsel.Course.Domain.Entities
         public Guid VideoId { get; set; }
 
         public int? HighestStreak { get; set; }
+        public int? TimeCodeHighestStreak { get; set; }
 
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }

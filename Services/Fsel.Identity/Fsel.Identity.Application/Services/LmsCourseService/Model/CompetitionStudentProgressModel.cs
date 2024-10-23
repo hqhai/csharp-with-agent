@@ -10,5 +10,7 @@ namespace Fsel.Identity.Application.Services.LmsCourseService.Model
         public Guid StudentId { get; set; }
         public double TotalScore { get; set; }
 
+        public Guid CourseResultId { get; set; }
+
     }
 }

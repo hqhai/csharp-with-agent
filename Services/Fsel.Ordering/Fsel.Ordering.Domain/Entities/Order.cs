@@ -62,6 +62,11 @@ namespace Fsel.Ordering.Domain.Entities
         ///</summary>
         public EnumPaymentMethodStatus? PaymentMethod { get; set; }
 
+        ///<summary>
+        /// Loại thanh toán
+        ///</summary>
+        public EnumPaymentRevenueType? RevenueType { get; set; }
+
         /// <summary>
         /// Giá Khóa Học
         /// </summary>
@@ -158,6 +163,9 @@ namespace Fsel.Ordering.Domain.Entities
         public Guid? ClassId { get; set; }
 
         #endregion Không sử dụng
+
+        public Guid? VoucherId { get; set; }
+        public Voucher? Voucher { get; set; }
 
         public ICollection<OrderTransaction> OrderTransactions { get; set; } = new List<OrderTransaction>();
     }

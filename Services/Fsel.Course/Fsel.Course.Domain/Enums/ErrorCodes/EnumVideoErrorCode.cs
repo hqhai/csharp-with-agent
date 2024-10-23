@@ -23,5 +23,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Cannot have both UnitTest and SkillTest at the same time
         /// </summary>
         CanNotUnitTestAndSkillTestAtTheSameTime,
+
+        /// <summary>
+        /// Config Question Invalid Format
+        /// </summary>
+        ConfigInvalidFormat,
     }
 }

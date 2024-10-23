@@ -6,6 +6,7 @@ namespace Fsel.Shared.Helpers
     using System.Globalization;
     using System.Text;
     using System.Text.RegularExpressions;
+    using Fsel.Shared.Constants;
 
     public static class StringHelper
     {
@@ -198,9 +199,8 @@ namespace Fsel.Shared.Helpers
 
         public static string ReplaceWord(this string? word)
         {
-            string pattern = "[‘'’ʼ]";
             string replacement = "'";
-            return word?.TrimHiddenChars().ToLower(CultureInfo.CurrentCulture).ReplaceWord(pattern, replacement) ?? string.Empty;
+            return word?.TrimHiddenChars().ToLower(CultureInfo.CurrentCulture).ReplaceWord(RegexSetting.WordPattern, replacement) ?? string.Empty;
         }
 
         public static string TrimHiddenChars(this string? word)
@@ -215,12 +215,28 @@ namespace Fsel.Shared.Helpers
 
         public static bool ContainsSpecialCharacter(string input)
         {
-            // Định nghĩa biểu thức chính quy cho các ký tự đặc biệt
-            string pattern = @"[^a-zA-Z0-9]";
-            Regex regex = new Regex(pattern);
-
-            // Kiểm tra xem chuỗi có chứa ký tự đặc biệt không
+            Regex regex = new Regex(RegexSetting.SpecialCharacterPattern);
             return regex.IsMatch(input);
+        }
+
+        public static ICollection<string> GetEnumNames<T>() where T : Enum
+        {
+            return new List<string>(Enum.GetNames(typeof(T)));
+        }
+
+        public static string RemoveMarkdownFromJson(string json)
+        {
+            string cleanedJson = Regex.Replace(json, RegexSetting.AiReponseJsonPattern, "");
+            return cleanedJson;
+        }
+
+        public static bool IsBase64Image(string? inputString)
+        {
+            if (string.IsNullOrEmpty(inputString))
+            {
+                return false;
+            }
+            return Regex.IsMatch(inputString, RegexSetting.Base64Pattern, RegexOptions.Compiled);
         }
     }
 }
