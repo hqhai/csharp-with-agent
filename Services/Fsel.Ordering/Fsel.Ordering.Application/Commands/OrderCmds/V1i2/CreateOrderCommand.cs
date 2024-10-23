@@ -86,7 +86,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             }
 
-            var package = await _packageRepository.GetByIdAsync(request.PackageId);
+            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.Id == request.PackageId && p.Status == EnumPackageStatus.Active, cancellationToken);
             if (package == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
