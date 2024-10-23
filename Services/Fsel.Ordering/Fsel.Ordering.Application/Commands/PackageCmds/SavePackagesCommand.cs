@@ -10,8 +10,10 @@ namespace Fsel.Ordering.Application.Commands.PackageCmds
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class SavePackagesCommand : SavePackagesCommandModel, IRequest<MethodResult<bool>>
     {
@@ -51,7 +53,7 @@ namespace Fsel.Ordering.Application.Commands.PackageCmds
 
             foreach (var item in request.Packages)
             {
-                var package = await _packageRepository.GetByIdAsync(item.Id);
+                var package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.Id == item.Id && p.Status == EnumPackageStatus.Active, cancellationToken);
                 if (package == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));

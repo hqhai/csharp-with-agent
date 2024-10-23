@@ -347,6 +347,10 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
+                    b.Property<string>("RevenueType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -371,11 +375,16 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("VoucherId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("EventId");
 
                     b.HasIndex("PackageId");
+
+                    b.HasIndex("VoucherId");
 
                     b.ToTable("Orders");
                 });
@@ -518,6 +527,14 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<decimal>("PriceMonth")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("ReferToken")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(108);
@@ -548,7 +565,9 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             MonthNumber = 1,
                             Name = "Fsel_1_Month",
                             Price = 500000m,
-                            PriceMonth = 500000m
+                            PriceMonth = 500000m,
+                            Status = "InActive",
+                            ReferToken = 50000
                         },
                         new
                         {
@@ -562,7 +581,9 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             MonthNumber = 6,
                             Name = "Fsel_6_Months",
                             Price = 2400000m,
-                            PriceMonth = 320000m
+                            PriceMonth = 400000m,
+                            Status = "Active",
+                            ReferToken = 240000
                         },
                         new
                         {
@@ -576,7 +597,25 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             MonthNumber = 12,
                             Name = "Fsel_12_Months",
                             Price = 3600000m,
-                            PriceMonth = 240000m
+                            PriceMonth = 300000m,
+                            Status = "Active",
+                            ReferToken = 360000
+                        },
+                        new
+                        {
+                            Id = new Guid("cbd0a22a-356d-47da-8b42-849a0121361c"),
+                            Code = "PREMIUM",
+                            CreatedDate = new DateTime(2024, 9, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Tặng phí bản quyền của NXB Đại học Cambridge",
+                            IsDeleted = false,
+                            MonthNumber = 24,
+                            Name = "Fsel_24_Months",
+                            Price = 7200000m,
+                            PriceMonth = 300000m,
+                            Status = "Active",
+                            ReferToken = 720000
                         });
                 });
 
@@ -875,6 +914,39 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "fr-FR",
                             PackageId = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb")
+                        },
+                        new
+                        {
+                            Id = new Guid("7d3ea25f-b36e-487c-9d3b-c1a2db1b03cb"),
+                            CreatedDate = new DateTime(2024, 9, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Tặng phí bản quyền của NXB Đại học Cambridge",
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            PackageId = new Guid("cbd0a22a-356d-47da-8b42-849a0121361c")
+                        },
+                        new
+                        {
+                            Id = new Guid("c9d07f5d-dfdb-448d-87c9-97a2a07b8237"),
+                            CreatedDate = new DateTime(2024, 9, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Free copyright fee from Cambridge University Press",
+                            IsDeleted = false,
+                            Language = "en-US",
+                            PackageId = new Guid("cbd0a22a-356d-47da-8b42-849a0121361c")
+                        },
+                        new
+                        {
+                            Id = new Guid("8789802b-84a4-4276-873a-5a4c140cae2c"),
+                            CreatedDate = new DateTime(2024, 9, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Faire don des droits d'auteur des Éditions de l'Université de Cambridge",
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            PackageId = new Guid("cbd0a22a-356d-47da-8b42-849a0121361c")
                         });
                 });
 
@@ -1019,11 +1091,10 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<string>("ContentFilePath")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CourseLevelsStr")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -1038,9 +1109,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<Guid>("CreatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
-
-                    b.Property<string>("CustomerTypesStr")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
@@ -1058,22 +1126,22 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<bool>("IsGlobal")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
-                    b.Property<DateTime?>("StartDate")
+                    b.Property<int>("Percent")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -1088,6 +1156,11 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<Guid?>("UpdatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
+
+                    b.Property<string>("VoucherType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -1134,9 +1207,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.Property<Guid>("PackageId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("Percentage")
-                        .HasColumnType("float");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -1186,9 +1256,15 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasForeignKey("PackageId")
                         .OnDelete(DeleteBehavior.Cascade);
 
+                    b.HasOne("Fsel.Ordering.Domain.Entities.Voucher", "Voucher")
+                        .WithMany("Orders")
+                        .HasForeignKey("VoucherId");
+
                     b.Navigation("Event");
 
                     b.Navigation("Package");
+
+                    b.Navigation("Voucher");
                 });
 
             modelBuilder.Entity("Fsel.Ordering.Domain.Entities.OrderTransaction", b =>
@@ -1288,6 +1364,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Ordering.Domain.Entities.Voucher", b =>
                 {
+                    b.Navigation("Orders");
+
                     b.Navigation("UserVouchers");
 
                     b.Navigation("VoucherPackages");

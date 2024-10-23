@@ -1,23 +1,24 @@
 // Copyright (c) Atlantic. All rights reserved.
 using System.Net;
+using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.MockTestCmd;
 using Fsel.Course.Application.Queries.MockTestQuery;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Asp.Versioning;
-using Fsel.Shared.Constants;
 
 namespace Fsel.Course.Lcms.Api.Controllers
 {
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/mock-test")]
-    [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
+    [ApiController]
     public class MockTestController : ControllerBase
     {
         private readonly IMediator _mediator;

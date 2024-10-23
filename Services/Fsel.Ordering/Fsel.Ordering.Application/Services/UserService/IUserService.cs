@@ -15,7 +15,7 @@ namespace Fsel.Ordering.Application.Services.UserService
         Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] Guid id);
 
         [Post("/v1/student/get-by-user-ids")]
-        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByIdsAsync([FromBody] IList<string> ids);
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByIdsAsync([FromBody] IList<Guid> ids);
 
         [Put("/v1/student/update-student-class")]
         Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByClassAsync([Body] UpdateStudentByClassIdModel command);
@@ -28,5 +28,8 @@ namespace Fsel.Ordering.Application.Services.UserService
 
         [Put("/v1/student-trial-registration")]
         Task<IApiResponse<MethodResult<StudentRegistrationModel>>> UpdateStudentTrialRegistration([Body] UpdateStudentTrialRegistrationModel command);
+
+        [Get("/v1/student/get-student-by-email")]
+        Task<IApiResponse<MethodResult<StudentModel?>>> GetStudentByEmail([Query] string email);
     }
 }

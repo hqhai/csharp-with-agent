@@ -6,7 +6,6 @@ using Fsel.Common.Constants;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Lms.Application.Commands.MockTestCmd;
 using Fsel.Course.Lms.Application.Queries.MockTestQuery;
-using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using MediatR;

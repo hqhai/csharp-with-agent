@@ -41,12 +41,15 @@ namespace Fsel.Ordering.Api.Controllers
         /// notify url
         /// </summary>
         [HttpPost("notify-url")]
-        [ProducesResponseType(typeof(MethodResult<NotifyUrlModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(NotifyUrlModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> NotifyUrl([FromBody] NotifyUrlCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
+            return new ObjectResult(commandResult.Result)
+            {
+                StatusCode = commandResult.StatusCode
+            };
         }
     }
 }

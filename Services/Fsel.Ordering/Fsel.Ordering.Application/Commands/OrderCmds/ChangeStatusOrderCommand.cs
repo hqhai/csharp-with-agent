@@ -9,6 +9,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Commands.OrderCmds.v1i1;
+    using Fsel.Ordering.Application.Commands.UserRefferalCmd;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.SenderService;
@@ -57,14 +58,14 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             , ILmsCourseService lmsCourseService
             , NotificationMessagePublisher notificationMessagePublisher
             , AuthContext authContext
-            , ILmsCourseService courseService,
-ISenderServices senderServices,
-AppSetting appSetting,
-AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher,
-ISystemService systemService,
-IMediator mediator,
-IPackageEventRepository packageEventRepository,
-ChangeStatusOrderPublisher changeStatusOrderPublisher)
+            , ILmsCourseService courseService
+            , ISenderServices senderServices
+            , AppSetting appSetting
+            , AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher
+            , ISystemService systemService
+            , IMediator mediator
+            , IPackageEventRepository packageEventRepository
+            , ChangeStatusOrderPublisher changeStatusOrderPublisher)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
@@ -129,8 +130,8 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                 }
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
+                    order.RevenueType = request.RevenueType;
                     allowOpenNextUnit = true;
-
                     var packageEvent = await _packageEventRepository.Queryable.FirstOrDefaultAsync(p => p.PackageId == package.Id && p.EventId == order.EventId, cancellationToken);
 
                     if (packageEvent == null)
@@ -138,16 +139,25 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                         methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventNotExist), nameof(packageEvent));
                         return methodResult;
                     }
-
-                    order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber + packageEvent.MonthBonus);
-                    order.ExpireDate = order.ExpireDate.Value.AddDays(packageEvent.DayBonus);
-
-                    await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
+                    if (!order.ExpireDate.HasValue)
                     {
-                        StudentId = student!.Id,
-                        Month = package.MonthNumber + packageEvent.MonthBonus,
-                        Day = packageEvent.DayBonus
-                    }, cancellationToken);
+                        order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber + packageEvent.MonthBonus);
+                        order.ExpireDate = order.ExpireDate.Value.AddDays(packageEvent.DayBonus);
+                        await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
+                        {
+                            StudentId = student!.Id,
+                            Month = package.MonthNumber + packageEvent.MonthBonus,
+                            Day = packageEvent.DayBonus
+                        }, cancellationToken);
+                    }
+                    else
+                    {
+                        await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
+                        {
+                            StudentId = student!.Id,
+                            ExpiredDate = order.ExpireDate
+                        }, cancellationToken);
+                    }
 
                     if (order.IsInvoice)
                     {
@@ -190,7 +200,7 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                 {
                     Status = request.OrderStatus == EnumOrderStatus.Payment ? EnumOrderTransactionStatus.Success : EnumOrderTransactionStatus.Fail,
                     ResponseBody = request.Receipt,
-                    Type = request.Type == EnumOrderTransactionType.AppStore ? EnumOrderTransactionType.AppStore : (request.Type == EnumOrderTransactionType.GooglePlay ? EnumOrderTransactionType.GooglePlay : EnumOrderTransactionType.BankTransfer)
+                    Type = request.Type ?? EnumOrderTransactionType.BankTransfer
                 });
 
                 order.Status = request.OrderStatus;
@@ -199,10 +209,18 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
 
                 #region Gửi mail thanh toán
 
-                //if (order.Status == EnumOrderStatus.Payment)
-                //{
-                //    await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
-                //}
+                if (order.Status == EnumOrderStatus.Payment)
+                {
+                    if (request.IsSendEmail)
+                    {
+                        await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
+                    }
+                    await _mediator.Send(new AddFeatureMissionCommand()
+                    {
+                        ReceiverId = order.UserId,
+                        FeatureUserReferral = EnumFeatureUserReferral.Payment
+                    }, cancellationToken).ConfigureAwait(false);
+                }
 
                 #endregion Gửi mail thanh toán
 

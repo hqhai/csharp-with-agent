@@ -24,6 +24,18 @@ namespace Fsel.Shared.Enums
         PaymentApproval,
         MailPaymentForStudent,
         MailPaymentForCustomer,
-        MailFromLandingPage
+        MailFromLandingPage,
+        CreateUser,
+        CreateUserForEventULIS,
+
+        #region event
+
+        CreateAccountWithEventSuccess,
+        SignUpEventSuccess,
+        WasInAnotherEvent,
+        LearnedOnThePlatform,
+        NotEligibleToParticipate
+
+        #endregion event
     }
 }

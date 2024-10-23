@@ -53,7 +53,8 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
                 return methodResult;
             }
 
-            var packages = await _packageRepository.Queryable.ToListAsync(cancellationToken);
+            var eventModel = _mapper.Map<EventModel>(@event);
+            var packages = await _packageRepository.Queryable.Where(p => p.Status == EnumPackageStatus.Active).ToListAsync(cancellationToken);
 
             foreach (var item in @event.PackageEvents)
             {
@@ -64,13 +65,13 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
                     return methodResult;
                 }
                 var packageModel = _mapper.Map<PackageModel>(package);
-                packageModel.EventId = @event.Id;
+                packageModel.EventId = eventModel.Id;
                 packageModel.Price = item.Price;
                 packageModel.PriceMonth = item.PriceMonth;
                 packageModel.MonthBonus = item.MonthBonus;
                 packageModel.DayBonus = item.DayBonus;
-                packageModel.ImagePaths = @event.ImagePaths;
-                packageModel.EventDescription = @event.Description;
+                packageModel.ImagePaths = eventModel.ImagePaths;
+                packageModel.EventDescription = eventModel.Description;
                 packageModel.Suggests = item.Suggests;
                 packageModels.Add(packageModel);
             }
