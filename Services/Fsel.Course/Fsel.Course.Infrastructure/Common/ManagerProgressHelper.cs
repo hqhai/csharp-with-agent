@@ -82,6 +82,8 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 ContentCompleted = string.Format("{0} / {1}", currentProgress, progress),
                 StartDate = courseResult.ProcessDate,
+                CreatedDate = courseResult.CreatedDate,
+                UpdatedDate = courseResult.UpdatedDate,
                 EndDate = courseResult.CompletionDate,
                 CourseName = courseResult.Course?.Code,
                 CourseId = courseResult.Course?.Id ?? default,
