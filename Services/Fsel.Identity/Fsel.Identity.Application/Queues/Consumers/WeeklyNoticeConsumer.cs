@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Queues.Consumers
     using System.Threading.Tasks;
     using Fsel.Core.Base;
     using Fsel.Identity.Application.Commands.StudentCmd;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
 
@@ -23,8 +24,7 @@ namespace Fsel.Identity.Application.Queues.Consumers
             {
                 return;
             }
-            await _mediator.Send(new NoticeExtendCommand()
-            ).ConfigureAwait(false);
+            await _mediator.Send(new WeeklyNoticeCommand { WeeklyNoticeType = message.WeeklyNoticeType }).ConfigureAwait(false);
         }
     }
 }
