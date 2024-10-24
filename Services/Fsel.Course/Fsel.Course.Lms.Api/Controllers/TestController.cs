@@ -104,6 +104,40 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// Import Module Process
+        /// </summary>
+        [HttpPost("import-module-process")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> ImportModuleProcess([FromForm] ImportUpdateModuleProgressCommand command)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Export_File_Error.xlsx");
+        }
+
+        /// <summary>
+        /// Export Module Process
+        /// </summary>
+        [HttpPost("export-template-module-process")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> ExportModuleProcess()
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(new ExportFileTemplateUpdateModuleCommand()).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Export_File_Template_ModuleProgess.xlsx");
+        }
+
+        /// <summary>
         /// Delete Video Time Code Answers
         /// </summary>
         [HttpPost("queue-test/{queueName}/{queueTopic}")]
