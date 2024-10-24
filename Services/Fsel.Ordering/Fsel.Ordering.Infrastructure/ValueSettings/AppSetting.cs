@@ -62,6 +62,7 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
     {
         public string? AppSecret { get; set; }
         public string? AppId { get; set; }
+        public IList<string>? DisableCategories { get; set; }
     }
 
     public class PayooConfig
