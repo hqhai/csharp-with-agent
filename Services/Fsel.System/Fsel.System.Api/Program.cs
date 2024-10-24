@@ -63,6 +63,9 @@ builder.Services.AddScoped<ITechieRepository, TechieRepository>();
 builder.Services.AddScoped<ITechieActionRepository, TechieActionRepository>();
 builder.Services.AddScoped<IStudentTechieRepository, StudentTechieRepository>();
 builder.Services.AddScoped<ILuckyTicketRepository, LuckyTicketRepository>();
+
+builder.Services.AddScoped<IFselRatingRepository, FselRatingRepository>();
+
 builder.Services.AddScoped<ICourseTargetConfigRepository, CourseTargetConfigRepository>();
 builder.Services.AddScoped<ICourseSuggestConfigRepository, CourseSuggestConfigRepository>();
 builder.Services.AddScoped<IBannerRepository, BannerRepository>();
