@@ -4,6 +4,7 @@ using Fsel.Ordering.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingDbContext))]
-    partial class OrderingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240904092623_Update_PackageTable_Add_ReferToken_For_Package24Months")]
+    partial class Update_PackageTable_Add_ReferToken_For_Package24Months
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -567,7 +570,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             Price = 500000m,
                             PriceMonth = 500000m,
                             ReferToken = 50000,
-                            Status = "Active"
+                            Status = "InActive"
                         },
                         new
                         {
@@ -614,8 +617,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             Name = "Fsel_24_Months",
                             Price = 7200000m,
                             PriceMonth = 300000m,
-                            Status = "Active",
-                            ReferToken = 720000 
+                            ReferToken = 720000,
+                            Status = "Active"
                         });
                 });
 
@@ -675,11 +678,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<decimal>("PriceMonth")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("SuggestStr")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
@@ -719,7 +717,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             PackageId = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"),
                             Price = 500000m,
                             PriceMonth = 500000m,
-                            Status = "Active",
                             SuggestStr = "null"
                         },
                         new
@@ -735,7 +732,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             PackageId = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"),
                             Price = 2400000m,
                             PriceMonth = 320000m,
-                            Status = "Active",
                             SuggestStr = "[\"BestSeller\"]"
                         },
                         new
@@ -751,7 +747,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             PackageId = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"),
                             Price = 3600000m,
                             PriceMonth = 240000m,
-                            Status = "Active",
                             SuggestStr = "[\"Recommend\"]"
                         });
                 });
@@ -1148,18 +1143,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
-
-                    b.Property<string>("Source")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("SourceName")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<Guid?>("SourceUserId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
