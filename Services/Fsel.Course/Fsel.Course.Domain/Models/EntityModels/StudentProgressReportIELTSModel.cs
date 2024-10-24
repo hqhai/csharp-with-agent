@@ -144,6 +144,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
         [EpplusTableColumn(Header = "Thời gian bắt đầu học", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
         public DateTime? ProcessDate { get; set; }
 
+        [EpplusTableColumn(Header = "Ngày truy cập gần nhất", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
+        public DateTime? LastVisited { get; set; }
+
         [EpplusTableColumn(Header = "Ngày hết hạn", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
         public DateTime? ExpiredDate { get; set; }
     }

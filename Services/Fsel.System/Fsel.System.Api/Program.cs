@@ -68,6 +68,9 @@ builder.Services.AddScoped<ICourseSuggestConfigRepository, CourseSuggestConfigRe
 builder.Services.AddScoped<IBannerRepository, BannerRepository>();
 builder.Services.AddScoped<IBannerStudentRepository, BannerStudentRepository>();
 
+
+builder.Services.AddScoped<IFselRatingRepository, FselRatingRepository>();
+
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
