@@ -105,6 +105,8 @@ namespace Fsel.System.Infrastructure
 
         public DbSet<FselRating> FselRatings { get; set; }
 
+        public DbSet<FselRating> FselRatings { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             ArgumentNullException.ThrowIfNull(optionsBuilder);
