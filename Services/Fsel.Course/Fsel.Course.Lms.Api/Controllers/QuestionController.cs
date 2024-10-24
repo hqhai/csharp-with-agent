@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersions(ApiSettings.APIVersion1)]
+    [ApiController]
     [Route(Settings.APIDefaultRoute + "/question")]
     [Permission(role: nameof(EnumRole.Student))]
     public class QuestionController : ControllerBase
