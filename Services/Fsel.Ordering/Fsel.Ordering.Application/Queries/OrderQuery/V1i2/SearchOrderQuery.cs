@@ -9,6 +9,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels.V1i2;
     using Fsel.Ordering.Domain.Models.QueryModels.Oders.V1i2;
@@ -25,11 +26,13 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
     {
         private readonly IOrderRepository _orderRepository;
         private readonly AuthContext _authContext;
+        private readonly IUserService _userService;
 
-        public SearchOrderQueryHandler(IOrderRepository orderRepository, AuthContext authContext)
+        public SearchOrderQueryHandler(IOrderRepository orderRepository, AuthContext authContext, IUserService userService)
         {
             _orderRepository = orderRepository;
             _authContext = authContext;
+            _userService = userService;
         }
 
         public async Task<MethodResult<PagingItemsModel<SearchOrderModel>>> Handle(SearchOrderQuery request, CancellationToken cancellationToken)
@@ -41,8 +44,6 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
             {
                 Id = x.Id,
                 Code = x.Code,
-                FullName = x.FullName,
-                Email = x.Email,
                 UserId = x.UserId,
                 CreatedDate = x.CreatedDate,
                 UpdatedDate = x.UpdatedDate,
@@ -110,6 +111,19 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
+
+            var userIds = lists.Select(l => l.UserId).Distinct().ToList();
+            if (userIds.Any())
+            {
+                var studentResults = await _userService.GetStudentsByIdsAsync(userIds);
+                var students = studentResults.Content?.Result;
+                lists.ForEach(p =>
+                {
+                    var student = students?.FirstOrDefault(x => x.Human != null && x.Human.UserId == p.UserId);
+                    p.Email = student?.Human?.Email;
+                    p.FullName = student?.Human?.FullName;
+                });
+            }
 
             methodResult.Result = new PagingItemsModel<SearchOrderModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
