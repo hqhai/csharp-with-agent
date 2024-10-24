@@ -197,41 +197,53 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
                 return methodResult;
             });
-            if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && sectionGroup.Sections.Any() && request.IsSubmit)
+            try
             {
-                // await _speakingAIService.EvaluationSpeakingAI(request.MockTestResultId, request.SectionGroupId, cancellationToken);
-
-                SpeakingAIEvaluationModel speakingEvaluationModel = new SpeakingAIEvaluationModel()
+                if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && sectionGroup.Sections.Any() && request.IsSubmit)
                 {
-                    MockTestResultId = request.MockTestResultId,
-                    SectionGroupId = request.SectionGroupId,
-                };
-                await _submitSpeakingAIPublisher.Publish(speakingEvaluationModel, cancellationToken);
+                    // await _speakingAIService.EvaluationSpeakingAI(request.MockTestResultId, request.SectionGroupId, cancellationToken);
+
+                    SpeakingAIEvaluationModel speakingEvaluationModel = new SpeakingAIEvaluationModel()
+                    {
+                        MockTestResultId = request.MockTestResultId,
+                        SectionGroupId = request.SectionGroupId,
+                    };
+                    await _submitSpeakingAIPublisher.Publish(speakingEvaluationModel, cancellationToken);
+                }
+            }
+            catch
+            {
             }
 
-            if (sectionGroup.CourseSkill == EnumCourseSkill.Writing && sectionGroup.Sections.Any() && request.IsSubmit)
+            try
             {
-                var sectionGroupId = sectionGroup.Id;
-                if (request.Answers != null && request.Answers.Count > 0)
+                if (sectionGroup.CourseSkill == EnumCourseSkill.Writing && sectionGroup.Sections.Any() && request.IsSubmit)
                 {
-                    foreach (var item in request.Answers)
+                    var sectionGroupId = sectionGroup.Id;
+                    if (request.Answers != null && request.Answers.Count > 0)
                     {
-                        if (item.SectionId == null)
+                        foreach (var item in request.Answers)
                         {
-                            continue;
+                            if (item.SectionId == null)
+                            {
+                                continue;
+                            }
+                            await SendToChatGpt((Guid)item.SectionId, sectionGroupId, mockTestResult.Id, item.Answer?.ToString(), cancellationToken);
                         }
-                        await SendToChatGpt((Guid)item.SectionId, sectionGroupId, mockTestResult.Id, item.Answer?.ToString(), cancellationToken);
                     }
-                }
-                else if (request.Answers == null || request.Answers.Count == 0)
-                {
-                    var mockTestAnswers = _mockTestAnswerRepository.Queryable.Where(x => x.MockTestResultId == mockTestResult.Id && x.SectionGroupResultId == sectionGroupResult.Id).ToList();
-
-                    foreach (var item in mockTestAnswers)
+                    else if (request.Answers == null || request.Answers.Count == 0)
                     {
-                        await SendToChatGpt(item.SectionId ?? default, sectionGroupId, mockTestResult.Id, item.AnswerStr, cancellationToken);
+                        var mockTestAnswers = _mockTestAnswerRepository.Queryable.Where(x => x.MockTestResultId == mockTestResult.Id && x.SectionGroupResultId == sectionGroupResult.Id).ToList();
+
+                        foreach (var item in mockTestAnswers)
+                        {
+                            await SendToChatGpt(item.SectionId ?? default, sectionGroupId, mockTestResult.Id, item.AnswerStr, cancellationToken);
+                        }
                     }
                 }
+            }
+            catch
+            {
             }
 
             await UpdateMockTestResultAsync(mockTestResult, isSkillTest, cancellationToken);

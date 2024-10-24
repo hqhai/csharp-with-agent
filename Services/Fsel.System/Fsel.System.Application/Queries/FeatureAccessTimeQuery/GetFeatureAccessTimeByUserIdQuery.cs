@@ -24,6 +24,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             _featureAccessTimeRepository = featureAccessTimeRepository;
             _mapper = mapper;
         }
+
         public async Task<MethodResult<IList<object>>> Handle(GetFeatureAccessTimeByUserIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -33,12 +34,12 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             var querys = await _featureAccessTimeRepository.Queryable
                 .Where(x => request.UserIds.Contains(x.CreatedUserId))
                 .GroupBy(x => x.CreatedUserId)
-                                                           .Select(x => new GetFeatureAccessTimeIntegrationModel
-                                                           {
-                                                               CreatedUserId = x.Key,
-                                                               LastVisited = x.OrderByDescending(x => x.LastVisited).FirstOrDefault() != null ? x.OrderByDescending(x => x.LastVisited).FirstOrDefault()!.LastVisited : null,
-                                                               AccessTime = x.Sum(x => x.AccessTime)
-                                                           })
+                .Select(x => new GetFeatureAccessTimeIntegrationModel
+                {
+                    CreatedUserId = x.Key,
+                    LastVisited = x.OrderByDescending(x => x.LastVisited).FirstOrDefault() != null ? x.OrderByDescending(x => x.LastVisited).FirstOrDefault()!.LastVisited : null,
+                    AccessTime = x.Sum(x => x.AccessTime)
+                })
                 .ToListAsync(cancellationToken);
 
             if (querys == null)
@@ -55,9 +56,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
     public class GetFeatureAccessTimeIntegrationModel
     {
         public Guid? CreatedUserId { get; set; }
-
         public DateTime? LastVisited { get; set; }
-
         public long? AccessTime { get; set; }
     }
 }

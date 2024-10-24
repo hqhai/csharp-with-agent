@@ -4851,11 +4851,12 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CourseId");
-
                     b.HasIndex("CourseUnitMockTestId");
 
                     b.HasIndex("UnitId");
+
+                    b.HasIndex("CourseId", "UnitId", "StudentId")
+                        .IsUnique();
 
                     b.ToTable("UnitResults");
                 });
