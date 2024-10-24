@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
 {
+    using System.Linq;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -12,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.QuestionExplanationErrors;
     using Fsel.Course.Lms.Application.Services.SystemService;
-    using Fsel.Course.Lms.Application.Services.SystemService.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -148,25 +148,10 @@ namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
             {
                 return;
             }
-            await _systemService.AddErrorReportExplanationQuestionToGoogleSheet(question).ConfigureAwait(false);
             var logExplanations = await _questionExplanationLogRepository.Queryable.Where(x => x.QuestionId == question.QuestionId).OrderBy(x => x.CreatedDate).ToListAsync();
-            if (!logExplanations.Any())
-            {
-                return;
-            }
-            await _systemService.AddPromptExplanationQuestionToGoogleSheet(new AddPromptExplanationQuestionCommandModel
-            {
-                AddPromptExplanationQuestions = logExplanations.Select(x => new AddQuestionExplanationPromptModel
-                {
-                    QuestionId = question.QuestionId,
-                    Config = question.Config,
-                    CourseLevel = question.CourseLevel,
-                    Explanation = question.Explanation,
-                    QuestionType = question.QuestionType,
-                    PromptRequest = x.PromptRequest,
-                    PromptResponse = x.PromptResponse,
-                }).ToList()
-            }).ConfigureAwait(false);
+            question.PromptRequest = string.Join("\n", logExplanations.Select(x => x.PromptRequest).ToList());
+            question.PromptResponse = string.Join("\n", logExplanations.Select(x => x.PromptResponse).ToList());
+            await _systemService.AddErrorReportExplanationQuestionToGoogleSheet(question).ConfigureAwait(false);
         }
     }
 }

@@ -56,8 +56,5 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Post("/v1/google-sheet/add-error-report-explanation-question")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> AddErrorReportExplanationQuestionToGoogleSheet([FromBody] AddErrorReportExplanationQuestionModel model);
-
-        [Post("/v1/google-sheet/add-prompt-explanation-question")]
-        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> AddPromptExplanationQuestionToGoogleSheet([FromBody] AddPromptExplanationQuestionCommandModel model);
     }
 }

@@ -48,7 +48,6 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public string? RegisterStudentForEventSpreadSheetId { get; set; }
         public string? ErrorReportExplanationQuestionId { get; set; }
         public string? ErrorReportExplanationQuestion { get; set; }
-        public string? PromptExplanationQuestion { get; set; }
     }
 
     public class Services : BaseServices

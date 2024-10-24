@@ -13,6 +13,8 @@ namespace Fsel.Shared.Models.ShareModels
         public EnumQuestionType QuestionType { get; set; }
         public object? Config { get; set; }
         public string? Explanation { get; set; }
+        public string? PromptRequest { get; set; }
+        public string? PromptResponse { get; set; }
         public string? Feedback { get; set; }
     }
 }
