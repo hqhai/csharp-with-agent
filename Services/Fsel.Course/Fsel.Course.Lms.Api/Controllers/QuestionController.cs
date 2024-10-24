@@ -17,8 +17,8 @@ namespace Fsel.Course.Lms.Api.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
+    [ApiController]
     [Route(Settings.APIDefaultRoute + "/question")]
     [Permission(role: nameof(EnumRole.Student))]
     public class QuestionController : ControllerBase
