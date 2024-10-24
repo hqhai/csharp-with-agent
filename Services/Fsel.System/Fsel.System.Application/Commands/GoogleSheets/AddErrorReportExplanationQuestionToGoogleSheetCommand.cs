@@ -55,6 +55,8 @@ namespace Fsel.System.Application.Commands.GoogleSheets
                     request.QuestionType.ToString(),
                     request.Config?.ToString() ?? string.Empty,
                     request.Explanation ?? string.Empty,
+                    request.PromptRequest ?? string.Empty,
+                    request.PromptResponse ?? string.Empty,
                     DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd-MM-yyyy HH:mm:ff", CultureInfo.CurrentCulture),
                     request.Feedback ?? string.Empty,
                 }
