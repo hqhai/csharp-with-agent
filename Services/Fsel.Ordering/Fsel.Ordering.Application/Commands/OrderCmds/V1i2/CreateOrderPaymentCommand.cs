@@ -216,8 +216,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 }
                 else
                 {
-                    await _mediator.Send(new SendMailPaymentCommand() { OrderId = newOrder.Id }, cancellationToken);
-                }
+                await _mediator.Send(new SendMailPaymentCommand() { OrderId = newOrder.Id }, cancellationToken);
+            }
             }
 
             return methodResult;

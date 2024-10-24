@@ -45,18 +45,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Get SubQuestion
-        /// </summary>
-        [HttpGet("sub-questions")]
-        [ProducesResponseType(typeof(MethodResult<IList<SubQuestionModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetSubQuestion([FromQuery] GetSubQuestionsByMockTestQuery query)
-        {
-            MethodResult<IList<SubQuestionModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Get Question
         /// </summary>
         [HttpPost("error-report-explanation-question")]
@@ -66,6 +54,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get SubQuestion
+        /// </summary>
+        [HttpGet("sub-questions")]
+        [ProducesResponseType(typeof(MethodResult<IList<SubQuestionModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSubQuestion([FromQuery] GetSubQuestionsByMockTestQuery query)
+        {
+            MethodResult<IList<SubQuestionModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }
