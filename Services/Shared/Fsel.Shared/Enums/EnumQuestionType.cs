@@ -55,6 +55,44 @@ namespace Fsel.Shared.Enums
         MultipleOptionSentenceCompletion,
 
         [Description("Exercise preparation")]
-        ExercisePreparation
+        ExercisePreparation,
+
+        // Dạng hỏi mới
+
+        [Description("Multiple Choice")]
+        MultichoiceV1,
+
+        [Description("Check list")]
+        CheckListV1,
+
+        [Description("Summary completion (Gap fill)")]
+        SummaryCompletionGapFill,
+
+        [Description("Completion Diagrams")]
+        CompletionDiagrams,
+
+        [Description("Yes/No/Not given (Drop down)")]
+        YesNoNotGivenDropDown,
+
+        [Description("True/False/Not given (Drop down)")]
+        TrueFalseNotGivenDropDown,
+
+        [Description("Map labeling (Drop down)")]
+        MapLabelingDropDown,
+
+        [Description("Summary completion (Drop down)")]
+        SummaryCompletionDropDown,
+
+        [Description("Matching paragraph info")]
+        MatchingParagraphInfo,
+
+        [Description("Matching heading")]
+        MatchingHeading,
+
+        [Description("Table Completion")]
+        TableCompletion,
+
+        [Description("Flow chart completion")]
+        FlowChartCompletion,
     }
 }

@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -70,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                                                             .FirstOrDefaultAsync(x => x.Id == request.MockTestId, cancellationToken);
             if (mockTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTest));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
 
@@ -89,35 +90,54 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             return methodResult;
         }
 
-        private async Task<List<SectionGroup>> GetSectionGroupsAsync(MockTestResult mockTestResult, CancellationToken cancellationToken)
+        private async Task<List<SectionGroup>> GetSectionGroupsAsync(MockTestResult mockTestResult, MockTest mockTest, CancellationToken cancellationToken)
         {
-            return await _sectionGroupRepository.Queryable
-                                       .Include(x => x!.Sections.Where(y => !y.IsDeleted))
-                                       .ThenInclude(x => x.SectionTimeCodes.Where(y => !y.IsDeleted))
-                                       .Include(x => x!.Sections.Where(y => !y.IsDeleted))
-                                       .ThenInclude(x => x.SectionParts.Where(y => !y.IsDeleted))
-                                       .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
-                                       .ThenInclude(x => x.Question)
-                                       .Include(x => x!.Sections.Where(y => !y.IsDeleted))
-                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
-                                       .Include(x => x!.SectionGroupResults.Where(x => x.MockTestResultId == mockTestResult.Id))
-                                       .Where(x => x.MockTestSections.Any(x => x.MockTestId == mockTestResult.MockTestId))
-                                       .OrderBy(x => x.CourseSkill)
-                                       .AsNoTracking()
-                                       .ToListAsync(cancellationToken);
+            if (mockTest.Version == (int)EnumVersion.V1)
+            {
+                return await _sectionGroupRepository.Queryable
+                                     .Include(x => x!.Sections.Where(y => !y.IsDeleted))
+                                     .ThenInclude(x => x.SectionTimeCodes.Where(y => !y.IsDeleted))
+                                     .Include(x => x!.Sections.Where(y => !y.IsDeleted))
+                                     .ThenInclude(x => x.SectionParts)
+                                     .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
+                                     .ThenInclude(x => x.Question)
+                                     .Include(x => x!.Sections.Where(y => !y.IsDeleted))
+                                     .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
+                                     .Include(x => x!.SectionGroupResults.Where(x => x.MockTestResultId == mockTestResult.Id))
+                                     .Where(x => x.MockTestSections.Any(x => x.MockTestId == mockTestResult.MockTestId))
+                                     .OrderBy(x => x.CreatedDate)
+                                     .AsNoTracking()
+                                     .ToListAsync(cancellationToken);
+            }
+            else
+            {
+                return await _sectionGroupRepository.Queryable
+                                     .Include(x => x!.Sections.Where(y => !y.IsDeleted))
+                                     .ThenInclude(x => x.SectionTimeCodes.Where(y => !y.IsDeleted))
+                                     .Include(x => x!.Sections.Where(y => !y.IsDeleted))
+                                     .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
+                                     .ThenInclude(x => x.Question)
+                                     .Include(x => x!.Sections.Where(y => !y.IsDeleted))
+                                     .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
+                                     .Include(x => x!.SectionGroupResults.Where(x => x.MockTestResultId == mockTestResult.Id))
+                                     .Where(x => x.MockTestSections.Any(x => x.MockTestId == mockTestResult.MockTestId))
+                                     .OrderBy(x => x.CreatedDate)
+                                     .AsNoTracking()
+                                     .ToListAsync(cancellationToken);
+            }
         }
 
         private async Task<MockTestModel> GetMockTestAsync(MockTest mockTest, MockTestResult mockTestResult, CancellationToken cancellationToken)
         {
             var mockTestDetail = _mapper.Map<MockTestModel>(mockTest);
-            var sectionGroups = await GetSectionGroupsAsync(mockTestResult, cancellationToken);
+            var sectionGroups = await GetSectionGroupsAsync(mockTestResult, mockTest, cancellationToken);
             mockTestDetail.TotalQuestion = _sectionGroupConverter.GetTotalQuestion(sectionGroups);
             mockTestDetail.SectionGroups = await _sectionGroupConverter.GetSectionGroupsAsync(sectionGroups, mockTestResult.Id, nameof(SectionGroupResult.MockTestResultId));
-            mockTestDetail.MockTestResult = await GetMockTestResult(mockTestDetail, mockTestResult, sectionGroups);
+            mockTestDetail.MockTestResult = await GetMockTestResultAsync(mockTestDetail, mockTestResult, sectionGroups);
             return mockTestDetail;
         }
 
-        private async Task<MockTestResultModel> GetMockTestResult(MockTestModel mockTestDetail, MockTestResult mockTestResult, IList<SectionGroup>? sectionGroups)
+        private async Task<MockTestResultModel> GetMockTestResultAsync(MockTestModel mockTestDetail, MockTestResult mockTestResult, IList<SectionGroup>? sectionGroups)
         {
             ArgumentNullException.ThrowIfNull(sectionGroups);
             var mockTestResultDto = _mapper.Map<MockTestResultModel>(mockTestResult);
