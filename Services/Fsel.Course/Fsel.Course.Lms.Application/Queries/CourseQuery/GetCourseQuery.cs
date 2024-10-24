@@ -21,6 +21,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -241,7 +242,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             if (course.CourseType == EnumCourseType.Ielts)
             {
                 var mockTestIds = courseUnitMockTests.Where(x => x.MockTestId.HasValue).Select(x => x.MockTestId!.Value).ToList();
-                mockTests = await GetMockTests(mockTestIds, course.Id, studentId);
+                mockTests = await GetMockTests(mockTestIds, course, studentId);
             }
 
             foreach (var courseUnitMockTest in courseUnitMockTests)
@@ -293,9 +294,9 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             }).ToList();
         }
 
-        private async Task<List<MockTestModel>> GetMockTests(IList<Guid> mockTestIds, Guid courseId, Guid? studentId)
+        private async Task<List<MockTestModel>> GetMockTests(IList<Guid> mockTestIds, Course course, Guid? studentId)
         {
-            var mockTests = await _mockTestRepository.Queryable.Include(x => x.MockTestResults.Where(x => x.CourseId == courseId && mockTestIds.Contains(x.MockTestId) && x.StudentId == studentId))
+            var mockTests = await _mockTestRepository.Queryable.Include(x => x.MockTestResults.Where(x => x.CourseId == course.Id && mockTestIds.Contains(x.MockTestId) && x.StudentId == studentId))
                                                                     .ThenInclude(x => x.SectionGroupResults.Where(x => x.StudentId == studentId))
                                                                 .Include(x => x.MockTestSections)
                                                                 .Where(y => mockTestIds.Contains(y.Id))
@@ -306,6 +307,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             {
                 var mockTest = _mapper.Map<MockTestModel>(x);
                 mockTest.MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTestResults.FirstOrDefault());
+                mockTest.MockTestResult.TargetBandScore = course.CourseLevel.GetBandScore();
                 return mockTest;
             }).ToList();
         }
