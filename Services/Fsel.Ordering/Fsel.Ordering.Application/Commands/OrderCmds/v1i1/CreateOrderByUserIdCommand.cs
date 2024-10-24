@@ -9,6 +9,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Queries.OrderQuery;
+    using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
@@ -23,6 +24,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -38,22 +40,30 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
         private readonly IEventRepository _eventRepository;
         private readonly IMediator _mediator;
         private readonly IPackageRepository _packageRepository;
-        private readonly AuthContext _authContext;
         private readonly ILmsCourseService _courseService;
         private readonly IUserService _userService;
         private readonly ITrainingService _trainingService;
+        private readonly AddExpiredDateForStudentPublisher _addExpiredDateForStudentPublisher;
 
-        public CreateOrderByUserIdCommandHandler(IMapper mapper, IOrderRepository orderRepository, IEventRepository eventRepository, IMediator mediator, IPackageRepository packageRepository, AuthContext authContext, ILmsCourseService courseService, IUserService userService, ITrainingService trainingService)
+        public CreateOrderByUserIdCommandHandler(IMapper mapper,
+            IOrderRepository orderRepository,
+            IEventRepository eventRepository,
+            IMediator mediator,
+            IPackageRepository packageRepository,
+            ILmsCourseService courseService,
+            IUserService userService,
+            ITrainingService trainingService,
+            AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
             _eventRepository = eventRepository;
             _mediator = mediator;
             _packageRepository = packageRepository;
-            _authContext = authContext;
             _courseService = courseService;
             _userService = userService;
             _trainingService = trainingService;
+            _addExpiredDateForStudentPublisher = addExpiredDateForStudentPublisher;
         }
 
         public async Task<MethodResult<OrderModel>> Handle(CreateOrderByUserIdCommand request, CancellationToken cancellationToken)
@@ -132,6 +142,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 methodResult.AddErrorBadRequest(newOrder.ErrorMessages);
                 return methodResult;
             }
+
             if (request.IsTrialRegistration)
             {
                 newOrder.IsTrial = request.IsTrialRegistration;
@@ -139,6 +150,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 newOrder.Status = EnumOrderStatus.Payment;
                 newOrder.RevenueType = EnumPaymentRevenueType.NotRevenue;
                 await _userService.CreateStudentTrialRegistration();
+                await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
+                {
+                    StudentId = student.Id,
+                    ExpiredDate = newOrder.ExpireDate
+                }, cancellationToken);
             }
             var numberOfShield = package.Code.HasValue ? (int)package.Code.Value : default;
             var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = request.UserId, CourseId = request.CourseId, PackageId = newOrder.PackageId ?? default, NumberOfShield = numberOfShield });
@@ -188,6 +204,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
         private static void AddDataIntoOrder(Order order, string? code, decimal price, Guid courseId, StudentModel student)
         {
             order.FullName = student.Human?.FullName;
+            order.PhoneNumber = student.Human?.PhoneNumber;
             order.Email = student.Human?.Email;
             order.Status = EnumOrderStatus.New;
             order.UserId = student.Human?.UserId ?? default;

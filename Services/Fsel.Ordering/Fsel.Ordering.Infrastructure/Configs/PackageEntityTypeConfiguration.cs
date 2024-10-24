@@ -19,6 +19,12 @@ namespace Fsel.Ordering.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumPackageCode>());
+
+            builder.Property(e => e.Status)
+               .HasMaxLength(100)
+               .HasConversion(
+                   v => v.ToString(),
+                   v => v.EnumParse<EnumPackageStatus>());
         }
     }
 }
