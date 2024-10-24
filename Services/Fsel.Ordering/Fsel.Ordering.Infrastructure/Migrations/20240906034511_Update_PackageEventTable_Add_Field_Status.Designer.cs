@@ -4,6 +4,7 @@ using Fsel.Ordering.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingDbContext))]
-    partial class OrderingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240906034511_Update_PackageEventTable_Add_Field_Status")]
+    partial class Update_PackageEventTable_Add_Field_Status
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -252,6 +255,10 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<string>("CompanyAddress")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("CompanyEmail")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("CompanyName")
                         .HasMaxLength(500)
@@ -614,8 +621,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             Name = "Fsel_24_Months",
                             Price = 7200000m,
                             PriceMonth = 300000m,
-                            Status = "Active",
-                            ReferToken = 720000 
+                            ReferToken = 720000,
+                            Status = "Active"
                         });
                 });
 
