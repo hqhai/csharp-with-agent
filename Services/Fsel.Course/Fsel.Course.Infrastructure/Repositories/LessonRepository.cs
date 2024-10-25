@@ -70,7 +70,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
             var listDones = classForums.Select(x => new
             {
-                CountDone = x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId)).Where(x => x.Status == EnumClassForumResultStatus.Denied || x.Status == EnumClassForumResultStatus.Graded).Count(),
+                CountDone = x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId)).Where(x => x.Status.HasValue).Count(),
                 TotalDone = 1
             }).ToList();
             return NumberHelper.GetPercent(listDones.Sum(x => x.CountDone), listDones.Sum(x => x.TotalDone));

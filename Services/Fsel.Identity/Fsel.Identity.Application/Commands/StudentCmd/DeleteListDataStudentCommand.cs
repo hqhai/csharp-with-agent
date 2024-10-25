@@ -17,10 +17,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+
     public class DeleteListDataStudentCommand : IRequest<MethodResult<bool>>
     {
         public Guid UserId { get; set; }
     }
+
     public class DeleteListDataStudentCommandHandler : IRequestHandler<DeleteListDataStudentCommand, MethodResult<bool>>
     {
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
@@ -65,6 +67,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             _trainingService = trainingService;
             _userManager = userManager;
         }
+
         public async Task<MethodResult<bool>> Handle(DeleteListDataStudentCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);

@@ -22,6 +22,15 @@ namespace Fsel.Shared.Enums
         B2,
 
         [Description("Think 5")]
-        C1
+        C1,
+
+        [Description("Adult Foundation 1")]
+        AF1,
+
+        [Description("Adult Foundation 2")]
+        AF2,
+
+        [Description("Adult Foundation 3")]
+        AF3
     }
 }

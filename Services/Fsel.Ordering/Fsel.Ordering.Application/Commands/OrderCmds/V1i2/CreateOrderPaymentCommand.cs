@@ -19,6 +19,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i2;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
@@ -40,8 +41,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
         private readonly IEventRepository _eventRepository;
         private readonly IVoucherRepository _voucherRepository;
         private readonly AddExpiredDateForStudentPublisher _addExpiredDateForStudentPublisher;
+        private readonly AppSetting _appSetting;
 
-        public CreateOrderPaymentCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, IPackageRepository packageRepository, IUserService userService, IEventRepository eventRepository, AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher, IVoucherRepository voucherRepository)
+        public CreateOrderPaymentCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, IPackageRepository packageRepository, IUserService userService, IEventRepository eventRepository, AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher, IVoucherRepository voucherRepository, AppSetting appSetting)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
@@ -51,6 +53,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             _eventRepository = eventRepository;
             _addExpiredDateForStudentPublisher = addExpiredDateForStudentPublisher;
             _voucherRepository = voucherRepository;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<OrderModel>> Handle(CreateOrderPaymentCommand request, CancellationToken cancellationToken)
@@ -198,7 +201,23 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
 
             if (request.IsSendMail)
             {
+                var createDate = newOrder.CreatedDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+                if (!newOrder.VoucherId.HasValue && _appSetting.VoucherConfigs?.VoucherForRetail?.StartDate <= createDate && _appSetting.VoucherConfigs.VoucherForRetail.EndDate >= createDate && currentDate < _appSetting.VoucherConfigs.VoucherForRetail.ExpiredDate)
+                {
+                    var voucher = await _mediator.Send(new CreateVoucherForRetailCommand()
+                    {
+                        UserId = newOrder.UserId,
+                        PackageId = newOrder.PackageId ?? default,
+                    }, cancellationToken).ConfigureAwait(false);
+                    voucherId = voucher.Result?.Id;
+
+                    await _mediator.Send(new SendMailPaymentWithVoucherCommand() { OrderId = newOrder.Id, VoucherId = voucherId ?? default }, cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
                 await _mediator.Send(new SendMailPaymentCommand() { OrderId = newOrder.Id }, cancellationToken);
+            }
             }
 
             return methodResult;

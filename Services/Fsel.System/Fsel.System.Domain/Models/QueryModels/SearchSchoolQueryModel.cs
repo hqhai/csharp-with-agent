@@ -3,7 +3,7 @@
 namespace Fsel.System.Domain.Models.QueryModels
 {
     using Fsel.Core.Base.BaseModels;
-    using Fsel.System.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class SearchSchoolQueryModel : BaseQueryModel
     {

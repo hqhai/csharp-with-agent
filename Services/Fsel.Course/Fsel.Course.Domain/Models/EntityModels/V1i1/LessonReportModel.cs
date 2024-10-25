@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels.V1i1
 {
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IEntities;
 
     public class LessonReportModel : IHighestStreak
@@ -12,5 +13,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
         public double AnswerTime { get; set; }
         public int? HighestStreak { get; set; }
         public int? TimeCodeHighestStreak { get; set; }
+        public int TotalToken { get; set; }
+        public bool IsShowToken { get; set; }
+        public EnumResultStatus? StatusVideoResult { get; set; }
     }
 }

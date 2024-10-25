@@ -5,6 +5,7 @@ namespace Fsel.Cms.PlanetDefender.Domain.Enums
     public enum EnumCourseType
     {
         Academic,
-        Ielts
+        Ielts,
+        AdultFoundation
     }
 }

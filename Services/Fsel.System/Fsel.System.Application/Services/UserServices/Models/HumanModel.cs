@@ -12,5 +12,6 @@ namespace Fsel.System.Application.Services.UserServices.Models
         public string? PhoneNumber { get; set; }
         public string? Code { get; set; }
         public string? AvatarPath { get; set; }
+        public Guid? UserId { get; set; }
     }
 }

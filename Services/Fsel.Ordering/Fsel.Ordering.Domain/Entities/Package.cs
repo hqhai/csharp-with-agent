@@ -50,9 +50,11 @@ namespace Fsel.Ordering.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? IncentivesWhenPurchasing { get; set; }
 
-        public EnumPackageStatus Status { get; set; }
+        public string? Description { get; set; }
 
-        public int ReferToken { get; set; } 
+        public int ReferToken { get; set; }
+
+        public EnumPackageStatus Status { get; set; }
 
         public ICollection<Order> Orders { get; set; } = new List<Order>();
 

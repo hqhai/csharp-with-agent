@@ -4,16 +4,16 @@ namespace Fsel.System.Application.Commands.LuckyTickets
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
+    using Fsel.System.Application.Queues.Publisher;
     using Fsel.System.Application.Services.GoogleSheetServices;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Infrastructure.ValueSettings;
-    using Google.Apis.Sheets.v4.Data;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -30,26 +30,22 @@ namespace Fsel.System.Application.Commands.LuckyTickets
         private readonly AuthContext _authContext;
         private readonly IGoogleSheetService _googleSheetService;
         private readonly AppSetting _appSetting;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
-        public CreateLuckyTicketCommandHandler(ILuckyTicketRepository luckyTicketRepository, IUserService userService, AuthContext authContext, AppSetting appSetting)
+        public CreateLuckyTicketCommandHandler(ILuckyTicketRepository luckyTicketRepository, IUserService userService, AuthContext authContext, AppSetting appSetting, NotificationMessagePublisher notificationMessagePublisher)
         {
             _luckyTicketRepository = luckyTicketRepository;
             _userService = userService;
             _authContext = authContext;
             _googleSheetService = new GoogleSheetService(ResourceSettings.I18NCredentialsFilePath);
             _appSetting = appSetting;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<VoidMethodResult>> Handle(CreateLuckyTicketCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<VoidMethodResult>();
-
-            DateTime currentDate = DateTime.Now;
-            if (currentDate.Month != 8 || currentDate.Year != 2024)
-            {
-                return methodResult;
-            }
 
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentsResult.IsSuccessStatusCode)
@@ -109,6 +105,19 @@ namespace Fsel.System.Application.Commands.LuckyTickets
                 _luckyTicketRepository.Add(luckyTicketEntity);
                 await _luckyTicketRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
+
+                await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
+                {
+                    UserIds = new List<Guid>() { _authContext.CurrentUserId },
+                    ObjectId = luckyTicketEntity.Id,
+                    ParamsMessage = new List<object> { luckyTicket },
+                    Type = EnumNotificationType.LinkPopup,
+                    Content = EnumNotificationContent.LuckyTicket,
+                    SenderId = _authContext.CurrentUserId,
+                    ParamsLink = new List<object> { luckyTicket },
+                    PlatformCode = EnumPlatformCode.LMS
+                }, cancellationToken);
+
                 return methodResult;
             });
             return methodResult;
