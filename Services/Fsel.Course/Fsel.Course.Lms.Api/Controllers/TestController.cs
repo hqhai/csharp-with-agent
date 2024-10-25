@@ -150,6 +150,19 @@ namespace Fsel.Course.Lms.Api.Controllers
             MethodResult<bool> queryResult = new MethodResult<bool>();
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Import Module Process
+        /// </summary>
+        [HttpGet("unauthorized")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public IActionResult ActionUnauthorized()
+        {
+            MethodResult<string> commandResult = new MethodResult<string>();
+            commandResult.AddError(StatusCodes.Status401Unauthorized, "Unauthorized");
+            return commandResult.GetActionResult();
+        }
     }
 
     public class QueueTestModel
