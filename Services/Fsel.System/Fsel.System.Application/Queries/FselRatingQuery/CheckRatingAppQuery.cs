@@ -59,6 +59,9 @@ namespace Fsel.System.Application.Queries.FselRatingQuery
                     DeviceCode = request.DeviceCode,
                     IsRating = false,
                 }, cancellationToken).ConfigureAwait(false);
+
+                methodResult.Result = isValid;
+                return methodResult;
             }
 
             DateTime dateThreshold = DateTime.UtcNow.AddDays(-FselRatingValue.DelayDateSendingRate).Date;
@@ -72,7 +75,7 @@ namespace Fsel.System.Application.Queries.FselRatingQuery
                            await _fselRatingRepository.Queryable
                                .AnyAsync(x =>
                                    x.DeviceCode == request.DeviceCode &&
-                                   x.AmountRating >= 0 &&
+                                   x.AmountRating > 0 &&
                                    (x.UpdatedDate.HasValue ? x.UpdatedDate.Value.Date : x.CreatedDate.Date) <= dateThreshold,
                                    cancellationToken);
 
