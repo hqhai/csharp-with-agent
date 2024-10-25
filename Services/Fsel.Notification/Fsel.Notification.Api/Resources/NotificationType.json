@@ -500,7 +500,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Khóa học của bạn sẽ kết thúc trong 2 tuần tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
-    "templateLink": "/pricing-plan",
+    "templateLink": "/account?setting=mySubscription",
     "createdDate": "2023-08-28",
     "translations": [
       {
@@ -533,7 +533,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Khóa học của bạn sẽ kết thúc trong 2 ngày tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
-    "templateLink": "/pricing-plan",
+    "templateLink": "/account?setting=mySubscription",
     "createdDate": "2023-08-28",
     "translations": [
       {
