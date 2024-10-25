@@ -14,7 +14,9 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public ClassForumResultProfile()
         {
-            CreateMap<ClassForumResult, ClassForumResultModel>().IgnoreAllNonExisting();
+            CreateMap<ClassForumResult, ClassForumResultModel>()
+                .ForMember(p => p.ClassForumScores, x => x.MapFrom(n => n.ClassForumScores.OrderBy(x => x.CreatedDate)));
+
             CreateMap<CreateClassForumResultCommandModel, ClassForumResult>().IgnoreAllNonExisting();
             CreateMap<ClassForumAIResponseModel, SetTimeRetryClassForumModel>().IgnoreAllNonExisting();
             CreateMap<RateClassForumResultCommandModel, ClassForumResult>().IgnoreAllNonExisting();

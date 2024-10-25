@@ -28,5 +28,15 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Config Question Invalid Format
         /// </summary>
         ConfigInvalidFormat,
+
+        /// <summary>
+        /// Ielts only accepts Standalone
+        /// </summary>
+        IeltsAcceptsStandalone,
+
+        /// <summary>
+        /// AdultFoundation not accepts SkillTest
+        /// </summary>
+        AdultFoundationNotAcceptsSkillTest,
     }
 }

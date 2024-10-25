@@ -13,6 +13,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.TokenHistorys;
     using Fsel.System.Domain.Models.EntityModels;
+    using Fsel.System.Domain.Models.EntityModels.Configs;
     using global::System;
     using global::System.Threading.Tasks;
     using MediatR;
@@ -61,6 +62,19 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
+            var userId = student.Human?.UserId ?? Guid.Empty;
+            var listEventCode = request.TokenHistorys.Where(x => !string.IsNullOrEmpty(x.EventCode)).Select(x => x.EventCode!).ToList();
+            if (listEventCode.Any())
+            {
+                var tokenHistoryStudents = await _tokenHistoryRepository.Queryable.Where(x => x.UserId == userId && x.Feature == EnumTokenFeature.FselEvent).ToListAsync(cancellationToken);
+                var tokenHistoryEvent = tokenHistoryStudents.FirstOrDefault(x => !string.IsNullOrEmpty(x.ConfigData?.EventCode) && listEventCode.Contains(x.ConfigData.EventCode));
+                if (tokenHistoryEvent != null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(tokenHistoryEvent.ConfigData.EventCode), tokenHistoryEvent.ConfigData?.EventCode);
+                    return methodResult;
+                }
+            }
+
             var numberOfToken = student.NumberOfToken;
 
             var tokenHistorys = new List<TokenHistory>();
@@ -69,6 +83,13 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
             {
                 TokenHistory tokenHistory = _mapper.Map<TokenHistory>(item);
                 tokenHistory.InitialToken = numberOfToken;
+                if (!string.IsNullOrEmpty(item.EventCode))
+                {
+                    tokenHistory.ConfigData = new ConfigDataToken
+                    {
+                        EventCode = item.EventCode
+                    };
+                }
                 if (item.Feature != EnumTokenFeature.MarketPlace)
                 {
                     var tokenConfig = tokenConfigs.FirstOrDefault(x => x.Feature == item.Feature && x.Mission == item.Mission);
@@ -82,6 +103,11 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                         }
                     }
                 }
+                tokenHistory.Translations = item.TokenHistoryTranslations?.Select(x => new TokenHistoryTranslation
+                {
+                    Language = x.Language,
+                    Config = x.Config
+                }).ToList() ?? new List<TokenHistoryTranslation>();
 
                 numberOfToken = tokenHistory.RemainToken;
                 tokenHistorys.Add(tokenHistory);

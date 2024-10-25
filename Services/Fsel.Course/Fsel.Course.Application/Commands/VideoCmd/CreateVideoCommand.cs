@@ -51,7 +51,6 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             await _videoRepository.ExecuteTransactionAsync(async () =>
             {
                 video = _videoRepository.Add(video);
-
                 await _videoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

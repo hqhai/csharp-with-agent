@@ -8,5 +8,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Unit have been use
         /// </summary>
         UnitUsed,
+
+        /// <summary>
+        /// Invalid Lesson Quantity
+        /// </summary>
+        InvalidLessonQuantity
     }
 }

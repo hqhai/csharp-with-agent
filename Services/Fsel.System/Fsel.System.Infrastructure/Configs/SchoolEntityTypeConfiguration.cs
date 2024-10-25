@@ -4,8 +4,8 @@ namespace Fsel.System.Infrastructure.Configs
 {
     using Fsel.Common.Helpers;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities;
-    using Fsel.System.Domain.Enums;
     using global::System;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;

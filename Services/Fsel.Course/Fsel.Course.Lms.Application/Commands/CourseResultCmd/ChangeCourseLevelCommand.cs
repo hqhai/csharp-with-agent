@@ -104,10 +104,9 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 return methodResult;
             }
             var userCourseSettings = userCourseSettingsResult.Content?.Result;
-            var userCourseSetting = userCourseSettings?.FirstOrDefault(x => x.Type == EnumUserCourseType.ChangeLevel);
-            if (userCourseSetting != null && userCourseSetting.Value <= 0)
+            if (!userCourseSettings.HasRemainingAttempts(EnumUserCourseType.ChangeLevel))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.ChangesExpired), nameof(userCourseSetting));
+                methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.ChangesExpired), nameof(userCourseSettings));
                 return methodResult;
             }
 

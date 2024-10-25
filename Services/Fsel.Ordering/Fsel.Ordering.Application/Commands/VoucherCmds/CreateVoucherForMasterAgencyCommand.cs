@@ -13,7 +13,6 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Vouchers;
-    using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;

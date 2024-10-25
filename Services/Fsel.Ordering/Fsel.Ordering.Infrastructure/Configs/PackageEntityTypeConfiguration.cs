@@ -21,6 +21,7 @@ namespace Fsel.Ordering.Infrastructure.Configs
                     v => v.EnumParse<EnumPackageCode>());
 
             builder.Property(e => e.Status)
+               .HasDefaultValue(EnumPackageStatus.Active)
                .HasMaxLength(100)
                .HasConversion(
                    v => v.ToString(),

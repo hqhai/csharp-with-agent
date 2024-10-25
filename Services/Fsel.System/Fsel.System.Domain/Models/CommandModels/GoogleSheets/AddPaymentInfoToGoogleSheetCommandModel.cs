@@ -13,5 +13,6 @@ namespace Fsel.System.Domain.Models.CommandModels.GoogleSheets
         public string? CompanyName { get; set; }
         public string? CompanyAddress { get; set; }
         public string? CompanyTaxCode { get; set; }
+        public string? CompanyEmail { get; set; }
     }
 }
