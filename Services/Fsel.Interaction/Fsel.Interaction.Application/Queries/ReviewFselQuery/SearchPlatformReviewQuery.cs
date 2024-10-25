@@ -49,7 +49,7 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                     CreatedUserId = x.CreatedUserId,
                     ReviewType = x.ReviewType,
                     StudentId = x.StudentId,
-                    Stars = x.StudentReviewDetails.Average(x => x.VoteStars),
+                    Stars = x.StudentReviewDetails.Any() ? x.StudentReviewDetails.Average(x => x.VoteStars) : default,
                     StudentReviewQuestionTypes = x.StudentReviewDetails.Select(x => new StudentReviewQuestionTypeModel
                     {
                         Id = x.Id,
@@ -58,6 +58,7 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                         VoteStars = x.VoteStars,
                     }).ToList()
                 });
+
             if (request.NumberOfStars != null)
             {
                 query = query.Where(x => x.Stars + 0.5 >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
