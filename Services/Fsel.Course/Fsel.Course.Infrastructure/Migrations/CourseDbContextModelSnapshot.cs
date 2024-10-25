@@ -5226,6 +5226,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
+                    b.Property<bool>("IsShowToken")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("LessonResultId")
                         .HasColumnType("uniqueidentifier");
 

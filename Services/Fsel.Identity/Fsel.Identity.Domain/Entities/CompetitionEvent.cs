@@ -34,6 +34,13 @@ namespace Fsel.Identity.Domain.Entities
             set { SchoolIdsStr = Common.Helpers.ConvertHelper.Serialize(value); }
         }
 
+        public Guid? LocationId { get; set; }
+
+        public Guid? ParentEventId { get; set; }
+
         public ICollection<StudentCompetitionEvent> StudentCompetitionEvents { get; set; } = new List<StudentCompetitionEvent>();
+
+        public CompetitionEvent? CompetitionEventParent { get; set; }
+        public ICollection<CompetitionEvent> CompetitionEvents { get; set; } = new List<CompetitionEvent>();
     }
 }

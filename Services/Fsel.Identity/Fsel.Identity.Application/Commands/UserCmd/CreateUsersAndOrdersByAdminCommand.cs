@@ -59,6 +59,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     var createUserResult = await _mediator.Send(new CreateUserByAdminCommand()
                     {
                         FullName = item.FullName,
+                        PhoneNumber = item.PhoneNumber,
                         Email = item.Email,
                         School = item.School,
                         SchoolId = item.SchoolId,
@@ -84,6 +85,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 {
                     UserId = user.Id,
                     FullName = item.FullName,
+                    PhoneNumber = item.PhoneNumber,
                     Email = item.Email,
                     MonthNumber = item.MonthNumber,
                     IsRevenue = item.IsRevenue,

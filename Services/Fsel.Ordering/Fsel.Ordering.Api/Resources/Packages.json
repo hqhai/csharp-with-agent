@@ -112,6 +112,7 @@
     "priceMonth": 300000,
     "monthNumber": 24,
     "status": "Active",
+    "referToken": 720000,
     "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
     "createdDate": "2024-09-04",
     "translations": [
