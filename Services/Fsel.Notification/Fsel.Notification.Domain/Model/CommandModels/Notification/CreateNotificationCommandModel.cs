@@ -7,6 +7,7 @@ namespace Fsel.Notification.Domain.Model.CommandModels.Notification
 
     public class CreateNotificationCommandModel
     {
+        public IList<NotificationMessageTranslationModel>? Translations { get; set; }
         public string? Message { get; set; }
 
         public string? Link { get; set; }
@@ -21,4 +22,12 @@ namespace Fsel.Notification.Domain.Model.CommandModels.Notification
 
         public Guid? SenderId { get; set; }
     }
+
+    public class NotificationMessageTranslationModel
+    {
+        public string? Message { get; set; }
+
+        public string? Language { get; set; }
+    }
+
 }

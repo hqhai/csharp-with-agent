@@ -36,6 +36,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public EnumCourseLevel Level { get; set; }
 
+        public EnumCourseType CourseType { get; set; }
+
         //Tham gia cuộc thi
         public string? SchoolName { get; set; }
 

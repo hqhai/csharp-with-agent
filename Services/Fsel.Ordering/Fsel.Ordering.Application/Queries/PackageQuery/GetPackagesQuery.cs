@@ -55,15 +55,16 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
             }
 
             var eventModel = _mapper.Map<EventModel>(@event);
-            var packages = await _packageRepository.Queryable.Where(p => p.Status == EnumPackageStatus.Active).ToListAsync(cancellationToken);
+            var packages = await _packageRepository.Queryable.ToListAsync(cancellationToken);
+
+            @event.PackageEvents = @event.PackageEvents.Where(p => p.Status == EnumEventPackageStatus.Active).ToList();
 
             foreach (var item in @event.PackageEvents)
             {
                 var package = packages.FirstOrDefault(p => p.Id == item.PackageId);
                 if (package == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
-                    return methodResult;
+                    continue;
                 }
                 var packageModel = _mapper.Map<PackageModel>(package);
                 packageModel.EventId = eventModel.Id;

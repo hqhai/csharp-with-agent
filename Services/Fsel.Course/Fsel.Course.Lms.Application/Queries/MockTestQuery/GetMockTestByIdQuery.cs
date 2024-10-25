@@ -38,6 +38,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
         private readonly IMapper _mapper;
 
         public GetMockTestByIdQueryHandler(IMockTestRepository mockTestRepository, ISectionGroupRepository sectionGroupRepository, SectionGroupConverter sectionGroupConverter, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper)
+
         {
             _mockTestRepository = mockTestRepository;
             _sectionGroupRepository = sectionGroupRepository;

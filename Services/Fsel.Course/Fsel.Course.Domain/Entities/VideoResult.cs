@@ -50,9 +50,18 @@ namespace Fsel.Course.Domain.Entities
         public int? HighestStreak { get; set; }
         public int? TimeCodeHighestStreak { get; set; }
 
+        [NotMapped]
+        public int TotalToken
+        {
+            get
+            {
+                return (TokenFirstTime ?? default) + (TokenLastTime ?? default);
+            }
+        }
+
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
-
+        public bool IsShowToken { get; set; }
         public ICollection<VideoTimeCodeResult> VideoTimeCodeResults { get; set; } = new List<VideoTimeCodeResult>();
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
 

@@ -58,8 +58,25 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
         private readonly AppSetting _appSetting;
         private readonly ILogger<CreatePlacementTestAnswerBySectionGroupCommand> _logger;
         private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly DisconnectSocketCalculateTimePublisher _disconnectSocketCalculateTimePublisher;
 
-        public CreatePlacementTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, AuthContext authContext, QuestionConverter questionConverter, SectionGroupConverter sectionGroupConverter, IUserService userService, IMediator mediator, IPlacementTestResultRepository placementTestResultRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, ISectionGroupResultRepository sectionGroupResultRepository, ISectionGroupRepository sectionGroupRepository, IPlacementTestRepository placementTestRepository, IMapper mapper, ICourseRepository courseRepository, AppSetting appSetting, ILogger<CreatePlacementTestAnswerBySectionGroupCommand> logger, QuestBoardPublisher questBoardPublisher)
+        public CreatePlacementTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository,
+                                                                     AuthContext authContext,
+                                                                     QuestionConverter questionConverter,
+                                                                     SectionGroupConverter sectionGroupConverter,
+                                                                     IUserService userService,
+                                                                     IMediator mediator,
+                                                                     IPlacementTestResultRepository placementTestResultRepository,
+                                                                     IPlacementTestAnswerRepository placementTestAnswerRepository,
+                                                                     ISectionGroupResultRepository sectionGroupResultRepository,
+                                                                     ISectionGroupRepository sectionGroupRepository,
+                                                                     IPlacementTestRepository placementTestRepository,
+                                                                     IMapper mapper,
+                                                                     ICourseRepository courseRepository,
+                                                                     AppSetting appSetting,
+                                                                     ILogger<CreatePlacementTestAnswerBySectionGroupCommand> logger,
+                                                                     QuestBoardPublisher questBoardPublisher,
+                                                                     DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -77,6 +94,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             _appSetting = appSetting;
             _logger = logger;
             _questBoardPublisher = questBoardPublisher;
+            _disconnectSocketCalculateTimePublisher = disconnectSocketCalculateTimePublisher;
         }
 
         public async Task<MethodResult<PlacementTestResultModel>> Handle(CreatePlacementTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -151,6 +169,14 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 
             #endregion Validate
 
+            if (request.IsSubmit)
+            {
+                await _disconnectSocketCalculateTimePublisher.Publish(new SetTimeModuleModel
+                {
+                    Type = nameof(PlacementTest),
+                    ObjectId = sectionGroupResult.Id
+                }, cancellationToken);
+            }
             if (request.Answers != null && request.Answers.Any())
             {
                 var answerResult = await CreateAnswerAsync(request, sectionGroupResult);

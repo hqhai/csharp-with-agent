@@ -5011,11 +5011,12 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CourseId");
-
                     b.HasIndex("CourseUnitMockTestId");
 
                     b.HasIndex("UnitId");
+
+                    b.HasIndex("CourseId", "UnitId", "StudentId")
+                        .IsUnique();
 
                     b.ToTable("UnitResults");
                 });
@@ -5224,6 +5225,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<bool>("IsShowToken")
+                        .HasColumnType("bit");
 
                     b.Property<Guid>("LessonResultId")
                         .HasColumnType("uniqueidentifier");

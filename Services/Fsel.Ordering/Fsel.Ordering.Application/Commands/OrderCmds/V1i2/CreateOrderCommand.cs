@@ -80,9 +80,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             }
 
-            if (request.IsInvoice && (string.IsNullOrEmpty(request.CompanyName) || string.IsNullOrEmpty(request.CompanyAddress) || string.IsNullOrEmpty(request.CompanyTaxCode)))
+            if (request.IsInvoice && (string.IsNullOrEmpty(request.CompanyName) || string.IsNullOrEmpty(request.CompanyAddress) || string.IsNullOrEmpty(request.CompanyTaxCode) || string.IsNullOrEmpty(request.CompanyEmail)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
+                return methodResult;
+            }
+
+            if (request.IsInvoice && !request.CompanyEmail.IsValidEmail())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
                 return methodResult;
             }
 
@@ -145,6 +151,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                     CompanyAddress = request.CompanyAddress,
                     CompanyName = request.CompanyName,
                     CompanyTaxCode = request.CompanyTaxCode,
+                    CompanyEmail = request.CompanyEmail,
                     ReferralCode = request.ReferralCode,
                     EventId = request.EventId,
                     VoucherCode = request.VoucherCode,
@@ -206,22 +213,25 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 SendNotify(newOrder.Id, newOrder.UserId, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<OrderModel>(newOrder);
-                if (newOrder.TotalPrice == 0)
-                {
-                    var changeStatusOrdersResult = await _mediator.Send(new ChangeStatusOrderCommand()
-                    {
-                        OrderIds = new[] { newOrder.Id },
-                        RevenueType = EnumPaymentRevenueType.NotRevenue,
-                        Status = EnumOrderStatus.Payment
-                    });
-                    if (!changeStatusOrdersResult.IsOK)
-                    {
-                        methodResult.AddError(changeStatusOrdersResult.ErrorMessages);
-                        return methodResult;
-                    }
-                }
                 return methodResult;
             });
+
+            if (newOrder.TotalPrice == 0)
+            {
+                var changeStatusOrdersResult = await _mediator.Send(new ChangeStatusOrderCommand()
+                {
+                    OrderIds = new[] { newOrder.Id },
+                    RevenueType = EnumPaymentRevenueType.NotRevenue,
+                    Status = EnumOrderStatus.Payment
+                }, cancellationToken);
+
+                if (!changeStatusOrdersResult.IsOK)
+                {
+                    methodResult.AddError(changeStatusOrdersResult.ErrorMessages);
+                    return methodResult;
+                }
+            }
+
             return methodResult;
         }
 

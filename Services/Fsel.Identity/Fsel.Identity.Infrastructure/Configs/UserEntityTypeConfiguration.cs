@@ -15,6 +15,8 @@ namespace Fsel.Identity.Infrastructure.Configs
                 .WithOne(b => b.User)
                 .HasForeignKey<Human>(b => b.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            //builder.Metadata.RemoveIndex(builder.HasIndex(u => u.NormalizedUserName).Metadata.Properties);
         }
     }
 }
