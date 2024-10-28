@@ -477,3 +477,4 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+/Services/Fsel.Storage/Fsel.Storage.Application/Properties/launchSettings.json

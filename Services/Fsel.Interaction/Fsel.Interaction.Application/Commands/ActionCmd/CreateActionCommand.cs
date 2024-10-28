@@ -136,7 +136,8 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                         FeatureModuleQuery query = new FeatureModuleQuery
                         {
                             FeatureModule = EnumFeatureModule.ClassForumResult,
-                            ObjectId = classForumResultTemp?.Id ?? default
+                            ObjectId = classForumResultTemp?.Id ?? default,
+                            UserId = _authContext.CurrentUserId,
                         };
                         var moduleResultReply = await _courseService.GetModuleModel(query);
                         var featureModuleReplyModel = moduleResultReply?.Content?.Result;

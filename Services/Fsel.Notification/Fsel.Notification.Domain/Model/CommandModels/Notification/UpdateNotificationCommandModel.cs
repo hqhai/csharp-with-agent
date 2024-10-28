@@ -3,6 +3,8 @@
 namespace Fsel.Notification.Domain.Model.CommandModels.Notification
 {
     using System;
+    using Fsel.Shared.Enums;
+
     public class UpdateNotificationCommandModel
     {
         public string? Message { get; set; }
@@ -16,5 +18,6 @@ namespace Fsel.Notification.Domain.Model.CommandModels.Notification
         public Guid ObjectId { get; set; }
 
         public Guid? SenderId { get; set; }
+        public EnumNotificationStatus? Status { get; set; }
     }
 }
