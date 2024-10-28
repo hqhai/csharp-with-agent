@@ -35,14 +35,14 @@ namespace Fsel.System.Application.Commands.FselRatingCmd
         public async Task<MethodResult<FselRatingModel>> Handle(CreateFselRatingCommand request, CancellationToken cancellationToken)
         {
             MethodResult<FselRatingModel> methodResult = new MethodResult<FselRatingModel>();
-            var userRating = await _fselRatingRepository.Queryable.FirstOrDefaultAsync(x => x.CreatedUserId == _authContext.CurrentUserId && x.DeviceCode == x.DeviceCode && !x.IsRating && x.AmountRating > 0, cancellationToken);
+            var userRating = await _fselRatingRepository.Queryable.FirstOrDefaultAsync(x => x.CreatedUserId == _authContext.CurrentUserId && !x.IsRating && x.AmountRating > 0, cancellationToken);
             bool isUpdate = false;
             FselRating newFselRating = new FselRating();
 
-            var checkExists = await _fselRatingRepository.Queryable.AnyAsync(x => x.CreatedUserId == _authContext.CurrentUserId || x.DeviceCode == x.DeviceCode, cancellationToken);
+            var checkExists = await _fselRatingRepository.Queryable.AnyAsync(x => x.CreatedUserId == _authContext.CurrentUserId, cancellationToken);
             if (checkExists && userRating == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumErrorFselRating.DuplicateUserInSameDevice));
+                methodResult.AddErrorBadRequest(nameof(EnumErrorFselRating.DataNotFound));
                 return methodResult;
             }
 

@@ -31,12 +31,12 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Check rating app
         /// </summary>
-        [HttpGet("check-rating-app/{deviceCode}")]
+        [HttpGet("check-rating-app")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CheckRatingApp([FromRoute] string? deviceCode)
+        public async Task<IActionResult> CheckRatingApp()
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new CheckRatingAppQuery { DeviceCode = deviceCode }).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(new CheckRatingAppQuery ()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
