@@ -19,7 +19,6 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
     [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/product")]
     [ApiController]
-
     public class ProductController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -72,7 +71,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         /// History redeem Product
         /// </summary>
         [HttpGet("history-redeem-product")]
-        [ProducesResponseType(typeof(MethodResult<ProductModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<HistoryRedeemProductModels>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> HistoryRedeemProduct()
