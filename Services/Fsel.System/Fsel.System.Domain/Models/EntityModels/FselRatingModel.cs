@@ -8,7 +8,6 @@ namespace Fsel.System.Domain.Models.EntityModels
     {
         public bool IsRating { get; set; }
         public int Year { get; set; } = DateTime.UtcNow.Year;
-        public string? DeviceCode { get; set; }
         public int AmountRating { get; set; }
     }
 }

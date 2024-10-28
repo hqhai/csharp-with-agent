@@ -18,7 +18,6 @@ namespace Fsel.System.Application.Queries.FselRatingQuery
 
     public class CheckRatingAppQuery : IRequest<MethodResult<bool>>
     {
-        public string? DeviceCode { get; set; }
     }
 
     public class CheckRatingAppQueryHandler : IRequestHandler<CheckRatingAppQuery, MethodResult<bool>>
@@ -50,13 +49,12 @@ namespace Fsel.System.Application.Queries.FselRatingQuery
 
             bool isValid = true;
             bool doesRecordExist = await _fselRatingRepository.Queryable
-                .AnyAsync(x => x.DeviceCode == request.DeviceCode || x.CreatedUserId == _authContext.CurrentUserId, cancellationToken);
+                .AnyAsync(x => x.CreatedUserId == _authContext.CurrentUserId, cancellationToken);
 
             if (!doesRecordExist)
             {
                 await _mediator.Send(new CreateFselRatingCommand
                 {
-                    DeviceCode = request.DeviceCode,
                     IsRating = false,
                 }, cancellationToken).ConfigureAwait(false);
 
@@ -67,14 +65,10 @@ namespace Fsel.System.Application.Queries.FselRatingQuery
             DateTime dateThreshold = DateTime.UtcNow.AddDays(-FselRatingValue.DelayDateSendingRate).Date;
 
             int recordCount = await _fselRatingRepository.Queryable
-                .CountAsync(x => x.DeviceCode == request.DeviceCode || x.CreatedUserId == _authContext.CurrentUserId, cancellationToken);
+                .CountAsync(x => x.CreatedUserId == _authContext.CurrentUserId, cancellationToken);
 
-
-
-            isValid = recordCount <= FselRatingValue.MoreThanOneDevice &&
-                           await _fselRatingRepository.Queryable
+            isValid = await _fselRatingRepository.Queryable
                                .AnyAsync(x =>
-                                   x.DeviceCode == request.DeviceCode &&
                                    x.AmountRating > 0 &&
                                    (x.UpdatedDate.HasValue ? x.UpdatedDate.Value.Date : x.CreatedDate.Date) <= dateThreshold,
                                    cancellationToken);
