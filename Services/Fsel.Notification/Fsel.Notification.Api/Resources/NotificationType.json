@@ -744,7 +744,7 @@
     "content": "ExtendSuccessfully",
     "icon": "",
     "priority": 1,
-    "templateMessage": "Chào mừng bạn đến với FSEL! Hãy chuẩn bị sẵn sàng cho hành trình học tập trong vòng 24 tháng tới nhé!",
+    "templateMessage": "Chào mừng bạn đến với FSEL! Hãy chuẩn bị sẵn sàng cho hành trình học tập trong vòng {0} tháng tới nhé!",
     "templateLink": "",
     "createdDate": "2023-08-28",
     "translations": [
@@ -752,21 +752,21 @@
         "id": "FCF43E61-7A49-4978-B547-85DE6AEA5363",
         "createdDate": "2024-08-28",
         "notificationTypeId": "30F3DCE8-E8C0-4231-A2B1-8B97E9551129",
-        "templateMessage": "Chào mừng bạn đến với FSEL! Hãy chuẩn bị sẵn sàng cho hành trình học tập trong vòng 24 tháng tới nhé!",
+        "templateMessage": "Chào mừng bạn đến với FSEL! Hãy chuẩn bị sẵn sàng cho hành trình học tập trong vòng {0} tháng tới nhé!",
         "language": "vi-VN"
       },
       {
         "id": "AA0BC23B-2281-4E19-BDFF-10C87DFB6152",
         "createdDate": "2024-08-28",
         "notificationTypeId": "30F3DCE8-E8C0-4231-A2B1-8B97E9551129",
-        "templateMessage": "Welcome to FSEL! Get ready for your learning journey over the next 3 months!",
+        "templateMessage": "Welcome to FSEL! Get ready for your learning journey over the next {0} months!",
         "language": "en-US"
       },
       {
         "id": "EBBD7083-4E2E-4F1F-BB6A-FAEBB371A3CE",
         "createdDate": "2024-08-28",
         "notificationTypeId": "30F3DCE8-E8C0-4231-A2B1-8B97E9551129",
-        "templateMessage": "Bienvenue chez FSEL ! Préparez-vous pour votre parcours d'apprentissage au cours des 3 prochains mois !",
+        "templateMessage": "Bienvenue chez FSEL ! Préparez-vous pour votre parcours d'apprentissage au cours des {0} prochains mois !",
         "language": "fr-FR"
       }
     ]
