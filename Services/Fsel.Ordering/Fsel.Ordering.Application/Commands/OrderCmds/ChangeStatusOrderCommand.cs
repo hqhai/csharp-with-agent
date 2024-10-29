@@ -32,6 +32,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class ChangeStatusOrderCommand : ChangeStatusOrderCommandModel, IRequest<MethodResult<bool>>
     {
@@ -190,23 +191,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         return methodResult;
                     }
                     var course = courseResults.Content?.Result?.FirstOrDefault();
-                    if (course != null)
+                    if (course != null && order != null && order.Package != null && (order.Package.MonthNumber == ExtendMonth.TwentyFourMonth ||
+                                                                   order.Package.MonthNumber == ExtendMonth.TwelveMonth ||
+                                                                   order.Package.MonthNumber == ExtendMonth.SixMonth ||
+                                                                   order.Package.MonthNumber == ExtendMonth.ThreeMonth))
                     {
-                        EnumNotificationContent content = EnumNotificationContent.OrderChangeStatus;
-                        if (order != null && order.Package != null && order.Package.MonthNumber == 24)
-                        {
-                            content = EnumNotificationContent.ExtendSuccessfully;
-                        }
-                        await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
-                        {
-                            UserIds = new List<Guid>() { order.UserId },
-                            ObjectId = order.Id,
-                            ParamsMessage = new List<object> { course.Name ?? string.Empty },
-                            Type = EnumNotificationType.LinkPage,
-                            Content = content,
-                            SenderId = _authContext.CurrentUserId,
-                            PlatformCode = EnumPlatformCode.LMS
-                        }, cancellationToken);
+                        await SendNotification(order, EnumNotificationContent.ExtendSuccessfully, cancellationToken);
                     }
                 }
                 order.OrderTransactions.Add(new OrderTransaction()
@@ -328,6 +318,20 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 _userVoucherLockRepository.Update(userVoucherLock);
                 await _userVoucherLockRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
+        }
+
+        public async Task SendNotification(Order order, EnumNotificationContent content, CancellationToken cancellationToken)
+        {
+            await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
+            {
+                UserIds = new List<Guid>() { order.UserId },
+                ObjectId = order.Id,
+                ParamsMessage = new List<object> { order.Package != null ? order.Package.MonthNumber : string.Empty },
+                Type = EnumNotificationType.LinkPage,
+                Content = content,
+                SenderId = _authContext.CurrentUserId,
+                PlatformCode = EnumPlatformCode.LMS
+            }, cancellationToken);
         }
     }
 }
