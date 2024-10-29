@@ -117,6 +117,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         /// <returns></returns>
         public async Task<IActionResult> VerifyOtp(string? returnUrl, string? type)
         {
+            TempData[nameof(VerifyOtp)] = type;
+
             var userRegisterModel = GetFromTempData(nameof(UserRegisterModel))?.ToString().Deserialize<UserRegisterModel>();
             var forgotModel = GetFromTempData(nameof(ForgotModel))?.ToString().Deserialize<ForgotModel>();
 
@@ -407,9 +409,10 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         /// Registration for sample user login
         /// </summary>
         /// <returns></returns>
-        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None, Duration = 0)]
+        //[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None, Duration = 0)]
         public IActionResult Register(string? returnUrl)
         {
+            TempData[nameof(VerifyOtp)] = string.Empty;
             var vm = new UserRegisterModel
             {
                 ReturnUrl = returnUrl
@@ -422,6 +425,16 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         public async Task<IActionResult> Register(UserRegisterModel? request)
         {
             ArgumentNullException.ThrowIfNull(request);
+
+            var type = GetFromTempData(nameof(VerifyOtp))?.ToString();
+            if (!string.IsNullOrEmpty(type))
+            {
+                return View(new UserRegisterModel
+                {
+                    ReturnUrl = request.ReturnUrl,
+                    IsShowVerifyOtp = true
+                });
+            }
 
             TempData[nameof(UserRegisterModel)] = request.Serialize();
             if (ModelState.IsValid)
@@ -621,7 +634,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
                 if (user is not null)
                 {
-                    var userLogin = await _signInManager.CheckPasswordSignInAsync(user, model.Password ?? string.Empty, true);
+                    var userLogin = await _signInManager.PasswordSignInAsync(user, model.Password ?? string.Empty, model.RememberLogin, true);
 
                     // validate username/password against in-memory store
                     if (userLogin.Succeeded)

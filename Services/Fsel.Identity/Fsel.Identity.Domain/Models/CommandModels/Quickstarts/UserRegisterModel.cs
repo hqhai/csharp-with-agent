@@ -82,5 +82,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
         public string? ReferralCode { get; set; }
 
         public string? ReturnUrl { get; set; }
+
+        public bool? IsShowVerifyOtp { get; set; }
     }
 }

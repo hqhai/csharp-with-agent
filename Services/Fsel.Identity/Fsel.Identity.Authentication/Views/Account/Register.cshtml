@@ -7,13 +7,15 @@
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
     var months = string.Join(",", new[] { "i18n_Jan", "i18n_Feb", "i18n_Mar", "i18n_Apr", "i18n_May", "i18n_Jun", "i18n_Jul", "i18n_Aug", "i18n_Sep", "i18n_Oct", "i18n_Nov", "i18n_Dec" }
                     .Select(x => Localizer[x].ToString()));
+    var isShowVerifyOtp = (Model.IsShowVerifyOtp.HasValue && Model.IsShowVerifyOtp.Value) ? nameof(Model.IsShowVerifyOtp) : string.Empty;
+
     // ViewData["Title"] = "Register";
 }
 
 @section meta {
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    @* <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="-1" />
+    <meta http-equiv="Expires" content="-1" /> *@
 }
 
 @section styles {
@@ -32,6 +34,7 @@
         <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
         <form id="form-Register" asp-route="Register">
             <input type="hidden" asp-for="ReturnUrl" />
+            <input type="hidden" name="IsShowVerifyOtp" value="@isShowVerifyOtp" />
             @Html.AntiForgeryToken()
 
             <!-- What’s your email? section -->

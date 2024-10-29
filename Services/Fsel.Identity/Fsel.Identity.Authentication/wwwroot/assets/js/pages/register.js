@@ -477,6 +477,22 @@
       $genderRadios.prop('checked', false);
     }
     $policyCheckbox.prop('checked', false);
+
+    const isShowVerifyOtp = $("input[name='IsShowVerifyOtp']").val();
+    if (isShowVerifyOtp) {
+      $emailInput.val('');
+      $phoneNumberInput.val('');
+      $firstNameInput.val('');
+      $lastNameInput.val('');
+      $newPasswordInput.val('');
+      $dayInput.val('');
+      $monthInput.val('');
+      $monthBirthdayInput.val('');
+      $yearInput.val('');
+
+      $policyCheckbox.prop('checked', false);
+      $genderRadios.prop('checked', false);
+    }
   });
 
 }(jQuery));	
