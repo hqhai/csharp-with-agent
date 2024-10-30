@@ -122,7 +122,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                     skillScore.Scores = NumberHelper.RoundNumberDouble((double)score / 4); // sửa sau
                 }
                 skillScores.Add(skillScore);
-                mockTestResult.SkillScores.Add(skillScores.Single());
             }
             sectionGroupResult.SkillScores = skillScores;
             sectionGroupResult.CorrectCount += (int)score;
