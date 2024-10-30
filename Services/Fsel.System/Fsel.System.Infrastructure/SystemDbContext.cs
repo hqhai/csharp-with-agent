@@ -56,6 +56,8 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new TechieActionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentTechieEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LuckyTicketEntityTypeConfigConfiguration());
+            
+            modelBuilder.ApplyConfiguration(new FselRatingEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseTargetConfigEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new CourseSuggestConfigEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new BannerEntityTypeConfiguration());
@@ -100,6 +102,8 @@ namespace Fsel.System.Infrastructure
         public DbSet<BannerStudent> BannerStudents { get; set; }
         public DbSet<TokenHistory> TokenHistories { get; set; }
         public DbSet<TokenHistoryTranslation> TokenHistoryTranslations { get; set; }
+
+        public DbSet<FselRating> FselRatings { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
