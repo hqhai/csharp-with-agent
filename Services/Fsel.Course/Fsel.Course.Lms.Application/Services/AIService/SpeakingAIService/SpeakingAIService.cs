@@ -130,8 +130,8 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             mockTestResultTemp.Add(skillScores.Single());
             mockTestResult.SkillScores = mockTestResultTemp;
 
-            _mockTestResultRepository.Update(mockTestResult);
-            await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            // save skillscore to mockTestResult
+            await SaveMockTestScoresToMockTestResultDatabase(mockTestResult, cancellationToken);
 
             await SendToWebSocket(mockTestScores, cancellationToken);
 
@@ -219,6 +219,12 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             }, cancellationToken).ConfigureAwait(false);
 
             return Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
+        }
+
+        private async Task SaveMockTestScoresToMockTestResultDatabase(MockTestResult mockTestResult, CancellationToken cancellationToken)
+        {
+            _mockTestResultRepository.Update(mockTestResult);
+            await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
