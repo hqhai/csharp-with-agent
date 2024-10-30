@@ -252,15 +252,15 @@ namespace Fsel.Shared.Helpers
                 return (string.Empty, string.Empty);
             }
 
-            int lastSpaceIndex = fullName.LastIndexOf(' ');
+            int firstSpaceIndex = fullName.IndexOf(' ');
 
-            if (lastSpaceIndex == -1)
+            if (firstSpaceIndex == -1)
             {
                 return (fullName, string.Empty);
             }
 
-            string firstName = fullName[(lastSpaceIndex + 1)..];
-            string lastName = fullName[..lastSpaceIndex];
+            string lastName = fullName[..firstSpaceIndex];
+            string firstName = fullName[(firstSpaceIndex + 1)..];
 
             return (firstName, lastName);
         }
