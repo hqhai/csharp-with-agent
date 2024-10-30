@@ -12,10 +12,13 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Microsoft.AspNetCore.Mvc;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Attributes;
+    using Fsel.Shared.Enums;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/student-progress")]
     [ApiController]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.AdminSchool))]
     public class StudentProgressController : ControllerBase
     {
         private readonly IMediator _mediator;

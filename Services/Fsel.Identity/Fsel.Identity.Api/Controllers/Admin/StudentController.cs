@@ -49,6 +49,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPut("{studentId}")]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.AdminSchool))]
         public async Task<IActionResult> UpdateStudent([FromRoute] Guid studentId, [FromBody] UpdateStudentByAdminCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
@@ -63,6 +64,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("profile/{studentId}")]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.AdminSchool))]
         public async Task<IActionResult> GetProfileStudent([FromRoute] Guid studentId)
         {
             MethodResult<StudentModel> queryResult = await _mediator.Send(new GetStudentProfileQuery { StudentId = studentId }).ConfigureAwait(false);
@@ -75,6 +77,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("survey/{studentId}")]
         [ProducesResponseType(typeof(MethodResult<IList<StudentSurveyQuestionModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.AdminSchool))]
         public async Task<IActionResult> GetSurveyStudent([FromRoute] Guid studentId)
         {
             MethodResult<IList<StudentSurveyQuestionModel>> queryResult = await _mediator.Send(new GetStudentSurveyQuestionQuery { StudentId = studentId }).ConfigureAwait(false);
@@ -87,6 +90,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("course")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentCourseModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.AdminSchool))]
         public async Task<IActionResult> SearchStudentCourse([FromQuery] SearchStudentCourseQuery query)
         {
             MethodResult<PagingItemsModel<StudentCourseModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -99,6 +103,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("lesson-comment")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentLessonCommentModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.AdminSchool))]
         public async Task<IActionResult> SearchStudentLessonComment([FromQuery] SearchStudentLessonCommentQuery query)
         {
             MethodResult<PagingItemsModel<StudentLessonCommentModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -111,6 +116,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("management")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentSearchAdminModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.AdminSchool))]
         public async Task<IActionResult> SearchStudent([FromQuery] SearchStudentsQuery query)
         {
             MethodResult<PagingItemsModel<StudentSearchAdminModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
