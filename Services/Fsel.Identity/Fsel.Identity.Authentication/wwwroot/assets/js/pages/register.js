@@ -249,7 +249,8 @@
       var day = parseInt($dayInput.val().trim());
 
       const date = new Date(year, month, day);
-      if (date.getFullYear() === year && date.getMonth() === month && date.getDate() === day) {
+      const currentDate = new Date();
+      if (date.getFullYear() === year && date.getMonth() === month && date.getDate() === day && date <= currentDate) {
         $yearInput.removeClass("content-border-danger");
         $monthInput.removeClass("content-border-danger");
         $dayInput.removeClass("content-border-danger");
@@ -262,6 +263,8 @@
         $yearInput.addClass("content-border-danger");
         $monthInput.addClass("content-border-danger");
         $dayInput.addClass("content-border-danger");
+        $("input.text-input-hidden[name='Birthday']").attr("value", `${year}-${month}-${day}`)
+        $("input.text-input-hidden[name='Birthday']").valid();
         $("input.text-input-hidden[name='BirthdayStr']").attr("value", "Birthday");
         $("input.text-input-hidden[name='BirthdayStr']").valid();
       }
