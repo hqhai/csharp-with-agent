@@ -87,7 +87,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("export-file-pts")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
-        public async Task<IActionResult> Export([FromForm] ExportPlacementTestByStudentsQuery query)
+        public async Task<IActionResult> Export([FromQuery] ExportPlacementTestByStudentsQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             if (!commandResult.IsOK || commandResult.Result == null)

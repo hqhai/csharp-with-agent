@@ -4,8 +4,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Lms.Application.Services.SystemService.CommandModels;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
+    using Fsel.Course.Lms.Application.Services.SystemService.QueryModels;
     using Fsel.Shared.Models.ShareModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -56,5 +56,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Post("/v1/google-sheet/add-error-report-explanation-question")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> AddErrorReportExplanationQuestionToGoogleSheet([FromBody] AddErrorReportExplanationQuestionModel model);
+
+        [Get("/v1/school")]
+        Task<IApiResponse<MethodResult<PagingItemsModel<SchoolModel>>>> SearchSchoolAsync([Query] SearchSchoolQueryModel query);
     }
 }

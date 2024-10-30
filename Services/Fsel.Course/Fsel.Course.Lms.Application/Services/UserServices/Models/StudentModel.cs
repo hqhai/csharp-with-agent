@@ -16,6 +16,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
         public EnumCourseLevel? BaseCourseLevel { get; set; }
         public Guid? PackageId { get; set; }
         public Guid? ClassId { get; set; }
+        public string? SchoolClass { get; set; }
+        public string? SchoolGrade { get; set; }
         public double NumberOfToken { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }

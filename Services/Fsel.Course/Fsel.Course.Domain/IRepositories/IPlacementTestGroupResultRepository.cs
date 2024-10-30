@@ -6,8 +6,7 @@ namespace Fsel.Course.Domain.IRepositories
     using Fsel.Course.Domain.Entities;
     using Fsel.Shared.Enums;
 
-    public interface IPlacementTestResultRepository : IRepository<PlacementTestResult>
+    public interface IPlacementTestGroupResultRepository : IRepository<PlacementTestGroupResult>
     {
-        Task<(EnumCourseLevel?, bool)> CheckByPassPlacementTestAsync(Guid studentId, int age);
     }
 }

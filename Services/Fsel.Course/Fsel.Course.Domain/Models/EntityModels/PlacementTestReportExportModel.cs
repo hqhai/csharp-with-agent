@@ -2,10 +2,11 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
+    using System;
     using Fsel.Shared.Enums;
     using OfficeOpenXml.Attributes;
 
-    public class PlacementTestResultExportModel
+    public class PlacementTestReportExportModel
     {
         [EpplusTableColumn(Header = "Họ và tên")]
         public string? Name { get; set; }
