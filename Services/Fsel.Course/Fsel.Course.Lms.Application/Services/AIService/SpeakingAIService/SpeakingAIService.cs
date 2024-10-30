@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 .Include(x => x.SectionGroupResults)
                 .FirstOrDefault(x => x.Id == mockTestResultId);
 
-            if (mockTestResult == null)
+            if (mockTestResult == null || mockTestResult.SkillScores == null)
             {
                 return false;
             }
@@ -122,9 +122,17 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                     skillScore.Scores = NumberHelper.RoundNumberDouble((double)score / 4); // sửa sau
                 }
                 skillScores.Add(skillScore);
+                mockTestResult.SkillScores.Add(skillScores.Single());
             }
             sectionGroupResult.SkillScores = skillScores;
             sectionGroupResult.CorrectCount += (int)score;
+
+            var mockTestResultTemp = mockTestResult.SkillScores.Where(s => s.Skill != sectionGroup?.CourseSkill).ToList();
+            mockTestResultTemp.Add(skillScores.Single());
+            mockTestResult.SkillScores = mockTestResultTemp;
+
+            _mockTestResultRepository.Update(mockTestResult);
+            await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             await SendToWebSocket(mockTestScores, cancellationToken);
 
