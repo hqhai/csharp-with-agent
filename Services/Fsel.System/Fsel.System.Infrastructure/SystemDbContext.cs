@@ -102,7 +102,6 @@ namespace Fsel.System.Infrastructure
         public DbSet<BannerStudent> BannerStudents { get; set; }
         public DbSet<TokenHistory> TokenHistories { get; set; }
         public DbSet<TokenHistoryTranslation> TokenHistoryTranslations { get; set; }
-
         public DbSet<FselRating> FselRatings { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
