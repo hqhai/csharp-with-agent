@@ -56,6 +56,11 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new TechieActionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentTechieEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LuckyTicketEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseTargetConfigEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseSuggestConfigEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new BannerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BannerStudentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TokenHistoryTranslationEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -80,7 +85,6 @@ namespace Fsel.System.Infrastructure
         public DbSet<Location> Locations { get; set; }
         public DbSet<School> Schools { get; set; }
         public DbSet<ErrorReport> ErrorReports { get; set; }
-        public DbSet<TokenHistory> TokenHistories { get; set; }
         public DbSet<ChatbotConfig> ChatbotConfigs { get; set; }
         public DbSet<ChatbotSkillConfig> ChatbotSkillConfigs { get; set; }
         public DbSet<ChatbotTokenConfigs> ChatbotTokenConfigs { get; set; }
@@ -90,6 +94,12 @@ namespace Fsel.System.Infrastructure
         public DbSet<StudentTechie> StudentTechies { get; set; }
         public DbSet<UserConfig> UserConfigs { get; set; }
         public DbSet<LuckyTicket> LuckyTickets { get; set; }
+        public DbSet<CourseTargetConfig> CourseTargetConfigs { get; set; }
+        public DbSet<CourseSuggestConfig> CourseSuggestConfigs { get; set; }
+        public DbSet<Banner> Banners { get; set; }
+        public DbSet<BannerStudent> BannerStudents { get; set; }
+        public DbSet<TokenHistory> TokenHistories { get; set; }
+        public DbSet<TokenHistoryTranslation> TokenHistoryTranslations { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

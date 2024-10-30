@@ -5,7 +5,7 @@ using Fsel.Shared.Enums;
 
 namespace Fsel.Notification.Domain.Entities
 {
-    public class NotificationMessage : Entity
+    public class NotificationMessage : Entity, IMultiLingualObject<NotificationMessageTranslation>
     {
         public Guid? UserId { get; set; }
         public Guid? SenderId { get; set; }

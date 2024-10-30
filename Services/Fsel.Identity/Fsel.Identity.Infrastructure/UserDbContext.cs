@@ -66,6 +66,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new UserReferralEntityTypeConfiguration());
             builder.ApplyConfiguration(new EventRegistrationEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserDeletionEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentDailyStreakEntityTypeConfiguration());
         }
 
         #region Db Set

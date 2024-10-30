@@ -60,7 +60,9 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 return methodResult;
             }
             var mockTestResults = await _mockTestResultRepository.Queryable
-                                .Where(x => x.MockTestId == mockTestResult.MockTestId && classStudentIds.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
+                                .Where(x => x.CourseId == mockTestResult.CourseId && x.MockTestId == mockTestResult.MockTestId)
+                                .Where(x => !mockTestResult.UnitId.HasValue || x.UnitId == mockTestResult.UnitId)
+                                .Where(x => classStudentIds.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
                                 .ToListAsync(cancellationToken);
 
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(classStudentIds);

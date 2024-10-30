@@ -9,6 +9,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Queries.OrderQuery;
+    using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
@@ -23,6 +24,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -38,28 +40,38 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
         private readonly IEventRepository _eventRepository;
         private readonly IMediator _mediator;
         private readonly IPackageRepository _packageRepository;
-        private readonly AuthContext _authContext;
         private readonly ILmsCourseService _courseService;
         private readonly IUserService _userService;
         private readonly ITrainingService _trainingService;
+        private readonly AddExpiredDateForStudentPublisher _addExpiredDateForStudentPublisher;
 
-        public CreateOrderByUserIdCommandHandler(IMapper mapper, IOrderRepository orderRepository, IEventRepository eventRepository, IMediator mediator, IPackageRepository packageRepository, AuthContext authContext, ILmsCourseService courseService, IUserService userService, ITrainingService trainingService)
+        public CreateOrderByUserIdCommandHandler(IMapper mapper,
+            IOrderRepository orderRepository,
+            IEventRepository eventRepository,
+            IMediator mediator,
+            IPackageRepository packageRepository,
+            ILmsCourseService courseService,
+            IUserService userService,
+            ITrainingService trainingService,
+            AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
             _eventRepository = eventRepository;
             _mediator = mediator;
             _packageRepository = packageRepository;
-            _authContext = authContext;
             _courseService = courseService;
             _userService = userService;
             _trainingService = trainingService;
+            _addExpiredDateForStudentPublisher = addExpiredDateForStudentPublisher;
         }
 
         public async Task<MethodResult<OrderModel>> Handle(CreateOrderByUserIdCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OrderModel>();
+
+            #region Validate Student
 
             var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
             if (!studentResult.IsSuccessStatusCode)
@@ -90,6 +102,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
 
+            #endregion Validate Student
+
             var package = await _packageRepository.GetByIdAsync(request.PackageId ?? default);
             if (package == null)
             {
@@ -98,7 +112,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             }
 
             var existsOrder = await _orderRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(x => x.UserId == request.UserId && x.Status == EnumOrderStatus.Payment, cancellationToken);
-
             var courseResult = await _courseService.GetCourseByIdAsync(request.CourseId);
             if (!courseResult.IsSuccessStatusCode)
             {
@@ -108,15 +121,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             var course = courseResult.Content?.Result;
             var newOrder = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == request.UserId && p.Status == EnumOrderStatus.New, cancellationToken);
             var isOrderEmpty = newOrder == null;
-
-            var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student.User?.Code }, cancellationToken).ConfigureAwait(false);
-            string code = codeSend.Result ?? string.Empty;
-
-            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken) && newOrder != null && newOrder.Code != code)
+            string code = string.Empty;
+            do
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(code));
-                return methodResult;
-            }
+                var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student.User?.Code }, cancellationToken).ConfigureAwait(false);
+                code = codeSend.Result ?? string.Empty;
+            } while (await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken) && (newOrder == null || newOrder.Code != code));
             if (newOrder != null)
             {
                 newOrder = _mapper.Map(request, newOrder);
@@ -125,27 +135,26 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             {
                 newOrder = _mapper.Map<Order>(request);
             }
-            newOrder.EventId = _eventRepository.Queryable.FirstOrDefault()?.Id;
-
+            newOrder.EventId = _eventRepository.Queryable.Include(x => x.PackageEvents).FirstOrDefault(x => x.PackageEvents.Any(y => y.PackageId == package.Id))?.Id;
             AddDataIntoOrder(newOrder, code, package.Price, existsOrder?.CourseId ?? course!.Id, student);
-
             if (!newOrder.IsValid())
             {
                 methodResult.AddErrorBadRequest(newOrder.ErrorMessages);
                 return methodResult;
             }
+
             if (request.IsTrialRegistration)
             {
                 newOrder.IsTrial = request.IsTrialRegistration;
                 newOrder.ExpireDate = DateTime.UtcNow.AddDays(ValueSettings.AmountTrialDays);
                 newOrder.Status = EnumOrderStatus.Payment;
-                newOrder.Price = 0;
-                newOrder.DiscountPercent = 0;
-                newOrder.DiscountPrice = 0;
-                newOrder.TotalPrice = 0;
-                newOrder.UserId = request.UserId;
                 newOrder.RevenueType = EnumPaymentRevenueType.NotRevenue;
                 await _userService.CreateStudentTrialRegistration();
+                await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
+                {
+                    StudentId = student.Id,
+                    ExpiredDate = newOrder.ExpireDate
+                }, cancellationToken);
             }
             var numberOfShield = package.Code.HasValue ? (int)package.Code.Value : default;
             var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = request.UserId, CourseId = request.CourseId, PackageId = newOrder.PackageId ?? default, NumberOfShield = numberOfShield });
@@ -154,6 +163,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 methodResult.AddError(addStudentIntoClassResult.Error);
                 return methodResult;
             }
+
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
                 if (isOrderEmpty)
@@ -177,7 +187,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     OrderId = newOrder.Id,
                     OrderStatus = EnumOrderStatus.Payment,
                     Type = EnumOrderTransactionType.BankTransfer,
-                    RevenueType = null
+                    RevenueType = request.RevenueType,
+                    IsSendEmail = request.IsSendEmail
                 }, cancellationToken);
 
                 if (!changeStatusOrderResult.IsOK)
@@ -193,12 +204,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
         private static void AddDataIntoOrder(Order order, string? code, decimal price, Guid courseId, StudentModel student)
         {
             order.FullName = student.User?.FullName;
+            order.PhoneNumber = student.User?.PhoneNumber;
             order.Email = student.User?.Email;
             order.Status = EnumOrderStatus.New;
             order.UserId = student?.UserId ?? default;
             order.Code = code;
             order.Price = price;
-            order.DiscountPercent = 0;
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
             order.CourseId = courseId;

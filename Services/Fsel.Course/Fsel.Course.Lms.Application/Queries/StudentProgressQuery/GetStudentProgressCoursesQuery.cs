@@ -130,7 +130,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 }
                 courseProgress.Add(courseStudentProgress);
             }
-            methodResult.Result = courseProgress;
+            methodResult.Result = courseProgress.OrderByDescending(x => x.UpdatedDate).ThenByDescending(x => x.CreatedDate).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

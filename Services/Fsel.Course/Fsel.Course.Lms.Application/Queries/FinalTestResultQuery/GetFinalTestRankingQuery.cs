@@ -54,13 +54,13 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             }
             var currentClass = await _trainingService.GetClassByStudentId(finalTestResult.StudentId);
             var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
-
-            var finalTestResults = await _finalTestResultRepository.Queryable
-                            .Where(x => x.FinalTestId == finalTestResult.FinalTestId && classStudentIds!.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
-                            .ToListAsync(cancellationToken);
-
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(classStudentIds);
             var students = studentResults?.Content?.Result;
+
+            var finalTestResults = await _finalTestResultRepository.Queryable
+                            .Where(x => classStudentIds != null && classStudentIds.Contains(x.StudentId))
+                            .Where(x => x.FinalTestId == finalTestResult.FinalTestId && x.CourseId == finalTestResult.CourseId && x.Status == EnumResultStatus.Done)
+                            .ToListAsync(cancellationToken);
 
             if (students != null)
             {

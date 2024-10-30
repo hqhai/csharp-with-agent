@@ -13,6 +13,8 @@ namespace Fsel.System.Domain.Models.EntityModels
         public EnumLocationType? Type { get; set; }
         public Guid? ParentId { get; set; }
         public string? Name { get; set; }
+        public string? LocalId { get; set; }
+        public string? LongPath { get; set; }
         public string? LocationName { get; set; }
     }
 }

@@ -25,12 +25,14 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
+    using Fsel.Ordering.Infrastructure.Repositories;
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class ChangeStatusOrderCommand : ChangeStatusOrderCommandModel, IRequest<MethodResult<bool>>
     {
@@ -53,6 +55,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly ISystemService _systemService;
         private readonly IMediator _mediator;
         private readonly IPackageEventRepository _packageEventRepository;
+        private readonly IUserVoucherLockRepository _userVoucherLockRepository;
 
         public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository
             , ITrainingService trainingService
@@ -61,14 +64,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             , ILmsCourseService lmsCourseService
             , NotificationMessagePublisher notificationMessagePublisher
             , AuthContext authContext
-            , ILmsCourseService courseService,
-ISenderServices senderServices,
-AppSetting appSetting,
-AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher,
-ISystemService systemService,
-IMediator mediator,
-IPackageEventRepository packageEventRepository,
-ChangeStatusOrderPublisher changeStatusOrderPublisher)
+            , ILmsCourseService courseService
+            , ISenderServices senderServices
+            , AppSetting appSetting
+            , AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher
+            , ISystemService systemService
+            , IMediator mediator
+            , IPackageEventRepository packageEventRepository
+            , ChangeStatusOrderPublisher changeStatusOrderPublisher
+            , IUserVoucherLockRepository userVoucherLockRepository)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
@@ -85,6 +89,7 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
             _systemService = systemService;
             _mediator = mediator;
             _packageEventRepository = packageEventRepository;
+            _userVoucherLockRepository = userVoucherLockRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeStatusOrderCommand request, CancellationToken cancellationToken)
@@ -134,9 +139,7 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
                     order.RevenueType = request.RevenueType;
-
                     allowOpenNextUnit = true;
-
                     var packageEvent = await _packageEventRepository.Queryable.FirstOrDefaultAsync(p => p.PackageId == package.Id && p.EventId == order.EventId, cancellationToken);
 
                     if (packageEvent == null)
@@ -144,16 +147,25 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                         methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventNotExist), nameof(packageEvent));
                         return methodResult;
                     }
-
-                    order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber + packageEvent.MonthBonus);
-                    order.ExpireDate = order.ExpireDate.Value.AddDays(packageEvent.DayBonus);
-
-                    await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
+                    if (!order.ExpireDate.HasValue)
                     {
-                        StudentId = student!.Id,
-                        Month = package.MonthNumber + packageEvent.MonthBonus,
-                        Day = packageEvent.DayBonus
-                    }, cancellationToken);
+                        order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber + packageEvent.MonthBonus);
+                        order.ExpireDate = order.ExpireDate.Value.AddDays(packageEvent.DayBonus);
+                        await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
+                        {
+                            StudentId = student!.Id,
+                            Month = package.MonthNumber + packageEvent.MonthBonus,
+                            Day = packageEvent.DayBonus
+                        }, cancellationToken);
+                    }
+                    else
+                    {
+                        await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
+                        {
+                            StudentId = student!.Id,
+                            ExpiredDate = order.ExpireDate
+                        }, cancellationToken);
+                    }
 
                     if (order.IsInvoice)
                     {
@@ -179,18 +191,12 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                         return methodResult;
                     }
                     var course = courseResults.Content?.Result?.FirstOrDefault();
-                    if (course != null)
+                    if (course != null && order != null && order.Package != null && (order.Package.MonthNumber == ExtendMonth.TwentyFourMonth ||
+                                                                   order.Package.MonthNumber == ExtendMonth.TwelveMonth ||
+                                                                   order.Package.MonthNumber == ExtendMonth.SixMonth ||
+                                                                   order.Package.MonthNumber == ExtendMonth.ThreeMonth))
                     {
-                        await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
-                        {
-                            UserIds = new List<Guid>() { order.UserId },
-                            ObjectId = order.Id,
-                            ParamsMessage = new List<object> { course.Name ?? string.Empty },
-                            Type = EnumNotificationType.Text,
-                            Content = EnumNotificationContent.OrderChangeStatus,
-                            SenderId = _authContext.CurrentUserId,
-                            PlatformCode = EnumPlatformCode.LMS
-                        }, cancellationToken);
+                        await SendNotification(order, EnumNotificationContent.ExtendSuccessfully, cancellationToken);
                     }
                 }
                 order.OrderTransactions.Add(new OrderTransaction()
@@ -218,22 +224,25 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
                     var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
                     Guid voucherId = default;
-
-                    if (!order.VoucherId.HasValue && _appSetting.VoucherConfigs?.VoucherForRetail?.StartDate <= createDate && _appSetting.VoucherConfigs.VoucherForRetail.EndDate >= createDate && currentDate < _appSetting.VoucherConfigs.VoucherForRetail.ExpiredDate)
+                    if (request.IsSendEmail)
                     {
-                        var voucher = await _mediator.Send(new CreateVoucherForRetailCommand()
+                        if (!order.VoucherId.HasValue && _appSetting.VoucherConfigs?.VoucherForRetail?.StartDate <= createDate && _appSetting.VoucherConfigs.VoucherForRetail.EndDate >= createDate && currentDate < _appSetting.VoucherConfigs.VoucherForRetail.ExpiredDate)
                         {
-                            UserId = order.UserId,
-                            PackageId = order.PackageId ?? default,
-                        }, cancellationToken).ConfigureAwait(false);
-                        voucherId = voucher.Result?.Id ?? default;
+                            var voucher = await _mediator.Send(new CreateVoucherForRetailCommand()
+                            {
+                                UserId = order.UserId,
+                                PackageId = order.PackageId ?? default,
+                            }, cancellationToken).ConfigureAwait(false);
+                            voucherId = voucher.Result?.Id ?? default;
 
-                        await _mediator.Send(new SendMailPaymentWithVoucherCommand() { OrderId = order.Id, VoucherId = voucherId }).ConfigureAwait(false);
+                            await _mediator.Send(new SendMailPaymentWithVoucherCommand() { OrderId = order.Id, VoucherId = voucherId }).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
+                        }
                     }
-                    else
-                    {
-                        await _mediator.Send(new SendMailPaymentCommand() { OrderId = order.Id });
-                    }
+                    await ResetUserVoucherLockAsync(order.UserId, cancellationToken).ConfigureAwait(false);
                 }
 
                 #endregion Gửi mail thanh toán
@@ -296,6 +305,33 @@ ChangeStatusOrderPublisher changeStatusOrderPublisher)
         private bool IsInteger(double number)
         {
             return number == (int)number;
+        }
+
+        private async Task ResetUserVoucherLockAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            var userVoucherLock = await _userVoucherLockRepository.Queryable.FirstOrDefaultAsync(p => p.CreatedUserId == userId, cancellationToken);
+            if (userVoucherLock != null)
+            {
+                userVoucherLock.Count = 0;
+                userVoucherLock.ExpiredDate = null;
+                userVoucherLock.IsLockForever = false;
+                _userVoucherLockRepository.Update(userVoucherLock);
+                await _userVoucherLockRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        public async Task SendNotification(Order order, EnumNotificationContent content, CancellationToken cancellationToken)
+        {
+            await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
+            {
+                UserIds = new List<Guid>() { order.UserId },
+                ObjectId = order.Id,
+                ParamsMessage = new List<object> { order.Package != null ? order.Package.MonthNumber : string.Empty },
+                Type = EnumNotificationType.LinkPage,
+                Content = content,
+                SenderId = _authContext.CurrentUserId,
+                PlatformCode = EnumPlatformCode.LMS
+            }, cancellationToken);
         }
     }
 }

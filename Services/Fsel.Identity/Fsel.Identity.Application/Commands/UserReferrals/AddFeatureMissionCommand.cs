@@ -26,12 +26,16 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
         private readonly IUserReferralRepository _userReferralRepository;
         private readonly AppSetting _appSetting;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private readonly IStudentRepository _studentRepository;
 
-        public AddFeatureMissionCommandHandler(IUserReferralRepository userReferralRepository, AppSetting appSetting, CreateTokenHistoryPublisher createTokenHistoryPublisher)
+        public AddFeatureMissionCommandHandler(IUserReferralRepository userReferralRepository, AppSetting appSetting, CreateTokenHistoryPublisher createTokenHistoryPublisher, NotificationMessagePublisher notificationMessagePublisher, IStudentRepository studentRepository)
         {
             _userReferralRepository = userReferralRepository;
             _appSetting = appSetting;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
+            _notificationMessagePublisher = notificationMessagePublisher;
+            _studentRepository = studentRepository;
         }
 
         public async Task<MethodResult<VoidMethodResult>> Handle(AddFeatureMissionCommand request, CancellationToken cancellationToken)
@@ -114,17 +118,24 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
 
                 var tokenMission = EnumTokenMission.FriendCompletePT;
 
+                EnumNotificationContent notificationContent = EnumNotificationContent.FriendCompletedExam; 
                 if (request.FeatureUserReferral == EnumFeatureUserReferral.PT)
                 {
                     tokenMission = EnumTokenMission.FriendCompletePT;
+                    notificationContent = EnumNotificationContent.FriendCompletedExam;
+
                 }
                 else if (request.FeatureUserReferral == EnumFeatureUserReferral.DoneUnit1)
                 {
                     tokenMission = EnumTokenMission.FriendCompleteUnit1;
+                    notificationContent = EnumNotificationContent.FriendCompleteUnitOne;
+
                 }
                 else if (request.FeatureUserReferral == EnumFeatureUserReferral.Payment)
                 {
                     tokenMission = EnumTokenMission.FriendCompletePayment;
+                    notificationContent = EnumNotificationContent.FriendPaymentSuccessfully;
+
                 }
 
                 var tokenHistories = new List<TokenHistoryQueueModel>()
@@ -151,15 +162,35 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                     });
                 }
 
+                var friendInfomation = await _studentRepository.Queryable.Include(x => x.User).Where(x => x.UserId == userReferral.ReceiverId).FirstOrDefaultAsync(cancellationToken);
+
                 await _createTokenHistoryPublisher.Publish(
                     tokenHistories,
                 cancellationToken).ConfigureAwait(false);
+
+                await SendNotification(friendInfomation?.User?.FullName ?? string.Empty, token, userReferral.SenderId, userReferral.ReceiverId, notificationContent, cancellationToken);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             });
 
             return methodResult;
+        }
+
+        private async Task SendNotification(string userName, int amountOfCoin, Guid userId, Guid senderId, EnumNotificationContent content, CancellationToken cancellationToken)
+        {
+            NotificationSendingQueueModel notificationQueue = new NotificationSendingQueueModel()
+            {
+                ObjectId = Guid.Empty,
+                UserIds = new List<Guid> { userId },
+                SenderId = senderId,
+                Type = EnumNotificationType.LinkPage,
+                Content = content,
+                PlatformCode = EnumPlatformCode.LMS,
+                ParamsMessage = new List<object> { userName, amountOfCoin },
+                ParamsLink = new List<object>()
+            };
+            await _notificationMessagePublisher.Publish(notificationQueue, cancellationToken);
         }
     }
 }

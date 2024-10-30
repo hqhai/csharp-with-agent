@@ -22,8 +22,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class ConfirmOtpResetPasswordCommandHandler : IRequestHandler<ConfirmOtpResetPasswordCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly IMediator _mediator;
         private readonly IParentRepository _parentRepository;
+        private readonly IMediator _mediator;
 
         public ConfirmOtpResetPasswordCommandHandler(UserManager<User> userManager, IMediator mediator, IParentRepository parentRepository)
         {
@@ -54,25 +54,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddError(method.ErrorMessages);
                 return methodResult;
             }
-            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == method.Result.UserId, cancellationToken);
+            var user = await _userManager.Users.Include(x => x.Student).FirstOrDefaultAsync(x => x.Id == method.Result.UserId, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
-            if (!user.EmailConfirmed)
+            if (!user.EmailConfirmed && (user.Student == null || user.Parent == null || user.CSO == null || user.Teacher == null))
             {
-                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                await _userManager.ConfirmEmailAsync(user, token);
-                var roles = await _userManager.GetRolesAsync(user);
-
-                user = await UpdateUserAsync(roles, user);
-                if (!user.IsValid())
-                {
-                    methodResult.AddError(user.ErrorMessages);
-                    return methodResult;
-                }
-                await _userManager.UpdateAsync(user);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
+                return methodResult;
             }
 
             var passwordValidator = new Microsoft.AspNetCore.Identity.PasswordValidator<User>();

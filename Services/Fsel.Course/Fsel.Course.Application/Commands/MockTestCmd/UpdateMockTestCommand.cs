@@ -124,7 +124,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     }
                 }
 
-                newSectionGroup.ExecutionTime = GetTimeSkill(sectionGroup.CourseSkill, sectionGroup.AudioPath);
+                newSectionGroup.ExecutionTime = sectionGroup.CourseSkill.GetTimeSkill(sectionGroup.AudioPath);
                 mockTest.MockTestSections.Add(new MockTestSection { SectionGroup = newSectionGroup });
             }
 
@@ -142,23 +142,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             });
 
             return methodResult;
-        }
-
-        public double GetTimeSkill(EnumCourseSkill skill, string? fileAudio)
-        {
-            if (skill == EnumCourseSkill.Reading)
-            {
-                return SectionGroupIELST.ExecutionTimeReading;
-            }
-            else if (skill == EnumCourseSkill.Listening && !string.IsNullOrEmpty(fileAudio))
-            {
-                return (MediaHelper.GetMediaDurationAsync(fileAudio) ?? default) + SectionGroupIELST.AdditionalTimeListening;
-            }
-            else if (skill == EnumCourseSkill.Speaking && !string.IsNullOrEmpty(fileAudio))
-            {
-                return (MediaHelper.GetMediaDurationAsync(fileAudio) ?? default); //thời gian audio
-            }
-            return default;
         }
     }
 }

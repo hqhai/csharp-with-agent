@@ -3,11 +3,12 @@
 namespace Fsel.Course.Lms.Application.Commands.AiCmd
 {
     using System;
+    using System.Collections;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.Helpers;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
@@ -18,6 +19,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using Kros.Extensions;
     using MediatR;
@@ -74,11 +76,11 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             #region Retry
 
+            aIResponse = Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
+
             var checkDataClassForum = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
 
             bool conditionRetry = checkDataClassForum?.All(x => x != null) ?? default;
-
-
 
             var classForumDetailResultOwner = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResult).ThenInclude(x => x.LessonResult).ThenInclude(x => x.Lesson).FirstOrDefault(x => x.Id == request.ClassForumDetailResultId);
 
@@ -106,26 +108,24 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 classForumDetailResult.RetryTime += 1;
             }
 
-
-
             #endregion Retry
 
-            var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
+            var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse));
 
             if (classForumDetailResult != null)
             {
-                classForumDetailResult.GradingAlFeedback = classForumAIs != null ? ConvertHelper.Serialize(classForumAIs) : default;
+                classForumDetailResult.GradingAlFeedback = classForumAIs != null ? ConvertHelper.Serialize(GetClassForumAIs(classForumAIs)) : default;
                 _classForumDetailResultRepository.Update(classForumDetailResult);
                 await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             GetFeatureModuleQuery query = new GetFeatureModuleQuery
             {
-                FeatureModule = EnumFeatureModule.ClassForumResult,
-                ObjectId = classForumDetailResult?.Id ?? default
+                FeatureModule = EnumFeatureModule.ClassForumDetailResult,
+                ObjectId = classForumDetailResult?.Id ?? default,
             };
 
-            var featureModule = await _mediator.Send(query).ConfigureAwait(false);
+            var featureModule = await _mediator.Send(query, cancellationToken);
             var featureModuleResult = featureModule?.Result;
 
             await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
@@ -156,6 +156,31 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 }
             }
             return true;
+        }
+
+        private static IList<ClassForumAIModel>? GetClassForumAIs(List<ClassForumAIModel>? classForumAIs)
+        {
+            if (classForumAIs == null || !classForumAIs.Any())
+            {
+                return classForumAIs;
+            }
+
+            foreach (var item in classForumAIs)
+            {
+                item.SuccessCriteriaItemFix = ConvertDataToStrings(item.SuccessCriteriaItemFix);
+                item.SuccessCriteriaItemEvidence = ConvertDataToStrings(item.SuccessCriteriaItemEvidence);
+            }
+            return classForumAIs;
+        }
+
+        private static IList<string> ConvertDataToStrings(object? data)
+        {
+            var listStr = data.Deserialize<IList<string>>();
+            if (listStr != null)
+            {
+                return listStr.ToList();
+            }
+            return new List<string> { data?.ToString() ?? string.Empty };
         }
     }
 }

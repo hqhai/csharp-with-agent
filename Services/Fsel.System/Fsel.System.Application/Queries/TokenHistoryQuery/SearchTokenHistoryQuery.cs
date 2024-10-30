@@ -2,6 +2,7 @@
 
 namespace Fsel.System.Application.Queries.TokenHistoryQuery
 {
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
@@ -24,11 +25,13 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
     {
         private readonly ITokenHistoryRepository _tokenHistoryRepository;
         private readonly AuthContext _authContext;
+        private readonly IMapper _mapper;
 
-        public GetListTokenHistoryQueryHandler(ITokenHistoryRepository tokenHistoryRepository, AuthContext authContext)
+        public GetListTokenHistoryQueryHandler(ITokenHistoryRepository tokenHistoryRepository, AuthContext authContext, IMapper mapper)
         {
             _tokenHistoryRepository = tokenHistoryRepository;
             _authContext = authContext;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<TokenHistoryListModel>>> Handle(SearchTokenHistoryQuery request, CancellationToken cancellationToken)
@@ -55,60 +58,28 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
 
             var userId = request.UserId ?? _authContext.CurrentUserId;
 
-            var tokenHistorys = _tokenHistoryRepository.Queryable.AsQueryable();
-
-            if (request.StartDate != null || request.EndDate != null)
+            var query = _tokenHistoryRepository.Queryable.Include(x => x.Translations)
+                                                    .Where(x => x.UserId == userId && (!request.CourseResultId.HasValue || x.CourseResultId == request.CourseResultId))
+                                                    .Where(x => !request.Type.HasValue || x.Type == request.Type)
+                                                    .Where(x => !request.StartDate.HasValue || x.CreatedDate.Date >= request.StartDate.Value.Date)
+                                                    .Where(x => !request.EndDate.HasValue || x.CreatedDate.Date <= request.EndDate.Value.Date)
+                                                    .AsNoTracking().AsEnumerable()
+                                                    .GroupBy(x => x.CreatedDate.Date);
+            int totalItem = query.Count();
+            var exeQuery = query.OrderByDescending(x => x.Key).ApplyPaging(request).ToList();
+            var lists = exeQuery.Select(x => new TokenHistoryListModel
             {
-                tokenHistorys = tokenHistorys.Where(m =>
-                                    (request.StartDate == null || m.CreatedDate.Date >= request.StartDate.Value.Date) &&
-                                    (request.EndDate == null || m.CreatedDate.Date <= request.EndDate.Value.Date));
-            }
-
-            if (request.Type != null)
-            {
-                tokenHistorys = tokenHistorys.Where(x => x.Type == request.Type);
-            }
-
-            var tokenHistoryQuery = tokenHistorys.Where(x => x.UserId == userId && (!request.CourseResultId.HasValue || x.CourseResultId == request.CourseResultId))
-                            .GroupBy(x => x.CreatedDate.Date)
-                            .OrderByDescending(x => x.Key)
-                            .Select(x => new TokenHistoryListModel
-                            {
-                                Date = x.Key,
-                                Features = x.GroupBy(x => x.Feature).Select(x => new FeatureModel
-                                {
-                                    Feature = x.Key,
-                                    InitialToken = x.Sum(x => x.InitialToken),
-                                    VolatileToken = x.Sum(x => x.VolatileToken),
-                                    RemainToken = x.Sum(x => x.RemainToken),
-                                    Type = x.Select(x => x.Type).FirstOrDefault(),
-                                    TokenHistories = x.Select(x => new TokenHistoryModel
-                                    {
-                                        Id = x.Id,
-                                        TokenConfigId = x.TokenConfigId,
-                                        Config = x.Config,
-                                        ConfigData = x.ConfigData,
-                                        CreatedDate = x.CreatedDate,
-                                        CreatedFullName = x.CreatedFullName,
-                                        CreatedUserId = x.UserId,
-                                        Feature = x.Feature,
-                                        InitialToken = x.InitialToken,
-                                        VolatileToken = x.VolatileToken,
-                                        RemainToken = x.RemainToken,
-                                        Mission = x.Mission,
-                                        ObjectId = x.ObjectId,
-                                        Type = x.Type,
-                                        UserId = x.UserId,
-                                    }).ToList(),
-                                }).ToList(),
-                            });
-
-            int totalItem = await tokenHistoryQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await tokenHistoryQuery
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+                Date = x.Key,
+                Features = x.GroupBy(x => x.Feature).Select(y => new FeatureModel
+                {
+                    Feature = y.Key,
+                    InitialToken = y.Sum(x => x.InitialToken),
+                    VolatileToken = y.Sum(x => x.VolatileToken),
+                    RemainToken = y.Sum(x => x.RemainToken),
+                    Type = y.Select(x => x.Type).FirstOrDefault(),
+                    TokenHistories = y.OrderByDescending(x => x.CreatedDate).Select(tokenHistory => _mapper.Map<TokenHistoryModel>(tokenHistory)).ToList(),
+                }).ToList(),
+            }).ToList();
 
             methodResult.Result = new PagingItemsModel<TokenHistoryListModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

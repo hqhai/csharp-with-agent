@@ -44,15 +44,13 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LeaderBoardSearchModel> methodResult = new MethodResult<LeaderBoardSearchModel>();
 
-            // Lấy ra danh sách StudentId đã hoàn thành khóa học
-            var studentIds = await _courseResultRepository.Queryable.Where(x => x.Status != EnumResultStatus.New && x.WorkingStatus == EnumWorkingStatus.Active).Select(c => c.StudentId).Distinct().ToListAsync(cancellationToken);
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
+            var studentResults = await _userService.GetUserByIds(new List<Guid> { _authContext.CurrentUserId });
             if (!studentResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
                 return methodResult;
             }
-            var student = studentResults?.Content?.Result?.Where(x => x.UserId == _authContext.CurrentUserId);
+            var student = studentResults?.Content?.Result;
 
             LeaderBoardSearchModel leaderBoardSearch = new LeaderBoardSearchModel();
             IList<LeaderBoardModel> leaderBoards = new List<LeaderBoardModel>();

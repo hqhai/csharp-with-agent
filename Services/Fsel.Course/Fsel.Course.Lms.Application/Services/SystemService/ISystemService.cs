@@ -4,8 +4,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Lms.Application.Services.SystemService.CommandModels;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -27,6 +27,9 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
         [Post("/v1/feature-access-time/gets")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetFeatureAccessTimesAsync([FromBody] FeatureAccessTimesQueryModel query);
 
+        [Post("/v1/feature-access-time/get-to-modules")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetFeatureAccessTimeToModulesAsync([FromBody] FeatureAccessTimesQueryModel query);
+
         [Get("/v1/feature-access-time/get-detail")]
         Task<IApiResponse<MethodResult<FeatureAccessTimeModel>>> GetFeatureAccessTimeAsync([FromQuery] FeatureAccessTimeQueryModel query);
 
@@ -44,5 +47,14 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Get("/v1/feature-access-time/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetListFeatureAccessTime([FromQuery] BaseQueryModel model);
+
+        [Post("/v1/school/get-by-ids")]
+        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolsAsync([Body] IList<Guid>? ids);
+
+        [Post("/v1/feature-access-time/get-feature-access-time-by-userIds")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetFeatureAccessTimeByUserIdsAsync([FromBody] IList<Guid> userIds);
+
+        [Post("/v1/google-sheet/add-error-report-explanation-question")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> AddErrorReportExplanationQuestionToGoogleSheet([FromBody] AddErrorReportExplanationQuestionModel model);
     }
 }

@@ -15,6 +15,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.LandingPages;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -80,8 +81,8 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             user = new User()
             {
                 UserName = request.Email,
-                FirstName = request.FullName.Split(" ").FirstOrDefault(),
-                LastName = request.FullName.Split(" ").LastOrDefault(),
+                FirstName = request.FullName.ParseFullName().FirstName,
+                LastName = request.FullName.ParseFullName().LastName,
                 Email = request.Email,
                 EmailConfirmed = true,
                 PhoneNumber = request.PhoneNumber,

@@ -14,6 +14,8 @@ using Fsel.Shared.Enums;
 using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -51,14 +53,19 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
                 return methodResult;
             }
-            var user = await _userManager.FindByEmailAsync(request.Email);
+            var user = await _userManager.Users.Include(x => x.Student).FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
                 return methodResult;
             }
+            if (!user.EmailConfirmed && (user.Student == null || user.Parent == null || user.CSO == null || user.Teacher == null))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
+                return methodResult;
+            }
 
-            var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
+            var userOtpCode = await _mediator.Send(new SaveUserOtpCommand { Id = user.Id }, cancellationToken);
             var param = new SendOtpTemplateModel
             {
                 OtpCode = userOtpCode.Result,

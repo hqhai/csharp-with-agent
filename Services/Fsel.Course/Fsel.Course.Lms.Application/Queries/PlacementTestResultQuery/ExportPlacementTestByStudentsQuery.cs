@@ -58,6 +58,19 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 }
                 return await Task.FromResult(errors.Count == 0);
             });
+            var duplicateEmails = result.Datas.GroupBy(user => user.Email).Where(group => group.Count() > 1).Select(group => group.Key);
+            if (duplicateEmails.Any())
+            {
+                methodResult.AddErrorBadRequest("Duplicate Emails");
+                return methodResult;
+            }
+            if (result.Stream != null)
+            {
+                methodResult.Result = result.Stream;
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
+
             var listEmail = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).ToList();
             var studentResultToEmail = await _userService.GetStudentByEmailsAsync(listEmail);
             if (!studentResultToEmail.IsSuccessStatusCode)

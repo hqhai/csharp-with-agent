@@ -28,6 +28,7 @@ builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<CompleteTestWhenTimeOutPublisher>();
 builder.Services.AddScoped<ReviewFselPublisher>();
 builder.Services.AddScoped<NoticeAccessTimePublisher>();
+builder.Services.AddScoped<NoticeExtendPackagePublisher>();
 builder.Services.AddScoped<WeeklyReportPublisher>();
 builder.Services.AddScoped<WeeklySnapShotLeaderBoardPublisher>();
 builder.Services.AddScoped<UpdateStatusTrialStudentPublisher>();
@@ -37,6 +38,7 @@ builder.Services.AddScoped<UpdateClassForumResultToExpiredTimePublisher>();
 builder.Services.AddScoped<JobActiveEventPublisher>();
 builder.Services.AddScoped<JobRunEventsPublisher>();
 builder.Services.AddScoped<CheckUserDeletionPublisher>();
+builder.Services.AddScoped<WeeklyNoticePublisher>();
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {

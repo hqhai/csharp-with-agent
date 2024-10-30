@@ -58,6 +58,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     public class RegisterStudentForEventCommandHandler : IRequestHandler<RegisterStudentForEventCommand, MethodResult<bool>>
     {
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
+        private readonly IEventRegistrationRepository _eventRegistrationRepository;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly UserManager<User> _userManager;
         private readonly IPlatformRepository _platformRepository;
@@ -75,7 +76,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
         private const string LearnedOnThePlatform = "Thông báo đặt lại dữ liệu khóa học để tham gia sự kiện";
         private const string SignUpEventSuccess = "Thông tin đăng kí tham gia sự kiện";
 
-        public RegisterStudentForEventCommandHandler(ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, UserManager<User> userManager, IPlatformRepository platformRepository, ISystemService systemService, ISenderService senderService, IOrderService orderService, MediatR.IMediator mediator, IInteractionService interactionService, AppSetting appSetting, IMapper mapper, IUserCourseSettingRepository userCourseSettingRepository)
+        public RegisterStudentForEventCommandHandler(ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, UserManager<User> userManager, IPlatformRepository platformRepository, ISystemService systemService, ISenderService senderService, IOrderService orderService, MediatR.IMediator mediator, IInteractionService interactionService, AppSetting appSetting, IMapper mapper, IUserCourseSettingRepository userCourseSettingRepository, IEventRegistrationRepository eventRegistrationRepository)
         {
             _competitionEventsRepository = competitionEventsRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
@@ -89,6 +90,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             _appSetting = appSetting;
             _mapper = mapper;
             _userCourseSettingRepository = userCourseSettingRepository;
+            _eventRegistrationRepository = eventRegistrationRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(RegisterStudentForEventCommand request, CancellationToken cancellationToken)
@@ -136,6 +138,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 if (studentEvents.Any(p => p.CompetitionEvents != null && p.CompetitionEvents.EventContent != null && p.CompetitionEvents.EventContent.StartDate.HasValue && p.CompetitionEvents.EventContent.EndDate.HasValue && p.CompetitionEvents.EventContent.StartDate.Value.Date <= currentDate.Date && p.CompetitionEvents.EventContent.EndDate.Value.Date >= currentDate.Date))
                 {
                     await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.WasInAnotherEvent, WasInAnotherEvent);
+                    await UpdateEventRegistration(user.Email ?? string.Empty, @event.Id, user!.Student!.Id, methodResult, cancellationToken);
                     return methodResult;
                 }
 
@@ -148,7 +151,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
 
                 if (orders != null && orders.Count > 0)
                 {
-                    var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id, ExpiredTime = @event.EventContent?.EndDate?.Date }, cancellationToken);
+                    var userOtpCode = await _mediator.Send(new SaveUserOtpCommand { Id = user.Id, ExpiredTime = @event.EventContent?.EndDate?.Date }, cancellationToken);
                     param.LinkResetProgress = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkResetProgress ?? string.Empty, user.Email, userOtpCode.Result, @event.EventCode);
                     // sai tại Phuc Xo
                     var userCourseSetting = await _userCourseSettingRepository.Queryable.FirstOrDefaultAsync(x => x.CourseLevel == user.Student.CourseLevel && x.UserId == user.Id && x.Type == EnumUserCourseType.ResetAndLearnAgain, cancellationToken);
@@ -160,8 +163,9 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     // sai tại Phuc Xo
                     else
                     {
-                    await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.LearnedOnThePlatform, LearnedOnThePlatform);
+                        await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.LearnedOnThePlatform, LearnedOnThePlatform);
                     }
+                    await UpdateEventRegistration(user.Email ?? string.Empty, @event.Id, user!.Student!.Id, methodResult, cancellationToken);
                     return methodResult;
                 }
 
@@ -179,9 +183,26 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.SignUpEventSuccess, SignUpEventSuccess);
                 await AddToGoogleSheet(request);
 
+                await UpdateEventRegistration(user.Email ?? string.Empty, @event.Id, user!.Student!.Id, methodResult, cancellationToken);
+
                 return methodResult;
             }
             return methodResult;
+        }
+
+        private async Task UpdateEventRegistration(string email, Guid competitionEventId, Guid studentId, MethodResult<bool> methodResult, CancellationToken cancellationToken)
+        {
+            var eventRegistration = await _eventRegistrationRepository.Queryable.FirstOrDefaultAsync(p => p.Email == email && p.CompetitionEventId == competitionEventId, cancellationToken);
+            if (eventRegistration != null)
+            {
+                eventRegistration.StudentId = studentId;
+                await _eventRegistrationRepository.ExecuteTransactionAsync(async () =>
+                {
+                    _eventRegistrationRepository.Update(eventRegistration);
+                    await _eventRegistrationRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    return methodResult;
+                });
+            }
         }
 
         private async Task AddToGoogleSheet(RegisterStudentForEventCommandModel request)
@@ -297,6 +318,9 @@ namespace Fsel.Identity.Application.Commands.LandingPages
 
                 return methodResult;
             });
+
+            await UpdateEventRegistration(user.Email ?? string.Empty, @event.Id, user.Student.Id, methodResult, cancellationToken);
+
             return methodResult;
         }
     }

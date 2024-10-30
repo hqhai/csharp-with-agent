@@ -36,11 +36,16 @@ namespace Fsel.Course.Infrastructure.Common
             }
             if (isMandatoryAnswer && isAnswerMissing)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotCompleted), nameof(question), new object[] { question.Id });
+                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotCompleted), nameof(question), new object[] { question.Id, answer ?? string.Empty });
                 return methodResult;
             }
             methodResult.Result = (question, answerConfig, correctCount, isAnswered);
             return methodResult;
+        }
+
+        public MethodResult<(Question, object?, int, bool)> HandleAnswerTest(Question? question, object? answer, bool isSubmit, bool isMandatoryAnswer = false)
+        {
+            return HandleQuestionAnswer(question, answer, isSubmit, default, false, isMandatoryAnswer);
         }
 
         public MethodResult<Question> HandleQuestion(Question question, bool isUseTypeExercisePreparation = false, bool isCreated = true)

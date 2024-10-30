@@ -10,14 +10,14 @@ namespace Fsel.Course.Domain.Models.EntityModels
         [EpplusTableColumn(Header = "VideoId")]
         public Guid VideoId { get; set; }
 
+        [EpplusTableColumn(Header = "CourseLevel")]
+        public EnumCourseLevel CourseLevel { get; set; }
+
         [EpplusTableColumn(Header = "DisplayTime")]
         public double DisplayTime { get; set; }
 
         [EpplusTableColumn(Header = "QuestionId")]
         public Guid QuestionId { get; set; }
-
-        [EpplusTableColumn(Header = "CourseLevel")]
-        public EnumCourseLevel CourseLevel { get; set; }
 
         [EpplusTableColumn(Header = "QuestionType")]
         public EnumQuestionType QuestionType { get; set; }

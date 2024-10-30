@@ -66,8 +66,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
-            var isCheckEmail = !string.IsNullOrEmpty(request.PhoneNumber) && user.Email != request.Email;
-            var isCheckPhone = !string.IsNullOrEmpty(request.PhoneNumber) && user.PhoneNumber != request.PhoneNumber;
+            var isCheckEmail = !string.IsNullOrEmpty(request.Email) && user.Email != request.Email;
 
             #region Validate User
 
@@ -96,11 +95,10 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             #region validate and Send OTP
 
-            if (isCheckEmail || isCheckPhone)
+            if (isCheckEmail)
             {
                 user.EmailConfirmed = false;
-                var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
-
+                var userOtpCode = await _mediator.Send(new SaveUserOtpCommand { Id = user.Id }, cancellationToken);
                 var param = new SendOtpTemplateModel
                 {
                     OtpCode = userOtpCode.Result,
@@ -108,16 +106,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidDay, _appSetting!.Otp!.StepDayWithAdmin)
                 };
                 var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
-                var sendResult = new MethodResult<bool>();
-                if (isCheckEmail)
-                {
-                    sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtpAndLink }, cancellationToken).ConfigureAwait(false);
-                }
-                else if (isCheckPhone)
-                {
-                    sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtpAndLink }, cancellationToken).ConfigureAwait(false);
-                }
-
+                var sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtpAndLink }, cancellationToken).ConfigureAwait(false);
                 if (!sendResult.IsOK)
                 {
                     methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);

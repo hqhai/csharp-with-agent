@@ -61,9 +61,11 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                 IsActive = unit.CourseUnitMockTests.Where(n => !n.IsDeleted).Any(),
                                 CourseLevel = unit.CourseLevel,
                                 CreatedDate = unit.CreatedDate,
+                                CreatedFullName = unit.CreatedFullName,
                                 CreatedUserId = unit.CreatedUserId,
                                 UpdatedDate = unit.UpdatedDate,
                                 UpdatedUserId = unit.UpdatedUserId,
+                                UpdatedFullName = unit.UpdatedFullName,
                                 TeacherIds = unit.UnitLessons.Select(l => l.Lesson)
                                                 .SelectMany(lv => lv!.LessonVideos.Where(n => !n.IsDeleted))
                                                 .Select(v => v.Video)

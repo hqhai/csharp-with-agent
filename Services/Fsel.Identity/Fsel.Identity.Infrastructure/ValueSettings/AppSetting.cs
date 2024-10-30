@@ -49,6 +49,8 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     {
         public int StepTime { get; set; }
         public int StepDayWithAdmin { get; set; }
+        public bool IsByPassOtp { get; set; }
+        public string? ByPassOtpValue { get; set; }
     }
 
     public class Smtp

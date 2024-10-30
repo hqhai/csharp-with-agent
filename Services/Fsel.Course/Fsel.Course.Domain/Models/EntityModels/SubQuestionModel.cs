@@ -7,6 +7,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class SubQuestionModel
     {
         public Guid Id { get; set; }
+        public int IndexSubQuestion { get; set; }
+        public Guid QuestionId { get; set; }
         public EnumCorrectStatus Status { get; set; }
         public EnumQuestionType QuestionType { get; set; }
     }

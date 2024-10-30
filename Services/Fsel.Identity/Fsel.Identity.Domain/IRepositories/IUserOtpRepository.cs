@@ -7,5 +7,6 @@ namespace Fsel.Identity.Domain.IRepositories
 
     public interface IUserOtpRepository : IRepository<UserOtp>
     {
+        Task<UserOtp?> GetUserOtpCodeAsync(string? otpCode, string? email);
     }
 }

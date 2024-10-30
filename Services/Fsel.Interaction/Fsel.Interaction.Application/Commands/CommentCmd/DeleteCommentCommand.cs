@@ -72,7 +72,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 
                 FeatureModuleQuery query = new FeatureModuleQuery
                 {
-                    FeatureModule = EnumFeatureModule.ClassForumResult,
+                    FeatureModule = EnumFeatureModule.ClassForumDetailResult,
                     ObjectId = classForumResultTemp?.Id ?? default
                 };
 
@@ -81,6 +81,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 
                 List<object> paramLinksValue = new List<object> { featureModuleResult?.CourseId ?? default, featureModuleResult?.UnitId ?? default, featureModuleResult?.LessonId ?? default, featureModuleResult?.ClassForumDetailResultId ?? default };
 
+                List<object> paramMessages = new List<object> { classForumResultTemp?.CreatedFullName?.ToString() ?? string.Empty };
 
                 NotificationSendingQueueModel notificationQueueModel = new NotificationSendingQueueModel()
                 {
@@ -89,6 +90,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                     Content = EnumNotificationContent.DeleteComment,
                     SenderId = _authContext.CurrentUserId,
                     ParamsLink = paramLinksValue,
+                    ParamsMessage = paramMessages,
                     ObjectId = comment.Id,
                     PlatformCode = EnumPlatformCode.LMS
                 };

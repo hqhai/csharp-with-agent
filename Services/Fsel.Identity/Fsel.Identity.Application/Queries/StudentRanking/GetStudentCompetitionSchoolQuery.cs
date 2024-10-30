@@ -125,7 +125,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                                       AvatarPath = studentInfo?.User?.AvatarPath ?? string.Empty, // Thêm kiểm tra null và mặc định giá trị nếu null
                                       UserId = studentFile.UserId,
                                       RankingScore = Process_Ratio * (studentResult?.ContentCompleted ?? 0) + Overall_Ratio * (studentResult?.TotalScore ?? 0),
-                                      CourseResultId = studentResult.CourseResultId
+                                      CourseResultId = studentResult.CourseResultId,
+                                      CourseType = studentResult.CourseType
                                   }).OrderByDescending(x => (Process_Ratio * x.Process + Overall_Ratio * x.OverallScore)).ToList();
             }
             else

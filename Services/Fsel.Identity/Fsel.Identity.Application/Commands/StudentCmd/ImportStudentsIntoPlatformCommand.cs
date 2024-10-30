@@ -16,10 +16,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -58,8 +58,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
 
-            var packagesResult = await _orderService.GetPackages();
-
             var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentToPlatformModel x, IList<ImportStudentToPlatformModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
                 if (string.IsNullOrEmpty(x.FullName))
@@ -69,6 +67,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 if (string.IsNullOrEmpty(x.Email) || !x.Email.IsValidEmail())
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null or malformed" });
+                }
+                else if (_userManager.Users.Any(p => (p.Email == x.Email || p.UserName == x.Email) && !p.EmailConfirmed))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email not confirmed email" });
                 }
                 else if (_userManager.Users.Any(p => p.Email == x.Email || p.UserName == x.Email))
                 {
@@ -122,16 +124,19 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     {
                         UserName = student.Email,
                         Email = student.Email,
-                        FirstName = student.Email?.Split('@').LastOrDefault(),
-                        LastName = student.Email?.Split('@').FirstOrDefault(),
+                        FirstName = student.FullName.ParseFullName().FirstName,
+                        LastName = student.FullName.ParseFullName().LastName,
+                        PhoneNumber = student.PhoneNumber,
                         EmailConfirmed = true,
                         Birthday = Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture),
                         Student = new Student()
                         {
                             CreatedByParent = false,
                             Occupation = "Student",
-                            CourseLevel = EnumCourseLevel.A1,
                             School = student.School,
+                            SchoolClass = student.SchoolClass,
+                            SchoolFaculty = student.SchoolFaculty,
+                            SchoolGrade = student.SchoolGrade
                         },
                         UserPlatforms = new List<UserPlatform>()
                                             {
@@ -162,8 +167,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             {
                                 UserName = student.ParentEmail,
                                 Email = student.ParentEmail,
-                                FirstName = student.ParentEmail?.Split('@').LastOrDefault(),
-                                LastName = student.ParentEmail?.Split('@').FirstOrDefault(),
+                                FirstName = student.FullName.ParseFullName().FirstName,
+                                LastName = student.FullName.ParseFullName().LastName,
                                 EmailConfirmed = true,
                                 Parent = new Parent()
                                 {

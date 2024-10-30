@@ -103,6 +103,11 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                         }
                     }
                 }
+                tokenHistory.Translations = item.TokenHistoryTranslations?.Select(x => new TokenHistoryTranslation
+                {
+                    Language = x.Language,
+                    Config = x.Config
+                }).ToList() ?? new List<TokenHistoryTranslation>();
 
                 numberOfToken = tokenHistory.RemainToken;
                 tokenHistorys.Add(tokenHistory);

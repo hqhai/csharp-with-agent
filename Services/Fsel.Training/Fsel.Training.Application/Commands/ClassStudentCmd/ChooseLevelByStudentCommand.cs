@@ -101,9 +101,7 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
 
                 var @events = eventResults.Content.Result;
 
-                var currentDate = DateTime.UtcNow;
-
-                var @event = @events.Where(p => p.EventContent != null && p.EventContent.IsByPassPayment).Select(p => p.EventContent).Where(p => p.StartDate.HasValue && p.EndDate.HasValue && p.StartDate.Value.Date <= currentDate.Date && p.EndDate.Value.Date >= currentDate.Date).FirstOrDefault();
+                var @event = @events.Where(p => p.EventContent != null && p.EventContent.IsByPassPayment).Select(p => p.EventContent).FirstOrDefault();
 
                 if (@event != null)
                 {

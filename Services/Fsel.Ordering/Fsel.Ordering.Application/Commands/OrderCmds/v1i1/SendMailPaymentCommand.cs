@@ -40,7 +40,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<VoidMethodResult>();
 
-            var order = await _orderRepository.Queryable.Include(p => p.Package).FirstOrDefaultAsync(p => p.Id == request.OrderId, cancellationToken);
+            var order = await _orderRepository.Queryable.Include(p => p.Package).FirstOrDefaultAsync(p => p.Id == request.OrderId && p.Status == EnumOrderStatus.Payment && !p.IsTrial, cancellationToken);
             if (order == null)
             {
                 return methodResult;
@@ -56,27 +56,18 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
 
-            var expiredDate = !student.ExpiredDate.HasValue ? string.Empty : student.ExpiredDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+            var expiredDate = !student.ExpiredDate.HasValue ? (order.ExpireDate.HasValue ? order.ExpireDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty) : student.ExpiredDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
-            await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
-            {
-                ToEmails = new List<string> { student.User?.Email ?? string.Empty },
-                Subject = "Chào mừng bạn đến với FSEL!",
-                Params = new
-                {
-                    FullName = student.User?.FullName,
-                    OrderCode = order.Code,
-                    ExpiredDate = expiredDate,
-                    ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
-                },
-                Template = EnumSenderTemplate.MailPaymentForStudent
-            });
+            var updatedDate = !order.UpdatedDate.HasValue ? order.CreatedDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : order.UpdatedDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
-            var updatedDate = !order.UpdatedDate.HasValue ? string.Empty : order.UpdatedDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+            var numberFormat = (NumberFormatInfo)CultureInfo.GetCultureInfo("vi-VN").NumberFormat.Clone();
+            numberFormat.CurrencySymbol = "";
 
-            var price = order.Price.ToString("C", new CultureInfo("vi-VN"));
+            var price = order.Price.ToString("C", numberFormat).Trim();
 
-            var totalPrice = order.TotalPrice.ToString("C", new CultureInfo("vi-VN"));
+            var discount = order.DiscountPrice.ToString("C", numberFormat).Trim();
+
+            var totalPrice = order.TotalPrice.ToString("C", numberFormat).Trim();
 
             await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
             {
@@ -87,7 +78,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     FullName = order.FullName,
                     OrderCode = order.Code,
                     PaymentMethod = order.PaymentMethod.ToString(),
-                    Discount = order.DiscountPrice,
+                    Discount = discount.ToString(CultureInfo.InvariantCulture),
                     CreatedDate = updatedDate,
                     ExpiredDate = expiredDate,
                     Package = GetPackageName(order.Package),
@@ -97,6 +88,24 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 },
                 Template = EnumSenderTemplate.MailPaymentForCustomer
             });
+
+            if (!string.IsNullOrEmpty(order.Email) && !string.IsNullOrEmpty(student.User?.Email) && order.Email.ToLower(CultureInfo.InvariantCulture) != student.User?.Email.ToLower(CultureInfo.InvariantCulture))
+            {
+                await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
+                {
+                    ToEmails = new List<string> { student.User?.Email ?? string.Empty },
+                    Subject = "Chào mừng bạn đến với FSEL!",
+                    Params = new
+                    {
+                        FullName = student.User?.FullName,
+                        OrderCode = order.Code,
+                        ExpiredDate = expiredDate,
+                        ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
+                    },
+                    Template = EnumSenderTemplate.MailPaymentForStudent
+                });
+            }
+
             return methodResult;
         }
 

@@ -7,7 +7,7 @@ using Fsel.Common.Constants;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.AdminCmd;
 using Fsel.Identity.Application.Commands.AuthCmd;
-using Fsel.Identity.Application.Commands.StudentCmd;
+using Fsel.Identity.Application.Commands.UserCmd;
 using Fsel.Identity.Application.Queries.UserQuery;
 using Fsel.Identity.Application.Queries.UserReferrals;
 using Fsel.Identity.Domain.Models.EntityModels;
@@ -68,7 +68,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new DeleteUserCommand { Id = id }).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(new Application.Commands.AdminCmd.DeleteUserCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -145,12 +145,32 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// Create Students
         /// </summary>
         [HttpPost("create-students")]
-        [ProducesResponseType(typeof(MethodResult<IList<UserModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateStudents([FromBody] CreateUserStudentsToAdminCommand command)
+        public async Task<IActionResult> CreateStudents([FromQuery] CreateUserStudentsToAdminCommand command)
         {
-            MethodResult<IList<UserModel>> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
+            MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "user_import.xlsx");
+        }
+
+        /// <summary>
+        /// Create Students
+        /// </summary>
+        [HttpPost("export-template-create-students")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportTemplate()
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(new ExportTemplateCreateStudentCommand()).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "export_template_create_student.xlsx");
         }
 
         /// <summary>
@@ -177,19 +197,25 @@ namespace Fsel.Identity.Api.Controllers.Admin
             return commandResult.GetActionResult();
         }
 
-        [HttpPost("create-orders-from-crm")]
-        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        /// <summary>
+        /// Create user by admin
+        /// </summary>
+        [HttpPost("create-user-by-admin")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateOrdersFromCRM([FromBody] CreateOrdersFromCRMCommand command)
+        public async Task<IActionResult> CreateUserAndOrder([FromBody] CreateUserByAdminCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
-        [HttpPost("lock-user")]
+        /// <summary>
+        /// Create user and order
+        /// </summary>
+        [HttpPost("create-users-and-orders")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> LockUser([FromBody] LockUserCommand command)
+        public async Task<IActionResult> CreateUserAndOrder([FromBody] CreateUsersAndOrdersByAdminCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

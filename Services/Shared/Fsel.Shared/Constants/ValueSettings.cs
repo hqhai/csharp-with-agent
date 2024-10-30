@@ -90,7 +90,7 @@ namespace Fsel.Shared.Constants
 
         public static class StudentDailyStreak
         {
-            public const int CheckInGoalTime = 54000;
+            public const int CheckInGoalTime = 900;
         }
 
         public static class CustomerSupport
@@ -111,6 +111,14 @@ namespace Fsel.Shared.Constants
             public const int StreakFourtyTimeCode = 40;
             public const int StreakFourtyFiveTimeCode = 45;
             public const int StreakFiftyTimeCode = 50;
+        }
+
+        public static class ExtendMonth
+        {
+            public const int TwentyFourMonth = 24;
+            public const int TwelveMonth = 12;
+            public const int SixMonth = 6;
+            public const int ThreeMonth = 3;
         }
     }
 }

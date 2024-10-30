@@ -23,6 +23,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -312,14 +313,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             if (parent == null)
             {
-                var parseFullName = Shared.Helpers.StringHelper.ParseFullName(parentName);
-
                 parent = new User()
                 {
                     UserName = userName,
                     Email = parentEmail,
-                    FirstName = !string.IsNullOrEmpty(parseFullName.Item1) ? parseFullName.Item1 : userName,
-                    LastName = !string.IsNullOrEmpty(parseFullName.Item2) ? parseFullName.Item2 : string.Empty,
+                    FirstName = parentName.ParseFullName().FirstName,
+                    LastName = parentName.ParseFullName().LastName,
                     EmailConfirmed = !string.IsNullOrEmpty(parentEmail),
                     PhoneNumber = parentPhoneNumber,
                     PhoneNumberConfirmed = !string.IsNullOrEmpty(parentPhoneNumber),

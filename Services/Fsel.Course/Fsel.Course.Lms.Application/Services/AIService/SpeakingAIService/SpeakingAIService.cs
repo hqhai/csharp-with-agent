@@ -5,14 +5,11 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
     using System.Globalization;
     using System.IO;
     using System.Text;
-    using System.Text.RegularExpressions;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
@@ -60,6 +57,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             var mockTestResult = _mockTestResultRepository.Queryable
                 .Include(x => x.MockTestAnswers)
                 .ThenInclude(x => x.SectionTimeCode)
+                .Include(x => x.SectionGroupResults)
                 .FirstOrDefault(x => x.Id == mockTestResultId);
 
             if (mockTestResult == null)
@@ -213,7 +211,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 SettingTopP = 1
             }, cancellationToken).ConfigureAwait(false);
 
-            return RemoveMarkdownFromJson(aIResponse ?? string.Empty);
+            return Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
         }
 
         /// <summary>
@@ -248,20 +246,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         #endregion Handle
 
         #region Func
-
-        /// <summary>
-        /// Hàm loại bỏ MarkDown của chatgpt trả về
-        /// </summary>
-        /// <param name="json"></param>
-        /// <returns></returns>
-        public static string RemoveMarkdownFromJson(string json)
-        {
-            // Loại bỏ dấu ```json từ đầu và cuối chuỗi JSON
-            string cleanedJson = Regex.Replace(json, @"^```json\s*|\s*```$", "");
-
-            // Trả về chuỗi JSON đã được loại bỏ dấu ```json
-            return cleanedJson;
-        }
 
         /// <summary>
         /// Gửi kết quả đển websocket

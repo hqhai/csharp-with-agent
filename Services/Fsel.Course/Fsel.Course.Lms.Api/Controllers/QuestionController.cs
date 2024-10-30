@@ -45,6 +45,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// Get Question
+        /// </summary>
+        [HttpPost("error-report-explanation-question")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateErrorReportExplanation([FromBody] CreateQuestionExplanationErrorCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get SubQuestion
         /// </summary>
         [HttpGet("sub-questions")]
@@ -54,20 +66,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         {
             MethodResult<IList<SubQuestionModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get Question
-        /// </summary>
-        [MapToApiVersion(ApiSettings.APIVersion1)]
-        [MapToApiVersion(ApiSettings.APIVersion1i1)]
-        [HttpPost("error-report-explanation-question")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateErrorReportExplanation([FromBody] CreateQuestionExplanationErrorCommand command)
-        {
-            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
         }
     }
 }
