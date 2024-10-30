@@ -77,5 +77,17 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<IList<SchoolModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Lấy liệu sự kiện trong khoảng ngày
+        /// </summary>
+        [HttpGet("envent-date")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCompetitionEventsByDate([FromQuery] GetCompetitionEventsByDateQuery query)
+        {
+            MethodResult<IList<CompetitionEventsModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

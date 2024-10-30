@@ -8,6 +8,30 @@ namespace Fsel.System.Domain.Enums.ErrorCodes
 
         ThisStudentViewedThisBanner,
 
-        BannerNotExist
+        BannerNotExist,
+
+        CustomFrequencyRequiresDisplayDate,
+
+        DisplayStartDateGreaterThanDisplayEndDate,
+
+        DisplayStartTimeGreaterThanDisplayEndTime,
+
+        DisplayStartTimeMustGreaterThanZero,
+
+        BannerScopesRequired,
+
+        EachBannerOnlyOneCourseLevel,
+
+        TargetUsersRequired,
+
+        ApplicableUserGroupsRequired,
+
+        CompetitionEventIdsRequired,
+
+        MaximumPerDayMustGreaterThanZero,
+
+        DisplayIntervalTimeMustGreaterThanZero,
+
+        CodeAlreadyExist
     }
 }

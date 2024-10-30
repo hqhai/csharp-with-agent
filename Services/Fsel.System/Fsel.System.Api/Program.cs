@@ -60,6 +60,8 @@ builder.Services.AddScoped<IStudentTechieRepository, StudentTechieRepository>();
 builder.Services.AddScoped<ILuckyTicketRepository, LuckyTicketRepository>();
 builder.Services.AddScoped<IBannerRepository, BannerRepository>();
 builder.Services.AddScoped<IBannerStudentRepository, BannerStudentRepository>();
+builder.Services.AddScoped<IBannerSettingRepository, BannerSettingRepository>();
+builder.Services.AddScoped<IBannerScopeRepository, BannerScopeRepository>();
 
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();

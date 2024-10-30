@@ -57,6 +57,8 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new StudentTechieEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LuckyTicketEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new BannerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BannerScopeEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BannerSettingEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new BannerStudentEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
@@ -93,6 +95,8 @@ namespace Fsel.System.Infrastructure
         public DbSet<UserConfig> UserConfigs { get; set; }
         public DbSet<LuckyTicket> LuckyTickets { get; set; }
         public DbSet<Banner> Banners { get; set; }
+        public DbSet<BannerSetting> BannerSettings { get; set; }
+        public DbSet<BannerScope> BannerScopes { get; set; }
         public DbSet<BannerStudent> BannerStudents { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
