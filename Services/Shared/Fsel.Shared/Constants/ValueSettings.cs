@@ -114,6 +114,14 @@ namespace Fsel.Shared.Constants
             public const int StreakFiftyTimeCode = 50;
         }
 
+        public static class ExtendMonth
+        {
+            public const int TwentyFourMonth = 24;
+            public const int TwelveMonth = 12;
+            public const int SixMonth = 6;
+            public const int ThreeMonth = 3;
+        }
+
         public static class FselRatingValue
         {
             public const int DelayDateSendingRate = 5;

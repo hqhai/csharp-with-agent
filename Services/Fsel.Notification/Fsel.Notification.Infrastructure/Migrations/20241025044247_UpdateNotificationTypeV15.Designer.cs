@@ -4,6 +4,7 @@ using Fsel.Notification.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Notification.Infrastructure.Migrations
 {
     [DbContext(typeof(NotificationsDBContext))]
-    partial class NotificationsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241025044247_UpdateNotificationTypeV15")]
+    partial class UpdateNotificationTypeV15
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -774,7 +777,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Priority = 1,
                             TemplateLink = "",
-                            TemplateMessage = "Chào mừng bạn đến với FSEL! Hãy chuẩn bị sẵn sàng cho hành trình học tập trong vòng {0} tháng tới nhé!",
+                            TemplateMessage = "Chào mừng bạn đến với FSEL! Hãy chuẩn bị sẵn sàng cho hành trình học tập trong vòng 24 tháng tới nhé!",
                             Type = "LinkPage"
                         },
                         new
@@ -1604,7 +1607,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "vi-VN",
                             NotificationTypeId = new Guid("30f3dce8-e8c0-4231-a2b1-8b97e9551129"),
-                            TemplateMessage = "Chào mừng bạn đến với FSEL! Hãy chuẩn bị sẵn sàng cho hành trình học tập trong vòng {0} tháng tới nhé!"
+                            TemplateMessage = "Chào mừng bạn đến với FSEL! Hãy chuẩn bị sẵn sàng cho hành trình học tập trong vòng 24 tháng tới nhé!"
                         },
                         new
                         {
@@ -1615,7 +1618,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "en-US",
                             NotificationTypeId = new Guid("30f3dce8-e8c0-4231-a2b1-8b97e9551129"),
-                            TemplateMessage = "Welcome to FSEL! Get ready for your learning journey over the next {0} months!"
+                            TemplateMessage = "Welcome to FSEL! Get ready for your learning journey over the next 3 months!"
                         },
                         new
                         {
@@ -1626,7 +1629,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "fr-FR",
                             NotificationTypeId = new Guid("30f3dce8-e8c0-4231-a2b1-8b97e9551129"),
-                            TemplateMessage = "Bienvenue chez FSEL ! Préparez-vous pour votre parcours d'apprentissage au cours des {0} prochains mois !"
+                            TemplateMessage = "Bienvenue chez FSEL ! Préparez-vous pour votre parcours d'apprentissage au cours des 3 prochains mois !"
                         },
                         new
                         {
