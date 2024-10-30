@@ -106,7 +106,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         /// <summary>
         /// Delete Vouchers
         /// </summary>
-        [HttpPost("delete")]
+        [HttpDelete("delete")]
         [ProducesResponseType(typeof(MethodResult<VoucherModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Delete([FromBody] DeleteVouchersCommand command)
