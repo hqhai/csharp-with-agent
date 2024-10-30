@@ -121,5 +121,11 @@ namespace Fsel.Shared.Constants
             public const int SixMonth = 6;
             public const int ThreeMonth = 3;
         }
+
+        public static class FselRatingValue
+        {
+            public const int DelayDateSendingRate = 5;
+            public const int MoreThanOneDevice = 1;
+        }
     }
 }
