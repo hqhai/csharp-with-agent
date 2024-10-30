@@ -223,8 +223,13 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
         private async Task SaveMockTestScoresToMockTestResultDatabase(MockTestResult mockTestResult, CancellationToken cancellationToken)
         {
-            _mockTestResultRepository.Update(mockTestResult);
-            await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _mockTestResultRepository.ExecuteTransactionAsync(async () =>
+            {
+                _mockTestResultRepository.Update(mockTestResult);
+
+                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                return new MethodResult<bool>();
+            });
         }
 
         /// <summary>
