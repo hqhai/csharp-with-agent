@@ -3,7 +3,9 @@
 namespace Fsel.Ordering.Domain.Entities
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
@@ -14,9 +16,15 @@ namespace Fsel.Ordering.Domain.Entities
 
     public class Voucher : Entity, IMultiLingualObject<VoucherTranslation>
     {
+        public Voucher Clone()
+        {
+            return (Voucher)MemberwiseClone();
+        }
+
         /// <summary>
         /// Mã voucher
         /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(10, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Code { get; set; }
 
@@ -36,13 +44,13 @@ namespace Fsel.Ordering.Domain.Entities
         /// <summary>
         /// Loại khuyễn mãi
         /// </summary>
-        public EnumVoucherCategory VoucherCategory { get; set; }
+        public EnumVoucherCategory Category { get; set; }
 
         /// <summary>
         /// Giá trị khuyến mãi
         /// </summary>
         [Range(1, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int Percent { get; set; }
+        public int Value { get; set; }
 
         /// <summary>
         /// Số lượng tối đa
@@ -61,9 +69,27 @@ namespace Fsel.Ordering.Domain.Entities
         public DateTime EndDate { get; set; }
 
         /// <summary>
-        /// Loại voucher
+        /// Đối tượng áp dụng
         /// </summary>
-        public EnumVoucherType VoucherType { get; set; }
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? ApplicableSubjectsStr { get; set; }
+
+        [NotMapped]
+        public IList<EnumApplicableSubjectsVoucher>? ApplicableSubjects
+        {
+            get { return ConvertHelper.Deserialize<IList<EnumApplicableSubjectsVoucher>>(ApplicableSubjectsStr); }
+            set { ApplicableSubjectsStr = ConvertHelper.Serialize(value); }
+        }
+
+        public string? ApplicableEmailsStr { get; set; }
+
+        [NotMapped]
+        public IList<string>? ApplicableEmails
+        {
+            get { return ConvertHelper.Deserialize<IList<string>>(ApplicableEmailsStr); }
+            set { ApplicableEmailsStr = ConvertHelper.Serialize(value); }
+        }
 
         /// <summary>
         /// Nguồn voucher
@@ -95,6 +121,9 @@ namespace Fsel.Ordering.Domain.Entities
             set { EventIdsStr = ConvertHelper.Serialize(value); }
         }
 
+        [DefaultValue(false)]
+        public bool IsShowMyVoucher { get; set; }
+
         /// <summary>
         /// Trạng thái
         /// </summary>
@@ -111,11 +140,17 @@ namespace Fsel.Ordering.Domain.Entities
         public string? DescriptionStr { get; set; }
 
         [NotMapped]
-        public EventDescription? Description
+        public VoucherDescription? Description
         {
-            get { return DescriptionStr.Deserialize<EventDescription>(); }
+            get { return DescriptionStr.Deserialize<VoucherDescription>(); }
             set { DescriptionStr = value.Serialize(); }
         }
+
+        /// <summary>
+        /// Số lượt đổi
+        /// </summary>
+        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int? NumberOfChanges { get; set; }
 
         /// <summary>
         /// Link Banner
@@ -128,36 +163,39 @@ namespace Fsel.Ordering.Domain.Entities
 
         public ICollection<UserVoucher> UserVouchers { get; set; } = new List<UserVoucher>();
         public ICollection<Order> Orders { get; set; } = new List<Order>();
-        public ICollection<VoucherTranslation> Translations { get; set; } = new List<VoucherTranslation>();
+
+        /// <summary>
+        /// Đa ngôn ngữ
+        /// </summary>
+        public string? TranslationsStr { get; set; }
+
+        [NotMapped]
+        public ICollection<VoucherTranslation>? Translations
+        {
+            get { return TranslationsStr.Deserialize<ICollection<VoucherTranslation>>(); }
+            set { TranslationsStr = value.Serialize(); }
+        }
     }
 
-    public class EventDescription
+    public class VoucherDescription
     {
+        public IList<string>? Title { get; set; }
         public IList<string>? HowToUses { get; set; }
         public IList<string>? Conditions { get; set; }
         public IList<string>? Contacts { get; set; }
         public IList<string>? Others { get; set; }
     }
 
-    public class VoucherTranslation : Entity, ITranslationObject
+    public class VoucherTranslation : ITranslationObject
     {
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? Name { get; set; }
-
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? DescriptionStr { get; set; }
 
         [NotMapped]
-        public ProductDescription? Description
+        public VoucherDescription? Description
         {
-            get { return DescriptionStr.Deserialize<ProductDescription>(); }
+            get { return DescriptionStr.Deserialize<VoucherDescription>(); }
             set { DescriptionStr = value.Serialize(); }
         }
-
-        public Guid ProductId { get; set; }
-
-        public Product? Product { get; set; }
 
         public string? Language { get; set; }
     }
