@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 .Include(x => x.SectionGroupResults)
                 .FirstOrDefault(x => x.Id == mockTestResultId);
 
-            if (mockTestResult == null)
+            if (mockTestResult == null || mockTestResult.SkillScores == null)
             {
                 return false;
             }
@@ -125,6 +125,13 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             }
             sectionGroupResult.SkillScores = skillScores;
             sectionGroupResult.CorrectCount += (int)score;
+
+            var mockTestResultTemp = mockTestResult.SkillScores.Where(s => s.Skill != sectionGroup?.CourseSkill).ToList();
+            mockTestResultTemp.Add(skillScores.Single());
+            mockTestResult.SkillScores = mockTestResultTemp;
+
+            // save skillscore to mockTestResult
+            await SaveMockTestScoresToMockTestResultDatabase(mockTestResult, cancellationToken);
 
             await SendToWebSocket(mockTestScores, cancellationToken);
 
@@ -212,6 +219,17 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             }, cancellationToken).ConfigureAwait(false);
 
             return Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
+        }
+
+        private async Task SaveMockTestScoresToMockTestResultDatabase(MockTestResult mockTestResult, CancellationToken cancellationToken)
+        {
+            await _mockTestResultRepository.ExecuteTransactionAsync(async () =>
+            {
+                _mockTestResultRepository.Update(mockTestResult);
+
+                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                return new MethodResult<bool>();
+            });
         }
 
         /// <summary>
