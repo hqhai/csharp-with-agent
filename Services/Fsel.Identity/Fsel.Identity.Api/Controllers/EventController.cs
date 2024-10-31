@@ -81,7 +81,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Lấy liệu sự kiện trong khoảng ngày
         /// </summary>
-        [HttpGet("envent-date")]
+        [HttpGet("event-by-date")]
         [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetCompetitionEventsByDate([FromQuery] GetCompetitionEventsByDateQuery query)
