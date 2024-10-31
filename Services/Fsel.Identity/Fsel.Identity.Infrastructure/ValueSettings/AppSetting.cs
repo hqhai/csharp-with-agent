@@ -65,6 +65,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     public class GoogleSheetConfig
     {
         public string? SchoolStudentSheetId { get; set; }
+        public string? CreateUsersAndOrders { get; set; }
     }
 
     public class UserDeletionConfig
