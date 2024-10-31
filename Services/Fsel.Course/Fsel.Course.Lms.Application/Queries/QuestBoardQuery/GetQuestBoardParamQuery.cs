@@ -223,7 +223,8 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 NameUnit = learn.UnitResult?.Unit?.Name,
                 DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.CourseId == learn.CourseResult?.CourseId && x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
                 LessonId = learn.LessonResult?.LessonId,
-                LessonResultId = learn.LessonResult?.Id
+                LessonResultId = learn.LessonResult?.Id,
+                ClassForumId = learn.ClassForum?.Id
             };
 
             if (learn.LessonResult != null && learn.LessonResult.Status == EnumResultStatus.Process)
@@ -259,7 +260,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 DisplayOrder = learn.UnitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.CourseId == learn.CourseResult?.CourseId && x.UnitId == learn.UnitResult.UnitId)?.DisplayOrder,
                 LessonId = learn.LessonResult?.LessonId,
                 LessonResultId = learn.LessonResult?.Id,
-                ClassForumId = learn.ClassForum?.Id,
+                ClassForumId = learn.ClassForum?.Id
             };
 
             if (learn.ClassForum != null)
