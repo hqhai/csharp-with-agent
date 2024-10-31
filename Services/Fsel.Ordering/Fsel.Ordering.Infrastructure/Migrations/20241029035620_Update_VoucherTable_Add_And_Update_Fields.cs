@@ -20,7 +20,13 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 defaultValue: "");
 
             migrationBuilder.Sql(
-                "UPDATE Vouchers SET ApplicableSubjectsStr = '[\"' + VoucherType + '\"]'");
+                "UPDATE Vouchers " +
+                "SET ApplicableSubjectsStr = " +
+                "CASE " +
+                "WHEN VoucherType = 'All' THEN '[\"NewSale\",\"CurrentStudent\",\"Alumni\"]' " +
+                "ELSE '[\"' + VoucherType + '\"]' " +
+                "END"
+            );
 
             migrationBuilder.DropColumn(
                 name: "VoucherType",
@@ -128,8 +134,12 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
             migrationBuilder.Sql(
                 "UPDATE Vouchers " +
-                "SET VoucherType = JSON_VALUE(ApplicableSubjectsStr, '$[0]') " +
-                "WHERE ISJSON(ApplicableSubjectsStr) = 1");
+                "SET VoucherType = CASE " +
+                "WHEN ApplicableSubjectsStr = '[\"NewSale\",\"CurrentStudent\",\"Alumni\"]' THEN 'All' " +
+                "ELSE JSON_VALUE(ApplicableSubjectsStr, '$[0]') " +
+                "END " +
+                "WHERE ISJSON(ApplicableSubjectsStr) = 1"
+                );
 
             migrationBuilder.DropColumn(
                name: "ApplicableSubjectsStr",
