@@ -1,3 +1,4 @@
+
 // Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.System.Application.Commands.BannerCmd
@@ -13,6 +14,7 @@ namespace Fsel.System.Application.Commands.BannerCmd
     using Fsel.System.Domain.Models.CommandModels.Banners;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System;
+    using global::System.Threading;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -40,80 +42,10 @@ namespace Fsel.System.Application.Commands.BannerCmd
             var methodResult = new MethodResult<BannerModel>();
 
             #region Validation
-            if (request.StartDate >= request.EndDate)
+            (bool isValid, string errorCode, string field, object? value) = await ValidateBanner(request);
+            if (!isValid)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.StartDateGreaterThanEndDate));
-                return methodResult;
-            }
-
-            if (request.Type == EnumBannerType.Popup && string.IsNullOrEmpty(request.FilePath))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(EnumBannerType.Popup), request.FilePath);
-                return methodResult;
-            }
-            else if (request.Type == EnumBannerType.Warning && string.IsNullOrEmpty(request.Content))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(EnumBannerType.Warning), request.Content);
-                return methodResult;
-            }
-
-            if (request.BannerFrequency == EnumBannerFrequency.Custom && (!request.DisplayStartDate.HasValue || !request.DisplayEndDate.HasValue))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.CustomFrequencyRequiresDisplayDate));
-                return methodResult;
-            }
-
-            if (request.BannerFrequency == EnumBannerFrequency.Custom && (request.DisplayStartDate >= request.DisplayEndDate))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.DisplayStartDateGreaterThanDisplayEndDate));
-                return methodResult;
-            }
-
-            if (request.DisplayStartTime.HasValue && request.DisplayEndTime.HasValue && request.DisplayStartTime >= request.DisplayEndTime)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.DisplayStartTimeGreaterThanDisplayEndTime));
-                return methodResult;
-            }
-
-            if (request.DisplayStartTime.HasValue && request.DisplayStartTime < 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.DisplayStartTimeMustGreaterThanZero));
-                return methodResult;
-            }
-
-            if (request.BannerScopes == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.BannerScopesRequired), nameof(request.BannerScopes), request.BannerScopes);
-                return methodResult;
-            }
-
-            if (request.BannerScopes.GroupBy(x => x.CourseLevel).Any(x => x.Count() > 1))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.EachBannerOnlyOneCourseLevel), nameof(request.BannerScopes), request.BannerScopes);
-                return methodResult;
-            }
-
-            if (request.BannerScopes.Any(x => x.TargetUsers == null))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.TargetUsersRequired));
-                return methodResult;
-            }
-
-            if (request.BannerScopes.Any(x => x.ApplicableUserGroups == null))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.ApplicableUserGroupsRequired));
-                return methodResult;
-            }
-
-            if (request.BannerScopes.Any(x => x.ApplicableUserGroups != null && x.ApplicableUserGroups.Any(c => c == EnumApplicableUserGroup.Event) && x.CompetitionEventIds == null))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.CompetitionEventIdsRequired));
-                return methodResult;
-            }
-
-            if (await _bannerRepository.Queryable.AnyAsync(x => x.Code.ToLower().Trim() == request.Code.ToLower().Trim(), cancellationToken))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.CodeAlreadyExist), nameof(request.Code), request.Code);
+                methodResult.AddErrorBadRequest(errorCode, field, value);
                 return methodResult;
             }
 
@@ -127,36 +59,7 @@ namespace Fsel.System.Application.Commands.BannerCmd
 
             await _bannerRepository.ExecuteTransactionAsync(async () =>
             {
-                if (request.Type == EnumBannerType.Warning)
-                {
-                    var contentBanner = await _bannerRepository.Queryable.FirstOrDefaultAsync(x => x.Type == EnumBannerType.Warning && request.StartDate.Date <= x.EndDate.Date && request.EndDate.Date >= x.StartDate.Date, cancellationToken);
-                    if (contentBanner != null)
-                    {
-                        contentBanner.Status = false;
-                        _bannerRepository.Update(contentBanner);
-                    }
-                }
-                else
-                {
-                    var courseLevels = request.BannerScopes.Where(x => x.IsPriority).Select(x => x.CourseLevel).ToList();
-                    var priorityBanners = await _bannerScopeRepository.Queryable
-                                                                      .Include(x => x.Banner)
-                                                                      .Where(x => x.Banner != null && request.StartDate <= x.Banner.EndDate && request.EndDate >= x.Banner.StartDate)
-                                                                      .Where(x => courseLevels.Contains(x.CourseLevel) && x.IsPriority)
-                                                                      .ToListAsync(cancellationToken);
-
-                    if (priorityBanners != null && priorityBanners.Any())
-                    {
-                        foreach (var priorityBanner in priorityBanners)
-                        {
-                            priorityBanner.IsPriority = false;
-                        }
-
-                        _bannerScopeRepository.UpdateList(priorityBanners);
-                        await _bannerScopeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                    }
-                }
-
+                await BannerScopeHandler(request, cancellationToken);
                 banner.StartDate = banner.StartDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
                 banner.EndDate = banner.EndDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
                 banner.Status = true;
@@ -171,6 +74,116 @@ namespace Fsel.System.Application.Commands.BannerCmd
             });
 
             return methodResult;
+        }
+
+        private async Task<VoidMethodResult> BannerScopeHandler(CreateBannerCommand request, CancellationToken cancellationToken)
+        {
+            VoidMethodResult methodResult = new VoidMethodResult();
+
+            if (request.Type == EnumBannerType.Warning)
+            {
+                var contentBanner = await _bannerRepository.Queryable.FirstOrDefaultAsync(x => x.Type == EnumBannerType.Warning && request.StartDate.Date <= x.EndDate.Date && request.EndDate.Date >= x.StartDate.Date, cancellationToken);
+                if (contentBanner != null)
+                {
+                    contentBanner.Status = false;
+                    _bannerRepository.Update(contentBanner);
+                }
+            }
+            else
+            {
+                var courseLevels = request.BannerScopes.Where(x => x.IsPriority).Select(x => x.CourseLevel).ToList();
+                var priorityBanners = await _bannerScopeRepository.Queryable
+                                                                  .Include(x => x.Banner)
+                                                                  .Where(x => x.Banner != null && request.StartDate <= x.Banner.EndDate && request.EndDate >= x.Banner.StartDate)
+                                                                  .Where(x => courseLevels.Contains(x.CourseLevel) && x.IsPriority)
+                                                                  .ToListAsync(cancellationToken);
+
+                if (priorityBanners != null && priorityBanners.Any())
+                {
+                    foreach (var priorityBanner in priorityBanners)
+                    {
+                        priorityBanner.IsPriority = false;
+                    }
+
+                    _bannerScopeRepository.UpdateList(priorityBanners);
+                    await _bannerScopeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
+            }
+
+            return methodResult;
+        }
+
+        private async Task<(bool, string, string, object?)> ValidateBanner(CreateBannerCommand request)
+        {
+            bool condition = true;
+            string errorMessage = string.Empty;
+            string field = string.Empty;
+            object? value = default;
+
+            if (await _bannerRepository.Queryable.AnyAsync(x => x.Code.ToLower().Trim() == request.Code.ToLower().Trim()))
+            {
+                condition = false;
+                errorMessage = nameof(EnumBannerErrorCode.CodeAlreadyExist);
+                field = nameof(request.Code);
+                value = request.Code;
+            }
+
+            if (request.StartDate >= request.EndDate)
+            {
+                condition = false;
+                errorMessage = nameof(EnumBannerErrorCode.StartDateGreaterThanEndDate);
+                field = nameof(request.StartDate);
+                value = request.StartDate;
+            }
+
+            if (request.Type == EnumBannerType.Popup && string.IsNullOrEmpty(request.FilePath))
+            {
+                condition = false;
+                errorMessage = nameof(EnumSystemErrorCode.DataNotExist);
+                field = nameof(EnumBannerType.Popup);
+                value = request.FilePath;
+            }
+            else if (request.Type == EnumBannerType.Warning && string.IsNullOrEmpty(request.Content))
+            {
+                condition = false;
+                errorMessage = nameof(EnumSystemErrorCode.DataNotExist);
+                field = nameof(EnumBannerType.Warning);
+                value = request.Content;
+            }
+
+            if (request.BannerFrequency == EnumBannerFrequency.Custom && (request.DisplayStartDate >= request.DisplayEndDate))
+            {
+                condition = false;
+                errorMessage = nameof(EnumBannerErrorCode.DisplayStartDateGreaterThanDisplayEndDate);
+                field = nameof(request.DisplayStartDate);
+                value = request.DisplayStartDate;
+            }
+
+            if (request.DisplayStartTime.HasValue && request.DisplayEndTime.HasValue && request.DisplayStartTime >= request.DisplayEndTime)
+            {
+                condition = false;
+                errorMessage = nameof(EnumBannerErrorCode.DisplayStartTimeGreaterThanDisplayEndTime);
+                field = nameof(request.DisplayStartTime);
+                value = request.DisplayStartTime;
+            }
+
+            if (request.BannerScopes.GroupBy(x => x.CourseLevel).Any(x => x.Count() > 1))
+            {
+                condition = false;
+                errorMessage = nameof(EnumBannerErrorCode.EachBannerOnlyOneCourseLevel);
+                field = nameof(request.BannerScopes);
+                value = request.BannerScopes;
+            }
+
+            if (request.BannerScopes.Any(x => x.ApplicableUserGroups != null && x.ApplicableUserGroups.Any(c => c == EnumApplicableUserGroup.Event) && x.CompetitionEventIds == null))
+            {
+                condition = false;
+                errorMessage = nameof(EnumBannerErrorCode.CompetitionEventIdsRequired);
+                field = nameof(request.BannerScopes);
+                value = request.BannerScopes;
+            }
+
+            return (condition, errorMessage, field, value);
         }
     }
 }

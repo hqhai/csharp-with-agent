@@ -126,17 +126,5 @@ namespace Fsel.System.Api.Controllers.Admins
             MethodResult<BannerPriorityExistenceModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
-        /// <summary>
-        /// change status
-        /// </summary>
-        [HttpPut("change-status/{id}")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ChangeStatus([FromRoute] Guid id)
-        {
-            MethodResult<bool> commandResult = await _mediator.Send(new ChangeStatusBannerCommand { Id = id }).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
     }
 }

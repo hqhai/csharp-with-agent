@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20241029040146_Add_Table_Banner")]
+    [Migration("20241031025444_Add_Table_Banner")]
     partial class Add_Table_Banner
     {
         /// <inheritdoc />

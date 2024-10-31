@@ -4,6 +4,7 @@ namespace Fsel.System.Domain.Models.CommandModels.Banners
 {
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.Models.CommandModels.BannerScopes;
+    using global::System.ComponentModel.DataAnnotations;
 
     public class CreateBannerCommandModel
     {
@@ -33,6 +34,7 @@ namespace Fsel.System.Domain.Models.CommandModels.Banners
 
         public long? DisplayEndTime { get; set; }
 
-        public IList<CreateBannerScopeCommandModel>? BannerScopes { get; set; }
+        [Required]
+        public IList<CreateBannerScopeCommandModel> BannerScopes { get; set; } = new List<CreateBannerScopeCommandModel>();
     }
 }

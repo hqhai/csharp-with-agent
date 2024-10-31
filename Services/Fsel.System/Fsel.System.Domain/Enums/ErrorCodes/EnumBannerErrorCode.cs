@@ -18,8 +18,6 @@ namespace Fsel.System.Domain.Enums.ErrorCodes
 
         DisplayStartTimeMustGreaterThanZero,
 
-        BannerScopesRequired,
-
         EachBannerOnlyOneCourseLevel,
 
         TargetUsersRequired,
