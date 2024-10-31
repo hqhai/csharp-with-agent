@@ -115,18 +115,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             {
                 return string.Empty;
             }
-            if (package.MonthNumber == 1)
-            {
-                return "1 month";
-            }
-            else if (package.MonthNumber == 6)
-            {
-                return "6 months";
-            }
-            else
-            {
-                return "12 months";
-            }
+            return package.MonthNumber == 1 ? "1 month" : $"{package.MonthNumber} months";
         }
     }
 }
