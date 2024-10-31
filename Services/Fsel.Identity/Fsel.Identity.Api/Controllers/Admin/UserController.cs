@@ -219,5 +219,17 @@ namespace Fsel.Identity.Api.Controllers.Admin
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Create users and orders from gg sheet
+        /// </summary>
+        [HttpPost("create-users-and-orders-from-gg-sheet")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateUsersAndOrdersAndGGSheet([FromBody] CreateUsersAndOrdersFromGGSheetCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
