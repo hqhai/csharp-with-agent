@@ -28,6 +28,15 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 "END"
             );
 
+            migrationBuilder.Sql(
+                "Update Vouchers " +
+                "Set Source = " +
+                "Case" +
+                "When Source = 'Retail' or Source = 'MasterAgency'  Then 'Auto'" +
+                "ELSE 'Admin'" +
+                "END"
+            );
+
             migrationBuilder.DropColumn(
                 name: "VoucherType",
                 table: "Vouchers");
@@ -140,6 +149,15 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 "END " +
                 "WHERE ISJSON(ApplicableSubjectsStr) = 1"
                 );
+
+            migrationBuilder.Sql(
+                "Update Vouchers " +
+                "Set Source = " +
+                "Case" +
+                "When Source = 'Auto' Then 'MasterAgency'" +
+                "ELSE 'Admin'" +
+                "END"
+            );
 
             migrationBuilder.DropColumn(
                name: "ApplicableSubjectsStr",
