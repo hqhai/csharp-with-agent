@@ -115,6 +115,14 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 nullable: false,
                 defaultValue: "");
 
+            migrationBuilder.Sql(
+                "UPDATE Vouchers " +
+                "SET EventIdsStr = (" +
+                "SELECT TOP(1) '[\"' + CAST(Id AS NVARCHAR(MAX)) + '\"]' " +
+                "FROM Events " +
+                "WHERE IsDefault = 1)"
+            );
+
             migrationBuilder.AddColumn<bool>(
                 name: "IsShowMyVoucher",
                 table: "Vouchers",
