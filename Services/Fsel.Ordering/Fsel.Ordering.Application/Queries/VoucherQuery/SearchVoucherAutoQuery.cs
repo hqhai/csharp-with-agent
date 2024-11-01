@@ -45,6 +45,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                     return new VoucherModel
                     {
                         Name = x.First().Name,
+                        CodePrefix = x.First().CodePrefix,
                         CreatedDate = x.First().CreatedDate,
                         Quantity = x.Count(),
                         Value = x.First().Value,
