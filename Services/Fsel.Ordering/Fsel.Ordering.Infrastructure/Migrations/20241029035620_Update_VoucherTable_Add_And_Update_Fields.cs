@@ -74,6 +74,11 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 nullable: false,
                 defaultValue: "");
 
+            migrationBuilder.Sql(
+                "Update Vouchers " +
+                "Set Category = 'Percent'"
+            );
+
             migrationBuilder.AddColumn<string>(
                 name: "ApplicableEmailsStr",
                 table: "Vouchers",

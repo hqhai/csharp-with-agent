@@ -23,11 +23,13 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
     {
         private readonly IMapper _mapper;
         private readonly IVoucherRepository _voucherRepository;
+        private readonly IEventRepository _eventRepository;
 
-        public GetVoucherQueryHandler(IMapper mapper, IVoucherRepository voucherRepository)
+        public GetVoucherQueryHandler(IMapper mapper, IVoucherRepository voucherRepository, IEventRepository eventRepository)
         {
             _mapper = mapper;
             _voucherRepository = voucherRepository;
+            _eventRepository = eventRepository;
         }
 
         public async Task<MethodResult<VoucherModel>> Handle(GetVoucherQuery request, CancellationToken cancellationToken)
@@ -46,6 +48,14 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
             var voucherModel = _mapper.Map<VoucherModel>(voucher);
 
             voucherModel.QuantityUsed = voucher.Orders.Where(p => p.Status == EnumOrderStatus.New || p.Status == EnumOrderStatus.Payment).Count();
+
+            var @events = await _eventRepository.Queryable.Where(p => voucherModel.EventIds != null && voucherModel.EventIds.Contains(p.Id)).ToListAsync(cancellationToken);
+
+            voucherModel.EventModels = @events.Select(p => new EventModel()
+            {
+                Id = p.Id,
+                Name = p.Name,
+            }).ToList();
 
             methodResult.Result = voucherModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
