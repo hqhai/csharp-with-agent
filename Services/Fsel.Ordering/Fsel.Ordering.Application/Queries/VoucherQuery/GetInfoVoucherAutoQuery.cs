@@ -37,7 +37,8 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<VoucherModel>();
 
-            var vouchers = await _voucherRepository.Queryable.Include(p => p.Orders.Where(x => x.Status == Shared.Enums.EnumOrderStatus.New || x.Status == Shared.Enums.EnumOrderStatus.Payment)).Where(p => !string.IsNullOrEmpty(p.CodePrefix) && p.CodePrefix.ToLower() == request.CodePrefix.ToLower()).ToListAsync(cancellationToken);
+            var vouchers = await _voucherRepository.Queryable.Include(p => p.Orders.Where(x => x.Status == Shared.Enums.EnumOrderStatus.New || x.Status == Shared.Enums.EnumOrderStatus.Payment)).Include(p => p.VoucherPackages).ThenInclude(p => p.Package).Where(p => !string.IsNullOrEmpty(p.CodePrefix) && p.CodePrefix.ToLower() == request.CodePrefix.ToLower()).ToListAsync(cancellationToken);
+
             if (vouchers == null || vouchers.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(vouchers));
@@ -48,6 +49,16 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
             var voucherModel = _mapper.Map<VoucherModel>(voucher);
             voucherModel.QuantityUsed = quantityUsed;
             voucherModel.RemainingQuantity = voucherModel.Quantity - voucherModel.QuantityUsed;
+            var voucherPackages = voucher.VoucherPackages.Where(p => p.Package != null).Select(p => p.Package!).ToList();
+            if (voucherPackages.Count > 0)
+            {
+                voucherModel.PackageModels = voucherPackages.Select(p => new PackageModel()
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    MonthNumber = p.MonthNumber
+                }).ToList();
+            }
             methodResult.Result = voucherModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

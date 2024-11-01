@@ -196,6 +196,11 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                             newVoucher.Id = Guid.NewGuid();
                             newVoucher.Code = code;
                             newVoucher.Quantity = 1;
+                            newVoucher.VoucherPackages = new List<VoucherPackage>();
+                            request.PackageIds.ForEach(p => newVoucher.VoucherPackages.Add(new VoucherPackage()
+                            {
+                                PackageId = p
+                            }));
                             vouchers.Add(newVoucher);
                         }
 

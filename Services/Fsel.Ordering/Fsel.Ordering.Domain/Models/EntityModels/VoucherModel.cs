@@ -35,7 +35,8 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public IList<Guid>? EventIds { get; set; }
         public string? TranslationsStr { get; set; }
         public IList<EventModel>? EventModels { get; set; }
+        public IList<PackageModel>? PackageModels { get; set; }
         public ICollection<VoucherTranslation>? Translations { get; set; }
-        public ICollection<VoucherPackageModel>? VoucherPackages { get; set; }
+        public IList<VoucherPackageModel>? VoucherPackages { get; set; }
     }
 }
