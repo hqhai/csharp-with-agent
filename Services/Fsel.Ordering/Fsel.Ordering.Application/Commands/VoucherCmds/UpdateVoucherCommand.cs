@@ -126,7 +126,9 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
             #endregion Validation
 
-            if (request.ApplicableSubjects.Any(p => p == EnumApplicableSubjectsVoucher.Other))
+            _mapper.Map(request, voucher);
+
+            if (request.ApplicableSubjects.Any(p => p == EnumApplicableSubjectsVoucher.Other) && request.ExcelFilePath.ToLower() != voucher.ExcelFilePath.ToLower())
             {
                 voucher.ApplicableEmails = emails;
             }
@@ -144,8 +146,6 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
             await _voucherRepository.ExecuteTransactionAsync(async () =>
             {
-                _mapper.Map(request, voucher);
-
                 foreach (var item in voucher.VoucherPackages.ToList())
                 {
                     if (!request.PackageIds.Contains(item.PackageId))
