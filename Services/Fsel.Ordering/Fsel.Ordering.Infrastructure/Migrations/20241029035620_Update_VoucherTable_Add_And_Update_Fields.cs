@@ -166,9 +166,9 @@ namespace Fsel.Ordering.Infrastructure.Migrations
             migrationBuilder.Sql(
                 "Update Vouchers " +
                 "Set Source = " +
-                "Case" +
-                "When Source = 'Auto' Then 'MasterAgency'" +
-                "ELSE 'Admin'" +
+                "Case " +
+                "When Source = 'Auto' Then 'MasterAgency' " +
+                "ELSE 'Admin' " +
                 "END"
             );
 
