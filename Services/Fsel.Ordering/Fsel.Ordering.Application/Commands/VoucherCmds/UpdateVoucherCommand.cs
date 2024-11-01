@@ -48,6 +48,13 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
             #region Validation
 
+            var voucher = await _voucherRepository.Queryable.Include(p => p.VoucherPackages).FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
+            if (voucher == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucher));
+                return methodResult;
+            }
+
             if (string.IsNullOrEmpty(request.Banner) || string.IsNullOrEmpty(request.Name))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
@@ -73,13 +80,13 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.ApplicableSubjects), request.ApplicableSubjects);
                 return methodResult;
             }
-            if (request.ApplicableSubjects.Any(p => p == EnumApplicableSubjectsVoucher.Other) && (request.File == null || request.File.Length == 0))
+            if (request.ApplicableSubjects.Any(p => p == EnumApplicableSubjectsVoucher.Other) && request.ExcelFilePath.ToLower() != voucher.ExcelFilePath.ToLower() && (request.File == null || request.File.Length == 0 || string.IsNullOrEmpty(request.ExcelFilePath)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.File), request.File);
                 return methodResult;
             }
             var emails = new List<string>();
-            if (request.ApplicableSubjects.Any(p => p == EnumApplicableSubjectsVoucher.Other))
+            if (request.ApplicableSubjects.Any(p => p == EnumApplicableSubjectsVoucher.Other) && request.ExcelFilePath.ToLower() != voucher.ExcelFilePath.ToLower())
             {
                 var result = request.File?.ImportAndValidateExcel(async (ImportEmailsInToVoucherModel x, IList<ImportEmailsInToVoucherModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
                 {
@@ -118,13 +125,6 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             }
 
             #endregion Validation
-
-            var voucher = await _voucherRepository.Queryable.Include(p => p.VoucherPackages).FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
-            if (voucher == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucher));
-                return methodResult;
-            }
 
             if (request.ApplicableSubjects.Any(p => p == EnumApplicableSubjectsVoucher.Other))
             {

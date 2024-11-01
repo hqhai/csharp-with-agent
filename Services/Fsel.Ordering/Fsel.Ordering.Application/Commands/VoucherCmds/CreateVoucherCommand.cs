@@ -86,7 +86,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.ApplicableSubjects), request.ApplicableSubjects);
                 return methodResult;
             }
-            if (request.ApplicableSubjects.Any(p => p == EnumApplicableSubjectsVoucher.Other) && (request.File == null || request.File.Length == 0))
+            if (request.ApplicableSubjects.Any(p => p == EnumApplicableSubjectsVoucher.Other) && (request.File == null || request.File.Length == 0 || string.IsNullOrEmpty(request.ExcelFilePath)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.File), request.File);
                 return methodResult;

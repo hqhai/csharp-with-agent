@@ -28,6 +28,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public int? NumberOfChanges { get; set; }
         public bool IsActive { get; set; }
         public string? Banner { get; set; }
+        public string? ExcelFilePath { get; set; }
         public string? Duration { get; set; }
         public string? ItemStatus { get; set; }
         public IList<Guid>? PackageIds { get; set; }

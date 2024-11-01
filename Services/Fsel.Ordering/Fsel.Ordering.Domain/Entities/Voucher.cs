@@ -82,6 +82,12 @@ namespace Fsel.Ordering.Domain.Entities
             set { ApplicableSubjectsStr = ConvertHelper.Serialize(value); }
         }
 
+        /// <summary>
+        /// Link file chứa email
+        /// </summary>
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? ExcelFilePath { get; set; }
+
         public string? ApplicableEmailsStr { get; set; }
 
         [NotMapped]
@@ -155,7 +161,6 @@ namespace Fsel.Ordering.Domain.Entities
         /// <summary>
         /// Link Banner
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Banner { get; set; }
 

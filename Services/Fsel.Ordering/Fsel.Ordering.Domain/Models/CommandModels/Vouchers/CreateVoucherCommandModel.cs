@@ -23,6 +23,7 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Vouchers
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public string? Banner { get; set; }
+        public string? ExcelFilePath { get; set; }
         public int? NumberOfChanges { get; set; }
         public IFormFile? File { get; set; }
 
