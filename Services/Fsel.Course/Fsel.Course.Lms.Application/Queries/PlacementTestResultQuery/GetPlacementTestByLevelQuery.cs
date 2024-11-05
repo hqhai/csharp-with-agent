@@ -177,9 +177,9 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             placementTestGroupResult = new PlacementTestGroupResult
             {
                 StudentId = studentId,
-                ProcessDate = DateTime.UtcNow,
                 ProcessLevel = placementTest.Level,
-                Status = EnumResultStatus.Process
+                NewDate = DateTime.UtcNow,
+                Status = EnumResultStatus.New,
             };
             _placementTestGroupResultRepository.Add(placementTestGroupResult);
             await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
