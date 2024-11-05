@@ -37,7 +37,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
             if (isCheckDate)
             {
-                query = query.Where(x => studentIds.Any(y => y == x.StudentId));
+                query = query.Where(x => studentIds.Contains(x.StudentId));
             }
             return await query.Select(x => x.StudentId).ToListAsync();
         }

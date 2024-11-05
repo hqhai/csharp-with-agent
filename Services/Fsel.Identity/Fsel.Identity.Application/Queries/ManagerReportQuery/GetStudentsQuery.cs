@@ -64,15 +64,15 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             }
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.Admin.ToString()) && request.SchoolIds != null && request.SchoolIds.Any())
             {
-                query = query.Where(x => x.SchoolId.HasValue && request.SchoolIds.Any(y => y == x.SchoolId.Value));
+                query = query.Where(x => x.SchoolId.HasValue && request.SchoolIds.Contains(x.SchoolId.Value));
             }
             if (request.IsCheckDate)
             {
-                query = query.Where(x => request.StudentIds != null && request.StudentIds.Any() && request.StudentIds.Any(y => y == x.Id));
+                query = query.Where(x => request.StudentIds != null && request.StudentIds.Any() && request.StudentIds.Contains(x.Id));
             }
-            if (!request.IsCheckDate && request.StudentIds != null && request.StudentIds.Any())
+            else if (request.StudentIds != null && request.StudentIds.Any())
             {
-                query = query.Where(x => request.StudentIds.Any(y => y == x.Id));
+                query = query.Where(x => request.StudentIds.Contains(x.Id));
             }
             if (request.Status.HasValue && request.Status.Value == EnumCompletionStatus.NotStarted)
             {

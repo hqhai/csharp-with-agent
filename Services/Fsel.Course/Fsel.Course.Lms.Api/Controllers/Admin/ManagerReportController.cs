@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// search
         /// </summary>
         [HttpGet("search")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<PlacementTestReportModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<SearchReportPlacementTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool) })]
         public async Task<IActionResult> Get([FromQuery] SearchReportPlacementTestQuery query)

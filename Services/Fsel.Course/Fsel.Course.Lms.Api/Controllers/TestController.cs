@@ -165,12 +165,12 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// ToolAddDataPlacementTestGroupResult
+        /// Tool Add Data PlacementTestGroupResult
         /// </summary>
-        [HttpPut("tool-add-data")]
+        [HttpPost("tool-add-data-placement-test-group")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Tool()
+        public async Task<IActionResult> ToolAddData()
         {
             MethodResult<bool> queryResult = await _mediator.Send(new ToolAddDataPlacementTestGroupResultCommand()).ConfigureAwait(false);
             return queryResult.GetActionResult();
