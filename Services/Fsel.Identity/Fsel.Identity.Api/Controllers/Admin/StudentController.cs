@@ -10,10 +10,12 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Fsel.Identity.Application.Commands.AdminCmd;
     using Fsel.Identity.Application.Commands.StudentCmd;
     using Fsel.Identity.Application.Queries.AdminQuery;
+    using Fsel.Identity.Application.Queries.ManagerReportQuery;
     using Fsel.Identity.Application.Queries.StudentQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -138,6 +140,30 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> GetByUserId([FromRoute] Guid id)
         {
             MethodResult<StudentModel> commandResult = await _mediator.Send(new GetStudentByUserIdQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search Student
+        /// </summary>
+        [HttpPost("search")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentDtoModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Gets([FromBody] SearchStudentQuery query)
+        {
+            MethodResult<PagingItemsModel<StudentDtoModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Student
+        /// </summary>
+        [HttpPost("gets")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentDtoModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Gets([FromBody] GetStudentsQuery query)
+        {
+            MethodResult<IList<StudentDtoModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

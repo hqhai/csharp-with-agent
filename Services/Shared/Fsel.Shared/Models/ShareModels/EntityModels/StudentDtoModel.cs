@@ -1,0 +1,22 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Shared.Models.ShareModels.EntityModels
+{
+    using Fsel.Shared.Enums;
+
+    public class StudentDtoModel
+    {
+        public Guid Id { get; set; }
+        public string? FullName { get; set; }
+        public string? Email { get; set; }
+        public string? PhoneNumber { get; set; }
+        public DateTime? BirthDay { get; set; }
+        public Guid? SchoolId { get; set; }
+        public string? School { get; set; }
+        public string? SchoolGrade { get; set; }
+        public string? SchoolClass { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
+        public EnumCourseLevel? BaseCourseLevel { get; set; }
+        public DateTime? ExpiredDate { get; set; }
+    }
+}

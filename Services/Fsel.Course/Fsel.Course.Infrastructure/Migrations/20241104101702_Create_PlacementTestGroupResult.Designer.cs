@@ -4,6 +4,7 @@ using Fsel.Course.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241104101702_Create_PlacementTestGroupResult")]
+    partial class Create_PlacementTestGroupResult
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -3805,15 +3808,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("PlacementTestGroupResultId");
 
-                    b.HasIndex("StudentId");
-
-                    b.HasIndex("Level", "StudentId");
-
                     b.HasIndex("PlacementTestId", "StudentId")
                         .IsUnique()
                         .HasFilter("[PlacementTestId] IS NOT NULL");
-
-                    b.HasIndex("Status", "StudentId");
 
                     b.ToTable("PlacementTestResults");
                 });

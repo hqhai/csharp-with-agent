@@ -8,5 +8,6 @@ namespace Fsel.Course.Domain.IRepositories
 
     public interface IPlacementTestGroupResultRepository : IRepository<PlacementTestGroupResult>
     {
+        Task<IList<Guid>> GetStudentIdsToStatusAsync(EnumCompletionStatus? status, IList<Guid> studentIds, bool isCheckDate);
     }
 }

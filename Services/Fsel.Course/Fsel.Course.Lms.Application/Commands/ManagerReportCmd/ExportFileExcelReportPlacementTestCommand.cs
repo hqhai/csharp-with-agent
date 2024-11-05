@@ -1,0 +1,129 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
+{
+    using System.Globalization;
+    using System.IO;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
+    using Fsel.Course.Lms.Application.Queries.ManagerReportQuery;
+    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Models.ShareModels.EntityModels;
+    using MediatR;
+    using OfficeOpenXml;
+
+    public class ExportFileExcelReportPlacementTestCommand : GetReportPlacementTestQueryModel, IRequest<MethodResult<Stream>>
+    {
+    }
+
+    public class ExportFileExcelReportPlacementTestCommandHandler : IRequestHandler<ExportFileExcelReportPlacementTestCommand, MethodResult<Stream>>
+    {
+        private readonly IMediator _mediator;
+        private readonly IUserService _userService;
+
+        public ExportFileExcelReportPlacementTestCommandHandler(IMediator mediator, IUserService userService)
+        {
+            _mediator = mediator;
+            _userService = userService;
+        }
+
+        public async Task<MethodResult<Stream>> Handle(ExportFileExcelReportPlacementTestCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<Stream>();
+            var dataResult = await _mediator.Send(new GetReportPlacementTestsQuery
+            {
+                ListDistrict = request.ListDistrict,
+                ListProvince = request.ListProvince,
+                ListSchool = request.ListSchool,
+                SchoolGrade = request.SchoolGrade,
+                EndDate = request.EndDate,
+                Filters = request.Filters,
+                IncludePaths = request.IncludePaths,
+                Keyword = request.Keyword,
+                Page = request.Page,
+                Status = request.Status,
+                StartDate = request.StartDate,
+            }, cancellationToken);
+            var dataOverallResult = await _mediator.Send(new GetOverallReportPlacementTestQuery
+            {
+                ListDistrict = request.ListDistrict,
+                ListProvince = request.ListProvince,
+                ListSchool = request.ListSchool,
+                SchoolGrade = request.SchoolGrade,
+                EndDate = request.EndDate,
+                Filters = request.Filters,
+                IncludePaths = request.IncludePaths,
+                Keyword = request.Keyword,
+                Page = request.Page,
+                Status = request.Status,
+                StartDate = request.StartDate,
+            }, cancellationToken);
+            var userResult = await _userService.GetUserProfileAsync();
+            string schoolName = userResult.Content?.Result?.SchoolName ?? string.Empty;
+            methodResult.Result = ExportExcelTemplate(request, dataResult.Result, dataOverallResult.Result, schoolName);
+            return methodResult;
+        }
+
+        public static Stream ExportExcelTemplate(ExportFileExcelReportPlacementTestCommand request, IList<PlacementTestReportModel>? placementTestReports, OverallReportPlacementTestModel? overallReportPlacementTest, string? schoolName)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            MemoryStream memoryStream = new MemoryStream();
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.ManagerReportPlacementTestExcel)))
+            {
+                var excelWorksheet = excelPackage.Workbook.Worksheets[0];
+                excelWorksheet.Cells["I2"].Value = GetData(excelWorksheet.Cells["I2"].Value, DateTime.Now.Date.ToString("dd/M/yyyy", CultureInfo.InvariantCulture));
+                excelWorksheet.Cells["B3"].Value = GetData(excelWorksheet.Cells["B3"].Value, schoolName);
+                excelWorksheet.Cells["D3"].Value = GetData(excelWorksheet.Cells["D3"].Value, request.Status.ToString() ?? string.Empty);
+                excelWorksheet.Cells["E3"].Value = GetData(excelWorksheet.Cells["E3"].Value, request.SchoolGrade);
+                excelWorksheet.Cells["F3"].Value = GetData(excelWorksheet.Cells["F3"].Value, request.StartDate.HasValue ? request.StartDate.Value.ToString("dd/M/yyyy", CultureInfo.InvariantCulture) : string.Empty);
+                excelWorksheet.Cells["G3"].Value = GetData(excelWorksheet.Cells["G3"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/M/yyyy", CultureInfo.InvariantCulture) : string.Empty);
+                excelWorksheet.Cells["B4"].Value = GetData(excelWorksheet.Cells["B4"].Value, overallReportPlacementTest?.TotalStudent ?? default);
+                excelWorksheet.Cells["B5"].Value = GetData(excelWorksheet.Cells["B5"].Value, overallReportPlacementTest?.TotalPlacementTest ?? default);
+                excelWorksheet.Cells["B6"].Value = GetData(excelWorksheet.Cells["B6"].Value, overallReportPlacementTest?.TotalCompletePlacementTest ?? default);
+
+                excelWorksheet.Cells["B7"].Value = GetData(excelWorksheet.Cells["B7"].Value, overallReportPlacementTest?.TotalCourseLevelA1 ?? default);
+                excelWorksheet.Cells["C7"].Value = GetData(excelWorksheet.Cells["C7"].Value, overallReportPlacementTest?.TotalCourseLevelA2 ?? default);
+                excelWorksheet.Cells["D7"].Value = GetData(excelWorksheet.Cells["D7"].Value, overallReportPlacementTest?.TotalCourseLevelB1 ?? default);
+                excelWorksheet.Cells["E7"].Value = GetData(excelWorksheet.Cells["E7"].Value, overallReportPlacementTest?.TotalCourseLevelB1Plus ?? default);
+                excelWorksheet.Cells["F7"].Value = GetData(excelWorksheet.Cells["F7"].Value, overallReportPlacementTest?.TotalCourseLevelB2 ?? default);
+                excelWorksheet.Cells["G7"].Value = GetData(excelWorksheet.Cells["G7"].Value, overallReportPlacementTest?.TotalCourseLevelC1 ?? default);
+
+                if (placementTestReports != null && placementTestReports.Any())
+                {
+                    int startRow = 9;
+                    foreach (var item in placementTestReports)
+                    {
+                        excelWorksheet.Cells[startRow, 1].Value = item.FullName;
+                        excelWorksheet.Cells[startRow, 2].Value = item.Email;
+                        excelWorksheet.Cells[startRow, 3].Value = item.PhoneNumber;
+                        excelWorksheet.Cells[startRow, 4].Value = item.Birthday?.ToString("dd/M/yyyy", CultureInfo.InvariantCulture);
+                        excelWorksheet.Cells[startRow, 5].Value = item.SchoolName;
+                        excelWorksheet.Cells[startRow, 6].Value = item.SchoolGrade;
+                        excelWorksheet.Cells[startRow, 7].Value = item.SchoolClass;
+                        excelWorksheet.Cells[startRow, 8].Value = item.ChooseLevel;
+                        excelWorksheet.Cells[startRow, 9].Value = item.CurrentLevel;
+                        excelWorksheet.Cells[startRow, 10].Value = item.Status;
+                        excelWorksheet.Cells[startRow, 11].Value = item.ExpirePTDate?.ToString("dd/M/yyyy", CultureInfo.InvariantCulture);
+                        startRow++; // Di chuyển xuống dòng tiếp theo
+                    }
+                }
+                excelPackage.SaveAs(memoryStream);
+            }
+
+            memoryStream.Position = 0L;
+            return memoryStream;
+        }
+
+        private static string GetData(object data, object? param)
+        {
+            string objStr = data?.ToString() ?? string.Empty;
+            return string.Format(objStr, param);
+        }
+    }
+}

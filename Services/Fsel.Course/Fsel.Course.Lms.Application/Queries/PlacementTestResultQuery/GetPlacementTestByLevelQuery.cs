@@ -139,8 +139,14 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 placementTest = placementTests.OrderBy(x => random.Next()).FirstOrDefault();
                 if (placementTest != null)
                 {
-                    await CreatePlacementGroupResultAsync(placementTest, studentId);
-                    placementTestResult = new PlacementTestResult { Level = placementTest.Level, PlacementTestId = placementTest.Id, StudentId = studentId };
+                    var placementTestGroupResult = await SavePlacementGroupResultAsync(placementTest, studentId);
+                    placementTestResult = new PlacementTestResult
+                    {
+                        Level = placementTest.Level,
+                        PlacementTestId = placementTest.Id,
+                        StudentId = studentId,
+                        PlacementTestGroupResultId = placementTestGroupResult.Id
+                    };
                     _placementTestResultRepository.Add(placementTestResult);
 
                     try
@@ -161,12 +167,12 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             return (placementTest, placementTestResult);
         }
 
-        private async Task CreatePlacementGroupResultAsync(PlacementTest placementTest, Guid studentId)
+        private async Task<PlacementTestGroupResult> SavePlacementGroupResultAsync(PlacementTest placementTest, Guid studentId)
         {
             var placementTestGroupResult = await _placementTestGroupResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId);
             if (placementTestGroupResult != null)
             {
-                return;
+                return placementTestGroupResult;
             }
             placementTestGroupResult = new PlacementTestGroupResult
             {
@@ -177,6 +183,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             };
             _placementTestGroupResultRepository.Add(placementTestGroupResult);
             await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            return placementTestGroupResult;
         }
     }
 }

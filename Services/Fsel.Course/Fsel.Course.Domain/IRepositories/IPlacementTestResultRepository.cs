@@ -9,5 +9,7 @@ namespace Fsel.Course.Domain.IRepositories
     public interface IPlacementTestResultRepository : IRepository<PlacementTestResult>
     {
         Task<(EnumCourseLevel?, bool)> CheckByPassPlacementTestAsync(Guid studentId, int age);
+
+        Task<List<Guid>> GetStudentPtIdsAsync(DateTime? startDate, DateTime? dndDate);
     }
 }

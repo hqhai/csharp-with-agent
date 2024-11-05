@@ -59,5 +59,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Get("/v1/school")]
         Task<IApiResponse<MethodResult<PagingItemsModel<SchoolModel>>>> SearchSchoolAsync([Query] SearchSchoolQueryModel query);
+
+        [Post("/v1/school/get-ids")]
+        Task<IApiResponse<MethodResult<IList<Guid>>>> GetSchoolIdsAsync([Body] GetSchoolsQueryModel query);
     }
 }

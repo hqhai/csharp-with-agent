@@ -32,6 +32,17 @@ namespace Fsel.Course.Infrastructure.Configs
                  v => v.ToString(),
                  v => v.EnumParse<EnumResultStatus>());
 
+            builder.Property(e => e.SuggetLevel)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumCourseLevel>());
+
+            builder.Property(e => e.ChooseLevel)
+                   .HasMaxLength(100)
+                   .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumCourseLevel>());
             builder.HasIndex(c => c.StudentId).IsUnique();
         }
     }

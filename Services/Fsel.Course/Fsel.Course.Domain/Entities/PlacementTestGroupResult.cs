@@ -15,7 +15,9 @@ namespace Fsel.Course.Domain.Entities
         public EnumPlacementTestLevel? ProcessLevel { get; set; }
         public EnumPlacementTestLevel? CompletionLevel { get; set; }
         public EnumCourseLevel? SuggetLevel { get; set; }
+        public EnumCourseLevel? ChooseLevel { get; set; }
         public EnumResultStatus Status { get; set; }
         public Guid StudentId { get; set; }
+        public ICollection<PlacementTestResult> PlacementTestResults { get; set; } = new List<PlacementTestResult>();
     }
 }

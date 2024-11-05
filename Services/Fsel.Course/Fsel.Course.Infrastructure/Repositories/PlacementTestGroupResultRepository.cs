@@ -5,21 +5,41 @@ namespace Fsel.Course.Infrastructure.Repositories
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
 
     public class PlacementTestGroupResultRepository : BaseRepository<PlacementTestGroupResult>, IPlacementTestGroupResultRepository
     {
         public PlacementTestGroupResultRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
+        }
+
+        public async Task<IList<Guid>> GetStudentIdsToStatusAsync(EnumCompletionStatus? status, IList<Guid> studentIds, bool isCheckDate)
+        {
+            var query = Queryable;
+            if (status.HasValue)
+            {
+                switch (status.Value)
+                {
+                    case EnumCompletionStatus.Completed:
+                        query = query.Where(x => x.Status == EnumResultStatus.Done);
+                        break;
+
+                    case EnumCompletionStatus.InProgress:
+                        query = query.Where(x => x.Status != EnumResultStatus.Done);
+                        break;
+                }
+            }
+            if (isCheckDate)
+            {
+                query = query.Where(x => studentIds.Any(y => y == x.StudentId));
+            }
+            return await query.Select(x => x.StudentId).ToListAsync();
         }
     }
 }
