@@ -81,6 +81,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 query = query.Where(m => (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()) ||
+                                         (m.PhoneNumber ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()) ||
                                          (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
             }
             var lists = await query.OrderBy(x => x.SchoolGrade).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName)

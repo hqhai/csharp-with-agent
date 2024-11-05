@@ -84,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 }
             }
 
-            GetTotalCourseLevel(overallReportPlacementTest, placementTestGroupResults);
+            GetTotalCourseLevel(overallReportPlacementTest, placementTestGroupResults.Where(x => x.Status == EnumResultStatus.Done).ToList());
             methodResult.Result = overallReportPlacementTest;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

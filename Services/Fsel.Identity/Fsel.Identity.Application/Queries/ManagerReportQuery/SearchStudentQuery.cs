@@ -80,6 +80,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 query = query.Where(m => (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()) ||
+                                         (m.PhoneNumber ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()) ||
                                          (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
             }
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
