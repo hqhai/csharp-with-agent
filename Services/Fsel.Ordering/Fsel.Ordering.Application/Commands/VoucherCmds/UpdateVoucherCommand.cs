@@ -62,7 +62,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             }
             if ((string.IsNullOrEmpty(request.Code) || !Shared.Helpers.StringHelper.ContainsWhitespaceOrSpecialChars(request.Code)))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.Code));
+                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.CodeInValidFormat), nameof(request.Code));
                 return methodResult;
             }
             if (request.Translations == null || request.Translations.Count == 0)
@@ -121,6 +121,11 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             if (request.EventIds != null && request.EventIds.Count > 0 && _eventRepository.IsIdsInValid(request.EventIds))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.EventIds));
+                return methodResult;
+            }
+            if (await _voucherRepository.Queryable.AnyAsync(p => p.Code.ToLower() == request.Code.ToLower() && p.Id != request.Id, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.CodeAlreadyExists), nameof(request.Code));
                 return methodResult;
             }
 

@@ -58,12 +58,12 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             }
             if (request.Source == EnumVoucherSource.Auto && await _voucherRepository.Queryable.AnyAsync(p => p.CodePrefix.ToLower() == request.CodePrefix.ToLower(), cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.CodePrefix));
+                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.CodeAlreadyExists), nameof(request.CodePrefix));
                 return methodResult;
             }
             if (request.Source == EnumVoucherSource.Auto && !string.IsNullOrEmpty(request.CodePrefix) && (request.CodePrefix.Length > 5 || !StringHelper.ContainsWhitespaceOrSpecialChars(request.CodePrefix)))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.CodePrefix));
+                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.CodeInValidFormat), nameof(request.CodePrefix));
                 return methodResult;
             }
             if (string.IsNullOrEmpty(request.Banner))
@@ -136,7 +136,12 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             }
             if (request.Source == EnumVoucherSource.Admin && (string.IsNullOrEmpty(request.Code) || !StringHelper.ContainsWhitespaceOrSpecialChars(request.Code)))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.Code));
+                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.CodeInValidFormat), nameof(request.Code));
+                return methodResult;
+            }
+            if (request.Source == EnumVoucherSource.Admin && await _voucherRepository.Queryable.AnyAsync(p => p.Code.ToLower() == request.Code.ToLower(), cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.CodeAlreadyExists), nameof(request.Code));
                 return methodResult;
             }
 
