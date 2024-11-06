@@ -9,6 +9,7 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         OutOfQuantity,
         NotEnoughTokens,
         CodeAlreadyExists,
+        NameAlreadyExists,
         WrongQuantity,
         WrongExpirationDate
     }
