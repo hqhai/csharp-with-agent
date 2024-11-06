@@ -2,15 +2,18 @@
 
 namespace Fsel.Identity.Application.Commands.AdminCmd
 {
+    using System.Text;
     using Fsel.Common.ActionResults;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Entities.BeginnerGuideConfigs;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class ToolUpdateBeginnerGuideStudentCommand : IRequest<MethodResult<bool>>
     {
@@ -30,21 +33,31 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         public async Task<MethodResult<bool>> Handle(ToolUpdateBeginnerGuideStudentCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<bool>();
-            var listStudent = new List<Student>();
+            MethodResult<bool> methodResult = new MethodResult<bool>();
+            List<Student> listStudent = new List<Student>();
 
             var students = await _studentRepository.Queryable.ToListAsync(cancellationToken);
-            var paramBeginnerGuidesResult = await _lmsCourseService.GetParamBegginnerGuide(string.Join(",", students.Select(x => x.Id)));
-            if (!paramBeginnerGuidesResult.IsSuccessStatusCode)
+            var sendingPhase = (int)Math.Ceiling((double)students.Count / AmountStudentSending);
+
+            List< ParamBeginnerGuideModel> paramBeginnerGuidesResult = new List<ParamBeginnerGuideModel>();
+            for (int i = 0; i < sendingPhase; i++)
             {
-                methodResult.AddError(paramBeginnerGuidesResult.Error);
-                return methodResult;
+                var studentBatch = students.Skip(i * AmountStudentSending).Take(AmountStudentSending).ToList();
+                var paramBeginnerGuidesResultTemp = await _lmsCourseService.GetParamBeginnerGuide(studentBatch.Select(x => x.Id).ToList());
+
+                if (!paramBeginnerGuidesResultTemp.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(paramBeginnerGuidesResultTemp.Error);
+                    return methodResult;
+                }
+
+                paramBeginnerGuidesResult.AddRange(paramBeginnerGuidesResultTemp.Content?.Result ?? new List<ParamBeginnerGuideModel>()); // Giả sử Data là nơi chứa danh sách các ParamBeginnerGuideModel
+
             }
 
-            var paramBeginnerGuides = paramBeginnerGuidesResult.Content?.Result;
             foreach (var student in students)
             {
-                var paramBeginnerGuide = paramBeginnerGuides?.Where(x => x.StudentId == student.Id).FirstOrDefault();
+                var paramBeginnerGuide = paramBeginnerGuidesResult.Where(x => x.StudentId == student.Id).FirstOrDefault();
                 if (paramBeginnerGuide == null)
                 {
                     continue;
@@ -90,21 +103,16 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     };
                 }
             }
-            _studentRepository.UpdateList(students);
-            await _studentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _studentRepository.ExecuteTransactionAsync(async () =>
+            {
+                _studentRepository.UpdateList(students);
+                await _studentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                methodResult.Result = true;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
 
-            methodResult.Result = true;
-            methodResult.StatusCode = StatusCodes.Status200OK;
+            });
             return methodResult;
-        }
-
-        private enum EnumCheckPoint
-        {
-            DoneOnePlacementTest,
-            LevelSelection,
-            DoneVideo,
-            DoneClassForum,
-            DoneHomeWork
         }
 
         private string? GetBeginnerGuideOther(EnumCheckPoint checkPoint, string? other)
@@ -112,8 +120,14 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             var data = datas.Where(x => x.Key == checkPoint).Select(x => x.Value).ToList();
             var dataOthers = other?.Split(",").ToList();
             var others = data.Where(x => dataOthers == null || !dataOthers.Any(y => y == x)).ToList();
-            other = string.Concat(other, ",", string.Join(",", others));
-            return other;
+            StringBuilder stringBuilder = new StringBuilder(other);
+            if (!string.IsNullOrEmpty(other) && others.Any())
+            {
+                stringBuilder.Append(',');
+            }
+            stringBuilder.Append(string.Join(",", others));
+
+            return stringBuilder.ToString();
         }
 
         private IList<KeyValuePair<EnumCheckPoint, string>> datas = new List<KeyValuePair<EnumCheckPoint, string>>

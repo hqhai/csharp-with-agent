@@ -15,15 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
 
     public class GetParamBeginnerGuideQuery : IRequest<MethodResult<IList<ParamBeginnerGuideModel>>>
     {
-        public string? StudentIds { get; set; }
-
-        public IList<Guid>? ListStudentIds
-        {
-            get
-            {
-                return StudentIds.ToList<Guid>();
-            }
-        }
+        public IList<Guid>? ListStudentIds{ get; set; }
     }
 
     public class GetParamBeginnerGuideQueryHandler : IRequestHandler<GetParamBeginnerGuideQuery, MethodResult<IList<ParamBeginnerGuideModel>>>

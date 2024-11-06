@@ -142,7 +142,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// <summary>
         /// Get Student by UserId
         /// </summary>
-        [HttpPut("tool-update-begginner-guide")]
+        [HttpGet("tool-update-beginner-guide")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ToolUpdateBeginnerGuide()
