@@ -15,14 +15,6 @@
     // Auth Service
     {
       "SwaggerKey": "auth",
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      },
       "UpstreamPathTemplate": "/auth-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
@@ -37,14 +29,6 @@
     // User Service
     {
       "SwaggerKey": "user",
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      },
       "UpstreamPathTemplate": "/user-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
@@ -59,14 +43,6 @@
     // Lcms Course Service
     {
       "SwaggerKey": "lcms-course",
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      },
       "UpstreamPathTemplate": "/lcms-course-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
@@ -81,14 +57,6 @@
     // Lms Course Service
     {
       "SwaggerKey": "lms-course",
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      },
       "UpstreamPathTemplate": "/lms-course-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
@@ -103,14 +71,6 @@
     // Storage Service
     {
       "SwaggerKey": "storage",
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      },
       "UpstreamPathTemplate": "/storage-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
@@ -130,14 +90,6 @@
     // Sender Service
     {
       "SwaggerKey": "sender",
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      },
       "UpstreamPathTemplate": "/sender-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
@@ -152,14 +104,6 @@
     // Training Service
     {
       "SwaggerKey": "training",
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      },
       "UpstreamPathTemplate": "/training-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
@@ -174,14 +118,6 @@
     // Interaction Service
     {
       "SwaggerKey": "interaction",
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      },
       "UpstreamPathTemplate": "/interaction-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
@@ -196,14 +132,6 @@
     // Ordering Service
     {
       "SwaggerKey": "ordering",
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      },
       "UpstreamPathTemplate": "/ordering-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
@@ -218,14 +146,6 @@
     // System Service
     {
       "SwaggerKey": "system",
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      },
       "UpstreamPathTemplate": "/system-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
@@ -240,14 +160,6 @@
     // Cms Planet Defender Service
     {
       "SwaggerKey": "cms-planet-defender",
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      },
       "UpstreamPathTemplate": "/cms-planet-defender-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
@@ -262,14 +174,6 @@
     // Realtime Service
     {
       "SwaggerKey": "realtime",
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      },
       "UpstreamPathTemplate": "/realtime-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
@@ -284,14 +188,6 @@
     // Notification Service
     {
       "SwaggerKey": "notification",
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      },
       "UpstreamPathTemplate": "/notification-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
