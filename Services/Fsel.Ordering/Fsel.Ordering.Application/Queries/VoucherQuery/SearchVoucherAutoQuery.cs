@@ -76,6 +76,8 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                 voucherModels = voucherModels.Where(m => m.CreatedDate.HasValue && m.CreatedDate.Value.Date == request.CreatedDate.Value.Date).ToList();
             }
 
+            voucherModels = voucherModels.OrderByDescending(x => x.CreatedDate);
+
             int totalItem = voucherModels.Count();
             var lists = voucherModels.ApplyPaging(request).ToList();
 

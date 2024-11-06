@@ -72,6 +72,8 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                 orders = orders.Where(p => p.Status == request.Status);
             }
 
+            orders = orders.OrderByDescending(m => m.DayUsed);
+
             int totalItem = await orders.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await orders
                     .ApplySortAndPaging(request)
