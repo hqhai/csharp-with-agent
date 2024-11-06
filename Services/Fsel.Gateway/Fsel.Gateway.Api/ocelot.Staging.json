@@ -5,7 +5,6 @@
   "RateLimitOptions": {
     "DisableRateLimitHeaders": true,
     "EnableRateLimiting": true,
-    "EndpointRateLimiting": true,
     "ClientWhitelist": [],
     "Period": "1s",
     "PeriodTimespan": 1,
