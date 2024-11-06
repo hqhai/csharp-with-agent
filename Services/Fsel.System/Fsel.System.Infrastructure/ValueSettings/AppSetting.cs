@@ -10,6 +10,7 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public Otp? Otp { get; set; }
         public ConstantUrl? ConstantUrl { get; set; }
         public GoogleSheetConfig? GoogleSheetConfig { get; set; }
+        public SharePointConfig? SharePointConfig { get; set; }
         public new Services? Services { get; set; }
 
         public OpenAiConfig? OpenAiConfig { get; set; }
@@ -25,6 +26,16 @@ namespace Fsel.System.Infrastructure.ValueSettings
     {
         public string? Uri { get; set; }
         public string? ApiKey { get; set; }
+    }
+
+    public class SharePointConfig
+    {
+        public string? ClientId { get; set; }
+        public string? ClientSecret { get; set; }
+        public string? TenantId { get; set; }
+        public string? FSELDeveloperId { get; set; }
+        public string? ExplanationUserReportId { get; set; }
+        public string? ExplanationUserReportSheetName { get; set; }
     }
 
     public class ConstantUrl

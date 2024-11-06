@@ -70,7 +70,7 @@ builder.Services.AddScoped<ICourseTargetConfigRepository, CourseTargetConfigRepo
 builder.Services.AddScoped<ICourseSuggestConfigRepository, CourseSuggestConfigRepository>();
 builder.Services.AddScoped<IBannerRepository, BannerRepository>();
 builder.Services.AddScoped<IBannerStudentRepository, BannerStudentRepository>();
-
+builder.Services.AddScoped<ISharePointService, SharePointService>();
 
 builder.Services.AddScoped<IFselRatingRepository, FselRatingRepository>();
 
