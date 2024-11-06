@@ -33,9 +33,9 @@ namespace Fsel.System.Application.Commands.GoogleSheets
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var siteId = _appSetting.SharePointConfig?.FSELDeveloperId;
-            var fileId = _appSetting.SharePointConfig?.ExplanationUserReportId;
-            var sheetName = _appSetting.SharePointConfig?.ExplanationUserReportSheetName;
+            var siteId = _appSetting.SharePointConfig?.FSELContentTeamSiteId;
+            var fileId = _appSetting.SharePointConfig?.FSELContentTeamFileId;
+            var sheetName = _appSetting.SharePointConfig?.FSELContentTeamSheetName;
 
             if (string.IsNullOrEmpty(siteId) || string.IsNullOrEmpty(fileId) || string.IsNullOrEmpty(sheetName))
             {
