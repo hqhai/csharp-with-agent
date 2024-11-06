@@ -33,9 +33,9 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public string? ClientId { get; set; }
         public string? ClientSecret { get; set; }
         public string? TenantId { get; set; }
-        public string? FSELDeveloperId { get; set; }
-        public string? ExplanationUserReportId { get; set; }
-        public string? ExplanationUserReportSheetName { get; set; }
+        public string? FSELContentTeamSiteId { get; set; }
+        public string? FSELContentTeamFileId { get; set; }
+        public string? FSELContentTeamSheetName { get; set; }
     }
 
     public class ConstantUrl
