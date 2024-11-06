@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 .Include(x => x.SectionGroupResults)
                 .FirstOrDefault(x => x.Id == mockTestResultId);
 
-            if (mockTestResult == null || mockTestResult.SkillScores == null)
+            if (mockTestResult == null)
             {
                 return false;
             }
@@ -126,12 +126,27 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             sectionGroupResult.SkillScores = skillScores;
             sectionGroupResult.CorrectCount += (int)score;
 
-            var mockTestResultTemp = mockTestResult.SkillScores.Where(s => s.Skill != sectionGroup?.CourseSkill).ToList();
-            mockTestResultTemp.Add(skillScores.Single());
-            mockTestResult.SkillScores = mockTestResultTemp;
+            if (mockTestResult.SkillScores != null && mockTestResult.SkillScores.Count > 1)
+            {
+                if (skillScores.Any())
+                {
+                    // Bước 1: Clone danh sách mà không chứa phần tử có Skill là Speaking
+                    var clonedSkillScores = mockTestResult.SkillScores
+                        .Where(x => x.Skill != EnumCourseSkill.Speaking)
+                        .ToList(); // Chuyển đổi thành danh sách
 
-            // save skillscore to mockTestResult
-            await SaveMockTestScoresToMockTestResultDatabase(mockTestResult, cancellationToken);
+                    // Bước 2: Thêm phần tử từ skillScores.Single() vào danh sách đã clone
+                    var skillScoreToAdd = skillScores.Single();
+                    clonedSkillScores.Add(skillScoreToAdd);
+
+                    // Bước 3: Gán ngược giá trị đã chỉnh sửa vào mockTestResult.SkillScores
+                    mockTestResult.SkillScores = clonedSkillScores;
+                }
+            }
+            else
+            {
+                mockTestResult.SkillScores = skillScores;
+            }
 
             await SendToWebSocket(mockTestScores, cancellationToken);
 
@@ -219,17 +234,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             }, cancellationToken).ConfigureAwait(false);
 
             return Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
-        }
-
-        private async Task SaveMockTestScoresToMockTestResultDatabase(MockTestResult mockTestResult, CancellationToken cancellationToken)
-        {
-            await _mockTestResultRepository.ExecuteTransactionAsync(async () =>
-            {
-                _mockTestResultRepository.Update(mockTestResult);
-
-                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                return new MethodResult<bool>();
-            });
         }
 
         /// <summary>
