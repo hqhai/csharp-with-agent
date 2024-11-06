@@ -23,15 +23,7 @@
           "Host": "auth-staging.fsel-1m.svc",
           "Port": 80
         }
-      ],
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      }
+      ]
     },
     // User Service
     {
@@ -45,15 +37,7 @@
           "Host": "user-staging.fsel-1m.svc",
           "Port": 80
         }
-      ],
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      }
+      ]
     },
     // Lcms Course Service
     {
@@ -67,15 +51,7 @@
           "Host": "lcmsapi-staging.fsel-1m.svc",
           "Port": 80
         }
-      ],
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      }
+      ]
     },
     // Lms Course Service
     {
@@ -89,15 +65,7 @@
           "Host": "lmsapi-staging.fsel-1m.svc",
           "Port": 80
         }
-      ],
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      }
+      ]
     },
     // Storage Service
     {
@@ -112,14 +80,6 @@
           "Port": 80
         }
       ],
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      },
       "QoSOptions": {
         "ExceptionsAllowedBeforeBreaking": 99999,
         "DurationOfBreak": 1000,
@@ -138,15 +98,7 @@
           "Host": "sender-staging.fsel-1m.svc",
           "Port": 80
         }
-      ],
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      }
+      ]
     },
     // Training Service
     {
@@ -160,15 +112,7 @@
           "Host": "training-staging.fsel-1m.svc",
           "Port": 80
         }
-      ],
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      }
+      ]
     },
     // Interaction Service
     {
@@ -182,14 +126,7 @@
           "Host": "interaction-staging.fsel-1m.svc",
           "Port": 80
         }
-      ],
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
+      ]
       }
     },
     // Ordering Service
@@ -204,15 +141,7 @@
           "Host": "ordering-staging.fsel-1m.svc",
           "Port": 80
         }
-      ],
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      }
+      ]
     },
     // System Service
     {
@@ -226,15 +155,7 @@
           "Host": "system-staging.fsel-1m.svc",
           "Port": 80
         }
-      ],
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      }
+      ]
     },
     // Cms Planet Defender Service
     {
@@ -248,15 +169,7 @@
           "Host": "cms-planet-defender-staging.fsel-1m.svc",
           "Port": 80
         }
-      ],
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      }
+      ]
     },
     // Realtime Service
     {
@@ -270,15 +183,7 @@
           "Host": "realtime-staging.fsel-1m.svc",
           "Port": 80
         }
-      ],
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      }
+      ]
     },
     // Notification Service
     {
@@ -292,15 +197,7 @@
           "Host": "notification-staging.fsel-1m.svc",
           "Port": 80
         }
-      ],
-      "RateLimitOptions": {
-        "DisableRateLimitHeaders": true,
-        "EnableRateLimiting": true,
-        "ClientWhitelist": [],
-        "Period": "1s",
-        "PeriodTimespan": 1,
-        "Limit": 100
-      }
+      ]
     }
   ],
   "SwaggerEndPoints": [
