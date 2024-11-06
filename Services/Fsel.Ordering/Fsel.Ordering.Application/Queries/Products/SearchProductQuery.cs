@@ -46,9 +46,10 @@ namespace Fsel.Ordering.Application.Queries.Products
             query.ForEach(p =>
             {
                 var product = products.FirstOrDefault(x => x.Id == p.Id);
-                p.ProductStatus = p.Status == EnumProductStatus.Active;
                 p.QuantityChanged = product?.OrderTransactions.Count ?? 0;
                 p.RemainingQuantity = p.Quantity - p.QuantityChanged;
+                p.ProductStatus = p.Quantity > p.QuantityChanged;
+                p.Status = p.Quantity > p.QuantityChanged ? EnumProductStatus.Active : EnumProductStatus.InActive;
             });
 
             if (!string.IsNullOrEmpty(request.Code))
@@ -73,23 +74,26 @@ namespace Fsel.Ordering.Application.Queries.Products
 
             if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
             {
-                if (request.PopularOrLatest.HasValue && request.PopularOrLatest == true)
-                {
-                    query = query.OrderByDescending(x => x.QuantityChanged).ToList();
-                }
-                else if (request.PopularOrLatest.HasValue && request.PopularOrLatest == false)
-                {
-                    query = query.OrderByDescending(x => x.CreatedDate).ToList();
-                }
-                else
-                {
-                    query = query.OrderByDescending(x => x.ShowPriority).ToList();
-                }
+                var queryShowPriority = query.Where(p => p.ShowPriority).ToList();
+                var queryNotShowPriority = query.Where(p => !p.ShowPriority).ToList();
+
+                Func<ProductModel, object> orderByCriteria = request.PopularOrLatest == true
+                    ? x => x.QuantityChanged
+                    : x => x.CreatedDate!;
+
+                queryShowPriority = queryShowPriority.OrderByDescending(orderByCriteria).ToList();
+                queryNotShowPriority = queryNotShowPriority.OrderByDescending(orderByCriteria).ToList();
+
                 if (request.Min.HasValue && request.Max.HasValue)
                 {
-                    query = query.Where(x => x.Price >= request.Min && x.Price <= request.Max).ToList();
+                    queryShowPriority = queryShowPriority.Where(x => x.Price >= request.Min && x.Price <= request.Max).ToList();
+                    queryNotShowPriority = queryNotShowPriority.Where(x => x.Price >= request.Min && x.Price <= request.Max).ToList();
                 }
+
+                query = queryShowPriority.Concat(queryNotShowPriority).ToList();
+
                 query = query.Where(p => p.EventIds != null && request.EventIds != null && request.EventIds.Any(x => p.EventIds.Contains(x))).ToList();
+
                 query = query.Where(p => p.ExpireDate.Date >= DateTime.UtcNow.Date && p.RemainingQuantity > 0).ToList();
             }
 

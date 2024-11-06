@@ -47,9 +47,10 @@ namespace Fsel.Ordering.Application.Queries.Products
 
             productModel.QuantityChanged = quantityChanged;
             productModel.RemainingQuantity = productModel.Quantity - quantityChanged;
+            productModel.Status = productModel.Quantity > quantityChanged ? EnumProductStatus.Active : EnumProductStatus.InActive;
+            productModel.ProductStatus = productModel.Quantity > quantityChanged;
 
             methodResult.Result = productModel;
-
             return methodResult;
         }
     }
