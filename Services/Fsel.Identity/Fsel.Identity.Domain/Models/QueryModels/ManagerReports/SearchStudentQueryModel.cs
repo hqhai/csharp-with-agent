@@ -9,6 +9,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
     public class SearchStudentQueryModel : BaseQueryModel
     {
         public string? SchoolGrade { get; set; }
+        public string? SchoolClass { get; set; }
         public string? ListSchoolId { get; set; }
 
         public IList<Guid>? SchoolIds
@@ -29,6 +30,9 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             }
         }
 
+        public bool? IsLearning { get; set; }
+        public EnumCourseType? CourseType { get; set; }
+        public EnumLearningStatus? LearningStatus { get; set; }
         public EnumCompletionStatus? Status { get; set; }
         public bool IsCheckDate { get; set; }
     }

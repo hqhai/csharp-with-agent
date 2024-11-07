@@ -9,6 +9,7 @@ namespace Fsel.Shared.Helpers
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public static class EnumCourseLevelHelper
     {
@@ -391,6 +392,21 @@ namespace Fsel.Shared.Helpers
 
                 default:
                     return string.Empty;
+            }
+        }
+
+        public static int GetTotalProgress(this EnumCourseType courseType)
+        {
+            switch (courseType)
+            {
+                case EnumCourseType.Academic:
+                    return CourseProgressValue.ProgressAcademic;
+
+                case EnumCourseType.Ielts:
+                    return CourseProgressValue.ProgressIELTS;
+
+                default:
+                    return 0;
             }
         }
     }

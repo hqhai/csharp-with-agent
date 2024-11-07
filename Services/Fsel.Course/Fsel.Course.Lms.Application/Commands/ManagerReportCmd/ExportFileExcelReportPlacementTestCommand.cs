@@ -7,16 +7,17 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
     using Fsel.Course.Lms.Application.Queries.ManagerReportQuery;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Models.ShareModels.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using OfficeOpenXml;
 
-    public class ExportFileExcelReportPlacementTestCommand : GetReportPlacementTestQueryModel, IRequest<MethodResult<Stream>>
+    public class ExportFileExcelReportPlacementTestCommand : SearchReportPlacementTestQueryModel, IRequest<MethodResult<Stream>>
     {
     }
 
@@ -79,20 +80,20 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 var excelWorksheet = excelPackage.Workbook.Worksheets[0];
                 excelWorksheet.Cells["I2"].Value = GetData(excelWorksheet.Cells["I2"].Value, DateTime.Now.Date.ToString("dd/M/yyyy", CultureInfo.InvariantCulture));
                 excelWorksheet.Cells["B3"].Value = GetData(excelWorksheet.Cells["B3"].Value, schoolName);
-                excelWorksheet.Cells["D3"].Value = GetData(excelWorksheet.Cells["D3"].Value, request.Status.ToString() ?? string.Empty);
+                excelWorksheet.Cells["D3"].Value = GetData(excelWorksheet.Cells["D3"].Value, request.Status.HasValue ? request.Status.Value.GetDescription() : string.Empty);
                 excelWorksheet.Cells["E3"].Value = GetData(excelWorksheet.Cells["E3"].Value, request.SchoolGrade);
-                excelWorksheet.Cells["F3"].Value = GetData(excelWorksheet.Cells["F3"].Value, request.StartDate.HasValue ? request.StartDate.Value.ToString("dd/M/yyyy", CultureInfo.InvariantCulture) : string.Empty);
-                excelWorksheet.Cells["G3"].Value = GetData(excelWorksheet.Cells["G3"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/M/yyyy", CultureInfo.InvariantCulture) : string.Empty);
+                excelWorksheet.Cells["F3"].Value = GetData(excelWorksheet.Cells["F3"].Value, request.StartDate.HasValue ? request.StartDate.Value.ToString("dd/M/yyyy hh:mm", CultureInfo.InvariantCulture) : string.Empty);
+                excelWorksheet.Cells["G3"].Value = GetData(excelWorksheet.Cells["G3"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/M/yyyy hh:mm", CultureInfo.InvariantCulture) : string.Empty);
                 excelWorksheet.Cells["B4"].Value = GetData(excelWorksheet.Cells["B4"].Value, overallReportPlacementTest?.TotalStudent ?? default);
                 excelWorksheet.Cells["B5"].Value = GetData(excelWorksheet.Cells["B5"].Value, overallReportPlacementTest?.TotalPlacementTest ?? default);
                 excelWorksheet.Cells["B6"].Value = GetData(excelWorksheet.Cells["B6"].Value, overallReportPlacementTest?.TotalCompletePlacementTest ?? default);
 
-                excelWorksheet.Cells["B7"].Value = GetData(excelWorksheet.Cells["B7"].Value, overallReportPlacementTest?.TotalCourseLevelA1 ?? default);
-                excelWorksheet.Cells["C7"].Value = GetData(excelWorksheet.Cells["C7"].Value, overallReportPlacementTest?.TotalCourseLevelA2 ?? default);
-                excelWorksheet.Cells["D7"].Value = GetData(excelWorksheet.Cells["D7"].Value, overallReportPlacementTest?.TotalCourseLevelB1 ?? default);
-                excelWorksheet.Cells["E7"].Value = GetData(excelWorksheet.Cells["E7"].Value, overallReportPlacementTest?.TotalCourseLevelB1Plus ?? default);
-                excelWorksheet.Cells["F7"].Value = GetData(excelWorksheet.Cells["F7"].Value, overallReportPlacementTest?.TotalCourseLevelB2 ?? default);
-                excelWorksheet.Cells["G7"].Value = GetData(excelWorksheet.Cells["G7"].Value, overallReportPlacementTest?.TotalCourseLevelC1 ?? default);
+                excelWorksheet.Cells["B7"].Value = GetData(excelWorksheet.Cells["B7"].Value, GetTotalCount(overallReportPlacementTest?.CourseLevelProgresses, EnumCourseLevel.A1));
+                excelWorksheet.Cells["C7"].Value = GetData(excelWorksheet.Cells["C7"].Value, GetTotalCount(overallReportPlacementTest?.CourseLevelProgresses, EnumCourseLevel.A2));
+                excelWorksheet.Cells["D7"].Value = GetData(excelWorksheet.Cells["D7"].Value, GetTotalCount(overallReportPlacementTest?.CourseLevelProgresses, EnumCourseLevel.B1));
+                excelWorksheet.Cells["E7"].Value = GetData(excelWorksheet.Cells["E7"].Value, GetTotalCount(overallReportPlacementTest?.CourseLevelProgresses, EnumCourseLevel.B1Plus));
+                excelWorksheet.Cells["F7"].Value = GetData(excelWorksheet.Cells["F7"].Value, GetTotalCount(overallReportPlacementTest?.CourseLevelProgresses, EnumCourseLevel.B2));
+                excelWorksheet.Cells["G7"].Value = GetData(excelWorksheet.Cells["G7"].Value, GetTotalCount(overallReportPlacementTest?.CourseLevelProgresses, EnumCourseLevel.C1));
 
                 if (placementTestReports != null && placementTestReports.Any())
                 {
@@ -124,6 +125,11 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
         {
             string objStr = data?.ToString() ?? string.Empty;
             return string.Format(objStr, param);
+        }
+
+        private static int GetTotalCount(IList<CourseLevelProgressModel>? courseLevelProgresses, EnumCourseLevel courseLevel)
+        {
+            return courseLevelProgresses?.FirstOrDefault(x => x.CourseLevel == courseLevel)?.TotalCount ?? default(int);
         }
     }
 }

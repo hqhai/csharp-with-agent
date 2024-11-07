@@ -1,22 +1,21 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Shared.Models.ShareModels.EntityModels
+namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
 {
     using Fsel.Common.Helpers;
     using Fsel.Shared.Enums;
 
-    public class PlacementTestReportModel
+    public class LearningProgressModel
     {
         public string? FullName { get; set; }
         public string? Email { get; set; }
-        public string? PhoneNumber { get; set; }
-        public DateTime? Birthday { get; set; }
         public string? SchoolName { get; set; }
         public string? SchoolGrade { get; set; }
         public string? SchoolClass { get; set; }
-        public EnumCourseLevel? ChooseLevel { get; set; }
-        public EnumCourseLevel? CurrentLevel { get; set; }
-        public EnumCompletionStatus Status { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
+        public string? ContentProgress { get; set; }
+        public string? UnitName { get; set; }
+        public string? LessonName { get; set; }
 
         public string? StatusDescription
         {
@@ -26,6 +25,6 @@ namespace Fsel.Shared.Models.ShareModels.EntityModels
             }
         }
 
-        public DateTime? ExpirePTDate { get; set; }
+        public EnumLearningStatus Status { get; set; }
     }
 }

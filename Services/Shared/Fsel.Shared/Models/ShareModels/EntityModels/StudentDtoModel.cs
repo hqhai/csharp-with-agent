@@ -18,5 +18,6 @@ namespace Fsel.Shared.Models.ShareModels.EntityModels
         public EnumCourseLevel? CourseLevel { get; set; }
         public EnumCourseLevel? BaseCourseLevel { get; set; }
         public DateTime? ExpiredDate { get; set; }
+        public Guid? CourseId { get; set; }
     }
 }

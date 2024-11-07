@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.QueryModels.ManagerReports;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -43,39 +44,69 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
 
-            var query = _studentRepository.Queryable.Include(x => x.Human).Select(i => new StudentDtoModel
-            {
-                Id = i.Id,
-                FullName = i.Human!.FullName,
-                BirthDay = i.Human.Birthday,
-                Email = i.Human.Email,
-                PhoneNumber = i.Human.PhoneNumber,
-                CourseLevel = i.CourseLevel,
-                ExpiredDate = i.ExpiredDate,
-                School = i.School,
-                SchoolClass = i.SchoolClass,
-                SchoolGrade = i.SchoolGrade,
-                SchoolId = i.SchoolId
-            });
+            var query = _studentRepository.Queryable.Include(x => x.Human)
+                .Select(i => new StudentDtoModel
+                {
+                    Id = i.Id,
+                    FullName = i.Human!.FullName,
+                    BirthDay = i.Human.Birthday,
+                    Email = i.Human.Email,
+                    PhoneNumber = i.Human.PhoneNumber,
+                    CourseLevel = i.CourseLevel,
+                    ExpiredDate = i.ExpiredDate,
+                    School = i.School,
+                    SchoolClass = i.SchoolClass,
+                    SchoolGrade = i.SchoolGrade,
+                    SchoolId = i.SchoolId,
+                    CourseId = i.CourseId
+                });
             if (schoolId.HasValue)
             {
                 query = query.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId.Value);
             }
             if (!string.IsNullOrEmpty(request.SchoolGrade))
             {
-                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolGrade) && x.SchoolGrade.Contains(request.SchoolGrade));
+                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolGrade) && x.SchoolGrade.Trim().ToLower() == request.SchoolGrade.Trim().ToLower());
+            }
+            if (!string.IsNullOrEmpty(request.SchoolClass))
+            {
+                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolClass) && x.SchoolClass.Trim().ToLower().Contains(request.SchoolClass.Trim().ToLower()));
+            }
+            if (request.LearningStatus.HasValue)
+            {
+                if (request.LearningStatus.Value == EnumLearningStatus.InProgress)
+                {
+                    query = query.Where(x => x.ExpiredDate.HasValue && x.ExpiredDate.Value > DateTime.UtcNow);
+                }
+                else
+                {
+                    query = query.Where(x => x.ExpiredDate.HasValue && x.ExpiredDate.Value <= DateTime.UtcNow);
+                }
             }
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.Admin.ToString()) && request.SchoolIds != null && request.SchoolIds.Any())
             {
-                query = query.Where(x => x.SchoolId.HasValue && request.SchoolIds.Any(y => y == x.SchoolId.Value));
+                query = query.Where(x => x.SchoolId.HasValue && request.SchoolIds.Contains(x.SchoolId.Value));
+            }
+            if (request.IsLearning.HasValue)
+            {
+                query = query.Where(x => request.IsLearning.Value ? x.CourseId.HasValue : !x.CourseId.HasValue);
             }
             if (request.IsCheckDate)
             {
-                query = query.Where(x => request.StudentIds != null && request.StudentIds.Any() && request.StudentIds.Any(y => y == x.Id));
+                query = query.Where(x => request.StudentIds != null && request.StudentIds.Any() && request.StudentIds.Contains(x.Id));
+            }
+            else if (request.StudentIds != null && request.StudentIds.Any())
+            {
+                query = query.Where(x => request.StudentIds.Contains(x.Id));
             }
             if (request.Status.HasValue && request.Status.Value == EnumCompletionStatus.NotStarted)
             {
-                query = query.Where(x => !x.CourseLevel.HasValue);
+                query = query.Where(x => !x.BaseCourseLevel.HasValue);
+            }
+            if (request.CourseType.HasValue)
+            {
+                var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType.Value);
+                query = query.Where(x => x.CourseLevel.HasValue && courseLevels.Contains(x.CourseLevel.Value));
             }
             if (!string.IsNullOrEmpty(request.Keyword))
             {

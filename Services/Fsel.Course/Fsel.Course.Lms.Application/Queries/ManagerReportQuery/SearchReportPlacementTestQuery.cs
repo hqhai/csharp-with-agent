@@ -5,20 +5,18 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
-    using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchReportPlacementTestQuery : GetReportPlacementTestQueryModel, IRequest<MethodResult<SearchReportPlacementTestModel>>
+    public class SearchReportPlacementTestQuery : SearchReportPlacementTestQueryModel, IRequest<MethodResult<SearchReportPlacementTestModel>>
     {
     }
 
@@ -56,6 +54,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
                 Page = request.Page,
+                PageSize = request.PageSize,
                 Status = request.Status,
                 StartDate = request.StartDate,
             }, cancellationToken);
@@ -71,8 +70,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
                 Page = request.Page,
+                PageSize = request.PageSize,
                 Status = request.Status,
                 StartDate = request.StartDate,
+                ManagerReportType = EnumManagerReportType.ReportManagerPT,
                 IsSearchReport = true
             }, cancellationToken);
             if (!userResults.IsOK)
@@ -86,12 +87,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var studentIds = students.Select(x => x.Id).ToList();
-            var query = _placementTestGroupResultRepository.Queryable.Where(x => studentIds != null && studentIds.Any(y => y == x.StudentId));
-            var lists = await query
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+            var lists = await _placementTestGroupResultRepository.Queryable.Where(x => studentIds != null && studentIds.Any(y => y == x.StudentId)).ToListAsync(cancellationToken);
+
             var data = new List<PlacementTestReportModel>();
             var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => studentIds.Contains(x.StudentId))
                 .GroupBy(x => x.StudentId)

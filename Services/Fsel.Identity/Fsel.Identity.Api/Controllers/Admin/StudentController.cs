@@ -166,5 +166,17 @@ namespace Fsel.Identity.Api.Controllers.Admin
             MethodResult<IList<StudentDtoModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get SchoolClass
+        /// </summary>
+        [HttpGet("get-school-class")]
+        [ProducesResponseType(typeof(MethodResult<IList<string>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Gets([FromQuery] GetSchoolClassBySchoolGradeQuery query)
+        {
+            MethodResult<IList<string>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

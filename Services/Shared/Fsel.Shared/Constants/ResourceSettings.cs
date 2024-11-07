@@ -77,5 +77,7 @@ namespace Fsel.Shared.Constants
         public const string SchoolEventRules = "Resources//SchoolEventRules.json";
 
         public const string ManagerReportPlacementTestExcel = "Resources//ManagerReports//BaoCaoPlacmentTest.xlsx";
+        public const string ManagerReportLearningProgressAcaExcel = "Resources//ManagerReports//BaoCaoTienDoHocTapAca.xlsx";
+        public const string ManagerReportLearningProgressIELTSExcel = "Resources//ManagerReports//BaoCaoTienDoHocTapIELTS.xlsx";
     }
 }

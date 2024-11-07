@@ -6,6 +6,7 @@ namespace Fsel.Course.Infrastructure.Maps
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Entities.BandScoresConfigs;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
 
     public class OtherProfile : Profile
     {
@@ -13,6 +14,7 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<BandScores, BandScoresReport>().IgnoreAllNonExisting();
             CreateMap<OverallReportPlacementTestModel, SearchReportPlacementTestModel>().IgnoreAllNonExisting();
+            CreateMap<OverallReportLearningProgressModel, SearchReportLearningProgressModel>().IgnoreAllNonExisting();
         }
     }
 }

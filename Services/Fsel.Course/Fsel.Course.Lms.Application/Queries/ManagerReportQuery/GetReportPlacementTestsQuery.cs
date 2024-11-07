@@ -6,14 +6,14 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetReportPlacementTestsQuery : GetReportPlacementTestQueryModel, IRequest<MethodResult<IList<PlacementTestReportModel>>>
+    public class GetReportPlacementTestsQuery : SearchReportPlacementTestQueryModel, IRequest<MethodResult<IList<PlacementTestReportModel>>>
     {
     }
 
@@ -21,12 +21,12 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     {
         private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
-        private readonly MediatR.IMediator _mediator;
+        private readonly IMediator _mediator;
 
         public GetReportPlacementTestsQueryHandler(
             IPlacementTestGroupResultRepository placementTestGroupResultRepository,
             IPlacementTestResultRepository placementTestResultRepository,
-            MediatR.IMediator mediator)
+            IMediator mediator)
         {
             _placementTestGroupResultRepository = placementTestGroupResultRepository;
             _placementTestResultRepository = placementTestResultRepository;
@@ -50,6 +50,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 Page = request.Page,
                 Status = request.Status,
                 StartDate = request.StartDate,
+                ManagerReportType = EnumManagerReportType.ReportManagerPT,
             }, cancellationToken);
             if (!userResults.IsOK)
             {

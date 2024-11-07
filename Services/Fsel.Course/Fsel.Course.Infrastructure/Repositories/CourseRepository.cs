@@ -174,17 +174,24 @@ namespace Fsel.Course.Infrastructure.Repositories
                          .FirstOrDefaultAsync();
         }
 
-        public async Task<(int, int)> GetDisplayOrder(CourseResultModel courseResult)
+        public async Task<(int, int)> GetDisplayOrder(CourseResultModel courseResult, DateTime? arrivalDate = default)
         {
             ArgumentNullException.ThrowIfNull(courseResult);
 
-            var displayOrderLesson = 0;
-            var displayOrderUnit = 0;
-            var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit).ThenInclude(x => x!.CourseUnitMockTests).Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished).OrderByDescending(x => x.CreatedDate).ThenByDescending(x => x.UpdatedDate).FirstOrDefaultAsync();
+            var displayOrderLesson = 1;
+            var displayOrderUnit = 1;
+            var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit).ThenInclude(x => x!.CourseUnitMockTests)
+                .Where(x => !arrivalDate.HasValue || (x!.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                .Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
+                .OrderByDescending(x => x.CreatedDate)
+                .ThenByDescending(x => x.UpdatedDate)
+                .FirstOrDefaultAsync();
             if (unitResult != null)
             {
                 displayOrderUnit = unitResult.Unit?.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder ?? default;
-                var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.UnitId == unitResult.UnitId && x.CourseId == courseResult.CourseId).ToListAsync();
+                var lessonResults = await _lessonResultRepository.Queryable.Where(x => !arrivalDate.HasValue || (x!.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                                    .Where(x => x.StudentId == courseResult.StudentId && x.UnitId == unitResult.UnitId && x.CourseId == courseResult.CourseId)
+                                    .ToListAsync();
                 if (lessonResults != null && lessonResults.Any())
                 {
                     if (lessonResults.All(x => x.Status == EnumResultStatus.Done))

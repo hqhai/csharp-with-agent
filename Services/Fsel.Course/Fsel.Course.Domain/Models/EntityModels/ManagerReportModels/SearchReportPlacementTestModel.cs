@@ -1,9 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Models.EntityModels
+namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
 {
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Shared.Models.ShareModels.EntityModels;
 
     public class SearchReportPlacementTestModel : OverallReportPlacementTestModel
     {

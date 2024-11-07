@@ -8,7 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -16,7 +16,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetOverallReportPlacementTestQuery : GetReportPlacementTestQueryModel, IRequest<MethodResult<OverallReportPlacementTestModel>>
+    public class GetOverallReportPlacementTestQuery : SearchReportPlacementTestQueryModel, IRequest<MethodResult<OverallReportPlacementTestModel>>
     {
     }
 
@@ -44,12 +44,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListSchool = request.ListSchool,
                 SchoolGrade = request.SchoolGrade,
                 EndDate = request.EndDate,
-                Filters = request.Filters,
-                IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
-                Page = request.Page,
                 Status = request.Status,
                 StartDate = request.StartDate,
+                ManagerReportType = EnumManagerReportType.ReportManagerPT,
             }, cancellationToken);
             if (!userResults.IsOK)
             {
@@ -93,14 +91,14 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
         private static void GetTotalCourseLevel(OverallReportPlacementTestModel overallReportPlacementTest, IList<PlacementTestGroupResult> placementTestGroupResults)
         {
             var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic);
+            overallReportPlacementTest.CourseLevelProgresses = new List<CourseLevelProgressModel>();
             foreach (var item in courseLevels)
             {
-                var courseLevelField = typeof(OverallReportPlacementTestModel).GetProperty($"TotalCourseLevel{item}");
-                if (courseLevelField == null)
+                overallReportPlacementTest.CourseLevelProgresses.Add(new CourseLevelProgressModel
                 {
-                    continue;
-                }
-                courseLevelField.SetValue(overallReportPlacementTest, placementTestGroupResults.Where(x => x.SuggetLevel == item).Count());
+                    CourseLevel = item,
+                    TotalCount = placementTestGroupResults.Where(x => x.SuggetLevel == item).Count()
+                });
             }
         }
     }

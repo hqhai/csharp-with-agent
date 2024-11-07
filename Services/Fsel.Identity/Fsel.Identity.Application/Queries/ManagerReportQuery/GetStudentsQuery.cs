@@ -11,6 +11,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.QueryModels.ManagerReports;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -52,7 +53,8 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 SchoolClass = i.SchoolClass,
                 SchoolGrade = i.SchoolGrade,
                 BaseCourseLevel = i.BaseCourseLevel,
-                SchoolId = i.SchoolId
+                SchoolId = i.SchoolId,
+                CourseId = i.CourseId,
             });
             if (schoolId.HasValue)
             {
@@ -60,11 +62,30 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             }
             if (!string.IsNullOrEmpty(request.SchoolGrade))
             {
-                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolGrade) && x.SchoolGrade.Contains(request.SchoolGrade));
+                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolGrade) && x.SchoolGrade.Trim().ToLower() == request.SchoolGrade.Trim().ToLower());
+            }
+            if (!string.IsNullOrEmpty(request.SchoolClass))
+            {
+                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolClass) && x.SchoolClass.Trim().ToLower().Contains(request.SchoolClass.Trim().ToLower()));
+            }
+            if (request.LearningStatus.HasValue)
+            {
+                if (request.LearningStatus.Value == EnumLearningStatus.InProgress)
+                {
+                    query = query.Where(x => x.ExpiredDate.HasValue && x.ExpiredDate.Value > DateTime.UtcNow);
+                }
+                else
+                {
+                    query = query.Where(x => x.ExpiredDate.HasValue && x.ExpiredDate.Value <= DateTime.UtcNow);
+                }
             }
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.Admin.ToString()) && request.SchoolIds != null && request.SchoolIds.Any())
             {
                 query = query.Where(x => x.SchoolId.HasValue && request.SchoolIds.Contains(x.SchoolId.Value));
+            }
+            if (request.IsLearning.HasValue)
+            {
+                query = query.Where(x => request.IsLearning.Value ? x.CourseId.HasValue : !x.CourseId.HasValue);
             }
             if (request.IsCheckDate)
             {
@@ -78,11 +99,17 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             {
                 query = query.Where(x => !x.BaseCourseLevel.HasValue);
             }
+            if (request.CourseType.HasValue)
+            {
+                var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType.Value);
+                query = query.Where(x => x.CourseLevel.HasValue && courseLevels.Contains(x.CourseLevel.Value));
+            }
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()) ||
-                                         (m.PhoneNumber ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()) ||
-                                         (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
+                request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+                query = query.Where(m => (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword) ||
+                                         (m.PhoneNumber ?? string.Empty).Trim().ToLower().Contains(request.Keyword) ||
+                                         (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword));
             }
             var lists = await query.OrderBy(x => x.SchoolGrade).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName)
                                    .AsNoTracking()
