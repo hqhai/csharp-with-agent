@@ -7,8 +7,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -48,8 +51,32 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             }
 
             methodResult.Result = _mapper.Map<ClassForumSearchModel>(classForumResult);
+
+            var classForumDetailResult = classForumResult.ClassForumDetailResults.FirstOrDefault(x => x.Status == EnumClassForumResultStatus.Graded);
+            if (classForumDetailResult == null)
+            {
+                return methodResult;
+            }
+
+            methodResult.Result.Score = GetTargetCount(classForumDetailResult, classForumResult);
+            methodResult.Result.CorrectCount = classForumDetailResult.CorrectCount;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private static int GetTargetCount(ClassForumDetailResult classForumDetailResult, ClassForumResult classForumResult)
+        {
+            int targetScore = default;
+            var classForum = classForumResult.ClassForum;
+            if (classForum?.CourseSkill == EnumCourseSkill.Writing && classForum?.TaggetWordLimit <= classForumDetailResult.WordCount)
+            {
+                ++targetScore;
+            }
+            if (classForum?.CourseSkill == EnumCourseSkill.Speaking && classForum?.TaggetTimeLimit <= classForumDetailResult.TimeCount)
+            {
+                ++targetScore;
+            }
+            return targetScore;
         }
     }
 }

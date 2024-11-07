@@ -29,11 +29,14 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public double CorrectCount { get; set; }
 
-        public double CorrectTotal { get; set; }
+        public double Score { get; set; }
 
-        public double Score
+        public double CorrectTotal
         {
-            get => CorrectTotal - CorrectCount;
+            get
+            {
+                return CorrectCount + Score;
+            }
         }
 
         public IList<ClassForumResultFileModel>? ClassForumResultFiles { get; set; }
