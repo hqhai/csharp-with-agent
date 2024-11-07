@@ -66,10 +66,7 @@
           "Host": "lmsapi-staging.fsel-1m.svc",
           "Port": 80
         }
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "ApiKey"
-      }
+      ]
     },
     // Storage Service
     {
