@@ -37,7 +37,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IMediator _mediator;
         private readonly IPlatformRepository _platformRepository;
         private readonly AppSetting _appSetting;
-        private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly ITrainingService _trainingService;
         private readonly IHumanRepository _humanRepository;
 
@@ -47,7 +46,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IMediator mediator,
             AppSetting appSetting,
             IPlatformRepository platformRepository,
-            QuestBoardPublisher questBoardPublisher,
             ITrainingService trainingService,
             IHumanRepository humanRepository
             )
@@ -58,7 +56,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _mediator = mediator;
             _appSetting = appSetting;
             _platformRepository = platformRepository;
-            _questBoardPublisher = questBoardPublisher;
             _trainingService = trainingService;
             _humanRepository = humanRepository;
         }
