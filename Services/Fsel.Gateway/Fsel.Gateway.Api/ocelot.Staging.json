@@ -5,6 +5,7 @@
   "RateLimitOptions": {
     "DisableRateLimitHeaders": true,
     "EnableRateLimiting": true,
+    "ClientIdHeader": "Client-Id",
     "ClientWhitelist": [],
     "Period": "1s",
     "PeriodTimespan": 1,
@@ -65,7 +66,10 @@
           "Host": "lmsapi-staging.fsel-1m.svc",
           "Port": 80
         }
-      ]
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "ApiKey"
+      }
     },
     // Storage Service
     {
