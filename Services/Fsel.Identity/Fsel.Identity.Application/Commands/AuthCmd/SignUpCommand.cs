@@ -94,12 +94,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 }
                 else
                 {
-                    using (var scope = new TransactionScope(TransactionScopeOption.Required,
-                        new TransactionOptions
-                        {
-                            IsolationLevel = IsolationLevel.ReadCommitted
-                        },
-                        TransactionScopeAsyncFlowOption.Enabled))
+                    //using (var scope = new TransactionScope(TransactionScopeOption.Required,
+                    //    new TransactionOptions
+                    //    {
+                    //        IsolationLevel = IsolationLevel.ReadCommitted
+                    //    },
+                    //    TransactionScopeAsyncFlowOption.Enabled))
                     {
                         try
                         {
@@ -215,18 +215,18 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                             if (!sendResult.IsOK)
                             {
-                                scope.Dispose();
+                                //scope.Dispose();
                                 methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
                                 return methodResult;
                             }
-                            scope.Complete();
+                            //scope.Complete();
 
                             #endregion Send Code OTP
                         }
                         catch
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr));
-                            scope.Dispose();
+                            //scope.Dispose();
                         }
                     }
                 }
