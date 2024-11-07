@@ -5,7 +5,6 @@
   "RateLimitOptions": {
     "DisableRateLimitHeaders": true,
     "EnableRateLimiting": true,
-    "ClientIdHeader": "Client-Id",
     "ClientWhitelist": [],
     "Period": "1s",
     "PeriodTimespan": 1,
