@@ -59,7 +59,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                         Status = quantityUsed < x.Quantity,
                         Category = x.Category,
                         ItemStatus = quantityUsed < x.Quantity ? "Đang còn" : "Đã hết",
-                        Duration = currentDate > x.EndDate ? "Còn hiệu lực" : "Hết hiệu lực"
+                        Duration = currentDate < x.EndDate ? "Còn hiệu lực" : "Hết hiệu lực"
                     };
                 }
             });
