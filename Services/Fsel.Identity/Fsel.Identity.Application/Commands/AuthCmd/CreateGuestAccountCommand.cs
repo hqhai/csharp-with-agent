@@ -46,7 +46,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             using (var scope = new TransactionScope(TransactionScopeOption.Required,
                 new TransactionOptions
                 {
-                    IsolationLevel = IsolationLevel.Snapshot
+                    IsolationLevel = IsolationLevel.ReadCommitted
                 },
                 TransactionScopeAsyncFlowOption.Enabled))
             {

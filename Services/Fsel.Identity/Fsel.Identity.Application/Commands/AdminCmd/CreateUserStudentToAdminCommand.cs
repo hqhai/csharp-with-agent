@@ -170,7 +170,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             using (var scope = new TransactionScope(TransactionScopeOption.Required,
                 new TransactionOptions
                 {
-                    IsolationLevel = IsolationLevel.Snapshot
+                    IsolationLevel = IsolationLevel.ReadCommitted
                 },
                 TransactionScopeAsyncFlowOption.Enabled))
             {
