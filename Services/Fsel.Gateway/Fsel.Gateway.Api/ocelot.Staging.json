@@ -17,11 +17,11 @@
       "UpstreamPathTemplate": "/auth-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "auth-staging.fsel-1m.svc",
-          "Port": 443
+          "Port": 80
         }
       ]
     },
@@ -31,11 +31,11 @@
       "UpstreamPathTemplate": "/user-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "user-staging.fsel-1m.svc",
-          "Port": 443
+          "Port": 80
         }
       ]
     },
@@ -45,11 +45,11 @@
       "UpstreamPathTemplate": "/lcms-course-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "lcmsapi-staging.fsel-1m.svc",
-          "Port": 443
+          "Port": 80
         }
       ]
     },
@@ -59,11 +59,11 @@
       "UpstreamPathTemplate": "/lms-course-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "lmsapi-staging.fsel-1m.svc",
-          "Port": 443
+          "Port": 80
         }
       ]
     },
@@ -73,11 +73,11 @@
       "UpstreamPathTemplate": "/storage-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "storage-staging.fsel-1m.svc",
-          "Port": 443
+          "Port": 80
         }
       ],
       "QoSOptions": {
@@ -92,11 +92,11 @@
       "UpstreamPathTemplate": "/sender-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "sender-staging.fsel-1m.svc",
-          "Port": 443
+          "Port": 80
         }
       ]
     },
@@ -106,11 +106,11 @@
       "UpstreamPathTemplate": "/training-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "training-staging.fsel-1m.svc",
-          "Port": 443
+          "Port": 80
         }
       ]
     },
@@ -120,11 +120,11 @@
       "UpstreamPathTemplate": "/interaction-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "interaction-staging.fsel-1m.svc",
-          "Port": 443
+          "Port": 80
         }
       ]
       }
@@ -135,11 +135,11 @@
       "UpstreamPathTemplate": "/ordering-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "ordering-staging.fsel-1m.svc",
-          "Port": 443
+          "Port": 80
         }
       ]
     },
@@ -149,11 +149,11 @@
       "UpstreamPathTemplate": "/system-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "system-staging.fsel-1m.svc",
-          "Port": 443
+          "Port": 80
         }
       ]
     },
@@ -163,11 +163,11 @@
       "UpstreamPathTemplate": "/cms-planet-defender-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "cms-planet-defender-staging.fsel-1m.svc",
-          "Port": 443
+          "Port": 80
         }
       ]
     },
@@ -177,11 +177,11 @@
       "UpstreamPathTemplate": "/realtime-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "realtime-staging.fsel-1m.svc",
-          "Port": 443
+          "Port": 80
         }
       ]
     },
@@ -191,11 +191,11 @@
       "UpstreamPathTemplate": "/notification-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "notification-staging.fsel-1m.svc",
-          "Port": 443
+          "Port": 80
         }
       ]
     }
@@ -207,17 +207,17 @@
         {
           "Name": "Auths API",
           "Version": "v1",
-          "Url": "https://auth-staging.fsel-1m.svc/swagger/v1/swagger.json"
+          "Url": "http://auth-staging.fsel-1m.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Auths API",
           "Version": "v1.1",
-          "Url": "https://auth-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
+          "Url": "http://auth-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Auths API",
           "Version": "v1.2",
-          "Url": "https://auth-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
+          "Url": "http://auth-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -227,17 +227,17 @@
         {
           "Name": "Users API",
           "Version": "v1",
-          "Url": "https://user-staging.fsel-1m.svc/swagger/v1/swagger.json"
+          "Url": "http://user-staging.fsel-1m.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Users API",
           "Version": "v1.1",
-          "Url": "https://user-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
+          "Url": "http://user-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Users API",
           "Version": "v1.2",
-          "Url": "https://user-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
+          "Url": "http://user-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -247,17 +247,17 @@
         {
           "Name": "Lcms Courses API",
           "Version": "v1",
-          "Url": "https://lcmsapi-staging.fsel-1m.svc/swagger/v1/swagger.json"
+          "Url": "http://lcmsapi-staging.fsel-1m.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Lcms Courses API",
           "Version": "v1.1",
-          "Url": "https://lcmsapi-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
+          "Url": "http://lcmsapi-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Lcms Courses API",
           "Version": "v1.2",
-          "Url": "https://lcmsapi-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
+          "Url": "http://lcmsapi-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -267,17 +267,17 @@
         {
           "Name": "Lms Courses API",
           "Version": "v1",
-          "Url": "https://lmsapi-staging.fsel-1m.svc/swagger/v1/swagger.json"
+          "Url": "http://lmsapi-staging.fsel-1m.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Lms Courses API",
           "Version": "v1.1",
-          "Url": "https://lmsapi-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
+          "Url": "http://lmsapi-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Lms Courses API",
           "Version": "v1.2",
-          "Url": "https://lmsapi-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
+          "Url": "http://lmsapi-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -287,12 +287,12 @@
         {
           "Name": "Storage API",
           "Version": "v1",
-          "Url": "https://storage-staging.fsel-1m.svc/swagger/v1/swagger.json"
+          "Url": "http://storage-staging.fsel-1m.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Storage API",
           "Version": "v1.1",
-          "Url": "https://storage-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
+          "Url": "http://storage-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Storage API",
@@ -307,17 +307,17 @@
         {
           "Name": "Senders API",
           "Version": "v1",
-          "Url": "https://sender-staging.fsel-1m.svc/swagger/v1/swagger.json"
+          "Url": "http://sender-staging.fsel-1m.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Senders API",
           "Version": "v1.1",
-          "Url": "https://sender-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
+          "Url": "http://sender-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Senders API",
           "Version": "v1.2",
-          "Url": "https://sender-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
+          "Url": "http://sender-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -327,17 +327,17 @@
         {
           "Name": "Training API",
           "Version": "v1",
-          "Url": "https://training-staging.fsel-1m.svc/swagger/v1/swagger.json"
+          "Url": "http://training-staging.fsel-1m.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Training API",
           "Version": "v1.1",
-          "Url": "https://training-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
+          "Url": "http://training-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Training API",
           "Version": "v1.2",
-          "Url": "https://training-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
+          "Url": "http://training-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -347,17 +347,17 @@
         {
           "Name": "Interaction API",
           "Version": "v1",
-          "Url": "https://interaction-staging.fsel-1m.svc/swagger/v1/swagger.json"
+          "Url": "http://interaction-staging.fsel-1m.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Interaction API",
           "Version": "v1.1",
-          "Url": "https://interaction-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
+          "Url": "http://interaction-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Interaction API",
           "Version": "v1.2",
-          "Url": "https://interaction-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
+          "Url": "http://interaction-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -367,17 +367,17 @@
         {
           "Name": "Ordering API",
           "Version": "v1",
-          "Url": "https://ordering-staging.fsel-1m.svc/swagger/v1/swagger.json"
+          "Url": "http://ordering-staging.fsel-1m.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Ordering API",
           "Version": "v1.1",
-          "Url": "https://ordering-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
+          "Url": "http://ordering-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Ordering API",
           "Version": "v1.2",
-          "Url": "https://ordering-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
+          "Url": "http://ordering-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -387,17 +387,17 @@
         {
           "Name": "System API",
           "Version": "v1",
-          "Url": "https://system-staging.fsel-1m.svc/swagger/v1/swagger.json"
+          "Url": "http://system-staging.fsel-1m.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "System API",
           "Version": "v1.1",
-          "Url": "https://system-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
+          "Url": "http://system-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "System API",
           "Version": "v1.2",
-          "Url": "https://system-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
+          "Url": "http://system-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -407,17 +407,17 @@
         {
           "Name": "Cms Planet Defender API",
           "Version": "v1",
-          "Url": "https://cms-planet-defender-staging.fsel-1m.svc/swagger/v1/swagger.json"
+          "Url": "http://cms-planet-defender-staging.fsel-1m.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Cms Planet Defender API",
           "Version": "v1.1",
-          "Url": "https://cms-planet-defender-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
+          "Url": "http://cms-planet-defender-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Cms Planet Defender API",
           "Version": "v1.2",
-          "Url": "https://cms-planet-defender-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
+          "Url": "http://cms-planet-defender-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -427,17 +427,17 @@
         {
           "Name": "Realtime API",
           "Version": "v1",
-          "Url": "https://realtime-staging.fsel-1m.svc/swagger/v1/swagger.json"
+          "Url": "http://realtime-staging.fsel-1m.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Realtime API",
           "Version": "v1.1",
-          "Url": "https://realtime-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
+          "Url": "http://realtime-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Realtime API",
           "Version": "v1.2",
-          "Url": "https://realtime-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
+          "Url": "http://realtime-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -447,17 +447,17 @@
         {
           "Name": "Notification API",
           "Version": "v1",
-          "Url": "https://notification-staging.fsel-1m.svc/swagger/v1/swagger.json"
+          "Url": "http://notification-staging.fsel-1m.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Notification API",
           "Version": "v1.1",
-          "Url": "https://notification-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
+          "Url": "http://notification-staging.fsel-1m.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Notification API",
           "Version": "v1.2",
-          "Url": "https://notification-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
+          "Url": "http://notification-staging.fsel-1m.svc/swagger/v1.2/swagger.json"
         }
       ]
     }
