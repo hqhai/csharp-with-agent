@@ -113,6 +113,10 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                 case EnumCourseSourceData.CompletionStatus:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumCompletionStatus>();
                     break;
+
+                case EnumCourseSourceData.LearningStatus:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumLearningStatus>();
+                    break;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

@@ -25,6 +25,7 @@ namespace Fsel.Shared.Enums
         RepeatType,
         EnumFeature,
         MockTestScoreCriteria,
-        CompletionStatus
+        CompletionStatus,
+        LearningStatus
     }
 }
