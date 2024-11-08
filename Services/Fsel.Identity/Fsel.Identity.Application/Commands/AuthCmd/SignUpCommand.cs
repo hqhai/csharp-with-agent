@@ -22,6 +22,7 @@ using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -39,6 +40,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly AppSetting _appSetting;
         private readonly ITrainingService _trainingService;
         private readonly IHumanRepository _humanRepository;
+        private readonly ILogger<SignUpCommandHandler> _logger;
 
         public SignUpCommandHandler(UserManager<User> userManager,
             RoleManager<Role> roleManager,
@@ -48,7 +50,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IPlatformRepository platformRepository,
             ITrainingService trainingService,
             IHumanRepository humanRepository
-            )
+,
+            ILogger<SignUpCommandHandler> logger)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -58,6 +61,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _platformRepository = platformRepository;
             _trainingService = trainingService;
             _humanRepository = humanRepository;
+            _logger = logger;
         }
 
         public async Task<MethodResult<UserModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
@@ -104,7 +108,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                         try
                         {
                             ArgumentNullException.ThrowIfNull(request);
-                            var role = await _roleManager.FindByNameAsync(request.Role.ToString() ?? string.Empty);
+                            var role = await _roleManager.FindByNameAsync(request.Role.ToString());
                             if (role == null)
                             {
                                 role = new Role
@@ -223,8 +227,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                             #endregion Send Code OTP
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            _logger.LogError(ex, "SignUpCommand encouters error: {message}", ex.Message);
                             methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr));
                             //scope.Dispose();
                         }

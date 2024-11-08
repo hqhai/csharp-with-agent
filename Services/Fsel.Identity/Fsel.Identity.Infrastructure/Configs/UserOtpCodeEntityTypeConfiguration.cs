@@ -26,6 +26,8 @@ namespace Fsel.Identity.Infrastructure.Configs
                    .HasConversion(
                         v => v.ToString(),
                         v => v.EnumParse<EnumOtpCodeStatus>());
+
+            builder.HasIndex(x => new { x.OTPCode, x.Status });
         }
     }
 }

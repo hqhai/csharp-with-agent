@@ -4,7 +4,6 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
@@ -12,6 +11,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
 
     public class ConfirmOtpCommand : ConfirmOtpCommandModel, IRequest<MethodResult<UserOtpCodeModel>>
     {
@@ -21,11 +21,13 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     {
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger<ConfirmOtpCommandHandler> _logger;
 
-        public ConfirmOtpCommandHandler(IUserOtpCodeRepository userOtpCodeRepository, IMapper mapper)
+        public ConfirmOtpCommandHandler(IUserOtpCodeRepository userOtpCodeRepository, IMapper mapper, ILogger<ConfirmOtpCommandHandler> logger)
         {
             _userOtpCodeRepository = userOtpCodeRepository;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<MethodResult<UserOtpCodeModel>> Handle(ConfirmOtpCommand request, CancellationToken cancellationToken)
@@ -49,8 +51,11 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 _userOtpCodeRepository.Update(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "ConfirmOtpCommand encouters error: {message}", ex.Message);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr));
+                //scope.Dispose();
             }
             methodResult.Result = _mapper.Map<UserOtpCodeModel>(userOtpCode);
             methodResult.StatusCode = StatusCodes.Status200OK;
