@@ -5,6 +5,7 @@ using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
+using Fsel.Core.Entities;
 using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Application.Commands.UserReferrals;
 using Fsel.Identity.Application.Services.TrainingService;
@@ -13,6 +14,7 @@ using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Identity.Domain.Models.EntityModels;
+using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
@@ -38,6 +40,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly AppSetting _appSetting;
         private readonly ITrainingService _trainingService;
         private readonly IHumanRepository _humanRepository;
+        private readonly UserDbContext _userDbContext;
         private readonly ILogger<SignUpCommandHandler> _logger;
 
         public SignUpCommandHandler(UserManager<User> userManager,
@@ -49,7 +52,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ITrainingService trainingService,
             IHumanRepository humanRepository
 ,
-            ILogger<SignUpCommandHandler> logger)
+            ILogger<SignUpCommandHandler> logger,
+            UserDbContext userDbContext)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -60,6 +64,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _trainingService = trainingService;
             _humanRepository = humanRepository;
             _logger = logger;
+            _userDbContext = userDbContext;
         }
 
         public async Task<MethodResult<UserModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
@@ -178,6 +183,18 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                                 #endregion add user setting
 
+                                //#region add user role
+
+                                //user.UserRoles = new List<UserRoleEntity>()
+                                //    {
+                                //        new UserRoleEntity
+                                //        {
+                                //            RoleId = role.Id
+                                //        }
+                                //    };
+
+                                //#endregion add user role
+
                                 var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password);
                                 if (!validPassword.Succeeded)
                                 {
@@ -191,7 +208,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
                                     return methodResult;
                                 }
-                                await _userManager.AddToRoleAsync(user, request.Role.ToString() ?? string.Empty);
+
+                                await _userDbContext.UserRoles.AddAsync(new UserRoleEntity
+                                {
+                                    UserId = user.Id,
+                                    RoleId = role.Id
+                                }, cancellationToken);
+
+                                //await _userManager.AddToRoleAsync(user, request.Role.ToString());
                             }
 
                             #region Send Code OTP
