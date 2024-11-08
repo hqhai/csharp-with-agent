@@ -1,14 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Globalization;
-using System.Transactions;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Application.Commands.UserReferrals;
-using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
