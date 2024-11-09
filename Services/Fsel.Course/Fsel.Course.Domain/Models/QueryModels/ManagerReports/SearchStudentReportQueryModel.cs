@@ -8,8 +8,8 @@ namespace Fsel.Course.Domain.Models.QueryModels.ManagerReports
     {
         public DateTime? StartDate { get; set; }
         public EnumCompletionStatus? Status { get; set; }
-        public EnumCourseType CourseType { get; set; }
+        public EnumCourseType? CourseType { get; set; }
         public EnumLearningStatus? LearningStatus { get; set; }
-        public string? SchoolClass { get; set; }
+        public EnumCourseLevel? CurrentLevel { get; set; }
     }
 }

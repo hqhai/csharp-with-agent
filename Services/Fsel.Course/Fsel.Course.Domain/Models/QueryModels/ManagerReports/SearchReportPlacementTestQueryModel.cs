@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.ManagerReports
     public class SearchReportPlacementTestQueryModel : BaseSearchStudentReportQuery
     {
         public DateTime? StartDate { get; set; }
+        public EnumCourseLevel? CurrentLevel { get; set; }
         public EnumCompletionStatus? Status { get; set; }
     }
 }

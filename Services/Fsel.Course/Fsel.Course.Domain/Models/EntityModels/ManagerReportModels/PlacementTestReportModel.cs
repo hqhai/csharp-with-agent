@@ -15,7 +15,25 @@ namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
         public string? SchoolGrade { get; set; }
         public string? SchoolClass { get; set; }
         public EnumCourseLevel? ChooseLevel { get; set; }
+
+        public string? ChooseLevelStr
+        {
+            get
+            {
+                return ChooseLevel.HasValue ? ChooseLevel.Value.GetDescription() : null;
+            }
+        }
+
         public EnumCourseLevel? CurrentLevel { get; set; }
+
+        public string? CurrentLevelStr
+        {
+            get
+            {
+                return CurrentLevel.HasValue ? CurrentLevel.Value.GetDescription() : null;
+            }
+        }
+
         public EnumCompletionStatus Status { get; set; }
 
         public string? StatusDescription
@@ -26,6 +44,6 @@ namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
             }
         }
 
-        public DateTime? ExpirePTDate { get; set; }
+        public DateTime? ExpiredPTDate { get; set; }
     }
 }

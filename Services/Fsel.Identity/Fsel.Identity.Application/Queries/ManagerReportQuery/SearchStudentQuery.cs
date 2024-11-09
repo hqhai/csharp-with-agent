@@ -58,7 +58,8 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                     SchoolClass = i.SchoolClass,
                     SchoolGrade = i.SchoolGrade,
                     SchoolId = i.SchoolId,
-                    CourseId = i.CourseId
+                    CourseId = i.CourseId,
+                    UserId = i.Human.UserId,
                 });
             if (schoolId.HasValue)
             {
@@ -66,11 +67,13 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             }
             if (!string.IsNullOrEmpty(request.SchoolGrade))
             {
-                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolGrade) && x.SchoolGrade.Trim().ToLower() == request.SchoolGrade.Trim().ToLower());
+                request.SchoolGrade = request.SchoolGrade.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolGrade) && x.SchoolGrade.Trim().ToLower() == request.SchoolGrade);
             }
             if (!string.IsNullOrEmpty(request.SchoolClass))
             {
-                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolClass) && x.SchoolClass.Trim().ToLower().Contains(request.SchoolClass.Trim().ToLower()));
+                request.SchoolClass = request.SchoolClass.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolClass) && x.SchoolClass.Trim().ToLower().Contains(request.SchoolClass));
             }
             if (request.LearningStatus.HasValue)
             {
@@ -110,16 +113,16 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             }
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()) ||
-                                         (m.PhoneNumber ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()) ||
-                                         (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
+                request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+                query = query.Where(m => (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword) ||
+                                         (m.PhoneNumber ?? string.Empty).Trim().ToLower().Contains(request.Keyword) ||
+                                         (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword));
             }
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await query.OrderBy(x => x.SchoolGrade).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName)
+            var lists = query.AsEnumerable()
+                    .OrderBy(x => int.TryParse(x.SchoolGrade, out int graded) ? graded : 0).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName)
                     .ApplyPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+                    .ToList();
 
             methodResult.Result = new PagingItemsModel<StudentDtoModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

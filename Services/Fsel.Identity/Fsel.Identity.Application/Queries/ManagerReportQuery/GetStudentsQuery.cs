@@ -10,6 +10,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.QueryModels.ManagerReports;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels.EntityModels;
@@ -55,6 +56,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 BaseCourseLevel = i.BaseCourseLevel,
                 SchoolId = i.SchoolId,
                 CourseId = i.CourseId,
+                UserId = i.Human.UserId
             });
             if (schoolId.HasValue)
             {
@@ -111,12 +113,8 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                                          (m.PhoneNumber ?? string.Empty).Trim().ToLower().Contains(request.Keyword) ||
                                          (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword));
             }
-            var lists = await query.OrderBy(x => x.SchoolGrade).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName)
-                                   .AsNoTracking()
-                                   .ToListAsync(cancellationToken: cancellationToken)
-                                   .ConfigureAwait(false);
-
-            methodResult.Result = lists;
+            var lists = await query.AsNoTracking().ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            methodResult.Result = lists.OrderBy(x => int.TryParse(x.SchoolGrade, out int graded) ? graded : 0).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

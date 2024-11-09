@@ -42,14 +42,14 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
+                SchoolClass = request.SchoolClass,
                 SchoolGrade = request.SchoolGrade,
                 EndDate = request.EndDate,
-                Filters = request.Filters,
-                IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
-                Page = request.Page,
                 Status = request.Status,
                 StartDate = request.StartDate,
+                CourseLevel = request.CourseLevel,
+                CurrentLevel = request.CurrentLevel,
                 ManagerReportType = EnumManagerReportType.ReportManagerPT,
             }, cancellationToken);
             if (!userResults.IsOK)
@@ -86,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     Status = GetStatus(placementTestGroupResult),
                     ChooseLevel = placementTestGroupResult?.ChooseLevel,
                     CurrentLevel = placementTestGroupResult?.SuggetLevel,
-                    ExpirePTDate = placementTestResult?.UpdatedDate ?? placementTestResult?.CreatedDate,
+                    ExpiredPTDate = placementTestResult?.UpdatedDate ?? placementTestResult?.CreatedDate,
                 });
             }
             methodResult.Result = data;

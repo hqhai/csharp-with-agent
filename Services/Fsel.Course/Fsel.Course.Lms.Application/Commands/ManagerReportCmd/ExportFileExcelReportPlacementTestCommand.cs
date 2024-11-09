@@ -41,28 +41,28 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
+                SchoolClass = request.SchoolClass,
                 SchoolGrade = request.SchoolGrade,
                 EndDate = request.EndDate,
-                Filters = request.Filters,
-                IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
-                Page = request.Page,
                 Status = request.Status,
                 StartDate = request.StartDate,
+                CourseLevel = request.CourseLevel,
+                CurrentLevel = request.CurrentLevel,
             }, cancellationToken);
             var dataOverallResult = await _mediator.Send(new GetOverallReportPlacementTestQuery
             {
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
+                SchoolClass = request.SchoolClass,
                 SchoolGrade = request.SchoolGrade,
                 EndDate = request.EndDate,
-                Filters = request.Filters,
-                IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
-                Page = request.Page,
                 Status = request.Status,
                 StartDate = request.StartDate,
+                CourseLevel = request.CourseLevel,
+                CurrentLevel = request.CurrentLevel,
             }, cancellationToken);
             var userResult = await _userService.GetUserProfileAsync();
             string schoolName = userResult.Content?.Result?.SchoolName ?? string.Empty;
@@ -78,12 +78,12 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
             using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.ManagerReportPlacementTestExcel)))
             {
                 var excelWorksheet = excelPackage.Workbook.Worksheets[0];
-                excelWorksheet.Cells["I2"].Value = GetData(excelWorksheet.Cells["I2"].Value, DateTime.Now.Date.ToString("dd/M/yyyy", CultureInfo.InvariantCulture));
+                excelWorksheet.Cells["I2"].Value = GetData(excelWorksheet.Cells["I2"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
                 excelWorksheet.Cells["B3"].Value = GetData(excelWorksheet.Cells["B3"].Value, schoolName);
                 excelWorksheet.Cells["D3"].Value = GetData(excelWorksheet.Cells["D3"].Value, request.Status.HasValue ? request.Status.Value.GetDescription() : string.Empty);
                 excelWorksheet.Cells["E3"].Value = GetData(excelWorksheet.Cells["E3"].Value, request.SchoolGrade);
-                excelWorksheet.Cells["F3"].Value = GetData(excelWorksheet.Cells["F3"].Value, request.StartDate.HasValue ? request.StartDate.Value.ToString("dd/M/yyyy hh:mm", CultureInfo.InvariantCulture) : string.Empty);
-                excelWorksheet.Cells["G3"].Value = GetData(excelWorksheet.Cells["G3"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/M/yyyy hh:mm", CultureInfo.InvariantCulture) : string.Empty);
+                excelWorksheet.Cells["F3"].Value = GetData(excelWorksheet.Cells["F3"].Value, request.StartDate.HasValue ? request.StartDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
+                excelWorksheet.Cells["G3"].Value = GetData(excelWorksheet.Cells["G3"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
                 excelWorksheet.Cells["B4"].Value = GetData(excelWorksheet.Cells["B4"].Value, overallReportPlacementTest?.TotalStudent ?? default);
                 excelWorksheet.Cells["B5"].Value = GetData(excelWorksheet.Cells["B5"].Value, overallReportPlacementTest?.TotalPlacementTest ?? default);
                 excelWorksheet.Cells["B6"].Value = GetData(excelWorksheet.Cells["B6"].Value, overallReportPlacementTest?.TotalCompletePlacementTest ?? default);
@@ -103,14 +103,14 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                         excelWorksheet.Cells[startRow, 1].Value = item.FullName;
                         excelWorksheet.Cells[startRow, 2].Value = item.Email;
                         excelWorksheet.Cells[startRow, 3].Value = item.PhoneNumber;
-                        excelWorksheet.Cells[startRow, 4].Value = item.Birthday?.ToString("dd/M/yyyy", CultureInfo.InvariantCulture);
+                        excelWorksheet.Cells[startRow, 4].Value = item.Birthday?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
                         excelWorksheet.Cells[startRow, 5].Value = item.SchoolName;
                         excelWorksheet.Cells[startRow, 6].Value = item.SchoolGrade;
                         excelWorksheet.Cells[startRow, 7].Value = item.SchoolClass;
-                        excelWorksheet.Cells[startRow, 8].Value = item.ChooseLevel;
-                        excelWorksheet.Cells[startRow, 9].Value = item.CurrentLevel;
-                        excelWorksheet.Cells[startRow, 10].Value = item.Status;
-                        excelWorksheet.Cells[startRow, 11].Value = item.ExpirePTDate?.ToString("dd/M/yyyy", CultureInfo.InvariantCulture);
+                        excelWorksheet.Cells[startRow, 8].Value = item.ChooseLevelStr;
+                        excelWorksheet.Cells[startRow, 9].Value = item.CurrentLevelStr;
+                        excelWorksheet.Cells[startRow, 10].Value = item.StatusDescription;
+                        excelWorksheet.Cells[startRow, 11].Value = item.ExpiredPTDate?.ToString("dd/MM/yyyy hh:mm", CultureInfo.InvariantCulture);
                         startRow++; // Di chuyển xuống dòng tiếp theo
                     }
                 }

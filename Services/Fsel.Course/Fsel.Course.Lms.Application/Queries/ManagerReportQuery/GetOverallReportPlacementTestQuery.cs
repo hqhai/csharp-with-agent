@@ -42,11 +42,14 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
+                SchoolClass = request.SchoolClass,
                 SchoolGrade = request.SchoolGrade,
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
                 Status = request.Status,
                 StartDate = request.StartDate,
+                CourseLevel = request.CourseLevel,
+                CurrentLevel = request.CurrentLevel,
                 ManagerReportType = EnumManagerReportType.ReportManagerPT,
             }, cancellationToken);
             if (!userResults.IsOK)
@@ -97,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 overallReportPlacementTest.CourseLevelProgresses.Add(new CourseLevelProgressModel
                 {
                     CourseLevel = item,
-                    TotalCount = placementTestGroupResults.Where(x => x.SuggetLevel == item).Count()
+                    TotalCount = placementTestGroupResults.Where(x => x.CompletionLevel.HasValue && x.CompletionLevel.Value.GetCourseLevelByPlacementTestLevel() == item).Count()
                 });
             }
         }

@@ -13,7 +13,17 @@ namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
         public string? SchoolGrade { get; set; }
         public string? SchoolClass { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
+
+        public string? CourseLevelStr
+        {
+            get
+            {
+                return CourseLevel.HasValue ? CourseLevel.Value.GetDescription() : null;
+            }
+        }
+
         public string? ContentProgress { get; set; }
+
         public string? UnitName { get; set; }
         public string? LessonName { get; set; }
 

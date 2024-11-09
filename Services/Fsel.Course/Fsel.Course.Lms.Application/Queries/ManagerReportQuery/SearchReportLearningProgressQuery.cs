@@ -59,6 +59,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 EndDate = request.EndDate,
                 LearningStatus = request.LearningStatus,
                 CourseType = request.CourseType,
+                CourseLevel = request.CourseLevel,
             }, cancellationToken);
             var reportLearningProgress = _mapper.Map<SearchReportLearningProgressModel>(dataOverallResult.Result);
             var userResults = await _mediator.Send(new GetStudentReportQuery
@@ -76,6 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 Page = request.Page,
                 LearningStatus = request.LearningStatus,
                 CourseType = request.CourseType,
+                CourseLevel = request.CourseLevel,
                 ManagerReportType = EnumManagerReportType.ReportLearningProgress,
                 IsSearchReport = true
             }, cancellationToken);
@@ -88,6 +90,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             var students = userResults?.Result;
             if (students == null)
             {
+                methodResult.Result = reportLearningProgress;
                 return methodResult;
             }
             var studentIds = students.Select(x => x.Id).ToList();

@@ -52,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 Keyword = request.Keyword,
                 LearningStatus = request.LearningStatus,
                 CourseType = request.CourseType,
+                CourseLevel = request.CourseLevel,
                 ManagerReportType = EnumManagerReportType.ReportLearningProgress,
             }, cancellationToken);
 

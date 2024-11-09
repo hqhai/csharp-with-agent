@@ -7,6 +7,6 @@ namespace Fsel.Shared.Enums
         ReportManagerPT,
         ReportLearningProgress,
         ReportLearningResults,
-        ReportAssiduity
+        ReportStudentAssiduity
     }
 }

@@ -50,13 +50,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListSchool = request.ListSchool,
                 SchoolGrade = request.SchoolGrade,
                 EndDate = request.EndDate,
-                Filters = request.Filters,
-                IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
-                Page = request.Page,
-                PageSize = request.PageSize,
                 Status = request.Status,
                 StartDate = request.StartDate,
+                CourseLevel = request.CourseLevel,
+                CurrentLevel = request.CurrentLevel,
             }, cancellationToken);
             var reportPlacementTest = _mapper.Map<SearchReportPlacementTestModel>(dataOverallResult.Result);
             var userResults = await _mediator.Send(new GetStudentReportQuery
@@ -65,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
                 SchoolGrade = request.SchoolGrade,
-                EndDate = request.EndDate,
+                SchoolClass = request.SchoolClass,
                 Filters = request.Filters,
                 IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
@@ -73,6 +71,9 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 PageSize = request.PageSize,
                 Status = request.Status,
                 StartDate = request.StartDate,
+                EndDate = request.EndDate,
+                CourseLevel = request.CourseLevel,
+                CurrentLevel = request.CurrentLevel,
                 ManagerReportType = EnumManagerReportType.ReportManagerPT,
                 IsSearchReport = true
             }, cancellationToken);
@@ -84,6 +85,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             var students = userResults?.Result;
             if (students == null)
             {
+                methodResult.Result = reportPlacementTest;
                 return methodResult;
             }
             var studentIds = students.Select(x => x.Id).ToList();
@@ -99,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             {
                 var placementTestGroupResult = lists.FirstOrDefault(x => x.StudentId == item.Id);
                 var placementTestResult = placementTestResults.FirstOrDefault(x => x.StudentId == item.Id);
-                data.Add(new PlacementTestReportModel
+                var placementTestReport = new PlacementTestReportModel
                 {
                     Birthday = item.BirthDay,
                     Email = item.Email,
@@ -108,11 +110,16 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     SchoolClass = item.SchoolClass,
                     SchoolGrade = item.SchoolGrade,
                     SchoolName = item.School,
-                    Status = GetStatus(placementTestGroupResult),
-                    ChooseLevel = placementTestGroupResult?.ChooseLevel,
-                    CurrentLevel = placementTestGroupResult?.SuggetLevel,
-                    ExpirePTDate = placementTestResult?.UpdatedDate ?? placementTestResult?.CreatedDate,
-                });
+                    ExpiredPTDate = placementTestResult?.UpdatedDate ?? placementTestResult?.CreatedDate
+                };
+                if (placementTestGroupResult != null)
+                {
+                    placementTestReport.Status = GetStatus(placementTestGroupResult);
+                    placementTestReport.ChooseLevel = placementTestGroupResult.ChooseLevel;
+                    placementTestReport.CurrentLevel = placementTestGroupResult.CompletionLevel.HasValue ? placementTestGroupResult.CompletionLevel.Value.GetCourseLevelByPlacementTestLevel() : null;
+                }
+
+                data.Add(placementTestReport);
             }
 
             reportPlacementTest.PagingItems = new PagingItemsModel<PlacementTestReportModel>(data, request, reportPlacementTest.TotalStudent);

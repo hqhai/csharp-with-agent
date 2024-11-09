@@ -42,7 +42,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 query = query.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId.Value);
             }
 
-            var schoolClass = await query.Select(x => x.SchoolClass!).ToListAsync(cancellationToken);
+            var schoolClass = await query.Select(x => x.SchoolClass!).Distinct().ToListAsync(cancellationToken);
             methodResult.Result = schoolClass.OrderBy(x =>
             {
                 // Tách phần số ra

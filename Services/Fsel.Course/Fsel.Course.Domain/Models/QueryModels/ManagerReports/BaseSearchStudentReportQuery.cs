@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Models.QueryModels.ManagerReports
 {
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
     public class BaseSearchStudentReportQuery : BaseQueryModel
@@ -37,7 +38,9 @@ namespace Fsel.Course.Domain.Models.QueryModels.ManagerReports
             }
         }
 
+        public string? SchoolClass { get; set; }
         public string? SchoolGrade { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
         public DateTime? EndDate { get; set; }
     }
 }

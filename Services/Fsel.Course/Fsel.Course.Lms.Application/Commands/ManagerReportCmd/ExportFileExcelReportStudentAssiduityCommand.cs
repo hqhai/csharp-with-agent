@@ -1,0 +1,123 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
+{
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
+    using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
+    using Fsel.Course.Lms.Application.Queries.ManagerReportQuery;
+    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Constants;
+    using global::System.Globalization;
+    using MediatR;
+    using OfficeOpenXml;
+
+    public class ExportFileExcelReportStudentAssiduityCommand : SearchReportAssiduityQueryModel, IRequest<MethodResult<Stream>>
+    {
+    }
+
+    public class ExportFileExcelReportStudentAssiduityCommandHandler : IRequestHandler<ExportFileExcelReportStudentAssiduityCommand, MethodResult<Stream>>
+    {
+        private readonly IMediator _mediator;
+        private readonly IUserService _userService;
+
+        public ExportFileExcelReportStudentAssiduityCommandHandler(IMediator mediator, IUserService userService)
+        {
+            _mediator = mediator;
+            _userService = userService;
+        }
+
+        public async Task<MethodResult<Stream>> Handle(ExportFileExcelReportStudentAssiduityCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<Stream>();
+            var dataResult = await _mediator.Send(new GetReportStudentAssiduityQuery
+            {
+                ListDistrict = request.ListDistrict,
+                ListProvince = request.ListProvince,
+                ListSchool = request.ListSchool,
+                SchoolGrade = request.SchoolGrade,
+                EndDate = request.EndDate,
+                Keyword = request.Keyword,
+                StartDate = request.StartDate,
+                CourseType = request.CourseType,
+                LearningStatus = request.LearningStatus,
+                SchoolClass = request.SchoolClass,
+            }, cancellationToken);
+            var dataOverallResult = await _mediator.Send(new GetOverallReportStudentAssiduityQuery
+            {
+                ListDistrict = request.ListDistrict,
+                ListProvince = request.ListProvince,
+                ListSchool = request.ListSchool,
+                SchoolGrade = request.SchoolGrade,
+                Keyword = request.Keyword,
+                StartDate = request.StartDate,
+                EndDate = request.EndDate,
+                LearningStatus = request.LearningStatus,
+                SchoolClass = request.SchoolClass,
+                CourseType = request.CourseType,
+            }, cancellationToken);
+            var userResult = await _userService.GetUserProfileAsync();
+            string schoolName = userResult.Content?.Result?.SchoolName ?? string.Empty;
+            methodResult.Result = ExportExcelTemplate(request, dataResult.Result, dataOverallResult.Result, schoolName);
+            return methodResult;
+        }
+
+        public static Stream ExportExcelTemplate(ExportFileExcelReportStudentAssiduityCommand request, IList<StudentAssiduityModel>? studentAssiduityReports, OverallReportStudentAssiduityModel? overallReport, string? schoolName)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            MemoryStream memoryStream = new MemoryStream();
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.ManagerReportStudentAssiduityExcel)))
+            {
+                var excelWorksheet = excelPackage.Workbook.Worksheets[0];
+                excelWorksheet.Cells["N2"].Value = GetData(excelWorksheet.Cells["N2"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
+                excelWorksheet.Cells["E2"].Value = GetData(excelWorksheet.Cells["E2"].Value, schoolName);
+                excelWorksheet.Cells["G2"].Value = GetData(excelWorksheet.Cells["G2"].Value, request.CourseType.HasValue ? request.CourseType.Value : string.Empty);
+                excelWorksheet.Cells["H2"].Value = GetData(excelWorksheet.Cells["H2"].Value, request.LearningStatus.HasValue ? request.LearningStatus.Value.GetDescription() : null);
+                excelWorksheet.Cells["I2"].Value = GetData(excelWorksheet.Cells["I2"].Value, request.SchoolGrade);
+                excelWorksheet.Cells["J2"].Value = GetData(excelWorksheet.Cells["J2"].Value, request.SchoolClass);
+                excelWorksheet.Cells["K2"].Value = GetData(excelWorksheet.Cells["K2"].Value, request.StartDate.HasValue ? request.StartDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
+                excelWorksheet.Cells["L2"].Value = GetData(excelWorksheet.Cells["L2"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
+
+                excelWorksheet.Cells["E3"].Value = overallReport?.TotalStudent ?? default;
+                excelWorksheet.Cells["E4"].Value = overallReport?.TotalAvgProgressTime ?? default;
+                excelWorksheet.Cells["E5"].Value = overallReport?.TotalAvgVisit ?? default;
+
+                if (studentAssiduityReports != null && studentAssiduityReports.Any())
+                {
+                    int startRow = 7;
+                    foreach (var item in studentAssiduityReports)
+                    {
+                        excelWorksheet.Cells[startRow, 1].Value = item.FullName;
+                        excelWorksheet.Cells[startRow, 2].Value = item.Email;
+                        excelWorksheet.Cells[startRow, 3].Value = item.SchoolName;
+                        excelWorksheet.Cells[startRow, 4].Value = item.SchoolGrade;
+                        excelWorksheet.Cells[startRow, 5].Value = item.SchoolClass;
+                        excelWorksheet.Cells[startRow, 6].Value = item.CourseLevel.HasValue ? item.CourseLevel.Value.GetDescription() : null;
+                        excelWorksheet.Cells[startRow, 7].Value = item.TotalTimeVideoStr;
+                        excelWorksheet.Cells[startRow, 8].Value = item.TotalTimeClassForumStr;
+                        excelWorksheet.Cells[startRow, 9].Value = item.TotalTimeHomeWorkStr;
+                        excelWorksheet.Cells[startRow, 10].Value = item.TotalTimeStr;
+                        excelWorksheet.Cells[startRow, 11].Value = item.TotalVisit;
+                        excelWorksheet.Cells[startRow, 12].Value = item.ProcessDate.HasValue ? item.ProcessDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm", CultureInfo.InvariantCulture) : null;
+                        excelWorksheet.Cells[startRow, 13].Value = item.CurrentDate.HasValue ? item.CurrentDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm", CultureInfo.InvariantCulture) : null;
+                        excelWorksheet.Cells[startRow, 14].Value = item.ExpiredDate.HasValue ? item.ExpiredDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm", CultureInfo.InvariantCulture) : null;
+                        startRow++; // Di chuyển xuống dòng tiếp theo
+                    }
+                }
+                excelPackage.SaveAs(memoryStream);
+            }
+
+            memoryStream.Position = 0L;
+            return memoryStream;
+        }
+
+        private static string GetData(object data, object? param)
+        {
+            string objStr = data?.ToString() ?? string.Empty;
+            return string.Format(objStr, param);
+        }
+    }
+}
