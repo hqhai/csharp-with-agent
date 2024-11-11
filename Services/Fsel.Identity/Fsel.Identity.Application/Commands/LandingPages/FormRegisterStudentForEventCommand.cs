@@ -201,7 +201,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 return methodResult;
             });
 
-            await SendMailInfoUser(request, password, EnumSenderTemplate.CreateUserForEventULIS, Subject);
+            await SendMailInfoUser(request, password, EnumSenderTemplate.MailCreateUserForEventHaNoi, Subject);
 
             return methodResult;
         }
@@ -253,7 +253,10 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 Params = new
                 {
                     UserName = request.Email,
-                    Password = password
+                    Password = password,
+                    FullName = request.FirstName + " " + request.LastName,
+                    Class = request.SchoolClass,
+                    School = request.School
                 },
             });
         }
