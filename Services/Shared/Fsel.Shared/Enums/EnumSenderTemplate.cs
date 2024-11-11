@@ -28,6 +28,7 @@ namespace Fsel.Shared.Enums
         CreateUserForEventULIS,
         MailPaymentWithVoucher,
         CreateUser,
+        MailCreateUserForEventHaNoi,
 
         #region event
 

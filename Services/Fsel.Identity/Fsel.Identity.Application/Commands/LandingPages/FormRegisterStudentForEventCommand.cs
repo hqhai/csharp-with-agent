@@ -160,8 +160,10 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     }
             };
 
+            var password = request.Password ?? DefaultPassword;
+
             var passwordValidator = new Microsoft.AspNetCore.Identity.PasswordValidator<User>();
-            var validPassword = await passwordValidator.ValidateAsync(_userManager, user, DefaultPassword);
+            var validPassword = await passwordValidator.ValidateAsync(_userManager, user, password);
             if (!validPassword.Succeeded)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIsNotValid));
@@ -174,7 +176,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 return methodResult;
             }
 
-            identityStudentResult = await _userManager.CreateAsync(user, DefaultPassword);
+            identityStudentResult = await _userManager.CreateAsync(user, password);
             if (!identityStudentResult.Succeeded)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
@@ -199,7 +201,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 return methodResult;
             });
 
-            await SendMailInfoUser(request, DefaultPassword, EnumSenderTemplate.CreateUserForEventULIS, Subject);
+            await SendMailInfoUser(request, password, EnumSenderTemplate.CreateUserForEventULIS, Subject);
 
             return methodResult;
         }
