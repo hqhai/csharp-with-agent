@@ -46,7 +46,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
         public int GetNextValueForUserSequence()
         {
-            return _userDbContext.Database.SqlQueryRaw<int>("SELECT NEXT VALUE FOR UserSequence").Single();
+            return _userDbContext.Database.SqlQueryRaw<int>("SELECT NEXT VALUE FOR UserSequence").AsEnumerable().First();
         }
     }
 }
