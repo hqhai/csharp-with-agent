@@ -139,7 +139,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
         private async Task<string> GeneratorCodeAsync(UpdateCodeStudentCommand request)
         {
-            var stt = await _studentRepository.Queryable.CountAsync();
+            var stt = _studentRepository.GetNextValueForUserSequence();
             var currentDate = DateTime.UtcNow;
             var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
             var lastDigitOfYear = currentDate.Year % 10;

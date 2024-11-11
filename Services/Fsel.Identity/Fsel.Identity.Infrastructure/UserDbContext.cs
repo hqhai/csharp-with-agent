@@ -27,6 +27,10 @@ namespace Fsel.Identity.Infrastructure
             builder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<UserToken>().HasQueryFilter(e => !e.IsDeleted);
 
+            builder.HasSequence<int>("UserSequence")
+                .StartsAt(1000000)
+                .IncrementsBy(1);
+
             SeedPlatforms(builder);
             SeedRoles(builder);
 
