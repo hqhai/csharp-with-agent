@@ -92,14 +92,7 @@ namespace Fsel.Ordering.Application.Queries.Products
 
                 query = queryShowPriority.Concat(queryNotShowPriority).ToList();
 
-                if (request.ListEventId == null || request.ListEventId.Count == 0)
-                {
-                    query = query.Where(p => p.EventIds != null && request.EventIds != null && request.EventIds.Any(x => p.EventIds.Contains(x))).ToList();
-                }
-                else
-                {
-                    query = query.Where(p => p.EventIds != null && request.ListEventId != null && p.EventIds.Any(x => request.ListEventId.Contains(x.ToString()))).ToList();
-                }
+                query = query.Where(p => p.EventIds != null && request.EventIds != null && request.EventIds.Any(x => p.EventIds.Contains(x))).ToList();
 
                 query = query.Where(p => p.ExpireDate.Date >= DateTime.UtcNow.Date && p.RemainingQuantity > 0).ToList();
             }
