@@ -18,6 +18,7 @@ namespace Fsel.Ordering.Domain.Models.QueryModels.Products
         #region Dùng cho LMS
 
         public IList<Guid>? EventIds { get; set; }
+        public IList<string>? ListEventId { get; set; }
         public bool? PopularOrLatest { get; set; }
         public int? Min { get; set; }
         public int? Max { get; set; }
