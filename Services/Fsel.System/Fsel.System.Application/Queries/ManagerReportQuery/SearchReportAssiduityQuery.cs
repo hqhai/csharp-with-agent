@@ -1,0 +1,132 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.System.Application.Queries.ManagerReportQuery
+{
+    using AutoMapper;
+    using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Helpers;
+    using Fsel.System.Application.Services.CourseServices;
+    using Fsel.System.Application.Services.CourseServices.QueryModels.ManagerReports;
+    using Fsel.System.Domain.IRepositories;
+    using Fsel.System.Domain.Models.EntityModels.ManagerReportModels;
+    using Fsel.System.Domain.Models.QueryModels.ManagerReports;
+    using global::System.Linq;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+
+    public class SearchReportAssiduityQuery : SearchReportAssiduityQueryModel, IRequest<MethodResult<SearchReportStudentAssiduityModel>>
+    {
+    }
+
+    public class SearchReportAssiduityQueryHandler : IRequestHandler<SearchReportAssiduityQuery, MethodResult<SearchReportStudentAssiduityModel>>
+    {
+        private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
+        private readonly IFeatureAccessTimeRepository _featureAccessTimeRepository;
+        private readonly ICourseService _courseService;
+
+        public SearchReportAssiduityQueryHandler(
+            IMediator mediator,
+            IMapper mapper,
+            IFeatureAccessTimeRepository featureAccessTimeRepository,
+            ICourseService courseService)
+        {
+            _mediator = mediator;
+            _mapper = mapper;
+            _featureAccessTimeRepository = featureAccessTimeRepository;
+            _courseService = courseService;
+        }
+
+        public async Task<MethodResult<SearchReportStudentAssiduityModel>> Handle(SearchReportAssiduityQuery request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<SearchReportStudentAssiduityModel>();
+            var userResults = await _mediator.Send(new GetStudentReportQuery
+            {
+                PageSize = request.PageSize,
+                Filters = request.Filters,
+                IncludePaths = request.IncludePaths,
+                Keyword = request.Keyword,
+                Page = request.Page,
+                ListDistrict = request.ListDistrict,
+                ListProvince = request.ListProvince,
+                ListSchool = request.ListSchool,
+                SchoolGrade = request.SchoolGrade,
+                SchoolClass = request.SchoolClass,
+                StartDate = request.StartDate,
+                EndDate = request.EndDate,
+                LearningStatus = request.LearningStatus,
+                CourseType = request.CourseType,
+                IsSearchReport = true,
+            }, cancellationToken);
+
+            if (!userResults.IsOK)
+            {
+                methodResult.AddError(userResults.ErrorMessages);
+                return methodResult;
+            }
+            var students = userResults?.Result;
+            if (students == null)
+            {
+                methodResult.Result = new SearchReportStudentAssiduityModel();
+                return methodResult;
+            }
+            var featureAccessTimeReportQuerys = students.Where(x => x.CourseId.HasValue).Select(item =>
+            {
+                return new GetFeatureAccessTimeReportQueryModel
+                {
+                    UserId = item.UserId ?? default,
+                    CourseId = item.CourseId.GetValueOrDefault()
+                };
+            }).ToList();
+
+            var overallFeatureAccessTimes = await _featureAccessTimeRepository.GetOverallFeatureAccessTimesAsync(featureAccessTimeReportQuerys, request.StartDate, request.EndDate);
+            var dataOverallResult = await _mediator.Send(new GetOverallReportStudentAssiduityQuery
+            {
+                Keyword = request.Keyword,
+                ListDistrict = request.ListDistrict,
+                ListProvince = request.ListProvince,
+                ListSchool = request.ListSchool,
+                SchoolGrade = request.SchoolGrade,
+                SchoolClass = request.SchoolClass,
+                StartDate = request.StartDate,
+                EndDate = request.EndDate,
+                CourseType = request.CourseType,
+                LearningStatus = request.LearningStatus,
+            }, cancellationToken);
+            var reportStudentAssiduity = _mapper.Map<SearchReportStudentAssiduityModel>(dataOverallResult.Result);
+            var studentIds = students.Select(x => x.Id).ToList();
+            var courseStudentResults = await _courseService.GetCourseResultToStudentIdsAsync(new GetCourseResultsToStudentIdsQueryModel
+            {
+                StudentIds = studentIds,
+            });
+            var courseResults = courseStudentResults.Content?.Result;
+
+            var datas = new List<StudentAssiduityModel>();
+            students.ForEach(student =>
+            {
+                var userId = student.UserId ?? default;
+                var courseResult = courseResults?.FirstOrDefault(x => x.StudentId == student.Id);
+                var overallFeatureAccessTime = overallFeatureAccessTimes.FirstOrDefault(x => x.UserId == userId);
+                var studentAssiduity = new StudentAssiduityModel
+                {
+                    FullName = student.FullName,
+                    Email = student.Email,
+                    SchoolName = student.School,
+                    SchoolClass = student.SchoolClass,
+                    SchoolGrade = student.SchoolGrade,
+                    CourseLevel = student.CourseLevel,
+                    ExpiredDate = student.ExpiredDate,
+                    ProcessDate = courseResult?.ProcessDate
+                };
+                _mapper.Map(overallFeatureAccessTime, studentAssiduity);
+                datas.Add(studentAssiduity);
+            });
+            reportStudentAssiduity.PagingItems = new PagingItemsModel<StudentAssiduityModel>(datas, request, reportStudentAssiduity.TotalStudent);
+            methodResult.Result = reportStudentAssiduity;
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+    }
+}

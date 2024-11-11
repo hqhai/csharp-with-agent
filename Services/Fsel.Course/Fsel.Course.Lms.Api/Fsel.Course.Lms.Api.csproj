@@ -65,9 +65,6 @@
     <None Update="Resources\MailTemplates\UnitNumber.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\ManagerReports\BaoCaoChuyenCan.xlsx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="Resources\ManagerReports\BaoCaoPlacmentTest.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -29,6 +29,10 @@ namespace Fsel.System.Application.Queries.SchoolQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<Guid>> methodResult = new MethodResult<IList<Guid>>();
+            if (!request.SchoolIds.Any() || !request.ProvinceIds.Any() || !request.DistrictIds.Any())
+            {
+                return methodResult;
+            }
 
             var districtIds = await GetDistrictIdsAsync(request);
             var query = _locationCrmRepository.Queryable;

@@ -81,7 +81,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     break;
 
                 case EnumManagerReportType.ReportLearningProgress:
-                case EnumManagerReportType.ReportStudentAssiduity:
                     searchQuery.LearningStatus = request.LearningStatus;
                     searchQuery.CourseType = request.CourseType;
                     searchQuery.IsLearning = true;

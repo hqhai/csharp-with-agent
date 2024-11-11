@@ -87,35 +87,5 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "Export_Report_LearningProgress.xlsx");
         }
-
-        /// <summary>
-        /// search
-        /// </summary>
-        [HttpGet("search-report-student-assiduity")]
-        [ProducesResponseType(typeof(MethodResult<SearchReportAssiduityQueryModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool) })]
-        public async Task<IActionResult> Get([FromQuery] SearchReportAssiduityQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Overall Report PlacementTest
-        /// </summary>
-        [HttpGet("export-report-student-assiduity")]
-        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(roles: new string[] { nameof(EnumRole.AdminSchool) })]
-        public async Task<IActionResult> Get([FromQuery] ExportFileExcelReportStudentAssiduityCommand command)
-        {
-            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            if (!commandResult.IsOK || commandResult.Result == null)
-            {
-                return commandResult.GetActionResult();
-            }
-            return File(commandResult.Result, Settings.Excels.ContentType, "Export_Report_StudentAssiduity.xlsx");
-        }
     }
 }

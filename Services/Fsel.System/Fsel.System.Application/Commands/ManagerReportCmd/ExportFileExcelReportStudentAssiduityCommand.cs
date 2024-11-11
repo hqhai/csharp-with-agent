@@ -1,14 +1,14 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
+namespace Fsel.System.Application.Commands.ManagerReportCmd
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
-    using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
-    using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
-    using Fsel.Course.Lms.Application.Queries.ManagerReportQuery;
-    using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
+    using Fsel.System.Application.Queries.ManagerReportQuery;
+    using Fsel.System.Application.Services.UserServices;
+    using Fsel.System.Domain.Models.EntityModels.ManagerReportModels;
+    using Fsel.System.Domain.Models.QueryModels.ManagerReports;
     using global::System.Globalization;
     using MediatR;
     using OfficeOpenXml;

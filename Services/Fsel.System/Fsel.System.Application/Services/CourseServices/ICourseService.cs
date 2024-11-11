@@ -5,7 +5,9 @@ namespace Fsel.System.Application.Services.CourseServices
     using Fsel.Common.ActionResults;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
+    using Fsel.Shared.Models.ShareModels.EntityModels;
     using Fsel.System.Application.Services.CourseServices.Models;
+    using Fsel.System.Application.Services.CourseServices.QueryModels.ManagerReports;
     using global::System;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -44,5 +46,8 @@ namespace Fsel.System.Application.Services.CourseServices
 
         [Get("/v1/quest-board/percent-course")]
         Task<IApiResponse<MethodResult<QuestBoardCategoryModel>>> GetPercentCourseResult([Query] GetFinishOneQueryModel query);
+
+        [Post("/v1/admin/course/get-result-to-student-ids")]
+        Task<IApiResponse<MethodResult<IList<CourseResultDtoModel>>>> GetCourseResultToStudentIdsAsync([Body] GetCourseResultsToStudentIdsQueryModel query);
     }
 }

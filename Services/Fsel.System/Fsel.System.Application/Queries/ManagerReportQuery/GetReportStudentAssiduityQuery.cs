@@ -1,0 +1,106 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.System.Application.Queries.ManagerReportQuery
+{
+    using AutoMapper;
+    using Fsel.Common.ActionResults;
+    using Fsel.System.Application.Services.CourseServices;
+    using Fsel.System.Application.Services.CourseServices.QueryModels.ManagerReports;
+    using Fsel.System.Domain.IRepositories;
+    using Fsel.System.Domain.Models.EntityModels.ManagerReportModels;
+    using Fsel.System.Domain.Models.QueryModels.ManagerReports;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+
+    public class GetReportStudentAssiduityQuery : SearchReportAssiduityQueryModel, IRequest<MethodResult<IList<StudentAssiduityModel>>>
+    {
+    }
+
+    public class GetReportStudentAssiduityQueryHandler : IRequestHandler<GetReportStudentAssiduityQuery, MethodResult<IList<StudentAssiduityModel>>>
+    {
+        private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
+        private readonly IFeatureAccessTimeRepository _featureAccessTimeRepository;
+        private readonly ICourseService _courseService;
+
+        public GetReportStudentAssiduityQueryHandler(
+            IMediator mediator,
+            IMapper mapper,
+            IFeatureAccessTimeRepository featureAccessTimeRepository,
+            ICourseService courseService)
+        {
+            _mediator = mediator;
+            _mapper = mapper;
+            _featureAccessTimeRepository = featureAccessTimeRepository;
+            _courseService = courseService;
+        }
+
+        public async Task<MethodResult<IList<StudentAssiduityModel>>> Handle(GetReportStudentAssiduityQuery request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<IList<StudentAssiduityModel>>();
+            var userResults = await _mediator.Send(new GetStudentReportQuery
+            {
+                Keyword = request.Keyword,
+                ListDistrict = request.ListDistrict,
+                ListProvince = request.ListProvince,
+                ListSchool = request.ListSchool,
+                SchoolGrade = request.SchoolGrade,
+                SchoolClass = request.SchoolClass,
+                StartDate = request.StartDate,
+                EndDate = request.EndDate,
+                LearningStatus = request.LearningStatus,
+                CourseType = request.CourseType,
+            }, cancellationToken);
+
+            if (!userResults.IsOK)
+            {
+                methodResult.AddError(userResults.ErrorMessages);
+                return methodResult;
+            }
+            var students = userResults?.Result;
+            if (students == null)
+            {
+                return methodResult;
+            }
+            var studentIds = students.Select(x => x.Id).ToList();
+            var courseStudentResults = await _courseService.GetCourseResultToStudentIdsAsync(new GetCourseResultsToStudentIdsQueryModel
+            {
+                StudentIds = studentIds,
+            });
+            var courseResults = courseStudentResults.Content?.Result;
+            var featureAccessTimeReportQuerys = students.Where(x => x.CourseId.HasValue).Select(item =>
+            {
+                return new GetFeatureAccessTimeReportQueryModel
+                {
+                    UserId = item.UserId ?? default,
+                    CourseId = item.CourseId.GetValueOrDefault()
+                };
+            }).ToList();
+
+            var overallFeatureAccessTimes = await _featureAccessTimeRepository.GetOverallFeatureAccessTimesAsync(featureAccessTimeReportQuerys, request.StartDate, request.EndDate);
+            var datas = students.Select(student =>
+            {
+                var userId = student.UserId ?? default;
+                var courseResult = courseResults?.FirstOrDefault(x => x.StudentId == student.Id);
+                var overallFeatureAccessTime = overallFeatureAccessTimes.FirstOrDefault(x => x.UserId == userId);
+                var studentAssiduity = new StudentAssiduityModel
+                {
+                    FullName = student.FullName,
+                    Email = student.Email,
+                    SchoolName = student.School,
+                    SchoolClass = student.SchoolClass,
+                    SchoolGrade = student.SchoolGrade,
+                    CourseLevel = student.CourseLevel,
+                    ExpiredDate = student.ExpiredDate,
+                    ProcessDate = courseResult?.ProcessDate
+                };
+                _mapper.Map(overallFeatureAccessTime, studentAssiduity);
+                return studentAssiduity;
+            }).ToList();
+            methodResult.Result = datas;
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+    }
+}

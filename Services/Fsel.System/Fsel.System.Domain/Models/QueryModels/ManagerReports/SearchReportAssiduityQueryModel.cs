@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Models.QueryModels.ManagerReports
+namespace Fsel.System.Domain.Models.QueryModels.ManagerReports
 {
     using Fsel.Shared.Enums;
 

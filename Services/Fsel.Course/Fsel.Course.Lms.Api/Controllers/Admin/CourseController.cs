@@ -8,10 +8,12 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.CourseQuery;
+    using Fsel.Course.Lms.Application.Queries.CourseQuery.Admins;
+    using Fsel.Shared.Attributes;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Shared.Constants;
-    using Fsel.Shared.Attributes;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/admin/course")]
@@ -70,6 +72,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         public async Task<IActionResult> GetCourseById([FromRoute] Guid id)
         {
             MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseLevelQuery { CourseId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get CourseResult To StudentIds
+        /// </summary>
+        [HttpPost("get-result-to-student-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseResultDtoModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromBody] GetCourseResultsToStudentIdsQuery query)
+        {
+            MethodResult<IList<CourseResultDtoModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
+namespace Fsel.System.Domain.Models.EntityModels.ManagerReportModels
 {
     using Fsel.Common.Helpers;
     using Fsel.Shared.Enums;
