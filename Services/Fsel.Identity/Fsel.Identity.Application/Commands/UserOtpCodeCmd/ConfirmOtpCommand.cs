@@ -49,7 +49,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             {
                 userOtpCode.Status = EnumOtpCodeStatus.Verified;
                 _userOtpCodeRepository.Update(userOtpCode);
-                await _userOtpCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

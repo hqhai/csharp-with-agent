@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Add_IndexOTPCodeAndStatus_To_UserOtpTable : Migration
+    public partial class Update_UserOtpTable_OTPCodeField : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,20 +19,11 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
                 oldNullable: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserOtpCodes_OTPCode_Status",
-                table: "UserOtpCodes",
-                columns: new[] { "OTPCode", "Status" });
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_UserOtpCodes_OTPCode_Status",
-                table: "UserOtpCodes");
-
             migrationBuilder.AlterColumn<string>(
                 name: "OTPCode",
                 table: "UserOtpCodes",

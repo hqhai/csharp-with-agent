@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20241108020527_Add_IndexOTPCodeAndStatus_To_UserOtpTable")]
-    partial class Add_IndexOTPCodeAndStatus_To_UserOtpTable
+    [Migration("20241111042332_Update_UserOtpTable_OTPCodeField")]
+    partial class Update_UserOtpTable_OTPCodeField
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1935,8 +1935,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("OTPCode", "Status");
 
                     b.ToTable("UserOtpCodes");
                 });

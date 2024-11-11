@@ -1933,8 +1933,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("OTPCode", "Status");
-
                     b.ToTable("UserOtpCodes");
                 });
 
