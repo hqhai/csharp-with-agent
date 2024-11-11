@@ -27,7 +27,8 @@ namespace Fsel.Identity.Infrastructure.Configs
                         v => v.ToString(),
                         v => v.EnumParse<EnumOtpCodeStatus>());
 
-            //builder.HasIndex(x => new { x.OTPCode, x.Status });
+            builder.HasIndex(x => new { x.UserId, x.Status });
+            builder.HasIndex(x => new { x.UserId, x.OTPCode });
         }
     }
 }
