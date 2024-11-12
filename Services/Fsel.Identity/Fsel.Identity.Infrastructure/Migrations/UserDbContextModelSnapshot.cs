@@ -23,7 +23,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.HasSequence<int>("UserSequence")
-                .StartsAt(1000000L);
+                .StartsAt(100000L);
 
             modelBuilder.Entity("Fsel.Core.Entities.RoleClaimEntity", b =>
                 {
@@ -469,6 +469,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("IsDeleted", "Code");
 
                     b.ToTable("Humans");
                 });
@@ -1782,8 +1784,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email");
-
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -1791,6 +1791,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("IsDeleted", "Email");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });

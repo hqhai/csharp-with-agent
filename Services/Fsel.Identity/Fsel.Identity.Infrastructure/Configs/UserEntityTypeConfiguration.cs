@@ -16,7 +16,7 @@ namespace Fsel.Identity.Infrastructure.Configs
                 .HasForeignKey<Human>(b => b.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasIndex(x => new { x.Email });
+            builder.HasIndex(x => new { x.IsDeleted, x.Email });
         }
     }
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20241111042332_Update_UserOtpTable_OTPCodeField")]
-    partial class Update_UserOtpTable_OTPCodeField
+    [Migration("20241112021532_Add_IndexTable_UserAndHuman")]
+    partial class Add_IndexTable_UserAndHuman
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.HasSequence<int>("UserSequence")
+                .StartsAt(100000L);
 
             modelBuilder.Entity("Fsel.Core.Entities.RoleClaimEntity", b =>
                 {
@@ -469,6 +472,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("IsDeleted", "Code");
 
                     b.ToTable("Humans");
                 });
@@ -1790,6 +1795,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
+                    b.HasIndex("IsDeleted", "Email");
+
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
@@ -1934,7 +1941,13 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Status");
+
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "OTPCode");
+
+                    b.HasIndex("UserId", "Status");
 
                     b.ToTable("UserOtpCodes");
                 });
