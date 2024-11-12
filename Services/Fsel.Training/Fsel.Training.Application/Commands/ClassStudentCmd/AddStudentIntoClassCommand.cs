@@ -26,16 +26,18 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
     public class AddStudentIntoClassCommandHandler : IRequestHandler<AddStudentIntoClassCommand, MethodResult<Guid>>
     {
         private readonly IClassRepository _classRepository;
+        private readonly IClassStudentRepository _classStudentRepository;
         private readonly IUserService _userService;
         private readonly IMediator _mediator;
         private readonly ICourseService _courseService;
 
-        public AddStudentIntoClassCommandHandler(IClassRepository classRepository, IUserService userService, IMediator mediator, ICourseService courseService)
+        public AddStudentIntoClassCommandHandler(IClassRepository classRepository, IUserService userService, IMediator mediator, ICourseService courseService, IClassStudentRepository classStudentRepository)
         {
             _classRepository = classRepository;
             _userService = userService;
             _mediator = mediator;
             _courseService = courseService;
+            _classStudentRepository = classStudentRepository;
         }
 
         public async Task<MethodResult<Guid>> Handle(AddStudentIntoClassCommand request, CancellationToken cancellationToken)
@@ -72,7 +74,7 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.YouChoseTheWrongLevel), nameof(course.CourseLevel));
                 return methodResult;
             }
-            var @class = await _classRepository.Queryable.Include(x => x.ClassStudents).FirstOrDefaultAsync(p => p.CourseId == request.CourseId, cancellationToken);
+            var @class = await _classRepository.Queryable.FirstOrDefaultAsync(p => p.CourseId == request.CourseId, cancellationToken);
 
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
@@ -88,15 +90,15 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                         Status = EnumClassStatus.Active,
                         PackageId = request.PackageId ?? default,
                         ClassStudents = new List<ClassStudent>()
-                    {
-                        new ClassStudent() { StudentId = student.Id, IsActive = true }
-                    }
+                        {
+                            new ClassStudent() { StudentId = student.Id, IsActive = true }
+                        }
                     };
                     @class = _classRepository.Add(newClass);
                 }
                 else
                 {
-                    if (!@class.ClassStudents.Any(p => p.StudentId == student.Id))
+                    if (!await _classStudentRepository.Queryable.AnyAsync(p => p.ClassId == @class.Id && p.StudentId == student.Id))
                     {
                         @class.ClassStudents.Add(new ClassStudent() { StudentId = student.Id, IsActive = true });
                     }
