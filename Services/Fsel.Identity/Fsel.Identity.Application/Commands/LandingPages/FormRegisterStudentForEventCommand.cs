@@ -201,7 +201,11 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 return methodResult;
             });
 
-            await SendMailInfoUser(request, password, EnumSenderTemplate.MailCreateUserForEventHaNoi, Subject);
+            var template = competitionEvent.EventContent?.ActionConfigs?.FirstOrDefault(p => p.MailRegister.HasValue);
+            if (template != null && template.MailRegister.HasValue)
+            {
+                await SendMailInfoUser(request, password, template.MailRegister.Value, Subject);
+            }
 
             return methodResult;
         }
