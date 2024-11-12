@@ -43,10 +43,5 @@ namespace Fsel.Identity.Infrastructure.Repositories
                 throw;
             }
         }
-
-        public int GetNextValueForUserSequence()
-        {
-            return _userDbContext.Database.SqlQueryRaw<int>("SELECT NEXT VALUE FOR UserSequence").AsEnumerable().First();
-        }
     }
 }

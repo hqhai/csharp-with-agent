@@ -7,6 +7,5 @@ namespace Fsel.Identity.Domain.IRepositories
 
     public interface IStudentRepository : IRepository<Student>
     {
-        int GetNextValueForUserSequence();
     }
 }
