@@ -49,13 +49,13 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             {
                 userOtpCode.Status = EnumOtpCodeStatus.Verified;
                 _userOtpCodeRepository.Update(userOtpCode);
+                await _userOtpCodeRepository.DeleteAsync(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "ConfirmOtpCommand encouters error: {message}", ex.Message);
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr));
-                //scope.Dispose();
             }
             methodResult.Result = _mapper.Map<UserOtpCodeModel>(userOtpCode);
             methodResult.StatusCode = StatusCodes.Status200OK;
