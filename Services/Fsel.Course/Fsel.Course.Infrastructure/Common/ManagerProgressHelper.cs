@@ -189,7 +189,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 countTests.Add(await GetUnitCompletes(unitIds, courseResult, arrivalDate));
             }
-            if (courseResult.CourseType == EnumCourseType.Academic)
+            if (course.CourseType == EnumCourseType.Academic)
             {
                 var finalTestResult = await _finalTestResultRepository.Queryable.Where(x => !arrivalDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
                                                                                 .FirstOrDefaultAsync(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId);

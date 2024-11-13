@@ -10,7 +10,6 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.QueryModels.ManagerReports;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels.EntityModels;
@@ -56,7 +55,8 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 BaseCourseLevel = i.BaseCourseLevel,
                 SchoolId = i.SchoolId,
                 CourseId = i.CourseId,
-                UserId = i.Human.UserId
+                UserId = i.Human.UserId,
+                CreatedDate = i.CreatedDate,
             });
             if (schoolId.HasValue)
             {
@@ -105,6 +105,10 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             {
                 var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType.Value);
                 query = query.Where(x => x.CourseLevel.HasValue && courseLevels.Contains(x.CourseLevel.Value));
+            }
+            if (request.CourseLevel.HasValue)
+            {
+                query = query.Where(x => x.CourseLevel.HasValue && x.CourseLevel == request.CourseLevel.Value);
             }
             if (!string.IsNullOrEmpty(request.Keyword))
             {

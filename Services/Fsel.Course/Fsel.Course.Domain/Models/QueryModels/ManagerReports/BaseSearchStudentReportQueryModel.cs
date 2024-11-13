@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.ManagerReports
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
-    public class BaseSearchStudentReportQuery : BaseQueryModel
+    public class BaseSearchStudentReportQueryModel : BaseQueryModel
     {
         public string? ListSchool { get; set; }
 

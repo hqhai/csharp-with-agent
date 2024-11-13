@@ -122,20 +122,12 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     Status = item.ExpiredDate > DateTime.UtcNow ? EnumLearningStatus.InProgress : EnumLearningStatus.Expired,
                     CourseLevel = item.CourseLevel,
                 };
-                var courseResult = lists.FirstOrDefault(x => x.StudentId == item.Id);
-                if (courseResult != null)
-                {
-                    var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResult, request.EndDate);
-                    var (displayOrderUnit, displayOrderLesson) = await _courseRepository.GetDisplayOrder(courseResult, request.EndDate);
-                    learningProgress.ContentProgress = $"{currentProgress} / {progress}";
-                    learningProgress.UnitName = $"Unit {displayOrderUnit}";
-                    learningProgress.LessonName = $"Lesson {displayOrderLesson}";
-                }
-                else
-                {
-                    learningProgress.ContentProgress = $"{ValueSettings.ValueDefault} / {request.CourseType.GetTotalProgress()}";
-                }
-
+                var courseResult = lists.FirstOrDefault(x => x.StudentId == item.Id) ?? new CourseResultModel { StudentId = item.Id, CourseId = item.CourseId.HasValue ? item.CourseId.Value : default };
+                var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResult, request.EndDate);
+                var (displayOrderUnit, displayOrderLesson) = await _courseRepository.GetDisplayOrder(courseResult, request.EndDate);
+                learningProgress.ContentProgress = $"{currentProgress} / {progress}";
+                learningProgress.UnitName = $"Unit {displayOrderUnit}";
+                learningProgress.LessonName = $"Lesson {displayOrderLesson}";
                 datas.Add(learningProgress);
             }
 

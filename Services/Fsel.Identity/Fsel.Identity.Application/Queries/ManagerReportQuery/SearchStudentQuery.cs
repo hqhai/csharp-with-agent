@@ -60,6 +60,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                     SchoolId = i.SchoolId,
                     CourseId = i.CourseId,
                     UserId = i.Human.UserId,
+                    CreatedDate = i.CreatedDate,
                 });
             if (schoolId.HasValue)
             {

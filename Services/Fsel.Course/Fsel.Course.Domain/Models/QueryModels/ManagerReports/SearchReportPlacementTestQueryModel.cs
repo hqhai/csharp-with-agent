@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.ManagerReports
 {
     using Fsel.Shared.Enums;
 
-    public class SearchReportPlacementTestQueryModel : BaseSearchStudentReportQuery
+    public class SearchReportPlacementTestQueryModel : BaseSearchStudentReportQueryModel
     {
         public DateTime? StartDate { get; set; }
         public EnumCourseLevel? CurrentLevel { get; set; }

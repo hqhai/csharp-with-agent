@@ -2,11 +2,11 @@
 
 namespace Fsel.Shared.Models.ShareModels.EntityModels
 {
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class StudentDtoModel
+    public class StudentDtoModel : BaseModel
     {
-        public Guid Id { get; set; }
         public string? FullName { get; set; }
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }

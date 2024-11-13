@@ -32,6 +32,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
 
         public bool? IsLearning { get; set; }
         public EnumCourseType? CourseType { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
         public EnumLearningStatus? LearningStatus { get; set; }
         public EnumCompletionStatus? Status { get; set; }
         public bool IsCheckDate { get; set; }

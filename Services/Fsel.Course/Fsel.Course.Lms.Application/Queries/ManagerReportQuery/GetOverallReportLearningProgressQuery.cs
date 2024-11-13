@@ -49,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 LearningStatus = request.LearningStatus,
                 CourseType = request.CourseType,
                 CourseLevel = request.CourseLevel,
-                ManagerReportType = EnumManagerReportType.ReportLearningProgress,
+                ManagerReportType = EnumManagerReportType.ReportLearningResults,
             }, cancellationToken);
             if (!userResults.IsOK)
             {
@@ -63,27 +63,25 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 TotalStudent = studentIds?.Count ?? default
             };
             GetTotalCourseLevel(overallReport, request.CourseType, students);
-            await SetAverageProgress(overallReport, request, studentIds);
+            await SetAverageProgress(overallReport, request, students);
             methodResult.Result = overallReport;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task SetAverageProgress(OverallReportLearningProgressModel overallReport, GetOverallReportLearningProgressQuery request, IList<Guid>? studentIds)
+        private async Task SetAverageProgress(OverallReportLearningProgressModel overallReport, GetOverallReportLearningProgressQuery request, IList<StudentDtoModel>? students)
         {
-            if (studentIds == null)
+            if (students == null)
             {
                 return;
             }
             var averageProgress = new List<(double, double)>();
-            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).ToListAsync();
-            foreach (var courseResult in courseResults)
+            foreach (var student in students)
             {
                 averageProgress.Add(await _managerProgressHelper.GetCompleteCourseAsync(new CourseResultModel
                 {
-                    CourseType = courseResult.Course?.CourseType,
-                    CourseId = courseResult.CourseId,
-                    StudentId = courseResult.StudentId
+                    CourseId = student.CourseId ?? default,
+                    StudentId = student.Id
                 }, request.EndDate));
             }
             var countProgress = averageProgress.Any() ? NumberHelper.ConvertRound(averageProgress.Average(x => x.Item1)) : default;
@@ -100,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 overallReportLearningProgress.CourseLevelProgresses.Add(new CourseLevelProgressModel
                 {
                     CourseLevel = item,
-                    TotalCount = studentDtos?.Where(x => x.CourseLevel == item).Count() ?? default
+                    TotalStudent = studentDtos?.Where(x => x.CourseLevel == item).Count() ?? default
                 });
             }
         }

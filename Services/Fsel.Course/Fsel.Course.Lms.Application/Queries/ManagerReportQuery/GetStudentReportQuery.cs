@@ -74,19 +74,19 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                         studentPtIds = await _placementTestResultRepository.GetStudentPtIdsAsync(request.StartDate, request.EndDate);
                     }
                     var studentPtGroups = await _placementTestGroupResultRepository.GetStudentIdsAsync(request.Status, studentPtIds, isCheckDate, request.CurrentLevel, request.CourseLevel);
-                    studentPtIds.AddRange(studentPtGroups);
+                    studentPtIds = studentPtGroups.ToList();
                     searchQuery.Status = request.Status;
                     searchQuery.IsCheckDate = isCheckDate;
 
                     break;
 
                 case EnumManagerReportType.ReportLearningProgress:
+                case EnumManagerReportType.ReportLearningResults:
+
                     searchQuery.LearningStatus = request.LearningStatus;
                     searchQuery.CourseType = request.CourseType;
+                    searchQuery.CourseLevel = request.CourseLevel;
                     searchQuery.IsLearning = true;
-                    break;
-
-                case EnumManagerReportType.ReportLearningResults:
                     break;
             }
             searchQuery.ListStudentId = studentPtIds != null && studentPtIds.Any() ? string.Join(",", studentPtIds.Distinct().ToList()) : null;

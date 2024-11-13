@@ -55,7 +55,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 query = query.Where(x =>
                     (x.UpdatedDate.HasValue ? x.UpdatedDate.Value.Date <= endDate.Value.Date : x.CreatedDate.Date <= endDate.Value.Date));
             }
-            var groupedResults = await query.ToListAsync();
+            var groupedResults = await query.Where(x => x.Status == EnumResultStatus.Done).ToListAsync();
             return groupedResults.GroupBy(x => x.StudentId)
                                  .Select(g => g.OrderByDescending(x => x.UpdatedDate)
                                                .ThenByDescending(x => x.CreatedDate)

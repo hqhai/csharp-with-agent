@@ -100,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 overallReportPlacementTest.CourseLevelProgresses.Add(new CourseLevelProgressModel
                 {
                     CourseLevel = item,
-                    TotalCount = placementTestGroupResults.Where(x => x.CompletionLevel.HasValue && x.CompletionLevel.Value.GetCourseLevelByPlacementTestLevel() == item).Count()
+                    TotalStudent = placementTestGroupResults.Where(x => x.CompletionLevel.HasValue && x.CompletionLevel.Value.GetCourseLevelByPlacementTestLevel() == item).Count()
                 });
             }
         }

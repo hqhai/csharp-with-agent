@@ -16,5 +16,6 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.QueryModels
         public EnumCompletionStatus? Status { get; set; }
         public EnumLearningStatus? LearningStatus { get; set; }
         public EnumCourseType? CourseType { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
     }
 }

@@ -6,8 +6,6 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Helpers;
-    using Fsel.System.Application.Services.CourseServices;
-    using Fsel.System.Application.Services.CourseServices.QueryModels.ManagerReports;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.System.Domain.Models.QueryModels.ManagerReports;
@@ -24,18 +22,15 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly IFeatureAccessTimeRepository _featureAccessTimeRepository;
-        private readonly ICourseService _courseService;
 
         public SearchReportAssiduityQueryHandler(
             IMediator mediator,
             IMapper mapper,
-            IFeatureAccessTimeRepository featureAccessTimeRepository,
-            ICourseService courseService)
+            IFeatureAccessTimeRepository featureAccessTimeRepository)
         {
             _mediator = mediator;
             _mapper = mapper;
             _featureAccessTimeRepository = featureAccessTimeRepository;
-            _courseService = courseService;
         }
 
         public async Task<MethodResult<SearchReportStudentAssiduityModel>> Handle(SearchReportAssiduityQuery request, CancellationToken cancellationToken)
@@ -97,17 +92,10 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
             }, cancellationToken);
             var reportStudentAssiduity = _mapper.Map<SearchReportStudentAssiduityModel>(dataOverallResult.Result);
             var studentIds = students.Select(x => x.Id).ToList();
-            var courseStudentResults = await _courseService.GetCourseResultToStudentIdsAsync(new GetCourseResultsToStudentIdsQueryModel
-            {
-                StudentIds = studentIds,
-            });
-            var courseResults = courseStudentResults.Content?.Result;
-
             var datas = new List<StudentAssiduityModel>();
             students.ForEach(student =>
             {
                 var userId = student.UserId ?? default;
-                var courseResult = courseResults?.FirstOrDefault(x => x.StudentId == student.Id);
                 var overallFeatureAccessTime = overallFeatureAccessTimes.FirstOrDefault(x => x.UserId == userId);
                 var studentAssiduity = new StudentAssiduityModel
                 {
@@ -118,7 +106,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                     SchoolGrade = student.SchoolGrade,
                     CourseLevel = student.CourseLevel,
                     ExpiredDate = student.ExpiredDate,
-                    ProcessDate = courseResult?.ProcessDate
+                    ProcessDate = student.CreatedDate
                 };
                 _mapper.Map(overallFeatureAccessTime, studentAssiduity);
                 datas.Add(studentAssiduity);

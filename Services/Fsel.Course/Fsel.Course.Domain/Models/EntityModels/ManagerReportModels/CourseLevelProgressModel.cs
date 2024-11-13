@@ -7,6 +7,15 @@ namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
     public class CourseLevelProgressModel
     {
         public EnumCourseLevel CourseLevel { get; set; }
-        public int TotalCount { get; set; }
+        public int TotalStudent { get; set; }
+        public IList<OverallTestResultModel>? OverallTestResults { get; set; }
+    }
+
+    public class OverallTestResultModel
+    {
+        public string? Type { get; set; }
+        public int Index { get; set; }
+        public double Score { get; set; }
+        public int TotalStudent { get; set; }
     }
 }

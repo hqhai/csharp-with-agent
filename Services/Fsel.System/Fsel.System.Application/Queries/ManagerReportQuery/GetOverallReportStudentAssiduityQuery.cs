@@ -84,9 +84,12 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
 
         private async Task<(double, double)> GetOverallFeatureAccessTimes(GetFeatureAccessTimesQueryModel queryModel)
         {
-            var courseIds = queryModel.FeatureAccessTimes.Select(x => x.CourseId).ToList();
+            var courseIds = queryModel.FeatureAccessTimes.Where(x => x.CourseId.HasValue).Select(x => x.CourseId).Distinct().ToList();
             var userIds = queryModel.FeatureAccessTimes.Select(x => x.UserId).ToList();
-            var query = _featureAccessTimeRepository.Queryable.Where(x => courseIds.Contains(x.CourseId) && userIds.Contains(x.CreatedUserId));
+            var datas = queryModel.FeatureAccessTimes.Where(x => x.CourseId.HasValue).Select(x => new { CourseId = x.CourseId, UserId = x.UserId }).ToList();
+
+            var query = _featureAccessTimeRepository.Queryable.Where(x => x.CourseId.HasValue && courseIds.Contains(x.CourseId.Value) && userIds.Contains(x.CreatedUserId))
+                                                              .Where(x => x.EnumFeature != Shared.Enums.EnumFeature.Other);
             if (queryModel.StartDate.HasValue)
             {
                 query = query.Where(x => queryModel.StartDate.Value.Date <= (x.UpdatedDate ?? x.CreatedDate).Date);
@@ -95,12 +98,25 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
             {
                 query = query.Where(x => queryModel.EndDate.Value.Date >= (x.UpdatedDate ?? x.CreatedDate).Date);
             }
-            var overall = await query.GroupBy(x => new { x.CourseId, x.CreatedUserId })
+            var featureAccessTimes = await query.Select(x => new
+            {
+                CourseId = x.CourseId,
+                UserId = x.CreatedUserId,
+                AccessTime = x.AccessTime,
+                Visit = x.Visit,
+            }).ToListAsync();
+
+            var overall = featureAccessTimes.Join(
+                                     datas,
+                                     featureAccessTime => new { featureAccessTime.CourseId, featureAccessTime.UserId },
+                                     student => new { student.CourseId, student.UserId },
+                                     (featureAccessTime, student) => featureAccessTime)
+                                     .GroupBy(x => new { x.CourseId, x.UserId })
                                      .Select(x => new
                                      {
                                          AccessTime = x.Sum(x => x.AccessTime),
                                          Visit = x.Sum(x => x.Visit),
-                                     }).ToListAsync();
+                                     }).ToList();
             if (!overall.Any())
             {
                 return (default, default);

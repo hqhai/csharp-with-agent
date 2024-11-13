@@ -14,6 +14,7 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<BandScores, BandScoresReport>().IgnoreAllNonExisting();
             CreateMap<OverallReportPlacementTestModel, SearchReportPlacementTestModel>().IgnoreAllNonExisting();
             CreateMap<OverallReportLearningProgressModel, SearchReportLearningProgressModel>().IgnoreAllNonExisting();
+            CreateMap<OverallReportLearningResultModel, SearchReportLearningResultModel>().IgnoreAllNonExisting();
         }
     }
 }

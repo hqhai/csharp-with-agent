@@ -72,8 +72,7 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
             using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.ManagerReportStudentAssiduityExcel)))
             {
                 var excelWorksheet = excelPackage.Workbook.Worksheets[0];
-                excelWorksheet.Cells["N2"].Value = GetData(excelWorksheet.Cells["N2"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
-                excelWorksheet.Cells["E2"].Value = GetData(excelWorksheet.Cells["E2"].Value, schoolName);
+                excelWorksheet.Cells["M2"].Value = GetData(excelWorksheet.Cells["M2"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
                 excelWorksheet.Cells["G2"].Value = GetData(excelWorksheet.Cells["G2"].Value, request.CourseType.HasValue ? request.CourseType.Value : string.Empty);
                 excelWorksheet.Cells["H2"].Value = GetData(excelWorksheet.Cells["H2"].Value, request.LearningStatus.HasValue ? request.LearningStatus.Value.GetDescription() : null);
                 excelWorksheet.Cells["I2"].Value = GetData(excelWorksheet.Cells["I2"].Value, request.SchoolGrade);
@@ -81,6 +80,7 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
                 excelWorksheet.Cells["K2"].Value = GetData(excelWorksheet.Cells["K2"].Value, request.StartDate.HasValue ? request.StartDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
                 excelWorksheet.Cells["L2"].Value = GetData(excelWorksheet.Cells["L2"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
 
+                excelWorksheet.Cells["E2"].Value = schoolName;
                 excelWorksheet.Cells["E3"].Value = overallReport?.TotalStudent ?? default;
                 excelWorksheet.Cells["E4"].Value = overallReport?.TotalAvgProgressTime ?? default;
                 excelWorksheet.Cells["E5"].Value = overallReport?.TotalAvgVisit ?? default;

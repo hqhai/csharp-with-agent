@@ -17,6 +17,7 @@ namespace Fsel.System.Api.Controllers.Admins
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/manager-report/admin")]
+    [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool) })]
     [ApiController]
     public class ManagerReportController : ControllerBase
     {
@@ -33,7 +34,6 @@ namespace Fsel.System.Api.Controllers.Admins
         [HttpGet("search-report-student-assiduity")]
         [ProducesResponseType(typeof(MethodResult<SearchReportAssiduityQueryModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool) })]
         public async Task<IActionResult> Get([FromQuery] SearchReportAssiduityQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -46,7 +46,6 @@ namespace Fsel.System.Api.Controllers.Admins
         [HttpGet("export-report-student-assiduity")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool) })]
         public async Task<IActionResult> Get([FromQuery] ExportFileExcelReportStudentAssiduityCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);

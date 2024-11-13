@@ -132,6 +132,11 @@ namespace Fsel.Shared.Constants
         {
             public const int ProgressAcademic = 217;
             public const int ProgressIELTS = 106;
+            public const int CountUnitAca = 12;
+            public const int CountUnitIELTS = 8;
+            public const int CountFullMockTest = 2;
+            public const int CountFinalTest = 2;
+            public const int MockTestPosition = 5;
         }
     }
 }
