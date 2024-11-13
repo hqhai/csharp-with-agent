@@ -95,18 +95,22 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                         }
                     };
                     @class = _classRepository.Add(newClass);
+                    await _classRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
                     if (!await _classStudentRepository.Queryable.AnyAsync(p => p.ClassId == @class.Id && p.StudentId == student.Id))
                     {
-                        @class.ClassStudents.Add(new ClassStudent() { StudentId = student.Id, IsActive = true });
+                        _classStudentRepository.Add(new ClassStudent() { ClassId = @class.Id, StudentId = student.Id, IsActive = true });
+                        await _classStudentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     }
-                    @class.Status = EnumClassStatus.Active;
-                    _classRepository.Update(@class);
+                    if (@class.Status != EnumClassStatus.Active)
+                    {
+                        @class.Status = EnumClassStatus.Active;
+                        _classRepository.Update(@class);
+                        await _classRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    }
                 }
-
-                await _classRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 var updateStudentResult = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel
                 {
