@@ -33,14 +33,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                 FeatureAccessTimeModel? featureAccessTime;
                 var userId = request.UserId == Guid.Empty ? item.UserId : request.UserId;
                 var query = _featureAccessTimeRepository.Queryable.Where(x => x.CreatedUserId == userId && (!item.CourseId.HasValue || x.CourseId == item.CourseId) && x.ObjectId.HasValue);
-                if (request.StartDate.HasValue)
-                {
-                    query = query.Where(x => request.StartDate.Value.Date <= (x.UpdatedDate ?? x.CreatedDate).Date);
-                }
-                if (request.EndDate.HasValue)
-                {
-                    query = query.Where(x => request.EndDate.Value.Date >= (x.UpdatedDate ?? x.CreatedDate).Date);
-                }
+
                 if (item.UnitId.HasValue)
                 {
                     query = query.Where(x => x.UnitId == item.UnitId);
