@@ -113,6 +113,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
             var mockTestResults = await _mockTestResultRepository.Queryable
                                           .Where(x => studentIds.Contains(x.StudentId) && courseIds.Contains(x.CourseId) && x.Status == EnumResultStatus.Done)
+                                          .Where(x => !x.UnitId.HasValue)
                                           .ToListAsync(cancellationToken);
             var finalTestResults = await _finalTestResultRepository.Queryable
                                           .Where(x => studentIds.Contains(x.StudentId) && courseIds.Contains(x.CourseId) && x.Status == EnumResultStatus.Done)

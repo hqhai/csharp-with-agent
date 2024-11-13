@@ -135,7 +135,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     {
                         Index = i,
                         TotalStudent = resultScores.Count,
-                        Score = !resultScores.Any() ? ValueDefault : resultScores.Average(),
+                        Score = !resultScores.Any() ? ValueDefault : NumberHelper.RoundNumberDouble(resultScores.Average()),
                         Type = nameof(MockTest)
                     };
                 });
@@ -201,6 +201,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     TotalStudent = finalTestResults.Count,
                     Type = nameof(FinalTest)
                 });
+                overallReport.OverallAvgPercentFinal = !finalTestResults.Any() ? ValueDefault : NumberHelper.ConvertRound(finalTestResults.Average(x => x.Percent));
             }
 
             overallModules.AddRange(unitModules);

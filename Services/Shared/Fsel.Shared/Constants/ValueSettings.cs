@@ -137,6 +137,7 @@ namespace Fsel.Shared.Constants
             public const int CountFullMockTest = 2;
             public const int CountFinalTest = 2;
             public const int MockTestPosition = 5;
+            public const int SkillFullMocKTest = 4;
         }
     }
 }

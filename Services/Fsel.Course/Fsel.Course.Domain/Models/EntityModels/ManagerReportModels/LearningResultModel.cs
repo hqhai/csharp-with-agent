@@ -26,6 +26,15 @@ namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
         public IList<OverallModuleReportModel> OverallModules { get; set; } = new List<OverallModuleReportModel>();
         public DateTime? ProcessDate { get; set; }
         public EnumLearningStatus Status { get; set; }
+
+        public string? StatusStr
+        {
+            get
+            {
+                return Status.GetDescription();
+            }
+        }
+
         public DateTime? ExpiredDate { get; set; }
     }
 }

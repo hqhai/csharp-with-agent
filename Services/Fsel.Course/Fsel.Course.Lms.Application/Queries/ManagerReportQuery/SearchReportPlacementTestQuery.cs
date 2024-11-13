@@ -94,18 +94,17 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var studentIds = students.Select(x => x.Id).ToList();
-            var lists = await _placementTestGroupResultRepository.Queryable.Where(x => studentIds != null && studentIds.Any(y => y == x.StudentId)).ToListAsync(cancellationToken);
+            var lists = await _placementTestGroupResultRepository.Queryable.Where(x => studentIds.Any(y => y == x.StudentId)).ToListAsync(cancellationToken);
 
-            var data = new List<PlacementTestReportModel>();
             var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => studentIds.Contains(x.StudentId))
                 .GroupBy(x => x.StudentId)
                 .Select(x => x.Select(x => x).OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
                 .ToListAsync(cancellationToken);
 
-            foreach (var item in students)
+            var datas = students.Select(item =>
             {
                 var placementTestGroupResult = lists.FirstOrDefault(x => x.StudentId == item.Id);
-                var placementTestResult = placementTestResults.FirstOrDefault(x => x.StudentId == item.Id);
+                var placementTestResult = placementTestResults.FirstOrDefault(x => x != null && x.StudentId == item.Id);
                 var placementTestReport = new PlacementTestReportModel
                 {
                     Birthday = item.BirthDay,
@@ -123,11 +122,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     placementTestReport.ChooseLevel = placementTestGroupResult.ChooseLevel;
                     placementTestReport.CurrentLevel = placementTestGroupResult.CompletionLevel.HasValue ? placementTestGroupResult.CompletionLevel.Value.GetCourseLevelByPlacementTestLevel() : null;
                 }
+                return placementTestReport;
+            }).ToList();
 
-                data.Add(placementTestReport);
-            }
-
-            reportPlacementTest.PagingItems = new PagingItemsModel<PlacementTestReportModel>(data, request, reportPlacementTest.TotalStudent);
+            reportPlacementTest.PagingItems = new PagingItemsModel<PlacementTestReportModel>(datas, request, reportPlacementTest.TotalStudent);
             methodResult.Result = reportPlacementTest;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

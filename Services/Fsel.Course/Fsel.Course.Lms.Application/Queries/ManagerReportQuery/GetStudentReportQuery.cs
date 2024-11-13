@@ -77,7 +77,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     studentPtIds = studentPtGroups.ToList();
                     searchQuery.Status = request.Status;
                     searchQuery.IsCheckDate = isCheckDate;
-
                     break;
 
                 case EnumManagerReportType.ReportLearningProgress:

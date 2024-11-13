@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
@@ -13,7 +12,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class GetOverallReportLearningProgressQuery : SearchReportLearningProgressQueryModel, IRequest<MethodResult<OverallReportLearningProgressModel>>
     {
@@ -22,13 +20,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     public class GetOverallReportLearningProgressQueryHandler : IRequestHandler<GetOverallReportLearningProgressQuery, MethodResult<OverallReportLearningProgressModel>>
     {
         private readonly IMediator _mediator;
-        private readonly ICourseResultRepository _courseResultRepository;
         private readonly ManagerProgressHelper _managerProgressHelper;
 
-        public GetOverallReportLearningProgressQueryHandler(IMediator mediator, ICourseResultRepository courseResultRepository, ManagerProgressHelper managerProgressHelper)
+        public GetOverallReportLearningProgressQueryHandler(IMediator mediator, ManagerProgressHelper managerProgressHelper)
         {
             _mediator = mediator;
-            _courseResultRepository = courseResultRepository;
             _managerProgressHelper = managerProgressHelper;
         }
 
@@ -86,7 +82,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             }
             var countProgress = averageProgress.Any() ? NumberHelper.ConvertRound(averageProgress.Average(x => x.Item1)) : default;
             var totalProgress = averageProgress.Any() ? NumberHelper.ConvertRound(averageProgress.Average(x => x.Item2)) : request.CourseType.GetTotalProgress();
-            overallReport.ContentAverageProgress = string.Format("{0}/{1}", countProgress, totalProgress);
+            overallReport.ContentAverageProgress = $"{countProgress} / {totalProgress}";
         }
 
         private static void GetTotalCourseLevel(OverallReportLearningProgressModel overallReportLearningProgress, EnumCourseType courseType, IList<StudentDtoModel>? studentDtos)

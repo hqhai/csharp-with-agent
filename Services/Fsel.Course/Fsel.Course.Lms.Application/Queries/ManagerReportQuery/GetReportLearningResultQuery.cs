@@ -17,11 +17,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using Microsoft.EntityFrameworkCore;
     using static Fsel.Shared.Constants.ValueSettings;
 
-    public class GetReportLearningResultQuery : SearchReportLearningResultQueryModel, IRequest<MethodResult<IList<LearningResultModel>>>
+    public class GetReportLearningResultQuery : SearchReportLearningResultQueryModel, IRequest<MethodResult<IList<LearningResultReportModel>>>
     {
     }
 
-    public class GetReportLearningResultQueryHandler : IRequestHandler<GetReportLearningResultQuery, MethodResult<IList<LearningResultModel>>>
+    public class GetReportLearningResultQueryHandler : IRequestHandler<GetReportLearningResultQuery, MethodResult<IList<LearningResultReportModel>>>
     {
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
@@ -50,11 +50,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             _finalTestResultRepository = finalTestResultRepository;
         }
 
-        public async Task<MethodResult<IList<LearningResultModel>>> Handle(GetReportLearningResultQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<LearningResultReportModel>>> Handle(GetReportLearningResultQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<IList<LearningResultModel>>();
-            var datas = new List<LearningResultModel>();
+            var methodResult = new MethodResult<IList<LearningResultReportModel>>();
+            var datas = new List<LearningResultReportModel>();
 
             var userResults = await _mediator.Send(new GetStudentReportQuery
             {
@@ -71,8 +71,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 Page = request.Page,
                 CourseLevel = request.CourseLevel,
                 CourseType = request.CourseType,
-                ManagerReportType = EnumManagerReportType.ReportLearningResults,
-                IsSearchReport = true
+                ManagerReportType = EnumManagerReportType.ReportLearningResults
             }, cancellationToken);
 
             if (!userResults.IsOK)
@@ -87,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var studentIds = students.Select(x => x.Id).ToList();
-            var courseIds = students.Select(x => x.CourseId).ToList();
+            var courseIds = students.Select(x => x.CourseId).Distinct().ToList();
             var dataStudent = students.Select(x => new { StudentId = x.Id, CourseId = x.CourseId.GetValueOrDefault() }).ToList();
 
             var unitResults = await _unitResultRepository.Queryable
@@ -104,7 +103,9 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                                 CourseUnitResults = x.OrderBy(x => x.CreatedDate).Select((y, index) => new
                                                 {
                                                     Percent = y.Percent,
-                                                    Index = index + 1
+                                                    Index = index + 1,
+                                                    UnitId = y.UnitId,
+                                                    CourseId = y.CourseId
                                                 })
                                             }).ToList();
 
@@ -115,24 +116,26 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             var mockTestGroupResults = mockTestResults.Join(dataStudent,
                                             mockTestResult => new { mockTestResult.CourseId, mockTestResult.StudentId },
                                             student => new { student.CourseId, student.StudentId },
-                                            (unitResult, student) => unitResult)
+                                            (mockTestResult, student) => mockTestResult)
                                           .GroupBy(x => x.StudentId)
                                           .Select(x => new
                                           {
                                               StudentId = x.Key,
-                                              MockTestResults = x.OrderBy(x => x.CreatedDate).Select((y, index) => new
+                                              MockTestResults = x.Where(x => !x.UnitId.HasValue).OrderBy(x => x.CreatedDate).Select((y, index) => new
                                               {
                                                   Index = index + 1,
                                                   MockTestResult = y
                                               }).ToList(),
+                                              SkillMockTestResults = x.Where(x => x.UnitId.HasValue).OrderBy(x => x.CreatedDate).ToList(),
                                           }).ToList();
+
             var finalTestResults = await _finalTestResultRepository.Queryable
                                           .Where(x => studentIds.Contains(x.StudentId) && courseIds.Contains(x.CourseId) && x.Status == EnumResultStatus.Done)
                                           .ToListAsync(cancellationToken);
             var finalTestGroupResults = finalTestResults.Join(dataStudent,
-                                                      unitResult => new { unitResult.CourseId, unitResult.StudentId },
+                                                      finalTest => new { finalTest.CourseId, finalTest.StudentId },
                                                       student => new { student.CourseId, student.StudentId },
-                                                      (unitResult, student) => unitResult)
+                                                      (finalTest, student) => finalTest)
                                                     .Select(x => new
                                                     {
                                                         StudentId = x.StudentId,
@@ -146,24 +149,37 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             {
                 var unitGroupResult = unitGroupResults.FirstOrDefault(x => x.StudentId == item.Id);
                 var result = mockTestGroupResults.FirstOrDefault(x => x.StudentId == item.Id);
-                var overallModuleReports = new List<OverallModuleReportModel>();
+                var overallModuleReports = new List<OverallModuleReportSkillModel>();
 
                 for (int i = 1; i <= countUnit; i++)
                 {
-                    var unit = unitGroupResult?.CourseUnitResults.FirstOrDefault(x => x.Index == i);
-                    overallModuleReports.Add(new OverallModuleReportModel
+                    var unitResult = unitGroupResult?.CourseUnitResults.FirstOrDefault(x => x.Index == i);
+                    overallModuleReports.Add(new OverallModuleReportSkillModel
                     {
                         Index = i,
                         DisplayOrder = request.CourseType == EnumCourseType.Ielts && i == CourseProgressValue.MockTestPosition ? i + 1 : i,
-                        Percent = unit?.Percent,
+                        Percent = unitResult?.Percent,
                         Type = nameof(Domain.Entities.Unit)
                     });
+                    if (request.CourseType == EnumCourseType.Ielts)
+                    {
+                        var skillMocklTest = result?.SkillMockTestResults.FirstOrDefault(x => x.UnitId == unitResult?.UnitId && x.CourseId == unitResult?.CourseId);
+                        var skillScores = skillMocklTest?.SkillScores;
+
+                        overallModuleReports.Add(new OverallModuleReportSkillModel
+                        {
+                            Index = i,
+                            DisplayOrder = i == CourseProgressValue.MockTestPosition ? i + 1 : i,
+                            Score = skillScores != null && skillScores.Any() ? NumberHelper.RoundNumberDouble(skillScores.Average(x => x.Scores)) : null,
+                            Type = nameof(EnumMockTestType.SkillMockTest)
+                        });
+                    }
                 }
                 if (request.CourseType == EnumCourseType.Academic)
                 {
                     var finalTestResult = finalTestGroupResults.FirstOrDefault(x => x.StudentId == item.Id);
                     int displayOrder = overallModuleReports.Count + 1;
-                    overallModuleReports.Add(new OverallModuleReportModel
+                    overallModuleReports.Add(new OverallModuleReportSkillModel
                     {
                         Index = displayOrder,
                         DisplayOrder = displayOrder,
@@ -177,16 +193,17 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     {
                         var mockTestResult = result?.MockTestResults.FirstOrDefault(x => x.Index == i);
                         var skillScores = mockTestResult?.MockTestResult.SkillScores;
-                        overallModuleReports.Add(new OverallModuleReportModel
+                        overallModuleReports.Add(new OverallModuleReportSkillModel
                         {
                             Index = mockTestResult?.Index ?? i,
                             DisplayOrder = CourseProgressValue.MockTestPosition * i,
                             Score = skillScores != null && skillScores.Any() ? NumberHelper.RoundNumberDouble(skillScores.Average(x => x.Scores)) : null,
-                            Type = nameof(MockTest)
+                            Type = nameof(EnumMockTestType.FullMockTest),
+                            SkillScores = skillScores
                         });
                     }
                 }
-                var learningResult = new LearningResultModel
+                var learningResult = new LearningResultReportModel
                 {
                     Email = item.Email,
                     FullName = item.FullName,
@@ -198,7 +215,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     ProcessDate = item.CreatedDate,
                     ExpiredDate = item.ExpiredDate,
                     OverallPercent = unitGroupResult != null && unitGroupResult.CourseUnitResults.Any() ? NumberHelper.ConvertRound(unitGroupResult.CourseUnitResults.Average(x => x.Percent)) : ValueDefault,
-                    OverallModules = overallModuleReports.OrderBy(x => x.DisplayOrder).ToList(),
+                    OverallModuleReports = overallModuleReports.OrderBy(x => x.DisplayOrder).ToList(),
                 };
                 datas.Add(learningResult);
             }

@@ -27,7 +27,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
         public string? UnitName { get; set; }
         public string? LessonName { get; set; }
 
-        public string? StatusDescription
+        public string? StatusStr
         {
             get
             {

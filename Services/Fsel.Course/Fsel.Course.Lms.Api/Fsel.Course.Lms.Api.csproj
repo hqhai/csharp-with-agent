@@ -65,6 +65,12 @@
     <None Update="Resources\MailTemplates\UnitNumber.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\ManagerReports\BaoCaoKetQuaHocTapAca.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\ManagerReports\BaoCaoKetQuaHocTapIELTS.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\ManagerReports\BaoCaoPlacmentTest.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

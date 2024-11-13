@@ -2,10 +2,13 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
 {
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
+
     public class OverallReportLearningResultModel
     {
         public long TotalStudent { get; set; }
         public double OverallAvgPercent { get; set; }
+        public double OverallAvgPercentFinal { get; set; }
         public IList<CourseLevelProgressModel>? CourseLevelProgresses { get; set; }
         public IList<OverallModuleReportModel>? OverallModules { get; set; }
     }
@@ -18,5 +21,10 @@ namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
         public double? Percent { get; set; }
         public double? Score { get; set; }
         public long? TotalStudent { get; set; }
+    }
+
+    public class OverallModuleReportSkillModel : OverallModuleReportModel
+    {
+        public IList<SkillScores>? SkillScores { get; set; }
     }
 }

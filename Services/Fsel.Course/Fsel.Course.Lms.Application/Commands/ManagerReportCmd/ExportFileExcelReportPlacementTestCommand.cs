@@ -103,7 +103,7 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
         private static void FillSearchKeyData(ExcelWorksheet excelWorksheet, ExportFileExcelReportPlacementTestCommand request)
         {
             excelWorksheet.Cells["K1"].Value = GetData(excelWorksheet.Cells["K1"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
-            excelWorksheet.Cells["E3"].Value = GetData(excelWorksheet.Cells["E3"].Value, request.Status.HasValue ? request.Status.Value.GetDescription() : string.Empty);
+            excelWorksheet.Cells["E3"].Value = GetData(excelWorksheet.Cells["E3"].Value, request.Status?.GetDescription());
             excelWorksheet.Cells["F3"].Value = GetData(excelWorksheet.Cells["F3"].Value, request.SchoolGrade);
             excelWorksheet.Cells["G3"].Value = GetData(excelWorksheet.Cells["G3"].Value, request.SchoolClass);
             excelWorksheet.Cells["H3"].Value = GetData(excelWorksheet.Cells["H3"].Value, request.CurrentLevel);
