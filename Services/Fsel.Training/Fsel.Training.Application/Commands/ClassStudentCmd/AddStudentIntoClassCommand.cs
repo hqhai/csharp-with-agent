@@ -76,60 +76,56 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
             }
             var @class = await _classRepository.Queryable.FirstOrDefaultAsync(p => p.CourseId == request.CourseId, cancellationToken);
 
-            await _classRepository.ExecuteTransactionAsync(async () =>
+            if (@class == null)
             {
-                if (@class == null)
+                var codeResult = await _mediator.Send(new GetNewClassCodeQuery { Code = course.Code, CourseLevel = course.CourseLevel }, cancellationToken).ConfigureAwait(false);
+                var code = codeResult.Result;
+                var newClass = new Class
                 {
-                    var codeResult = await _mediator.Send(new GetNewClassCodeQuery { Code = course.Code, CourseLevel = course.CourseLevel }, cancellationToken).ConfigureAwait(false);
-                    var code = codeResult.Result;
-                    var newClass = new Class
-                    {
-                        Code = code,
-                        Name = code,
-                        CourseId = request.CourseId,
-                        Status = EnumClassStatus.Active,
-                        PackageId = request.PackageId ?? default,
-                        ClassStudents = new List<ClassStudent>()
+                    Code = code,
+                    Name = code,
+                    CourseId = request.CourseId,
+                    Status = EnumClassStatus.Active,
+                    PackageId = request.PackageId ?? default,
+                    ClassStudents = new List<ClassStudent>()
                         {
                             new ClassStudent() { StudentId = student.Id, IsActive = true }
                         }
-                    };
-                    @class = _classRepository.Add(newClass);
+                };
+                @class = _classRepository.Add(newClass);
+                await _classRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                if (!await _classStudentRepository.Queryable.AnyAsync(p => p.ClassId == @class.Id && p.StudentId == student.Id, cancellationToken))
+                {
+                    _classStudentRepository.Add(new ClassStudent() { ClassId = @class.Id, StudentId = student.Id, IsActive = true });
+                    await _classStudentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                if (@class.Status != EnumClassStatus.Active)
+                {
+                    @class.Status = EnumClassStatus.Active;
+                    _classRepository.Update(@class);
                     await _classRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
-                else
-                {
-                    if (!await _classStudentRepository.Queryable.AnyAsync(p => p.ClassId == @class.Id && p.StudentId == student.Id))
-                    {
-                        _classStudentRepository.Add(new ClassStudent() { ClassId = @class.Id, StudentId = student.Id, IsActive = true });
-                        await _classStudentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                    }
-                    if (@class.Status != EnumClassStatus.Active)
-                    {
-                        @class.Status = EnumClassStatus.Active;
-                        _classRepository.Update(@class);
-                        await _classRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                    }
-                }
+            }
 
-                var updateStudentResult = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel
-                {
-                    StudentId = student.Id,
-                    ClassId = @class.Id,
-                    PackageId = request.PackageId,
-                    CourseLevel = course.CourseLevel,
-                    NumberOfShield = request.NumberOfShield,
-                    CourseId = @class.CourseId
-                });
-                if (!updateStudentResult.IsSuccessStatusCode)
-                {
-                    methodResult.AddError(updateStudentResult.Error);
-                    return methodResult;
-                }
-
-                methodResult.Result = @class.Id;
-                return methodResult;
+            var updateStudentResult = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel
+            {
+                StudentId = student.Id,
+                ClassId = @class.Id,
+                PackageId = request.PackageId,
+                CourseLevel = course.CourseLevel,
+                NumberOfShield = request.NumberOfShield,
+                CourseId = @class.CourseId
             });
+            if (!updateStudentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(updateStudentResult.Error);
+                return methodResult;
+            }
+
+            methodResult.Result = @class.Id;
             return methodResult;
         }
     }
