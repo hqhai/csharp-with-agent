@@ -3,9 +3,10 @@
 namespace Fsel.Course.Lms.Application.Services.SystemService
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
-    using Fsel.Shared.Enums;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -48,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
         [Get("/v1/feature-access-time/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetListFeatureAccessTime([FromQuery] BaseQueryModel model);
 
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
         [Post("/v1/school/get-by-ids")]
         Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolsAsync([Body] IList<Guid>? ids);
 
