@@ -48,6 +48,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<SearchReportLearningProgressModel>();
+            if (request.PageSize > 100)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
             var dataOverallResult = await _mediator.Send(new GetOverallReportLearningProgressQuery
             {
                 Keyword = request.Keyword,

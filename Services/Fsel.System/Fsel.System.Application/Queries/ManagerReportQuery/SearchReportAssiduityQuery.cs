@@ -37,6 +37,11 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<SearchReportStudentAssiduityModel>();
+            if (request.PageSize > 100)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
             var userResults = await _mediator.Send(new GetStudentReportQuery
             {
                 PageSize = request.PageSize,
