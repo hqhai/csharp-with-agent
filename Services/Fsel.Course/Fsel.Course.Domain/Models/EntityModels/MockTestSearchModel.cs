@@ -11,11 +11,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public string? Name { get; set; }
         public bool IsActive { get; set; }
-
         public EnumCourseType CourseType { get; set; }
-
         public EnumMockTestType MockTestType { get; set; }
-
+        public double Version { get; set; }
         public IList<EnumCourseSkill>? Skills { get; set; }
     }
 }

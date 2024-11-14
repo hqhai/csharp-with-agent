@@ -21,8 +21,8 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<Section, SectionDtoModel>()
                 .ForMember(p => p.Answer, x => x.MapFrom(n => n.MockTestAnswers.Select(x => x.Answer).FirstOrDefault() ?? n.ExtraPracticeAnswers.Select(x => x.Answer).FirstOrDefault() ?? default))
                 .ForMember(p => p.MockTestAnswer, x => x.MapFrom(n => n.MockTestAnswers.FirstOrDefault() ?? default))
-                .ForMember(p => p.QuestionIds, x => x.MapFrom(n => n.SectionQuestions.OrderBy(x => x.CreatedDate).Where(x => x.QuestionId.HasValue).Select(x => x.QuestionId!.Value).ToList()));
-
+                .ForMember(p => p.QuestionIds, x => x.MapFrom(n => n.SectionQuestions.OrderBy(x => x.CreatedDate).Where(x => x.QuestionId.HasValue).Select(x => x.QuestionId!.Value).ToList()))
+                .ForMember(p => p.TotalQuestion, x => x.MapFrom(n => n.SectionQuestions.Where(x => x.Question != null).Sum(x => x.Question!.SubQuestionNumber)));
         }
     }
 }

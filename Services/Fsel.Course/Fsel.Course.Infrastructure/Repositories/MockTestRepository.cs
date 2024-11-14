@@ -52,6 +52,11 @@ namespace Fsel.Course.Infrastructure.Repositories
                                        .ThenInclude(x => x.SectionParts.Where(y => !y.IsDeleted))
                                        .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
                                        .ThenInclude(x => x.Question)
+                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
+                                       .ThenInclude(x => x.SectionGroup)
+                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
+                                       .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
+                                       .ThenInclude(x => x.Question)
                                        .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
                                        .Include(x => x.UnitSkillMockTests.Where(y => !y.IsDeleted))
                                        .OrderBy(x => x!.CreatedDate)
@@ -77,15 +82,20 @@ namespace Fsel.Course.Infrastructure.Repositories
                                        .ThenInclude(x => x.SectionParts.Where(y => !y.IsDeleted))
                                        .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
                                        .ThenInclude(x => x.Question)
+                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
+                                       .ThenInclude(x => x.SectionGroup)
+                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
+                                       .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
+                                       .ThenInclude(x => x.Question)
                                        .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
                                        .Include(x => x.UnitSkillMockTests.Where(y => !y.IsDeleted))
-                                       .OrderBy(x => x!.CreatedDate)
                                        .Where(x => x.Id == id)
                                        .AsNoTracking()
                                        .Select(x => new MockTestModel
                                        {
                                            Id = x.Id,
                                            Name = x.Name,
+                                           Version = x.Version,
                                            CreatedDate = x.CreatedDate,
                                            IsActive = x.UnitSkillMockTests.Any() || x.CourseUnitMockTests.Any(),
                                            MockTestType = x.MockTestType,

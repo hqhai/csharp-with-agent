@@ -31,5 +31,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels
             }
             set { SchoolIdsStr = Common.Helpers.ConvertHelper.Serialize(value); }
         }
+
+        public Guid? LocationId { get; set; }
+        public Guid? ParentEventId { get; set; }
     }
 }

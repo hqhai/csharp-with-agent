@@ -2,8 +2,10 @@
 
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.Managers;
+using Fsel.Identity.Application.Commands.UserDeletionCmd;
 using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
@@ -80,6 +82,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.UserNameAndPasswordIncorrect), new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
                 return methodResult;
             }
+            await _mediator.Send(new UpdateStatusUserDeletionCommand { UserId = user.Id, Status = EnumUserDeletionStatus.Cancel }, cancellationToken).ConfigureAwait(false);
             var generateToken = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
             methodResult = generateToken;
             return methodResult;

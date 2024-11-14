@@ -46,6 +46,20 @@ namespace Fsel.Course.Infrastructure.Common
             return !string.IsNullOrEmpty(data?.ToString());
         }
 
+        public bool IsDuplicateAnswerId(object? data, string? nameProperty = default)
+        {
+            if (data is IList list)
+            {
+                var objects = list.Cast<object>().ToList();
+                if (objects != null && objects.Any())
+                {
+                    return objects.GroupBy(x => x.GetPropValue(nameProperty)).Any(x => x.Count() > 1);
+                }
+                return false;
+            }
+            return !string.IsNullOrEmpty(data?.ToString());
+        }
+
         public bool CheckAnswerCount(object? answer, object? question)
         {
             if (answer is IList listAnswer && question is IList listQuestion)
@@ -55,7 +69,7 @@ namespace Fsel.Course.Infrastructure.Common
             return true;
         }
 
-        public bool? CheckAnswer(IList<string>? words, string? word, int index)
+        public bool? CheckAnswer(IList<string>? words, string? word, int index = default)
         {
             if (words != null && words.Any() && !string.IsNullOrEmpty(word))
             {
@@ -74,6 +88,30 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     return true;
                 }
+            }
+            return false;
+        }
+
+        public bool CheckAnswer(string? content, string? word)
+        {
+            if (string.IsNullOrEmpty(content))
+            {
+                return false;
+            }
+            if (content.IndexOf('|', StringComparison.Ordinal) != -1)
+            {
+                string[] questionWords = content.Split('|');
+                foreach (var item in questionWords)
+                {
+                    if (word.ReplaceWord() == item.ReplaceWord())
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (content.ReplaceWord() == word.ReplaceWord())
+            {
+                return true;
             }
             return false;
         }

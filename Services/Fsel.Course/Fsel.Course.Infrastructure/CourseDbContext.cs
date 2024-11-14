@@ -83,6 +83,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForumDetailResult> ClassForumDetailResults { get; set; }
         public DbSet<MockTestAICriteriaSetting> MockTestAICriteriaSettings { get; set; }
         public DbSet<ProsodyScore> ProsodyScore { get; set; }
+        public DbSet<QuestionExplanationError> QuestionExplanationErrors { get; set; }
+        public DbSet<QuestionExplanationLog> QuestionExplanationLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -154,7 +156,8 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new MockTestAICriteriaSettingTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumDetailResultTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ProsodyScoreEntityTypeConfiguration());
-
+            modelBuilder.ApplyConfiguration(new QuestionExplanationErrorEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestionExplanationLogEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
