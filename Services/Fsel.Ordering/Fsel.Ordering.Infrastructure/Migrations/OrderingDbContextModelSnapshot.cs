@@ -253,6 +253,10 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("CompanyEmail")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
                     b.Property<string>("CompanyName")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -396,6 +400,9 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
@@ -430,6 +437,9 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<Guid?>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("RequestBodyStr")
                         .HasColumnType("nvarchar(max)");
 
@@ -462,6 +472,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
 
                     b.ToTable("OrderTransactions");
                 });
@@ -505,6 +517,9 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("IncentivesWhenPurchasing")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -529,6 +544,13 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.Property<int>("ReferToken")
                         .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasDefaultValue("Active");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -561,7 +583,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             Name = "Fsel_1_Month",
                             Price = 500000m,
                             PriceMonth = 500000m,
-                            ReferToken = 50000
+                            ReferToken = 50000,
+                            Status = "Active"
                         },
                         new
                         {
@@ -575,8 +598,9 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             MonthNumber = 6,
                             Name = "Fsel_6_Months",
                             Price = 2400000m,
-                            PriceMonth = 320000m,
-                            ReferToken = 240000
+                            PriceMonth = 400000m,
+                            ReferToken = 240000,
+                            Status = "Active"
                         },
                         new
                         {
@@ -590,8 +614,25 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             MonthNumber = 12,
                             Name = "Fsel_12_Months",
                             Price = 3600000m,
-                            PriceMonth = 240000m,
-                            ReferToken = 360000
+                            PriceMonth = 300000m,
+                            ReferToken = 360000,
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            Id = new Guid("cbd0a22a-356d-47da-8b42-849a0121361c"),
+                            Code = "PREMIUM",
+                            CreatedDate = new DateTime(2024, 9, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Tặng phí bản quyền của NXB Đại học Cambridge",
+                            IsDeleted = false,
+                            MonthNumber = 24,
+                            Name = "Fsel_24_Months",
+                            Price = 7200000m,
+                            PriceMonth = 300000m,
+                            ReferToken = 720000,
+                            Status = "Active"
                         });
                 });
 
@@ -651,6 +692,11 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<decimal>("PriceMonth")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("SuggestStr")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
@@ -690,6 +736,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             PackageId = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"),
                             Price = 500000m,
                             PriceMonth = 500000m,
+                            Status = "Active",
                             SuggestStr = "null"
                         },
                         new
@@ -705,6 +752,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             PackageId = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"),
                             Price = 2400000m,
                             PriceMonth = 320000m,
+                            Status = "Active",
                             SuggestStr = "[\"BestSeller\"]"
                         },
                         new
@@ -720,6 +768,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             PackageId = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"),
                             Price = 3600000m,
                             PriceMonth = 240000m,
+                            Status = "Active",
                             SuggestStr = "[\"Recommend\"]"
                         });
                 });
@@ -890,7 +939,216 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "fr-FR",
                             PackageId = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb")
+                        },
+                        new
+                        {
+                            Id = new Guid("7d3ea25f-b36e-487c-9d3b-c1a2db1b03cb"),
+                            CreatedDate = new DateTime(2024, 9, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Tặng phí bản quyền của NXB Đại học Cambridge",
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            PackageId = new Guid("cbd0a22a-356d-47da-8b42-849a0121361c")
+                        },
+                        new
+                        {
+                            Id = new Guid("c9d07f5d-dfdb-448d-87c9-97a2a07b8237"),
+                            CreatedDate = new DateTime(2024, 9, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Free copyright fee from Cambridge University Press",
+                            IsDeleted = false,
+                            Language = "en-US",
+                            PackageId = new Guid("cbd0a22a-356d-47da-8b42-849a0121361c")
+                        },
+                        new
+                        {
+                            Id = new Guid("8789802b-84a4-4276-873a-5a4c140cae2c"),
+                            CreatedDate = new DateTime(2024, 9, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Faire don des droits d'auteur des Éditions de l'Université de Cambridge",
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            PackageId = new Guid("cbd0a22a-356d-47da-8b42-849a0121361c")
                         });
+                });
+
+            modelBuilder.Entity("Fsel.Ordering.Domain.Entities.Product", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("DescriptionStr")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EventIdsStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ExpireDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImagesStr")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("MarketPlaceType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Price")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("ShowPriority")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("Fsel.Ordering.Domain.Entities.ProductTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("DescriptionStr")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Language")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductTranslations");
                 });
 
             modelBuilder.Entity("Fsel.Ordering.Domain.Entities.UserReferral", b =>
@@ -1027,6 +1285,71 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.ToTable("UserVouchers");
                 });
 
+            modelBuilder.Entity("Fsel.Ordering.Domain.Entities.UserVoucherLock", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<DateTime?>("ExpiredDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<bool>("IsLockForever")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserVoucherLocks");
+                });
+
             modelBuilder.Entity("Fsel.Ordering.Domain.Entities.Voucher", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1083,6 +1406,18 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("SourceName")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("SourceUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -1217,7 +1552,14 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.ClientCascade);
 
+                    b.HasOne("Fsel.Ordering.Domain.Entities.Product", "Product")
+                        .WithMany("OrderTransactions")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.ClientCascade);
+
                     b.Navigation("Order");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Fsel.Ordering.Domain.Entities.PackageEvent", b =>
@@ -1248,6 +1590,17 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Package");
+                });
+
+            modelBuilder.Entity("Fsel.Ordering.Domain.Entities.ProductTranslation", b =>
+                {
+                    b.HasOne("Fsel.Ordering.Domain.Entities.Product", "Product")
+                        .WithMany("Translations")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Fsel.Ordering.Domain.Entities.UserVoucher", b =>
@@ -1303,6 +1656,13 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Navigation("Translations");
 
                     b.Navigation("VoucherPackages");
+                });
+
+            modelBuilder.Entity("Fsel.Ordering.Domain.Entities.Product", b =>
+                {
+                    b.Navigation("OrderTransactions");
+
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("Fsel.Ordering.Domain.Entities.Voucher", b =>

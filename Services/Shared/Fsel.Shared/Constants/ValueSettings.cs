@@ -11,17 +11,34 @@ namespace Fsel.Shared.Constants
             public const int Random_Daily_QuestBoard = 3; // Lấy ngẫu nhiên 3 nhiệm vụ trong daily questboard
         }
 
+        public const int ValueDefault = 0;
+
         public const int DelayOneMinute = 1;
         public const int DelayThreeMinute = 3;
         public const int DelayTenMinutes = 10;
         public const int DelayTwoHours = 2;
         public const int DelayWorkerSecond = 60;
         public const int AmountTrialDays = 14;
-
+        public const int MaxSendingRateApp = 3;
+        
         public static class AgeMilestone
         {
             public const int ChildrenAge = 13;
             public const int StudentAge = 14;
+        }
+
+        public static class SectionGroupIELST
+        {
+            public const int ExecutionTimeReading = 3600;
+            public const int AdditionalTimeListening = 120;
+
+            public const int MaxSectionSkillWriting = 2;
+            public const int MaxSectionSkillListening = 4;
+            public const int MaxSectionSkillReading = 3;
+
+            public const int MaxScoreSkillListening = 10;
+            public const int MinScoreSkillReading = 13;
+            public const int MaxScoreSkillReading = 14;
         }
 
         public static class CreateAction
@@ -74,7 +91,7 @@ namespace Fsel.Shared.Constants
 
         public static class StudentDailyStreak
         {
-            public const int CheckInGoalTime = 54000;
+            public const int CheckInGoalTime = 900;
         }
 
         public static class CustomerSupport
@@ -95,6 +112,20 @@ namespace Fsel.Shared.Constants
             public const int StreakFourtyTimeCode = 40;
             public const int StreakFourtyFiveTimeCode = 45;
             public const int StreakFiftyTimeCode = 50;
+        }
+
+        public static class ExtendMonth
+        {
+            public const int TwentyFourMonth = 24;
+            public const int TwelveMonth = 12;
+            public const int SixMonth = 6;
+            public const int ThreeMonth = 3;
+        }
+
+        public static class FselRatingValue
+        {
+            public const int DelayDateSendingRate = 5;
+            public const int MoreThanOneDevice = 1;
         }
     }
 }

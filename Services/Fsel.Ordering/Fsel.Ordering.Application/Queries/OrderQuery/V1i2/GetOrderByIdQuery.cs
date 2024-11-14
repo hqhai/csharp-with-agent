@@ -33,7 +33,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OrderModel>();
 
-            var order = await _orderRepository.Queryable.Include(p => p.Package).FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
+            var order = await _orderRepository.Queryable.Include(p => p.Package).Include(p => p.Voucher).FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
             if (order == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(order));

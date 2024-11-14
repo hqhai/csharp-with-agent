@@ -90,7 +90,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             user.Human.Student.SchoolId = request.SchoolId;
             if (request.SchoolId.HasValue)
             {
-                var schoolResults = await _systemService.GetSchoolsAsync(new List<Guid> { request.SchoolId.Value });
+                var schoolResults = await _systemService.GetSchoolByIds(new List<Guid> { request.SchoolId.Value });
                 if (schoolResults.IsSuccessStatusCode)
                 {
                     user.Human.Student.School = schoolResults.Content?.Result?.FirstOrDefault()?.Name;

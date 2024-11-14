@@ -32,11 +32,11 @@ namespace Fsel.Notification.Api.Controllers
         /// Get Notification
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<NotificationMessageModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsNotificationModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetList([FromQuery] GetListNotificationQuery query)
         {
-            MethodResult<PagingItemsModel<NotificationMessageModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<PagingItemsNotificationModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

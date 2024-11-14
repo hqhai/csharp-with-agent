@@ -28,5 +28,11 @@ namespace Fsel.Ordering.Application.Services.UserService
 
         [Put("/v1/student-trial-registration")]
         Task<IApiResponse<MethodResult<StudentRegistrationModel>>> UpdateStudentTrialRegistration([Body] UpdateStudentTrialRegistrationModel command);
+
+        [Get("/v1/student-ranking/get-events-by-user-id")]
+        Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>>>> GetEventByUserId([Query] Guid? userId);
+
+        [Get("/v1/student/get-student-by-email")]
+        Task<IApiResponse<MethodResult<StudentModel?>>> GetStudentByEmail([Query] string email);
     }
 }

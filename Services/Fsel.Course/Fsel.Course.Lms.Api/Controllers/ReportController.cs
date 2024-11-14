@@ -101,5 +101,21 @@ namespace Fsel.Course.Lms.Api.Controllers
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "Export_Student_Progress_IELTS.xlsx");
         }
+
+        /// <summary>
+        /// Expot File ExplanationQuestion
+        /// </summary>
+        [HttpPost("export-file-explanation-question")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportFile([FromQuery] ExportFileReportExplanationLogQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!queryResult.IsOK || queryResult.Result == null)
+            {
+                return queryResult.GetActionResult();
+            }
+            return File(queryResult.Result, Settings.Excels.ContentType, "export_file_explanation_question.xlsx");
+        }
     }
 }

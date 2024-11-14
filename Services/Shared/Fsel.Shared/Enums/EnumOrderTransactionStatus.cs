@@ -4,6 +4,6 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumOrderTransactionStatus
     {
-        Success, Fail
+        Success, Fail, Requested, Received
     }
 }

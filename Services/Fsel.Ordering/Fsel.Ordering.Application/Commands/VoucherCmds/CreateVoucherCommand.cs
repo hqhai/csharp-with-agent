@@ -14,6 +14,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Vouchers;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -62,7 +63,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             }
 
             Voucher voucher = _mapper.Map<Voucher>(request);
-
+            voucher.Source = EnumVoucherSource.Admin;
             request.PackageIds.ForEach(p => voucher.VoucherPackages.Add(new VoucherPackage()
             {
                 PackageId = p
