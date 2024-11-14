@@ -5,17 +5,16 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class SearchReportLearningProgressQuery : SearchReportLearningProgressQueryModel, IRequest<MethodResult<SearchReportLearningProgressModel>>
     {
@@ -98,25 +97,14 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 methodResult.Result = reportLearningProgress;
                 return methodResult;
             }
-            var studentIds = students.Select(x => x.Id).ToList();
-            var query = _courseResultRepository.Queryable.Include(x => x.Course)
-              .Where(x => studentIds.Contains(x.StudentId))
-              .Where(x => !x.IsDeleted && x.WorkingStatus == EnumWorkingStatus.Active)
-              .GroupBy(r => new { r.StudentId, r.CourseId })
-              .Select(group => new CourseResultModel
-              {
-                  StudentId = group.Key.StudentId,
-                  CourseId = group.Key.CourseId,
-                  CourseType = group.Select(x => x.Course).FirstOrDefault(c => c!.Id == group.Key.CourseId)!.CourseType,
-                  CourseLevel = group.Select(x => x.Course).FirstOrDefault(c => c!.Id == group.Key.CourseId)!.CourseLevel,
-                  CreatedDate = group.Max(r => r.CreatedDate),
-                  UpdatedDate = group.Max(r => r.UpdatedDate),
-              });
-
-            var lists = await query.ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
             var datas = new List<LearningProgressModel>();
+
+            var unitCurrentPositions = await _courseRepository.GetDisplayOrder(lists, request.EndDate);
+            var courseCompletes = await _managerProgressHelper.GetProgressCompleteModuleAsync(lists, request.EndDate);
             foreach (var item in students)
             {
+                var unitCurrentPosition = unitCurrentPositions.FirstOrDefault(x => x.StudentId == item.Id);
                 var learningProgress = new LearningProgressModel
                 {
                     Email = item.Email,
@@ -127,12 +115,15 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     Status = item.ExpiredDate > DateTime.UtcNow ? EnumLearningStatus.InProgress : EnumLearningStatus.Expired,
                     CourseLevel = item.CourseLevel,
                 };
-                var courseResult = lists.FirstOrDefault(x => x.StudentId == item.Id) ?? new CourseResultModel { StudentId = item.Id, CourseId = item.CourseId.HasValue ? item.CourseId.Value : default };
-                var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResult, request.EndDate);
-                var (displayOrderUnit, displayOrderLesson) = await _courseRepository.GetDisplayOrder(courseResult, request.EndDate);
-                learningProgress.ContentProgress = $"{currentProgress} / {progress}";
-                learningProgress.UnitName = $"Unit {displayOrderUnit}";
-                learningProgress.LessonName = $"Lesson {displayOrderLesson}";
+                var courseResult = lists.FirstOrDefault(x => x.StudentId == item.Id) ?? new CourseResultModel
+                {
+                    StudentId = item.Id,
+                    CourseId = item.CourseId.GetValueOrDefault()
+                };
+                var courseComplete = courseCompletes.FirstOrDefault(x => x.StudentId == item.Id);
+                learningProgress.ContentProgress = $"{courseComplete?.CountComplete} / {courseComplete?.TotalComplete}";
+                learningProgress.UnitName = $"{nameof(Domain.Entities.Unit)} {unitCurrentPosition?.DisplayUnit}";
+                learningProgress.LessonName = $"{nameof(Lesson)} {unitCurrentPosition?.DisplayLesson}";
                 datas.Add(learningProgress);
             }
 

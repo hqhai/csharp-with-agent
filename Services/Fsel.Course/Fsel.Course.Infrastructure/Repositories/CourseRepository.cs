@@ -2,10 +2,10 @@
 
 using AutoMapper;
 using Fsel.Core.Base;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
-using Fsel.Shared.Enums;
 using Fsel.Shared.Helpers;
 using Microsoft.EntityFrameworkCore;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
@@ -205,6 +205,66 @@ namespace Fsel.Course.Infrastructure.Repositories
                 }
             }
             return (displayOrderUnit, displayOrderLesson);
+        }
+
+        public async Task<List<UnitCurrentPositionModel>> GetDisplayOrder(IList<CourseResultModel>? courseResults, DateTime? arrivalDate = default)
+        {
+            var unitCurrentPositions = new List<UnitCurrentPositionModel>();
+            if (courseResults == null)
+            {
+                return unitCurrentPositions;
+            }
+            var courseIds = courseResults.Select(x => x.CourseId).ToList();
+            var studentIds = courseResults.Select(x => x.StudentId).ToList();
+            var lessonResults = new List<LessonResult>();
+
+            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit).ThenInclude(x => x!.CourseUnitMockTests)
+                 .Where(x => !arrivalDate.HasValue || (x!.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                 .Where(x => x.Status != EnumResultStatus.Unfinished)
+                 .Where(x => courseIds.Contains(x.CourseId) && studentIds.Contains(x.StudentId))
+                 .GroupBy(x => x.StudentId)
+                 .Where(x => x.Any())
+                 .Select(x => x.OrderByDescending(x => x.CreatedDate).ThenByDescending(x => x.UpdatedDate).FirstOrDefault()!)
+                 .ToListAsync();
+            if (unitResults != null)
+            {
+                lessonResults = await _lessonResultRepository.Queryable.Where(x => !arrivalDate.HasValue || (x!.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                                       .Where(x => courseIds.Contains(x.CourseId) && studentIds.Contains(x.StudentId))
+                                       .ToListAsync();
+
+                lessonResults = lessonResults.Join(unitResults,
+                                                 lessonResult => new { lessonResult.CourseId, lessonResult.UnitId, lessonResult.StudentId },
+                                                 unitResult => new { unitResult!.CourseId, unitResult.UnitId, unitResult.StudentId },
+                                                 (lessonResult, unitResult) => lessonResult).ToList();
+            }
+            foreach (var courseResult in courseResults)
+            {
+                var unitCurrentPositionModel = new UnitCurrentPositionModel()
+                {
+                    StudentId = courseResult.StudentId,
+                };
+                var unitResult = unitResults?.FirstOrDefault(x => x.StudentId == courseResult.StudentId);
+                if (unitResult != null)
+                {
+                    unitCurrentPositionModel.DisplayUnit = unitResult.Unit?.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder ?? default;
+                    var lessonUnitResults = lessonResults?.Where(x => x.StudentId == courseResult.StudentId).ToList();
+                    if (lessonUnitResults == null || !lessonUnitResults.Any())
+                    {
+                        unitCurrentPositions.Add(unitCurrentPositionModel);
+                        continue;
+                    }
+                    if (lessonUnitResults.All(x => x.Status == EnumResultStatus.Done))
+                    {
+                        unitCurrentPositionModel.DisplayLesson = lessonUnitResults.Count;
+                    }
+                    else
+                    {
+                        unitCurrentPositionModel.DisplayLesson = lessonUnitResults.Where(x => x.Status == EnumResultStatus.Done).Count() + 1;
+                    }
+                }
+                unitCurrentPositions.Add(unitCurrentPositionModel);
+            }
+            return unitCurrentPositions;
         }
     }
 }

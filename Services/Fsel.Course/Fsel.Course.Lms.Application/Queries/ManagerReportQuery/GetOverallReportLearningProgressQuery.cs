@@ -71,17 +71,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             {
                 return;
             }
-            var averageProgress = new List<(double, double)>();
-            foreach (var student in students)
-            {
-                averageProgress.Add(await _managerProgressHelper.GetCompleteCourseAsync(new CourseResultModel
-                {
-                    CourseId = student.CourseId ?? default,
-                    StudentId = student.Id
-                }, request.EndDate));
-            }
-            var countProgress = averageProgress.Any() ? NumberHelper.ConvertRound(averageProgress.Average(x => x.Item1)) : default;
-            var totalProgress = averageProgress.Any() ? NumberHelper.ConvertRound(averageProgress.Average(x => x.Item2)) : request.CourseType.GetTotalProgress();
+            var courseResults = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
+            var countProgress = await _managerProgressHelper.GetOverallCompleteAsync(courseResults, request.EndDate);
+            var totalProgress = await _managerProgressHelper.GetCourseCompletesAsync(courseResults);
+
             overallReport.ContentAverageProgress = $"{countProgress} / {totalProgress}";
         }
 

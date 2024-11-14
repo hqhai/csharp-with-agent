@@ -17,5 +17,7 @@ namespace Fsel.Course.Domain.IRepositories
         Task<CourseModel?> GetIncludeCourseResult(Guid id, Guid? studentId, string? classCode);
 
         Task<(int, int)> GetDisplayOrder(CourseResultModel courseResult, DateTime? arrivalDate = default);
+
+        Task<List<UnitCurrentPositionModel>> GetDisplayOrder(IList<CourseResultModel>? courseResults, DateTime? arrivalDate = default);
     }
 }

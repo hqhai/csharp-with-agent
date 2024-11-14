@@ -13,7 +13,6 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
-    using static MassTransit.Logging.OperationName;
 
     public class ManagerProgressHelper
     {
@@ -24,11 +23,19 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
         private const int NumberModuleLesson = 3;
         private const int NumberDefaultComplete = 1;
         private const int NumberDefault = 0;
 
-        public ManagerProgressHelper(ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IFinalTestResultRepository finalTestResultRepository, ICourseRepository courseRepository, ICourseResultRepository courseResultRepository, IUnitRepository unitRepository, IMockTestResultRepository mockTestResultRepository)
+        public ManagerProgressHelper(ILessonResultRepository lessonResultRepository,
+            IUnitResultRepository unitResultRepository,
+            IFinalTestResultRepository finalTestResultRepository,
+            ICourseRepository courseRepository,
+            ICourseResultRepository courseResultRepository,
+            IUnitRepository unitRepository,
+            IMockTestResultRepository mockTestResultRepository,
+            ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _lessonResultRepository = lessonResultRepository;
             _unitResultRepository = unitResultRepository;
@@ -37,6 +44,7 @@ namespace Fsel.Course.Infrastructure.Common
             _courseResultRepository = courseResultRepository;
             _unitRepository = unitRepository;
             _mockTestResultRepository = mockTestResultRepository;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
         public async Task<UnitStudentProgressModel?> GetUnitManager(Guid courseId, Guid unitId, Guid? studentId)
@@ -175,6 +183,32 @@ namespace Fsel.Course.Infrastructure.Common
             return (counts.Sum(), totalModules.Sum());
         }
 
+        private class OverallModuleLearnModel
+        {
+            public Guid CourseId { get; set; }
+            public int Count { get; set; }
+        }
+
+        public async Task<int> GetOverallCompleteAsync(IList<CourseResultModel>? courseResults, DateTime? arrivalDate = default)
+        {
+            if (courseResults == null)
+            {
+                return default;
+            }
+            var groups = await GetCourseCompletesAsync(courseResults, arrivalDate);
+            return (int)(groups.Any() ? NumberHelper.ConvertRound(groups.Sum(x => x.CountComplete) / courseResults.Count) : NumberDefault);
+        }
+
+        public async Task<int> GetTotalCompleteCourseAsync(IList<CourseResultModel>? courseResults)
+        {
+            if (courseResults == null)
+            {
+                return default;
+            }
+            var courseGroups = await GetCompleteCourseTotalsAsync(courseResults);
+            return (int)(courseGroups.Any() ? NumberHelper.ConvertRound(courseGroups.Average(x => x.Count)) : NumberDefault);
+        }
+
         public async Task<(int, int)> GetCompleteCourseAsync(CourseResultModel courseResult, DateTime? arrivalDate = default)
         {
             ArgumentNullException.ThrowIfNull(courseResult);
@@ -191,20 +225,162 @@ namespace Fsel.Course.Infrastructure.Common
             }
             if (course.CourseType == EnumCourseType.Academic)
             {
-                var finalTestResult = await _finalTestResultRepository.Queryable.Where(x => !arrivalDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
-                                                                                .FirstOrDefaultAsync(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId);
+                var countDoneFinalTest = await _finalTestResultRepository.Queryable.Where(x => !arrivalDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                                                                                .Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId)
+                                                                                .Where(x => x.Status == EnumResultStatus.Done)
+                                                                                .CountAsync();
 
-                countTests.Add((finalTestResult?.Status == EnumResultStatus.Done ? NumberDefaultComplete : NumberDefault, NumberDefaultComplete));
+                countTests.Add((countDoneFinalTest, NumberDefaultComplete));
             }
             else
             {
-                var mockTestResults = await _mockTestResultRepository.Queryable
+                var mockTestIds = course.CourseUnitMockTests.Where(x => x.MockTestId.HasValue).Select(x => x.MockTestId.GetValueOrDefault()).ToList();
+                var countDoneMockTest = await _mockTestResultRepository.Queryable
                     .Where(x => !arrivalDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
                     .Where(x => x.StudentId == courseResult.StudentId && !x.UnitId.HasValue && x.CourseId == courseResult.CourseId)
-                    .ToListAsync();
-                countTests.Add((mockTestResults.Where(x => x.Status == EnumResultStatus.Done).Count(), mockTestResults.Count));
+                    .Where(x => x.Status == EnumResultStatus.Done)
+                    .CountAsync();
+                countTests.Add((countDoneMockTest, mockTestIds.Count));
             }
             return (countTests.Sum(x => x.Item1), countTests.Sum(x => x.Item2));
+        }
+
+        public async Task<IList<CourseCompleteModel>> GetProgressCompleteModuleAsync(IList<CourseResultModel> courseResults, DateTime? arrivalDate = default)
+        {
+            if (courseResults == null)
+            {
+                return new List<CourseCompleteModel>();
+            }
+            var courseCompleteModules = await GetCourseCompletesAsync(courseResults, arrivalDate);
+            var courseCompleteTotalModules = await GetCompleteCourseTotalsAsync(courseResults);
+            return courseResults.Select(item =>
+            {
+                var courseCompleteModule = courseCompleteModules.FirstOrDefault(x => x.StudentId == item.StudentId && x.CourseId == item.CourseId) ?? new CourseCompleteModel
+                {
+                    StudentId = item.StudentId,
+                    CourseId = item.CourseId,
+                };
+                var courseCompleteTotalModule = courseCompleteTotalModules.FirstOrDefault(x => x.CourseId == item.CourseId);
+                courseCompleteModule.TotalComplete = courseCompleteTotalModule?.Count ?? default;
+                return courseCompleteModule;
+            }).ToList();
+        }
+
+        private async Task<List<OverallModuleLearnModel>> GetCompleteCourseTotalsAsync(IList<CourseResultModel>? courseResults)
+        {
+            if (courseResults == null)
+            {
+                return new List<OverallModuleLearnModel>();
+            }
+            var courseIds = courseResults.Select(x => x.CourseId).Distinct().ToList();
+            var courses = await _courseUnitMockTestRepository.Queryable.Where(x => courseIds.Contains(x.CourseId))
+                                                                      .GroupBy(x => x.CourseId)
+                                                                      .Select(x => new
+                                                                      {
+                                                                          CourseId = x.Key,
+                                                                          CountLesson = x.Where(x => x.UnitId.HasValue).Select(x => x.Unit).SelectMany(x => x.UnitLessons).Count(),
+                                                                          CountSkillMockTest = x.Where(x => x.UnitId.HasValue).Select(x => x.Unit).SelectMany(x => x.UnitSkillMockTests).Count(),
+                                                                          CountMockTest = x.Where(x => x.MockTestId.HasValue).Count(),
+                                                                          CountFinalTest = x.Where(x => x.FinalTestId.HasValue).Count(),
+                                                                      }).ToListAsync();
+            return courseResults.Join(courses,
+                                      courseResult => courseResult.CourseId,
+                                      course => course.CourseId,
+                                      (courseResult, course) => course).Select(x => new OverallModuleLearnModel
+                                      {
+                                          CourseId = x.CourseId,
+                                          Count = x.CountLesson * NumberModuleLesson + x.CountFinalTest + x.CountSkillMockTest + x.CountFinalTest
+                                      }).ToList();
+        }
+
+        public async Task<IList<CourseCompleteModel>> GetCourseCompletesAsync(IList<CourseResultModel> courseResults, DateTime? arrivalDate = default)
+        {
+            var courseIds = courseResults.Select(x => x.CourseId).ToList();
+            var studentIds = courseResults.Select(x => x.StudentId).ToList();
+            var dataStudent = courseResults.Select(x => new { StudentId = x.StudentId, CourseId = x.CourseId }).ToList();
+
+            var lessonGroupResults = await _lessonResultRepository.Queryable
+                                 .Where(x => courseIds.Contains(x.CourseId) && studentIds.Contains(x.StudentId))
+                                 .Where(x => !arrivalDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                                 .AsNoTracking()
+                                 .GroupBy(x => new { x.StudentId, x.CourseId })
+                                 .Select(x => new
+                                 {
+                                     CourseId = x.Key.CourseId,
+                                     StudentId = x.Key.StudentId,
+                                     CountVideo = x.Select(x => x.VideoResult).Where(x => x != null)
+                                                   .Where(x => !arrivalDate.HasValue || (x!.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                                                   .Where(x => x!.Status == EnumResultStatus.Done).Count(),
+                                     CountClassForum = x.SelectMany(x => x.ClassForumResults)
+                                                   .Where(x => !arrivalDate.HasValue || (x!.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                                                   .Where(x => x!.Status.HasValue).Count(),
+                                     CountHomeWork = x.SelectMany(x => x.HomeWorkResults).GroupBy(x => x.LessonResultId)
+                                                   .Select(x => x.Select(x => x).All(x => x.Status == EnumResultStatus.Done) && x.Select(x => x).All(x => !arrivalDate.HasValue || (x!.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date))
+                                                   .Count(),
+                                 }).ToListAsync();
+
+            var mockTestGroupResults = await _mockTestResultRepository.Queryable.Where(x => courseIds.Contains(x.CourseId) && studentIds.Contains(x.StudentId))
+                                  .Where(x => !arrivalDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                                  .Where(x => x.Status == EnumResultStatus.Done)
+                                  .GroupBy(x => new { x.StudentId, x.CourseId })
+                                  .Select(x => new CourseCompleteModel
+                                  {
+                                      StudentId = x.Key.StudentId,
+                                      CourseId = x.Key.CourseId,
+                                      CountComplete = x.Count(),
+                                  }).ToListAsync();
+
+            var finalTestGroupResults = await _finalTestResultRepository.Queryable.Where(x => courseIds.Contains(x.CourseId) && studentIds.Contains(x.StudentId))
+                                 .Where(x => !arrivalDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                                 .Where(x => x.Status == EnumResultStatus.Done)
+                                 .GroupBy(x => new { x.StudentId, x.CourseId })
+                                 .Select(x => new CourseCompleteModel
+                                 {
+                                     StudentId = x.Key.StudentId,
+                                     CourseId = x.Key.CourseId,
+                                     CountComplete = x.Count(),
+                                 })
+                                 .ToListAsync();
+            var finalTestJoinResults = finalTestGroupResults.Join(dataStudent,
+                                                 finalTestResult => new { finalTestResult.CourseId, finalTestResult.StudentId },
+                                                 student => new { student.CourseId, student.StudentId },
+                                                 (finalTestResult, student) => finalTestResult)
+                                                .Select(x => new CourseCompleteModel
+                                                {
+                                                    StudentId = x.StudentId,
+                                                    CourseId = x.CourseId,
+                                                    CountComplete = x.CountComplete
+                                                }).ToList();
+
+            var mockTestJoinResults = mockTestGroupResults.Join(dataStudent,
+                                             mockTestResult => new { mockTestResult.CourseId, mockTestResult.StudentId },
+                                             student => new { student.CourseId, student.StudentId },
+                                             (mockTestResult, student) => mockTestResult)
+                                            .Select(x => new CourseCompleteModel
+                                            {
+                                                StudentId = x.StudentId,
+                                                CourseId = x.CourseId,
+                                                CountComplete = x.CountComplete
+                                            }).ToList();
+            var lessonJoinResults = lessonGroupResults.Join(dataStudent,
+                                            lessonResult => new { lessonResult.CourseId, lessonResult.StudentId },
+                                            student => new { student.CourseId, student.StudentId },
+                                            (lessonResult, student) => lessonResult)
+                                           .Select(x => new CourseCompleteModel
+                                           {
+                                               StudentId = x.StudentId,
+                                               CourseId = x.CourseId,
+                                               CountComplete = x.CountClassForum + x.CountVideo + x.CountHomeWork
+                                           }).ToList();
+            return finalTestJoinResults.Concat(lessonJoinResults).Concat(mockTestJoinResults)
+                                            .GroupBy(x => new { x.StudentId, x.CourseId })
+                                            .Select(x => new CourseCompleteModel
+                                            {
+                                                StudentId = x.Key.StudentId,
+                                                CourseId = x.Key.CourseId,
+                                                CountComplete = x.Sum(x => x.CountComplete)
+                                            })
+                                            .ToList();
         }
     }
 }
