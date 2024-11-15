@@ -4,10 +4,16 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Base.Managers;
     using Fsel.Core.Extensions;
+    using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Identity.Infrastructure.Repositories;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -20,10 +26,12 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     public class SearchStudentsQueryHandler : IRequestHandler<SearchStudentsQuery, MethodResult<PagingItemsModel<StudentSearchAdminModel>>>
     {
         private readonly IStudentRepository _studentRepository;
+        private readonly IUserSchoolRepository _userSchoolRepository;
 
-        public SearchStudentsQueryHandler(IStudentRepository studentRepository)
+        public SearchStudentsQueryHandler(IStudentRepository studentRepository, IUserSchoolRepository userSchoolRepository)
         {
             _studentRepository = studentRepository;
+            _userSchoolRepository = userSchoolRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<StudentSearchAdminModel>>> Handle(SearchStudentsQuery request, CancellationToken cancellationToken)
@@ -35,6 +43,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
+            var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
             var query = _studentRepository.Queryable.Include(x => x.Human).Select(x => new StudentSearchAdminModel
             {
                 Id = x.Id,
@@ -43,7 +52,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 CourseLevel = x.CourseLevel,
                 Email = x.Human.Email,
                 FullName = x.Human.FullName,
-                Type = x.CourseLevel.GetEnumCourseType()
+                Type = x.CourseLevel.GetEnumCourseType(),
+                SchoolId = x.SchoolId
             });
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -57,6 +67,11 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                     query = query.Where(m => m.Id.ToString() == request.Keyword || (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
                 }
             }
+            if (schoolId.HasValue)
+            {
+                query = query.Where(x => x.SchoolId == schoolId.Value);
+            }
+
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
                     .ApplySortAndPaging(request)
