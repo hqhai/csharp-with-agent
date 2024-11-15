@@ -47,6 +47,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
             var voucher = vouchers.First();
             var quantityUsed = vouchers.Where(p => p.Orders.Any()).Count();
             var voucherModel = _mapper.Map<VoucherModel>(voucher);
+            voucherModel.Quantity = vouchers.Count;
             voucherModel.QuantityUsed = quantityUsed;
             voucherModel.RemainingQuantity = voucherModel.Quantity - voucherModel.QuantityUsed;
             var voucherPackages = voucher.VoucherPackages.Where(p => p.Package != null).Select(p => p.Package!).ToList();
