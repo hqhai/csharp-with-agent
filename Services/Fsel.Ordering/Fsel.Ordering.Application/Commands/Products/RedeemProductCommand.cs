@@ -6,6 +6,7 @@ namespace Fsel.Ordering.Application.Commands.Products
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.UserService;
@@ -44,6 +45,12 @@ namespace Fsel.Ordering.Application.Commands.Products
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<string>();
+
+            if (!request.PhoneNumber.IsValidPhoneNumber())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.PhoneNumber), request.PhoneNumber);
+                return methodResult;
+            }
 
             var product = await _productRepository.Queryable.Include(p => p.OrderTransactions).FirstOrDefaultAsync(p => p.Id == request.ProductId, cancellationToken);
             if (product == null)
