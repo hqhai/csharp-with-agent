@@ -124,5 +124,17 @@ namespace Fsel.Course.Lms.Api.Controllers
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Save choose Level PT
+        /// </summary>
+        [HttpPost("choose-level-pt")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SavePlacementTestGroupResult([FromBody] SavePlacementTestGroupResultCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

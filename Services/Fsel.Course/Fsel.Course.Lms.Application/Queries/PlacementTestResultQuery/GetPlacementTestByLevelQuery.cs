@@ -145,6 +145,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                         Level = placementTest.Level,
                         PlacementTestId = placementTest.Id,
                         StudentId = studentId,
+                        Status = EnumResultStatus.New,
                         PlacementTestGroupResultId = placementTestGroupResult.Id
                     };
                     _placementTestResultRepository.Add(placementTestResult);
