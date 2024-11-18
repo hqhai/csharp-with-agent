@@ -4,7 +4,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -163,9 +162,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     });
                     if (request.CourseType == EnumCourseType.Ielts)
                     {
-                        var skillMocklTest = result?.SkillMockTestResults.FirstOrDefault(x => x.UnitId == unitResult?.UnitId && x.CourseId == unitResult?.CourseId);
-                        var skillScores = skillMocklTest?.SkillScores;
-
+                        var skillScores = result?.SkillMockTestResults.FirstOrDefault(x => x.UnitId == unitResult?.UnitId && x.CourseId == unitResult?.CourseId)?.SkillScores;
                         overallModuleReports.Add(new OverallModuleReportSkillModel
                         {
                             Index = i,

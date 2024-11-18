@@ -114,6 +114,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             var courseCompletes = await _managerProgressHelper.GetProgressCompleteModuleAsync(lists, request.EndDate);
             foreach (var item in students)
             {
+                var courseComplete = courseCompletes.FirstOrDefault(x => x.StudentId == item.Id);
                 var learningProgress = new LearningProgressModel
                 {
                     Email = item.Email,
@@ -123,11 +124,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     SchoolName = item.School,
                     Status = item.ExpiredDate > DateTime.UtcNow ? EnumLearningStatus.InProgress : EnumLearningStatus.Expired,
                     CourseLevel = item.CourseLevel,
+                    ContentProgress = $"{courseComplete?.CountComplete} / {courseComplete?.TotalComplete}",
+                    UnitName = $"{nameof(Domain.Entities.Unit)} {courseComplete?.UnitDisplayOrder}",
+                    LessonName = $"{nameof(Lesson)} {courseComplete?.LessonDisplayOrder}",
                 };
-                var courseComplete = courseCompletes.FirstOrDefault(x => x.StudentId == item.Id);
-                learningProgress.ContentProgress = $"{courseComplete?.CountComplete} / {courseComplete?.TotalComplete}";
-                learningProgress.UnitName = $"{nameof(Domain.Entities.Unit)} {courseComplete?.UnitDisplayOrder}";
-                learningProgress.LessonName = $"{nameof(Lesson)} {courseComplete?.LessonDisplayOrder}";
+
                 datas.Add(learningProgress);
             }
 

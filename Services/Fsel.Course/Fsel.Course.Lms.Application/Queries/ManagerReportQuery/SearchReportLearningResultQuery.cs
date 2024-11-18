@@ -175,7 +175,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     overallModuleReports.Add(new OverallModuleReportModel
                     {
                         Index = i,
-                        DisplayOrder = request.CourseType == EnumCourseType.Ielts && i == 5 ? i + 1 : i,
+                        DisplayOrder = request.CourseType == EnumCourseType.Ielts && i == CourseProgressValue.MockTestPosition ? i + 1 : i,
                         Percent = unit?.Percent,
                         Type = nameof(Domain.Entities.Unit)
                     });
@@ -183,10 +183,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 if (request.CourseType == EnumCourseType.Academic)
                 {
                     var finalTestResult = finalTestGroupResults.FirstOrDefault(x => x.StudentId == item.Id);
+                    int displayOrder = overallModuleReports.Count + 1;
                     overallModuleReports.Add(new OverallModuleReportModel
                     {
-                        Index = overallModuleReports.Count + 1,
-                        DisplayOrder = overallModuleReports.Count + 1,
+                        Index = displayOrder,
+                        DisplayOrder = displayOrder,
                         Percent = finalTestResult?.Percent,
                         Type = nameof(FinalTest)
                     });

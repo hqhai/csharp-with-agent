@@ -9,13 +9,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
-    using Nest;
 
     public class GetReportLearningProgressStudentQuery : SearchReportLearningProgressQueryModel, IRequest<MethodResult<IList<LearningProgressModel>>>
     {
@@ -72,7 +69,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             var courseCompletes = await _managerProgressHelper.GetProgressCompleteModuleAsync(lists, request.EndDate);
             methodResult.Result = students.Select(item =>
             {
-                var learningProgress = new LearningProgressModel
+                var courseComplete = courseCompletes.FirstOrDefault(x => x.StudentId == item.Id);
+                return new LearningProgressModel
                 {
                     Email = item.Email,
                     FullName = item.FullName,
@@ -81,17 +79,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     SchoolName = item.School,
                     Status = item.ExpiredDate > DateTime.UtcNow ? EnumLearningStatus.InProgress : EnumLearningStatus.Expired,
                     CourseLevel = item.CourseLevel,
+                    ContentProgress = $"{courseComplete?.CountComplete} / {courseComplete?.TotalComplete}",
+                    UnitName = $"{nameof(Domain.Entities.Unit)} {courseComplete?.UnitDisplayOrder}",
+                    LessonName = $"{nameof(Lesson)} {courseComplete?.LessonDisplayOrder}"
                 };
-                var courseResult = lists.FirstOrDefault(x => x.StudentId == item.Id) ?? new CourseResultModel
-                {
-                    StudentId = item.Id,
-                    CourseId = item.CourseId.GetValueOrDefault()
-                };
-                var courseComplete = courseCompletes.FirstOrDefault(x => x.StudentId == item.Id);
-                learningProgress.ContentProgress = $"{courseComplete?.CountComplete} / {courseComplete?.TotalComplete}";
-                learningProgress.UnitName = $"{nameof(Domain.Entities.Unit)} {courseComplete?.UnitDisplayOrder}";
-                learningProgress.LessonName = $"{nameof(Lesson)} {courseComplete?.LessonDisplayOrder}";
-                return learningProgress;
             }).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
