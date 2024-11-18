@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Nest;
 
     public class GetReportLearningProgressStudentQuery : SearchReportLearningProgressQueryModel, IRequest<MethodResult<IList<LearningProgressModel>>>
     {
@@ -69,12 +70,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             }
             var lists = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
             var courseCompletes = await _managerProgressHelper.GetProgressCompleteModuleAsync(lists, request.EndDate);
-            var unitCurrentPositions = await _courseRepository.GetDisplayOrder(lists, request.EndDate);
-            var datas = new List<LearningProgressModel>();
-
-            foreach (var item in students)
+            methodResult.Result = students.Select(item =>
             {
-                var unitCurrentPosition = unitCurrentPositions.FirstOrDefault(x => x.StudentId == item.Id);
                 var learningProgress = new LearningProgressModel
                 {
                     Email = item.Email,
@@ -92,11 +89,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 };
                 var courseComplete = courseCompletes.FirstOrDefault(x => x.StudentId == item.Id);
                 learningProgress.ContentProgress = $"{courseComplete?.CountComplete} / {courseComplete?.TotalComplete}";
-                learningProgress.UnitName = $"{nameof(Domain.Entities.Unit)} {unitCurrentPosition?.DisplayUnit}";
-                learningProgress.LessonName = $"{nameof(Lesson)} {unitCurrentPosition?.DisplayLesson}";
-                datas.Add(learningProgress);
-            }
-            methodResult.Result = datas;
+                learningProgress.UnitName = $"{nameof(Domain.Entities.Unit)} {courseComplete?.UnitDisplayOrder}";
+                learningProgress.LessonName = $"{nameof(Lesson)} {courseComplete?.LessonDisplayOrder}";
+                return learningProgress;
+            }).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

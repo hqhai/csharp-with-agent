@@ -65,18 +65,6 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         }
 
         /// <summary>
-        /// search
-        /// </summary>
-        [HttpGet("overall-report-learning-progress")]
-        [ProducesResponseType(typeof(MethodResult<OverallReportLearningProgressModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] GetOverallReportLearningProgressQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Overall Report PlacementTest
         /// </summary>
         [HttpGet("export-report-placement-test")]
