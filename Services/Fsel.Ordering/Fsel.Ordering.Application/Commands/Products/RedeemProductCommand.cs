@@ -46,6 +46,12 @@ namespace Fsel.Ordering.Application.Commands.Products
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<string>();
 
+            if (string.IsNullOrEmpty(request.PhoneNumber))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.PhoneNumber), request.PhoneNumber);
+                return methodResult;
+            }
+
             if (!request.PhoneNumber.IsValidPhoneNumber())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.PhoneNumber), request.PhoneNumber);
