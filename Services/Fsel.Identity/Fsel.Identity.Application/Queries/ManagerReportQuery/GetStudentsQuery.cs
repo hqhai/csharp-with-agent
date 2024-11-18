@@ -93,13 +93,13 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             {
                 query = query.Where(x => request.StudentIds != null && request.StudentIds.Any() && request.StudentIds.Contains(x.Id));
             }
+            else if (request.Status.HasValue && request.Status == EnumCompletionStatus.InProgress)
+            {
+                query = query.Where(x => (request.StudentIds != null && request.StudentIds.Any() && request.StudentIds.Contains(x.Id)) || !x.BaseCourseLevel.HasValue);
+            }
             else if (request.StudentIds != null && request.StudentIds.Any())
             {
                 query = query.Where(x => request.StudentIds.Contains(x.Id));
-            }
-            if (request.Status.HasValue && request.Status.Value == EnumCompletionStatus.NotStarted)
-            {
-                query = query.Where(x => !x.BaseCourseLevel.HasValue);
             }
             if (request.CourseType.HasValue)
             {

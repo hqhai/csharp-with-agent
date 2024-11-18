@@ -20,8 +20,21 @@ namespace Fsel.Course.Infrastructure.Repositories
         private readonly IUnitRepository _unitRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IMapper _mapper;
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
+        private readonly IUnitLessonRepository _unitLessonRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
 
-        public CourseRepository(CourseDbContext dbContext, IUnitResultRepository unitResultRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUnitRepository unitRepository, ILessonResultRepository lessonResultRepository, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public CourseRepository(CourseDbContext dbContext,
+            IUnitResultRepository unitResultRepository,
+            IFinalTestResultRepository finalTestResultRepository,
+            IMockTestResultRepository mockTestResultRepository,
+            AuthContext authContext,
+            IUnitRepository unitRepository,
+            ILessonResultRepository lessonResultRepository,
+            IMapper mapper,
+            ICourseUnitMockTestRepository courseUnitMockTestRepository,
+            IUnitLessonRepository unitLessonRepository,
+            ICourseResultRepository courseResultRepository) : base(dbContext, authContext, mapper)
         {
             _unitResultRepository = unitResultRepository;
             _finalTestResultRepository = finalTestResultRepository;
@@ -29,6 +42,9 @@ namespace Fsel.Course.Infrastructure.Repositories
             _unitRepository = unitRepository;
             _lessonResultRepository = lessonResultRepository;
             _mapper = mapper;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
+            _unitLessonRepository = unitLessonRepository;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<bool> IsUnitUsed(Guid id)
@@ -207,6 +223,28 @@ namespace Fsel.Course.Infrastructure.Repositories
             return (displayOrderUnit, displayOrderLesson);
         }
 
+        public async Task<List<UnitCurrentPositionModel>> GetPostionUnit(IList<CourseResultModel>? courseResults)
+        {
+            var unitCurrentPositions = new List<UnitCurrentPositionModel>();
+            if (courseResults == null)
+            {
+                return unitCurrentPositions;
+            }
+            var query = from baseQ in _courseResultRepository.Queryable
+                        join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
+                        join ur in _unitResultRepository.Queryable on new { baseQ.CourseId, baseQ.StudentId, UnitId = cum.UnitId } equals new { ur.CourseId, ur.StudentId, UnitId = (Guid?)ur.UnitId }
+                        join ul in _unitLessonRepository.Queryable on ur.UnitId equals ul.UnitId
+                        join lr in _lessonResultRepository.Queryable on new { ur.CourseId, ur.StudentId, ur.UnitId } equals new { lr.CourseId, lr.StudentId, lr.UnitId }
+                        where courseResults.Select(x => x.StudentId).Contains(baseQ.StudentId) && baseQ.WorkingStatus == Shared.Enums.EnumWorkingStatus.Active
+                        group new { baseQ, lr, ur, cum, ul } by new { baseQ.CourseId, baseQ.StudentId } into g
+                        select new UnitCurrentPositionModel
+                        {
+                            StudentId = g.Key.StudentId,
+                        };
+            var b = await query.ToListAsync();
+            return unitCurrentPositions;
+        }
+
         public async Task<List<UnitCurrentPositionModel>> GetDisplayOrder(IList<CourseResultModel>? courseResults, DateTime? arrivalDate = default)
         {
             var unitCurrentPositions = new List<UnitCurrentPositionModel>();
@@ -218,13 +256,13 @@ namespace Fsel.Course.Infrastructure.Repositories
             var studentIds = courseResults.Select(x => x.StudentId).ToList();
             var lessonResults = new List<LessonResult>();
 
-            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit).ThenInclude(x => x!.CourseUnitMockTests)
+            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit).ThenInclude(x => x!.CourseUnitMockTests.Where(x => courseIds.Contains(x.CourseId)))
                  .Where(x => !arrivalDate.HasValue || (x!.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
                  .Where(x => x.Status != EnumResultStatus.Unfinished)
                  .Where(x => courseIds.Contains(x.CourseId) && studentIds.Contains(x.StudentId))
                  .GroupBy(x => x.StudentId)
                  .Where(x => x.Any())
-                 .Select(x => x.OrderByDescending(x => x.CreatedDate).ThenByDescending(x => x.UpdatedDate).FirstOrDefault()!)
+                 .Select(x => x.OrderByDescending(x => x.UpdatedDate).ThenByDescending(x => x.CreatedDate).FirstOrDefault()!)
                  .ToListAsync();
             if (unitResults != null)
             {
@@ -243,10 +281,11 @@ namespace Fsel.Course.Infrastructure.Repositories
                 {
                     StudentId = courseResult.StudentId,
                 };
-                var unitResult = unitResults?.FirstOrDefault(x => x.StudentId == courseResult.StudentId);
-                if (unitResult != null)
+                var unitResult = unitResults?.FirstOrDefault(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId);
+                var displayUnit = unitResult?.Unit?.CourseUnitMockTests.FirstOrDefault(x => x.CourseId == courseResult.CourseId)?.Number;
+                if (unitResult != null && displayUnit.HasValue)
                 {
-                    unitCurrentPositionModel.DisplayUnit = unitResult.Unit?.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder ?? default;
+                    unitCurrentPositionModel.DisplayUnit = displayUnit.Value;
                     var lessonUnitResults = lessonResults?.Where(x => x.StudentId == courseResult.StudentId).ToList();
                     if (lessonUnitResults == null || !lessonUnitResults.Any())
                     {

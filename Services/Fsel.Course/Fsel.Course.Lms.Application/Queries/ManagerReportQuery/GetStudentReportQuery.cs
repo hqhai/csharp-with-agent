@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     public class GetStudentReportQuery : SearchStudentReportQueryModel, IRequest<MethodResult<IList<StudentDtoModel>>>
     {
         public bool IsSearchReport { get; set; }
+        public bool IsListGuid { get; set; }
         public EnumManagerReportType ManagerReportType { get; set; }
     }
 
@@ -61,10 +62,12 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 PageSize = request.PageSize,
                 SortBy = request.SortBy,
                 LearningStatus = request.LearningStatus,
+                CourseLevel = request.CourseLevel,
+                CourseType = request.CourseType,
+                Status = request.Status,
                 ListSchoolId = schoolIds != null && schoolIds.Any() ? string.Join(",", schoolIds) : null,
             };
             List<Guid> studentPtIds = new List<Guid>();
-
             switch (request.ManagerReportType)
             {
                 case EnumManagerReportType.ReportManagerPT:
@@ -75,16 +78,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     }
                     var studentPtGroups = await _placementTestGroupResultRepository.GetStudentIdsAsync(request.Status, studentPtIds, isCheckDate, request.CurrentLevel, request.CourseLevel);
                     studentPtIds = studentPtGroups.ToList();
-                    searchQuery.Status = request.Status;
                     searchQuery.IsCheckDate = isCheckDate;
                     break;
 
                 case EnumManagerReportType.ReportLearningProgress:
                 case EnumManagerReportType.ReportLearningResults:
-
-                    searchQuery.LearningStatus = request.LearningStatus;
-                    searchQuery.CourseType = request.CourseType;
-                    searchQuery.CourseLevel = request.CourseLevel;
                     searchQuery.IsLearning = true;
                     break;
             }

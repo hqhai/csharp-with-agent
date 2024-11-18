@@ -21,11 +21,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         public async Task<IList<Guid>> GetStudentIdsAsync(EnumCompletionStatus? status, IList<Guid> studentIds, bool isCheckDate, EnumCourseLevel? currentLevel, EnumCourseLevel? courseLevel)
         {
-            if (status.HasValue && status.Value == EnumCompletionStatus.NotStarted)
-            {
-                return new List<Guid>();
-            }
-            if (!(currentLevel.HasValue || courseLevel.HasValue || (isCheckDate || studentIds.Any())))
+            if (!(currentLevel.HasValue || status.HasValue || courseLevel.HasValue || (isCheckDate || studentIds.Any())))
             {
                 return new List<Guid>();
             }

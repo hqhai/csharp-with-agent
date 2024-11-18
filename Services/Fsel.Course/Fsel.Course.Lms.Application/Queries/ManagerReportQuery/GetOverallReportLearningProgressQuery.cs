@@ -53,12 +53,18 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var students = userResults?.Result;
-            var studentIds = students?.Select(x => x.Id).ToList();
+            var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType);
+
             var overallReport = new OverallReportLearningProgressModel
             {
-                TotalStudent = studentIds?.Count ?? default
+                TotalStudent = students?.Count ?? default,
+                CourseLevelProgresses = courseLevels.Select(item => new CourseLevelProgressModel
+                {
+                    CourseLevel = item,
+                    TotalStudent = students?.Where(x => x.CourseLevel == item).Count() ?? default
+                }).ToList()
             };
-            GetTotalCourseLevel(overallReport, request.CourseType, students);
+
             await SetAverageProgress(overallReport, request, students);
             methodResult.Result = overallReport;
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -73,23 +79,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             }
             var courseResults = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
             var countProgress = await _managerProgressHelper.GetOverallCompleteAsync(courseResults, request.EndDate);
-            var totalProgress = await _managerProgressHelper.GetCourseCompletesAsync(courseResults);
-
+            var totalProgress = await _managerProgressHelper.GetTotalCompleteCourseAsync(courseResults);
             overallReport.ContentAverageProgress = $"{countProgress} / {totalProgress}";
-        }
-
-        private static void GetTotalCourseLevel(OverallReportLearningProgressModel overallReportLearningProgress, EnumCourseType courseType, IList<StudentDtoModel>? studentDtos)
-        {
-            var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(courseType);
-            overallReportLearningProgress.CourseLevelProgresses = new List<CourseLevelProgressModel>();
-            foreach (var item in courseLevels)
-            {
-                overallReportLearningProgress.CourseLevelProgresses.Add(new CourseLevelProgressModel
-                {
-                    CourseLevel = item,
-                    TotalStudent = studentDtos?.Where(x => x.CourseLevel == item).Count() ?? default
-                });
-            }
         }
     }
 }

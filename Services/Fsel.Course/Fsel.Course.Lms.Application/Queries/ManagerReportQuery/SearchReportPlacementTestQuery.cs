@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 {
+    using System.Diagnostics;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
@@ -62,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 CurrentLevel = request.CurrentLevel,
             }, cancellationToken);
             var reportPlacementTest = _mapper.Map<SearchReportPlacementTestModel>(dataOverallResult.Result);
+
             var userResults = await _mediator.Send(new GetStudentReportQuery
             {
                 ListDistrict = request.ListDistrict,
@@ -93,17 +95,26 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 methodResult.Result = reportPlacementTest;
                 return methodResult;
             }
+
             var studentIds = students.Select(x => x.Id).ToList();
-            var lists = await _placementTestGroupResultRepository.Queryable.Where(x => studentIds.Any(y => y == x.StudentId)).ToListAsync(cancellationToken);
+            var lists = await _placementTestGroupResultRepository.Queryable.Where(x => studentIds.Any(y => y == x.StudentId))
+                .Select(x => new
+                {
+                    StudentId = x.StudentId,
+                    Status = x.Status,
+                    ChooseLevel = x.ChooseLevel,
+                    CompletionLevel = x.CompletionLevel
+                })
+                .ToListAsync(cancellationToken);
 
             var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => studentIds.Contains(x.StudentId))
                 .GroupBy(x => x.StudentId)
-                .Select(x => x.Select(x => x).OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
+                .Select(x => x.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
                 .ToListAsync(cancellationToken);
 
             var datas = students.Select(item =>
             {
-                var placementTestGroupResult = lists.FirstOrDefault(x => x.StudentId == item.Id);
+                var groupResult = lists.FirstOrDefault(x => x.StudentId == item.Id);
                 var placementTestResult = placementTestResults.FirstOrDefault(x => x != null && x.StudentId == item.Id);
                 var placementTestReport = new PlacementTestReportModel
                 {
@@ -114,13 +125,13 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     SchoolClass = item.SchoolClass,
                     SchoolGrade = item.SchoolGrade,
                     SchoolName = item.School,
-                    ExpiredPTDate = placementTestResult?.UpdatedDate ?? placementTestResult?.CreatedDate
+                    ExpiredPTDate = placementTestResult?.UpdatedDate ?? placementTestResult?.CreatedDate,
+                    Status = groupResult != null && groupResult.Status == EnumResultStatus.Done ? EnumCompletionStatus.Completed : EnumCompletionStatus.InProgress
                 };
-                if (placementTestGroupResult != null)
+                if (groupResult != null)
                 {
-                    placementTestReport.Status = GetStatus(placementTestGroupResult);
-                    placementTestReport.ChooseLevel = placementTestGroupResult.ChooseLevel;
-                    placementTestReport.CurrentLevel = placementTestGroupResult.CompletionLevel.HasValue ? placementTestGroupResult.CompletionLevel.Value.GetCourseLevelByPlacementTestLevel() : null;
+                    placementTestReport.ChooseLevel = groupResult.ChooseLevel;
+                    placementTestReport.CurrentLevel = groupResult.CompletionLevel.HasValue ? groupResult.CompletionLevel.Value.GetCourseLevelByPlacementTestLevel() : null;
                 }
                 return placementTestReport;
             }).ToList();
@@ -129,11 +140,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             methodResult.Result = reportPlacementTest;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        private static EnumCompletionStatus GetStatus(PlacementTestGroupResult? placementTestGroupResult)
-        {
-            return placementTestGroupResult == null ? EnumCompletionStatus.NotStarted : placementTestGroupResult.Status == EnumResultStatus.Done ? EnumCompletionStatus.Completed : EnumCompletionStatus.NotStarted;
         }
     }
 }

@@ -27,20 +27,31 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ManagerProgressHelper _managerProgressHelper;
         private readonly ICourseRepository _courseRepository;
+        private readonly IUnitResultRepository _unitResultRepository;
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
+        private readonly IUnitLessonRepository _unitLessonRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
 
         public SearchReportLearningProgressQueryHandler(
             IMediator mediator,
             IMapper mapper,
             ICourseResultRepository courseResultRepository,
             ManagerProgressHelper managerProgressHelper,
-            ICourseRepository courseRepository
-            )
+            ICourseRepository courseRepository,
+            IUnitResultRepository unitResultRepository,
+            ICourseUnitMockTestRepository courseUnitMockTestRepository,
+            IUnitLessonRepository unitLessonRepository,
+            ILessonResultRepository lessonResultRepository)
         {
             _mediator = mediator;
             _mapper = mapper;
             _courseResultRepository = courseResultRepository;
             _managerProgressHelper = managerProgressHelper;
             _courseRepository = courseRepository;
+            _unitResultRepository = unitResultRepository;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
+            _unitLessonRepository = unitLessonRepository;
+            _lessonResultRepository = lessonResultRepository;
         }
 
         public async Task<MethodResult<SearchReportLearningProgressModel>> Handle(SearchReportLearningProgressQuery request, CancellationToken cancellationToken)
@@ -97,14 +108,12 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 methodResult.Result = reportLearningProgress;
                 return methodResult;
             }
+
             var lists = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
             var datas = new List<LearningProgressModel>();
-
-            var unitCurrentPositions = await _courseRepository.GetDisplayOrder(lists, request.EndDate);
             var courseCompletes = await _managerProgressHelper.GetProgressCompleteModuleAsync(lists, request.EndDate);
             foreach (var item in students)
             {
-                var unitCurrentPosition = unitCurrentPositions.FirstOrDefault(x => x.StudentId == item.Id);
                 var learningProgress = new LearningProgressModel
                 {
                     Email = item.Email,
@@ -115,15 +124,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     Status = item.ExpiredDate > DateTime.UtcNow ? EnumLearningStatus.InProgress : EnumLearningStatus.Expired,
                     CourseLevel = item.CourseLevel,
                 };
-                var courseResult = lists.FirstOrDefault(x => x.StudentId == item.Id) ?? new CourseResultModel
-                {
-                    StudentId = item.Id,
-                    CourseId = item.CourseId.GetValueOrDefault()
-                };
                 var courseComplete = courseCompletes.FirstOrDefault(x => x.StudentId == item.Id);
                 learningProgress.ContentProgress = $"{courseComplete?.CountComplete} / {courseComplete?.TotalComplete}";
-                learningProgress.UnitName = $"{nameof(Domain.Entities.Unit)} {unitCurrentPosition?.DisplayUnit}";
-                learningProgress.LessonName = $"{nameof(Lesson)} {unitCurrentPosition?.DisplayLesson}";
+                learningProgress.UnitName = $"{nameof(Domain.Entities.Unit)} {courseComplete?.UnitDisplayOrder}";
+                learningProgress.LessonName = $"{nameof(Lesson)} {courseComplete?.LessonDisplayOrder}";
                 datas.Add(learningProgress);
             }
 

@@ -96,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
         private static EnumCompletionStatus GetStatus(PlacementTestGroupResult? placementTestGroupResult)
         {
-            return placementTestGroupResult == null ? EnumCompletionStatus.NotStarted : placementTestGroupResult.Status == EnumResultStatus.Done ? EnumCompletionStatus.Completed : EnumCompletionStatus.NotStarted;
+            return placementTestGroupResult != null && placementTestGroupResult.Status == EnumResultStatus.Done ? EnumCompletionStatus.Completed : EnumCompletionStatus.InProgress;
         }
     }
 }

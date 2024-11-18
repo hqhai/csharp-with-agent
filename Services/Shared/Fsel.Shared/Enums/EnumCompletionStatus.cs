@@ -9,10 +9,7 @@ namespace Fsel.Shared.Enums
         [Description("Hoàn thành")]
         Completed,
 
-        [Description("Chưa hoàn thành")]
-        InProgress,
-
-        [Description("Chưa làm")]
-        NotStarted
+        [Description("Chưa hoàn thành PT")]
+        InProgress
     }
 }

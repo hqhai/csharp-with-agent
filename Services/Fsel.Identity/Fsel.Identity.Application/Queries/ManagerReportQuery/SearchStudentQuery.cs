@@ -61,6 +61,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                     CourseId = i.CourseId,
                     UserId = i.Human.UserId,
                     CreatedDate = i.CreatedDate,
+                    BaseCourseLevel = i.BaseCourseLevel,
                 });
             if (schoolId.HasValue)
             {
@@ -91,22 +92,25 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             {
                 query = query.Where(x => x.SchoolId.HasValue && request.SchoolIds.Contains(x.SchoolId.Value));
             }
+
             if (request.IsLearning.HasValue)
             {
                 query = query.Where(x => request.IsLearning.Value ? x.CourseId.HasValue : !x.CourseId.HasValue);
             }
+
             if (request.IsCheckDate)
             {
                 query = query.Where(x => request.StudentIds != null && request.StudentIds.Any() && request.StudentIds.Contains(x.Id));
+            }
+            else if (request.Status.HasValue && request.Status == EnumCompletionStatus.InProgress)
+            {
+                query = query.Where(x => (request.StudentIds != null && request.StudentIds.Any() && request.StudentIds.Contains(x.Id)) || !x.BaseCourseLevel.HasValue);
             }
             else if (request.StudentIds != null && request.StudentIds.Any())
             {
                 query = query.Where(x => request.StudentIds.Contains(x.Id));
             }
-            if (request.Status.HasValue && request.Status.Value == EnumCompletionStatus.NotStarted)
-            {
-                query = query.Where(x => !x.BaseCourseLevel.HasValue);
-            }
+
             if (request.CourseType.HasValue)
             {
                 var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType.Value);
