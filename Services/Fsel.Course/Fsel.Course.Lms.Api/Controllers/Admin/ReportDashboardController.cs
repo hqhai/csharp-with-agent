@@ -53,5 +53,17 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             MethodResult<DashBoardLearningResultModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Learning Result
+        /// </summary>
+        [HttpGet("learning-result-stack")]
+        [ProducesResponseType(typeof(MethodResult<StackBarChartsModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ReportLearningResultStack([FromQuery] GetReportLearningResultStackQuery query)
+        {
+            MethodResult<StackBarChartsModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
