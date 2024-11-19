@@ -4,21 +4,15 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReportDashboard
 {
     using System.Collections.Generic;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Models.EntityModels.BaseChart;
     using Fsel.Shared.Enums;
 
     public class ReportPTResultModel : BaseModel
     {
         public OverallStaticModel OverallStatic { get; set; } = new OverallStaticModel();
-        public BaseChartResult OverallEvaluation {  get; set; } = new BaseChartResult();
-        public BaseChartResult AmountStudentByLevel { get; set; } = new BaseChartResult();
+        public BaseChartResultModel OverallEvaluation {  get; set; } = new BaseChartResultModel();
+        public BaseChartResultModel AmountStudentByLevel { get; set; } = new BaseChartResultModel();
         public StackBarCharts AmountStudentByLevelAndClass { get; set; } = new StackBarCharts();
-    }
-
-    public class StackBarCharts : BaseChartResult
-    {
-        public new IList<StackBarChart> DataCharts { get; set; } = new List<StackBarChart>();
-
     }
     public class OverallStaticModel
     {
@@ -27,11 +21,4 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReportDashboard
         public int NumberStudentNotFinishPT { get; set; }
 
     }
-    public class StackBarChart
-    {
-        public string? Labels { get; set; }
-        public IList<DataChart>? DataColumns { get; set; }
-
-    }
-
 }
