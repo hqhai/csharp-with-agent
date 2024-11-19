@@ -78,6 +78,7 @@ namespace Microsoft.Extensions.DependencyInjection
             });
 
             builder.AddResourceOwnerValidator<ResourceOwnerPasswordValidator<TUser>>();
+            builder.AddExtensionGrantValidator<ImpersonationGrantValidator<TUser>>();
             builder.AddProfileService<ProfileService<TUser>>();
 
             return builder;

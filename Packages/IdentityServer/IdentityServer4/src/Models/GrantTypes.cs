@@ -10,11 +10,14 @@ namespace IdentityServer4.Models
 {
     public class GrantTypes
     {
+        public static ICollection<string> Impersonation =>
+            new[] { GrantType.Impersonation };
+
         public static ICollection<string> Implicit =>
             new[] { GrantType.Implicit };
 
         public static ICollection<string> ImplicitAndClientCredentials =>
-            new[]  { GrantType.Implicit, GrantType.ClientCredentials };
+            new[] { GrantType.Implicit, GrantType.ClientCredentials };
 
         public static ICollection<string> Code =>
             new[] { GrantType.AuthorizationCode };
@@ -33,6 +36,9 @@ namespace IdentityServer4.Models
 
         public static ICollection<string> ResourceOwnerPassword =>
             new[] { GrantType.ResourceOwnerPassword };
+
+        public static ICollection<string> ResourceOwnerPasswordAndImpersonation =>
+            new[] { GrantType.ResourceOwnerPassword, GrantType.Impersonation };
 
         public static ICollection<string> ResourceOwnerPasswordAndClientCredentials =>
             new[] { GrantType.ResourceOwnerPassword, GrantType.ClientCredentials };

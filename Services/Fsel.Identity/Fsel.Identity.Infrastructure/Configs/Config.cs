@@ -134,7 +134,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                 {
                     ClientId = "app.fsel.angular.lmsadmin",
 
-                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
+                    AllowedGrantTypes = GrantTypes.ResourceOwnerPasswordAndImpersonation,
 
                     ClientSecrets =
                     {
@@ -271,6 +271,39 @@ namespace Fsel.Authentication.Infrastructure.Configs
 
                     AllowOfflineAccess = true, // Cho phép sử dụng refresh token
                     AccessTokenLifetime = 60,
+                    UpdateAccessTokenClaimsOnRefresh = true,
+                    RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
+                    RefreshTokenExpiration = TokenExpiration.Sliding, // Cấu hình thời gian sống của refresh token
+                    SlidingRefreshTokenLifetime = 1209600, // Cấu hình thời gian sống cho refresh token
+                    AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
+                },
+                new Client
+                {
+                    ClientId = "test.fsel.impersonation",
+
+                    AllowedGrantTypes = GrantTypes.Impersonation,
+
+                    ClientSecrets =
+                    {
+                        new Secret("test.fsel.impersonation_secret".Sha256())
+                    },
+
+                    PostLogoutRedirectUris = { "https://localhost:4400", "https://identityserver4.readthedocs.io/en/latest/endpoints/endsession.html" },
+
+                    AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Email,
+                        IdentityServerConstants.StandardScopes.Phone,
+                        IdentityServerConstants.StandardScopes.Address,
+                        IdentityServerSettings.AllowedScopes.Roles,
+                        IdentityServerSettings.AllowedScopes.Api
+                    },
+
+                    AllowOfflineAccess = true, // Cho phép sử dụng refresh token
+                    AccessTokenLifetime = 3600,
                     UpdateAccessTokenClaimsOnRefresh = true,
                     RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
                     RefreshTokenExpiration = TokenExpiration.Sliding, // Cấu hình thời gian sống của refresh token

@@ -631,7 +631,6 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             if (ModelState.IsValid)
             {
                 var user = await _signInManager.UserManager.FindByNameAsync(model.Username ?? string.Empty);
-
                 if (user is not null)
                 {
                     var userLogin = await _signInManager.PasswordSignInAsync(user, model.Password ?? string.Empty, model.RememberLogin, true);
