@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Models.EntityModels.BaseChart
+namespace Fsel.Course.Domain.Models.EntityModels.BaseChartModels
 {
     using Fsel.Shared.Enums;
 
@@ -16,16 +16,14 @@ namespace Fsel.Course.Domain.Models.EntityModels.BaseChart
         public int Value { get; set; }
     }
 
-    public class StackBarCharts : BaseChartResultModel
+    public class StackBarChartsModel : BaseChartResultModel
     {
         public new IList<StackBarChart> DataCharts { get; set; } = new List<StackBarChart>();
-
     }
 
     public class StackBarChart
     {
         public string? Label { get; set; }
         public IList<DataChart>? DataColumns { get; set; }
-
     }
 }

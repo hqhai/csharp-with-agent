@@ -8,9 +8,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels.BaseChart;
+    using Fsel.Course.Domain.Models.EntityModels.BaseChartModels;
     using Fsel.Course.Domain.Models.QueryModels.ReportDashboard;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
@@ -28,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
         private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
+
         public GetReportPTResultQueryHandler(IMapper mapper, IUserService userService, IPlacementTestGroupResultRepository placementTestGroupResultRepository)
         {
             _mapper = mapper;
@@ -132,7 +132,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                                                    .ToList();
                 }
 
-                StackBarCharts stackBarCharts = new StackBarCharts
+                StackBarChartsModel stackBarCharts = new StackBarChartsModel
                 {
                     Type = EnumChartType.StackbarChart,
                     DataCharts = amountStudentByLevelAndClass
@@ -146,5 +146,4 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             return methodResult;
         }
     }
-
 }
