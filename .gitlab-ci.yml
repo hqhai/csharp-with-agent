@@ -118,7 +118,7 @@ build-demo-auth:
     - Services/Fsel.Identity/**/*
     - Services/Shared/**/*
     refs:
-    - fsel-demo
+    - demo
 
 build-prod-auth:
   stage: build-image
@@ -230,7 +230,7 @@ build-demo-gateway:
     - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
     - Services/Shared/**/*
     refs:
-    - fsel-demo
+    - demo
 
 build-prod-gateway:
   stage: build-image
@@ -341,7 +341,7 @@ build-demo-hangfire:
     - Services/Fsel.Hangfire/**/*
     - Services/Shared/**/*
     refs:
-    - fsel-demo
+    - demo
 
 build-prod-hangfire:
   stage: build-image
@@ -453,7 +453,7 @@ build-demo-interaction:
     - Services/Fsel.Interaction/**/*
     - Services/Shared/**/*
     refs:
-    - fsel-demo
+    - demo
 
 build-prod-interaction:
   stage: build-image
@@ -565,7 +565,7 @@ build-demo-lcmsapi:
     - Services/Fsel.Course/**/*
     - Services/Shared/**/*
     refs:
-    - fsel-demo
+    - demo
 
 build-prod-lcmsapi:
   stage: build-image
@@ -677,7 +677,7 @@ build-demo-lmsapi:
     - Services/Fsel.Course/**/*
     - Services/Shared/**/*
     refs:
-    - fsel-demo
+    - demo
 
 build-prod-lmsapi:
   stage: build-image
@@ -789,7 +789,7 @@ build-demo-notification:
     - Services/Fsel.Notification/**/*
     - Services/Shared/**/*
     refs:
-    - fsel-demo
+    - demo
 
 build-prod-notification:
   stage: build-image
@@ -901,7 +901,7 @@ build-demo-ordering:
     - Services/Fsel.Ordering/**/*
     - Services/Shared/**/*
     refs:
-    - fsel-demo
+    - demo
 
 build-prod-ordering:
   stage: build-image
@@ -1013,7 +1013,7 @@ build-demo-realtime:
     - Services/Fsel.Realtime/**/*
     - Services/Shared/**/*
     refs:
-    - fsel-demo
+    - demo
 
 build-prod-realtime:
   stage: build-image
@@ -1125,7 +1125,7 @@ build-demo-sender:
     - Services/Fsel.Sender/**/*
     - Services/Shared/**/*
     refs:
-    - fsel-demo
+    - demo
 
 build-prod-sender:
   stage: build-image
@@ -1237,7 +1237,7 @@ build-demo-storage:
     - Services/Fsel.Storage/**/*
     - Services/Shared/**/*
     refs:
-    - fsel-demo
+    - demo
 
 build-prod-storage:
   stage: build-image
@@ -1349,7 +1349,7 @@ build-demo-system:
     - Services/Fsel.System/**/*
     - Services/Shared/**/*
     refs:
-    - fsel-demo
+    - demo
 
 build-prod-system:
   stage: build-image
@@ -1461,7 +1461,7 @@ build-demo-training:
     - Services/Fsel.Training/**/*
     - Services/Shared/**/*
     refs:
-    - fsel-demo
+    - demo
 
 build-prod-training:
   stage: build-image
@@ -1573,7 +1573,7 @@ build-demo-identity:
     - Services/Fsel.Identity/**/*
     - Services/Shared/**/*
     refs:
-    - fsel-demo
+    - demo
 
 build-prod-identity:
   stage: build-image
@@ -1685,7 +1685,7 @@ build-demo-cms-planetdefender:
     - Services/Fsel.Cms.PlanetDefender/**/*
     - Services/Shared/**/*
     refs:
-    - fsel-demo
+    - demo
 
 build-prod-cms-planetdefender:
   stage: build-image
