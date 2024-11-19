@@ -98,6 +98,28 @@ build-staging-auth:
     refs:
     - staging
 
+build-demo-auth:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    DOCKERFILE: "./Environments/Production/Auth.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Identity/**/*
+    - Services/Shared/**/*
+    refs:
+    - fsel-demo
+
 build-prod-auth:
   stage: build-image
   tags:
@@ -188,6 +210,28 @@ build-staging-gateway:
     refs:
     - staging
 
+build-demo-gateway:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
+    DOCKERFILE: "./Environments/Production/Gateway.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
+    - Services/Shared/**/*
+    refs:
+    - fsel-demo
+
 build-prod-gateway:
   stage: build-image
   tags:
@@ -276,6 +320,28 @@ build-staging-hangfire:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-demo-hangfire:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
+    DOCKERFILE: "./Environments/Production/Hangfire.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Hangfire/**/*
+    - Services/Shared/**/*
+    refs:
+    - fsel-demo
 
 build-prod-hangfire:
   stage: build-image
@@ -367,6 +433,28 @@ build-staging-interaction:
     refs:
     - staging
 
+build-demo-interaction:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
+    DOCKERFILE: "./Environments/Production/Interaction.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Interaction/**/*
+    - Services/Shared/**/*
+    refs:
+    - fsel-demo
+
 build-prod-interaction:
   stage: build-image
   tags:
@@ -456,6 +544,28 @@ build-staging-lcmsapi:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-demo-lcmsapi:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
+    DOCKERFILE: "./Environments/Production/Lcms.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Course/**/*
+    - Services/Shared/**/*
+    refs:
+    - fsel-demo
 
 build-prod-lcmsapi:
   stage: build-image
@@ -547,6 +657,28 @@ build-staging-lmsapi:
     refs:
     - staging
 
+build-demo-lmsapi:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
+    DOCKERFILE: "./Environments/Production/Lms.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Course/**/*
+    - Services/Shared/**/*
+    refs:
+    - fsel-demo
+
 build-prod-lmsapi:
   stage: build-image
   tags:
@@ -636,6 +768,28 @@ build-staging-notification:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-demo-notification:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
+    DOCKERFILE: "./Environments/Production/Notification.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Notification/**/*
+    - Services/Shared/**/*
+    refs:
+    - fsel-demo
 
 build-prod-notification:
   stage: build-image
@@ -727,6 +881,28 @@ build-staging-ordering:
     refs:
     - staging
 
+build-demo-ordering:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
+    DOCKERFILE: "./Environments/Production/Ordering.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Ordering/**/*
+    - Services/Shared/**/*
+    refs:
+    - fsel-demo
+
 build-prod-ordering:
   stage: build-image
   tags:
@@ -816,6 +992,28 @@ build-staging-realtime:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-demo-realtime:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
+    DOCKERFILE: "./Environments/Production/Realtime.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Realtime/**/*
+    - Services/Shared/**/*
+    refs:
+    - fsel-demo
 
 build-prod-realtime:
   stage: build-image
@@ -907,6 +1105,28 @@ build-staging-sender:
     refs:
     - staging
 
+build-demo-sender:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
+    DOCKERFILE: "./Environments/Production/Sender.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Sender/**/*
+    - Services/Shared/**/*
+    refs:
+    - fsel-demo
+
 build-prod-sender:
   stage: build-image
   tags:
@@ -996,6 +1216,28 @@ build-staging-storage:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-demo-storage:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
+    DOCKERFILE: "./Environments/Production/Storage.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Storage/**/*
+    - Services/Shared/**/*
+    refs:
+    - fsel-demo
 
 build-prod-storage:
   stage: build-image
@@ -1087,6 +1329,28 @@ build-staging-system:
     refs:
     - staging
 
+build-demo-system:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
+    DOCKERFILE: "./Environments/Production/System.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.System/**/*
+    - Services/Shared/**/*
+    refs:
+    - fsel-demo
+
 build-prod-system:
   stage: build-image
   tags:
@@ -1176,6 +1440,28 @@ build-staging-training:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-demo-training:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
+    DOCKERFILE: "./Environments/Production/Training.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Training/**/*
+    - Services/Shared/**/*
+    refs:
+    - fsel-demo
 
 build-prod-training:
   stage: build-image
@@ -1267,6 +1553,28 @@ build-staging-identity:
     refs:
     - staging
 
+build-demo-identity:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
+    DOCKERFILE: "./Environments/Production/User.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Identity/**/*
+    - Services/Shared/**/*
+    refs:
+    - fsel-demo
+
 build-prod-identity:
   stage: build-image
   tags:
@@ -1356,6 +1664,28 @@ build-staging-cms-planetdefender:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-demo-cms-planetdefender:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
+    DOCKERFILE: "./Environments/Production/Cms.PlanetDefender.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Cms.PlanetDefender/**/*
+    - Services/Shared/**/*
+    refs:
+    - fsel-demo
 
 build-prod-cms-planetdefender:
   stage: build-image
