@@ -11,6 +11,8 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         CodeAlreadyExists,
         NameAlreadyExists,
         WrongQuantity,
-        WrongExpirationDate
+        WrongExpirationDate,
+        EmptyPhoneNumber,
+        PhoneNumberIsInvalid
     }
 }
