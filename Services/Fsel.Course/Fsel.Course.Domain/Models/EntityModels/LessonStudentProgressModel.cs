@@ -9,6 +9,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public string? Type { get; set; }
         public Guid ObjectId { get; set; }
+        public Guid Id { get; set; }
         public string? Name { get; set; }
         public EnumResultStatus Status { get; set; }
         public double Percent { get; set; }

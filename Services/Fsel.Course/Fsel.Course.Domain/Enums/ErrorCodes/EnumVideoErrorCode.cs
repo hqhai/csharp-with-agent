@@ -23,5 +23,20 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Cannot have both UnitTest and SkillTest at the same time
         /// </summary>
         CanNotUnitTestAndSkillTestAtTheSameTime,
+
+        /// <summary>
+        /// Config Question Invalid Format
+        /// </summary>
+        ConfigInvalidFormat,
+
+        /// <summary>
+        /// Ielts only accepts Standalone
+        /// </summary>
+        IeltsAcceptsStandalone,
+
+        /// <summary>
+        /// AdultFoundation not accepts SkillTest
+        /// </summary>
+        AdultFoundationNotAcceptsSkillTest,
     }
 }

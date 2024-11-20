@@ -36,6 +36,9 @@ namespace Fsel.Course.Domain.Entities
             }
         }
 
+        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public double Version { get; set; }
+
         public ExtraPractice? ExtraPractice { get; set; }
         public ICollection<MockTestSection> MockTestSections { get; set; } = new List<MockTestSection>();
         public ICollection<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();

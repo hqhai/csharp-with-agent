@@ -98,7 +98,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             #endregion Check environment
 
-            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.Name == request.TransactionInfo.ProductId, cancellationToken);
+            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.Name == request.TransactionInfo.ProductId && p.Status == EnumPackageStatus.Active, cancellationToken);
 
             if (package == null)
             {

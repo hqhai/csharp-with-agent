@@ -4,11 +4,13 @@
 #For more information, please see https://aka.ms/containercompat
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+RUN apt update && apt install ffmpeg -y
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+RUN apt update && apt install ffmpeg -y
 WORKDIR /src
 COPY ["Services/Fsel.Course/Fsel.Course.Lcms.Api/Fsel.Course.Lcms.Api.csproj", "Services/Fsel.Course/Fsel.Course.Lcms.Api/"]
 COPY ["Services/Fsel.Course/Fsel.Course.Application/Fsel.Course.Application.csproj", "Services/Fsel.Course/Fsel.Course.Application/"]

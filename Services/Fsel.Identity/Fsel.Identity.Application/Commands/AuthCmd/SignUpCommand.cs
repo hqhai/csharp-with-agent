@@ -1,20 +1,20 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Globalization;
-using System.Transactions;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
+using Fsel.Core.Entities;
 using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Application.Commands.UserReferrals;
-using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Identity.Domain.Models.EntityModels;
+using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
@@ -22,6 +22,7 @@ using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -37,9 +38,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IMediator _mediator;
         private readonly IPlatformRepository _platformRepository;
         private readonly AppSetting _appSetting;
-        private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly ITrainingService _trainingService;
         private readonly IHumanRepository _humanRepository;
+        private readonly UserDbContext _userDbContext;
+        private readonly ILogger<SignUpCommandHandler> _logger;
 
         public SignUpCommandHandler(UserManager<User> userManager,
             RoleManager<Role> roleManager,
@@ -47,10 +49,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IMediator mediator,
             AppSetting appSetting,
             IPlatformRepository platformRepository,
-            QuestBoardPublisher questBoardPublisher,
             ITrainingService trainingService,
             IHumanRepository humanRepository
-            )
+,
+            ILogger<SignUpCommandHandler> logger,
+            UserDbContext userDbContext)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -58,9 +61,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _mediator = mediator;
             _appSetting = appSetting;
             _platformRepository = platformRepository;
-            _questBoardPublisher = questBoardPublisher;
             _trainingService = trainingService;
             _humanRepository = humanRepository;
+            _logger = logger;
+            _userDbContext = userDbContext;
         }
 
         public async Task<MethodResult<UserModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
@@ -97,12 +101,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 }
                 else
                 {
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    //using (var scope = new TransactionScope(TransactionScopeOption.Required,
+                    //    new TransactionOptions
+                    //    {
+                    //        IsolationLevel = IsolationLevel.ReadCommitted
+                    //    },
+                    //    TransactionScopeAsyncFlowOption.Enabled))
                     {
                         try
                         {
                             ArgumentNullException.ThrowIfNull(request);
-                            var role = await _roleManager.FindByNameAsync(request.Role.ToString() ?? string.Empty);
+                            var role = await _roleManager.FindByNameAsync(request.Role.ToString());
                             if (role == null)
                             {
                                 role = new Role
@@ -136,7 +145,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 result = await _userManager.UpdateAsync(user);
                                 if (!result.Succeeded)
                                 {
-                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
+                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate), nameof(result.Errors));
                                     return methodResult;
                                 }
                             }
@@ -174,6 +183,18 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                                 #endregion add user setting
 
+                                //#region add user role
+
+                                //user.UserRoles = new List<UserRoleEntity>()
+                                //    {
+                                //        new UserRoleEntity
+                                //        {
+                                //            RoleId = role.Id
+                                //        }
+                                //    };
+
+                                //#endregion add user role
+
                                 var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password);
                                 if (!validPassword.Succeeded)
                                 {
@@ -187,44 +208,52 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
                                     return methodResult;
                                 }
-                                await _userManager.AddToRoleAsync(user, request.Role.ToString() ?? string.Empty);
+
+                                await _userDbContext.UserRoles.AddAsync(new UserRoleEntity
+                                {
+                                    UserId = user.Id,
+                                    RoleId = role.Id
+                                }, cancellationToken);
+
+                                //await _userManager.AddToRoleAsync(user, request.Role.ToString());
                             }
 
                             #region Send Code OTP
 
                             var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
-                            var param = new SendOtpTemplateModel
-                            {
-                                OtpCode = userOtpCode.Result,
-                                OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
-                            };
-                            var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
-                            var sendResult = new MethodResult<bool>();
+                            //var param = new SendOtpTemplateModel
+                            //{
+                            //    OtpCode = userOtpCode.Result,
+                            //    OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
+                            //};
+                            //var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
+                            //var sendResult = new MethodResult<bool>();
 
-                            ArgumentNullException.ThrowIfNull(request);
-                            if (!string.IsNullOrEmpty(request.Email))
-                            {
-                                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, IsCCEmailDefault = true, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
-                            }
-                            else if (!string.IsNullOrEmpty(request.PhoneNumber))
-                            {
-                                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject }, cancellationToken).ConfigureAwait(false);
-                            }
+                            //ArgumentNullException.ThrowIfNull(request);
+                            //if (!string.IsNullOrEmpty(request.Email))
+                            //{
+                            //    sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, IsCCEmailDefault = true, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
+                            //}
+                            //else if (!string.IsNullOrEmpty(request.PhoneNumber))
+                            //{
+                            //    sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject }, cancellationToken).ConfigureAwait(false);
+                            //}
 
-                            if (!sendResult.IsOK)
-                            {
-                                scope.Dispose();
-                                methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
-                                return methodResult;
-                            }
-                            scope.Complete();
+                            //if (!sendResult.IsOK)
+                            //{
+                            //    //scope.Dispose();
+                            //    methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
+                            //    return methodResult;
+                            //}
+                            //scope.Complete();
 
                             #endregion Send Code OTP
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            _logger.LogError(ex, "SignUpCommand encouters error: {message}", ex.Message);
                             methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr));
-                            scope.Dispose();
+                            //scope.Dispose();
                         }
                     }
                 }

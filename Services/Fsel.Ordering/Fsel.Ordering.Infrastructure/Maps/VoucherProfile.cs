@@ -15,6 +15,7 @@ namespace Fsel.Ordering.Infrastructure.Maps
             CreateMap<Voucher, VoucherModel>().IgnoreAllNonExisting();
             CreateMap<CreateVoucherCommandModel, Voucher>().IgnoreAllNonExisting();
             CreateMap<UpdateVoucherCommandModel, Voucher>().IgnoreAllNonExisting();
+            CreateMap<UserVoucherLock, UserVoucherLockModel>().IgnoreAllNonExisting();
         }
     }
 }

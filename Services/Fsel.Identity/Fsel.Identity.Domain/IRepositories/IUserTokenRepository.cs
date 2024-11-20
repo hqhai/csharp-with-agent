@@ -10,6 +10,6 @@ namespace Fsel.Identity.Domain.IRepositories
 
         Task<UserToken?> AddAsync(UserToken? userToken);
 
-        Task<UserToken?> Remove(UserToken? userToken);
+        Task<UserToken?> RemoveAsync(UserToken? userToken);
     }
 }

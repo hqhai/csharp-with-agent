@@ -54,6 +54,7 @@ namespace Fsel.System.Application.Commands.GoogleSheets
                     request.CompanyTaxCode ?? string.Empty,
                     request.CompanyName ?? string.Empty,
                     request.CompanyAddress ?? string.Empty,
+                    request.CompanyEmail ?? string.Empty,
                 }
             };
 
