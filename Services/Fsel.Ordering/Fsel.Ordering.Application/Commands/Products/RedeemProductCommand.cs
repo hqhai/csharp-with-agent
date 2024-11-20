@@ -48,13 +48,13 @@ namespace Fsel.Ordering.Application.Commands.Products
 
             if (string.IsNullOrEmpty(request.PhoneNumber))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.PhoneNumber), request.PhoneNumber);
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.EmptyPhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
                 return methodResult;
             }
 
             if (!request.PhoneNumber.IsValidPhoneNumber())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.PhoneNumber), request.PhoneNumber);
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.PhoneNumberIsInvalid), nameof(request.PhoneNumber), request.PhoneNumber);
                 return methodResult;
             }
 
