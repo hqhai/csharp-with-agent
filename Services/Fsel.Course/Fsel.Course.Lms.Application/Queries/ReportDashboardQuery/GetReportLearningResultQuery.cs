@@ -83,7 +83,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                                       }).ToListAsync(cancellationToken);
             DashBoardLearningResultModel reportLearningResult = new DashBoardLearningResultModel
             {
-                Percent = (int)NumberHelper.ConvertRound(unitOveralls.Where(x => x.CountPercent != 0).Any() ? unitOveralls.Where(x => x.CountPercent != 0).Average(x => x.TotalPercent / x.CountPercent) : default),
+                Percent = (int)NumberHelper.ConvertRound(courseOveralls.Any() ? courseOveralls.Average(x => x.Percent) : default),
                 LearningResultChart = new LearningResultChartModel
                 {
                     Type = EnumChartType.PieChart,
@@ -110,7 +110,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                             CourseType = courseType,
                             DataColumns = unitOveralls.Where(x => x.CourseLevel.GetEnumCourseType() == courseType)
                             .GroupBy(x => x.DisplayOrder)
-                            .OrderBy(x => x.Key).Select(x => new DataChart
+                            .OrderBy(x => x.Key).Select(x => new DataChartModel
                             {
                                 Label = $"{x.Key}",
                                 Value = x.Where(y => y.CountPercent != 0).Any() ? (int)NumberHelper.ConvertRound(x.Where(x => x.CountPercent != 0).Average(y => y.TotalPercent / y.CountPercent)) : default,

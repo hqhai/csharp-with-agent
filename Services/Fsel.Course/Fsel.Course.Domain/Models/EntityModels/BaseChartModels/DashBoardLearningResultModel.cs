@@ -24,10 +24,10 @@ namespace Fsel.Course.Domain.Models.EntityModels.BaseChartModels
     public class UnitChartModel
     {
         public EnumCourseType CourseType { get; set; }
-        public IList<DataChart>? DataColumns { get; set; }
+        public IList<DataChartModel>? DataColumns { get; set; }
     }
 
-    public class LearningResultDataChartModel : DataChart
+    public class LearningResultDataChartModel : DataChartModel
     {
         public long TotalStudentAca { get; set; }
         public long TotalStudentIELST { get; set; }

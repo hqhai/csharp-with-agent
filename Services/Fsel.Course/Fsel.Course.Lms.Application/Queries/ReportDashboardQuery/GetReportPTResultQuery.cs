@@ -76,14 +76,14 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 BaseChartResultModel overallEvaluation = new BaseChartResultModel
                 {
                     Type = EnumChartType.PieChart,
-                    DataCharts = new List<DataChart>
+                    DataCharts = new List<DataChartModel>
                     {
-                        new DataChart
+                        new DataChartModel
                         {
                             Label = ChartConstant.PercentStudentFinishPT,
                             Value = percentStudentFinishPT
                         },
-                        new DataChart
+                        new DataChartModel
                         {
                             Label = ChartConstant.PercentStudentNotFinishPT,
                             Value = percentStudentNotFinishPT
@@ -96,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                     Type = EnumChartType.BarChart,
                     DataCharts = filteredStudents.GroupBy(student => student.CourseLevel)
                                                  .OrderBy(group => group.Key)
-                                                 .Select(group => new DataChart
+                                                 .Select(group => new DataChartModel
                                                  {
                                                      Label = group.Key.ToString(),
                                                      Value = group.Count()
@@ -113,11 +113,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                                                                    })
                                                                    .GroupBy(x => x.ClassName)
                                                                    .OrderBy(classGroup => classGroup.Key)
-                                                                   .Select(classGroup => new StackBarChart
+                                                                   .Select(classGroup => new StackBarChartModel
                                                                    {
                                                                        Label = classGroup.Key,
                                                                        DataColumns = classGroup.OrderBy(levelGroup => levelGroup.CourseLevel)
-                                                                                               .Select(levelGroup => new DataChart
+                                                                                               .Select(levelGroup => new DataChartModel
                                                                                                {
                                                                                                    Label = levelGroup.CourseLevel.ToString(),
                                                                                                    Value = levelGroup.Count

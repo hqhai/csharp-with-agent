@@ -122,7 +122,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             StackBarChartsModel reportLearningResult = new StackBarChartsModel
             {
                 Type = EnumChartType.StackbarChart,
-                DataCharts = studentGroups?.Select(studentGroup => new StackBarChart
+                DataCharts = studentGroups?.Select(studentGroup => new StackBarChartModel
                 {
                     Label = studentGroup.Key,
                     DataColumns = ConvertHelper.EnumToList<EnumOverallScore>()
@@ -131,13 +131,13 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                     {
                         var percent = (int)EnumOverallScore.Accuracy75OrMore;
                         var overallPercents = courseOveralls.Where(x => enumOverall == EnumOverallScore.Accuracy75OrMore ? x.Percent >= percent : x.Percent < percent);
-                        return new DataChart
+                        return new DataChartModel
                         {
                             Label = enumOverall.ToString(),
                             Value = overallPercents.Where(y => studentGroup.Select(z => z.Id).Contains(y.StudentId)).Count(),
                         };
                     }).ToList()
-                }).ToList() ?? new List<StackBarChart>()
+                }).ToList() ?? new List<StackBarChartModel>()
             };
             methodResult.Result = reportLearningResult;
             return methodResult;

@@ -19,7 +19,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Shared.Enums;
 
     [ApiVersions(ApiSettings.APIVersion1)]
-    [Route(Settings.APIDefaultRoute + "/report-dashboard")]
+    [Route(Settings.APIDefaultRoute + "/admin/report-dashboard")]
     [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool) })]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.AdminSchool))]
@@ -45,9 +45,9 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         }
 
         /// <summary>
-        /// Get Learning Result
+        /// Get Learning Result Statistical
         /// </summary>
-        [HttpGet("learning-result")]
+        [HttpGet("learning-result-statistical")]
         [ProducesResponseType(typeof(MethodResult<DashBoardLearningResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ReportLearningResult([FromQuery] GetReportLearningResultQuery query)
@@ -57,9 +57,9 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         }
 
         /// <summary>
-        /// Get Learning Result
+        /// Get Student Learning Result Statistical
         /// </summary>
-        [HttpGet("learning-result-stack")]
+        [HttpGet("student-learning-statistical")]
         [ProducesResponseType(typeof(MethodResult<StackBarChartsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ReportLearningResultStack([FromQuery] GetReportLearningResultStackQuery query)

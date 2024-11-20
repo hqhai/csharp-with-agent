@@ -7,10 +7,10 @@ namespace Fsel.Course.Domain.Models.EntityModels.BaseChartModels
     public class BaseChartResultModel
     {
         public EnumChartType Type { get; set; }
-        public IList<DataChart>? DataCharts { get; set; }
+        public IList<DataChartModel>? DataCharts { get; set; }
     }
 
-    public class DataChart
+    public class DataChartModel
     {
         public string? Label { get; set; }
         public int Value { get; set; }
@@ -18,12 +18,12 @@ namespace Fsel.Course.Domain.Models.EntityModels.BaseChartModels
 
     public class StackBarChartsModel : BaseChartResultModel
     {
-        public new IList<StackBarChart> DataCharts { get; set; } = new List<StackBarChart>();
+        public new IList<StackBarChartModel> DataCharts { get; set; } = new List<StackBarChartModel>();
     }
 
-    public class StackBarChart
+    public class StackBarChartModel
     {
         public string? Label { get; set; }
-        public IList<DataChart>? DataColumns { get; set; }
+        public IList<DataChartModel>? DataColumns { get; set; }
     }
 }
