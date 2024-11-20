@@ -5,19 +5,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Queries.CourseQuery;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Attributes;
     using Fsel.Course.Lms.Application.Queries.ReportDashboardQuery;
     using Fsel.Course.Domain.Models.QueryModels.ReportDashboard;
+    using Fsel.Shared.Enums;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/report-dashboard")]
     [ApiController]
+    [Common.Attributes.Permission(role: nameof(EnumRole.AdminSchool))]
     public class ReportDashboard : ControllerBase
     {
         private readonly IMediator _mediator;

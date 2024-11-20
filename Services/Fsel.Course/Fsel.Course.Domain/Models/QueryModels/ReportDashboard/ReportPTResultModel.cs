@@ -9,6 +9,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReportDashboard
 
     public class ReportPTResultModel : BaseModel
     {
+        public string? SchoolName { get; set; }
         public OverallStaticModel OverallStatic { get; set; } = new OverallStaticModel();
         public BaseChartResultModel OverallEvaluation {  get; set; } = new BaseChartResultModel();
         public BaseChartResultModel AmountStudentByLevel { get; set; } = new BaseChartResultModel();
