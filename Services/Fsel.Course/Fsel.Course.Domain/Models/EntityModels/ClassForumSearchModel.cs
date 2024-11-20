@@ -2,37 +2,43 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    using System;
     using System.Collections.Generic;
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
-    public class ClassForumSearchModel : BaseModel
+    public class ClassForumSearchModel
     {
-        public EnumGradingStyle GradingStyle { get; set; }
         public string? PromptName { get; set; }
-        public long TaggetWordLimit { get; set; }
-        public double TaggetTimeLimit { get; set; }
+
+        public long? TaggetWordLimit { get; set; }
+
+        public double? TaggetTimeLimit { get; set; }
 
         public string? MediaPost { get; set; }
 
-        public bool IsActive { get; set; }
-
         public EnumCourseSkill CourseSkill { get; set; }
-
-        public Guid? LessonId { get; set; }
-
-        public LessonModel? Lesson { get; set; }
-
-        public string? LessonName { get; set; }
-
-        public string? UnitName { get; set; }
-
-        public Guid? TeacherId { get; set; }
 
         public IList<ClassForumFileModel>? ClassForumFiles { get; set; }
 
-        public ClassForumResultModel? ClassForumResult { get; set; }
+        public string? Content { get; set; }
+
+        public int? WordCount { get; set; }
+
+        public int? TimeCount { get; set; }
+
+        public string? GradingAlFeedback { get; set; }
+
+        public double CorrectCount { get; set; }
+
+        public double Score { get; set; }
+
+        public double CorrectTotal
+        {
+            get
+            {
+                return CorrectCount + Score;
+            }
+        }
+
+        public IList<ClassForumResultFileModel>? ClassForumResultFiles { get; set; }
     }
 }

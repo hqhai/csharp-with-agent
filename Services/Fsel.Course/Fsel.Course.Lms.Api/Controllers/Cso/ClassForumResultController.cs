@@ -87,5 +87,17 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Class Forum Result By 
+        /// </summary>
+        [HttpGet("get-by-lessonResultId")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetClassForumResultByLessonResultId([FromQuery] GetClassForumResultByLessonResultIdQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
