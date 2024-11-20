@@ -4,7 +4,6 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
 {
     using System.Linq;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Extensions;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;

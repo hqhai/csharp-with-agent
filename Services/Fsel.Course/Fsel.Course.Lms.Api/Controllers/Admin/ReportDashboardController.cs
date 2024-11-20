@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -19,6 +20,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/report-dashboard")]
+    [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool) })]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.AdminSchool))]
     public class ReportDashboard : ControllerBase
