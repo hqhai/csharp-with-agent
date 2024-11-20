@@ -13,8 +13,23 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public PayooConfig? PayooConfig { get; set; }
         public new Services? Services { get; set; }
         public UrBoxConfig? UrBoxConfig { get; set; }
+        public VoucherConfigs? VoucherConfigs { get; set; }
         public PurchaseSettings? PurchaseSettings { get; set; }
         public ResourceContent? ResourceContent { get; set; }
+    }
+
+    public class VoucherConfigs
+    {
+        public VoucherConfig? VoucherForRetail { get; set; }
+    }
+
+    public class VoucherConfig
+    {
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public DateTime ExpiredDate { get; set; }
+        public int Quantity { get; set; }
+        public int Percent { get; set; }
     }
 
     public class PurchaseSettings
@@ -47,6 +62,7 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
     {
         public string? AppSecret { get; set; }
         public string? AppId { get; set; }
+        public IList<string>? DisableCategories { get; set; }
     }
 
     public class PayooConfig

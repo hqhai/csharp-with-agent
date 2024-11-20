@@ -86,7 +86,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.RefreshTokenExpired));
             }
 
-            await _userTokenRepository.Remove(refreshToken);
+            await _userTokenRepository.RemoveAsync(refreshToken);
 
             methodResult = await _mediator.Send(new GenerateTokenCommand { Id = refreshToken.UserId }, cancellationToken).ConfigureAwait(false);
             return methodResult;

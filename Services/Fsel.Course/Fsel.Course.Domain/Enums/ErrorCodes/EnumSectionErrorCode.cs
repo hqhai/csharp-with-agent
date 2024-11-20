@@ -8,5 +8,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Only one of two SectionParts or Questions
         /// </summary>
         OnlyOneOfTwoSectionPartsOrQuestions,
+
+        /// <summary>
+        ///  Exceeded valid score
+        /// </summary>
+        ExceededValidScore
     }
 }

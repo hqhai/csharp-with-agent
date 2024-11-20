@@ -13,5 +13,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseLevel CourseLevel { get; set; }
         public EnumCourseType CourseType { get; set; }
         public EnumCourseLevel NextCourseLevel { get; set; }
+        public double TargetBandScores { get; set; }
+        public double BandScores { get; set; }
     }
 }

@@ -167,7 +167,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(user));
                 return methodResult;
             }
-            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            //using (var scope = new TransactionScope(TransactionScopeOption.Required,
+            //    new TransactionOptions
+            //    {
+            //        IsolationLevel = IsolationLevel.ReadCommitted
+            //    },
+            //    TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -196,12 +201,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                         return methodResult;
                     }
                     await _userManager.AddToRoleAsync(user, nameof(Student));
-                    scope.Complete();
+                    //scope.Complete();
                 }
                 catch
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr));
-                    scope.Dispose();
+                    //scope.Dispose();
                 }
             }
             if (!methodResult.IsOK || user == null)

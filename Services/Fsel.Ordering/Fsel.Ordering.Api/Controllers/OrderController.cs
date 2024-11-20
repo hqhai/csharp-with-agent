@@ -58,11 +58,11 @@ namespace Fsel.Ordering.Api.Controllers
         /// Check Status User
         /// </summary>
         [HttpGet("get-list-order")]
-        [ProducesResponseType(typeof(MethodResult<Guid>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<OrderModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListOrder([FromQuery] GetListOrderQuery query)
         {
-            MethodResult<Guid> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<OrderModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

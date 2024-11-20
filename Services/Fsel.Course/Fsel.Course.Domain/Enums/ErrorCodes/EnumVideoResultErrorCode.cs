@@ -17,6 +17,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Select Video TimeCode first
         /// </summary>
-        VideoTimeCodeNotFirst
+        VideoTimeCodeNotFirst,
+
+        /// <summary>
+        /// Coin is displayed
+        /// </summary>
+        CoinDisplayed
     }
 }

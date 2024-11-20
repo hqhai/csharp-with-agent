@@ -5,6 +5,7 @@ namespace Fsel.System.Domain.Models.EntityModels
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
+    using Fsel.System.Domain.Models.EntityModels.Configs;
     using global::System;
 
     public class TokenHistoryModel : BaseModel
@@ -20,6 +21,7 @@ namespace Fsel.System.Domain.Models.EntityModels
         public EnumTokenMission? Mission { get; set; }
         public EnumTokenHistoryType Type { get; set; }
         public object? Config { get; set; }
+        public ConfigDataToken? ConfigData { get; set; }
         public TokenConfigModel? TokenConfig { get; set; }
     }
 }

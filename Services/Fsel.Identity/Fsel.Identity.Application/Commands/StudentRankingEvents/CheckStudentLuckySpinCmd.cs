@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingEvents
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -39,13 +40,16 @@ namespace Fsel.Identity.Application.Commands.StudentRankingEvents
 
             var userId = request.UserId ?? _authContext.CurrentUserId;
 
-            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(x => x.Human != null && x.Human.UserId == userId, cancellationToken);
+            var student = await _studentRepository.Queryable.Include(p => p.Human).FirstOrDefaultAsync(x => x.Human != null && x.Human.UserId == userId, cancellationToken);
+
             var studentRankingEvents = await _studentRankingEventsRepository.Queryable
                 .Include(x => x.CompetitionEvents)
                 .Where(x => student != null && x.StudentId == student.Id)
                 .ToListAsync(cancellationToken);
 
-            var competitionEvents = studentRankingEvents.Where(x => x.CompetitionEvents != null && x.CompetitionEvents.EventContent != null && x.CompetitionEvents.EventContent.LuckySpin)
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+            var competitionEvents = studentRankingEvents.Where(x => x.CompetitionEvents != null && x.CompetitionEvents.EventContent != null && x.CompetitionEvents.EventContent.LuckySpin && x.CompetitionEvents.EventContent.StartDate.HasValue && x.CompetitionEvents.EventContent.EndDate.HasValue && x.CompetitionEvents.EventContent.StartDate.Value.Date <= currentDate.Date && x.CompetitionEvents.EventContent.EndDate.Value.Date >= currentDate.Date)
                 .Select(x => x.CompetitionEvents);
 
             methodResult.Result = _mapper.Map<IList<CompetitionEventsModel>?>(competitionEvents);
