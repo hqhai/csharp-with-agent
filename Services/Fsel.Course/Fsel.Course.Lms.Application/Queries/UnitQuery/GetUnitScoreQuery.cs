@@ -39,7 +39,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
         {
             MethodResult<IList<UnitResultModel>> methodResult = new MethodResult<IList<UnitResultModel>>();
 
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));

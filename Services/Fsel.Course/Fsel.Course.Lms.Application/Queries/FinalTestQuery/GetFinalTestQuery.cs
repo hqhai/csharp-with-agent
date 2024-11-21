@@ -54,7 +54,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<FinalTestModel> methodResult = new MethodResult<FinalTestModel>();
 
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));

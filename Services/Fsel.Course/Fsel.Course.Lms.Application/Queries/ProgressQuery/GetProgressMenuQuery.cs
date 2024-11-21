@@ -87,7 +87,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private async Task<MethodResult<(Course, CourseResult)>> ValidateAsync(GetProgressMenuQuery request)
         {
             var methodResult = new MethodResult<(Course, CourseResult)>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
