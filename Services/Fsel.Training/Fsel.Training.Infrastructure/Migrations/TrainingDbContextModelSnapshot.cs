@@ -422,6 +422,8 @@ namespace Fsel.Training.Infrastructure.Migrations
 
                     b.HasIndex("ClassId");
 
+                    b.HasIndex("IsDeleted", "ClassId", "StudentId");
+
                     b.ToTable("ClassStudents");
                 });
 

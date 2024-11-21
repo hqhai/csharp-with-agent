@@ -24,6 +24,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
     using Fsel.Interaction.Application.Services.UserServices.Models;
     using Kros.Extensions;
     using Fsel.Interaction.Infrastructure.Repositories;
+    using Fsel.Interaction.Application.Services.CourseServices.QueryModel;
 
     public class CreateActionCommand : CreateActionCommandModel, IRequest<MethodResult<bool>>
     {
@@ -129,13 +130,33 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 
                         var lesson = await _courseService.GetLessonResult(classForumResultTemp.LessonResultId ?? default);
 
-                        var (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(classForumResultTemp!, classForumResultTemp?.CourseId, classForumResultTemp?.CurrentUnitId, lesson?.Content?.Result?.Id);
+                        var objectOwnerId = CustomDataForParamMessage(classForumResultTemp!);
+
+
+                        FeatureModuleQuery query = new FeatureModuleQuery
+                        {
+                            FeatureModule = EnumFeatureModule.ClassForumResult,
+                            ObjectId = classForumResultTemp?.Id ?? default,
+                            UserId = _authContext.CurrentUserId,
+                        };
+                        var moduleResultReply = await _courseService.GetModuleModel(query);
+                        var featureModuleReplyModel = moduleResultReply?.Content?.Result;
+
+                        var paramLinksValue = new List<object>
+                                     {
+                                        featureModuleReplyModel?.CourseId ?? default,
+                                        featureModuleReplyModel?.UnitId ?? default,
+                                        featureModuleReplyModel?.LessonId ?? default,
+                                        featureModuleReplyModel?.ClassForumDetailResultId ?? default,
+                                     };
+
+
                         bool conditionCheckIsClassForum = await CheckObjecIsClassForum(request.ObjectId);
                         if (!conditionCheckIsClassForum)
                         {
                             var comment = await _commentRepository.GetByIdAsync(request.ObjectId);
                             classForumResultTemp = await GetClassForumResultModel(comment!.ObjectId);
-                            (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(comment!, classForumResultTemp?.CourseId, classForumResultTemp?.UnitId, lesson?.Content?.Result?.Id);
+                            objectOwnerId = CustomDataForParamMessage(comment!);
 
                             businessType = EnumNotificationType.LinkComment;
                             businessContent = EnumNotificationContent.LikeComment;
@@ -157,7 +178,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                                     UserIds = new List<Guid>() { objectOwnerId },
                                     SenderId = _authContext.CurrentUserId,
                                     ParamsMessage = new List<object> { userNameLiked ?? string.Empty },
-                                    ParamsLink = returnedParamsLink,
+                                    ParamsLink = paramLinksValue,
                                     Type = businessType,
                                     Content = businessContent,
                                     InterationType = action.Type,
@@ -248,17 +269,17 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
         /// <param name="userService"></param>
         /// <param name="trainingService"></param>
         /// <returns></returns>
-        public (List<object> paramsLink, Guid ownerObjectId) CustomDataForParamMessage(dynamic templateResult, Guid? courseId, Guid? unitId, Guid? lessonId)
+        public Guid CustomDataForParamMessage(dynamic templateResult)
         {
             if (templateResult == null)
             {
-                return (new List<object>(), Guid.Empty);
+                return Guid.Empty;
             }
             // param
-            var paramsLink = new List<object> { lessonId?.ToString() ?? string.Empty, courseId?.ToString() ?? string.Empty, unitId?.ToString() ?? string.Empty };
+
             var ownerObjectId = templateResult?.CreatedUserId ?? default;
 
-            return (paramsLink, ownerObjectId);
+            return ownerObjectId;
         }
 
         /// <summary>

@@ -14,7 +14,9 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public ClassForumResultProfile()
         {
-            CreateMap<ClassForumResult, ClassForumResultModel>().IgnoreAllNonExisting();
+            CreateMap<ClassForumResult, ClassForumResultModel>()
+                .ForMember(p => p.ClassForumScores, x => x.MapFrom(n => n.ClassForumScores.OrderBy(x => x.CreatedDate)));
+
             CreateMap<CreateClassForumResultCommandModel, ClassForumResult>().IgnoreAllNonExisting();
             CreateMap<ClassForumAIResponseModel, SetTimeRetryClassForumModel>().IgnoreAllNonExisting();
             CreateMap<RateClassForumResultCommandModel, ClassForumResult>().IgnoreAllNonExisting();
@@ -24,6 +26,13 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<ClassForumResult, ClassForumResultInfoModel>()
                 .ForMember(p => p.UnitId, x => x.MapFrom(n => n.LessonResult!.UnitId))
                 .ForMember(p => p.CourseId, x => x.MapFrom(n => n.LessonResult!.CourseId));
+            CreateMap<ClassForumResult, ClassForumSearchModel>()
+                .ForMember(x => x.PromptName, x => x.MapFrom(y => y.ClassForum != null ? y.ClassForum.PromptName : null))
+                .ForMember(x => x.TaggetWordLimit, x => x.MapFrom(y => y.ClassForum != null ? y.ClassForum.TaggetWordLimit : 0))
+                .ForMember(x => x.TaggetTimeLimit, x => x.MapFrom(y => y.ClassForum != null ? y.ClassForum.TaggetTimeLimit : 0))
+                .ForMember(x => x.MediaPost, x => x.MapFrom(y => y.ClassForum != null ? y.ClassForum.MediaPost : null))
+                .ForMember(x => x.CourseSkill, x => x.MapFrom(y => y.ClassForum != null ? y.ClassForum.CourseSkill : default))
+                .ForMember(x => x.ClassForumFiles, x => x.MapFrom(y => y.ClassForum != null ? y.ClassForum.ClassForumFiles : default));
         }
     }
 }

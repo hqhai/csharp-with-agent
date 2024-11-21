@@ -29,8 +29,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd.V1i1
         public CreateCourseCommandHandler(ICourseRepository courseRepository
             , CourseHelper courseHelper
             , IMapper mapper
-            , IUserService userService
-            )
+            , IUserService userService)
         {
             _courseRepository = courseRepository;
             _courseHelper = courseHelper;
@@ -46,6 +45,11 @@ namespace Fsel.Course.Application.Commands.CourseCmd.V1i1
             #region Validation
 
             var course = _mapper.Map<EntityCourse>(request);
+            if (!course.IsValid())
+            {
+                methodResult.AddErrorBadRequest(course.ErrorMessages);
+                return methodResult;
+            }
 
             var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course.CourseTeachers.Select(x => x.TeacherId).ToList() });
             if (!teachers.IsSuccessStatusCode)
@@ -65,13 +69,13 @@ namespace Fsel.Course.Application.Commands.CourseCmd.V1i1
             course.CourseUnitMockTests.ForEach(x =>
             {
                 var query = course.CourseUnitMockTests.OrderBy(n => n.DisplayOrder);
-                if (x.UnitId != null)
+                if (x.UnitId.HasValue)
                 {
-                    x.Number = query.Where(n => n.UnitId != null).ToList().IndexOf(x) + 1;
+                    x.Number = query.Where(n => n.UnitId.HasValue).ToList().IndexOf(x) + 1;
                 }
-                else if (x.MockTestId != null)
+                else if (x.MockTestId.HasValue)
                 {
-                    x.Number = query.Where(n => n.MockTestId != null).ToList().IndexOf(x) + 1;
+                    x.Number = query.Where(n => n.MockTestId.HasValue).ToList().IndexOf(x) + 1;
                 }
             });
 

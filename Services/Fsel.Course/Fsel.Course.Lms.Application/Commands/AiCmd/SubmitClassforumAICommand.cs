@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Infrastructure.ValueSettings;
+    using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SenderService;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -118,6 +119,15 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
+            GetFeatureModuleQuery query = new GetFeatureModuleQuery
+            {
+                FeatureModule = EnumFeatureModule.ClassForumDetailResult,
+                ObjectId = classForumDetailResult?.Id ?? default,
+            };
+
+            var featureModule = await _mediator.Send(query, cancellationToken);
+            var featureModuleResult = featureModule?.Result;
+
             await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
             {
                 GradingAlFeedback = ConvertHelper.Serialize(classForumAIs),
@@ -130,7 +140,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 if (classForumDetailResultOwner != null)
                 {
                     var lessonResult = await _lessonResultRepository.GetIncludeByIdAsync(classForumDetailResultOwner.ClassForumResult!.LessonResultId);
-                    var paramsLink = new List<object> { lessonResult?.LessonId.ToString() ?? string.Empty, lessonResult?.CourseId.ToString() ?? string.Empty, lessonResult?.UnitId.ToString() ?? string.Empty };
+
+                    var paramsLink = new List<object> { featureModuleResult?.CourseId.ToString() ?? string.Empty, featureModuleResult?.UnitId.ToString() ?? string.Empty, featureModuleResult?.LessonId.ToString() ?? string.Empty };
 
                     NotificationSendingQueueModel notificationQueue = new NotificationSendingQueueModel()
                     {

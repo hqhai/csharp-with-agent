@@ -10,6 +10,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public double CountQuestion { get; set; }
         public double TotalQuestion { get; set; }
+        public double CorrectCount { get; set; }
+        public double CorrectTotal { get; set; }
         public long WorkingTime { get; set; }
         public int? HighestStreak { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }

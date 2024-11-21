@@ -11,7 +11,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -212,10 +211,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             var maxHighestStreak = 0;
             foreach (var videoTimeCodeResult in videoTimeCodeResults)
             {
-                var isCheckScore = !videoTimeCodeResult.CorrectCountUngraded.HasValue && videoTimeCodeResult.CorrectCount == videoTimeCodeResult.CorrectTotal;
-                bool isCheckScoreUng = videoTimeCodeResult.CorrectCountUngraded.HasValue && videoTimeCodeResult.CorrectTotalUngraded.HasValue
-                                       && videoTimeCodeResult.CorrectCountUngraded.Value == videoTimeCodeResult.CorrectTotalUngraded.Value;
-                if (isCheckScoreUng || isCheckScore)
+                //var isCheckScore = !videoTimeCodeResult.CorrectCountUngraded.HasValue && videoTimeCodeResult.CorrectCount == videoTimeCodeResult.CorrectTotal;
+                //bool isCheckScoreUng = videoTimeCodeResult.CorrectCountUngraded.HasValue && videoTimeCodeResult.CorrectTotalUngraded.HasValue
+                //                       && videoTimeCodeResult.CorrectCountUngraded.Value == videoTimeCodeResult.CorrectTotalUngraded.Value;
+                //if (isCheckScoreUng || isCheckScore)
+                if (videoTimeCodeResult.CorrectCount == videoTimeCodeResult.CorrectTotal)
                 {
                     highestStreak++;
                     maxHighestStreak = Math.Max(maxHighestStreak, highestStreak);
@@ -456,7 +456,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             if (currentVideoTimeCodeResults != null && currentVideoTimeCodeResults.CorrectCount == currentVideoTimeCodeResults.CorrectTotal && currentVideoTimeCodeResults.Status == EnumResultStatus.Done)
             {
                 int indexOfCurrent = videoTimeCodeResults.IndexOf(currentVideoTimeCodeResults);
-
                 int count = 0;
                 for (int i = indexOfCurrent; i >= 0; i--)
                 {

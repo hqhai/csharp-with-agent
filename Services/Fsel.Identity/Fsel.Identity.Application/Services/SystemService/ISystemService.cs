@@ -29,19 +29,14 @@ namespace Fsel.Identity.Application.Services.SystemService
         [Get("/v1/school/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<SchoolModel>>>> ExecuteListSchoolQueryAsync([Query] BaseQueryModel query);
 
-        [RefitCache(CacheSettings.TimeCache.OneHour)]
-        [Post("/v1/school/get-school-by-ids")]
-        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolByIds([Body] IList<Guid> ids);
-
         [Post("/v1/feature-access-time/get-feature-access-time-by-userIds")]
         Task<IApiResponse<MethodResult<IList<GetFeatureAccessTimeQueryModel>>>> GetFeatureAccessTimeByUserIds([FromBody] IList<Guid> userIds);
 
         [Post("/v1/google-sheet/add-contact-info-from-landing-page")]
         Task<IApiResponse<MethodResult<bool>>> AddContactInfoToGoogleSheet([Body] ReceiveDataFromLandingPageCommandModel model);
 
-        [RefitCache(CacheSettings.TimeCache.OneHour)]
         [Post("/v1/school/get-by-ids")]
-        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolsAsync([Body] IList<Guid>? ids);
+        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolByIds([Body] IList<Guid>? ids);
 
         [Post("/v1/google-sheet/register-student-for-event")]
         Task<IApiResponse<MethodResult<bool>>> RegisterStudentForEvent([Body] RegisterStudentForEventCommandModel model);

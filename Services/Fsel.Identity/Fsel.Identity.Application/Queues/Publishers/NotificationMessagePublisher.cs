@@ -27,6 +27,8 @@ namespace Fsel.Identity.Application.Queues.Publishers
                 Type = model.Type,
                 Content = model.Content,
                 PlatformCode = EnumPlatformCode.LMS,
+                ParamsLink = model.ParamsLink,
+                ParamsMessage = model.ParamsMessage
             }, cancellationToken);
         }
     }

@@ -15,14 +15,11 @@ namespace Fsel.Course.Domain.Models.CommandModels.Sections
         public int? TargetWord { get; set; }
         public int DisplayOrder { get; set; }
         public string? VideoFilePath { get; set; }
-
         public string? SubFilePath { get; set; }
         public IList<CreateSectionPartCommandModel>? SectionParts { get; set; }
         public IList<CreateQuestionCommandModel>? Questions { get; set; }
         public IList<CreateSectionTimeCodeCommandModel>? SectionTimeCodes { get; set; }
-
         public IList<MockTestAISettingModel>? MockTestAISettings { get; set; }
-
     }
 
     public class MockTestAISettingModel
@@ -38,21 +35,15 @@ namespace Fsel.Course.Domain.Models.CommandModels.Sections
         public double? SettingPresence { get; set; }
         public string? Task { get; set; }
         public IList<MockTestPromptModel>? Prompts { get; set; }
-
         public IList<MockTestAICriteriaSettingModel>? MockTestAICriteriaSettings { get; set; }
     }
 
     public class MockTestAICriteriaSettingModel
     {
         public string? SystemRoleAlConfig { get; set; }
-
         public string? PromptStr { get; set; }
-
         public IList<MockTestPromptModel>? Prompts { get; set; }
-
         public Guid? MockTestAISettingId { get; set; }
-
         public EnumMockTestAIType CriteriaName { get; set; }
-
     }
 }

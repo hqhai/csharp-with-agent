@@ -16,9 +16,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -39,8 +41,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly IOrderService _orderService;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private readonly IMediator _mediator;
 
-        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext, IUserService userService, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher)
+        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext, IUserService userService, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, IMediator mediator)
         {
             _classForumResultRepository = classForumResultRepository;
             _mapper = mapper;
@@ -50,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             _orderService = orderService;
             _lessonResultRepository = lessonResultRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(ApproveClassForumPenddingCommand request, CancellationToken cancellationToken)
@@ -71,13 +75,13 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
             var csoId = csoResults.Content?.Result?.Id;
 
-            //var studentResult = await _userService.GetStudentByUserIdAsync(classForumResult.CreatedUserId);
-            //var student = studentResult.Content?.Result;
+            var studentResult = await _userService.GetStudentByUserIdAsync(classForumResult.CreatedUserId);
+            var student = studentResult.Content?.Result;
 
-            //var packageResults = await _orderService.GetPackages();
-            //var packages = packageResults.Content?.Result;
+            var packageResults = await _orderService.GetPackages();
+            var packages = packageResults.Content?.Result;
 
-            //var studentPackageCode = packages?.FirstOrDefault(x => x.Id == student?.PackageId)?.Code;
+            var studentPackageCode = packages?.FirstOrDefault(x => x.Id == student?.PackageId)?.Code;
 
             if (classForumResult.Status != EnumClassForumResultStatus.Pending)
             {
@@ -95,7 +99,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
                 if (request.IsApprove)
                 {
-                    classForumResult.Status = EnumClassForumResultStatus.Graded;
+                    if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.Autodot || (studentPackageCode == EnumPackageCode.BASIC && classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.TeacherGrading))
+                    {
+                        classForumResult.Status = EnumClassForumResultStatus.Graded;
+                    }
+
                     var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
                     var csoId = csoResults.Content?.Result?.Id;
                     classForumResult.CheckCsoId = csoId;
@@ -120,7 +128,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 }
 
                 _classForumResultRepository.Update(classForumResult);
-                await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 //Thông báo cho user khi bài viết được phê duyệt
                 await SendNotification(classForumResult, enumNotification, cancellationToken);
@@ -141,7 +149,17 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 var user = await _userService.GetUserByStudentId(lessonResult.StudentId);
                 var userId = user?.Content?.Result?.Human?.UserId;
 
-                List<object> paramLinksValue = new List<object> { lessonResult.LessonId.ToString() ?? string.Empty, lessonResult.CourseId.ToString() ?? string.Empty, lessonResult?.UnitId.ToString() ?? string.Empty };
+                GetFeatureModuleQuery query = new GetFeatureModuleQuery
+                {
+                    FeatureModule = EnumFeatureModule.ClassForumResult,
+                    ObjectId = classForumResult?.Id ?? default,
+                    UserId = userId ?? default
+                };
+
+                var featureModule = await _mediator.Send(query).ConfigureAwait(false);
+                var featureModuleResult = featureModule?.Result;
+
+                List<object> paramLinksValue = new List<object> { featureModuleResult?.CourseId.ToString() ?? string.Empty, featureModuleResult?.UnitId.ToString() ?? string.Empty, featureModuleResult?.LessonId.ToString() ?? string.Empty, featureModuleResult?.ClassForumDetailResultId.ToString() ?? string.Empty };
 
                 NotificationSendingQueueModel model = new NotificationSendingQueueModel()
                 {

@@ -34,20 +34,16 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     {
         private readonly IMapper _mapper;
         private readonly IClassForumResultRepository _classForumResultRepository;
-        private readonly IClassForumRepository _classForumRepository;
-        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IUserService _userService;
         private readonly ITrainingService _trainingService;
         private readonly INotificationService _notificationService;
         private readonly IInteractionService _interactionService;
         private readonly AuthContext _authContext;
 
-        public SearchRelevantClassForumsQueryHandler(IMapper mapper, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, IUserService userService, ITrainingService trainingService, INotificationService notificationService, IInteractionService interactionService, AuthContext authContext)
+        public SearchRelevantClassForumsQueryHandler(IMapper mapper, IClassForumResultRepository classForumResultRepository, IUserService userService, ITrainingService trainingService, INotificationService notificationService, IInteractionService interactionService, AuthContext authContext)
         {
             _mapper = mapper;
             _classForumResultRepository = classForumResultRepository;
-            _classForumRepository = classForumRepository;
-            _lessonResultRepository = lessonResultRepository;
             _userService = userService;
             _trainingService = trainingService;
             _notificationService = notificationService;
@@ -80,12 +76,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
-            if (lessonResult == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
             var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumDetailResults).FirstOrDefaultAsync(x => x.Id == request.ClassForumResultId, cancellationToken);
             if (classForumResult == null)
             {
@@ -98,49 +88,13 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 return methodResult;
             }
 
-            var classForum = await _classForumRepository.Queryable.Where(x => x.LessonId == lessonResult.LessonId).FirstOrDefaultAsync(cancellationToken);
-            if (classForum == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
-
             var classForumResults = _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
-                .Where(x => x.ClassForumId == classForum.Id
+                .Where(x => x.ClassForumId == classForumResult.ClassForumId
                 && x.Status == EnumClassForumResultStatus.Graded
                 && x.Id != request.ClassForumResultId
-                && classStudentIds.Contains(x.StudentId))
-                .Select(x => new ClassForumResultModel
-                {
-                    Id = x.Id,
-                    Status = x.Status,
-                    CheckCsoId = x.CheckCsoId,
-                    CheckStartDate = x.CheckStartDate,
-                    ClassForumId = x.ClassForumId,
-                    Content = x.Content,
-                    CorrectCount = x.CorrectCount,
-                    CorrectTotal = x.CorrectTotal,
-                    SkillScores = x.SkillScores,
-                    WordCount = x.WordCount,
-                    WordContent = x.WordContent,
-                    UpdatedUserId = x.UpdatedUserId,
-                    UpdatedFullName = x.UpdatedFullName,
-                    UpdatedDate = x.UpdatedDate,
-                    TimeCount = x.TimeCount,
-                    StudentId = x.StudentId,
-                    LessonResultId = x.LessonResultId,
-                    GradingStartDate = x.GradingStartDate,
-                    CreatedDate = x.CreatedDate,
-                    CreatedFullName = x.CreatedFullName,
-                    CreatedUserId = x.CreatedUserId,
-                    ClassForumScores = _mapper.Map<IList<ClassForumScoreModel>>(x.ClassForumScores.OrderBy(x => x.CreatedDate)),
-                    ClassForumResultFiles = _mapper.Map<IList<ClassForumResultFileModel>>(x.ClassForumResultFiles),
-                    TokenLastTime = x.TokenLastTime,
-                    TokenFirstTime = x.TokenFirstTime,
-                    IsViewed = x.IsViewed,
-                });
+                && classStudentIds.Contains(x.StudentId));
 
             int totalItem = await classForumResults.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await classForumResults
@@ -160,26 +114,24 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             var notificationRemind = await _notificationService.GetListNotificationRemind(query);
             var notificationTurnOff = notificationRemind.Content?.Result;
-            List<ClassForumResultModel> classForumResultModels = new List<ClassForumResultModel>();
-
-            var userResults = await _userService.GetUsersByUserIdsAsync(lists.Select(x => x.CreatedUserId).ToList());
-            var users = userResults?.Content?.Result;
+            var classForumResultModels = _mapper.Map<List<ClassForumResultModel>>(lists);
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).ToList());
+            var students = studentResults?.Content?.Result;
             if (actions != null)
             {
-                classForumResultModels = lists.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
-                foreach (var item in classForumResultModels)
+                classForumResultModels = classForumResultModels.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
+                classForumResultModels.ForEach(item =>
                 {
-                    var user = users?.FirstOrDefault(x => x.Id == item.CreatedUserId);
+                    var studentDto = students?.FirstOrDefault(x => x.Id == item.StudentId);
                     var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
                     item.CommentNumber = action?.CommentNumber;
                     item.LikeNumber = action?.LikeNumber;
                     item.IsLiked = action?.IsLiked;
-                    item.CreatedFullName = user?.FullName;
-                    item.IsTurnedOffNotification = notificationTurnOff!.Any(x => x.ObjectId == item.Id);
+                    item.CreatedFullName = studentDto?.Human?.FullName;
+                    item.IsTurnedOffNotification = notificationTurnOff?.Any(x => x.ObjectId == item.Id) ?? default;
                     item.CourseLevel = student.CourseLevel;
-                }
+                });
             }
-
             methodResult.Result = new PagingItemsModel<ClassForumResultModel>(classForumResultModels, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
