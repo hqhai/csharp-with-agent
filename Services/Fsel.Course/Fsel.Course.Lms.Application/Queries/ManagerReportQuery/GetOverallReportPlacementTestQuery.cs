@@ -58,16 +58,12 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var students = userResults?.Result;
-            if (students == null)
-            {
-                return methodResult;
-            }
-            var studentIds = students.Select(x => x.Id).ToList();
+            var studentIds = students?.Select(x => x.Id).ToList();
             var query = _placementTestGroupResultRepository.Queryable.Where(x => x.CompletionLevel != EnumPlacementTestLevel.IELTS)
-                                                           .Where(x => studentIds.Contains(x.StudentId));
+                                                           .Where(x => studentIds != null && studentIds.Contains(x.StudentId));
             var overallReportPlacementTest = new OverallReportPlacementTestModel
             {
-                TotalStudent = studentIds.Count,
+                TotalStudent = studentIds?.Count ?? default,
                 TotalPlacementTest = await query.CountAsync(cancellationToken),
                 TotalCompletePlacementTest = await query.Where(x => x.Status == EnumResultStatus.Done).CountAsync(cancellationToken),
             };

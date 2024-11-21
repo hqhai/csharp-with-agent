@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class GetOverallReportLearningProgressQuery : SearchReportLearningProgressQueryModel, IRequest<MethodResult<OverallReportLearningProgressModel>>
     {
@@ -73,14 +74,20 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
         private async Task SetAverageProgress(OverallReportLearningProgressModel overallReport, GetOverallReportLearningProgressQuery request, IList<StudentDtoModel>? students)
         {
-            if (students == null)
+            if (students == null || !students.Any())
             {
+                overallReport.ContentAverageProgress = $"{ValueDefault} / {GetTotalProgress(request)}";
                 return;
             }
             var courseResults = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
             var countProgress = await _managerProgressHelper.GetOverallCompleteAsync(courseResults, request.EndDate);
             var totalProgress = await _managerProgressHelper.GetTotalCompleteCourseAsync(courseResults);
             overallReport.ContentAverageProgress = $"{countProgress} / {totalProgress}";
+        }
+
+        private static double GetTotalProgress(GetOverallReportLearningProgressQuery request)
+        {
+            return request.CourseType == EnumCourseType.Academic ? CourseProgressValue.ProgressAcademic : request.CourseType == EnumCourseType.Ielts ? CourseProgressValue.ProgressIELTS : ValueDefault;
         }
     }
 }

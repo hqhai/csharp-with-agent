@@ -103,7 +103,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var students = userResults?.Result;
-            if (students == null)
+            if (students == null || !students.Any())
             {
                 methodResult.Result = reportLearningProgress;
                 return methodResult;

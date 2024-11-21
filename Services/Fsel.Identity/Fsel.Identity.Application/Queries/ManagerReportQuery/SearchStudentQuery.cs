@@ -116,6 +116,10 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType.Value);
                 query = query.Where(x => x.CourseLevel.HasValue && courseLevels.Contains(x.CourseLevel.Value));
             }
+            if (request.CourseLevel.HasValue)
+            {
+                query = query.Where(x => x.CourseLevel.HasValue && x.CourseLevel == request.CourseLevel.Value);
+            }
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);

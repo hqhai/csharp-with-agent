@@ -201,7 +201,7 @@ namespace Fsel.Course.Infrastructure.Common
 
         public async Task<double> GetOverallCompleteAsync(IList<CourseResultModel>? courseResults, DateTime? arrivalDate = default)
         {
-            if (courseResults == null)
+            if (courseResults == null || !courseResults.Any())
             {
                 return default;
             }
@@ -273,7 +273,7 @@ namespace Fsel.Course.Infrastructure.Common
 
         public async Task<int> GetTotalCompleteCourseAsync(IList<CourseResultModel>? courseResults)
         {
-            if (courseResults == null)
+            if (courseResults == null || !courseResults.Any())
             {
                 return default;
             }
@@ -319,7 +319,7 @@ namespace Fsel.Course.Infrastructure.Common
 
         public async Task<IList<CourseCompleteModel>> GetProgressCompleteModuleAsync(IList<CourseResultModel> courseResults, DateTime? arrivalDate = default)
         {
-            if (courseResults == null)
+            if (courseResults == null || !courseResults.Any())
             {
                 return new List<CourseCompleteModel>();
             }
@@ -342,7 +342,7 @@ namespace Fsel.Course.Infrastructure.Common
 
         public async Task<IList<CourseCompleteModel>> GetCourseCompletesAsync(IList<CourseResultModel>? courseResults, DateTime? arrivalDate = default)
         {
-            if (courseResults == null)
+            if (courseResults == null || !courseResults.Any())
             {
                 return new List<CourseCompleteModel>();
             }
@@ -417,7 +417,7 @@ namespace Fsel.Course.Infrastructure.Common
 
         private async Task<List<OverallModuleLearnModel>> GetCompleteCourseTotalsAsync(IList<CourseResultModel>? courseResults)
         {
-            if (courseResults == null)
+            if (courseResults == null || !courseResults.Any())
             {
                 return new List<OverallModuleLearnModel>();
             }
