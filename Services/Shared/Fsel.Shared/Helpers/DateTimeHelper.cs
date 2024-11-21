@@ -164,5 +164,11 @@ namespace Fsel.Shared.Helpers
 
             return false;
         }
+
+        public static long ConvertDateTimeToSeconds(this DateTime dateTime)
+        {
+            long totalSeconds = dateTime.Hour * 3600 + dateTime.Minute * 60;
+            return totalSeconds;
+        }
     }
 }

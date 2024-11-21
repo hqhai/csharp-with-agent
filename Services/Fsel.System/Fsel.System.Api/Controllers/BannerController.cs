@@ -7,6 +7,7 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.System.Application.Commands.BannerStudentCmd;
     using Fsel.System.Application.Queries.BannerQuery;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
@@ -36,6 +37,30 @@ namespace Fsel.System.Api.Controllers
         public async Task<IActionResult> GetBannerToStudent()
         {
             MethodResult<BannerModel> commandResult = await _mediator.Send(new GetBannerToStudentQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get baner by student
+        /// </summary>
+        [HttpGet("banner-heading-student")]
+        [ProducesResponseType(typeof(MethodResult<IList<BannerStudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetBannerByStudent([FromQuery] GetBannerByStudentQuery query)
+        {
+            MethodResult<IList<BannerStudentModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create Banner Student In Day 
+        /// </summary>
+        [HttpPost]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateBannerStudentInDay([FromBody] CreateBannerStudentInDayCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
