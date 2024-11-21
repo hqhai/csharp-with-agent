@@ -29,6 +29,10 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Get("/v1/student/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] Guid id);
 
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
+        [Get("/v1/student/get-by-user-id/{id}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdWithCacheAsync([FromRoute] Guid id);
+
         [Get("/v1/student/get-student-by-class-id/{id}")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByClassIdAsync([Body] Guid id);
 

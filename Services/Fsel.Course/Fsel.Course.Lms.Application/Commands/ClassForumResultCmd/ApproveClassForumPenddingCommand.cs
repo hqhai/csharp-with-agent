@@ -71,13 +71,13 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
             var csoId = csoResults.Content?.Result?.Id;
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(classForumResult.CreatedUserId);
-            var student = studentResult.Content?.Result;
+            //var studentResult = await _userService.GetStudentByUserIdAsync(classForumResult.CreatedUserId);
+            //var student = studentResult.Content?.Result;
 
-            var packageResults = await _orderService.GetPackages();
-            var packages = packageResults.Content?.Result;
+            //var packageResults = await _orderService.GetPackages();
+            //var packages = packageResults.Content?.Result;
 
-            var studentPackageCode = packages?.FirstOrDefault(x => x.Id == student?.PackageId)?.Code;
+            //var studentPackageCode = packages?.FirstOrDefault(x => x.Id == student?.PackageId)?.Code;
 
             if (classForumResult.Status != EnumClassForumResultStatus.Pending)
             {
