@@ -221,30 +221,30 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             #region Send Code OTP
 
                             var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
-                            //var param = new SendOtpTemplateModel
-                            //{
-                            //    OtpCode = userOtpCode.Result,
-                            //    OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
-                            //};
-                            //var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
-                            //var sendResult = new MethodResult<bool>();
+                            var param = new SendOtpTemplateModel
+                            {
+                                OtpCode = userOtpCode.Result,
+                                OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
+                            };
+                            var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
+                            var sendResult = new MethodResult<bool>();
 
-                            //ArgumentNullException.ThrowIfNull(request);
-                            //if (!string.IsNullOrEmpty(request.Email))
-                            //{
-                            //    sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, IsCCEmailDefault = true, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
-                            //}
-                            //else if (!string.IsNullOrEmpty(request.PhoneNumber))
-                            //{
-                            //    sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject }, cancellationToken).ConfigureAwait(false);
-                            //}
+                            ArgumentNullException.ThrowIfNull(request);
+                            if (!string.IsNullOrEmpty(request.Email))
+                            {
+                                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, IsCCEmailDefault = true, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
+                            }
+                            else if (!string.IsNullOrEmpty(request.PhoneNumber))
+                            {
+                                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject }, cancellationToken).ConfigureAwait(false);
+                            }
 
-                            //if (!sendResult.IsOK)
-                            //{
-                            //    //scope.Dispose();
-                            //    methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
-                            //    return methodResult;
-                            //}
+                            if (!sendResult.IsOK)
+                            {
+                                //scope.Dispose();
+                                methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
+                                return methodResult;
+                            }
                             //scope.Complete();
 
                             #endregion Send Code OTP
