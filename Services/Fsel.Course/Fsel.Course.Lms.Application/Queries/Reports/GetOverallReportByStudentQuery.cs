@@ -47,7 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             Guid? userId = null;
             if (_authContext.CurrentUserId != default)
             {
-                var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+                var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
                 if (!studentResult.IsSuccessStatusCode)
                 {
                     methodResult.AddError(studentResult.Error);

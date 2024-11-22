@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PlacementTestResultModel> methodResult = new MethodResult<PlacementTestResultModel>();
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var student = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(student));

@@ -35,7 +35,6 @@ namespace Fsel.Identity.Application.Services.SystemService
         [Post("/v1/google-sheet/add-contact-info-from-landing-page")]
         Task<IApiResponse<MethodResult<bool>>> AddContactInfoToGoogleSheet([Body] ReceiveDataFromLandingPageCommandModel model);
 
-        [RefitCache(CacheSettings.TimeCache.OneHour)]
         [Post("/v1/school/get-by-ids")]
         Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolByIds([Body] IList<Guid>? ids);
 

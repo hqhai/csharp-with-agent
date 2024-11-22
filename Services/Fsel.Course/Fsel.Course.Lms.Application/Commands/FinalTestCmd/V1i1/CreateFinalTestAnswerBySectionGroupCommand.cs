@@ -101,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             StudentModel? student;
             if (request.StudentId.HasValue)
             {
-                var studentResult = await _userService.GetUserByStudentId(request.StudentId.Value);
+                var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(request.StudentId.Value);
                 if (!studentResult.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));

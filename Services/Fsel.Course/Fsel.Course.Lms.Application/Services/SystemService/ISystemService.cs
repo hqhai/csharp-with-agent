@@ -30,15 +30,19 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
         [Post("/v1/feature-access-time/get-to-modules")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetFeatureAccessTimeToModulesAsync([FromBody] FeatureAccessTimesQueryModel query);
 
+        [RefitCache(CacheSettings.TimeCache.FiveMinutes)]
         [Get("/v1/feature-access-time/get-detail")]
         Task<IApiResponse<MethodResult<FeatureAccessTimeModel>>> GetFeatureAccessTimeAsync([FromQuery] FeatureAccessTimeQueryModel query);
 
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
         [Get("/v1/forbidden-word/get-list-forbidden-word")]
         Task<IApiResponse<MethodResult<IList<string>>>> CheckContainForbiddenWord([FromQuery] string Word);
 
+        [RefitCache(CacheSettings.TimeCache.TenMinutes)]
         [Get("/v1/token-config/get-token")]
         Task<IApiResponse<MethodResult<TokenConfigModel>>> GetTokenConfigAsync([Query] GetTokenQueryModel query);
 
+        [RefitCache(CacheSettings.TimeCache.TenMinutes)]
         [Get("/v1/token-config/get-tokens")]
         Task<IApiResponse<MethodResult<IList<TokenConfigModel>>>> GetTokenConfigsAsync([Query] GetTokenConfigsQueryModel query);
 

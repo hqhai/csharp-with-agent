@@ -56,7 +56,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoTimeCodeModel> methodResult = new MethodResult<VideoTimeCodeModel>();
 
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));

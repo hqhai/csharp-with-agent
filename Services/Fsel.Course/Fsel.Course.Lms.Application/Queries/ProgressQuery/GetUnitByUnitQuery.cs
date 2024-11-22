@@ -53,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<UnitModel>> methodResult = new MethodResult<IList<UnitModel>>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
