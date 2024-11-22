@@ -81,11 +81,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 }
             }
             var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic);
-            var placementTestGroupResults = await query.Where(x => x.Status == EnumResultStatus.Done && x.CompletionLevel.HasValue)
-                                                       .GroupBy(x => x.CompletionLevel)
+            var placementTestGroupResults = await query.Where(x => x.Status == EnumResultStatus.Done && x.CurrentLevel.HasValue)
+                                                       .GroupBy(x => x.CurrentLevel)
                                                        .Select(x => new
                                                        {
-                                                           CompletionLevel = x.Key,
+                                                           CurrentLevel = x.Key,
                                                            CountStudent = x.Count()
                                                        })
                                                        .ToListAsync(cancellationToken);
@@ -93,7 +93,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             overallReportPlacementTest.CourseLevelProgresses = new List<CourseLevelProgressModel>();
             foreach (var item in courseLevels)
             {
-                var studentLevel = placementTestGroupResults.FirstOrDefault(x => x.CompletionLevel.GetValueOrDefault().GetCourseLevelByPlacementTestLevel() == item);
+                var studentLevel = placementTestGroupResults.FirstOrDefault(x => x.CurrentLevel == item);
                 overallReportPlacementTest.CourseLevelProgresses.Add(new CourseLevelProgressModel
                 {
                     CourseLevel = item,

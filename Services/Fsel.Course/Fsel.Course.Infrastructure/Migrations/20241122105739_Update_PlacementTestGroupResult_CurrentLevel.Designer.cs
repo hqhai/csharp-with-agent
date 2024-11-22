@@ -4,6 +4,7 @@ using Fsel.Course.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241122105739_Update_PlacementTestGroupResult_CurrentLevel")]
+    partial class Update_PlacementTestGroupResult_CurrentLevel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -774,6 +777,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<DateTime?>("NewDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<double>("Percent")
                         .HasColumnType("float");
@@ -2677,6 +2683,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<DateTime?>("CompletionDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("CorrectCount")
                         .HasColumnType("int");
 
@@ -2720,8 +2729,17 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("LessonId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("MaxHoursCompleted")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("NewDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<double>("Percent")
                         .HasColumnType("float");
+
+                    b.Property<DateTime?>("ProcessDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("SkillScoresStr")
                         .HasColumnType("nvarchar(max)");
@@ -3203,6 +3221,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<DateTime?>("CompletionDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("CorrectCount")
                         .HasColumnType("int");
 
@@ -3255,11 +3276,20 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<bool>("IsViewed")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("MaxHoursCompleted")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("MockTestId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("NewDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<double>("Percent")
                         .HasColumnType("float");
+
+                    b.Property<DateTime?>("ProcessDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("SkillScoresStr")
                         .HasColumnType("nvarchar(max)");
@@ -3812,19 +3842,12 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("PlacementTestGroupResultId");
 
-                    b.HasIndex("StudentId");
-
-                    b.HasIndex("Level", "StudentId");
-
                     b.HasIndex("PlacementTestId", "StudentId")
                         .IsUnique()
                         .HasFilter("[PlacementTestId] IS NOT NULL");
 
-
-                    b.HasIndex("Status", "StudentId");
-
                     b.ToTable("PlacementTestResults");
-            });
+                });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.PlacementTestSection", b =>
                 {
@@ -5088,6 +5111,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<DateTime?>("NewDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<double>("Percent")
                         .HasColumnType("float");

@@ -103,7 +103,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     StudentId = x.StudentId,
                     Status = x.Status,
                     ChooseLevel = x.ChooseLevel,
-                    CompletionLevel = x.CompletionLevel
+                    CompletionLevel = x.CompletionLevel,
+                    CurrentLevel = x.CurrentLevel,
                 })
                 .ToListAsync(cancellationToken);
 
@@ -131,7 +132,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 if (groupResult != null)
                 {
                     placementTestReport.ChooseLevel = groupResult.ChooseLevel;
-                    placementTestReport.CurrentLevel = groupResult.CompletionLevel.HasValue ? groupResult.CompletionLevel.Value.GetCourseLevelByPlacementTestLevel() : null;
+                    placementTestReport.CurrentLevel = groupResult.CurrentLevel;
                 }
                 return placementTestReport;
             }).ToList();

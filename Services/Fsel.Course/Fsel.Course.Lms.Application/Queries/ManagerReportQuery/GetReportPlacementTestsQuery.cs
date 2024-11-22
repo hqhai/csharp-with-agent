@@ -85,7 +85,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     SchoolName = item.School,
                     Status = GetStatus(placementTestGroupResult),
                     ChooseLevel = placementTestGroupResult?.ChooseLevel,
-                    CurrentLevel = placementTestGroupResult?.SuggetLevel,
+                    CurrentLevel = placementTestGroupResult?.CurrentLevel,
                     ExpiredPTDate = placementTestResult?.UpdatedDate ?? placementTestResult?.CreatedDate,
                 });
             }
