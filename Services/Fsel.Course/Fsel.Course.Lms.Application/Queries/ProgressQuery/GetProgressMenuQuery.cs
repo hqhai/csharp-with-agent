@@ -99,7 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            var studentId = student.Id;
+
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
