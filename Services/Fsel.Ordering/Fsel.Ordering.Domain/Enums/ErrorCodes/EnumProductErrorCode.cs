@@ -4,6 +4,7 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
 {
     public enum EnumProductErrorCode
     {
+        ProductNotExist,
         NotPartOfTheEvent,
         ExchangeExpirationDate,
         OutOfQuantity,

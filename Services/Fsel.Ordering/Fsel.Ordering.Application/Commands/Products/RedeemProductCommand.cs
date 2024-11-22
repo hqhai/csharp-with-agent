@@ -61,7 +61,7 @@ namespace Fsel.Ordering.Application.Commands.Products
             var product = await _productRepository.Queryable.Include(p => p.OrderTransactions).FirstOrDefaultAsync(p => p.Id == request.ProductId, cancellationToken);
             if (product == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.ProductNotExist));
                 return methodResult;
             }
 
@@ -89,7 +89,9 @@ namespace Fsel.Ordering.Application.Commands.Products
                 return methodResult;
             }
 
-            if (product.ExpireDate.Date < DateTime.UtcNow.Date)
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+            if (product.ExpireDate.Date < currentDate)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.ExchangeExpirationDate));
                 return methodResult;
