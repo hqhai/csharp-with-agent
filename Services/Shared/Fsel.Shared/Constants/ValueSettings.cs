@@ -20,7 +20,7 @@ namespace Fsel.Shared.Constants
         public const int DelayWorkerSecond = 60;
         public const int AmountTrialDays = 14;
         public const int MaxSendingRateApp = 3;
-        
+
         public static class AgeMilestone
         {
             public const int ChildrenAge = 13;
@@ -126,6 +126,71 @@ namespace Fsel.Shared.Constants
         {
             public const int DelayDateSendingRate = 5;
             public const int MoreThanOneDevice = 1;
+        }
+
+        public static class OverallPercentCourse
+        {
+            #region Aca
+
+            public const int OverallAcaPercentVideo = 9;
+            public const int OverallAcaPercentUnitTest = 24;
+            public const int OverallAcaPercentSkillTest = 18;
+            public const int OverallAcaPercentHomeWork = 14;
+            public const int OverallAcaPercentClassForum = 20;
+            public const int OverallAcaPercentFinalTest = 15;
+
+            #endregion Aca
+
+            #region RFI
+
+            public const int OverallRFIPercentVideo = 9;
+            public const int OverallRFIPercentUnitTest = 42;
+            public const int OverallRFIPercentHomeWork = 14;
+            public const int OverallRFIPercentClassForum = 20;
+            public const int OverallRFIPercentFinalTest = 15;
+
+            #endregion RFI
+
+            #region IELTS
+
+            public const int OverallIELTSPercentVideo = 20;
+            public const double SkillIELTSPercentVideo = 3.25;
+            public const double SkillSWIELTSPercentVideo = 3.5;
+            public const int OverallIELTSPercentHomeWork = 48;
+            public const int OverallIELTSPercentClassForum = 32;
+
+            #endregion IELTS
+        }
+
+        public static class OverallPercentUnit
+        {
+            #region Aca
+
+            public const int OverallAcaPercentVideo = 18;
+            public const int OverallAcaPercentUnitTest = 30;
+            public const int OverallAcaPercentSkillTest = 10;
+            public const int OverallAcaPercentHomeWork = 22;
+            public const int OverallAcaPercentClassForum = 20;
+
+            #endregion Aca
+
+            #region RFI
+
+            public const int OverallRFIPercentVideo = 18;
+            public const int OverallRFIPercentUnitTest = 40;
+            public const int OverallRFIPercentHomeWork = 22;
+            public const int OverallRFIPercentClassForum = 20;
+
+            #endregion RFI
+
+            #region IELTS
+
+            public const double SkillIELTSPercentVideo = 3.25;
+            public const double SkillSWIELTSPercentVideo = 3.5;
+            public const int OverallIELTSPercentHomeWork = 48;
+            public const int OverallIELTSPercentClassForum = 32;
+
+            #endregion IELTS
         }
     }
 }

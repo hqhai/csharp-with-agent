@@ -6,7 +6,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using System.Globalization;
     using System.Linq;
     using System.Threading;
-    using Amazon.Runtime.Internal.Util;
     using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
     using Fsel.Common.Models;
@@ -32,15 +31,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class BaseInternalUnitResultEventHandler : BaseInternalEventHandler
     {
-        private const int PercentOccupyVideo = 18;
-        private const int PercentOccupySkillTest = 10;
-        private const int PercentOccupyUnitTest = 30;
-        private const int PercentOccupyHomeWork = 22;
-        private const int PercentOccupyClassForum = 20;
-
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly ILogger<BaseInternalUnitResultEventHandler> _logger;
         private readonly ILessonResultRepository _lessonResultRepository;
@@ -397,7 +391,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (isSendEmail)
             {
                 var parameter = await GetParameter(skillScores, percent, unitResult.CreatedUserId, unitResult.StudentId, unit, lessonResults, course, cancellationToken);
-                await SendStudentCompleteUnit(unitResult.StudentId, parameter, course.CourseType, cancellationToken);
+                await SendStudentCompleteUnit(unitResult.StudentId, parameter, cancellationToken);
             }
             return isSendEmail;
         }
@@ -639,7 +633,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             var unitTestSkillScores = await GetVideoTestSkillScores(lessonResultIds, EnumTimeCodeType.UnitTest);
             var skillTestSkillScores = await GetVideoTestSkillScores(lessonResultIds, EnumTimeCodeType.SkillTest);
-
             return (unitTestSkillScores, skillTestSkillScores);
         }
 
@@ -651,7 +644,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (videoResults != null && videoResults.Any())
             {
                 skillScores = videoResults.SelectMany(x => x.VideoSkillScores!).Where(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
-                return skillScores;
             }
             return skillScores;
         }
@@ -663,37 +655,51 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var groupedSkillScores = new List<SkillScores>();
             if (courseType == EnumCourseType.Academic)
             {
-                var (videoSkillScores, percentVideo) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.Standalone, PercentOccupyVideo);
-                var (unitTestSkillScores, percentUnitTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.UnitTest, PercentOccupyUnitTest);
+                var (videoSkillScores, percentVideo) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.Standalone, OverallPercentCourse.OverallAcaPercentVideo);
+                var (unitTestSkillScores, percentUnitTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.UnitTest, OverallPercentCourse.OverallAcaPercentUnitTest);
                 if (!unitTestSkillScores.Any())
                 {
-                    percentUnitTest = PercentOccupyUnitTest;
+                    percentUnitTest = OverallPercentCourse.OverallAcaPercentUnitTest;
                 }
-                var (skillTestSkillScores, percentSkillTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.SkillTest, PercentOccupySkillTest);
+                var (skillTestSkillScores, percentSkillTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.SkillTest, OverallPercentCourse.OverallAcaPercentSkillTest);
                 if (!skillTestSkillScores.Any())
                 {
-                    percentSkillTest = PercentOccupySkillTest;
+                    percentSkillTest = OverallPercentCourse.OverallAcaPercentSkillTest;
                 }
-                var (homeWorkSkillScores, percentHomeWork) = await GetHomeWordsSkillScores(lessonResultIds, PercentOccupyHomeWork);
-                var (classForumSkillScores, percentClassForum) = await GetClassForumSkillScores(lessonResultIds, PercentOccupyClassForum);
+                var (homeWorkSkillScores, percentHomeWork) = await GetHomeWordsSkillScores(lessonResultIds, OverallPercentCourse.OverallAcaPercentHomeWork);
+                var (classForumSkillScores, percentClassForum) = await GetClassForumSkillScores(lessonResultIds, OverallPercentCourse.OverallAcaPercentClassForum);
                 List<SkillScores> mergedSkillScores = videoSkillScores.Concat(homeWorkSkillScores).Concat(classForumSkillScores).Concat(skillTestSkillScores).Concat(unitTestSkillScores).ToList();
                 groupedSkillScores = mergedSkillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).ToList();
                 percents = new List<double> { percentClassForum, percentHomeWork, percentSkillTest, percentUnitTest, percentVideo };
             }
-            else
+            else if (courseType == EnumCourseType.Ielts)
             {
-                var (videoSkillScores, percentVideo) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.Standalone, default, courseType);
-                var (homeWorkSkillScores, percentHomeWork) = await GetHomeWordsSkillScores(lessonResultIds, default, courseType);
-                var (classForumSkillScores, percentClassForum) = await GetClassForumSkillScores(lessonResultIds, default, courseType);
+                var (videoSkillScores, percentVideo) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.Standalone, courseType: courseType);
+                var (homeWorkSkillScores, percentHomeWork) = await GetHomeWordsSkillScores(lessonResultIds, courseType: courseType);
+                var (classForumSkillScores, percentClassForum) = await GetClassForumSkillScores(lessonResultIds, courseType: courseType);
                 List<SkillScores> mergedSkillScores = videoSkillScores.Concat(homeWorkSkillScores).Concat(classForumSkillScores).ToList();
                 groupedSkillScores = mergedSkillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).OrderBy(x => x.Skill).ToList();
                 percents = new List<double> { percentClassForum, percentHomeWork, percentVideo };
+            }
+            else if (courseType == EnumCourseType.AdultFoundation)
+            {
+                var (videoSkillScores, percentVideo) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.Standalone, OverallPercentCourse.OverallRFIPercentVideo);
+                var (unitTestSkillScores, percentUnitTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.UnitTest, OverallPercentCourse.OverallRFIPercentUnitTest);
+                if (!unitTestSkillScores.Any())
+                {
+                    percentUnitTest = OverallPercentCourse.OverallRFIPercentUnitTest;
+                }
+                var (homeWorkSkillScores, percentHomeWork) = await GetHomeWordsSkillScores(lessonResultIds, OverallPercentCourse.OverallRFIPercentHomeWork);
+                var (classForumSkillScores, percentClassForum) = await GetClassForumSkillScores(lessonResultIds, OverallPercentCourse.OverallRFIPercentClassForum);
+                List<SkillScores> mergedSkillScores = videoSkillScores.Concat(homeWorkSkillScores).Concat(classForumSkillScores).Concat(unitTestSkillScores).ToList();
+                groupedSkillScores = mergedSkillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).ToList();
+                percents = new List<double> { percentClassForum, percentHomeWork, percentUnitTest, percentVideo };
             }
 
             return (groupedSkillScores, (int)percents.Sum());
         }
 
-        private async Task SendStudentCompleteUnit(Guid studentId, SendStudentCompleteUnitModel model, EnumCourseType courseType, CancellationToken cancellationToken)
+        private async Task SendStudentCompleteUnit(Guid studentId, SendStudentCompleteUnitModel model, CancellationToken cancellationToken)
         {
             var studentResult = await _userService.GetUserByStudentId(studentId);
             if (!studentResult.IsSuccessStatusCode)
