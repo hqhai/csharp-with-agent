@@ -77,13 +77,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var refreshToken = await _userTokenRepository.GetByRefreshTokenAsync(request.RefreshToken);
             if (refreshToken == null)
             {
-                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.InvalidToken),
-                    nameof(request.RefreshToken), request.RefreshToken);
+                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.InvalidToken), nameof(request.RefreshToken), request.RefreshToken);
                 return methodResult;
             }
             else if (refreshToken.RefreshTokenExpiryTime == null || refreshToken.RefreshTokenExpiryTime.Value <= DateTime.UtcNow)
             {
-                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.RefreshTokenExpired));
+                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.RefreshTokenExpired), nameof(request.RefreshToken), request.RefreshToken);
+                return methodResult;
             }
 
             await _userTokenRepository.RemoveAsync(refreshToken);
