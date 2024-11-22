@@ -58,7 +58,7 @@ namespace Fsel.System.Application.Queries.LocationQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                locations = locations.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                locations = locations.Where(m => m.GlobalId.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             int totalItem = await locations.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
