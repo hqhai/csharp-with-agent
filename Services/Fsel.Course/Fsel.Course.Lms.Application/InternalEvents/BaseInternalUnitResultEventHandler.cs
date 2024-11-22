@@ -655,19 +655,19 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var groupedSkillScores = new List<SkillScores>();
             if (courseType == EnumCourseType.Academic)
             {
-                var (videoSkillScores, percentVideo) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.Standalone, OverallPercentCourse.OverallAcaPercentVideo);
-                var (unitTestSkillScores, percentUnitTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.UnitTest, OverallPercentCourse.OverallAcaPercentUnitTest);
+                var (videoSkillScores, percentVideo) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.Standalone, OverallPercentUnit.OverallAcaPercentVideo);
+                var (unitTestSkillScores, percentUnitTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.UnitTest, OverallPercentUnit.OverallAcaPercentUnitTest);
                 if (!unitTestSkillScores.Any())
                 {
-                    percentUnitTest = OverallPercentCourse.OverallAcaPercentUnitTest;
+                    percentUnitTest = OverallPercentUnit.OverallAcaPercentUnitTest;
                 }
-                var (skillTestSkillScores, percentSkillTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.SkillTest, OverallPercentCourse.OverallAcaPercentSkillTest);
+                var (skillTestSkillScores, percentSkillTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.SkillTest, OverallPercentUnit.OverallAcaPercentSkillTest);
                 if (!skillTestSkillScores.Any())
                 {
-                    percentSkillTest = OverallPercentCourse.OverallAcaPercentSkillTest;
+                    percentSkillTest = OverallPercentUnit.OverallAcaPercentSkillTest;
                 }
-                var (homeWorkSkillScores, percentHomeWork) = await GetHomeWordsSkillScores(lessonResultIds, OverallPercentCourse.OverallAcaPercentHomeWork);
-                var (classForumSkillScores, percentClassForum) = await GetClassForumSkillScores(lessonResultIds, OverallPercentCourse.OverallAcaPercentClassForum);
+                var (homeWorkSkillScores, percentHomeWork) = await GetHomeWordsSkillScores(lessonResultIds, OverallPercentUnit.OverallAcaPercentHomeWork);
+                var (classForumSkillScores, percentClassForum) = await GetClassForumSkillScores(lessonResultIds, OverallPercentUnit.OverallAcaPercentClassForum);
                 List<SkillScores> mergedSkillScores = videoSkillScores.Concat(homeWorkSkillScores).Concat(classForumSkillScores).Concat(skillTestSkillScores).Concat(unitTestSkillScores).ToList();
                 groupedSkillScores = mergedSkillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).ToList();
                 percents = new List<double> { percentClassForum, percentHomeWork, percentSkillTest, percentUnitTest, percentVideo };
@@ -683,14 +683,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
             else if (courseType == EnumCourseType.AdultFoundation)
             {
-                var (videoSkillScores, percentVideo) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.Standalone, OverallPercentCourse.OverallRFIPercentVideo);
-                var (unitTestSkillScores, percentUnitTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.UnitTest, OverallPercentCourse.OverallRFIPercentUnitTest);
+                var (videoSkillScores, percentVideo) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.Standalone, OverallPercentUnit.OverallRFIPercentVideo);
+                var (unitTestSkillScores, percentUnitTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.UnitTest, OverallPercentUnit.OverallRFIPercentUnitTest);
                 if (!unitTestSkillScores.Any())
                 {
-                    percentUnitTest = OverallPercentCourse.OverallRFIPercentUnitTest;
+                    percentUnitTest = OverallPercentUnit.OverallRFIPercentUnitTest;
                 }
-                var (homeWorkSkillScores, percentHomeWork) = await GetHomeWordsSkillScores(lessonResultIds, OverallPercentCourse.OverallRFIPercentHomeWork);
-                var (classForumSkillScores, percentClassForum) = await GetClassForumSkillScores(lessonResultIds, OverallPercentCourse.OverallRFIPercentClassForum);
+                var (homeWorkSkillScores, percentHomeWork) = await GetHomeWordsSkillScores(lessonResultIds, OverallPercentUnit.OverallRFIPercentHomeWork);
+                var (classForumSkillScores, percentClassForum) = await GetClassForumSkillScores(lessonResultIds, OverallPercentUnit.OverallRFIPercentClassForum);
                 List<SkillScores> mergedSkillScores = videoSkillScores.Concat(homeWorkSkillScores).Concat(classForumSkillScores).Concat(unitTestSkillScores).ToList();
                 groupedSkillScores = mergedSkillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).ToList();
                 percents = new List<double> { percentClassForum, percentHomeWork, percentUnitTest, percentVideo };
