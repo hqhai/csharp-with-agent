@@ -43,7 +43,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
 
-            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            //using (var scope = new TransactionScope(TransactionScopeOption.Required,
+            //    new TransactionOptions
+            //    {
+            //        IsolationLevel = IsolationLevel.ReadCommitted
+            //    },
+            //    TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -113,7 +118,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                         return methodResult;
                     }
                     var generateToken = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
-                    scope.Complete();
+                    //scope.Complete();
 
                     #endregion SignIn
 
@@ -123,7 +128,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 catch
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SignUpFail));
-                    scope.Dispose();
+                    //scope.Dispose();
                 }
                 return methodResult;
             }

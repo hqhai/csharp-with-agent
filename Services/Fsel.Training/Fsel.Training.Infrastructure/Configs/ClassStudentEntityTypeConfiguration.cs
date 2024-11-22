@@ -15,6 +15,8 @@ namespace Fsel.Training.Infrastructure.Configs
                .WithMany(b => b.ClassStudents)
                .HasForeignKey(b => b.ClassId)
                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasIndex(c => new { c.IsDeleted, c.ClassId, c.StudentId });
         }
     }
 }
