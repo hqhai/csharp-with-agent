@@ -115,7 +115,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             if (classForumDetailResult != null)
             {
                 classForumDetailResult.GradingAlFeedback = classForumAIs != null ? ConvertHelper.Serialize(GetClassForumAIs(classForumAIs)) : default;
-                _classForumDetailResultRepository.Update(classForumDetailResult);
+                _classForumDetailResultRepository.Update(classForumDetailResult, false, x => x.Status);
                 await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
