@@ -681,7 +681,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 groupedSkillScores = mergedSkillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).OrderBy(x => x.Skill).ToList();
                 percents = new List<double> { percentClassForum, percentHomeWork, percentVideo };
             }
-            else if (courseType == EnumCourseType.AdultFoundation)
+            else if (courseType == EnumCourseType.EnglishFoundation)
             {
                 var (videoSkillScores, percentVideo) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.Standalone, OverallPercentUnit.OverallRFIPercentVideo);
                 var (unitTestSkillScores, percentUnitTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.UnitTest, OverallPercentUnit.OverallRFIPercentUnitTest);

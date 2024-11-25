@@ -130,7 +130,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 mergedSkillScores = mergedSkillScores.Concat(skillSkillScores).Concat(unitSkillScores).Concat(finalTestSkillScores).ToList();
                 percents.AddRange(new List<double> { percentUnitSkill, percentSkill, percentFinalTest });
             }
-            if (course.CourseType == EnumCourseType.AdultFoundation)
+            if (course.CourseType == EnumCourseType.EnglishFoundation)
             {
                 var (unitSkillScores, percentUnitSkill) = await GetSkillScoreByCourses(course.Id, unitIds, studentId, EnumTimeCodeType.UnitTest, OverallPercentCourse.OverallRFIPercentUnitTest);
                 if (!unitSkillScores.Any())
@@ -175,7 +175,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         percentSkill = OverallPercentCourse.OverallAcaPercentVideo;
                         break;
 
-                    case EnumCourseType.AdultFoundation:
+                    case EnumCourseType.EnglishFoundation:
                         percentSkill = OverallPercentCourse.OverallRFIPercentVideo;
                         break;
                 }
@@ -208,7 +208,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         percentSkill = OverallPercentCourse.OverallIELTSPercentClassForum;
                         break;
 
-                    case EnumCourseType.AdultFoundation:
+                    case EnumCourseType.EnglishFoundation:
                         percentSkill = OverallPercentCourse.OverallRFIPercentClassForum;
                         break;
                 }
@@ -237,7 +237,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         percentSkill = OverallPercentCourse.OverallIELTSPercentHomeWork;
                         break;
 
-                    case EnumCourseType.AdultFoundation:
+                    case EnumCourseType.EnglishFoundation:
                         percentSkill = OverallPercentCourse.OverallRFIPercentHomeWork;
                         break;
                 }
@@ -348,7 +348,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 percentSkill = OverallPercentCourse.OverallAcaPercentFinalTest;
             }
-            else if (course.CourseType == EnumCourseType.AdultFoundation)
+            else if (course.CourseType == EnumCourseType.EnglishFoundation)
             {
                 percentSkill = OverallPercentCourse.OverallRFIPercentFinalTest;
             }
