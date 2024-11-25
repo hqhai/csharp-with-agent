@@ -67,9 +67,6 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             }
 
             var lists = await query.AsNoTracking().ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            lists = lists
-                .ToList();
-
             methodResult.Result = lists;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
