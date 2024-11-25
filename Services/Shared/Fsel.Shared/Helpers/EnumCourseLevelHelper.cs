@@ -362,6 +362,15 @@ namespace Fsel.Shared.Helpers
         {
             switch (courseLevel)
             {
+                case EnumCourseLevel.AF1:
+                    return SendMailSetting.A1Photo;
+
+                case EnumCourseLevel.AF2:
+                    return SendMailSetting.A2Photo;
+
+                case EnumCourseLevel.AF3:
+                    return SendMailSetting.B1Photo;
+
                 case EnumCourseLevel.A1:
                     return SendMailSetting.A1Photo;
 

@@ -6,25 +6,45 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
     using Fsel.System.Application.Commands.CourseSuggestConfigCmd;
     using Fsel.System.Application.Queries.CourseSuggestConfigQuery;
+    using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Refit;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/course-suggest-config")]
     [ApiController]
-    public class CourseSuggestConfigController : ControllerBase
+    public class CourseSuggestConfigController : BaseController
     {
         private readonly IMediator _mediator;
+        private readonly ICourseSuggestConfigRepository _courseSuggestConfigRepository;
 
-        public CourseSuggestConfigController(IMediator mediator)
+        public CourseSuggestConfigController(IMediator mediator, ICourseSuggestConfigRepository courseSuggestConfigRepository)
         {
             _mediator = mediator;
+            _courseSuggestConfigRepository = courseSuggestConfigRepository;
+        }
+
+        /// <summary>
+        /// Execute-list-query
+        /// </summary>
+        [HttpGet("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseSuggestConfigModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExecuteList([FromQuery] BaseQueryModel query)
+        {
+            ArgumentNullException.ThrowIfNull(query);
+            query.SetIsQueryAll(true);
+            var result = await _courseSuggestConfigRepository.GetListResultAsync<CourseSuggestConfigModel>(query);
+            return result.GetActionResult();
         }
 
         /// <summary>

@@ -8,9 +8,12 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.Common.Models;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -23,6 +26,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Commands.StudentCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
@@ -59,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
         private readonly ILogger<CreatePlacementTestAnswerBySectionGroupCommand> _logger;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly DisconnectSocketCalculateTimePublisher _disconnectSocketCalculateTimePublisher;
+        private readonly ISystemService _systemService;
 
         public CreatePlacementTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository,
                                                                      AuthContext authContext,
@@ -76,7 +81,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                                                                      AppSetting appSetting,
                                                                      ILogger<CreatePlacementTestAnswerBySectionGroupCommand> logger,
                                                                      QuestBoardPublisher questBoardPublisher,
-                                                                     DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher)
+                                                                     DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher,
+                                                                     ISystemService systemService)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -95,6 +101,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             _logger = logger;
             _questBoardPublisher = questBoardPublisher;
             _disconnectSocketCalculateTimePublisher = disconnectSocketCalculateTimePublisher;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<PlacementTestResultModel>> Handle(CreatePlacementTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -270,19 +277,48 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
         {
             var currentLevel = SendMailHelper.GetPreviousEnumValue(courseLevel);
 
-            string currentCourseHtml = string.Empty;
-            IList<EnumCourseLevel> suggestLevels = new List<EnumCourseLevel>();
+            //string currentCourseHtml = string.Empty;
+            //IList<EnumCourseLevel> suggestLevels = new List<EnumCourseLevel>();
 
-            if (courseLevel == EnumCourseLevel.A1)
+            var courseSuggestResults = await _systemService.CourseSuggestConfigQuery(new BaseQueryModel()
             {
-                currentCourseHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, EnumCourseLevelHelper.GetCourseInfo(null), cancellationToken);
-                suggestLevels = SendMailHelper.GetSuggestLevels(null, age);
-            }
-            else
-            {
-                currentCourseHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, EnumCourseLevelHelper.GetCourseInfo(currentLevel), cancellationToken);
-                suggestLevels = SendMailHelper.GetSuggestLevels(currentLevel, age);
-            }
+                Filters = new List<GenericFilterModel>()
+                {
+                    new GenericFilterModel()
+                    {
+                        Property = "FromAge",
+                        Operator = EnumFilterOperator.GreaterThanOrEqual,
+                        Value = age
+                    },
+                     new GenericFilterModel()
+                    {
+                        Property = "ToAge",
+                        Operator = EnumFilterOperator.LessThanOrEqual,
+                        Value = age
+                    },
+                     new GenericFilterModel()
+                    {
+                        Property = "PlacementTestLevel",
+                        Operator = EnumFilterOperator.Equal,
+                        Value = courseLevel
+                    }
+                }
+            });
+
+            var courseSuggests = courseSuggestResults.Content?.Result;
+            var suggestLevels = courseSuggests?.FirstOrDefault()?.CourseLevels;
+
+            string currentCourseHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, EnumCourseLevelHelper.GetCourseInfo(currentLevel), cancellationToken);
+            //if (courseLevel == EnumCourseLevel.A1)
+            //{
+            //    currentCourseHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, EnumCourseLevelHelper.GetCourseInfo(null), cancellationToken);
+            //    suggestLevels = SendMailHelper.GetSuggestLevels(null, age);
+            //}
+            //else
+            //{
+            //    currentCourseHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, EnumCourseLevelHelper.GetCourseInfo(currentLevel), cancellationToken);
+            //    suggestLevels = SendMailHelper.GetSuggestLevels(currentLevel, age);
+            //}
 
             var courseInfoHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.CourseInfo, cancellationToken);
 
@@ -292,7 +328,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 
             string coursesInfo = string.Empty;
 
-            for (int i = 0; i < suggestLevels.Count; i++)
+            for (int i = 0; i < suggestLevels?.Count; i++)
             {
                 var teachers = listTeachersBios?.Where(p => p.TeacherLevels != null && p.TeacherLevels.Any(x => x == suggestLevels[i])).ToList();
                 var teacherInfo = string.Empty;
@@ -312,7 +348,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 }
                 var courseType = EnumCourseLevelHelper.GetEnumCourseType(suggestLevels[i]);
 
-                var courseInfo = string.Format(CultureInfo.InvariantCulture, courseInfoHtml, i + 1, suggestLevels[i], suggestLevels[i].GetDescription(), EnumCourseLevelHelper.GetCourseTitle(suggestLevels[i]), EnumCourseLevelHelper.GetLevelPhoto(suggestLevels[i]), courseType == EnumCourseType.Academic ? EnumCourseType.Academic.ToString() : EnumCourseType.Ielts.ToString().ToUpper(CultureInfo.CurrentCulture), SendMailHelper.GetInfoCourse(EnumCourseLevelHelper.GetEnumCourseType(suggestLevels[i])), teacherInfo);
+                var courseInfo = string.Format(CultureInfo.InvariantCulture, courseInfoHtml, i + 1, suggestLevels[i], suggestLevels[i].GetDescription(), EnumCourseLevelHelper.GetCourseTitle(suggestLevels[i]), EnumCourseLevelHelper.GetLevelPhoto(suggestLevels[i]), SendMailHelper.GetCourseTitle(courseType), SendMailHelper.GetInfoCourse(EnumCourseLevelHelper.GetEnumCourseType(suggestLevels[i])), teacherInfo);
 
                 coursesInfo += courseInfo;
             }

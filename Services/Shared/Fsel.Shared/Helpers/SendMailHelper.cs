@@ -77,13 +77,33 @@ namespace Fsel.Shared.Helpers
 
         public static string GetInfoCourse(EnumCourseType currentValue)
         {
-            if (currentValue == EnumCourseType.Academic)
+            if (currentValue == EnumCourseType.AdultFoundation)
+            {
+                return SendMailSetting.EnglishFoundation;
+            }
+            else if (currentValue == EnumCourseType.Academic)
             {
                 return SendMailSetting.AcademicInfo;
             }
             else
             {
                 return SendMailSetting.IELTInfo;
+            }
+        }
+
+        public static string GetCourseTitle(EnumCourseType currentValue)
+        {
+            if (currentValue == EnumCourseType.AdultFoundation)
+            {
+                return "English Foundation (16+)";
+            }
+            else if (currentValue == EnumCourseType.Academic)
+            {
+                return "Academic";
+            }
+            else
+            {
+                return "IELTS";
             }
         }
 
