@@ -6,10 +6,6 @@ namespace Fsel.System.Domain.Enums.ErrorCodes
     {
         RecordWithSameTypeAndLevelHasOverlappingAges,
 
-        NoReviewTypeForA1Level,
-
-        NoChallengeTypeForIELTSLevel,
-
         AgeMustBeBetweenZeroAndOneHundredFifty,
 
         ToAgeNotThanFromAge
