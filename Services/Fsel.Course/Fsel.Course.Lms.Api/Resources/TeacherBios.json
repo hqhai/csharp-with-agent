@@ -93,5 +93,30 @@
       "MS2",
       "MS3"
     ]
+  },
+  {
+    "fullName": "Hannah Latif",
+    "nationality": "Brunei",
+    "deggree": "Thạc sỹ Ngành Luật, Cử nhân Ngành Luật",
+    "certifications": "Chứng chỉ giảng dạy CELTA",
+    "experience": "5 năm kinh nghiệm giảng dạy tiếng Anh tại Việt Nam",
+    "strength": "",
+    "avatarPath": "https://drive.google.com/file/d/1ee8urWJk2XWsDbUxNWA8knP3ISI_iClc/view?usp=sharing",
+    "teacherLevels": [
+      "AF1"
+    ]
+  },
+  {
+    "fullName": "Douglas Grey",
+    "nationality": "United Kingdom",
+    "deggree": "Cử nhân Điện ảnh",
+    "certifications": "Chứng chỉ giảng dạy CELTA",
+    "experience": "3 năm kinh nghiệm giảng dạy tiếng Anh tại Việt Nam",
+    "strength": "",
+    "avatarPath": "https://s3-sgn10.fptcloud.com/fsel/Images/Douglas_Grey_7766_1732595337920.jpg",
+    "teacherLevels": [
+      "AF2",
+      "AF3"
+    ]
   }
 ]

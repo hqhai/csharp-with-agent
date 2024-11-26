@@ -299,6 +299,15 @@ namespace Fsel.Shared.Helpers
                 case EnumCourseLevel.B1:
                     return SendMailSetting.CourseB1Title;
 
+                case EnumCourseLevel.AF1:
+                    return SendMailSetting.CourseA1Title;
+
+                case EnumCourseLevel.AF2:
+                    return SendMailSetting.CourseA2Title;
+
+                case EnumCourseLevel.AF3:
+                    return SendMailSetting.CourseB1Title;
+
                 case EnumCourseLevel.B1Plus:
                     return SendMailSetting.CourseB1PlusTitle;
 
