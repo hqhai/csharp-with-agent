@@ -3,15 +3,12 @@
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.UserDeletionCmd;
-using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Identity.Domain.Models.EntityModels;
-using Fsel.Shared.Enums;
-using Fsel.Shared.Models.ShareModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -28,19 +25,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly Microsoft.AspNetCore.Identity.SignInManager<User> _signInManager;
         private readonly IMediator _mediator;
         private readonly IPlatformRepository _platformRepository;
-        private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
         public LoginCommandHandler(UserManager<User> userManager,
             Microsoft.AspNetCore.Identity.SignInManager<User> signInManager,
             IMediator mediator,
-            IPlatformRepository platformRepository,
-            NotificationMessagePublisher notificationMessagePublisher)
+            IPlatformRepository platformRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _mediator = mediator;
             _platformRepository = platformRepository;
-            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -86,21 +80,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var generateToken = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
             methodResult = generateToken;
             return methodResult;
-        }
-
-        public async Task SendNotification(User user, CancellationToken cancellationToken)
-        {
-            if (user != null)
-            {
-                NotificationSendingQueueModel notificationQueue = new NotificationSendingQueueModel()
-                {
-                    UserIds = new List<Guid> { user.Id },
-                    Type = EnumNotificationType.LinkPage,
-                    Content = EnumNotificationContent.ReviewFsel,
-                    PlatformCode = EnumPlatformCode.LMS,
-                };
-                await _notificationMessagePublisher.Publish(notificationQueue, cancellationToken);
-            }
         }
     }
 }

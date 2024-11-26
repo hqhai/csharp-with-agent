@@ -17,6 +17,8 @@ namespace Fsel.Identity.Infrastructure.Configs
                 .OnDelete(DeleteBehavior.Cascade);
 
             //builder.Metadata.RemoveIndex(builder.HasIndex(u => u.NormalizedUserName).Metadata.Properties);
+
+            builder.HasIndex(x => new { x.IsDeleted, x.Email });
         }
     }
 }
