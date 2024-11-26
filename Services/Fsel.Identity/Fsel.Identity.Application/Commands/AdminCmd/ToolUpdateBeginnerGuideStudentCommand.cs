@@ -156,8 +156,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "showCaseQuestionMark"),
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "showCaseQuestionTime"),
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "showCaseQuestionList"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "showCaseBodyQuestionList"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "showCaseQuestionBottomBar"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "keyQuestionListBottomSheetFinalTestMockTest"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "keyQuestionBottomBar"),
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "showCaseQuestionBottomBar2"),
 
               // web
