@@ -18,6 +18,7 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         VoucherDoesNotApplyToThisPackage,
         ValueGreaterThan100,
         CodeAlreadyExists,
+        CodePrefixAlreadyExists,
         CodeInValidFormat
     }
 }

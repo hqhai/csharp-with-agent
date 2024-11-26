@@ -58,7 +58,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             }
             if (request.Source == EnumVoucherSource.Auto && await _voucherRepository.Queryable.AnyAsync(p => p.CodePrefix.ToLower() == request.CodePrefix.ToLower(), cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.CodeAlreadyExists), nameof(request.CodePrefix));
+                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.CodePrefixAlreadyExists), nameof(request.CodePrefix));
                 return methodResult;
             }
             if (request.Source == EnumVoucherSource.Auto && !string.IsNullOrEmpty(request.CodePrefix) && (request.CodePrefix.Length > 5 || !StringHelper.ContainsWhitespaceOrSpecialChars(request.CodePrefix)))
