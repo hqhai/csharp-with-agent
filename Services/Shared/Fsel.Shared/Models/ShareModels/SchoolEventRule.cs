@@ -143,6 +143,8 @@ namespace Fsel.Shared.Models.ShareModels
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int WeekNumber { get; set; }
+        public EnumLeaderBoardType LeaderBoardType { get; set; }
+        public string? FormOfAward { get; set; }
         public string? Rule { get; set; }
     }
 
