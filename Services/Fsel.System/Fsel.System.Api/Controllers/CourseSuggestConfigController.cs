@@ -82,7 +82,7 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Course Suggest Config
         /// </summary>
-        [HttpGet("suggest-level")]
+        [HttpGet("level-suggestion")]
         [ProducesResponseType(typeof(MethodResult<IList<CourseSuggestConfigStudentModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission]
