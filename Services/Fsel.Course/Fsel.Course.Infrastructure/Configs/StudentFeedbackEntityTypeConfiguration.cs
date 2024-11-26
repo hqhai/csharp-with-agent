@@ -26,6 +26,8 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumFeature>());
+
+            builder.HasIndex(c => new { c.IsDeleted, c.Type, c.ObjectId });
         }
     }
 }

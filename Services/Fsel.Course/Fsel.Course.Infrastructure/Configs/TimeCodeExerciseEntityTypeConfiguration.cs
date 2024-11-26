@@ -21,6 +21,11 @@ namespace Fsel.Course.Infrastructure.Configs
                 .WithMany(b => b.TimeCodeExercises)
                 .HasForeignKey(b => b.ExerciseId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasAnnotation("SqlServer:RawSqlIndex",
+                @"CREATE INDEX IX_TimeCodeExercises_IsDeleted_WithInclude
+                ON [TimeCodeExercises] ([IsDeleted])
+                INCLUDE ([ExerciseId], [VideoTimeCodeId])");
         }
     }
 }
