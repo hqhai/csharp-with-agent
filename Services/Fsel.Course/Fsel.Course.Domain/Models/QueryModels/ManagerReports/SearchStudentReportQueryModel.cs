@@ -11,5 +11,6 @@ namespace Fsel.Course.Domain.Models.QueryModels.ManagerReports
         public EnumCourseType? CourseType { get; set; }
         public EnumLearningStatus? LearningStatus { get; set; }
         public EnumCourseLevel? CurrentLevel { get; set; }
+        public EnumOverallScore? OverallScore { get; set; }
     }
 }

@@ -29,6 +29,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
         public GetReportLearningResultQueryHandler(
             IMediator mediator,
@@ -37,7 +38,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             ICourseRepository courseRepository,
             IUnitResultRepository unitResultRepository,
             IMockTestResultRepository mockTestResultRepository,
-            IFinalTestResultRepository finalTestResultRepository
+            IFinalTestResultRepository finalTestResultRepository,
+            ICourseUnitMockTestRepository courseUnitMockTestRepository
             )
         {
             _mediator = mediator;
@@ -47,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             _unitResultRepository = unitResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _finalTestResultRepository = finalTestResultRepository;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
         public async Task<MethodResult<IList<LearningResultReportModel>>> Handle(GetReportLearningResultQuery request, CancellationToken cancellationToken)
@@ -70,6 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 Page = request.Page,
                 CourseLevel = request.CourseLevel,
                 CourseType = request.CourseType,
+                OverallScore = request.OverallScore,
                 ManagerReportType = EnumManagerReportType.ReportLearningResults
             }, cancellationToken);
 
@@ -88,25 +92,20 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             var courseIds = students.Select(x => x.CourseId).Distinct().ToList();
             var dataStudent = students.Select(x => new { StudentId = x.Id, CourseId = x.CourseId.GetValueOrDefault() }).ToList();
 
-            var unitResults = await _unitResultRepository.Queryable
-                                          .Where(x => studentIds.Contains(x.StudentId) && courseIds.Contains(x.CourseId) && x.Status == EnumResultStatus.Done)
-                                          .ToListAsync(cancellationToken);
-            var unitGroupResults = unitResults.Join(dataStudent,
-                                              unitResult => new { unitResult.CourseId, unitResult.StudentId },
-                                              student => new { student.CourseId, student.StudentId },
-                                              (unitResult, student) => unitResult)
-                                            .GroupBy(x => x.StudentId)
-                                            .Select(x => new
-                                            {
-                                                StudentId = x.Key,
-                                                CourseUnitResults = x.OrderBy(x => x.CreatedDate).Select((y, index) => new
-                                                {
-                                                    Percent = y.Percent,
-                                                    Index = index + 1,
-                                                    UnitId = y.UnitId,
-                                                    CourseId = y.CourseId
-                                                })
-                                            }).ToList();
+            var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable
+                                          join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
+                                          join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
+                                          from ur in unitGroup.DefaultIfEmpty()
+                                          where students.Select(x => x.Id).Contains(baseQ.StudentId) && baseQ.WorkingStatus == EnumWorkingStatus.Active &&
+                                          (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date) && ur.Status == EnumResultStatus.Done
+                                          group new { baseQ, ur }
+                                          by new { baseQ.CourseId, baseQ.StudentId } into g
+                                          select new
+                                          {
+                                              StudentId = g.Key.StudentId,
+                                              OverallPercent = g.Select(x => x.ur).Any() ? g.Select(x => x.ur).Average(x => x.Percent) : default,
+                                              UnitResults = g.Select(x => x.ur).ToList(),
+                                          }).ToListAsync(cancellationToken);
 
             var mockTestResults = await _mockTestResultRepository.Queryable
                                           .Where(x => studentIds.Contains(x.StudentId) && courseIds.Contains(x.CourseId) && x.Status == EnumResultStatus.Done)
@@ -128,31 +127,39 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                               SkillMockTestResults = x.Where(x => x.UnitId.HasValue).OrderBy(x => x.CreatedDate).ToList(),
                                           }).ToList();
 
-            var finalTestResults = await _finalTestResultRepository.Queryable
-                                          .Where(x => studentIds.Contains(x.StudentId) && courseIds.Contains(x.CourseId) && x.Status == EnumResultStatus.Done)
-                                          .ToListAsync(cancellationToken);
-            var finalTestGroupResults = finalTestResults.Join(dataStudent,
-                                                      finalTest => new { finalTest.CourseId, finalTest.StudentId },
-                                                      student => new { student.CourseId, student.StudentId },
-                                                      (finalTest, student) => finalTest)
-                                                    .Select(x => new
-                                                    {
-                                                        StudentId = x.StudentId,
-                                                        Percent = x.Percent
-                                                    }).ToList();
+            var finalTestResults = await (from baseQ in _courseResultRepository.Queryable
+                                          join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
+                                          join ftr in _finalTestResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, FinalTestId = cum.FinalTestId } equals new { ftr.StudentId, ftr.CourseId, FinalTestId = (Guid?)ftr.FinalTestId } into finalTestGroup
+                                          from ftr in finalTestGroup.DefaultIfEmpty()
+                                          where students.Select(x => x.Id).Contains(baseQ.StudentId) && baseQ.WorkingStatus == EnumWorkingStatus.Active &&
+                                          (!request.EndDate.HasValue || (ftr.UpdatedDate ?? ftr.CreatedDate).Date <= request.EndDate.Value.Date) && ftr.Status == EnumResultStatus.Done
+                                          select new
+                                          {
+                                              Percent = ftr.Percent,
+                                              StudentId = ftr.StudentId,
+                                          }).ToListAsync(cancellationToken);
 
             var countUnit = request.CourseType == EnumCourseType.Academic ? CourseProgressValue.CountUnitAca :
                             request.CourseType == EnumCourseType.Ielts ? CourseProgressValue.CountUnitIELTS : ValueDefault;
 
             foreach (var item in students)
             {
-                var unitGroupResult = unitGroupResults.FirstOrDefault(x => x.StudentId == item.Id);
+                var unitResultGroup = unitResultGroups.FirstOrDefault(x => x.StudentId == item.Id);
+                var courseUnitResults = unitResultGroup?.UnitResults.OrderBy(x => x.CreatedDate).Select((y, index) => new
+                {
+                    Percent = y.Percent,
+                    UnitId = y.UnitId,
+                    CourseId = y.CourseId,
+                    Index = index + 1
+                });
+
+                var overallPercent = NumberHelper.ConvertRound(unitResultGroup?.OverallPercent ?? default);
                 var result = mockTestGroupResults.FirstOrDefault(x => x.StudentId == item.Id);
                 var overallModuleReports = new List<OverallModuleReportSkillModel>();
 
                 for (int i = 1; i <= countUnit; i++)
                 {
-                    var unitResult = unitGroupResult?.CourseUnitResults.FirstOrDefault(x => x.Index == i);
+                    var unitResult = courseUnitResults?.FirstOrDefault(x => x.Index == i);
                     overallModuleReports.Add(new OverallModuleReportSkillModel
                     {
                         Index = i,
@@ -174,7 +181,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 }
                 if (request.CourseType == EnumCourseType.Academic)
                 {
-                    var finalTestResult = finalTestGroupResults.FirstOrDefault(x => x.StudentId == item.Id);
+                    var finalTestResult = finalTestResults.FirstOrDefault(x => x.StudentId == item.Id);
                     int displayOrder = overallModuleReports.Count + 1;
                     overallModuleReports.Add(new OverallModuleReportSkillModel
                     {
@@ -211,7 +218,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     CourseLevel = item.CourseLevel,
                     ProcessDate = item.CreatedDate,
                     ExpiredDate = item.ExpiredDate,
-                    OverallPercent = unitGroupResult != null && unitGroupResult.CourseUnitResults.Any() ? NumberHelper.ConvertRound(unitGroupResult.CourseUnitResults.Average(x => x.Percent)) : ValueDefault,
+                    OverallPercent = overallPercent,
                     OverallModuleReports = overallModuleReports.OrderBy(x => x.DisplayOrder).ToList(),
                 };
                 datas.Add(learningResult);

@@ -6,10 +6,10 @@ namespace Fsel.Shared.Enums
 
     public enum EnumOverallScore
     {
+        [Description("Hoàn thành đúng < 75%")]
+        AccuracyBelow75 = 74,
+
         [Description("Hoàn thành đúng >= 75%")]
         Accuracy75OrMore,
-
-        [Description("Hoàn thành đúng < 75%")]
-        AccuracyBelow75
     }
 }
