@@ -182,12 +182,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "i18n_techie_lesson_ClassForumLock_step1"),
 
               //mobile
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "showCasePlanet"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "showCaseVideo"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "showCaseControl"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "showCaseListEx"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "showCaseIconNoteFist"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "showCaseReviewLesson"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "keyPlanet"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "keyVideo"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "keyVideoControls"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "keyListVideo"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "keyNote"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneVideo, "keyReviewLesson"),
 
               // web
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "i18n_techie_lesson_page_classForum_step2"),
@@ -197,19 +197,52 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "i18n_beginnerGuide_classForum_step4"),
 
               //mobile
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "showCaseClassForumFist"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "showCaseFormClassForumLast"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "keyClassForum"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "keyPromptNewPost"),
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "keyPromptChatGPT1"),
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "keyPromptChatGPT2"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "showCaseClassMate"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "keyClassMate"),
 
               //web
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneHomeWork, "i18n_beginnerGuide_classForum_step5"),
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneHomeWork, "i18n_beginnerGuide_homeWork_step1"),
 
               //mmobile
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneHomeWork, "showCaseHomeWorkFist"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneHomeWork, "showCaseHomeWorkItem")
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneHomeWork, "keyHomeWork"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneHomeWork, "keyItemHomeWork"),
+
+              //web
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "Multichoice"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "MultipleOptionSentenceCompletion"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "Checklist"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "MatchingType2"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "DragAndDropListSentenceOrder"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "MatchingType1"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "beginner_guide_matchingType1_step_2"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "GapFillWordBankScoreByGap"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "beginner-guide-gap-fill-word-bank-step-2"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "GapFillScoreByQuestion"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "ShortAnswerWordCount"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "ShortAnswerWordBase"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "ExercisePreparation"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "DragAndDropPicture"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "Listing"),
+
+              //mobile
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "multipleChoice"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "checklist"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "matchingType2"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "dragAndDropSentenceOrder"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "showCaseQuestionDialogueOrder"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "matchingType1"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "gapFillWordBankScoreByGap"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "gapFillWordBankScoreByQuestion"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "gapFillScoreByQuestion"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "shortAnswerWordCount"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "shortAnswerWordBase"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "showCaseQuestionExercisePreparation"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "DragAndDropPicture"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "Listing"),
         };
     }
 }
