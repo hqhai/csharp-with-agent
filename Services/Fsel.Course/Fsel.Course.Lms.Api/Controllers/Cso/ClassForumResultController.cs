@@ -89,7 +89,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
         }
 
         /// <summary>
-        /// Get Class Forum Result By 
+        /// Get Class Forum Result By
         /// </summary>
         [HttpGet("get-by-lessonResultId")]
         [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
