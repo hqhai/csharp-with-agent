@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20241126111913_Add_IndexToDBTable_1")]
-    partial class Add_IndexToDBTable_1
+    [Migration("20241128030120_Add_IndexToDBTable_2")]
+    partial class Add_IndexToDBTable_2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

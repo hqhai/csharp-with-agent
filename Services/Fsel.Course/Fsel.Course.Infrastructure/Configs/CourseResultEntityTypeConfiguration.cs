@@ -33,11 +33,6 @@ namespace Fsel.Course.Infrastructure.Configs
 
             builder.HasIndex(c => new { c.CourseId, c.StudentId }).IsUnique();
             builder.HasIndex(c => new { c.StudentId, c.WorkingStatus });
-
-            builder.HasAnnotation("SqlServer:RawSqlIndex",
-                @"CREATE INDEX IX_CourseResults_CreatedUserId_WithInclude
-                ON [CourseResults] ([CreatedUserId])
-                INCLUDE ([Status], [CourseId])");
         }
     }
 }

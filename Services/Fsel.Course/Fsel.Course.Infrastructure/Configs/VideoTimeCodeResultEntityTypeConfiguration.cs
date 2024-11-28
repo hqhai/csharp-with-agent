@@ -30,11 +30,6 @@ namespace Fsel.Course.Infrastructure.Configs
                    .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasIndex(c => new { c.VideoResultId, c.VideoTimeCodeId, c.StudentId }).IsUnique();
-
-            builder.HasAnnotation("SqlServer:RawSqlIndex",
-                @"CREATE INDEX IX_VideoTimeCodeResults_Status_StudentId_WithInclude
-                ON [VideoTimeCodeResults] ([Status], [StudentId])
-                INCLUDE ([VideoResultId], [VideoTimeCodeId], [CorrectCount], [CorrectTotal], [WorkingTime])");
         }
     }
 }
