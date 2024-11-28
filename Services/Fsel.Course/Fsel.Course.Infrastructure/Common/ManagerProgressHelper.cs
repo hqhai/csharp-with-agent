@@ -409,8 +409,16 @@ namespace Fsel.Course.Infrastructure.Common
                                                              g.Where(x => x.ftr.Status == EnumResultStatus.Done).Select(x => x.ftr.Id).Distinct().Count() +
                                                              g.Where(x => x.mtr.Status == EnumResultStatus.Done).Select(x => x.mtr.Id).Distinct().Count() +
                                                              g.Where(x => x.skmt.Status == EnumResultStatus.Done).Select(x => x.skmt.Id).Distinct().Count(),
-                                             UnitDisplayOrder = g.Select(x => x.ur).OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).Where(x => x.Unit != null).Select(x => x.Unit!.CourseUnitMockTests.Where(n => n.CourseId == x.CourseId).Select(n => n.Number).FirstOrDefault()).FirstOrDefault(),
-                                             LessonDisplayOrder = g.Select(x => x.lr).OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).Where(x => x.Lesson != null).Select(x => x.Lesson!.UnitLessons.Where(n => n.UnitId == x.UnitId).Select(n => n.DisplayOrder).FirstOrDefault()).FirstOrDefault()
+                                             UnitDisplayOrder = g.Select(x => x.ur).Where(x => x.Status != EnumResultStatus.Unfinished)
+                                                                 .OrderBy(x => x.Status == EnumResultStatus.Process ? 1 :
+                                                                               x.Status == EnumResultStatus.New ? 2 :
+                                                                               x.Status == EnumResultStatus.Done ? 3 : 4)
+                                                                 .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate).Where(x => x.Unit != null).Select(x => x.Unit!.CourseUnitMockTests.Where(n => n.CourseId == x.CourseId).Select(n => n.Number).FirstOrDefault()).FirstOrDefault(),
+                                             LessonDisplayOrder = g.Select(x => x.lr).Where(x => x.Status != EnumResultStatus.Unfinished)
+                                                                 .OrderBy(x => x.Status == EnumResultStatus.Process ? 1 :
+                                                                               x.Status == EnumResultStatus.New ? 2 :
+                                                                               x.Status == EnumResultStatus.Done ? 3 : 4)
+                                                                 .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate).Where(x => x.Lesson != null).Select(x => x.Lesson!.UnitLessons.Where(n => n.UnitId == x.UnitId).Select(n => n.DisplayOrder).FirstOrDefault()).FirstOrDefault()
                                          }).ToListAsync();
             return courseCompletes;
         }
