@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Application.Commands.AdminCmd
 {
+    using System.Collections.Generic;
     using System.Text;
     using Fsel.Common.ActionResults;
     using Fsel.Identity.Application.Services.LmsCourseService;
@@ -39,7 +40,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             var students = await _studentRepository.Queryable.ToListAsync(cancellationToken);
             var sendingPhase = (int)Math.Ceiling((double)students.Count / AmountStudentSending);
 
-            List< ParamBeginnerGuideModel> paramBeginnerGuidesResult = new List<ParamBeginnerGuideModel>();
+            List<ParamBeginnerGuideModel> paramBeginnerGuidesResult = new List<ParamBeginnerGuideModel>();
             for (int i = 0; i < sendingPhase; i++)
             {
                 var studentBatch = students.Skip(i * AmountStudentSending).Take(AmountStudentSending).ToList();
@@ -63,7 +64,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     continue;
                 }
                 var other = student.BeginnerGuide?.Other;
-
+                var questionTypes = paramBeginnerGuide.QuestionTypes;
+                IList<EnumQuestionType> listQuestionTypes = student.BeginnerGuide?.QuestionTypes ?? new List<EnumQuestionType>();
                 if (paramBeginnerGuide.IsDoneOnePT)
                 {
                     other = GetBeginnerGuideOther(EnumCheckPoint.DoneOnePlacementTest, other);
@@ -84,13 +86,29 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 {
                     other = GetBeginnerGuideOther(EnumCheckPoint.DoneHomeWork, other);
                 }
+                if (questionTypes != null)
+                {
+                    foreach (var questionType in questionTypes)
+                    {
+                        if (!listQuestionTypes.Contains(questionType))
+                        {
+                            listQuestionTypes.Add(questionType);
+                        }
+                        var matchedPair = datas.Where(kvp => string.Equals(kvp.Key.ToString(), questionType.ToString(), StringComparison.OrdinalIgnoreCase));
+
+                        if (matchedPair != default)
+                        {
+                            other = GetBeginnerGuideOther(matchedPair.FirstOrDefault().Key, other);
+                        }
+                    }
+                }
                 if (student.BeginnerGuide != null)
                 {
                     student.BeginnerGuide = new StudentBeginnerGuide
                     {
                         Other = other,
                         BeginnerGuides = student.BeginnerGuide.BeginnerGuides?.ToList(),
-                        QuestionTypes = student.BeginnerGuide.QuestionTypes?.ToList()
+                        QuestionTypes = listQuestionTypes
                     };
                 }
                 else
@@ -99,7 +117,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     {
                         Other = other,
                         BeginnerGuides = new List<EnumBeginnerGuide>(),
-                        QuestionTypes = new List<EnumQuestionType>()
+                        QuestionTypes = listQuestionTypes
                     };
                 }
             }
@@ -212,37 +230,37 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneHomeWork, "keyItemHomeWork"),
 
               //web
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "Multichoice"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "MultipleOptionSentenceCompletion"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "Checklist"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "MatchingType2"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "DragAndDropListSentenceOrder"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "MatchingType1"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "beginner_guide_matchingType1_step_2"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "GapFillWordBankScoreByGap"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "beginner-guide-gap-fill-word-bank-step-2"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "GapFillScoreByQuestion"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "ShortAnswerWordCount"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "ShortAnswerWordBase"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "ExercisePreparation"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "DragAndDropPicture"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "Listing"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.Multichoice, "Multichoice"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.Multichoice, "MultipleOptionSentenceCompletion"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.Checklist, "Checklist"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.MatchingType2, "MatchingType2"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DragAndDropListSentenceOrder, "DragAndDropListSentenceOrder"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.MatchingType1, "MatchingType1"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.MatchingType1, "beginner_guide_matchingType1_step_2"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.GapFillWordBankScoreByGap, "GapFillWordBankScoreByGap"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.GapFillWordBankScoreByGap, "beginner-guide-gap-fill-word-bank-step-2"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.GapFillScoreByQuestion, "GapFillScoreByQuestion"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.ShortAnswerWordCount, "ShortAnswerWordCount"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.ShortAnswerWordBase, "ShortAnswerWordBase"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.ExercisePreparation, "ExercisePreparation"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DragAndDropPicture, "DragAndDropPicture"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.Listing, "Listing"),
 
               //mobile
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "multipleChoice"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "checklist"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "matchingType2"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "dragAndDropSentenceOrder"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "showCaseQuestionDialogueOrder"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "matchingType1"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "gapFillWordBankScoreByGap"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "gapFillWordBankScoreByQuestion"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "gapFillScoreByQuestion"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "shortAnswerWordCount"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "shortAnswerWordBase"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "showCaseQuestionExercisePreparation"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "DragAndDropPicture"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "Listing"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.Multichoice, "multipleChoice"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.Checklist, "checklist"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.MatchingType2, "matchingType2"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DragAndDropSentenceOrder, "dragAndDropSentenceOrder"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DragAndDropListSentenceOrder, "showCaseQuestionDialogueOrder"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.MatchingType1, "matchingType1"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.GapFillWordBankScoreByGap, "gapFillWordBankScoreByGap"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.GapFillWordBankScoreByQuestion, "gapFillWordBankScoreByQuestion"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.GapFillScoreByQuestion, "gapFillScoreByQuestion"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.ShortAnswerWordCount, "shortAnswerWordCount"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.ShortAnswerWordBase, "shortAnswerWordBase"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.ExercisePreparation, "showCaseQuestionExercisePreparation"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DragAndDropPicture, "DragAndDropPicture"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.Listing, "Listing"),
         };
     }
 }
