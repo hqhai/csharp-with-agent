@@ -139,5 +139,13 @@ namespace Fsel.Shared.Constants
             public const int MockTestPosition = 5;
             public const int SkillFullMocKTest = 4;
         }
+
+        public static class ValueOrderIndex
+        {
+            public const int OrderIndexProcess = 0;
+            public const int OrderIndexNew = 1;
+            public const int OrderIndexDone = 2;
+            public const int OrderIndexOther = 3;
+        }
     }
 }
