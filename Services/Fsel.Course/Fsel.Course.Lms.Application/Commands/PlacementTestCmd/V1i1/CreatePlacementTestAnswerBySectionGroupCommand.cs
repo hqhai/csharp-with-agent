@@ -277,9 +277,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
         {
             var currentLevel = SendMailHelper.GetPreviousEnumValue(courseLevel);
 
-            //string currentCourseHtml = string.Empty;
-            //IList<EnumCourseLevel> suggestLevels = new List<EnumCourseLevel>();
-
             var courseSuggestResults = await _systemService.CourseSuggestConfigQuery(new BaseQueryModel()
             {
                 Filters = new List<GenericFilterModel>()
@@ -309,16 +306,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             var suggestLevels = courseSuggests?.FirstOrDefault()?.CourseLevels;
 
             string currentCourseHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, EnumCourseLevelHelper.GetCourseInfo(currentLevel), cancellationToken);
-            //if (courseLevel == EnumCourseLevel.A1)
-            //{
-            //    currentCourseHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, EnumCourseLevelHelper.GetCourseInfo(null), cancellationToken);
-            //    suggestLevels = SendMailHelper.GetSuggestLevels(null, age);
-            //}
-            //else
-            //{
-            //    currentCourseHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, EnumCourseLevelHelper.GetCourseInfo(currentLevel), cancellationToken);
-            //    suggestLevels = SendMailHelper.GetSuggestLevels(currentLevel, age);
-            //}
 
             var courseInfoHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.CourseInfo, cancellationToken);
 
