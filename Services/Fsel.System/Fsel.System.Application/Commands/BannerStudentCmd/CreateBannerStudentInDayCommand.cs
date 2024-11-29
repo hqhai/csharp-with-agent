@@ -52,7 +52,7 @@ namespace Fsel.System.Application.Commands.BannerStudentCmd
                 return methodResult;
             }
 
-            if (await _bannerStudentRepository.Queryable.AnyAsync(x => x.StudentId == student.Id && x.BannerId == request.BannerId, cancellationToken))
+            if (await _bannerStudentRepository.Queryable.AnyAsync(x => x.StudentId == student.Id && x.BannerId == request.BannerId && x.CreatedDate.Date == DateTime.UtcNow.Date, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.ThisStudentViewedThisBanner), nameof(request));
                 return methodResult;
