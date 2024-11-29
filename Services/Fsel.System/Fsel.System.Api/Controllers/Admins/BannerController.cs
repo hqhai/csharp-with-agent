@@ -126,5 +126,17 @@ namespace Fsel.System.Api.Controllers.Admins
             MethodResult<BannerPriorityExistenceModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Search
+        /// </summary>
+        [HttpGet("preview")]
+        [ProducesResponseType(typeof(MethodResult<IList<BannerModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> PreviewBannerByDate([FromQuery] PreviewBannerByDateQuery query)
+        {
+            MethodResult<IList<BannerModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

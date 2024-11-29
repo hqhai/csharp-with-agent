@@ -36,10 +36,10 @@ namespace Fsel.System.Domain.Entities
 
         public EnumBannerFrequency BannerFrequency { get; set; }
 
-        [RequiredIf(nameof(BannerFrequency), EnumBannerFrequency.Custom, ErrorMessage = nameof(EnumBannerErrorCode.CustomFrequencyRequiresDisplayDate))]
+        //[RequiredIf(nameof(BannerFrequency), EnumBannerFrequency.Custom, ErrorMessage = nameof(EnumBannerErrorCode.CustomFrequencyRequiresDisplayDate))]
         public DateTime? DisplayStartDate { get; set; }
 
-        [RequiredIf(nameof(BannerFrequency), EnumBannerFrequency.Custom, ErrorMessage = nameof(EnumBannerErrorCode.CustomFrequencyRequiresDisplayDate))]
+        //[RequiredIf(nameof(BannerFrequency), EnumBannerFrequency.Custom, ErrorMessage = nameof(EnumBannerErrorCode.CustomFrequencyRequiresDisplayDate))]
         public DateTime? DisplayEndDate { get; set; }
 
         [Range(0, long.MaxValue, ErrorMessage = nameof(EnumBannerErrorCode.DisplayStartTimeMustGreaterThanZero))]

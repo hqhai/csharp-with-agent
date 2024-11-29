@@ -34,6 +34,8 @@ namespace Fsel.System.Domain.Models.CommandModels.Banners
 
         public long? DisplayEndTime { get; set; }
 
+        public bool Status { get; set; }
+
         [Required]
         public IList<UpdateBannerScopeCommandModel> BannerScopes { get; set; } = new List<UpdateBannerScopeCommandModel>();
     }

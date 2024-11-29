@@ -159,6 +159,22 @@ namespace Fsel.System.Application.Commands.BannerCmd
                 value = request.DisplayStartDate;
             }
 
+            if (request.BannerFrequency == EnumBannerFrequency.Custom && !request.DisplayStartDate.HasValue)
+            {
+                condition = false;
+                errorMessage = nameof(EnumBannerErrorCode.CustomFrequencyRequiresDisplayDate);
+                field = nameof(request.DisplayStartDate);
+                value = request.DisplayStartDate;
+            }
+
+            if (request.BannerFrequency == EnumBannerFrequency.Custom && !request.DisplayEndDate.HasValue)
+            {
+                condition = false;
+                errorMessage = nameof(EnumBannerErrorCode.CustomFrequencyRequiresDisplayDate);
+                field = nameof(request.DisplayStartDate);
+                value = request.DisplayStartDate;
+            }
+
             if (request.DisplayStartTime.HasValue && request.DisplayEndTime.HasValue && request.DisplayStartTime >= request.DisplayEndTime)
             {
                 condition = false;
