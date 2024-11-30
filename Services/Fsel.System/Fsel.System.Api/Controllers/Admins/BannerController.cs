@@ -138,5 +138,17 @@ namespace Fsel.System.Api.Controllers.Admins
             MethodResult<IList<BannerModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// banner trong ngày
+        /// </summary>
+        [HttpGet("banner-in-day")]
+        [ProducesResponseType(typeof(MethodResult<IList<BannerModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetBannerInDateQuery([FromQuery] GetBannerInDateQuery query)
+        {
+            MethodResult<IList<BannerInDayModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
