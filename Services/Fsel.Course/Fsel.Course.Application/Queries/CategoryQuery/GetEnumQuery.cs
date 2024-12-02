@@ -121,6 +121,10 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                 case EnumCourseSourceData.OverallScore:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumOverallScore>();
                     break;
+
+                case EnumCourseSourceData.LearningProgress:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumLearningProgress>();
+                    break;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
