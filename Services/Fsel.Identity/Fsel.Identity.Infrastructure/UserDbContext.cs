@@ -26,6 +26,7 @@ namespace Fsel.Identity.Infrastructure
             builder.Entity<Role>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<UserToken>().HasQueryFilter(e => !e.IsDeleted);
+            builder.HasSequence<int>(SqlSettings.Sequence.UserSequence).StartsAt(100000).IncrementsBy(1);
 
             SeedPlatforms(builder);
             SeedRoles(builder);
@@ -55,6 +56,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new EventRegistrationEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserDeletionEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentDailyStreakEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserSchoolEntityTypeConfiguration());
         }
 
         #region Db Set
@@ -84,6 +86,7 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<UserReferral> UserReferrals { get; set; }
         public DbSet<EventRegistration> EventRegistrations { get; set; }
         public DbSet<UserDeletion> UserDeletions { get; set; }
+        public DbSet<UserSchool> UserSchools { get; set; }
 
         #endregion Db Set
 

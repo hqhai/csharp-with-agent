@@ -3708,9 +3708,15 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("Level", "StudentId");
+
                     b.HasIndex("PlacementTestId", "StudentId")
                         .IsUnique()
                         .HasFilter("[PlacementTestId] IS NOT NULL");
+
+                    b.HasIndex("Status", "StudentId");
 
                     b.ToTable("PlacementTestResults");
                 });
