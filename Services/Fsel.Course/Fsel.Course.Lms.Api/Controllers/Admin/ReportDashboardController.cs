@@ -67,5 +67,29 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             MethodResult<StackBarChartsModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Learning Progress Statistical
+        /// </summary>
+        [HttpGet("learning-progress-statistical")]
+        [ProducesResponseType(typeof(MethodResult<DashBoardLearningProgressModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ReportLearningProgress([FromQuery] GetReportLearningProgressQuery query)
+        {
+            MethodResult<DashBoardLearningProgressModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Student Learning Result Statistical
+        /// </summary>
+        [HttpGet("student-learning-progress-statistical")]
+        [ProducesResponseType(typeof(MethodResult<StackBarChartsModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ReportLearningProgressStack([FromQuery] GetReportLearningProgressStackQuery query)
+        {
+            MethodResult<StackBarChartsModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

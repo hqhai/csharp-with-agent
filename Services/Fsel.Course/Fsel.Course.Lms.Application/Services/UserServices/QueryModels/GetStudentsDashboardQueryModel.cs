@@ -6,7 +6,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.QueryModels
 
     public class GetStudentsDashboardQueryModel
     {
-        public IList<EnumCourseType>? CourseTypes { get; set; }
+        public IList<EnumCourseLevel>? CourseLevels { get; set; }
         public IList<string>? SchoolClasses { get; set; }
     }
 }

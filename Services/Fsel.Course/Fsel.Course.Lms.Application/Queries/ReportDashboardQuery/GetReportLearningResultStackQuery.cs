@@ -76,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             var methodResult = new MethodResult<StackBarChartsModel>();
             var userResults = await _userService.GetStudentsDashboardAsync(new GetStudentsDashboardQueryModel
             {
-                CourseTypes = request.CourseTypes,
+                CourseLevels = request.CourseTypes?.SelectMany(x => EnumCourseLevelHelper.GetEnumCourseLevels(x)).ToList(),
                 SchoolClasses = request.SchoolClasses,
             });
             if (!userResults.IsSuccessStatusCode)

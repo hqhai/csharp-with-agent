@@ -16,6 +16,11 @@ namespace Fsel.Course.Domain.Models.EntityModels.BaseChartModels
         public int Value { get; set; }
     }
 
+    public class DataPieChartModel : DataChartModel
+    {
+        public int Percent { get; set; }
+    }
+
     public class StackBarChartsModel : BaseChartResultModel
     {
         public new IList<StackBarChartModel> DataCharts { get; set; } = new List<StackBarChartModel>();

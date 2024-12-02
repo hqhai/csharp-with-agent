@@ -14,7 +14,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
 
     public class GetStudentsDashboardQuery : IRequest<MethodResult<IList<StudentDtoModel>>>
     {
-        public IList<EnumCourseType>? CourseTypes { get; set; }
+        public IList<EnumCourseLevel>? CourseLevels { get; set; }
         public IList<string>? SchoolClasses { get; set; }
     }
 
@@ -60,10 +60,9 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             {
                 query = query.Where(x => !string.IsNullOrEmpty(x.SchoolClass) && request.SchoolClasses.Contains(x.SchoolClass));
             }
-            if (request.CourseTypes != null)
+            if (request.CourseLevels != null)
             {
-                var courseLevels = request.CourseTypes.SelectMany(x => EnumCourseLevelHelper.GetEnumCourseLevels(x)).ToList();
-                query = query.Where(x => x.CourseLevel.HasValue && courseLevels.Contains(x.CourseLevel.Value));
+                query = query.Where(x => x.CourseLevel.HasValue && request.CourseLevels.Contains(x.CourseLevel.Value));
             }
 
             var lists = await query.AsNoTracking().ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
