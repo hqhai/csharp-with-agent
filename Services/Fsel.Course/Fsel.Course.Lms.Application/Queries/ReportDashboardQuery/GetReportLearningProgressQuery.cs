@@ -165,7 +165,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                         var unitOverall = unitOveralls.FirstOrDefault(x => x.DisplayOrder == item);
                         return new DataChartModel
                         {
-                            Label = $"{nameof(Unit)} {item}",
+                            Label = $"{item}",
                             Value = unitOverall?.TotalUnitDone ?? default,
                         };
                     }).ToList()
@@ -201,7 +201,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                         var lessonOverall = lessonOveralls.FirstOrDefault(x => x.DisplayOrder == item);
                         return new DataChartModel
                         {
-                            Label = $"{nameof(Lesson)} {item}",
+                            Label = $"{item}",
                             Value = lessonOverall?.TotalLessonDone ?? default,
                         };
                     }).ToList()
