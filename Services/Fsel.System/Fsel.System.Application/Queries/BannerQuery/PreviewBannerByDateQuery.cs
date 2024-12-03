@@ -33,7 +33,9 @@ namespace Fsel.System.Application.Queries.BannerQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<BannerModel>> methodResult = new MethodResult<IList<BannerModel>>();
 
-            var banners = await _bannerRepository.Queryable.Where(x => x.StartDate.Date <= request.Date.Date && x.EndDate.Date >= request.Date.Date).ToListAsync(cancellationToken);
+            var banners = await _bannerRepository.Queryable
+                                                 .Where(x => x.Status && x.StartDate.Date <= request.Date.Date && x.EndDate.Date >= request.Date.Date)
+                                                 .OrderBy(x => x.DisplayStartDate).ToListAsync(cancellationToken);
 
             if (request.Id.HasValue)
             {
