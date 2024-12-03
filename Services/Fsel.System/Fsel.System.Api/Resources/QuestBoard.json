@@ -31,7 +31,7 @@
     "id": "1483c74d-d798-46e7-b152-51afd03ff88e",
     "type": "BeginnerQuests",
     "name": "Tân thủ III",
-    "description": "Hoàn thành Diễn đàn lớp học đầu tiên",
+    "description": "Hoàn thành đăng bài trong Diễn đàn lớp học đầu tiên",
     "ImagePath": "",
     "category": "CompleteTheFirstClassForum",
     "targetValue": 1,
