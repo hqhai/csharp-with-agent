@@ -104,6 +104,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 var overallFeatureAccessTime = overallFeatureAccessTimes.FirstOrDefault(x => x.UserId == userId);
                 var studentAssiduity = new StudentAssiduityModel
                 {
+                    StudentId = student.Id,
                     FullName = student.FullName,
                     Email = student.Email,
                     SchoolName = student.School,

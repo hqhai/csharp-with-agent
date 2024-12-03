@@ -215,6 +215,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 }
                 var learningResult = new LearningResultModel
                 {
+                    StudentId = item.Id,
                     Email = item.Email,
                     FullName = item.FullName,
                     SchoolClass = item.SchoolClass,

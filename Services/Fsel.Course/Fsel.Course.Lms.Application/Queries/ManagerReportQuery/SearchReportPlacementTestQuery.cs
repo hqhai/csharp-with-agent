@@ -119,6 +119,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 var placementTestResult = placementTestResults.FirstOrDefault(x => x != null && x.StudentId == item.Id);
                 var placementTestReport = new PlacementTestReportModel
                 {
+                    StudentId = item.Id,
                     Birthday = item.BirthDay,
                     Email = item.Email,
                     FullName = item.FullName,

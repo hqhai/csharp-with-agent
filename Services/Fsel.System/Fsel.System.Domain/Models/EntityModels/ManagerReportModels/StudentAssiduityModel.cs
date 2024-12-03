@@ -8,6 +8,7 @@ namespace Fsel.System.Domain.Models.EntityModels.ManagerReportModels
 
     public class StudentAssiduityModel
     {
+        public Guid StudentId { get; set; }
         public string? FullName { get; set; }
         public string? Email { get; set; }
         public string? SchoolName { get; set; }

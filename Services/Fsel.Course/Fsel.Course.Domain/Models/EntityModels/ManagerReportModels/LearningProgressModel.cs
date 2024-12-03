@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
 
     public class LearningProgressModel
     {
+        public Guid StudentId { get; set; }
         public string? FullName { get; set; }
         public string? Email { get; set; }
         public string? SchoolName { get; set; }

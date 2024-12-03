@@ -117,6 +117,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 var courseComplete = courseCompletes.FirstOrDefault(x => x.StudentId == item.Id);
                 var learningProgress = new LearningProgressModel
                 {
+                    StudentId = item.Id,
                     Email = item.Email,
                     FullName = item.FullName,
                     SchoolClass = item.SchoolClass,
