@@ -52,6 +52,10 @@ namespace Fsel.Shared.Models.ShareModels
         public IList<WeekEvent>? LuckyStarRules { get; set; }
         public FormConfig? FormConfig { get; set; }
         public Guid? LocationId { get; set; }
+
+        public string? BackGroundImage { get; set; }
+
+        public IList<string>? TabNames { get; set; }
     }
 
     public enum EnumSchoolEventRuleAction
