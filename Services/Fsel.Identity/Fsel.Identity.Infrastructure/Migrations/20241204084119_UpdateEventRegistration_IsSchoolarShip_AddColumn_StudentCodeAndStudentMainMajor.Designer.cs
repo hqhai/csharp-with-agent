@@ -4,6 +4,7 @@ using Fsel.Identity.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241204084119_UpdateEventRegistration_IsSchoolarShip_AddColumn_StudentCodeAndStudentMainMajor")]
+    partial class UpdateEventRegistration_IsSchoolarShip_AddColumn_StudentCodeAndStudentMainMajor
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1119,6 +1122,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasIndex("CompetitionEventId");
 
+                    b.HasIndex("IsDeleted", "StudentId");
+
                     b.ToTable("StudentCompetitionEvents");
                 });
 
@@ -1266,6 +1271,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasIndex("StudentId");
 
+                    b.HasIndex("IsDeleted", "StudentId");
+
                     b.ToTable("StudentDailyStreak");
                 });
 
@@ -1336,6 +1343,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnOrder(102);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted", "StudentId", "CreatedDate");
+
+                    b.HasIndex("IsDeleted", "StudentId", "CreatedDate", "TargetTime");
 
                     b.ToTable("StudentFocusTimes");
                 });
@@ -2343,6 +2354,12 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
+                    b.Property<bool>("NotifiCourseTarget")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NotifiDelayCourseTarget")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("NotifiEmail")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -2358,6 +2375,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("NotifiLesson")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NotifiTimeCourseTarget")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("UpdatedDate")
