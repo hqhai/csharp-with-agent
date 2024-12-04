@@ -27,7 +27,6 @@ namespace Fsel.Shared.Models.ShareModels
         public string? ParentEmail { get; set; }
         public string? ParentPhoneNumber { get; set; }
         public bool IsBussinessCheckBox { get; set; }
-        public string? StudentCode { get; set; }
         public string? StudentMainMajor { get; set; }
     }
 }
