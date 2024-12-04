@@ -27,7 +27,7 @@ namespace Fsel.Shared.Models.ShareModels
 
         public IList<ProcessStep>? ProcessSteps { get; set; }
 
-        public string? HowToParticipate { get; set; }
+        public IList<string>? HowToParticipate { get; set; }
 
         public string? InstructionalVideo { get; set; }
 
