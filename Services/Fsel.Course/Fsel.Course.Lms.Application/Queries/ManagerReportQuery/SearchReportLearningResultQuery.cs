@@ -75,6 +75,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 CourseLevel = request.CourseLevel,
                 CourseType = request.CourseType,
                 OverallScore = request.OverallScore,
+                LearningStatus = request.LearningStatus,
             }, cancellationToken);
             var reportLearningResult = _mapper.Map<SearchReportLearningResultModel>(dataOverallResult.Result);
             var userResults = await _mediator.Send(new GetStudentReportQuery
@@ -88,11 +89,13 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 PageSize = request.PageSize,
                 Filters = request.Filters,
                 IncludePaths = request.IncludePaths,
+                SortBy = request.SortBy,
                 Keyword = request.Keyword,
                 Page = request.Page,
                 CourseLevel = request.CourseLevel,
                 CourseType = request.CourseType,
                 OverallScore = request.OverallScore,
+                LearningStatus = request.LearningStatus,
                 ManagerReportType = EnumManagerReportType.ReportLearningResults,
                 IsSearchReport = true
             }, cancellationToken);

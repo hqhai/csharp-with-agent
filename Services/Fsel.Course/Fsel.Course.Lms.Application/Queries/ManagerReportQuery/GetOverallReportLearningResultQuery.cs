@@ -107,15 +107,15 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                           by new { baseQ.CourseId, baseQ.StudentId } into g
                                           select new
                                           {
-                                              OverallPercent = g.Select(x => x.ur).Any() ? g.Select(x => x.ur).Average(x => x.Percent) : default,
+                                              StudentId = g.Key.StudentId,
+                                              OverallPercent = g.Select(x => x.ur).Any() ? Math.Round(g.Select(x => x.ur).Average(x => x.Percent)) : default,
                                               UnitResults = g.Select(x => x.ur).ToList()
-                                          }).ToListAsync();
-            var unitResults = unitResultGroups
-                .Where(x => !request.OverallScore.HasValue ||
-                (request.OverallScore == EnumOverallScore.Accuracy75OrMore ? NumberHelper.ConvertRound(x.OverallPercent) >= (int)EnumOverallScore.Accuracy75OrMore : NumberHelper.ConvertRound(x.OverallPercent) < (int)EnumOverallScore.Accuracy75OrMore))
-                .SelectMany(x => x.UnitResults).ToList();
+                                          })
+                                          .Where(x => (request.OverallScore == EnumOverallScore.Accuracy75OrMore ? x.OverallPercent > (int)EnumOverallScore.Accuracy75OrMore : x.OverallPercent < (int)EnumOverallScore.Accuracy75OrMore))
+                                          .ToListAsync();
 
-            students = students.Where(x => !request.OverallScore.HasValue || unitResults.Select(x => x.StudentId).Distinct().Contains(x.Id)).ToList();
+            var unitResults = unitResultGroups.Where(x => x.UnitResults != null && x.UnitResults.Any()).SelectMany(x => x.UnitResults).ToList();
+            students = students.Where(x => !request.OverallScore.HasValue || unitResultGroups.Select(x => x.StudentId).Distinct().Contains(x.Id)).ToList();
             var studentIds = students.Select(x => x.Id).ToList();
             var overallReport = new OverallReportLearningResultModel
             {

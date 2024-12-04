@@ -47,7 +47,8 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 CourseType = request.CourseType,
                 CourseLevel = request.CourseLevel,
                 OverallScore = request.OverallScore,
-                LearningStatus = request.LearningStatus
+                LearningStatus = request.LearningStatus,
+                SortBy = request.SortBy,
             }, cancellationToken);
             var dataOverallResult = await _mediator.Send(new GetOverallReportLearningResultQuery
             {

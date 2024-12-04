@@ -10,13 +10,33 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
     {
         public string? SchoolGrade { get; set; }
         public string? SchoolClass { get; set; }
-        public string? ListSchoolId { get; set; }
+        public string? SchoolIdsStr { get; set; }
 
         public IList<Guid>? SchoolIds
         {
             get
             {
-                return ListSchoolId.ToList<Guid>();
+                return SchoolIdsStr.ToList<Guid>();
+            }
+        }
+
+        public string? ListDistrict { get; set; }
+
+        public IList<Guid>? DistrictIds
+        {
+            get
+            {
+                return ListDistrict.ToList<Guid>();
+            }
+        }
+
+        public string? ListProvince { get; set; }
+
+        public IList<Guid>? ProvinceIds
+        {
+            get
+            {
+                return ListProvince.ToList<Guid>();
             }
         }
 

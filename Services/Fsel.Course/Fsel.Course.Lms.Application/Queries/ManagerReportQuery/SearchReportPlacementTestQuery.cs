@@ -2,11 +2,9 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 {
-    using System.Diagnostics;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
@@ -75,6 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
                 Page = request.Page,
+                SortBy = request.SortBy,
                 PageSize = request.PageSize,
                 Status = request.Status,
                 StartDate = request.StartDate,

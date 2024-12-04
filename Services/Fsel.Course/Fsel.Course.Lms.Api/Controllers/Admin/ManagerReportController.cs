@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.Course.Lms.Application.Commands.ManagerReportCmd;
     using Fsel.Course.Lms.Application.Queries.ManagerReportQuery;
@@ -19,7 +20,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     [Route(Settings.APIDefaultRoute + "/manager-report/admin")]
     [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool) })]
     [ApiController]
-    public class ManagerReportController : ControllerBase
+    public class ManagerReportController : BaseController
     {
         private readonly IMediator _mediator;
 
@@ -36,6 +37,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] SearchReportLearningProgressQuery query)
         {
+            SetQuery(query);
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
@@ -48,6 +50,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] SearchReportLearningResultQuery query)
         {
+            SetQuery(query);
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
@@ -88,6 +91,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] ExportFileExcelReportLearningProgressCommand command)
         {
+            SetQuery(command);
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             if (!commandResult.IsOK || commandResult.Result == null)
             {
@@ -104,6 +108,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] ExportFileExcelReportLearningResultCommand command)
         {
+            SetQuery(command);
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             if (!commandResult.IsOK || commandResult.Result == null)
             {

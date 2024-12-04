@@ -53,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 CourseType = request.CourseType,
                 CourseLevel = request.CourseLevel,
                 ManagerReportType = EnumManagerReportType.ReportLearningProgress,
+                SortBy = request.SortBy,
             }, cancellationToken);
 
             if (!userResults.IsOK)

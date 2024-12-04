@@ -49,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 StartDate = request.StartDate,
                 CourseLevel = request.CourseLevel,
                 CurrentLevel = request.CurrentLevel,
+                SortBy = request.SortBy,
             }, cancellationToken);
             var dataOverallResult = await _mediator.Send(new GetOverallReportPlacementTestQuery
             {

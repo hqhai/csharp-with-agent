@@ -87,6 +87,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 EndDate = request.EndDate,
                 PageSize = request.PageSize,
                 Filters = request.Filters,
+                SortBy = request.SortBy,
                 IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
                 Page = request.Page,

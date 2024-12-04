@@ -74,7 +74,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 CourseLevel = request.CourseLevel,
                 CourseType = request.CourseType,
                 OverallScore = request.OverallScore,
-                ManagerReportType = EnumManagerReportType.ReportLearningResults
+                ManagerReportType = EnumManagerReportType.ReportLearningResults,
+                SortBy = request.SortBy
             }, cancellationToken);
 
             if (!userResults.IsOK)

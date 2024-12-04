@@ -36,6 +36,7 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<Stream>();
+
             var dataResult = await _mediator.Send(new GetReportLearningProgressStudentQuery()
             {
                 ListDistrict = request.ListDistrict,
@@ -46,7 +47,8 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
                 CourseType = request.CourseType,
-                LearningStatus = request.LearningStatus
+                LearningStatus = request.LearningStatus,
+                SortBy = request.SortBy,
             }, cancellationToken);
             var dataOverallResult = await _mediator.Send(new GetOverallReportLearningProgressQuery
             {

@@ -47,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
                 Status = request.Status,
+                SortBy = request.SortBy,
                 StartDate = request.StartDate,
                 CourseLevel = request.CourseLevel,
                 CurrentLevel = request.CurrentLevel,
