@@ -78,7 +78,7 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.GapFillScoreByGap:
                     var gapFillQuestionByGap = config.Deserialize<GapFillQuestion>();
                     result = isDisableAnswers ? ClearAnswers(gapFillQuestionByGap) : gapFillQuestionByGap;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillQuestionByGap) : ValueSettings.ValueDefault;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillQuestionByGap, true) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
