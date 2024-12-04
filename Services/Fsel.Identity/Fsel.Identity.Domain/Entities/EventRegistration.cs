@@ -38,7 +38,7 @@ namespace Fsel.Identity.Domain.Entities
         [MaxLength(12, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? ParentPhoneNumber { get; set; }
 
-        public bool IsSchoolarshipAdvising { get; set; }
+        public bool IsBussinessCheckBox { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public DateTime BirthDay { get; set; }
@@ -75,5 +75,11 @@ namespace Fsel.Identity.Domain.Entities
         public EnumEventRegistrationStatus Status { get; set; }
         public Guid? StudentId { get; set; }
         public Student? Student { get; set; }
+
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? StudentCode { get; set; }
+
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? StudentMainMajor { get; set; }
     }
 }
