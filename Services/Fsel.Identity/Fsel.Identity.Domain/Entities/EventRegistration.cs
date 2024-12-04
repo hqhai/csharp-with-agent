@@ -77,9 +77,6 @@ namespace Fsel.Identity.Domain.Entities
         public Student? Student { get; set; }
 
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? StudentCode { get; set; }
-
-        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? StudentMainMajor { get; set; }
     }
 }
