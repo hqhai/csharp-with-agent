@@ -31,6 +31,7 @@ namespace Fsel.Shared.Enums
         MailRegisterForEventHaNoi,
         MailRegisterForEventPhuTho,
         MailRegisterForEventUlis,
+        MailRegisterForEventPhenikaa,
         #region event
 
         CreateAccountWithEventSuccess,

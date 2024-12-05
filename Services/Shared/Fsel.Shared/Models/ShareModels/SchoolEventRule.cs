@@ -26,7 +26,8 @@ namespace Fsel.Shared.Models.ShareModels
         public string? PromotionalVideo { get; set; }
 
         public IList<ProcessStep>? ProcessSteps { get; set; }
-
+        public LearningNotice? LearningNotice { get; set; }
+        public BannerPromotional? BannerPromotional { get; set; }
         public IList<string>? HowToParticipate { get; set; }
 
         public string? InstructionalVideo { get; set; }
@@ -144,6 +145,18 @@ namespace Fsel.Shared.Models.ShareModels
         public string? Detail { get; set; }
         public string? RewardImagine { get; set; }
         public int Rank { get; set; }
+    }
+
+    public class LearningNotice
+    {
+        public string? Title { get; set; }
+        public IList<string>? Images { get; set; }
+    }
+
+    public class BannerPromotional
+    {
+        public string? BannerWeb { get; set; }
+        public string? BannerMobile { get; set; }
     }
 
     #endregion
