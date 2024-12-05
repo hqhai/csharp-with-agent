@@ -102,6 +102,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                             {
                                 await SendMailMidCourseReport(studentId, course, cancellationToken).ConfigureAwait(false);
                             }
+                            else if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 5 && course.CourseLevel == EnumCourseLevel.EFA1 && course.CourseType == EnumCourseType.EnglishFoundation && isDone)
+                            {
+                                await SendMailMidCourseReport(studentId, course, cancellationToken).ConfigureAwait(false);
+                            }
+                            else if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 6 && course.CourseLevel != EnumCourseLevel.EFA1 && course.CourseType == EnumCourseType.EnglishFoundation && isDone)
+                            {
+                                await SendMailMidCourseReport(studentId, course, cancellationToken).ConfigureAwait(false);
+                            }
                             else if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 4 && course.CourseType == EnumCourseType.Ielts && isDone)
                             {
                                 await SendMailMidCourseReport(studentId, course, cancellationToken).ConfigureAwait(false);
@@ -134,6 +142,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (course.CourseType == EnumCourseType.Academic)
             {
                 numberUnitDone = 6;
+                listUnitId = course.CourseUnitMockTests.Where(p => p.DisplayOrder <= numberUnitDone && p.UnitId.HasValue).Select(p => p.UnitId ?? default).ToList();
+            }
+            else if (course.CourseType == EnumCourseType.EnglishFoundation && course.CourseLevel != EnumCourseLevel.EFA1)
+            {
+                numberUnitDone = 6;
+                listUnitId = course.CourseUnitMockTests.Where(p => p.DisplayOrder <= numberUnitDone && p.UnitId.HasValue).Select(p => p.UnitId ?? default).ToList();
+            }
+            else if (course.CourseType == EnumCourseType.EnglishFoundation && course.CourseLevel == EnumCourseLevel.EFA1)
+            {
+                numberUnitDone = 5;
                 listUnitId = course.CourseUnitMockTests.Where(p => p.DisplayOrder <= numberUnitDone && p.UnitId.HasValue).Select(p => p.UnitId ?? default).ToList();
             }
             else
@@ -277,7 +295,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                     classForumHtml += html;
                 }
-                if (course.CourseType == EnumCourseType.Academic)
+                if (course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation)
                 {
                     if (unitTestResult.Any(p => p.Skill == item) && (item == EnumCourseSkill.Vocabulary || item == EnumCourseSkill.Grammar))
                     {
@@ -319,6 +337,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 CourseType = course.CourseType,
                 Percent = percentUnit.ToString(CultureInfo.CurrentCulture),
                 ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                IndexMiddleUnit = course.CourseType == EnumCourseType.Academic || course.CourseLevel != EnumCourseLevel.EFA1 ? "6" : "5",
+                TotalUnit = course.CourseType == EnumCourseType.Academic || course.CourseLevel != EnumCourseLevel.EFA1 ? "12" : "10",
+                HideSkillTest = course.CourseType == EnumCourseType.EnglishFoundation ? SendMailSetting.DisplayNone : default,
                 LinkReport = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkFullMockTestReport!, course.Id, mockTestId, userId)
             };
 
@@ -512,7 +533,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     skillScoreHtml += html;
                 });
                 parameter.SkillScore = skillScoreHtml;
-                if (course.CourseType == EnumCourseType.Academic)
+                if (course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation)
                 {
                     parameter.AcademicDisplay = null;
                     parameter.IeltDisplay = SendMailSetting.Display;
@@ -560,7 +581,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     skillScoreHtml += html;
                 }
                 parameter.SkillScore = skillScoreHtml;
-                if (course.CourseType == EnumCourseType.Academic)
+                if (course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation)
                 {
                     parameter.IeltDisplay = SendMailSetting.Display;
                     parameter.IeltDisplay2 = SendMailSetting.Display;
@@ -735,7 +756,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 Email = student?.Human?.Email,
                 Subject = SenderSettings.MidCourseTitle,
                 Params = model,
-                Template = model.CourseType == EnumCourseType.Academic ? EnumSenderTemplate.SendMailMidCourseAcademic : EnumSenderTemplate.SendMailMidCourseIELT,
+                Template = model.CourseType == EnumCourseType.Academic || model.CourseType == EnumCourseType.EnglishFoundation ? EnumSenderTemplate.SendMailMidCourseAcademic : EnumSenderTemplate.SendMailMidCourseIELT,
                 CcEmail = student?.ParentEmail,
                 IsCCEmail = true
             }, cancellationToken).ConfigureAwait(false);

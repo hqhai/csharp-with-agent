@@ -718,7 +718,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var bandScore = string.Empty;
             var review = string.Empty;
 
-            if (course.CourseType == EnumCourseType.Academic)
+            if (course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation)
             {
                 if (course.CourseLevel == EnumCourseLevel.C1)
                 {
@@ -850,7 +850,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendStudentCompleteCourse, course.Name, student.Human.FullName),
                 Params = sendStudentCompleteCourseModel,
                 CcEmail = student.ParentEmail,
-                Template = course.CourseType == EnumCourseType.Academic ? EnumSenderTemplate.SendStudentCompleteCourseAcademic : EnumSenderTemplate.SendStudentCompleteCourseIetls
+                Template = course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation ? EnumSenderTemplate.SendStudentCompleteCourseAcademic : EnumSenderTemplate.SendStudentCompleteCourseIetls
             }, cancellationToken).ConfigureAwait(false);
         }
 

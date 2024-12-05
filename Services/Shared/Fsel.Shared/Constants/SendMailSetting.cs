@@ -21,6 +21,7 @@ namespace Fsel.Shared.Constants
         public const string Equal = "<img src=\"https://s3-sgn10.fptcloud.com/fsel/Images/MicrosoftTeamsimage_4_1706671214.png\" alt=\"\">";
 
         public const string Display = "style=\"width:100%;display: none;\"";
+        public const string DisplayNone = "display: none;";
 
         public const string LessonName = "Resources//MailTemplates//LessonName.html";
         public const string UnitName = "Resources//MailTemplates//UnitName.html";
