@@ -42,7 +42,10 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             }
             //var students = _studentRepository.Queryable.Where(x => x.SchoolId == schoolId).ToList();
 
-            var students = _studentRepository.Queryable.Include(s => s.Human).Where(x => x.SchoolId == schoolId).ToList();
+            var students = await _studentRepository.Queryable
+                .Include(s => s.Human)
+                .Where(x => x.SchoolId == schoolId)
+                .ToListAsync(cancellationToken);
 
             methodResult.Result = _mapper.Map<IList<StudentModel>>(students);
             methodResult.StatusCode = StatusCodes.Status200OK;

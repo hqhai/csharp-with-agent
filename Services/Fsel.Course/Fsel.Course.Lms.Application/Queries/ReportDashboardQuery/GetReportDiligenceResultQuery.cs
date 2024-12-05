@@ -14,7 +14,9 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels.BaseChartModels;
     using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -69,6 +71,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 
             var resultModel = new DashBoardDiligenceModel();
 
+            // Lấy dữ liệu học sinh
             var studentResult = await _userService.GetStudentsBySchoolId();
 
             if (!studentResult.IsSuccessStatusCode)
@@ -85,8 +88,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 return methodResult;
             }
 
+            // Lọc bản ghi có dữ liệu Human
             student = student.Where(s => s.Human != null).ToList();
 
+            // Lấy dữ liệu AccessTime
             var accessTimeResult = await _systemService.GetListFeatureAccessTime(new BaseQueryModel()
             {
                 Filters = new List<GenericFilterModel>() {
@@ -119,127 +124,59 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 return methodResult;
             }
 
+            // Gán tên trường học
             resultModel.SchoolName = student.FirstOrDefault()?.School;
 
+            // Lọc thep chương trình học
             if (request.EnumCourseTypes != null && request.EnumCourseTypes.Count > 0)
             {
                 student = student.Where(s => request.EnumCourseTypes.Contains(s.CourseLevel.GetEnumCourseType())).ToList();
                 featureAccsessTime = featureAccsessTime.Where(f => student.Select(s => s.Human!.UserId).Contains(f.CreatedUserId)).ToList();
             }
 
+            // Lọc theo lớp học của học sinh
             if (request.SchoolClasses != null && request.SchoolClasses.Count > 0)
             {
                 student = student.Where(s => s.SchoolClass != null && request.SchoolClasses.Contains(s.SchoolClass)).ToList();
                 featureAccsessTime = featureAccsessTime.Where(f => student.Select(s => s.Human!.UserId).Contains(f.CreatedUserId)).ToList();
             }
 
-            #region Biểu đồ học sinh không truy cập
-            var reportDate = DateTime.UtcNow.AddDays(-request.ReportDay + 1).Date;
+            resultModel.NumberStudentNotAccessModel = GetStudentNotAccessModel(student, featureAccsessTime, request);
 
-            var featureAccsessTimeInSomeDays = featureAccsessTime.Where(f => f.LastVisited.HasValue && f.LastVisited.Value.Date >= reportDate);
+            resultModel.NumberStudentAccessModel = GetStudentAccessModel(featureAccsessTime, request);
 
-            var studentNotAccessInSomeDays = student
-                .Where(s => !featureAccsessTimeInSomeDays.Any(f => f.CreatedUserId == s.Human!.UserId))
-                .Where(s => s.SchoolClass != null)
-                .GroupBy(s => s.SchoolClass)
-                .OrderBy(x => x.Key)
-                .Select(x => new DataChartModel()
-                {
-                    Label = x.Key,
-                    Value = x.Count()
-                }).ToList();
+            resultModel.LearningResultReportModel = GetLearningResultReportModel(featureAccsessTime);
 
-            resultModel.NumberStudentNotAccessModel.Type = EnumChartType.BarChart;
-            resultModel.NumberStudentNotAccessModel.DataCharts = studentNotAccessInSomeDays;
+            methodResult.Result = resultModel;
+            methodResult.StatusCode = StatusCodes.Status200OK;
 
-            #endregion
+            return methodResult;
+        }
 
-            #region Biểu đồ số lượng học sinh truy cập hệ thống
-            featureAccsessTimeInSomeDays = featureAccsessTime
-                    .Where(f =>
-                        f.LastVisited.HasValue &&
-                        (request.ReportEndDate.HasValue ?
-                        request.ReportStartDate.Date <= f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date &&
-                        request.ReportEndDate.Value.Date >= f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date :
-                        request.ReportStartDate.Date == f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date));
-
-            if (request.ReportEndDate.HasValue)
+        /// <summary>
+        /// Lấy thông tin báo cáo kết quả theo tuần
+        /// </summary>
+        /// <param name="featureAccsessTime">Dữ liệu truy cập hệ thống của học sinh</param>
+        /// <returns></returns>
+        private static LearningResultReportModel GetLearningResultReportModel(IList<FeatureAccessTimeModel> featureAccsessTime)
+        {
+            // Khởi tạo Model
+            // Nhãn thứ 1 model sẽ là các thứ trong tuần
+            // Nhãn thứ 2 là các dạng EnumFeature
+            var resultModel = new LearningResultReportModel()
             {
-                var studentAccessModelThisWeek = featureAccsessTimeInSomeDays
-                    .Select(f => new
-                    {
-                        Date = f.LastVisited!.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date,
-                        UserId = f.CreatedUserId
-                    })
-                    .GroupBy(x => x.Date).OrderBy(x => x.Key)
-                    .Select(x => new DataChartModel()
-                    {
-                        Label = x.Key.ToString(CultureInfo.CurrentCulture),
-                        Value = x.DistinctBy(x => x.UserId).Count()
-                    }).ToList();
+                Type = EnumChartType.StackbarChart
+            };
 
-                double totalStudentAccessModelThisWeek = studentAccessModelThisWeek.Sum(x => x.Value);
-                double totalStudentAccessModelLastWeek = featureAccsessTime
-                    .Where(f =>
-                        f.LastVisited.HasValue &&
-                        (request.ReportStartDate.Date.AddDays(-7) <= f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date &&
-                        request.ReportEndDate.Value.Date.AddDays(-7) >= f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date))
-                    .Select(f => new
-                    {
-                        Date = f.LastVisited!.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date,
-                        UserId = f.CreatedUserId
-                    })
-                    .GroupBy(x => x.Date)
-                    .Select(x => x.DistinctBy(x => x.UserId).Count())
-                    .Sum();
-
-                resultModel.NumberStudentAccessModel.DataCharts = studentAccessModelThisWeek;
-                resultModel.NumberStudentAccessModel.Percent = totalStudentAccessModelLastWeek == 0 ? 100 : (int)(((totalStudentAccessModelThisWeek - totalStudentAccessModelLastWeek) / totalStudentAccessModelLastWeek) * 100);
-            }
-            else
-            {
-                var studentAccessModelThisDay = featureAccsessTimeInSomeDays
-                    .Select(f => new
-                    {
-                        Hour = AssignHourLabelForAccessTime(f.LastVisited),
-                        UserId = f.CreatedUserId
-                    })
-                    .GroupBy(x => x.Hour).OrderBy(x => (int)x.Key)
-                    .Select(x => new DataChartModel()
-                    {
-                        Label = x.Key.GetDescription(),
-                        Value = x.DistinctBy(x => x.UserId).Count()
-                    });
-
-                double totalAccessThisDay = studentAccessModelThisDay.Sum(x => x.Value);
-                double totalAccessYesterday = featureAccsessTime
-                    .Where(f =>
-                        f.LastVisited.HasValue &&
-                        request.ReportStartDate.Date.AddDays(-1) == f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date)
-                    .Select(f => new
-                    {
-                        Hour = AssignHourLabelForAccessTime(f.LastVisited),
-                        UserId = f.CreatedUserId
-                    })
-                    .GroupBy(x => x.Hour)
-                    .Select(x => x.DistinctBy(x => x.UserId).Count())
-                    .Sum();
-
-                resultModel.NumberStudentAccessModel.DataCharts = studentAccessModelThisDay.ToList();
-                resultModel.NumberStudentAccessModel.Percent = totalAccessYesterday == 0 ? 100 : (int)(((totalAccessThisDay - totalAccessYesterday) / totalAccessYesterday) * 100);
-            }
-
-            resultModel.NumberStudentAccessModel.Type = EnumChartType.LineChart;
-
-            #endregion
-
-
-            #region Biểu đồ Báo các học tập theo tuần
             var dayOfWeek = DateTime.UtcNow.DayOfWeek;
             double totalDays = DateTime.UtcNow.DayOfWeek == DayOfWeek.Sunday ? 7 : (int)DateTime.UtcNow.DayOfWeek;
+
+            // Xóa định ngày bắt đầu lọc
             var startCalculateDay = DateTime.UtcNow.Date.AddDays(dayOfWeek == DayOfWeek.Sunday ? -6 : -(int)dayOfWeek + 1);
 
             double totalTimeThisWeek = 0;
+
+            // Lọc dữ liệu AccessTime
             var featureAccsessTimeThisWeek = featureAccsessTime
                 .Where(f => f.LastVisited.HasValue &&
                 startCalculateDay <= f.LastVisited.Value.Date && DateTime.UtcNow.Date >= f.LastVisited.Value.Date
@@ -249,7 +186,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                     totalTimeThisWeek += f.AccessTime;
                     return new
                     {
-                        Index = (f.LastVisited!.Value.DayOfWeek == DayOfWeek.Sunday) ? 7 : (int)f.LastVisited!.Value.DayOfWeek,
+                        Index = (f.LastVisited!.Value.DayOfWeek == DayOfWeek.Sunday) ? 7 : (int)f.LastVisited!.Value.DayOfWeek, // Sử dụng để sắp xếp
                         DayOfWeek = f.LastVisited!.Value.DayOfWeek,
                         EnumFeature = f.EnumFeature,
                         AccessTime = f.AccessTime
@@ -271,22 +208,177 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 .Where(f => f.LastVisited.HasValue &&
                 startCalculateDay.AddDays(-7) <= f.LastVisited.Value.Date && DateTime.UtcNow.Date.AddDays(-7) >= f.LastVisited.Value.Date
                 ).Sum(f => f.AccessTime);
+
             totalAccsessTimeLastWeek = totalAccsessTimeLastWeek / totalDays;
 
-            resultModel.LearningResultReportModel.Type = EnumChartType.StackbarChart;
-            resultModel.LearningResultReportModel.DataCharts = featureAccsessTimeThisWeek.ToList();
-            resultModel.LearningResultReportModel.TotalTime = (int)totalTimeThisWeek;
-            resultModel.LearningResultReportModel.AveragePerDay = totalTimeThisWeek / totalDays;
-            resultModel.LearningResultReportModel.Percent = totalAccsessTimeLastWeek == 0 ? 100 : (int)(((resultModel.LearningResultReportModel.AveragePerDay - totalAccsessTimeLastWeek) / totalAccsessTimeLastWeek) * 100);
+            resultModel.DataCharts = featureAccsessTimeThisWeek.ToList();
+            resultModel.TotalTime = (int)totalTimeThisWeek;
 
-            #endregion
+            // Trung bình trên ngày
+            resultModel.AveragePerDay = totalTimeThisWeek / totalDays;
 
-            methodResult.Result = resultModel;
-            methodResult.StatusCode = StatusCodes.Status200OK;
+            // Tính phần trăm so với tuần trước
+            // Cơ chế giải thích ở dười
+            resultModel.Percent = totalAccsessTimeLastWeek == 0 ? 100 : (int)(((resultModel.AveragePerDay - totalAccsessTimeLastWeek) / totalAccsessTimeLastWeek) * 100);
 
-            return methodResult;
+            return resultModel;
         }
 
+        /// <summary>
+        /// Hàm lấy dữ liệu học sinh không truy cập vào hệ thống để học tập
+        /// </summary>
+        /// <param name="student">Danh sách học sinh thuộc trường học</param>
+        /// <param name="featureAccsessTime">Dữ liệu truy cập hệ thống của học sinh</param>
+        /// <param name="request">Dữ liệu query</param>
+        /// <returns>Model tương ứng</returns>
+        private static BaseChartResultModel GetStudentNotAccessModel(IList<StudentModel> student, IList<FeatureAccessTimeModel> featureAccsessTime, GetReportDiligenceResultQuery request)
+        {
+            // Khởi tạo Model
+            // Nhãn model sẽ là lớp của các học sinh đó
+            var resultModel = new BaseChartResultModel()
+            {
+                Type = EnumChartType.BarChart
+            };
+
+            // Xác định khoảng thời gian để lọc dữ liệu accesstime
+            // Ví dụ ReportDay là 7 thí sẽ trừ đi 6 ngày để lọc
+            var reportDate = DateTime.UtcNow.AddDays(-request.ReportDay + 1).Date;
+
+            // Lọc dữ liệu AccessTime
+            var featureAccsessTimeInSomeDays = featureAccsessTime.Where(f => f.LastVisited.HasValue && f.LastVisited.Value.Date >= reportDate);
+
+            // Lọc những student không có bản ghi nào trong dữ liệu AccessTiem đã lọc
+            var studentNotAccessInSomeDays = student
+                .Where(s => !featureAccsessTimeInSomeDays.Any(f => f.CreatedUserId == s.Human!.UserId))
+                .Where(s => s.SchoolClass != null)
+                .GroupBy(s => s.SchoolClass)
+                .OrderBy(x => x.Key)
+                .Select(x => new DataChartModel()
+                {
+                    Label = x.Key,
+                    Value = x.Count()
+                }).ToList();
+
+            resultModel.DataCharts = studentNotAccessInSomeDays;
+
+            return resultModel;
+        }
+
+        /// <summary>
+        /// Hàm lấy sô lượng học sinh truy cập vào hệ thống để học tập
+        /// </summary>
+        /// <param name="featureAccsessTime">Dữ liệu truy cập hệ thống của học sinh</param>
+        /// <param name="request">Dữ liệu query</param>
+        /// <returns>Model tương ứng</returns>
+        private static NumberStudentAccessModel GetStudentAccessModel(IList<FeatureAccessTimeModel> featureAccsessTime, GetReportDiligenceResultQuery request)
+        {
+            // Khởi tạo Model
+            var resultModel = new NumberStudentAccessModel()
+            {
+                Type = EnumChartType.LineChart
+            };
+
+            // Lọc dữ liệu AccessTime
+            // Nếu truyền ReportEndDate ==> lấy dữ liệu AccessTime theo tuần
+            // Nếu không truyền ReportEndDate ==> lấy dữ liệu AccessTime theo ngày
+            // Trường ReportStartDate là bắt buộc phải có
+            // Dữ liệu DateTime (LastVisited) lấy ra phải chuyển sang giờ local để khớp với giờ nhận vào (ReportStartDate || ReportEndDate) từ query
+            var featureAccsessTimeInSomeDays = featureAccsessTime
+                    .Where(f =>
+                        f.LastVisited.HasValue &&
+                        (request.ReportEndDate.HasValue ?
+                        request.ReportStartDate.Date <= f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date &&
+                        request.ReportEndDate.Value.Date >= f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date :
+                        request.ReportStartDate.Date == f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date));
+
+            // Xử lý đổ dữ liệu vào Model với 2 trường hợp
+            if (request.ReportEndDate.HasValue)
+            {
+                // Lấy dữ liệu theo tuần
+                // Nhãn sẽ là các ngày-tháng-năm trong tuần 
+                var studentAccessModelThisWeek = featureAccsessTimeInSomeDays
+                    .Select(f => new
+                    {
+                        Date = f.LastVisited!.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date, // Chọn ra dữ liệu ngày để gom nhóm dữ liệu
+                        UserId = f.CreatedUserId
+                    })
+                    .GroupBy(x => x.Date).OrderBy(x => x.Key)
+                    .Select(x => new DataChartModel()
+                    {
+                        Label = x.Key.ToString(CultureInfo.CurrentCulture), // Gán nhãn (DateTime)
+                        Value = x.DistinctBy(x => x.UserId).Count()
+                    }).ToList();
+
+                // Tổng lượt truy cập của tuần muốn lấy
+                double totalStudentAccessModelThisWeek = studentAccessModelThisWeek.Sum(x => x.Value);
+                // Tính tổng truy cập của tuần trước (trừ đi 7 ngày)
+                double totalStudentAccessModelLastWeek = featureAccsessTime
+                    .Where(f =>
+                        f.LastVisited.HasValue &&
+                        (request.ReportStartDate.Date.AddDays(-7) <= f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date &&
+                        request.ReportEndDate.Value.Date.AddDays(-7) >= f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date))
+                    .Select(f => new
+                    {
+                        Date = f.LastVisited!.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date,
+                        UserId = f.CreatedUserId
+                    })
+                    .GroupBy(x => x.Date)
+                    .Select(x => x.DistinctBy(x => x.UserId).Count())
+                    .Sum();
+
+                resultModel.DataCharts = studentAccessModelThisWeek;
+
+                // Tính phần trăm tăng hoặc giảm tổng lượt truy cập so với tuần trước
+                // So sánh với 0 để tránh trường hợp số chia = 0
+                // Nếu số chia = 0 ==> mặc định tăng 100%
+                // Số dương ==> tăng & ngược lại
+                resultModel.Percent = totalStudentAccessModelLastWeek == 0 ? 100 : (int)(((totalStudentAccessModelThisWeek - totalStudentAccessModelLastWeek) / totalStudentAccessModelLastWeek) * 100);
+            }
+            else
+            {
+                // Trường hợp lấy dữ liệu theo ngày
+                // Nhãn là các mốc giờ trong ngày
+                var studentAccessModelThisDay = featureAccsessTimeInSomeDays
+                    .Select(f => new
+                    {
+                        Hour = AssignHourLabelForAccessTime(f.LastVisited), // Gọi hàm gán nhãn cho mỗi bản ghi
+                        UserId = f.CreatedUserId
+                    })
+                    .GroupBy(x => x.Hour).OrderBy(x => (int)x.Key)
+                    .Select(x => new DataChartModel()
+                    {
+                        Label = x.Key.GetDescription(),
+                        Value = x.DistinctBy(x => x.UserId).Count()
+                    });
+
+                // Tương tự trường hợp trên
+                double totalAccessThisDay = studentAccessModelThisDay.Sum(x => x.Value);
+                double totalAccessYesterday = featureAccsessTime
+                    .Where(f =>
+                        f.LastVisited.HasValue &&
+                        request.ReportStartDate.Date.AddDays(-1) == f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date)
+                    .Select(f => new
+                    {
+                        Hour = AssignHourLabelForAccessTime(f.LastVisited),
+                        UserId = f.CreatedUserId
+                    })
+                    .GroupBy(x => x.Hour)
+                    .Select(x => x.DistinctBy(x => x.UserId).Count())
+                    .Sum();
+
+                // Tương tự trường hợp trên
+                resultModel.DataCharts = studentAccessModelThisDay.ToList();
+                resultModel.Percent = totalAccessYesterday == 0 ? 100 : (int)(((totalAccessThisDay - totalAccessYesterday) / totalAccessYesterday) * 100);
+            }
+
+            return resultModel;
+        }
+
+        /// <summary>
+        /// Hàm gán nhãn cho dữ liệu DateTime thuộc khoảng giờ nào
+        /// </summary>
+        /// <param name="date">Dữ liệu DateTime</param>
+        /// <returns>EnumHour</returns>
         private static EnumHour AssignHourLabelForAccessTime(DateTime? date)
         {
             if (!date.HasValue)
