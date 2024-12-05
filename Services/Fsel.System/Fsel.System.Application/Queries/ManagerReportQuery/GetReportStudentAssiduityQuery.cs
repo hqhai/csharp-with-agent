@@ -10,7 +10,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class GetReportStudentAssiduityQuery : SearchReportAssiduityQueryModel, IRequest<MethodResult<IList<StudentAssiduityModel>>>
+    public class GetReportStudentAssiduityQuery : SearchStudentReportQueryModel, IRequest<MethodResult<IList<StudentAssiduityModel>>>
     {
     }
 

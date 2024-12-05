@@ -146,10 +146,10 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// <summary>
         /// Search Student
         /// </summary>
-        [HttpPost("search")]
+        [HttpGet("search")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentDtoModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Gets([FromBody] SearchStudentQuery query)
+        public async Task<IActionResult> Gets([FromQuery] SearchStudentQuery query)
         {
             MethodResult<PagingItemsModel<StudentDtoModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

@@ -10,6 +10,7 @@ namespace Fsel.System.Api.Controllers.Admins
     using Fsel.Shared.Enums;
     using Fsel.System.Application.Commands.ManagerReportCmd;
     using Fsel.System.Application.Queries.ManagerReportQuery;
+    using Fsel.System.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.System.Domain.Models.QueryModels.ManagerReports;
     using global::System.Net;
     using MediatR;
@@ -32,7 +33,7 @@ namespace Fsel.System.Api.Controllers.Admins
         /// search
         /// </summary>
         [HttpGet("search-report-student-assiduity")]
-        [ProducesResponseType(typeof(MethodResult<SearchReportAssiduityQueryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<SearchReportStudentAssiduityModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] SearchReportAssiduityQuery query)
         {

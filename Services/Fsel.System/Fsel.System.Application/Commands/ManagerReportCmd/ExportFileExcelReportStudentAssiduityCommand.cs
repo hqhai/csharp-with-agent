@@ -13,7 +13,7 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
     using MediatR;
     using OfficeOpenXml;
 
-    public class ExportFileExcelReportStudentAssiduityCommand : SearchReportAssiduityQueryModel, IRequest<MethodResult<Stream>>
+    public class ExportFileExcelReportStudentAssiduityCommand : SearchStudentReportQueryModel, IRequest<MethodResult<Stream>>
     {
     }
 

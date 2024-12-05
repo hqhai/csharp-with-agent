@@ -72,6 +72,7 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MemoryStream memoryStream = new MemoryStream();
+
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(request.CourseType == EnumCourseType.Academic ? ResourceSettings.ManagerReportLearningProgressAcaExcel : ResourceSettings.ManagerReportLearningProgressIELTSExcel)))
             {
@@ -87,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 excelWorksheet.Cells["H2"].Value = GetData(excelWorksheet.Cells["H2"].Value, request.CourseLevel);
                 excelWorksheet.Cells["I2"].Value = GetData(excelWorksheet.Cells["I2"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
 
-                FillCourseLevelData(excelWorksheet, request.CourseType, overallReportLearningProgress);
+                FillCourseLevelData(excelWorksheet, request.CourseType.GetValueOrDefault(), overallReportLearningProgress);
                 if (learningProgressReports != null && learningProgressReports.Any())
                 {
                     FillLearningProgressData(excelWorksheet, learningProgressReports);

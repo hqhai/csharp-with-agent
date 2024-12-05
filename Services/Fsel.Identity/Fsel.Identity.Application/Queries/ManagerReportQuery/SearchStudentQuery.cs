@@ -6,6 +6,8 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Identity.Application.Services.SystemService;
+    using Fsel.Identity.Application.Services.SystemService.QueryModels;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.QueryModels.ManagerReports;
     using Fsel.Shared.Enums;
@@ -24,20 +26,20 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
         private readonly IStudentRepository _studentRepository;
         private readonly IUserSchoolRepository _userSchoolRepository;
         private readonly AuthContext _authContext;
+        private readonly ISystemService _systemService;
 
-        public SearchStudentQueryHandler(IStudentRepository studentRepository, IUserSchoolRepository userSchoolRepository, AuthContext authContext)
+        public SearchStudentQueryHandler(IStudentRepository studentRepository, IUserSchoolRepository userSchoolRepository, AuthContext authContext, ISystemService systemService)
         {
             _studentRepository = studentRepository;
             _userSchoolRepository = userSchoolRepository;
             _authContext = authContext;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<PagingItemsModel<StudentDtoModel>>> Handle(SearchStudentQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<StudentDtoModel>> methodResult = new MethodResult<PagingItemsModel<StudentDtoModel>>();
-            var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
-
             if (request.PageSize > 100)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -63,10 +65,32 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                     CreatedDate = i.CreatedDate,
                     BaseCourseLevel = i.BaseCourseLevel,
                 });
-            if (schoolId.HasValue)
+
+            if (!string.IsNullOrEmpty(request.Keyword))
             {
+                request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+                query = query.Where(m => (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword) ||
+                                         (m.PhoneNumber ?? string.Empty).Trim().ToLower().Contains(request.Keyword) ||
+                                         (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword));
+            }
+
+            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
+            {
+                var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
                 query = query.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId.Value);
             }
+            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.Admin.ToString()))
+            {
+                var schoolIdResults = await _systemService.GetSchoolIdsAsync(new GetSchoolsQueryModel
+                {
+                    DistrictIds = request.DistrictIds,
+                    ProvinceIds = request.ProvinceIds,
+                    SchoolIds = request.SchoolIds,
+                });
+                var schoolIds = schoolIdResults.Content?.Result;
+                query = query.Where(x => x.SchoolId.HasValue && schoolIds != null && schoolIds.Contains(x.SchoolId.Value));
+            }
+
             if (!string.IsNullOrEmpty(request.SchoolGrade))
             {
                 request.SchoolGrade = request.SchoolGrade.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
@@ -88,29 +112,11 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                     query = query.Where(x => x.ExpiredDate.HasValue && x.ExpiredDate.Value <= DateTime.UtcNow);
                 }
             }
-            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.Admin.ToString()) && request.SchoolIds != null && request.SchoolIds.Any())
-            {
-                query = query.Where(x => x.SchoolId.HasValue && request.SchoolIds.Contains(x.SchoolId.Value));
-            }
 
             if (request.IsLearning.HasValue)
             {
                 query = query.Where(x => request.IsLearning.Value ? x.CourseId.HasValue : !x.CourseId.HasValue);
             }
-
-            if (request.IsCheckDate)
-            {
-                query = query.Where(x => request.StudentIds != null && request.StudentIds.Any() && request.StudentIds.Contains(x.Id));
-            }
-            else if (request.Status.HasValue && request.Status == EnumCompletionStatus.InProgress)
-            {
-                query = query.Where(x => (request.StudentIds != null && request.StudentIds.Any() && request.StudentIds.Contains(x.Id)) || !x.BaseCourseLevel.HasValue);
-            }
-            else if (request.StudentIds != null && request.StudentIds.Any())
-            {
-                query = query.Where(x => request.StudentIds.Contains(x.Id));
-            }
-
             if (request.CourseType.HasValue)
             {
                 var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType.Value);
@@ -120,13 +126,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             {
                 query = query.Where(x => x.CourseLevel.HasValue && x.CourseLevel == request.CourseLevel.Value);
             }
-            if (!string.IsNullOrEmpty(request.Keyword))
-            {
-                request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.Where(m => (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword) ||
-                                         (m.PhoneNumber ?? string.Empty).Trim().ToLower().Contains(request.Keyword) ||
-                                         (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword));
-            }
+
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = query.AsEnumerable()
                     .OrderBy(x => int.TryParse(x.SchoolGrade, out int graded) ? graded : 0).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName)

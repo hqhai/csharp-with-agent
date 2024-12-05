@@ -122,7 +122,8 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             {
                 query = query.Where(x => request.IsLearning.Value ? x.CourseId.HasValue : !x.CourseId.HasValue);
             }
-            methodResult.Result = await query.AsNoTracking().ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var list = await query.AsNoTracking().ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            methodResult.Result = list.OrderBy(x => int.TryParse(x.SchoolGrade, out int graded) ? graded : 0).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

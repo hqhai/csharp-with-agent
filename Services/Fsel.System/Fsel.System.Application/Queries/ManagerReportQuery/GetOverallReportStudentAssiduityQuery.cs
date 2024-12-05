@@ -12,7 +12,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetOverallReportStudentAssiduityQuery : SearchReportAssiduityQueryModel, IRequest<MethodResult<OverallReportStudentAssiduityModel>>
+    public class GetOverallReportStudentAssiduityQuery : SearchStudentReportQueryModel, IRequest<MethodResult<OverallReportStudentAssiduityModel>>
     {
     }
 
@@ -39,8 +39,6 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListSchool = request.ListSchool,
                 SchoolClass = request.SchoolClass,
                 SchoolGrade = request.SchoolGrade,
-                StartDate = request.StartDate,
-                EndDate = request.EndDate,
                 Keyword = request.Keyword,
                 LearningStatus = request.LearningStatus,
                 CourseType = request.CourseType
@@ -59,8 +57,8 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
             var studentIds = students.Select(x => x.Id).ToList();
             var featureAccessTimesQuery = new GetFeatureAccessTimesQueryModel
             {
-                EndDate = request.EndDate,
                 StartDate = request.StartDate,
+                EndDate = request.EndDate,
                 FeatureAccessTimes = students.Select(item =>
                 {
                     return new GetFeatureAccessTimeQueryModel

@@ -107,11 +107,11 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                     excelWorksheet.Cells["L2"].Value = GetData(excelWorksheet.Cells["L2"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
                     excelWorksheet.Cells["M2"].Value = GetData(excelWorksheet.Cells["M2"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
                 }
-                FillUnitData(excelWorksheet, request.CourseType, overallReport);
-                FillCourseLevelData(excelWorksheet, request.CourseType, overallReport);
+                FillUnitData(excelWorksheet, request.CourseType.GetValueOrDefault(), overallReport);
+                FillCourseLevelData(excelWorksheet, request.CourseType.GetValueOrDefault(), overallReport);
                 if (learningResultReports != null && learningResultReports.Any())
                 {
-                    FillLearningProgressData(excelWorksheet, request.CourseType, learningResultReports);
+                    FillLearningProgressData(excelWorksheet, request.CourseType.GetValueOrDefault(), learningResultReports);
                 }
                 excelPackage.SaveAs(memoryStream);
             }

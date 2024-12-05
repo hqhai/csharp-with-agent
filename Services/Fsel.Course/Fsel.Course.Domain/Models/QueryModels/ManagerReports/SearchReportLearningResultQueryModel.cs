@@ -3,11 +3,10 @@
 namespace Fsel.Course.Domain.Models.QueryModels.ManagerReports
 {
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels.QueryModels;
 
-    public class SearchReportLearningResultQueryModel : BaseSearchStudentReportQueryModel
+    public class SearchReportLearningResultQueryModel : SearchStudentSchoolQueryModel
     {
         public EnumOverallScore? OverallScore { get; set; }
-        public EnumCourseType CourseType { get; set; }
-        public EnumLearningStatus? LearningStatus { get; set; }
     }
 }

@@ -21,7 +21,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     public class GetStudentReportQuery : SearchStudentReportQueryModel, IRequest<MethodResult<IList<StudentDtoModel>>>
     {
         public bool IsSearchReport { get; set; }
-        public bool IsListGuid { get; set; }
         public EnumManagerReportType ManagerReportType { get; set; }
     }
 
