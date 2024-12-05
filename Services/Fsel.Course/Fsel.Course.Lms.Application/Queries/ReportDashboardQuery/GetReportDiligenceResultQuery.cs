@@ -58,6 +58,16 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
 
+        /// <summary>
+        ///  Khoảng thời gian để chia ra các khoảng trong ngày
+        /// </summary>
+        private const int TimePeriod = 2;
+
+        /// <summary>
+        /// Số ngày trong tuần
+        /// </summary>
+        private const int NumberDayOfWeek = 7;
+
         public GetReportDiligenceResultQueryHandler(IUserService userService, ISystemService systemService)
         {
             _userService = userService;
@@ -169,10 +179,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             };
 
             var dayOfWeek = DateTime.UtcNow.DayOfWeek;
-            double totalDays = DateTime.UtcNow.DayOfWeek == DayOfWeek.Sunday ? 7 : (int)DateTime.UtcNow.DayOfWeek;
+            double totalDays = DateTime.UtcNow.DayOfWeek == DayOfWeek.Sunday ? NumberDayOfWeek : (int)DateTime.UtcNow.DayOfWeek;
 
             // Xóa định ngày bắt đầu lọc
-            var startCalculateDay = DateTime.UtcNow.Date.AddDays(dayOfWeek == DayOfWeek.Sunday ? -6 : -(int)dayOfWeek + 1);
+            var startCalculateDay = DateTime.UtcNow.Date.AddDays(dayOfWeek == DayOfWeek.Sunday ? (-NumberDayOfWeek + 1) : -(int)dayOfWeek + 1);
 
             double totalTimeThisWeek = 0;
 
@@ -186,7 +196,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                     totalTimeThisWeek += f.AccessTime;
                     return new
                     {
-                        Index = (f.LastVisited!.Value.DayOfWeek == DayOfWeek.Sunday) ? 7 : (int)f.LastVisited!.Value.DayOfWeek, // Sử dụng để sắp xếp
+                        Index = (f.LastVisited!.Value.DayOfWeek == DayOfWeek.Sunday) ? NumberDayOfWeek : (int)f.LastVisited!.Value.DayOfWeek, // Sử dụng để sắp xếp
                         DayOfWeek = f.LastVisited!.Value.DayOfWeek,
                         EnumFeature = f.EnumFeature,
                         AccessTime = f.AccessTime
@@ -206,7 +216,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 
             double totalAccsessTimeLastWeek = featureAccsessTime
                 .Where(f => f.LastVisited.HasValue &&
-                startCalculateDay.AddDays(-7) <= f.LastVisited.Value.Date && DateTime.UtcNow.Date.AddDays(-7) >= f.LastVisited.Value.Date
+                startCalculateDay.AddDays(-NumberDayOfWeek) <= f.LastVisited.Value.Date && DateTime.UtcNow.Date.AddDays(-NumberDayOfWeek) >= f.LastVisited.Value.Date
                 ).Sum(f => f.AccessTime);
 
             totalAccsessTimeLastWeek = totalAccsessTimeLastWeek / totalDays;
@@ -315,8 +325,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 double totalStudentAccessModelLastWeek = featureAccsessTime
                     .Where(f =>
                         f.LastVisited.HasValue &&
-                        (request.ReportStartDate.Date.AddDays(-7) <= f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date &&
-                        request.ReportEndDate.Value.Date.AddDays(-7) >= f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date))
+                        (request.ReportStartDate.Date.AddDays(-NumberDayOfWeek) <= f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date &&
+                        request.ReportEndDate.Value.Date.AddDays(-NumberDayOfWeek) >= f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date))
                     .Select(f => new
                     {
                         Date = f.LastVisited!.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date,
@@ -390,8 +400,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 
             foreach (EnumHour hour in Enum.GetValues(typeof(EnumHour)))
             {
-                var index = (int)hour * 2;
-                if (index <= date.Value.Hour && index + 2 > date.Value.Hour)
+                var index = (int)hour * TimePeriod;
+                if (index <= date.Value.Hour && index + TimePeriod > date.Value.Hour)
                 {
                     return hour;
                 }
