@@ -19,6 +19,7 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         ValueGreaterThan100,
         CodeAlreadyExists,
         CodePrefixAlreadyExists,
-        CodeInValidFormat
+        CodeInValidFormat,
+        WrongEventApplied
     }
 }

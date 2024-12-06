@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
+    using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
@@ -21,6 +22,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     {
         public string? Code { get; set; }
         public Guid PackageId { get; set; }
+        public Guid EventId { get; set; }
     }
 
     public class CheckVoucherCommandHandler : IRequestHandler<CheckVoucherCommand, MethodResult<CheckVoucherModel>>
@@ -30,14 +32,16 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
         private readonly IOrderRepository _orderRepository;
         private readonly IPackageRepository _packageRepository;
         private readonly IUserVoucherLockRepository _userVoucherLockRepository;
+        private readonly IUserService _userService;
 
-        public CheckVoucherCommandHandler(IVoucherRepository voucherRepository, AuthContext authContext, IOrderRepository orderRepository, IPackageRepository packageRepository, IUserVoucherLockRepository userVoucherLockRepository)
+        public CheckVoucherCommandHandler(IVoucherRepository voucherRepository, AuthContext authContext, IOrderRepository orderRepository, IPackageRepository packageRepository, IUserVoucherLockRepository userVoucherLockRepository, IUserService userService)
         {
             _voucherRepository = voucherRepository;
             _authContext = authContext;
             _orderRepository = orderRepository;
             _packageRepository = packageRepository;
             _userVoucherLockRepository = userVoucherLockRepository;
+            _userService = userService;
         }
 
         public async Task<MethodResult<CheckVoucherModel>> Handle(CheckVoucherCommand request, CancellationToken cancellationToken)
@@ -58,10 +62,10 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 var result = await GetUserVoucherLockAsync(_authContext.CurrentUserId, cancellationToken);
                 methodResult.Result = new CheckVoucherModel()
                 {
-                    VoucherId = default,
-                    DiscountPrice = 0,
-                    Percent = 0,
-                    TotalPrice = 0,
+                    VoucherId = null,
+                    DiscountPrice = null,
+                    Value = null,
+                    TotalPrice = null,
                     UserVoucherLock = result
                 };
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist));
@@ -97,14 +101,84 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 return methodResult;
             }
 
-            //if (voucher.VoucherType == EnumApplicableSubjectsVoucher.NewSale)
-            //{
-            //    if (await _orderRepository.Queryable.AnyAsync(p => p.Status == EnumOrderStatus.Payment && p.UserId == _authContext.CurrentUserId && !p.IsTrial, cancellationToken))
-            //    {
-            //        methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.NotSubjectToUse));
-            //        return methodResult;
-            //    }
-            //}
+            if (voucher.ApplicableSubjects == null || voucher.ApplicableSubjects.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.NotSubjectToUse));
+                return methodResult;
+            }
+
+            if (voucher.EventIds == null || !voucher.EventIds.Contains(request.EventId))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.WrongEventApplied));
+                return methodResult;
+            }
+
+            if (voucher.Source == EnumVoucherSource.Auto)
+            {
+                var vouchersAuto = _voucherRepository.Queryable.Where(p => p.CodePrefix == voucher.CodePrefix).ToList();
+                var voucherIds = vouchersAuto.Select(p => p.Id).ToList();
+                var orders = _orderRepository.Queryable.Where(p => p.UserId == _authContext.CurrentUserId && p.VoucherId.HasValue && voucherIds.Contains(p.VoucherId ?? default)).ToList();
+                if (voucher.NumberOfChanges >= orders.Count)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.WrongEventApplied));
+                    return methodResult;
+                }
+            }
+
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(studentResult.Error);
+                return methodResult;
+            }
+            var student = studentResult.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.NotSubjectToUse));
+                return methodResult;
+            }
+
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+            bool check = voucher.ApplicableSubjects.Any(applicableSubject =>
+            {
+                return applicableSubject switch
+                {
+                    EnumApplicableSubjectsVoucher.NewSale =>
+                        !_orderRepository.Queryable.Any(p =>
+                            p.UserId == _authContext.CurrentUserId &&
+                            p.Status == EnumOrderStatus.Payment &&
+                            p.IsTrial),
+
+                    EnumApplicableSubjectsVoucher.CurrentStudent =>
+                        _orderRepository.Queryable.Any(p =>
+                            p.UserId == _authContext.CurrentUserId &&
+                            p.Status == EnumOrderStatus.Payment &&
+                            !p.IsTrial) &&
+                        student.ExpiredDate.HasValue &&
+                        student.ExpiredDate > currentDate,
+
+                    EnumApplicableSubjectsVoucher.Alumni =>
+                        _orderRepository.Queryable.Any(p =>
+                            p.UserId == _authContext.CurrentUserId &&
+                            p.Status == EnumOrderStatus.Payment &&
+                            !p.IsTrial) &&
+                        (!student.ExpiredDate.HasValue ||
+                         student.ExpiredDate < currentDate),
+
+                    EnumApplicableSubjectsVoucher.Other =>
+                        voucher.ApplicableEmails != null &&
+                        !string.IsNullOrEmpty(student.Human?.Email) &&
+                        voucher.ApplicableEmails.Contains(student.Human.Email),
+
+                    _ => false
+                };
+            });
+
+            if (!check)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.NotSubjectToUse));
+                return methodResult;
+            }
 
             var package = await _packageRepository.GetByIdAsync(request.PackageId);
             if (package == null)
@@ -113,16 +187,27 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 return methodResult;
             }
 
-            var discountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(package.Price * voucher.Value));
-            var totalPrice = package.Price - discountPrice;
+            decimal? discountPrice = null;
+            decimal? totalPrice = null;
+            if (voucher.Category == EnumVoucherCategory.Percent)
+            {
+                discountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(package.Price * voucher.Value));
+                totalPrice = package.Price - discountPrice;
+            }
+            else if (voucher.Category == EnumVoucherCategory.Money)
+            {
+                discountPrice = voucher.Value;
+                totalPrice = package.Price - discountPrice;
+            }
 
             await ResetUserVoucherLockAsync(_authContext.CurrentUserId, cancellationToken);
 
             methodResult.Result = new CheckVoucherModel()
             {
                 VoucherId = voucher.Id,
+                Category = voucher.Category,
                 DiscountPrice = discountPrice,
-                Percent = voucher.Value,
+                Value = voucher.Value,
                 TotalPrice = totalPrice,
             };
 
