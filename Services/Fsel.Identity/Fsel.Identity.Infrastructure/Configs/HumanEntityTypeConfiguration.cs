@@ -26,6 +26,8 @@ namespace Fsel.Identity.Infrastructure.Configs
                  .HasConversion(
                     v => v.HasValue ? v.ToString() : null,
                     v => v.EnumParse<EnumGender>());
+
+            builder.HasIndex(x => new { x.IsDeleted, x.Code });
         }
     }
 }
