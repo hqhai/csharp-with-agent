@@ -2,6 +2,8 @@
 
 namespace Fsel.Shared.Models.ShareModels
 {
+    using Fsel.Shared.Enums;
+
     public class SchoolEventRule
     {
         public bool LuckySpin { get; set; }
@@ -115,6 +117,7 @@ namespace Fsel.Shared.Models.ShareModels
         public EnumSchoolEventRuleAction Action { get; set; }
         public DateTime? EndDate { get; set; }
         public StopAtLevelSelectionConfig? StopAtLevelSelectionConfig { get; set; }
+        public EnumSenderTemplate? MailRegister { get; set; }
     }
 
     public class StopAtLevelSelectionConfig

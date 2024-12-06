@@ -9,6 +9,7 @@ namespace Fsel.Shared.Models.ShareModels
     public class RegisterStudentForEventCommandModel
     {
         public string? EventCode { get; set; }
+        public string? Password { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Email { get; set; }
