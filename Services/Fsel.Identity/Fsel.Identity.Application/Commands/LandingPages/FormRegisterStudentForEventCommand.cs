@@ -160,8 +160,10 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     }
             };
 
+            var password = request.Password ?? DefaultPassword;
+
             var passwordValidator = new Microsoft.AspNetCore.Identity.PasswordValidator<User>();
-            var validPassword = await passwordValidator.ValidateAsync(_userManager, user, DefaultPassword);
+            var validPassword = await passwordValidator.ValidateAsync(_userManager, user, password);
             if (!validPassword.Succeeded)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIsNotValid));
@@ -174,7 +176,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 return methodResult;
             }
 
-            identityStudentResult = await _userManager.CreateAsync(user, DefaultPassword);
+            identityStudentResult = await _userManager.CreateAsync(user, password);
             if (!identityStudentResult.Succeeded)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
@@ -199,7 +201,11 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 return methodResult;
             });
 
-            await SendMailInfoUser(request, DefaultPassword, EnumSenderTemplate.CreateUserForEventULIS, Subject);
+            var template = competitionEvent.EventContent?.ActionConfigs?.FirstOrDefault(p => p.MailRegister.HasValue);
+            if (template != null && template.MailRegister.HasValue)
+            {
+                await SendMailInfoUser(request, password, template.MailRegister.Value, Subject);
+            }
 
             return methodResult;
         }
@@ -251,7 +257,10 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 Params = new
                 {
                     UserName = request.Email,
-                    Password = password
+                    Password = password,
+                    FullName = request.FirstName + " " + request.LastName,
+                    Class = request.SchoolClass,
+                    School = request.School
                 },
             });
         }
