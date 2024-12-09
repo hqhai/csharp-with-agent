@@ -18,6 +18,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
     public class ToolUpdateBeginnerGuideStudentCommand : IRequest<MethodResult<bool>>
     {
+        public Guid? StudentId { get; set; }
     }
 
     public class ToolUpdateBeginnerGuideStudentCommandHandler : IRequestHandler<ToolUpdateBeginnerGuideStudentCommand, MethodResult<bool>>
@@ -35,9 +36,15 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            List<Student> listStudent = new List<Student>();
-
-            var students = await _studentRepository.Queryable.ToListAsync(cancellationToken);
+            List<Student> students = new List<Student>();
+            if (request.StudentId != null)
+            {
+                students = _studentRepository.Queryable.Where(x => x.Id == request.StudentId).ToList();
+            }
+            else
+            {
+                students = await _studentRepository.Queryable.ToListAsync(cancellationToken);
+            }
             var sendingPhase = (int)Math.Ceiling((double)students.Count / AmountStudentSending);
 
             List<ParamBeginnerGuideModel> paramBeginnerGuidesResult = new List<ParamBeginnerGuideModel>();
@@ -176,7 +183,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "showCaseQuestionList"),
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "keyQuestionListBottomSheetFinalTestMockTest"),
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "keyQuestionBottomBar"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "showCaseQuestionBottomBar2"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneOnePlacementTest, "keyQuestionBottomBar2"),
 
               // web
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.LevelSelection, "placement-test-select-level"),
@@ -216,7 +223,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
               //mobile
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "keyClassForum"),
-              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "keyPromptNewPost"),
+              new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "keyPostClassForum"),
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "keyPromptChatGPT1"),
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "keyPromptChatGPT2"),
               new KeyValuePair<EnumCheckPoint, string>( EnumCheckPoint.DoneClassForum, "keyClassMate"),

@@ -11,6 +11,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Fsel.Identity.Application.Commands.StudentCmd;
     using Fsel.Identity.Application.Queries.AdminQuery;
     using Fsel.Identity.Application.Queries.StudentQuery;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -146,9 +147,9 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("tool-update-beginner-guide")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ToolUpdateBeginnerGuide()
+        public async Task<IActionResult> ToolUpdateBeginnerGuide([FromQuery] Guid? id)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new ToolUpdateBeginnerGuideStudentCommand()).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(new ToolUpdateBeginnerGuideStudentCommand { StudentId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
