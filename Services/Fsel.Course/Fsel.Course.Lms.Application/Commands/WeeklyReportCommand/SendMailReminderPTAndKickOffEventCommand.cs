@@ -19,32 +19,33 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SendMailReminderToDoPTCommandModel
+    public class SendMailReminderPTAndKickOffEventCommandModel
     {
         public string? EventCode { get; set; }
         public string? Subject { get; set; }
         public ICollection<Guid>? StudentIds { get; set; }
         public IFormFile? File { get; set; }
+        public bool IsDonePT { get; set; }
     }
 
-    public class SendMailReminderToDoPTCommand : SendMailReminderToDoPTCommandModel, IRequest<MethodResult<bool>>
+    public class SendMailReminderPTAndKickOffEventCommand : SendMailReminderPTAndKickOffEventCommandModel, IRequest<MethodResult<bool>>
     {
     }
 
-    public class SendMailReminderToDoPTCommandHandler : IRequestHandler<SendMailReminderToDoPTCommand, MethodResult<bool>>
+    public class SendMailReminderPTAndKickOffEventCommandHandler : IRequestHandler<SendMailReminderPTAndKickOffEventCommand, MethodResult<bool>>
     {
         private readonly IUserService _userService;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IMediator _mediator;
 
-        public SendMailReminderToDoPTCommandHandler(IUserService userService, IPlacementTestResultRepository placementTestResultRepository, IMediator mediator)
+        public SendMailReminderPTAndKickOffEventCommandHandler(IUserService userService, IPlacementTestResultRepository placementTestResultRepository, IMediator mediator)
         {
             _userService = userService;
             _placementTestResultRepository = placementTestResultRepository;
             _mediator = mediator;
         }
 
-        public async Task<MethodResult<bool>> Handle(SendMailReminderToDoPTCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(SendMailReminderPTAndKickOffEventCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
@@ -94,7 +95,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                                                                                   PTEnd = p.Select(x => x).OrderByDescending(n => n.CreatedDate).FirstOrDefault(),
                                                                               }).ToListAsync(cancellationToken);
 
-            var studentsReminder = new List<StudentModel>();
+            var studentsEvent = new List<StudentModel>();
 
             foreach (var student in students)
             {
@@ -108,9 +109,13 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                 var (levelNext, isLock) = placementTestResultLast?.Level.GetLevelInScore(placementTestResultLast.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age)) ?? (null, default);
 
-                if (!isLock)
+                if (!isLock && !request.IsDonePT)
                 {
-                    studentsReminder.Add(student);
+                    studentsEvent.Add(student);
+                }
+                else
+                {
+                    studentsEvent.Add(student);
                 }
             }
 
@@ -128,7 +133,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 return methodResult;
             }
 
-            foreach (var student in studentsReminder)
+            foreach (var student in studentsEvent)
             {
                 var studentInfo = new
                 {
