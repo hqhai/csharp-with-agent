@@ -49,6 +49,7 @@ namespace Fsel.System.Domain.Entities
         public long? DisplayEndTime { get; set; }
 
         public bool Status { get; set; }
+        public EnumBannerLink? RouteScreen { get; set; }
 
         public ICollection<BannerScope> BannerScopes { get; set; } = new List<BannerScope>();
 

@@ -33,6 +33,7 @@ namespace Fsel.System.Domain.Models.CommandModels.Banners
         public long? DisplayStartTime { get; set; }
 
         public long? DisplayEndTime { get; set; }
+        public EnumBannerLink? RouteScreen { get; set; }
 
         [Required]
         public IList<CreateBannerScopeCommandModel> BannerScopes { get; set; } = new List<CreateBannerScopeCommandModel>();

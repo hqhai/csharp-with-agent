@@ -34,6 +34,7 @@ namespace Fsel.System.Domain.Models.EntityModels
         public long? DisplayEndTime { get; set; }
 
         public bool Status { get; set; }
+        public EnumBannerLink? RouteScreen { get; set; }
 
         public IList<BannerScopeModel>? BannerScopes { get; set; }
     }
