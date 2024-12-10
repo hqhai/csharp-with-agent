@@ -8,6 +8,8 @@ namespace Fsel.System.Domain.Enums.ErrorCodes
 
         AgeMustBeBetweenZeroAndOneHundredFifty,
 
-        ToAgeNotThanFromAge
+        ToAgeNotThanFromAge,
+
+        YouChoseTheWrongLevel
     }
 }
