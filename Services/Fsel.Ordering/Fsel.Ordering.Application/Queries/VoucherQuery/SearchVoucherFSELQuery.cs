@@ -82,7 +82,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
             voucherModels = voucherModels.OrderByDescending(x => x.CreatedDate);
 
             int totalItem = voucherModels.Count();
-            var lists = voucherModels.ApplyPaging(request).ToList();
+            var lists = voucherModels.ApplySortAndPaging(request).ToList();
 
             methodResult.Result = new PagingItemsModel<VoucherModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

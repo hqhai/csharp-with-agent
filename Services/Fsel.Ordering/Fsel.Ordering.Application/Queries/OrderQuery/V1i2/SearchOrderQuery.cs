@@ -45,7 +45,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 Id = x.Id,
                 Code = x.Code,
                 UserId = x.UserId,
-                CreatedDate = x.CreatedDate,
+                CreatedDate = x.UpdatedDate ?? x.CreatedDate,
                 UpdatedDate = x.UpdatedDate,
                 CreatedFullName = x.CreatedFullName,
                 Status = x.Status,

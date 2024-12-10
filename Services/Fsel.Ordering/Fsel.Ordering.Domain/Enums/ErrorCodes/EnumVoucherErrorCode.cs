@@ -4,11 +4,7 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
 {
     public enum EnumVoucherErrorCode
     {
-        /// <summary>
-        /// Voucher Start Time Must be Sooner Than the End Time
-        /// </summary>
         VoucherStartTimeMustSoonerThanEndTime,
-
         VoucherIsUsed,
         VoucherNotExist,
         VoucherNotActive,
@@ -20,6 +16,7 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         CodeAlreadyExists,
         CodePrefixAlreadyExists,
         CodeInValidFormat,
-        WrongEventApplied
+        WrongEventApplied,
+        TheNumberOfUsesHasExpired
     }
 }
