@@ -8,6 +8,7 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Course.Lms.Application.Commands.TestCmd;
 using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
+using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
 using Fsel.Shared.Attributes;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
@@ -135,6 +136,32 @@ namespace Fsel.Course.Lms.Api.Controllers
                 return commandResult.GetActionResult();
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "Export_File_Template_ModuleProgess.xlsx");
+        }
+
+        /// <summary>
+        /// Update Module Process
+        /// </summary>
+        [HttpPost("overall-score")]
+        [ProducesResponseType(typeof(MethodResult<double>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> GetOverall([FromBody] ToolTestOverallScoreCommand command)
+        {
+            MethodResult<double> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update Module Process
+        /// </summary>
+        [HttpGet("overall-skill-score")]
+        [ProducesResponseType(typeof(MethodResult<object>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> GetOverallParam([FromQuery] GetParamOverallScoreQuery query)
+        {
+            MethodResult<object> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>
