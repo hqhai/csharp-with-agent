@@ -111,7 +111,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             if (isCheckEmail)
             {
                 user.EmailConfirmed = false;
-                var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
+                var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id, ExpiredTime = DateTime.UtcNow.AddDays(_appSetting!.Otp!.StepDayWithAdmin) }, cancellationToken);
                 var param = new SendOtpTemplateModel
                 {
                     OtpCode = userOtpCode.Result,
@@ -250,7 +250,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
         private async Task<VoidMethodResult?> CheckDuplicateAsync(string? fieldValue, Guid? currentId, string errorCode, string fieldName, CancellationToken cancellationToken)
         {
-            var humanOther = await _humanRepository.Queryable
+            var humanOther = await _userManager.Users
                 .Where(x => (x.Email == fieldValue || x.PhoneNumber == fieldValue) && x.Id != currentId)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -260,7 +260,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(errorCode, fieldName);
                 return methodResult;
             }
-
             return null;
         }
     }
