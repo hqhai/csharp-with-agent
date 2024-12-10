@@ -48,12 +48,13 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get LeaderBoardCollevtive award
         /// </summary>
-        [HttpGet("{eventCode}")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<LeaderBoardCollectiveAwardModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetLessonScore([FromRoute] string eventCode)
+        public async Task<IActionResult> GetLessonScore([FromQuery] GetLeaderBoardCollectiveQuery query)
         {
-            MethodResult<IList<LeaderBoardCollectiveAwardModel>> queryResult = await _mediator.Send(new GetLeaderBoardCollectiveQuery { EventCode = eventCode }).ConfigureAwait(false);
+            SetQuery(query);
+            MethodResult<IList<LeaderBoardCollectiveAwardModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
