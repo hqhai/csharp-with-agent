@@ -81,7 +81,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             var student = user.Human?.Student;
 
-            user.UserName = request.Email;
             _mapper.Map(request, user);
             _mapper.Map(request, user.Human);
             student = _mapper.Map(request, user.Human?.Student);
