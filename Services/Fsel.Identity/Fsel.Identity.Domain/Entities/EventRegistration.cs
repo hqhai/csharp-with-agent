@@ -13,11 +13,9 @@ namespace Fsel.Identity.Domain.Entities
     {
         public Guid CompetitionEventId { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FirstName { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? LastName { get; set; }
 
@@ -38,18 +36,16 @@ namespace Fsel.Identity.Domain.Entities
         [MaxLength(12, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? ParentPhoneNumber { get; set; }
 
-        public bool IsSchoolarshipAdvising { get; set; }
+        public bool IsBussinessCheckBox { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public DateTime BirthDay { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Province { get; set; }
 
         public Guid? ProvinceId { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? District { get; set; }
 
@@ -61,11 +57,9 @@ namespace Fsel.Identity.Domain.Entities
 
         public Guid? SchoolId { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SchoolGrade { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SchoolClass { get; set; }
 
@@ -75,5 +69,8 @@ namespace Fsel.Identity.Domain.Entities
         public EnumEventRegistrationStatus Status { get; set; }
         public Guid? StudentId { get; set; }
         public Student? Student { get; set; }
+
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? StudentMainMajor { get; set; }
     }
 }
