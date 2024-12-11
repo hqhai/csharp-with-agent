@@ -83,7 +83,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<DashBoardLearningProgressModel>();
             var studentIds = new List<Guid>();
-            var courseLevels = request.CourseTypes?.SelectMany(x => EnumCourseLevelHelper.GetEnumCourseLevels(x)).ToList() ?? new List<EnumCourseLevel>();
+            var courseLevels = request.CourseTypes.GetCourseLevels(request.CourseLevels);
             bool isRoleAdminSchool = _authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString());
             if (isRoleAdminSchool)
             {

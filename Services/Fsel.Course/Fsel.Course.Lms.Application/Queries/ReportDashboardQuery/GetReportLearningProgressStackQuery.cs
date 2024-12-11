@@ -73,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StackBarChartsModel>();
-            var courseLevels = request.CourseTypes?.SelectMany(x => EnumCourseLevelHelper.GetEnumCourseLevels(x)).ToList() ?? new List<EnumCourseLevel>();
+            var courseLevels = request.CourseTypes.GetCourseLevels(request.CourseLevels);
             var userResults = await _userService.GetStudentsDashboardAsync(new GetStudentsDashboardQueryModel
             {
                 EnumCourseLevelStr = string.Join(",", courseLevels),
