@@ -2,21 +2,20 @@
 
 namespace Fsel.System.Api.Controllers
 {
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.System.Application.Commands.FeatureAccessTimeCmd;
     using Fsel.System.Application.Queries.FeatureAccessTimeQuery;
+    using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
-    using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.System.Domain.IRepositories;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]

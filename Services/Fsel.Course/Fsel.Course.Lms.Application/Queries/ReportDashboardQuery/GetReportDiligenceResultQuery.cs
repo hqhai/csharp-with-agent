@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     using Fsel.Course.Domain.Models.EntityModels.BaseChartModels;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
+    using Fsel.Course.Lms.Application.Services.SystemService.QueryModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
@@ -89,35 +90,22 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 methodResult.AddError(studentResult.Error);
                 return methodResult;
             }
-            var student = studentResult.Content?.Result;
+            var students = studentResult.Content?.Result;
 
-
-            if (student == null || student.Count == 0)
+            if (students == null || !students.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
                 return methodResult;
             }
 
             // Lọc bản ghi có dữ liệu Human
-            student = student.Where(s => s.Human != null).ToList();
+            students = students.Where(s => s.Human != null && s.Human.UserId.HasValue).ToList();
 
             // Lấy dữ liệu AccessTime
-            var accessTimeResult = await _systemService.GetListFeatureAccessTime(new BaseQueryModel()
+            var accessTimeResult = await _systemService.GetAccessTimeByUserAndFeature(new GetAccessTimeByUserAndFeatureQueryModel
             {
-                Filters = new List<GenericFilterModel>() {
-                    new GenericFilterModel()
-                    {
-                        Property = "CreatedUserId",
-                        Operator = EnumFilterOperator.In,
-                        Value = student!.Select(s => s.Human!.UserId).ToList()
-                    },
-                    new GenericFilterModel()
-                    {
-                        Property = "EnumFeature",
-                        Operator = EnumFilterOperator.In,
-                        Value = new List<EnumFeature>() { EnumFeature.ClassForum, EnumFeature.VideoLesson, EnumFeature.HomeWork }
-                    }
-                },
+                UserIds = students.Select(s => s.Human!.UserId!.Value).ToList(),
+                Features = new List<EnumFeature>() { EnumFeature.ClassForum, EnumFeature.VideoLesson, EnumFeature.HomeWork }
             });
 
             if (!accessTimeResult.IsSuccessStatusCode)
@@ -135,23 +123,23 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             }
 
             // Gán tên trường học
-            resultModel.SchoolName = student.FirstOrDefault()?.School;
+            resultModel.SchoolName = students.FirstOrDefault()?.School;
 
             // Lọc thep chương trình học
             if (request.EnumCourseTypes != null && request.EnumCourseTypes.Count > 0)
             {
-                student = student.Where(s => request.EnumCourseTypes.Contains(s.CourseLevel.GetEnumCourseType())).ToList();
-                featureAccsessTime = featureAccsessTime.Where(f => student.Select(s => s.Human!.UserId).Contains(f.CreatedUserId)).ToList();
+                students = students.Where(s => request.EnumCourseTypes.Contains(s.CourseLevel.GetEnumCourseType())).ToList();
+                featureAccsessTime = featureAccsessTime.Where(f => students.Select(s => s.Human!.UserId).Contains(f.CreatedUserId)).ToList();
             }
 
             // Lọc theo lớp học của học sinh
             if (request.SchoolClasses != null && request.SchoolClasses.Count > 0)
             {
-                student = student.Where(s => s.SchoolClass != null && request.SchoolClasses.Contains(s.SchoolClass)).ToList();
-                featureAccsessTime = featureAccsessTime.Where(f => student.Select(s => s.Human!.UserId).Contains(f.CreatedUserId)).ToList();
+                students = students.Where(s => s.SchoolClass != null && request.SchoolClasses.Contains(s.SchoolClass)).ToList();
+                featureAccsessTime = featureAccsessTime.Where(f => students.Select(s => s.Human!.UserId).Contains(f.CreatedUserId)).ToList();
             }
 
-            resultModel.NumberStudentNotAccessModel = GetStudentNotAccessModel(student, featureAccsessTime, request);
+            resultModel.NumberStudentNotAccessModel = GetStudentNotAccessModel(students, featureAccsessTime, request);
 
             resultModel.NumberStudentAccessModel = GetStudentAccessModel(featureAccsessTime, request);
 
