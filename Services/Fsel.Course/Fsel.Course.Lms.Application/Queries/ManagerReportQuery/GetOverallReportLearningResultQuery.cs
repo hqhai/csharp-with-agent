@@ -93,7 +93,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                      .Select(x => new
                                      {
                                          Number = x.Key,
-                                         UnitIds = x.Where(u => u.UnitId.HasValue).Select(u => u.UnitId.GetValueOrDefault()).Distinct().ToList()
+                                         UnitIds = x.Where(u => u.UnitId.HasValue).Select(u => new
+                                         {
+                                             CourseId = u.CourseId,
+                                             UnitId = u.UnitId.GetValueOrDefault()
+                                         }).Distinct().ToList()
                                      })
                                      .ToListAsync();
 
@@ -129,8 +133,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             var countUnit = request.CourseType == EnumCourseType.Academic ? CourseProgressValue.CountUnitAca : request.CourseType == EnumCourseType.Ielts ? CourseProgressValue.CountUnitIELTS : ValueDefault;
             var unitModules = Enumerable.Range(1, countUnit).Select(i =>
             {
-                var unitIds = unitGroups.Where(x => x.Number == i).SelectMany(x => x.UnitIds).ToList();
-                var resultPercents = unitResults.Where(x => unitIds.Contains(x.UnitId)).Select(x => x.Percent).ToList();
+                var courseUnits = unitGroups.Where(x => x.Number == i).SelectMany(x => x.UnitIds).ToList();
+                var resultPercents = unitResults.Where(x => courseUnits.Any(y => y.UnitId == x.UnitId && y.CourseId == x.CourseId)).Select(x => x.Percent).ToList();
                 return new OverallModuleReportModel
                 {
                     Percent = resultPercents.Any() ? NumberHelper.ConvertRound(resultPercents.Average()) : ValueDefault,
