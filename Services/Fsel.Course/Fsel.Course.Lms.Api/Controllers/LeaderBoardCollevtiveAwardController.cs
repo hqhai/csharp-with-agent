@@ -54,7 +54,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetLessonScore([FromQuery] GetLeaderBoardCollectiveQuery query)
         {
             SetQuery(query);
-            MethodResult<IList<LeaderBoardCollectiveAwardModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<PagingItemsModel<LeaderBoardCollectiveAwardModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

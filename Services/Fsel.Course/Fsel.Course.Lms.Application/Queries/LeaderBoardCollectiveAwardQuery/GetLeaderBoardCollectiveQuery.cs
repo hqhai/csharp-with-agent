@@ -16,12 +16,12 @@ namespace Fsel.Course.Lms.Application.Queries.LeaderBoardCollectiveAwardQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetLeaderBoardCollectiveQuery : BaseQueryModel, IRequest<MethodResult<IList<LeaderBoardCollectiveAwardModel>>>
+    public class GetLeaderBoardCollectiveQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<LeaderBoardCollectiveAwardModel>>>
     {
         public string? EventCode { get; set; }
     }
 
-    public class GetLeaderBoardCollectiveQueryHandler : IRequestHandler<GetLeaderBoardCollectiveQuery, MethodResult<IList<LeaderBoardCollectiveAwardModel>>>
+    public class GetLeaderBoardCollectiveQueryHandler : IRequestHandler<GetLeaderBoardCollectiveQuery, MethodResult<PagingItemsModel<LeaderBoardCollectiveAwardModel>>>
     {
         private readonly IUserService _userService;
         private readonly ICourseResultRepository _courseResultRepository;
@@ -45,11 +45,11 @@ namespace Fsel.Course.Lms.Application.Queries.LeaderBoardCollectiveAwardQuery
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
-        public async Task<MethodResult<IList<LeaderBoardCollectiveAwardModel>>> Handle(GetLeaderBoardCollectiveQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<LeaderBoardCollectiveAwardModel>>> Handle(GetLeaderBoardCollectiveQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(request.EventCode);
-            var methodResult = new MethodResult<IList<LeaderBoardCollectiveAwardModel>>();
+            var methodResult = new MethodResult<PagingItemsModel<LeaderBoardCollectiveAwardModel>>();
             List<LeaderBoardCollectiveAwardModel> leaderBoardCollectiveAwards = new List<LeaderBoardCollectiveAwardModel>();
 
             var studentResult = await _userService.GetStudentByEventCode(request.EventCode);
@@ -122,7 +122,10 @@ namespace Fsel.Course.Lms.Application.Queries.LeaderBoardCollectiveAwardQuery
                 leaderBoardCollectiveAwards = leaderBoardCollectiveAwards.ApplySort(request).ToList();
             }
 
-            methodResult.Result = leaderBoardCollectiveAwards;
+            int totalItem = leaderBoardCollectiveAwards.Count;
+            var lists = leaderBoardCollectiveAwards.ApplyPaging(request).ToList();
+
+            methodResult.Result = new PagingItemsModel<LeaderBoardCollectiveAwardModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
