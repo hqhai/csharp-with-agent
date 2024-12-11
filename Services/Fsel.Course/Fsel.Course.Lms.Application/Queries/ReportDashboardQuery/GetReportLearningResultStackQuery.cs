@@ -24,15 +24,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
         public string? ScoreOverallStr { get; set; }
 
         [JsonIgnore]
-        public IList<string>? SchoolClasses
-        {
-            get
-            {
-                return SchoolClassStr.ToList<string>();
-            }
-        }
-
-        [JsonIgnore]
         public IList<EnumCourseType>? CourseTypes
         {
             get
@@ -74,10 +65,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StackBarChartsModel>();
+            var courseLevels = request.CourseTypes?.SelectMany(x => EnumCourseLevelHelper.GetEnumCourseLevels(x)).ToList() ?? new List<EnumCourseLevel>();
             var userResults = await _userService.GetStudentsDashboardAsync(new GetStudentsDashboardQueryModel
             {
-                CourseLevels = request.CourseTypes?.SelectMany(x => EnumCourseLevelHelper.GetEnumCourseLevels(x)).ToList(),
-                SchoolClasses = request.SchoolClasses,
+                EnumCourseLevelStr = string.Join(",", courseLevels),
+                SchoolClassStr = request.SchoolClassStr,
             });
             if (!userResults.IsSuccessStatusCode)
             {

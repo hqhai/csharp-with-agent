@@ -39,15 +39,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
         }
 
         [JsonIgnore]
-        public IList<string>? SchoolClasses
-        {
-            get
-            {
-                return SchoolClassStr.ToList<string>();
-            }
-        }
-
-        [JsonIgnore]
         public IList<EnumCourseLevel>? CourseLevels
         {
             get
@@ -98,8 +89,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             {
                 var userResults = await _userService.GetStudentsDashboardAsync(new GetStudentsDashboardQueryModel
                 {
-                    CourseLevels = courseLevels,
-                    SchoolClasses = request.SchoolClasses,
+                    EnumCourseLevelStr = string.Join(",", courseLevels),
+                    SchoolClassStr = request.SchoolClassStr,
                 });
                 if (!userResults.IsSuccessStatusCode)
                 {

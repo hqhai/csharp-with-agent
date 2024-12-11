@@ -182,10 +182,10 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// <summary>
         /// Get Student
         /// </summary>
-        [HttpPost("get-dashboards")]
+        [HttpGet("get-dashboards")]
         [ProducesResponseType(typeof(MethodResult<IList<StudentDtoModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Gets([FromBody] GetStudentsDashboardQuery query)
+        public async Task<IActionResult> Gets([FromQuery] GetStudentsDashboardQuery query)
         {
             MethodResult<IList<StudentDtoModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

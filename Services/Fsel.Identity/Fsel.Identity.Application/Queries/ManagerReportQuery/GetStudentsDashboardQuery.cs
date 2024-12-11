@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Queries.ManagerReportQuery
 {
     using System.Linq;
+    using System.Text.Json.Serialization;
     using Fsel.Common.ActionResults;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Enums;
@@ -14,8 +15,26 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
 
     public class GetStudentsDashboardQuery : IRequest<MethodResult<IList<StudentDtoModel>>>
     {
-        public IList<EnumCourseLevel>? CourseLevels { get; set; }
-        public IList<string>? SchoolClasses { get; set; }
+        public string? SchoolClassStr { get; set; }
+        public string? EnumCourseLevelStr { get; set; }
+
+        [JsonIgnore]
+        public IList<EnumCourseLevel>? CourseLevels
+        {
+            get
+            {
+                return EnumCourseLevelStr.ToList<EnumCourseLevel>();
+            }
+        }
+
+        [JsonIgnore]
+        public IList<string>? SchoolClasses
+        {
+            get
+            {
+                return SchoolClassStr.ToList<string>();
+            }
+        }
     }
 
     public class GetStudentsDashboardQueryHandler : IRequestHandler<GetStudentsDashboardQuery, MethodResult<IList<StudentDtoModel>>>
@@ -34,7 +53,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<StudentDtoModel>> methodResult = new MethodResult<IList<StudentDtoModel>>();
             var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
-            var query = _studentRepository.Queryable.Select(i => new StudentDtoModel
+            var query = _studentRepository.Queryable.Where(x => x.CourseId.HasValue).Select(i => new StudentDtoModel
             {
                 Id = i.Id,
                 FullName = i.Human!.FullName,
