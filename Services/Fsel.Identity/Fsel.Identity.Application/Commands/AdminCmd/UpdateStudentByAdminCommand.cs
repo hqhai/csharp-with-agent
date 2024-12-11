@@ -149,12 +149,13 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 return;
             }
-            var email = $"1{user.Email}";
-            userOther.Email = email;
-            userOther.UserName = email;
+            userOther.Email = user.Email;
+            userOther.NormalizedEmail = user.Email;
+            userOther.UserName = user.Email;
+            userOther.NormalizedUserName = user.Email;
             if (userOther.Human != null)
             {
-                userOther.Human.Email = email;
+                userOther.Human.Email = user.Email;
             }
             await _userManager.UpdateAsync(userOther).ConfigureAwait(false);
         }

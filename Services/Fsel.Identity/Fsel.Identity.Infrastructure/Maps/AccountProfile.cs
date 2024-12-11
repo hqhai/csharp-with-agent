@@ -22,7 +22,10 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<UpdateUserCommandModel, User>().IgnoreAllNonExisting();
             CreateMap<UpdateStudentByAdminCommandModel, User>()
                 .ForMember(p => p.UserName, n => n.MapFrom(m => m.Email))
-                .ForMember(m => m.Id, opt => opt.Ignore()).IgnoreAllNonExisting();
+                .ForMember(p => p.Email, n => n.MapFrom(m => m.Email))
+                .ForMember(p => p.NormalizedUserName, n => n.MapFrom(m => m.Email))
+                .ForMember(p => p.NormalizedEmail, n => n.MapFrom(m => m.Email))
+                .ForMember(m => m.Id, opt => opt.Ignore());
 
             CreateMap<User, StudentModel>().ForMember(m => m.Id, opt => opt.Ignore()).IgnoreAllNonExisting();
             CreateMap<SignUpCommandModel, User>().IgnoreAllNonExisting();
