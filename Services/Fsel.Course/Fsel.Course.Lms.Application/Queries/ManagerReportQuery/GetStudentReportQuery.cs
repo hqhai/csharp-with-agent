@@ -115,7 +115,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                  {
                                      StudentId = g.Key.StudentId,
                                      OverallPercent = g.Select(x => x.ur).Where(x => x.Status == EnumResultStatus.Done).Any() ? Math.Round(g.Select(x => x.ur).Where(x => x.Status == EnumResultStatus.Done).Average(x => x.Percent)) : default,
-                                 }).Where(x => !request.OverallScore.HasValue || (request.OverallScore == EnumOverallScore.Accuracy75OrMore ? x.OverallPercent > (int)EnumOverallScore.Accuracy75OrMore : x.OverallPercent < (int)EnumOverallScore.Accuracy75OrMore));
+                                 }).Where(x => !request.OverallScore.HasValue || (request.OverallScore == EnumOverallScore.Accuracy75OrMore ? x.OverallPercent >= (int)EnumOverallScore.Accuracy75OrMore : x.OverallPercent < (int)EnumOverallScore.Accuracy75OrMore));
 
                     if (request.SortBy.Any())
                     {

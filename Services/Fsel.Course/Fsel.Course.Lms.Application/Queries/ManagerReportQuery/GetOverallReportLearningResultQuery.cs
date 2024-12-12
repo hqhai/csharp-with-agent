@@ -115,7 +115,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                               OverallPercent = g.Select(x => x.ur).Any() ? Math.Round(g.Select(x => x.ur).Average(x => x.Percent)) : default,
                                               UnitResults = g.Select(x => x.ur).ToList()
                                           })
-                                          .Where(x => (request.OverallScore == EnumOverallScore.Accuracy75OrMore ? x.OverallPercent > (int)EnumOverallScore.Accuracy75OrMore : x.OverallPercent < (int)EnumOverallScore.Accuracy75OrMore))
+                                          .Where(x => !request.OverallScore.HasValue || (request.OverallScore == EnumOverallScore.Accuracy75OrMore ? x.OverallPercent >= (int)EnumOverallScore.Accuracy75OrMore : x.OverallPercent < (int)EnumOverallScore.Accuracy75OrMore))
                                           .ToListAsync();
 
             var unitResults = unitResultGroups.Where(x => x.UnitResults != null && x.UnitResults.Any()).SelectMany(x => x.UnitResults).ToList();
