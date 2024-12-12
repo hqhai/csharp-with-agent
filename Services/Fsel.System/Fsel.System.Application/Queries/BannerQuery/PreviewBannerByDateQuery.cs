@@ -4,6 +4,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Shared.Enums;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
@@ -15,6 +16,8 @@ namespace Fsel.System.Application.Queries.BannerQuery
         public Guid? Id { get; set; }
 
         public DateTime Date { get; set; }
+
+        public EnumCourseLevel CourseLevel { get; set; }
     }
 
     public class PreviewBannerByDateQueryHandler : IRequestHandler<PreviewBannerByDateQuery, MethodResult<IList<BannerModel>>>
@@ -34,7 +37,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
             MethodResult<IList<BannerModel>> methodResult = new MethodResult<IList<BannerModel>>();
 
             var banners = await _bannerRepository.Queryable
-                                                 .Where(x => x.Status && x.StartDate.Date <= request.Date.Date && x.EndDate.Date >= request.Date.Date)
+                                                 .Where(x => x.Status && x.StartDate.Date <= request.Date.Date && x.EndDate.Date >= request.Date.Date && x.BannerScopes.Any(c => c.CourseLevel == request.CourseLevel))
                                                  .OrderBy(x => x.DisplayStartDate).ToListAsync(cancellationToken);
 
             if (request.Id.HasValue)

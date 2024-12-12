@@ -73,9 +73,9 @@ namespace Fsel.System.Application.Queries.BannerQuery
                 query = query.Where(x => (x.Name != null && x.Name.ToLower().Trim() == request.Keyword.ToLower().Trim()) || (x.Code != null && x.Code.ToLower().Trim() == request.Keyword.ToLower().Trim())).ToList();
             }
 
-            if (request.CourseLevel.HasValue)
+            if (request.ListCourseLevels != null)
             {
-                query = query.Where(x => x.BannerScopes != null && x.BannerScopes.Any(c => c.CourseLevel == request.CourseLevel)).ToList();
+                query = query.Where(x => x.BannerScopes != null && x.BannerScopes.Any(c => request.ListCourseLevels.Contains(c.CourseLevel))).ToList();
             }
 
             if (request.StartDate.HasValue && request.EndDate.HasValue)
