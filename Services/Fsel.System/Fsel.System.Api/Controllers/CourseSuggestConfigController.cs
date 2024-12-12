@@ -36,10 +36,10 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Execute-list-query
         /// </summary>
-        [HttpGet("execute-list-query")]
+        [HttpPost("execute-list-query")]
         [ProducesResponseType(typeof(MethodResult<IList<CourseSuggestConfigModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ExecuteList([FromQuery] BaseQueryModel query)
+        public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel query)
         {
             ArgumentNullException.ThrowIfNull(query);
             query.SetIsQueryAll(true);

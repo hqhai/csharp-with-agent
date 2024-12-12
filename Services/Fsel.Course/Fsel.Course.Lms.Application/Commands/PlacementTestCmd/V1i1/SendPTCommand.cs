@@ -60,13 +60,13 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                     new GenericFilterModel()
                     {
                         Property = "FromAge",
-                        Operator = EnumFilterOperator.GreaterThanOrEqual,
+                        Operator = EnumFilterOperator.LessThanOrEqual,
                         Value = age
                     },
                      new GenericFilterModel()
                     {
                         Property = "ToAge",
-                        Operator = EnumFilterOperator.LessThanOrEqual,
+                        Operator = EnumFilterOperator.GreaterThanOrEqual,
                         Value = age
                     },
                      new GenericFilterModel()

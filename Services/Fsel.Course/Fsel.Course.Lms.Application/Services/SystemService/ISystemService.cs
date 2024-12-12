@@ -57,7 +57,7 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
         [Post("/v1/google-sheet/add-error-report-explanation-question")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> AddErrorReportExplanationQuestionToGoogleSheet([FromBody] AddErrorReportExplanationQuestionModel model);
 
-        [Get("/v1/course-suggest-config/execute-list-query")]
-        Task<IApiResponse<MethodResult<IList<CourseSuggestConfigModel>>>> CourseSuggestConfigQuery([FromQuery] BaseQueryModel model);
+        [Post("/v1/course-suggest-config/execute-list-query")]
+        Task<IApiResponse<MethodResult<IList<CourseSuggestConfigModel>>>> CourseSuggestConfigQuery([Body] BaseQueryModel model);
     }
 }
