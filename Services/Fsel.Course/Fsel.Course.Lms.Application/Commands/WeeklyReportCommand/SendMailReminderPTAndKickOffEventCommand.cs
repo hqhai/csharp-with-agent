@@ -95,8 +95,8 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                                                                                   PTEnd = p.Select(x => x).OrderByDescending(n => n.CreatedDate).FirstOrDefault(),
                                                                               }).ToListAsync(cancellationToken);
 
-            var reminderPT = new List<StudentModel>();
-            var kickOff = new List<StudentModel>();
+            var unfinishedPT = new List<StudentModel>();
+            var completePT = new List<StudentModel>();
 
             foreach (var student in students)
             {
@@ -112,16 +112,15 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                 if (!isLock && !request.IsDonePT)
                 {
-                    reminderPT.Add(student);
+                    unfinishedPT.Add(student);
                 }
-                else if (isLock && request.IsDonePT)
-
+                else
                 {
-                    kickOff.Add(student);
+                    completePT.Add(student);
                 }
             }
 
-            var studentsEvent = !request.IsDonePT ? reminderPT : kickOff;
+            var studentsEvent = !request.IsDonePT ? unfinishedPT : completePT;
 
             var content = string.Empty;
 
