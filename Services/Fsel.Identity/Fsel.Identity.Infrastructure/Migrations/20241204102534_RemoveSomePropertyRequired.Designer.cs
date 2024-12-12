@@ -4,6 +4,7 @@ using Fsel.Identity.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241204102534_RemoveSomePropertyRequired")]
+    partial class RemoveSomePropertyRequired
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -739,18 +742,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("5f2e50c7-74b3-4d41-b8d2-f805cad9be24"),
-                            Code = "LMSAdmin",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "",
-                            IsDeleted = false,
-                            Name = "Learning Management System Admin",
-                            Type = "Admin"
-                        },
-                        new
-                        {
                             Id = new Guid("f144a094-3f49-4ca8-8f1e-7234289dd1a5"),
                             Code = "PlanetDefender",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -1121,6 +1112,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasIndex("CompetitionEventId");
 
+                    b.HasIndex("IsDeleted", "StudentId");
+
                     b.ToTable("StudentCompetitionEvents");
                 });
 
@@ -1268,6 +1261,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasIndex("StudentId");
 
+                    b.HasIndex("IsDeleted", "StudentId");
+
                     b.ToTable("StudentDailyStreak");
                 });
 
@@ -1338,6 +1333,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnOrder(102);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted", "StudentId", "CreatedDate");
+
+                    b.HasIndex("IsDeleted", "StudentId", "CreatedDate", "TargetTime");
 
                     b.ToTable("StudentFocusTimes");
                 });
@@ -2345,6 +2344,12 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
+                    b.Property<bool>("NotifiCourseTarget")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NotifiDelayCourseTarget")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("NotifiEmail")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -2360,6 +2365,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("NotifiLesson")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NotifiTimeCourseTarget")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("UpdatedDate")

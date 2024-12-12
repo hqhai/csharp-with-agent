@@ -54,76 +54,74 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 MonthNumber = x.Package == null ? null : x.Package.MonthNumber,
                 RevenueType = x.RevenueType,
                 TotalPrice = x.TotalPrice,
-            });
+            }).ToList();
 
-            if (request.IsNew.HasValue && request.IsNew == true)
-            {
-                query = query.Where(p => p.Status == EnumOrderStatus.New && (p.PaymentMethod == EnumPaymentMethodStatus.BankTransfer || p.PaymentMethod == EnumPaymentMethodStatus.Card));
-            }
-            else if (request.IsNew.HasValue && request.IsNew == false)
-            {
-                query = query.Where(p => p.Status != EnumOrderStatus.New || (p.Status == EnumOrderStatus.New && (p.PaymentMethod == EnumPaymentMethodStatus.Payoo || p.PaymentMethod == EnumPaymentMethodStatus.AppStore || p.PaymentMethod == EnumPaymentMethodStatus.CHPlay)));
-            }
-
-            if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
-            {
-                query = query.Where(p => p.UserId == _authContext.CurrentUserId);
-            }
-
-            if (!string.IsNullOrEmpty(request.Keyword))
-            {
-                if (request.Keyword.IsValidEmail())
-                {
-                    query = query.Where(p => !string.IsNullOrEmpty(p.Email) && p.Email.Contains(request.Keyword));
-                }
-                else
-                {
-                    query = query.Where(p => (!string.IsNullOrEmpty(p.Code) && p.Code.Contains(request.Keyword)) || (!string.IsNullOrEmpty(p.FullName) && p.FullName.Contains(request.Keyword)));
-                }
-            }
-
-            if (request.PackageIds != null && request.PackageIds.Count > 0)
-            {
-                query = query.Where(p => p.PackageId.HasValue && request.PackageIds.Contains(p.PackageId.Value));
-            }
-
-            if (request.StartDate.HasValue && request.EndDate.HasValue)
-            {
-                query = query.Where(p => p.CreatedDate.HasValue && request.StartDate.Value.Date <= p.CreatedDate.Value.Date && request.EndDate.Value.Date >= p.CreatedDate.Value.Date);
-            }
-            else if (request.StartDate.HasValue)
-            {
-                query = query.Where(p => p.CreatedDate.HasValue && request.StartDate.Value.Date <= p.CreatedDate.Value.Date);
-            }
-            else if (request.EndDate.HasValue)
-            {
-                query = query.Where(p => p.CreatedDate.HasValue && request.EndDate.Value.Date >= p.CreatedDate.Value.Date);
-            }
-
-            if (request.RevenueType.HasValue)
-            {
-                query = query.Where(p => p.RevenueType == request.RevenueType);
-            }
-
-            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await query
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
-
-            var userIds = lists.Select(l => l.UserId).Distinct().ToList();
+            var userIds = query.Select(l => l.UserId).Distinct().ToList();
             if (userIds.Any())
             {
                 var studentResults = await _userService.GetStudentsByIdsAsync(userIds);
                 var students = studentResults.Content?.Result;
-                lists.ForEach(p =>
+                query.ForEach(p =>
                 {
                     var student = students?.FirstOrDefault(x => x.Human != null && x.Human.UserId == p.UserId);
                     p.Email = student?.Human?.Email;
                     p.FullName = student?.Human?.FullName;
                 });
             }
+
+            if (request.IsNew.HasValue && request.IsNew == true)
+            {
+                query = query.Where(p => p.Status == EnumOrderStatus.New && (p.PaymentMethod == EnumPaymentMethodStatus.BankTransfer || p.PaymentMethod == EnumPaymentMethodStatus.Card)).ToList();
+            }
+            else if (request.IsNew.HasValue && request.IsNew == false)
+            {
+                query = query.Where(p => p.Status != EnumOrderStatus.New || (p.Status == EnumOrderStatus.New && (p.PaymentMethod == EnumPaymentMethodStatus.Payoo || p.PaymentMethod == EnumPaymentMethodStatus.AppStore || p.PaymentMethod == EnumPaymentMethodStatus.CHPlay))).ToList();
+            }
+
+            if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
+            {
+                query = query.Where(p => p.UserId == _authContext.CurrentUserId).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                if (request.Keyword.IsValidEmail())
+                {
+                    query = query.Where(p => !string.IsNullOrEmpty(p.Email) && p.Email.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase)).ToList();
+                }
+                else
+                {
+                    query = query.Where(p => (!string.IsNullOrEmpty(p.Code) && p.Code.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase)) || (!string.IsNullOrEmpty(p.FullName) && p.FullName.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase))).ToList();
+                }
+            }
+
+            if (request.PackageIds != null && request.PackageIds.Count > 0)
+            {
+                query = query.Where(p => p.PackageId.HasValue && request.PackageIds.Contains(p.PackageId.Value)).ToList();
+            }
+
+            if (request.StartDate.HasValue && request.EndDate.HasValue)
+            {
+                query = query.Where(p => p.CreatedDate.HasValue && request.StartDate.Value.Date <= p.CreatedDate.Value.Date && request.EndDate.Value.Date >= p.CreatedDate.Value.Date).ToList();
+            }
+            else if (request.StartDate.HasValue)
+            {
+                query = query.Where(p => p.CreatedDate.HasValue && request.StartDate.Value.Date <= p.CreatedDate.Value.Date).ToList();
+            }
+            else if (request.EndDate.HasValue)
+            {
+                query = query.Where(p => p.CreatedDate.HasValue && request.EndDate.Value.Date >= p.CreatedDate.Value.Date).ToList();
+            }
+
+            if (request.RevenueType.HasValue)
+            {
+                query = query.Where(p => p.RevenueType == request.RevenueType).ToList();
+            }
+
+            int totalItem = query.Count;
+            var lists = query
+                    .ApplySortAndPaging(request)
+                    .ToList();
 
             methodResult.Result = new PagingItemsModel<SearchOrderModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
