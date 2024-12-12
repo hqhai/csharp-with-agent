@@ -438,7 +438,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 return;
             }
-            switch (false)
+            switch (true)
             {
                 case var value when value == courseUnitMockTest.UnitId.HasValue:
                     var unitResultNext = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.UnitId == courseUnitMockTest.UnitId && x.CourseId == courseUnitMockTest.CourseId, cancellationToken);
