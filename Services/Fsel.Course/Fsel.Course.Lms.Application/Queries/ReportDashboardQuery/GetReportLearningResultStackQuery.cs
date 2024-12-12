@@ -101,8 +101,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             var courseOveralls = await (from baseQ in _courseResultRepository.Queryable
                                         join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                         join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
-                                        where baseQ.WorkingStatus == EnumWorkingStatus.Active && ur.Status == EnumResultStatus.Done &&
-                                        studentIds != null && studentIds.Contains(baseQ.StudentId) &&
+                                        where baseQ.WorkingStatus == EnumWorkingStatus.Active && ur.Status == EnumResultStatus.Done && studentIds.Contains(baseQ.StudentId) &&
                                         (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
                                         group new { baseQ, ur } by new { baseQ.CourseId, baseQ.StudentId } into g
                                         select new
