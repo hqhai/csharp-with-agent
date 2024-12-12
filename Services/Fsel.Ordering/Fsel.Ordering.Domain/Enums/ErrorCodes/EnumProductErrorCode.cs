@@ -4,6 +4,7 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
 {
     public enum EnumProductErrorCode
     {
+        ProductNotExist,
         NotPartOfTheEvent,
         ExchangeExpirationDate,
         OutOfQuantity,
@@ -11,6 +12,8 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         CodeAlreadyExists,
         NameAlreadyExists,
         WrongQuantity,
-        WrongExpirationDate
+        WrongExpirationDate,
+        EmptyPhoneNumber,
+        PhoneNumberIsInvalid
     }
 }
