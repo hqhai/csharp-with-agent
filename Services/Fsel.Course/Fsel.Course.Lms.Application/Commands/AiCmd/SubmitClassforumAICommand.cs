@@ -3,8 +3,6 @@
 namespace Fsel.Course.Lms.Application.Commands.AiCmd
 {
     using System;
-    using System.Collections;
-    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -78,9 +76,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             aIResponse = Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
 
-            var checkDataClassForum = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
+            var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>?>(aIResponse);
 
-            bool conditionRetry = checkDataClassForum?.All(x => x != null) ?? default;
+            bool conditionRetry = classForumAIs?.All(x => x != null) ?? default;
 
             var classForumDetailResultOwner = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResult).ThenInclude(x => x.LessonResult).ThenInclude(x => x.Lesson).FirstOrDefault(x => x.Id == request.ClassForumDetailResultId);
 
@@ -100,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 await _senderService.SendEmailAsync(model);
             }
 
-            if ((checkDataClassForum == null || !conditionRetry) && classForumDetailResult != null && classForumDetailResult.RetryTime <= Max_Time_Retry)
+            if ((classForumAIs == null || classForumAIs.Count == 0 || !conditionRetry) && classForumDetailResult != null && classForumDetailResult.RetryTime <= Max_Time_Retry)
             {
                 var model = _mapper.Map<SetTimeRetryClassForumModel>(request);
                 model.StartDate = DateTime.UtcNow;
@@ -109,8 +107,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             }
 
             #endregion Retry
-
-            var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse));
 
             if (classForumDetailResult != null)
             {
