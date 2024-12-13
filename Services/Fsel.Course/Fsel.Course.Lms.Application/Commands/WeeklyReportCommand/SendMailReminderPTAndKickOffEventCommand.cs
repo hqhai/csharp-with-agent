@@ -110,11 +110,11 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                 var (levelNext, isLock) = placementTestResultLast?.Level.GetLevelInScore(placementTestResultLast.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age)) ?? (null, default);
 
-                if (!isLock && !request.IsDonePT)
+                if (!isLock)
                 {
                     unfinishedPT.Add(student);
                 }
-                else if (isLock && request.IsDonePT)
+                else
                 {
                     completePT.Add(student);
                 }
