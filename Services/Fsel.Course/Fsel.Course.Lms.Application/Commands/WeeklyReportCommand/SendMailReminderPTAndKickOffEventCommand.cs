@@ -113,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 {
                     studentsEvent.Add(student);
                 }
-                else
+                else if (isLock && request.IsDonePT)
                 {
                     studentsEvent.Add(student);
                 }
