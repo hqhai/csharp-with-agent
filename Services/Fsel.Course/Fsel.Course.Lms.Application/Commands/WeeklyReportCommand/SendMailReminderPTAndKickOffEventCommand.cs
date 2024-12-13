@@ -114,7 +114,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 {
                     unfinishedPT.Add(student);
                 }
-                else
+                else if (isLock && request.IsDonePT)
                 {
                     completePT.Add(student);
                 }
