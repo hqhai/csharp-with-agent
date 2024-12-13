@@ -88,6 +88,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     PhoneNumber = item.PhoneNumber,
                     Email = item.Email,
                     MonthNumber = item.MonthNumber,
+                    ExpireDate = item.ExpireDate,
                     IsRevenue = item.IsRevenue,
                     IsSendMail = item.IsSendMail,
                     VoucherCode = item.VoucherCode,
