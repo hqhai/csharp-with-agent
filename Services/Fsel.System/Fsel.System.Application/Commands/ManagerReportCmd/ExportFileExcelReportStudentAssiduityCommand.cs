@@ -5,6 +5,7 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Helpers;
     using Fsel.System.Application.Queries.ManagerReportQuery;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Models.EntityModels.ManagerReportModels;
@@ -82,7 +83,7 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
 
                 excelWorksheet.Cells["E2"].Value = schoolName;
                 excelWorksheet.Cells["E3"].Value = overallReport?.TotalStudent ?? default;
-                excelWorksheet.Cells["E4"].Value = overallReport?.TotalAvgProgressTime ?? default;
+                excelWorksheet.Cells["E4"].Value = SendMailHelper.FormatTimeSpanAsClock(Shared.Helpers.DateTimeHelper.ConvertSecondsToMinutes((long)(overallReport?.TotalAvgProgressTime ?? default)));
                 excelWorksheet.Cells["E5"].Value = overallReport?.TotalAvgVisit ?? default;
 
                 if (studentAssiduityReports != null && studentAssiduityReports.Any())

@@ -77,16 +77,30 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
             using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(request.CourseType == EnumCourseType.Academic ? ResourceSettings.ManagerReportLearningProgressAcaExcel : ResourceSettings.ManagerReportLearningProgressIELTSExcel)))
             {
                 var excelWorksheet = excelPackage.Workbook.Worksheets[0];
-                excelWorksheet.Cells["D2"].Value = schoolName;
-                excelWorksheet.Cells["D3"].Value = overallReportLearningProgress?.TotalStudent;
-                excelWorksheet.Cells["D5"].Value = overallReportLearningProgress?.ContentAverageProgress;
-
-                excelWorksheet.Cells["J1"].Value = GetData(excelWorksheet.Cells["J1"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
-                excelWorksheet.Cells["E2"].Value = GetData(excelWorksheet.Cells["E2"].Value, request.LearningStatus.HasValue ? request.LearningStatus.Value.GetDescription() : string.Empty);
-                excelWorksheet.Cells["F2"].Value = GetData(excelWorksheet.Cells["F2"].Value, request.SchoolGrade);
-                excelWorksheet.Cells["G2"].Value = GetData(excelWorksheet.Cells["G2"].Value, request.SchoolClass);
-                excelWorksheet.Cells["H2"].Value = GetData(excelWorksheet.Cells["H2"].Value, request.CourseLevel);
-                excelWorksheet.Cells["I2"].Value = GetData(excelWorksheet.Cells["I2"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
+                if (request.CourseType == EnumCourseType.Academic)
+                {
+                    excelWorksheet.Cells["E2"].Value = schoolName;
+                    excelWorksheet.Cells["E3"].Value = overallReportLearningProgress?.TotalStudent;
+                    excelWorksheet.Cells["E5"].Value = overallReportLearningProgress?.ContentAverageProgress;
+                    excelWorksheet.Cells["J1"].Value = GetData(excelWorksheet.Cells["J1"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
+                    excelWorksheet.Cells["F2"].Value = GetData(excelWorksheet.Cells["F2"].Value, request.LearningStatus.HasValue ? request.LearningStatus.Value.GetDescription() : null);
+                    excelWorksheet.Cells["G2"].Value = GetData(excelWorksheet.Cells["G2"].Value, request.SchoolGrade);
+                    excelWorksheet.Cells["H2"].Value = GetData(excelWorksheet.Cells["H2"].Value, request.SchoolClass);
+                    excelWorksheet.Cells["I2"].Value = GetData(excelWorksheet.Cells["I2"].Value, request.CourseLevel);
+                    excelWorksheet.Cells["J2"].Value = GetData(excelWorksheet.Cells["J2"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
+                }
+                else
+                {
+                    excelWorksheet.Cells["D2"].Value = schoolName;
+                    excelWorksheet.Cells["D3"].Value = overallReportLearningProgress?.TotalStudent;
+                    excelWorksheet.Cells["D5"].Value = overallReportLearningProgress?.ContentAverageProgress;
+                    excelWorksheet.Cells["J1"].Value = GetData(excelWorksheet.Cells["J1"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
+                    excelWorksheet.Cells["E2"].Value = GetData(excelWorksheet.Cells["E2"].Value, request.LearningStatus.HasValue ? request.LearningStatus.Value.GetDescription() : null);
+                    excelWorksheet.Cells["F2"].Value = GetData(excelWorksheet.Cells["F2"].Value, request.SchoolGrade);
+                    excelWorksheet.Cells["G2"].Value = GetData(excelWorksheet.Cells["G2"].Value, request.SchoolClass);
+                    excelWorksheet.Cells["H2"].Value = GetData(excelWorksheet.Cells["H2"].Value, request.CourseLevel);
+                    excelWorksheet.Cells["I2"].Value = GetData(excelWorksheet.Cells["I2"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
+                }
 
                 FillCourseLevelData(excelWorksheet, request.CourseType.GetValueOrDefault(), overallReportLearningProgress);
                 if (learningProgressReports != null && learningProgressReports.Any())

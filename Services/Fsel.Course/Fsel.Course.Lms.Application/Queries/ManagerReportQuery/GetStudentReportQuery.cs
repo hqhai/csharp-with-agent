@@ -132,6 +132,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                     .ApplyPaging(request)
                                     .ToList();
             }
+            else if (!request.IsSearchReport && !request.SortBy.Any())
+            {
+                students = students?.OrderBy(x => int.TryParse(x.SchoolGrade, out int graded) ? graded : 0).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName).ToList();
+            }
 
             methodResult.Result = students;
             methodResult.StatusCode = StatusCodes.Status200OK;
