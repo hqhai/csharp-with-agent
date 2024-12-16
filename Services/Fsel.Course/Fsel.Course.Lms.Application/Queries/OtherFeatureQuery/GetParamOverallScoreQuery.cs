@@ -88,12 +88,12 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             List<SkillScores> mergedSkillScores = videoSkillScores.Concat(homeWorkSkillScores).Concat(classForumSkillScores).ToList();
             if (courseType == EnumCourseType.Academic)
             {
-                var (unitSkillScores, percentUnitSkill) = await GetSkillScoreByCourses(courseResult.CourseId, unitIds, courseResult.StudentId, EnumTimeCodeType.UnitTest, OverallPercentCourse.OverallAcaPercentUnitTest);
+                var (unitSkillScores, percentUnitSkill, listPercentSkillTest) = await GetSkillScoreByCourses(courseResult.CourseId, unitIds, courseResult.StudentId, EnumTimeCodeType.UnitTest, OverallPercentCourse.OverallAcaPercentUnitTest);
                 if (!unitSkillScores.Any())
                 {
                     percentUnitSkill = OverallPercentCourse.OverallAcaPercentUnitTest;
                 }
-                var (skillSkillScores, percentSkill) = await GetSkillScoreByCourses(courseResult.CourseId, unitIds, courseResult.StudentId, EnumTimeCodeType.SkillTest, OverallPercentCourse.OverallAcaPercentSkillTest);
+                var (skillSkillScores, percentSkill, listPercentUnitTest) = await GetSkillScoreByCourses(courseResult.CourseId, unitIds, courseResult.StudentId, EnumTimeCodeType.SkillTest, OverallPercentCourse.OverallAcaPercentSkillTest);
                 if (!skillSkillScores.Any())
                 {
                     percentSkill = OverallPercentCourse.OverallAcaPercentSkillTest;
@@ -113,11 +113,13 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                     PercentSkillTest = percentSkill,
                     FinalTestSkillScores = finalTestSkillScores,
                     PercentFinalTest = percentFinalTest,
+                    OverallPercentUnitTest = listPercentUnitTest,
+                    OverallPercentSkillTest = listPercentSkillTest,
                 };
             }
             if (courseType == EnumCourseType.EnglishFoundation)
             {
-                var (unitSkillScores, percentUnitSkill) = await GetSkillScoreByCourses(courseResult.CourseId, unitIds, courseResult.StudentId, EnumTimeCodeType.UnitTest, OverallPercentCourse.OverallRFIPercentUnitTest);
+                var (unitSkillScores, percentUnitSkill, listPercentUnitTest) = await GetSkillScoreByCourses(courseResult.CourseId, unitIds, courseResult.StudentId, EnumTimeCodeType.UnitTest, OverallPercentCourse.OverallRFIPercentUnitTest);
                 if (!unitSkillScores.Any())
                 {
                     percentUnitSkill = OverallPercentCourse.OverallRFIPercentUnitTest;
@@ -135,6 +137,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                     PercentUnitSkill = percentUnitSkill,
                     FinalTestSkillScores = finalTestSkillScores,
                     PercentFinalTest = percentFinalTest,
+                    OverallPercentUnitTest = listPercentUnitTest,
                 };
             }
             return new
@@ -375,7 +378,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             return skillScores;
         }
 
-        private async Task<(List<SkillScores>, double)> GetSkillScoreByCourses(Guid courseId, IList<Guid>? unitIds, Guid studentId, EnumTimeCodeType type, int percentSkill = default)
+        private async Task<(List<SkillScores>, double, IList<double>)> GetSkillScoreByCourses(Guid courseId, IList<Guid>? unitIds, Guid studentId, EnumTimeCodeType type, int percentSkill = default)
         {
             ArgumentNullException.ThrowIfNull(unitIds);
             var skillScorePercents = new List<(List<SkillScores>, double)>();
@@ -410,10 +413,10 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             if (skillScorePercents.Any())
             {
                 var skillScoreSkills = skillScorePercents.SelectMany(x => x.Item1).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
-                return (skillScoreSkills, NumberHelper.ConvertRound(skillScorePercents.Sum(x => x.Item2)));
+                return (skillScoreSkills, NumberHelper.ConvertRound(skillScorePercents.Sum(x => x.Item2)), skillScorePercents.Select(x => x.Item2).ToList());
             }
 
-            return (new List<SkillScores>(), default);
+            return (new List<SkillScores>(), default, skillScorePercents.Select(x => x.Item2).ToList());
         }
 
         private async Task<(List<SkillScores>, double)> GetFinalTestSkillScore(Course course, Guid studentId)

@@ -68,14 +68,14 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             var percents = new List<double> { percentClassForum, percentHomeWork, percentVideo };
             if (request.CourseType == EnumCourseType.Academic)
             {
-                var percentUnitSkill = GetSkillScoreByCourses(request, OverallPercentCourse.OverallAcaPercentUnitTest);
-                var percentSkillTest = GetSkillScoreByCourses(request, OverallPercentCourse.OverallAcaPercentSkillTest);
+                var percentUnitSkill = GetSkillScoreByCourses(request.OverallUnitTestPercents, OverallPercentCourse.OverallAcaPercentUnitTest);
+                var percentSkillTest = GetSkillScoreByCourses(request.OverallSkillTestPercents, OverallPercentCourse.OverallAcaPercentSkillTest);
                 var percentFinalTest = GetFinalTestPercent(request);
                 percents.AddRange(new List<double> { percentUnitSkill, percentSkillTest, percentFinalTest });
             }
             if (request.CourseType == EnumCourseType.EnglishFoundation)
             {
-                var percentUnitSkill = GetSkillScoreByCourses(request, OverallPercentCourse.OverallRFIPercentUnitTest);
+                var percentUnitSkill = GetSkillScoreByCourses(request.OverallUnitTestPercents, OverallPercentCourse.OverallRFIPercentUnitTest);
                 var percentFinalTest = GetFinalTestPercent(request);
                 percents.AddRange(new List<double> { percentUnitSkill, percentFinalTest });
             }
@@ -222,14 +222,13 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             }
         }
 
-        private static double GetSkillScoreByCourses(ToolTestOverallScoreCommand request, int percentSkill = default)
+        private static double GetSkillScoreByCourses(IList<double>? overallUnitTestPercent, int percentSkill = default)
         {
-            ArgumentNullException.ThrowIfNull(request);
-            if (request.OverallUnitTestPercents == null || !request.OverallUnitTestPercents.Any())
+            if (overallUnitTestPercent == null || !overallUnitTestPercent.Any())
             {
                 return percentSkill;
             }
-            var percents = request.OverallUnitTestPercents.Select(x => x * percentSkill / request.OverallUnitTestPercents.Count).ToList();
+            var percents = overallUnitTestPercent.Select(x => x * percentSkill / overallUnitTestPercent.Count).ToList();
             return NumberHelper.ConvertDoublePercent(percents.Sum());
         }
 
