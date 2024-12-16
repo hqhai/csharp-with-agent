@@ -80,7 +80,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             #region Validate User
 
             var student = user.Human?.Student;
-
             _mapper.Map(request, user);
             _mapper.Map(request, user.Human);
             student = _mapper.Map(request, user.Human?.Student);
@@ -149,15 +148,21 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 return;
             }
-            userOther.Email = user.Email;
-            userOther.NormalizedEmail = user.Email;
-            userOther.UserName = user.Email;
-            userOther.NormalizedUserName = user.Email;
-            if (userOther.Human != null)
+            await UpdateUserToEmailAsync(userOther, $"1{user.Email}");
+        }
+
+        private async Task UpdateUserToEmailAsync(User user, string? email)
+        {
+            //email cần thay đổi
+            user.Email = email;
+            user.NormalizedEmail = email;
+            user.UserName = email;
+            user.NormalizedUserName = email;
+            if (user.Human != null)
             {
-                userOther.Human.Email = user.Email;
+                user.Human.Email = email;
             }
-            await _userManager.UpdateAsync(userOther).ConfigureAwait(false);
+            await _userManager.UpdateAsync(user).ConfigureAwait(false);
         }
 
         private async Task<StudentModel> GetUser(User user, Student? student)
