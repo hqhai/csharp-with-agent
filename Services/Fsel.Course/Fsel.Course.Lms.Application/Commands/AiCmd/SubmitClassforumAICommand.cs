@@ -3,6 +3,8 @@
 namespace Fsel.Course.Lms.Application.Commands.AiCmd
 {
     using System;
+    using System.Text.Json.Serialization;
+    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -62,10 +64,18 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         {
             ArgumentNullException.ThrowIfNull(request);
 
+            var options = new JsonSerializerOptions
+            {
+                Converters = { (JsonConverter)new JsonStringEnumConverter() },
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+            };
+
             _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} Start");
 
             var classForumDetailResult = await _classForumDetailResultRepository.GetByIdAsync(request.ClassForumDetailResultId);
-            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 1: {classForumDetailResult.Serialize()}");
+            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 1: {classForumDetailResult.Serialize(options)}");
 
             var userAiConfig = request!.UserAIConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
             var aIResponse = await _mediator.Send(new SubmitAICommand
@@ -121,8 +131,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 classForumDetailResult.RetryTime += 1;
                 await _setTimeRetryClassForumPublisher.Publish(model, cancellationToken);
             }
-
-            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 2: {classForumDetailResult.Serialize()}");
+            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 2: {classForumDetailResult.Serialize(options)}");
 
             #endregion Retry
 
@@ -136,7 +145,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 3: {classForumDetailResult.Serialize()}");
+            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 3: {classForumDetailResult.Serialize(options)}");
             _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} End");
 
             GetFeatureModuleQuery query = new GetFeatureModuleQuery
