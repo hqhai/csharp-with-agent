@@ -25,6 +25,7 @@ namespace Fsel.Shared.Constants
         {
             public const int ChildrenAge = 13;
             public const int StudentAge = 14;
+            public const int TeenagersAge = 16;
         }
 
         public static class SectionGroupIELST

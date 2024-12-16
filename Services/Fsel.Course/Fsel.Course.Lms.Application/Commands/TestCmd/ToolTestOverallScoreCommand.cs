@@ -21,8 +21,8 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
         public IList<SkillScoreTest>? SkillScoreClassForums { get; set; }
         public IList<SkillScoreTest>? SkillScoreUnitTests { get; set; }
         public IList<SkillScoreTest>? SkillScoreSkillTests { get; set; }
-
-        public IList<double>? OverallUnitPercents { get; set; }
+        public IList<double>? OverallUnitTestPercents { get; set; }
+        public IList<double>? OverallSkillTestPercents { get; set; }
         public int PercentFinalTest { get; set; }
     }
 
@@ -225,11 +225,11 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
         private static double GetSkillScoreByCourses(ToolTestOverallScoreCommand request, int percentSkill = default)
         {
             ArgumentNullException.ThrowIfNull(request);
-            if (request.OverallUnitPercents == null || !request.OverallUnitPercents.Any())
+            if (request.OverallUnitTestPercents == null || !request.OverallUnitTestPercents.Any())
             {
                 return percentSkill;
             }
-            var percents = request.OverallUnitPercents.Select(x => x * percentSkill / request.OverallUnitPercents.Count).ToList();
+            var percents = request.OverallUnitTestPercents.Select(x => x * percentSkill / request.OverallUnitTestPercents.Count).ToList();
             return NumberHelper.ConvertDoublePercent(percents.Sum());
         }
 
