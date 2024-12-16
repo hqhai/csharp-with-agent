@@ -101,11 +101,13 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
 
             if (!string.IsNullOrEmpty(request.SchoolGrade))
             {
-                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolGrade) && x.SchoolGrade.Trim().ToLower() == request.SchoolGrade.Trim().ToLower());
+                request.SchoolGrade = request.SchoolGrade.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolGrade) && x.SchoolGrade.Trim().ToLower() == request.SchoolGrade);
             }
             if (!string.IsNullOrEmpty(request.SchoolClass))
             {
-                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolClass) && x.SchoolClass.Trim().ToLower().Contains(request.SchoolClass.Trim().ToLower()));
+                request.SchoolClass = request.SchoolClass.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolClass) && x.SchoolClass.Trim().ToLower() == request.SchoolClass);
             }
             if (request.LearningStatus.HasValue)
             {

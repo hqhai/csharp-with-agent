@@ -99,7 +99,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             if (!string.IsNullOrEmpty(request.SchoolClass))
             {
                 request.SchoolClass = request.SchoolClass.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolClass) && x.SchoolClass.Trim().ToLower().Contains(request.SchoolClass));
+                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolClass) && x.SchoolClass.Trim().ToLower() == request.SchoolClass);
             }
             if (request.LearningStatus.HasValue)
             {
