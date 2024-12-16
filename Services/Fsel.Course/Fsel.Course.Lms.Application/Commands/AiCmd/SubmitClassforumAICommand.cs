@@ -22,6 +22,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Kros.Extensions;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class SubmitClassForumAICommand : ClassForumAIResponseModel, IRequest<bool>
     {
@@ -40,8 +41,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly ISenderService _senderService;
         private const int Max_Time_Retry = 3;
         private readonly IUserService _userService;
+        private readonly ILogger<SubmitAIResponseCommandHandler> _logger;
 
-        public SubmitAIResponseCommandHandler(ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, NotificationMessagePublisher notificationMessagePublisher, IMediator mediator, IClassForumDetailResultRepository classForumDetailResultRepository, SetTimeRetryClassForumPublisher setTimeRetryClassForumPublisher, IMapper mapper, AppSetting appSetting, ISenderService senderService, IUserService userService)
+        public SubmitAIResponseCommandHandler(ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, NotificationMessagePublisher notificationMessagePublisher, IMediator mediator, IClassForumDetailResultRepository classForumDetailResultRepository, SetTimeRetryClassForumPublisher setTimeRetryClassForumPublisher, IMapper mapper, AppSetting appSetting, ISenderService senderService, IUserService userService, ILogger<SubmitAIResponseCommandHandler> logger)
         {
             _lessonResultRepository = lessonResultRepository;
             _submitAIResponsePublisher = submitAIResponsePublisher;
@@ -53,12 +55,18 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             _appSetting = appSetting;
             _senderService = senderService;
             _userService = userService;
+            _logger = logger;
         }
 
         public async Task<bool> Handle(SubmitClassForumAICommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+
+            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} Start");
+
             var classForumDetailResult = await _classForumDetailResultRepository.GetByIdAsync(request.ClassForumDetailResultId);
+            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 1: {classForumDetailResult.Serialize()}");
+
             var userAiConfig = request!.UserAIConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
             var aIResponse = await _mediator.Send(new SubmitAICommand
             {
@@ -74,11 +82,19 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             #region Retry
 
+
             aIResponse = Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
 
-            var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>?>(aIResponse);
+            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} userAiConfig: {userAiConfig}");
+            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} aIResponse: {aIResponse}");
+
+            var classForumAIs = GetClassForumAIs(ConvertHelper.Deserialize<List<ClassForumAIModel>?>(aIResponse));
+
+            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumAIs: {classForumAIs.Serialize()}");
 
             bool conditionRetry = classForumAIs?.All(x => x != null) ?? default;
+
+            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} conditionRetry: {conditionRetry}");
 
             var classForumDetailResultOwner = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResult).ThenInclude(x => x.LessonResult).ThenInclude(x => x.Lesson).FirstOrDefault(x => x.Id == request.ClassForumDetailResultId);
 
@@ -102,21 +118,26 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             {
                 var model = _mapper.Map<SetTimeRetryClassForumModel>(request);
                 model.StartDate = DateTime.UtcNow;
-                await _setTimeRetryClassForumPublisher.Publish(model, cancellationToken);
                 classForumDetailResult.RetryTime += 1;
+                await _setTimeRetryClassForumPublisher.Publish(model, cancellationToken);
             }
+
+            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 2: {classForumDetailResult.Serialize()}");
 
             #endregion Retry
 
             if (classForumDetailResult != null)
             {
-                classForumDetailResult.GradingAlFeedback = classForumAIs != null ? ConvertHelper.Serialize(GetClassForumAIs(classForumAIs)) : default;
+                classForumDetailResult.GradingAlFeedback = classForumAIs != null ? ConvertHelper.Serialize(classForumAIs) : default;
                 _classForumDetailResultRepository.Update(classForumDetailResult, false
                 , x => x.WordContent, x => x.Content
                 , x => x.WordCount, x => x.SubmissionCount
                 , x => x.ProcessDate, x => x.CompletionDate, x => x.Status);
                 await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
+
+            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 3: {classForumDetailResult.Serialize()}");
+            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} End");
 
             GetFeatureModuleQuery query = new GetFeatureModuleQuery
             {
