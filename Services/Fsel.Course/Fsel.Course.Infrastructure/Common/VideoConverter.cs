@@ -337,8 +337,7 @@ namespace Fsel.Course.Infrastructure.Common
                                     {
                                         Type = type,
                                         SkillScores = (from skill in Enum.GetValues(typeof(EnumCourseSkill)).Cast<EnumCourseSkill>()
-                                                       join answerTimeCodeQ in skillScores.AsQueryable() on skill equals answerTimeCodeQ.Skill into answerTimeCodeQ_jointable
-                                                       where answerTimeCodeQ_jointable.Any(x => x.Type == type)
+                                                       join answerTimeCodeQ in skillScores.Where(x => x.Type == type).AsQueryable() on skill equals answerTimeCodeQ.Skill into answerTimeCodeQ_jointable
                                                        select new SkillScores
                                                        {
                                                            Skill = skill,
@@ -346,7 +345,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                            CorrectCount = answerTimeCodeQ_jointable.Sum(x => x.CorrectCount),
                                                            TotalQuestion = answerTimeCodeQ_jointable.Sum(x => x.TotalQuestion),
                                                            CountQuestion = answerTimeCodeQ_jointable.Sum(x => x.CountQuestion),
-                                                       }).OrderBy(x => x.Skill).ToList()
+                                                       }).Where(x => x.TotalQuestion != 0).OrderBy(x => x.Skill).ToList()
                                     }).ToList();
             return (videoSkillScores, tokenConfig?.TokenFirst, tokenConfig?.TokenLast);
         }
