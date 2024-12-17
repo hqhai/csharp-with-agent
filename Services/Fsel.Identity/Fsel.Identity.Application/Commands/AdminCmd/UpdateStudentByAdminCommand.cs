@@ -148,11 +148,20 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 return;
             }
-            await UpdateUserToEmailAsync(userOther, $"1{user.Email}");
+            await UpdateUserToEmailAsync(userOther, user.Email);
         }
 
         private async Task UpdateUserToEmailAsync(User user, string? email)
         {
+            int dem = 1;
+            var emailCheck = email;
+            while (await _userManager.Users.AnyAsync(x => x.Email.ToLower().Trim() == emailCheck.ToLower().Trim()))
+            {
+                emailCheck = dem + email;
+                dem++;
+            }
+            email = emailCheck;
+
             //email cần thay đổi
             user.Email = email;
             user.NormalizedEmail = email;
