@@ -299,13 +299,29 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                         Operator = EnumFilterOperator.Equal,
                         Value = courseLevel
                     }
+                     ,
+                     new GenericFilterModel()
+                    {
+                        Property = "Type",
+                        Operator = EnumFilterOperator.Equal,
+                        Value = "Balanced"
+                    }
                 }
             });
 
             var courseSuggests = courseSuggestResults.Content?.Result;
             var suggestLevels = courseSuggests?.FirstOrDefault()?.CourseLevels;
 
-            string currentCourseHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, EnumCourseLevelHelper.GetCourseInfo(currentLevel), cancellationToken);
+            string currentCourseHtml = string.Empty;
+
+            if (courseLevel == EnumCourseLevel.A1)
+            {
+                currentCourseHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, EnumCourseLevelHelper.GetCourseInfo(null), cancellationToken);
+            }
+            else
+            {
+                currentCourseHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, EnumCourseLevelHelper.GetCourseInfo(currentLevel), cancellationToken);
+            }
 
             var courseInfoHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.CourseInfo, cancellationToken);
 
