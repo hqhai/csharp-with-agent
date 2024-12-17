@@ -77,20 +77,20 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
 
             var removeVoucher = new List<VoucherModel>();
 
+            var isHaveTuitionBill = _orderRepository.Queryable.Any(p => p.UserId == _authContext.CurrentUserId && p.Status == EnumOrderStatus.Payment && !p.IsTrial);
+
             foreach (var voucher in voucherModels)
             {
-                var isOrderPayment = _orderRepository.Queryable.Any(p => p.UserId == _authContext.CurrentUserId && p.Status == EnumOrderStatus.Payment && !p.IsTrial);
-
-                if (voucher.ApplicableSubjects!.Any(p => p == EnumApplicableSubjectsVoucher.NewSale) && !isOrderPayment)
+                if (voucher.ApplicableSubjects!.Any(p => p == EnumApplicableSubjectsVoucher.NewSale) && !isHaveTuitionBill)
                 {
                     continue;
                 }
-                if (voucher.ApplicableSubjects!.Any(p => p == EnumApplicableSubjectsVoucher.CurrentStudent) && isOrderPayment && student.ExpiredDate.HasValue &&
+                if (voucher.ApplicableSubjects!.Any(p => p == EnumApplicableSubjectsVoucher.CurrentStudent) && isHaveTuitionBill && student.ExpiredDate.HasValue &&
                         student.ExpiredDate > currentDate)
                 {
                     continue;
                 }
-                if (voucher.ApplicableSubjects!.Any(p => p == EnumApplicableSubjectsVoucher.Alumni) && isOrderPayment && student.ExpiredDate.HasValue &&
+                if (voucher.ApplicableSubjects!.Any(p => p == EnumApplicableSubjectsVoucher.Alumni) && isHaveTuitionBill && student.ExpiredDate.HasValue &&
                         student.ExpiredDate < currentDate)
                 {
                     continue;
