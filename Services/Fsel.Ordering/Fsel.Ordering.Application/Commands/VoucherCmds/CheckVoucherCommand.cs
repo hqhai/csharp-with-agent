@@ -150,7 +150,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                         !_orderRepository.Queryable.Any(p =>
                             p.UserId == _authContext.CurrentUserId &&
                             p.Status == EnumOrderStatus.Payment &&
-                            p.IsTrial),
+                            !p.IsTrial),
 
                     EnumApplicableSubjectsVoucher.CurrentStudent =>
                         _orderRepository.Queryable.Any(p =>
