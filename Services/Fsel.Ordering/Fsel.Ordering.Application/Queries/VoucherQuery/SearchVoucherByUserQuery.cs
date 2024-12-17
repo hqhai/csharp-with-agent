@@ -12,11 +12,8 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Ordering.Application.Services.UserService;
-    using Fsel.Ordering.Domain.Entities;
-    using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
-    using Fsel.Ordering.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -50,7 +47,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
-            var voucherQuery = await _voucherRepository.Queryable.Where(p => p.Source == EnumVoucherSource.Admin).Include(x => x.Orders).Where(p => p.StartDate <= currentDate && p.EndDate >= currentDate).OrderByDescending(x => x.CreatedDate).ToListAsync(cancellationToken);
+            var voucherQuery = await _voucherRepository.Queryable.Where(p => p.Source == EnumVoucherSource.Admin && p.IsShowMyVoucher).Include(x => x.Orders).Where(p => p.StartDate <= currentDate && p.EndDate >= currentDate).OrderByDescending(x => x.CreatedDate).ToListAsync(cancellationToken);
 
             var voucherModels = _mapper.Map<IList<VoucherModel>>(voucherQuery);
 
