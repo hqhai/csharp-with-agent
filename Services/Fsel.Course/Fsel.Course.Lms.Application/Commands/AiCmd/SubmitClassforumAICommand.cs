@@ -72,10 +72,10 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 ReferenceHandler = ReferenceHandler.IgnoreCycles,
             };
 
-            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} Start");
+            _logger.LogWarning($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} Start");
 
             var classForumDetailResult = await _classForumDetailResultRepository.GetByIdAsync(request.ClassForumDetailResultId);
-            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 1: {classForumDetailResult.Serialize(options)}");
+            _logger.LogWarning($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 1: {classForumDetailResult.Serialize(options)}");
 
             var userAiConfig = request!.UserAIConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
             var aIResponse = await _mediator.Send(new SubmitAICommand
@@ -95,16 +95,16 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             aIResponse = Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
 
-            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} userAiConfig: {userAiConfig}");
-            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} aIResponse: {aIResponse}");
+            _logger.LogWarning($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} userAiConfig: {userAiConfig}");
+            _logger.LogWarning($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} aIResponse: {aIResponse}");
 
             var classForumAIs = GetClassForumAIs(ConvertHelper.Deserialize<List<ClassForumAIModel>?>(aIResponse));
 
-            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumAIs: {classForumAIs.Serialize()}");
+            _logger.LogWarning($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumAIs: {classForumAIs.Serialize()}");
 
             bool conditionRetry = classForumAIs?.All(x => x != null) ?? default;
 
-            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} conditionRetry: {conditionRetry}");
+            _logger.LogWarning($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} conditionRetry: {conditionRetry}");
 
             var classForumDetailResultOwner = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResult).ThenInclude(x => x.LessonResult).ThenInclude(x => x.Lesson).FirstOrDefault(x => x.Id == request.ClassForumDetailResultId);
 
@@ -131,7 +131,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 classForumDetailResult.RetryTime += 1;
                 await _setTimeRetryClassForumPublisher.Publish(model, cancellationToken);
             }
-            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 2: {classForumDetailResult.Serialize(options)}");
+            _logger.LogWarning($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 2: {classForumDetailResult.Serialize(options)}");
 
             #endregion Retry
 
@@ -145,8 +145,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 3: {classForumDetailResult.Serialize(options)}");
-            _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} End");
+            _logger.LogWarning($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 3: {classForumDetailResult.Serialize(options)}");
+            _logger.LogWarning($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} End");
 
             GetFeatureModuleQuery query = new GetFeatureModuleQuery
             {
