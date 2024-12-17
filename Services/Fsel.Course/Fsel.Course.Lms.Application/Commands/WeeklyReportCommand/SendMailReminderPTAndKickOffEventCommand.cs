@@ -95,7 +95,8 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                                                                                   PTEnd = p.Select(x => x).OrderByDescending(n => n.CreatedDate).FirstOrDefault(),
                                                                               }).ToListAsync(cancellationToken);
 
-            var studentsEvent = new List<StudentModel>();
+            var unfinishedPT = new List<StudentModel>();
+            var completePT = new List<StudentModel>();
 
             foreach (var student in students)
             {
@@ -109,15 +110,17 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                 var (levelNext, isLock) = placementTestResultLast?.Level.GetLevelInScore(placementTestResultLast.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age)) ?? (null, default);
 
-                if (!isLock && !request.IsDonePT)
+                if (!isLock)
                 {
-                    studentsEvent.Add(student);
+                    unfinishedPT.Add(student);
                 }
-                else
+                else if (isLock && request.IsDonePT)
                 {
-                    studentsEvent.Add(student);
+                    completePT.Add(student);
                 }
             }
+
+            var studentsEvent = !request.IsDonePT ? unfinishedPT : completePT;
 
             var content = string.Empty;
 
