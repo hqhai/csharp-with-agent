@@ -245,7 +245,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                         .ThenInclude(x => x.UnitLessons.Where(x => x.UnitId == unit.UnitId))
                         .Where(p => p.StudentId == item.Id && p.Status == EnumResultStatus.Done && p.UnitId == unit.UnitId)
                         .Where(p => p.UpdatedDate.HasValue && p.UpdatedDate.Value.Date >= lastFridayAt13.Date && p.UpdatedDate.Value.Date < currentDate.Date)
-                        .Where(x => x.ClassForumResults.Any(x => x.Status == EnumClassForumResultStatus.Graded))
+                        .Where(x => x.ClassForumResults.Any(x => x.Status.HasValue))
                         .OrderBy(n => n.CreatedDate).ToListAsync(cancellationToken);
 
                     if (lessonResultsDone.Count > 0)
@@ -446,7 +446,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
         {
             if (businessType == EnumFeatureBussinessType.Learn)
             {
-                return featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.VideoLesson || p.EnumFeature == EnumFeature.HomeWork || p.EnumFeature == EnumFeature.FinalTest || p.EnumFeature == EnumFeature.MockTest).Sum(p => p.AccessTime) ?? 0;
+                return featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.VideoLesson || p.EnumFeature == EnumFeature.HomeWork || p.EnumFeature == EnumFeature.FinalTest || p.EnumFeature == EnumFeature.MockTest || p.EnumFeature == EnumFeature.ChatBot).Sum(p => p.AccessTime) ?? 0;
             }
             else if (businessType == EnumFeatureBussinessType.Social)
             {
@@ -465,7 +465,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             if (lessonResult != null)
             {
                 counts.Add(lessonResult.VideoResult?.Status == EnumResultStatus.Done ? 1 : 0);
-                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && (x.Status == EnumClassForumResultStatus.Denied || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == studentId).Count());
+                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && x.Status.HasValue && x.StudentId == studentId).Count());
                 counts.Add(lessonResult.HomeWorkResults.Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == studentId).GroupBy(x => x.LessonResultId).Count());
             }
             if (counts.Count == 0)

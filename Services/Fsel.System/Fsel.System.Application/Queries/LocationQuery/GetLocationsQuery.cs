@@ -2,10 +2,13 @@
 
 namespace Fsel.System.Application.Queries.LocationQuery
 {
+    using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Shared.Enums;
+    using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
@@ -20,11 +23,13 @@ namespace Fsel.System.Application.Queries.LocationQuery
 
     public class GetLocationsQueryHandler : IRequestHandler<GetLocationsQuery, MethodResult<PagingItemsModel<LocationModel>>>
     {
-        private readonly ILocationRepository _locationRepository;
+        private readonly IMapper _mapper;
+        private readonly ICrmLocationRepository _locationCrmRepository;
 
-        public GetLocationsQueryHandler(ILocationRepository locationRepository)
+        public GetLocationsQueryHandler(ICrmLocationRepository locationCrmRepository, IMapper mapper)
         {
-            _locationRepository = locationRepository;
+            _locationCrmRepository = locationCrmRepository;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<LocationModel>>> Handle(GetLocationsQuery request, CancellationToken cancellationToken)
@@ -32,27 +37,37 @@ namespace Fsel.System.Application.Queries.LocationQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<LocationModel>>();
 
-            var locations = _locationRepository.Queryable.Where(p => p.Type == request.LocationType).Select(p => new LocationModel()
-            {
-                Id = p.Id,
-                Code = p.UrBoxId,
-                Name = p.Name,
-                ParentId = p.ParentId,
-                CreatedDate = p.CreatedDate,
-            });
+            //if (request.LocationType != EnumLocationType.Province && request.LocationType != EnumLocationType.District)
+            //{
+            //    return methodResult;
+            //}
 
-            if (!string.IsNullOrEmpty(request.Keyword))
-            {
-                locations = locations.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
-            }
+            var locations = _locationCrmRepository.Queryable.Where(p => p.Level.HasValue && p.Level == (EnumCrmLocationLevel)request.LocationType);
 
             if (request.ParentId.HasValue)
             {
-                locations = locations.Where(p => p.ParentId == request.ParentId);
+                var parent = _locationCrmRepository.Queryable.FirstOrDefault(p => p.GlobalId == request.ParentId);
+                if (parent == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                    return methodResult;
+                }
+                if (parent.Level == EnumCrmLocationLevel.Country)
+                {
+                    locations = locations.Where(p => p.Parent != null && p.Parent.ParentId == parent.Id);
+                }
+                else
+                {
+                    locations = locations.Where(p => p.ParentId == parent.Id);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                locations = locations.Where(m => m.GlobalId.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             int totalItem = await locations.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-
             var lists = await locations
                     .ApplySortAndPaging(request)
                     .OrderBy(x => x.Name)
@@ -60,7 +75,7 @@ namespace Fsel.System.Application.Queries.LocationQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<LocationModel>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<LocationModel>(_mapper.Map<List<LocationModel>>(lists), request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -87,12 +87,36 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
+        /// Add vouchers for MA
+        /// </summary>
+        [HttpPost("add-vouchers-for-ma")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddVouchersForMA([FromBody] AddVouchersForMAIntoGoogleSheetCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Add Contact Info From Landing Page FSEL To GoogleSheet
         /// </summary>
         [HttpPost("register-student-for-event")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> RegisterStudentForEvent([FromBody] RegisterStudentForEventCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Add Error Report Explanation Question  To GoogleSheet
+        /// </summary>
+        [HttpPost("add-error-report-explanation-question")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddErrorReportExplanationQuestionToGoogleSheet([FromBody] AddErrorReportExplanationQuestionToGoogleSheetCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

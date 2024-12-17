@@ -28,6 +28,10 @@ namespace Fsel.Shared.Constants
                 public const string CreateTokenHistory = $"{KeyQueue}_CreateTokenHistory";
                 public const string AddExpiredDateForStudent = $"{KeyQueue}_AddExpiredDateForStudent";
                 public const string AddFeatureMission = $"{KeyQueue}_AddFeatureMission";
+                public const string NoticeExtend = $"{KeyQueue}_NoticeExtend";
+                public const string WeeklyNotice = $"{KeyQueue}_WeeklyNotice";
+                public const string JobRunEvents = $"{KeyQueue}_JobRunEvents";
+                public const string CheckUserDeletion = $"{KeyQueue}_CheckUserDeletion";
             }
         }
 
@@ -157,6 +161,7 @@ namespace Fsel.Shared.Constants
                 public const string JobActiveEvent = $"{KeyQueue}_JobActiveEvent";
                 public const string ChangeStatusOrder = $"{KeyQueue}_ChangeStatusOrder";
                 public const string JobUpdateVouchersStatus = $"{KeyQueue}_JobUpdateVouchersStatus";
+                public const string NoticeExtendPackage = $"{KeyQueue}_NoticeExtendPackage";
             }
         }
 

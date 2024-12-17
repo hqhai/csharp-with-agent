@@ -32,5 +32,14 @@ namespace Fsel.Shared.Enums
 
         [Description("Mindset 3")]
         MS3,
+
+        [Description("Adult Foundation 1")]
+        AF1,
+
+        [Description("Adult Foundation 2")]
+        AF2,
+
+        [Description("Adult Foundation 3")]
+        AF3
     }
 }

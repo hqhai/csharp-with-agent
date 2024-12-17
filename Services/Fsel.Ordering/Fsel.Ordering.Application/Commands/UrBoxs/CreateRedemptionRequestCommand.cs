@@ -215,6 +215,7 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                             Feature = EnumTokenFeature.MarketPlace,
                             Type = EnumTokenHistoryType.Exchanged,
                             UserId = student?.Human?.UserId ?? default,
+                            Mission = EnumTokenMission.UrBox,
                             Config = configs
                         }
                     };

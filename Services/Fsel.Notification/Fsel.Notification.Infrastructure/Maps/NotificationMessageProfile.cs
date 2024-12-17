@@ -13,8 +13,10 @@ namespace Fsel.Notification.Infrastructure.Maps
     {
         public NotificationMessageProfile()
         {
-            CreateMap<NotificationMessage, NotificationMessageModel>().IgnoreAllNonExisting();
+            CreateMap<NotificationMessage, NotificationMessageModel>().MapTranslations<NotificationMessage, NotificationMessageModel, NotificationMessageTranslation>();
+            CreateMap<NotificationMessageTranslation, NotificationMessage>().IgnoreEntity();
             CreateMap<NotificationMessage, OneSignalMessageModel>().IgnoreAllNonExisting();
+            CreateMap<NotificationMessageTranslationModel, NotificationMessageTranslation>().IgnoreAllNonExisting();
             CreateMap<CreateNotificationCommandModel, NotificationMessage>().IgnoreAllNonExisting();
             CreateMap<UpdateNotificationCommandModel, NotificationMessage>().IgnoreAllNonExisting();
             CreateMap<NotificationType, NotificationsTypeModel>().IgnoreAllNonExisting();

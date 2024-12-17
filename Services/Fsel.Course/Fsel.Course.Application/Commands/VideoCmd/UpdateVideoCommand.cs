@@ -69,7 +69,6 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 }
 
                 _mapper.Map(request, video);
-
                 method = await _videoConverter.UpdateTimeCodeToVideo(video, request);
                 if (!method.IsOK)
                 {

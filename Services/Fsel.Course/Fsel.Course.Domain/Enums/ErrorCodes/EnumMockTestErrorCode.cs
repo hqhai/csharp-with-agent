@@ -33,5 +33,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Skill Speaking Or Writing
         /// </summary>
         SkillSpeakingOrWriting,
+
+        /// <summary>
+        /// Cannot initialize a version smaller than the current version
+        /// </summary>
+        VersionTooLow
     }
 }

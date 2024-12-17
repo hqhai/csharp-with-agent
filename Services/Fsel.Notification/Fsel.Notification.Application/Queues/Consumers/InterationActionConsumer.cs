@@ -40,7 +40,6 @@ namespace Fsel.Notification.Application.Queues.Consumers
                     {
                         UserIds = message.UserIds ?? default,
                         ObjectId = message.ObjectId,
-                        Message = messageNoti,
                         Link = link,
                         Roles = message.Roles,
                         NotificationTypeId = notificationType?.Id ?? default,
@@ -57,7 +56,8 @@ namespace Fsel.Notification.Application.Queues.Consumers
                         Message = messageNoti,
                         Link = link,
                         NotificationTypeId = notificationType?.Id ?? default,
-                        SenderId = message.SenderId ?? default
+                        SenderId = message.SenderId ?? default,
+                        Status = EnumNotificationStatus.Sent,
                     };
                     await _mediator.Send(model).ConfigureAwait(false);
                 }

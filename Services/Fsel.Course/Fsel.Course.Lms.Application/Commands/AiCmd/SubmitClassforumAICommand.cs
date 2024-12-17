@@ -3,8 +3,6 @@
 namespace Fsel.Course.Lms.Application.Commands.AiCmd
 {
     using System;
-    using System.Collections;
-    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -13,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Infrastructure.ValueSettings;
+    using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SenderService;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -77,9 +76,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             aIResponse = Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
 
-            var checkDataClassForum = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
+            var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>?>(aIResponse);
 
-            bool conditionRetry = checkDataClassForum?.All(x => x != null) ?? default;
+            bool conditionRetry = classForumAIs?.All(x => x != null) ?? default;
 
             var classForumDetailResultOwner = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResult).ThenInclude(x => x.LessonResult).ThenInclude(x => x.Lesson).FirstOrDefault(x => x.Id == request.ClassForumDetailResultId);
 
@@ -99,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 await _senderService.SendEmailAsync(model);
             }
 
-            if ((checkDataClassForum == null || !conditionRetry) && classForumDetailResult != null && classForumDetailResult.RetryTime <= Max_Time_Retry)
+            if ((classForumAIs == null || classForumAIs.Count == 0 || !conditionRetry) && classForumDetailResult != null && classForumDetailResult.RetryTime <= Max_Time_Retry)
             {
                 var model = _mapper.Map<SetTimeRetryClassForumModel>(request);
                 model.StartDate = DateTime.UtcNow;
@@ -109,14 +108,24 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             #endregion Retry
 
-            var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse));
-
             if (classForumDetailResult != null)
             {
                 classForumDetailResult.GradingAlFeedback = classForumAIs != null ? ConvertHelper.Serialize(GetClassForumAIs(classForumAIs)) : default;
-                _classForumDetailResultRepository.Update(classForumDetailResult);
+                _classForumDetailResultRepository.Update(classForumDetailResult, false
+                , x => x.WordContent, x => x.Content
+                , x => x.WordCount, x => x.SubmissionCount
+                , x => x.ProcessDate, x => x.CompletionDate, x => x.Status);
                 await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
+
+            GetFeatureModuleQuery query = new GetFeatureModuleQuery
+            {
+                FeatureModule = EnumFeatureModule.ClassForumDetailResult,
+                ObjectId = classForumDetailResult?.Id ?? default,
+            };
+
+            var featureModule = await _mediator.Send(query, cancellationToken);
+            var featureModuleResult = featureModule?.Result;
 
             await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
             {
@@ -130,7 +139,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 if (classForumDetailResultOwner != null)
                 {
                     var lessonResult = await _lessonResultRepository.GetIncludeByIdAsync(classForumDetailResultOwner.ClassForumResult!.LessonResultId);
-                    var paramsLink = new List<object> { lessonResult?.LessonId.ToString() ?? string.Empty, lessonResult?.CourseId.ToString() ?? string.Empty, lessonResult?.UnitId.ToString() ?? string.Empty };
+
+                    var paramsLink = new List<object> { featureModuleResult?.CourseId.ToString() ?? string.Empty, featureModuleResult?.UnitId.ToString() ?? string.Empty, featureModuleResult?.LessonId.ToString() ?? string.Empty };
 
                     NotificationSendingQueueModel notificationQueue = new NotificationSendingQueueModel()
                     {

@@ -2,73 +2,62 @@
 
 namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 {
-    using System.Text.Json.Serialization;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Constants;
-    using Fsel.Common.Helpers;
-    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Domain.Models.CommandModels.UserOtpCodes;
+    using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
 
-    public class ConfirmOtpCommand : IRequest<MethodResult<UserOtpCode>>
+    public class ConfirmOtpCommand : ConfirmOtpCommandModel, IRequest<MethodResult<UserOtpCodeModel>>
     {
-        public string? Otp { get; set; }
-        public string? Email { get; set; }
-
-        [JsonIgnore]
-        public bool IsCheckExpiredTime { get; set; } = true;
     }
 
-    public class ConfirmOtpCommandHandler : IRequestHandler<ConfirmOtpCommand, MethodResult<UserOtpCode>>
+    public class ConfirmOtpCommandHandler : IRequestHandler<ConfirmOtpCommand, MethodResult<UserOtpCodeModel>>
     {
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
-        private readonly IHostEnvironment _environment;
-        private readonly string _otpDefault = "123456";
+        private readonly IMapper _mapper;
+        private readonly ILogger<ConfirmOtpCommandHandler> _logger;
 
-        public ConfirmOtpCommandHandler(IUserOtpCodeRepository userOtpCodeRepository, IHostEnvironment environment)
+        public ConfirmOtpCommandHandler(IUserOtpCodeRepository userOtpCodeRepository, IMapper mapper, ILogger<ConfirmOtpCommandHandler> logger)
         {
             _userOtpCodeRepository = userOtpCodeRepository;
-            _environment = environment;
+            _mapper = mapper;
+            _logger = logger;
         }
 
-        public async Task<MethodResult<UserOtpCode>> Handle(ConfirmOtpCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<UserOtpCodeModel>> Handle(ConfirmOtpCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<UserOtpCode> methodResult = new MethodResult<UserOtpCode>();
-            var userOtpCode = await _userOtpCodeRepository.Queryable
-                                   .FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.Otp, cancellationToken);
-            if (!string.IsNullOrEmpty(request.Email) && request.Otp == _otpDefault && (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)))
-            {
-                if (!request.Email.IsValidEmail())
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
-                    return methodResult;
-                }
-                userOtpCode = await _userOtpCodeRepository.Queryable.Include(x => x.User)
-                                   .FirstOrDefaultAsync(x => x.User != null && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.User.Email == request.Email, cancellationToken);
-            }
-
+            MethodResult<UserOtpCodeModel> methodResult = new MethodResult<UserOtpCodeModel>();
+            var userOtpCode = await _userOtpCodeRepository.GetUserOtpCodeAsync(request.Otp, request.Email);
             if (userOtpCode == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.InvalidOTP), nameof(request.Otp), request.Otp);
                 return methodResult;
             }
-
             if (request.IsCheckExpiredTime && DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OTPExpired), nameof(request.Otp), request.Otp);
                 return methodResult;
             }
-
-            userOtpCode.Status = EnumOtpCodeStatus.Verified;
-            _userOtpCodeRepository.Update(userOtpCode);
-            await _userOtpCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            methodResult.Result = userOtpCode;
+            try
+            {
+                userOtpCode.Status = EnumOtpCodeStatus.Verified;
+                _userOtpCodeRepository.Update(userOtpCode);
+                await _userOtpCodeRepository.DeleteAsync(userOtpCode);
+                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ConfirmOtpCommand encouters error: {message}", ex.Message);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr));
+            }
+            methodResult.Result = _mapper.Map<UserOtpCodeModel>(userOtpCode);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

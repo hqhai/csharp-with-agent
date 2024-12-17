@@ -23,6 +23,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public int CurrentPosition { get; set; }
 
         private string? _avatarPath;
+
         public string? AvatarPath
         {
             set { _avatarPath = value; }
@@ -53,6 +54,5 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public Guid CourseResultId { get; set; }
 
         public WeekEvent? WeekEvent { get; set; }
-
     }
 }

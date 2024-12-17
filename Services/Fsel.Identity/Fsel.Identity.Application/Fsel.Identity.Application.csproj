@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Folder Include="Commands\GoogleSheetReadingCmd\" />
+    <Folder Include="Queries\UserOtpCodeQuery\" />
     <Folder Include="Services\GoogleSheetServices\Models\" />
   </ItemGroup>
 

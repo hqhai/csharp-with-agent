@@ -10,6 +10,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using Fsel.Core.Base;
     using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.CourseServices;
+    using Fsel.Interaction.Application.Services.CourseServices.Models;
+    using Fsel.Interaction.Application.Services.CourseServices.QueryModel;
     using Fsel.Interaction.Application.Services.TrainingServices;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.IRepositories;
@@ -31,9 +33,10 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private readonly IUserService _userService;
         private readonly ITrainingService _trainingService;
         private readonly ICourseService _courseService;
+        private readonly IMediator _mediator;
 
 
-        public DeleteCommentCommandHandler(ICommentRepository commentRepository, AuthContext authContext, NotificationMessagePublisher notificationMessagePublisher, IUserService userService, ITrainingService trainingService, ICourseService courseService)
+        public DeleteCommentCommandHandler(ICommentRepository commentRepository, AuthContext authContext, NotificationMessagePublisher notificationMessagePublisher, IUserService userService, ITrainingService trainingService, ICourseService courseService, IMediator mediator)
         {
             _commentRepository = commentRepository;
             _authContext = authContext;
@@ -41,6 +44,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             _userService = userService;
             _trainingService = trainingService;
             _courseService = courseService;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteCommentCommand request, CancellationToken cancellationToken)
@@ -64,7 +68,20 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 
                 var lesson = await _courseService.GetLessonResult(classForumResultTemp.LessonResultId ?? default);
 
-                var (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(comment!, classForumResultTemp?.CourseId, classForumResultTemp?.UnitId, lesson?.Content?.Result?.Id, classForumResultTemp?.Id);
+                var objectOwnerId = CustomDataForParamMessage(comment!);
+
+                FeatureModuleQuery query = new FeatureModuleQuery
+                {
+                    FeatureModule = EnumFeatureModule.ClassForumDetailResult,
+                    ObjectId = classForumResultTemp?.Id ?? default
+                };
+
+                var featureModule = await _courseService.GetModuleModel(query);
+                var featureModuleResult = featureModule?.Content?.Result;
+
+                List<object> paramLinksValue = new List<object> { featureModuleResult?.CourseId ?? default, featureModuleResult?.UnitId ?? default, featureModuleResult?.LessonId ?? default, featureModuleResult?.ClassForumDetailResultId ?? default };
+
+                List<object> paramMessages = new List<object> { classForumResultTemp?.CreatedFullName?.ToString() ?? string.Empty };
 
                 NotificationSendingQueueModel notificationQueueModel = new NotificationSendingQueueModel()
                 {
@@ -72,7 +89,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                     Type = EnumNotificationType.LinkComment,
                     Content = EnumNotificationContent.DeleteComment,
                     SenderId = _authContext.CurrentUserId,
-                    ParamsLink = returnedParamsLink,
+                    ParamsLink = paramLinksValue,
+                    ParamsMessage = paramMessages,
                     ObjectId = comment.Id,
                     PlatformCode = EnumPlatformCode.LMS
                 };
@@ -86,18 +104,17 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             return methodResult;
         }
 
-        public static (List<object> paramsLink, Guid ownerObjectId) CustomDataForParamMessage(dynamic templateResult, Guid? courseId, Guid? unitId, Guid? lessonId, Guid? resultId)
+        public static Guid CustomDataForParamMessage(dynamic templateResult)
         {
             if (templateResult == null)
             {
-                return (new List<object>(), Guid.Empty);
+                return Guid.Empty;
             }
 
             // param
-            var paramsLink = new List<object> { lessonId ?? default, courseId ?? default, unitId ?? default, resultId ?? default };
             var ownerObjectId = templateResult?.CreatedUserId ?? default;
 
-            return (paramsLink, ownerObjectId);
+            return ownerObjectId;
         }
     }
 }

@@ -18,6 +18,7 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<StudentRankingEventCommandModel, StudentRankingEvent>().IgnoreAllNonExisting();
             CreateMap<StudentRankingModel, StudentRankingEvent>().IgnoreAllNonExisting();
             CreateMap<RegisterStudentForEventCommandModel, EventRegistration>().IgnoreAllNonExisting();
+            CreateMap<EventRegistration, RegisterStudentForEventCommandModel>().IgnoreAllNonExisting();
         }
     }
 }

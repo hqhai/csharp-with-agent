@@ -63,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var lessonResultIds = await _lessonResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == course.Id).Select(x => x.Id).ToListAsync(cancellationToken);
             progressMenu.NumberOfUnitDone = await _unitResultRepository.Queryable.Where(x => x.CourseId == course.Id && x.StudentId == courseResult.StudentId && x.Status == EnumResultStatus.Done).CountAsync(cancellationToken);
             progressMenu.NumberOfPostsCreated = await _classForumResultRepository.Queryable.Where(x => lessonResultIds.Contains(x.LessonResultId))
-                                                                                           .Where(x => x.Status == EnumClassForumResultStatus.Graded || x.Status == EnumClassForumResultStatus.Denied)
+                                                                                           .Where(x => x.Status.HasValue)
                                                                                            .CountAsync(cancellationToken);
             var dailyStreakResult = await _userService.GetDailyStreak(courseResult.StudentId);
             if (!dailyStreakResult.IsSuccessStatusCode)

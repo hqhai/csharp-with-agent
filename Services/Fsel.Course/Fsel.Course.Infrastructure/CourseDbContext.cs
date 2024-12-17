@@ -83,6 +83,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForumDetailResult> ClassForumDetailResults { get; set; }
         public DbSet<MockTestAICriteriaSetting> MockTestAICriteriaSettings { get; set; }
         public DbSet<ProsodyScore> ProsodyScore { get; set; }
+        public DbSet<QuestionExplanationError> QuestionExplanationErrors { get; set; }
+        public DbSet<QuestionExplanationLog> QuestionExplanationLogs { get; set; }
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -107,7 +109,6 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new LessonExtraPracticeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonHomeWorkEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonVideoEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new MockTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PlacementTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TimeCodeExerciseEntityTypeConfiguration());
@@ -118,7 +119,6 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new VideoTimeCodeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonResultEntityTypeConfiguraion());
             modelBuilder.ApplyConfiguration(new VideoResultEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new CourseResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoTimeCodeAnswerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoTimeCodeResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionFormEntityTypeConfiguration());
@@ -127,6 +127,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new HomeWorkResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new HomeWorkQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonNoteEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UnitResultEntityTypeConfiguraion());
 
             modelBuilder.ApplyConfiguration(new PlacementTestSectionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PlacementTestAnswerEntityTypeConfiguration());
@@ -156,7 +157,8 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new MockTestAICriteriaSettingTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumDetailResultTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ProsodyScoreEntityTypeConfiguration());
-
+            modelBuilder.ApplyConfiguration(new QuestionExplanationErrorEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestionExplanationLogEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 

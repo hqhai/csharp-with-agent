@@ -107,6 +107,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Invalid Unit Quantity
         /// </summary>
-        InvalidUnitQuantity
+        InvalidUnitQuantity,
+
+        /// <summary>
+        /// CourseRequest Not Active
+        /// </summary>
+        CourseRequestNotActive
     }
 }

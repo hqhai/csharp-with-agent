@@ -19,6 +19,11 @@ namespace Fsel.Ordering.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumVoucherType>());
+            builder.Property(e => e.Source)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumVoucherSource>());
         }
     }
 }
