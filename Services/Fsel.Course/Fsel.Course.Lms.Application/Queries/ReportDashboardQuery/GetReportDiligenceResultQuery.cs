@@ -2,16 +2,13 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 {
+    using System;
     using System.Globalization;
     using System.Text.Json.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
-    using Fsel.Common.Models;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels.BaseChartModels;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
@@ -31,16 +28,16 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 
         public int ReportDay { get; set; }
 
-        public string? EnumCourseTypesStr { get; set; }
+        public string? EnumCourseLevelsStr { get; set; }
 
         public string? SchoolClassesStr { get; set; }
 
         [JsonIgnore]
-        public IList<EnumCourseType>? EnumCourseTypes
+        public IList<EnumCourseLevel>? EnumCourseLevels
         {
             get
             {
-                return EnumCourseTypesStr.ToList<EnumCourseType>();
+                return EnumCourseLevelsStr.ToList<EnumCourseLevel>();
             }
         }
 
@@ -94,7 +91,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 
             if (students == null || !students.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
                 return methodResult;
             }
 
@@ -108,6 +104,14 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 Features = new List<EnumFeature>() { EnumFeature.ClassForum, EnumFeature.VideoLesson, EnumFeature.HomeWork }
             });
 
+            // Danh sách enum feature
+            var enumFeatures = new List<string>()
+            {
+                EnumFeature.ClassForum.ToString(),
+                EnumFeature.VideoLesson.ToString(),
+                EnumFeature.HomeWork.ToString()
+            };
+
             if (!accessTimeResult.IsSuccessStatusCode)
             {
                 methodResult.AddError(accessTimeResult.Error);
@@ -118,7 +122,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 
             if (featureAccsessTime == null || featureAccsessTime.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(featureAccsessTime));
                 return methodResult;
             }
 
@@ -126,9 +129,9 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             resultModel.SchoolName = students.FirstOrDefault()?.School;
 
             // Lọc thep chương trình học
-            if (request.EnumCourseTypes != null && request.EnumCourseTypes.Count > 0)
+            if (request.EnumCourseLevels != null && request.EnumCourseLevels.Count > 0)
             {
-                students = students.Where(s => request.EnumCourseTypes.Contains(s.CourseLevel.GetEnumCourseType())).ToList();
+                students = students.Where(s => s.CourseLevel != null && request.EnumCourseLevels.Contains(s.CourseLevel ?? default)).ToList();
                 featureAccsessTime = featureAccsessTime.Where(f => students.Select(s => s.Human!.UserId).Contains(f.CreatedUserId)).ToList();
             }
 
@@ -139,11 +142,13 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 featureAccsessTime = featureAccsessTime.Where(f => students.Select(s => s.Human!.UserId).Contains(f.CreatedUserId)).ToList();
             }
 
-            resultModel.NumberStudentNotAccessModel = GetStudentNotAccessModel(students, featureAccsessTime, request);
+            var classes = students.Where(s => s.SchoolClass != null).Select(s => s.SchoolClass).ToList();
+
+            resultModel.NumberStudentNotAccessModel = GetStudentNotAccessModel(students, featureAccsessTime, request, classes);
 
             resultModel.NumberStudentAccessModel = GetStudentAccessModel(featureAccsessTime, request);
 
-            resultModel.LearningResultReportModel = GetLearningResultReportModel(featureAccsessTime);
+            resultModel.LearningResultReportModel = GetLearningResultReportModel(featureAccsessTime, enumFeatures);
 
             methodResult.Result = resultModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -156,7 +161,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
         /// </summary>
         /// <param name="featureAccsessTime">Dữ liệu truy cập hệ thống của học sinh</param>
         /// <returns></returns>
-        private static LearningResultReportModel GetLearningResultReportModel(IList<FeatureAccessTimeModel> featureAccsessTime)
+        private static LearningResultReportModel GetLearningResultReportModel(IList<FeatureAccessTimeModel> featureAccsessTime, IList<string>? enumFeatures)
         {
             // Khởi tạo Model
             // Nhãn thứ 1 model sẽ là các thứ trong tuần
@@ -173,6 +178,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             var startCalculateDay = DateTime.UtcNow.Date.AddDays(dayOfWeek == DayOfWeek.Sunday ? (-NumberDayOfWeek + 1) : -(int)dayOfWeek + 1);
 
             double totalTimeThisWeek = 0;
+
+            var dayOfWeeks = Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>().Select(day => day.ToString()).ToList();
 
             // Lọc dữ liệu AccessTime
             var featureAccsessTimeThisWeek = featureAccsessTime
@@ -199,8 +206,48 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                     {
                         Label = x.Key.ToString(),
                         Value = (int)x.Sum(x => x.AccessTime)
-                    }).ToList()
+                    }).OrderBy(f => f.Label).ToList()
+                }).ToList();
+
+            foreach (var model in featureAccsessTimeThisWeek)
+            {
+                if (model.DataColumns != null && enumFeatures != null && model.DataColumns.Count < enumFeatures.Count)
+                {
+                    var lackLabels = model.DataColumns.Select(f => f.Label).Except(enumFeatures);
+                    var insertModels = lackLabels.Select(l => new DataChartModel()
+                    {
+                        Label = l,
+                        Value = 0
+                    }).ToList();
+
+                    model.DataColumns.ToList().AddRange(insertModels);
+                    model.DataColumns = model.DataColumns.OrderBy(l => l.Label).ToList();
+                }
+            }
+
+            if (dayOfWeeks.Count > featureAccsessTimeThisWeek.Count)
+            {
+                var lackLabels = dayOfWeeks.Except(featureAccsessTimeThisWeek.Select(f => f.Label));
+
+                var insertModels = lackLabels.Select(l => new StackBarChartModel()
+                {
+                    Label = l,
+                    DataColumns = enumFeatures?.Select(x => new DataChartModel()
+                    {
+                        Label = x,
+                        Value = 0
+                    }).OrderBy(x => x.Label).ToList()
+                }).ToList();
+
+                featureAccsessTimeThisWeek.AddRange(insertModels);
+
+                featureAccsessTimeThisWeek.Sort((x, y) =>
+                {
+                    var i = (!DayOfWeek.Sunday.ToString().Equals(x.Label, StringComparison.Ordinal)) ? (int)(DayOfWeek)Enum.Parse(typeof(DayOfWeek), x.Label ?? "", ignoreCase: true) : NumberDayOfWeek;
+                    var j = (!DayOfWeek.Sunday.ToString().Equals(y.Label, StringComparison.Ordinal)) ? (int)(DayOfWeek)Enum.Parse(typeof(DayOfWeek), y.Label ?? "", ignoreCase: true) : NumberDayOfWeek;
+                    return i.CompareTo(j);
                 });
+            }
 
             double totalAccsessTimeLastWeek = featureAccsessTime
                 .Where(f => f.LastVisited.HasValue &&
@@ -209,7 +256,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 
             totalAccsessTimeLastWeek = totalAccsessTimeLastWeek / totalDays;
 
-            resultModel.DataCharts = featureAccsessTimeThisWeek.ToList();
+            resultModel.DataCharts = featureAccsessTimeThisWeek;
             resultModel.TotalTime = (int)totalTimeThisWeek;
 
             // Trung bình trên ngày
@@ -229,7 +276,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
         /// <param name="featureAccsessTime">Dữ liệu truy cập hệ thống của học sinh</param>
         /// <param name="request">Dữ liệu query</param>
         /// <returns>Model tương ứng</returns>
-        private static BaseChartResultModel GetStudentNotAccessModel(IList<StudentModel> student, IList<FeatureAccessTimeModel> featureAccsessTime, GetReportDiligenceResultQuery request)
+        private static BaseChartResultModel GetStudentNotAccessModel(IList<StudentModel> student, IList<FeatureAccessTimeModel> featureAccsessTime, GetReportDiligenceResultQuery request, IList<string?>? classes)
         {
             // Khởi tạo Model
             // Nhãn model sẽ là lớp của các học sinh đó
@@ -256,6 +303,19 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                     Label = x.Key,
                     Value = x.Count()
                 }).ToList();
+
+            if (classes != null && classes.Count > studentNotAccessInSomeDays.Count)
+            {
+                var lackLabels = classes.Except(studentNotAccessInSomeDays.Select(f => f.Label));
+                var insertModels = lackLabels.Select(l => new DataChartModel()
+                {
+                    Label = l,
+                    Value = 0
+                }).ToList();
+
+                studentNotAccessInSomeDays.AddRange(insertModels);
+                studentNotAccessInSomeDays = studentNotAccessInSomeDays.OrderBy(l => l.Label).ToList();
+            }
 
             resultModel.DataCharts = studentNotAccessInSomeDays;
 
@@ -292,6 +352,13 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             // Xử lý đổ dữ liệu vào Model với 2 trường hợp
             if (request.ReportEndDate.HasValue)
             {
+                // Lấy khoảng ngày
+                var dates = new List<string>();
+                for (var date = request.ReportStartDate.Date; date <= request.ReportEndDate.Value.Date; date = date.AddDays(1))
+                {
+                    dates.Add(date.ToString(CultureInfo.CurrentCulture));
+                }
+
                 // Lấy dữ liệu theo tuần
                 // Nhãn sẽ là các ngày-tháng-năm trong tuần 
                 var studentAccessModelThisWeek = featureAccsessTimeInSomeDays
@@ -324,6 +391,24 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                     .Select(x => x.DistinctBy(x => x.UserId).Count())
                     .Sum();
 
+                if (studentAccessModelThisWeek.Count < dates.Count)
+                {
+                    var lackLabels = dates.Except(studentAccessModelThisWeek.Select(f => f.Label));
+                    var insertModels = lackLabels.Select(l => new DataChartModel()
+                    {
+                        Label = l,
+                        Value = 0
+                    }).ToList();
+
+                    studentAccessModelThisWeek.AddRange(insertModels);
+                    studentAccessModelThisWeek.Sort((x, y) =>
+                    {
+                        var i = x.Label != null ? DateTime.Parse(x.Label, CultureInfo.CurrentCulture) : default;
+                        var j = y.Label != null ? DateTime.Parse(y.Label, CultureInfo.CurrentCulture) : default;
+                        return i.CompareTo(j);
+                    });
+                }
+
                 resultModel.DataCharts = studentAccessModelThisWeek;
 
                 // Tính phần trăm tăng hoặc giảm tổng lượt truy cập so với tuần trước
@@ -345,9 +430,9 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                     .GroupBy(x => x.Hour).OrderBy(x => (int)x.Key)
                     .Select(x => new DataChartModel()
                     {
-                        Label = x.Key.GetDescription(),
+                        Label = x.Key.ToString(),
                         Value = x.DistinctBy(x => x.UserId).Count()
-                    });
+                    }).ToList();
 
                 // Tương tự trường hợp trên
                 double totalAccessThisDay = studentAccessModelThisDay.Sum(x => x.Value);
@@ -364,8 +449,32 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                     .Select(x => x.DistinctBy(x => x.UserId).Count())
                     .Sum();
 
+                var hours = Enum.GetValues(typeof(EnumHour)).Cast<EnumHour>().Select(day => day.ToString()).ToList();
+                if (studentAccessModelThisDay.Count < hours.Count)
+                {
+                    var lackLabels = hours.Except(studentAccessModelThisDay.Select(f => f.Label));
+                    var insertModels = lackLabels.Select(l => new DataChartModel()
+                    {
+                        Label = l,
+                        Value = 0
+                    }).ToList();
+
+                    studentAccessModelThisDay.AddRange(insertModels);
+                    studentAccessModelThisDay.Sort((x, y) =>
+                    {
+                        var i = (int)(EnumHour)Enum.Parse(typeof(EnumHour), x.Label ?? "", ignoreCase: true);
+                        var j = (int)(EnumHour)Enum.Parse(typeof(EnumHour), y.Label ?? "", ignoreCase: true);
+                        return i.CompareTo(j);
+                    });
+                    studentAccessModelThisDay.ForEach(s =>
+                    {
+                        var enumHour = (EnumHour)Enum.Parse(typeof(EnumHour), s.Label ?? "", ignoreCase: true);
+                        s.Label = enumHour.GetDescription();
+                    });
+                }
+
                 // Tương tự trường hợp trên
-                resultModel.DataCharts = studentAccessModelThisDay.ToList();
+                resultModel.DataCharts = studentAccessModelThisDay;
                 resultModel.Percent = totalAccessYesterday == 0 ? 100 : (int)(((totalAccessThisDay - totalAccessYesterday) / totalAccessYesterday) * 100);
             }
 
