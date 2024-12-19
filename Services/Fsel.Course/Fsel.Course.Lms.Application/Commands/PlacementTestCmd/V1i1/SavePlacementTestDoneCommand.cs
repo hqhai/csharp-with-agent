@@ -125,8 +125,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             placementTestGroupResult.CompletionDate = DateTime.UtcNow;
             placementTestGroupResult.CompletionLevel = placementTestResult.Level;
             placementTestGroupResult.SuggetLevel = level;
-            placementTestGroupResult.ChooseLevel = SendMailHelper.GetPreviousEnumValue(level ?? default);
-            placementTestGroupResult.CurrentLevel = desiredLevel;
+            placementTestGroupResult.ChooseLevel = desiredLevel;
+            placementTestGroupResult.CurrentLevel = SendMailHelper.GetPreviousEnumValue(level ?? default);
             placementTestGroupResult.Status = EnumResultStatus.Done;
             placementTestGroupResult.Percent = placementTestResult.Percent;
             _placementTestGroupResultRepository.Update(placementTestGroupResult);
