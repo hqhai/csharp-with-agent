@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent, GetInitialAge(startingLevel, age));
                 if (isLock)
                 {
-                    await UpdatePlacementGroupResultDoneAsync(placementTestResultDone, levelNext);
+                    await UpdatePlacementGroupResultDoneAsync(placementTestResultDone, desiredLevel, levelNext);
                     await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel { Id = student.Human?.UserId ?? default, CourseLevel = levelNext ?? default, BaseCourseLevel = levelNext ?? default });
                     return;
                 }
@@ -105,6 +105,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             placementTestGroupResult = new PlacementTestGroupResult
             {
                 StudentId = studentId,
+                NewDate = DateTime.UtcNow,
                 ProcessDate = DateTime.UtcNow,
                 ProcessLevel = placementTest.Level,
                 Status = EnumResultStatus.Process
@@ -113,16 +114,19 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        private async Task UpdatePlacementGroupResultDoneAsync(PlacementTestResult placementTestResult, EnumCourseLevel? level)
+        private async Task UpdatePlacementGroupResultDoneAsync(PlacementTestResult placementTestResult, EnumCourseLevel desiredLevel, EnumCourseLevel? level)
         {
             var placementTestGroupResult = await _placementTestGroupResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == placementTestResult.StudentId);
             if (placementTestGroupResult == null)
             {
                 return;
             }
+
             placementTestGroupResult.CompletionDate = DateTime.UtcNow;
             placementTestGroupResult.CompletionLevel = placementTestResult.Level;
             placementTestGroupResult.SuggetLevel = level;
+            placementTestGroupResult.ChooseLevel = SendMailHelper.GetPreviousEnumValue(level ?? default);
+            placementTestGroupResult.CurrentLevel = desiredLevel;
             placementTestGroupResult.Status = EnumResultStatus.Done;
             placementTestGroupResult.Percent = placementTestResult.Percent;
             _placementTestGroupResultRepository.Update(placementTestGroupResult);
