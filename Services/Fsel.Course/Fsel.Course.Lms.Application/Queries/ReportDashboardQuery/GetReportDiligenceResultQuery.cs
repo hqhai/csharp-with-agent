@@ -213,14 +213,16 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             {
                 if (model.DataColumns != null && enumFeatures != null && model.DataColumns.Count < enumFeatures.Count)
                 {
-                    var lackLabels = model.DataColumns.Select(f => f.Label).Except(enumFeatures);
+                    var lackLabels = enumFeatures.Except(model.DataColumns.Select(f => f.Label));
                     var insertModels = lackLabels.Select(l => new DataChartModel()
                     {
                         Label = l,
                         Value = 0
                     }).ToList();
 
-                    model.DataColumns.ToList().AddRange(insertModels);
+                    var dataColumnsTerm = model.DataColumns.ToList();
+                    dataColumnsTerm.AddRange(insertModels);
+                    model.DataColumns = dataColumnsTerm;
                     model.DataColumns = model.DataColumns.OrderBy(l => l.Label).ToList();
                 }
             }
@@ -260,7 +262,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             resultModel.TotalTime = (int)totalTimeThisWeek;
 
             // Trung bình trên ngày
-            resultModel.AveragePerDay = totalTimeThisWeek / totalDays;
+            resultModel.AveragePerDay = Math.Round(totalTimeThisWeek / totalDays, 0, MidpointRounding.AwayFromZero);
 
             // Tính phần trăm so với tuần trước
             // Cơ chế giải thích ở dười

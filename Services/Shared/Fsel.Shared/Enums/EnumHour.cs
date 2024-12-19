@@ -39,7 +39,7 @@ namespace Fsel.Shared.Enums
         [Description("20h-22h")]
         TwentyToTwentyTwo,
 
-        [Description("20h-24h")]
+        [Description("22h-24h")]
         TwentytwoToTwentyFour,
     }
 }
