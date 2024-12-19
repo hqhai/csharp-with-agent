@@ -72,6 +72,10 @@ namespace Fsel.Shared.Constants
         public const string SpeakingFluency = "Resources//SpeakingAiConfig//FluencyConfig.txt";
         public const string SpeakingLexical = "Resources//SpeakingAiConfig//LexicalResourceConfig.txt";
 
+
+        public const string AIClassForumRole = "Resources//AIPrompt//Role//ApprovalClassForumRole.txt";
+        public const string AIClassForumInstruction = "Resources//AIPrompt//Instruction//ApprovalClassForumInstruction.txt";
+
         public const string IeltsStudentResult = "Resources//IeltsStudentsResult.json";
         public const string AcademicStudentsResult = "Resources//AcademicStudentsResult.json";
         public const string SchoolEventRules = "Resources//SchoolEventRules.json";
