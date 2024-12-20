@@ -47,9 +47,21 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
-            var voucherQuery = await _voucherRepository.Queryable.Where(p => p.Source == EnumVoucherSource.Admin && p.IsShowMyVoucher).Include(x => x.Orders).Where(p => p.StartDate <= currentDate && p.EndDate >= currentDate).OrderByDescending(x => x.CreatedDate).ToListAsync(cancellationToken);
+            var voucherQuery = await _voucherRepository.Queryable.Include(p => p.VoucherPackages).Where(p => p.Source == EnumVoucherSource.Admin && p.IsShowMyVoucher).Include(x => x.Orders).Where(p => p.StartDate <= currentDate && p.EndDate >= currentDate).OrderByDescending(x => x.CreatedDate).ToListAsync(cancellationToken);
 
             var voucherModels = _mapper.Map<IList<VoucherModel>>(voucherQuery);
+
+            voucherModels.ForEach(x =>
+            {
+                var voucherModel = voucherQuery.First(p => p.Id == x.Id);
+                var quantityUsed = voucherModel.Orders.Where(p => p.Status == EnumOrderStatus.New || p.Status == EnumOrderStatus.Payment).Count();
+                x.PackageIds = voucherModel.VoucherPackages.Select(p => p.PackageId).ToList();
+                x.QuantityUsed = quantityUsed;
+                x.RemainingQuantity = x.Quantity - quantityUsed;
+                x.Status = quantityUsed < x.Quantity;
+                x.ItemStatus = quantityUsed < x.Quantity ? "Đang còn" : "Đã hết";
+                x.Duration = currentDate < x.EndDate ? "Còn hiệu lực" : "Hết hiệu lực";
+            });
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
@@ -64,16 +76,6 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
-
-            voucherModels.ForEach(x =>
-            {
-                var quantityUsed = voucherQuery.First(p => p.Id == x.Id).Orders.Where(p => p.Status == EnumOrderStatus.New || p.Status == EnumOrderStatus.Payment).Count();
-                x.QuantityUsed = quantityUsed;
-                x.RemainingQuantity = x.Quantity - quantityUsed;
-                x.Status = quantityUsed < x.Quantity;
-                x.ItemStatus = quantityUsed < x.Quantity ? "Đang còn" : "Đã hết";
-                x.Duration = currentDate < x.EndDate ? "Còn hiệu lực" : "Hết hiệu lực";
-            });
 
             var removeVoucher = new List<VoucherModel>();
 
