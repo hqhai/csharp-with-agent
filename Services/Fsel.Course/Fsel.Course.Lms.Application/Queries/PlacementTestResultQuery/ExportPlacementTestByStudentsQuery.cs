@@ -20,6 +20,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class ExportPlacementTestByStudentsQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
@@ -127,7 +128,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                     CompletionLevel = isLock ? EnumCourseLevelHelper.GetCodeByEnumCourseLevel(placementTestResultEnd.Level.GetCourseLevelByPlacementTestLevel()) : null,
                     ChooseLevel = isLock ? student.CourseLevel.GetCodeByEnumCourseLevel() : null,
                     SuggetLevel = isLock ? placementTestResultEnd.Status == EnumResultStatus.Done ? EnumCourseLevelHelper.GetCodeByEnumCourseLevel(levelCompleted) : EnumCourseLevelHelper.GetCodeByEnumCourseLevel(placementTestResultEnd.Level.GetCourseLevelByPlacementTestLevel()) : null,
-                    CurrentLevel = isLock ? currentLevel == EnumCourseLevel.A1 && placementTestResultEnd.Percent < ValueSettings.MinCompletePercent ? "Pre-A1" : EnumCourseLevelHelper.GetCodeByEnumCourseLevel(currentLevel) : null,
+                    CurrentLevel = isLock ? currentLevel == EnumCourseLevel.A1 && placementTestResultEnd.Percent < MinCompletePercent ? ValueCourseLevel.PreA1 : EnumCourseLevelHelper.GetCodeByEnumCourseLevel(currentLevel) : null,
                     Percent = isLock ? placementTestResultEnd.Percent : null,
                     IsPTdone = isLock,
                     CourseName = EnumCourseLevelHelper.GetCodeByEnumCourseLevel(courseResult?.Course?.CourseLevel),

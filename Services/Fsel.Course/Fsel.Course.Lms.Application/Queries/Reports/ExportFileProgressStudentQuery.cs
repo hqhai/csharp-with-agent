@@ -19,6 +19,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class ExportFileProgressStudentQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
@@ -99,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                         Email = student.Human?.Email,
                         CourseName = courseResult?.Course?.Name,
                         ExpiredDate = student.ExpiredDate,
-                        Status = courseResult == null ? "Chưa Học" : "Đã Học",
+                        Status = courseResult == null ? ValueStatusUser.NotStarted : ValueStatusUser.InProgress,
                         ProgressDate = courseResult?.ProcessDate,
                     };
                     await SetProgressStudentAsync(reportProgress, courseResult, cancellationToken);

@@ -136,5 +136,18 @@ namespace Fsel.Shared.Constants
             public const int OrderIndexDone = 2;
             public const int OrderIndexOther = 3;
         }
+
+        public static class ValueStatusUser
+        {
+            public const string CompletedPlacementTest = "Hoàn Thành PT";
+            public const string NotCompletedPlacementTest = "Chưa Hoàn Thành PT";
+            public const string InProgress = "Đang Học";
+            public const string NotStarted = "Chưa Học";
+        }
+
+        public static class ValueCourseLevel
+        {
+            public const string PreA1 = "Pre-A1";
+        }
     }
 }

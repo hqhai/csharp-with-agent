@@ -23,6 +23,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class ExportFileProgressStudentsToEmailsQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
@@ -186,7 +187,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 {
                     int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
                     var (levelCompleted, isLock) = placementTestStudent.PlacementTestEnd.Level.GetLevelInScore(placementTestStudent.PlacementTestEnd.Percent, IeltsScoreHelper.GetInitialAge(placementTestStudent.PlacementTestCurrent?.Level, age));
-                    studentProgressReport.StatusUser = isLock ? "Hoàn Thành PT" : "Chưa Hoàn Thành PT";
+                    studentProgressReport.StatusUser = isLock ? ValueStatusUser.CompletedPlacementTest : ValueStatusUser.NotCompletedPlacementTest;
                 }
                 if (courseComplete != null)
                 {
@@ -203,7 +204,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 }
                 if (courseResult != null)
                 {
-                    studentProgressReport.StatusUser = "Đang Học";
+                    studentProgressReport.StatusUser = ValueStatusUser.InProgress;
                     await SetFeatureAccessTimeAsync(studentProgressReport, student, courseResult);
                     studentProgressReport.LeaderboardPercent = studentRankings?.FirstOrDefault(x => x.StudentId == student.Id && x.CourseResultId == courseResult.Id)?.OverallScore ?? default;
                 }
