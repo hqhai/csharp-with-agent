@@ -30,6 +30,10 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
         private readonly AuthContext _authContext;
         private readonly IOrderRepository _orderRepository;
         private readonly IUserService _userService;
+        private const string StillValid = "Còn hiệu lực";
+        private const string Expire = "Hết hiệu lực";
+        private const string Still = "Đang còn";
+        private const string OutOfStock = "Đã hết";
 
         public SearchVoucherByUserQueryHandler(IVoucherRepository voucherRepository, IMapper mapper, AuthContext authContext, IOrderRepository orderRepository, IUserService userService)
         {
@@ -59,8 +63,8 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                 x.QuantityUsed = quantityUsed;
                 x.RemainingQuantity = x.Quantity - quantityUsed;
                 x.Status = quantityUsed < x.Quantity;
-                x.ItemStatus = quantityUsed < x.Quantity ? "Đang còn" : "Đã hết";
-                x.Duration = currentDate < x.EndDate ? "Còn hiệu lực" : "Hết hiệu lực";
+                x.ItemStatus = quantityUsed < x.Quantity ? Still : OutOfStock;
+                x.Duration = currentDate < x.EndDate ? StillValid : Expire;
             });
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
