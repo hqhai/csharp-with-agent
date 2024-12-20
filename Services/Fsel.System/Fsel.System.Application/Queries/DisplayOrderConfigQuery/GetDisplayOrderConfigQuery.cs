@@ -41,7 +41,7 @@ namespace Fsel.System.Application.Queries.DisplayOrderConfigQuery
                 new DisplayOrderConfigModel
                 {
                     DisplayOrder = 4,
-                    Name = Shared.Enums.EnumDisplayOrder.LuckyStar,
+                    Name = Shared.Enums.EnumDisplayOrder.FselCoin,
                     Status = true
                 },
                 new DisplayOrderConfigModel

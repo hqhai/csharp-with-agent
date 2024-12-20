@@ -4,7 +4,6 @@ namespace Fsel.System.Api.Controllers
 {
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Shared.Constants;
     using Fsel.System.Application.Queries.DisplayOrderConfigQuery;

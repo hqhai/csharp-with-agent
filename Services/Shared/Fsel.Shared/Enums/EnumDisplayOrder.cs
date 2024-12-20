@@ -7,7 +7,7 @@ namespace Fsel.Shared.Enums
         Popup,
         Heading,
         GoodMorning,
-        LuckyStar,
+        FselCoin,
         StreakTimeCode,
         TwentyFiveMinutesBreak,
         Beginner
