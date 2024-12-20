@@ -20,7 +20,8 @@ namespace Fsel.Shared.Constants
         public const int DelayWorkerSecond = 60;
         public const int AmountTrialDays = 14;
         public const int MaxSendingRateApp = 3;
-        
+        public const int MinCompletePercent = 75;
+
         public static class AgeMilestone
         {
             public const int ChildrenAge = 13;
@@ -126,6 +127,14 @@ namespace Fsel.Shared.Constants
         {
             public const int DelayDateSendingRate = 5;
             public const int MoreThanOneDevice = 1;
+        }
+
+        public static class ValueOrderIndex
+        {
+            public const int OrderIndexProcess = 0;
+            public const int OrderIndexNew = 1;
+            public const int OrderIndexDone = 2;
+            public const int OrderIndexOther = 3;
         }
     }
 }

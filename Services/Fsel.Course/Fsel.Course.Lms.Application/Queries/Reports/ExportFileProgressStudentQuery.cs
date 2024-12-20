@@ -11,7 +11,6 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -77,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 return methodResult;
             }
 
-            var emails = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).Distinct().ToList();
+            var emails = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!.ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim()).Distinct().ToList();
             var studentResultToEmail = await _userService.GetStudentByEmailsAsync(emails);
             if (!studentResultToEmail.IsSuccessStatusCode)
             {
@@ -125,7 +124,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 }
             }
 
-            methodResult.Result = reportStudents.OrderBy(x => x.FullName).ToList().ExportExcel();
+            methodResult.Result = reportStudents.OrderBy(x => emails.IndexOf((x.FullName ?? string.Empty).ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim())).ToList().ExportExcel();
             return methodResult;
         }
 

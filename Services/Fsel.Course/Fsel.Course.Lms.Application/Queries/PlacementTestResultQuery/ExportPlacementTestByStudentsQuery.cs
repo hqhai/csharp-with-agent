@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -71,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 return methodResult;
             }
 
-            var listEmail = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).ToList();
+            var listEmail = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!.ToLower().Trim()).ToList();
             var studentResultToEmail = await _userService.GetStudentByEmailsAsync(listEmail);
             if (!studentResultToEmail.IsSuccessStatusCode)
             {
@@ -81,41 +82,59 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
 
             var students = studentResultToEmail.Content?.Result?.ToList();
             var studentIds = students?.Select(x => x.Id).ToList() ?? new List<Guid>();
-            var placementTestResults = await _placementTestResultRepository.Queryable
-                                            .Where(x => studentIds.Contains(x.StudentId))
+            var placementTestResultGroups = await _placementTestResultRepository.Queryable
+                                            .Where(x => studentIds.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
                                             .GroupBy(x => x.StudentId)
-                                            .Select(x => x.OrderByDescending(x => x.UpdatedDate).ThenByDescending(x => x.CreatedDate).FirstOrDefault())
+                                            .Select(x => new
+                                            {
+                                                StudentId = x.Key,
+                                                PlacementTestStart = x.Select(x => x).OrderBy(x => x.CreatedDate).FirstOrDefault(),
+                                                PlacementTestEnd = x.Select(x => x).OrderByDescending(x => x.CreatedDate).FirstOrDefault(),
+                                            })
                                             .ToListAsync(cancellationToken);
 
             var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).ToListAsync(cancellationToken);
-            foreach (var item in placementTestResults)
+            foreach (var item in placementTestResultGroups)
             {
-                if (item != null)
+                var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
+                var placementTestResultEnd = item.PlacementTestEnd;
+                var placementTestResultStart = item.PlacementTestStart;
+                if (student == null)
                 {
-                    var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
-                    if (student != null)
-                    {
-                        var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == item.StudentId).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-                        int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
-                        var (levelCompleted, isLock) = item.Level.GetLevelInScore(item.Percent, IeltsScoreHelper.GetInitialAge(placementTestResult?.Level, age));
-                        var courseResult = courseResults.FirstOrDefault(x => x.StudentId == item.StudentId);
-                        placementTestResultExports.Add(new PlacementTestResultExportModel
-                        {
-                            Name = student.Human?.FullName,
-                            Birthday = student.Human?.Birthday,
-                            Email = student.Human?.Email,
-                            CourseLevel = item.Level.GetCourseLevelByPlacementTestLevel(),
-                            CurrentLevel = isLock ? student.CourseLevel : null,
-                            LevelCompleted = item.Status == EnumResultStatus.Done ? levelCompleted : item.Level.GetCourseLevelByPlacementTestLevel(),
-                            Percent = item.Percent,
-                            IsPTdone = isLock,
-                            CourseName = courseResult?.Course?.Name,
-                            UpdatedDate = item.UpdatedDate.HasValue ? item.UpdatedDate.Value : null,
-                        });
-                    }
+                    continue;
                 }
+
+                if (item == null || placementTestResultEnd == null)
+                {
+                    placementTestResultExports.Add(new PlacementTestResultExportModel
+                    {
+                        Name = student.Human?.FullName,
+                        Birthday = student.Human?.Birthday,
+                        Email = student.Human?.Email,
+                    });
+                    continue;
+                }
+
+                int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
+                var (levelCompleted, isLock) = placementTestResultEnd.Level.GetLevelInScore(placementTestResultEnd.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultStart?.Level, age));
+                var courseResult = courseResults.FirstOrDefault(x => x.StudentId == item.StudentId);
+                var currentLevel = SendMailHelper.GetPreviousEnumValue(levelCompleted ?? default);
+                placementTestResultExports.Add(new PlacementTestResultExportModel
+                {
+                    Name = student.Human?.FullName,
+                    Birthday = student.Human?.Birthday,
+                    Email = student.Human?.Email,
+                    CompletionLevel = isLock ? EnumCourseLevelHelper.GetCodeByEnumCourseLevel(placementTestResultEnd.Level.GetCourseLevelByPlacementTestLevel()) : null,
+                    ChooseLevel = isLock ? student.CourseLevel.GetCodeByEnumCourseLevel() : null,
+                    SuggetLevel = isLock ? placementTestResultEnd.Status == EnumResultStatus.Done ? EnumCourseLevelHelper.GetCodeByEnumCourseLevel(levelCompleted) : EnumCourseLevelHelper.GetCodeByEnumCourseLevel(placementTestResultEnd.Level.GetCourseLevelByPlacementTestLevel()) : null,
+                    CurrentLevel = isLock ? currentLevel == EnumCourseLevel.A1 && placementTestResultEnd.Percent < ValueSettings.MinCompletePercent ? "Pre-A1" : EnumCourseLevelHelper.GetCodeByEnumCourseLevel(currentLevel) : null,
+                    Percent = isLock ? placementTestResultEnd.Percent : null,
+                    IsPTdone = isLock,
+                    CourseName = EnumCourseLevelHelper.GetCodeByEnumCourseLevel(courseResult?.Course?.CourseLevel),
+                    FinishDate = isLock && placementTestResultEnd.UpdatedDate.HasValue ? placementTestResultEnd.UpdatedDate.Value : null,
+                });
             }
-            methodResult.Result = placementTestResultExports.OrderBy(x => x.UpdatedDate).ToList().ExportExcel();
+            methodResult.Result = placementTestResultExports.OrderBy(x => listEmail.IndexOf(x.Email?.ToLower(System.Globalization.CultureInfo.CurrentCulture) ?? string.Empty)).ToList().ExportExcel();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
