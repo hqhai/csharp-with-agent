@@ -49,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             {
                 return methodResult;
             }
-            var placementTestResultExports = new List<PlacementTestResultExportModel>();
+            var placementTestResultExports = new List<PlacementTestReportExportModel>();
 
             var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentEmailModel x, IList<ImportStudentEmailModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
@@ -106,7 +106,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
 
                 if (item == null || placementTestResultEnd == null)
                 {
-                    placementTestResultExports.Add(new PlacementTestResultExportModel
+                    placementTestResultExports.Add(new PlacementTestReportExportModel
                     {
                         Name = student.Human?.FullName,
                         Birthday = student.Human?.Birthday,
@@ -119,7 +119,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 var (levelCompleted, isLock) = placementTestResultEnd.Level.GetLevelInScore(placementTestResultEnd.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultStart?.Level, age));
                 var courseResult = courseResults.FirstOrDefault(x => x.StudentId == item.StudentId);
                 var currentLevel = SendMailHelper.GetPreviousEnumValue(levelCompleted ?? default);
-                placementTestResultExports.Add(new PlacementTestResultExportModel
+                placementTestResultExports.Add(new PlacementTestReportExportModel
                 {
                     Name = student.Human?.FullName,
                     Birthday = student.Human?.Birthday,

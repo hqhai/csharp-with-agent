@@ -54,7 +54,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             var students = new List<StudentModel>();
             var studentIds = new List<Guid>();
 
-            var placementTestResultExports = new List<PlacementTestResultExportModel>();
+            var placementTestResultExports = new List<PlacementTestReportExportModel>();
             var placementTestResults = await _placementTestResultRepository.Queryable
                                             .Where(x => x != null && x.UpdatedDate.HasValue && x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date)
                                             .GroupBy(x => x.StudentId)
@@ -97,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
 
                 if (item == null || placementTestResultEnd == null)
                 {
-                    placementTestResultExports.Add(new PlacementTestResultExportModel
+                    placementTestResultExports.Add(new PlacementTestReportExportModel
                     {
                         Name = student.Human?.FullName,
                         Birthday = student.Human?.Birthday,
@@ -112,7 +112,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 var courseResult = courseResults.FirstOrDefault(x => x.StudentId == item.StudentId);
                 var currentLevel = SendMailHelper.GetPreviousEnumValue(levelCompleted ?? default);
 
-                placementTestResultExports.Add(new PlacementTestResultExportModel
+                placementTestResultExports.Add(new PlacementTestReportExportModel
                 {
                     Name = student.Human?.FullName,
                     Birthday = student.Human?.Birthday,
