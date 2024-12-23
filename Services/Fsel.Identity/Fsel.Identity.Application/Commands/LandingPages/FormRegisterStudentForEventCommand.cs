@@ -202,9 +202,9 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             });
 
             var template = competitionEvent.EventContent?.ActionConfigs?.FirstOrDefault(p => p.MailRegister.HasValue);
-            if (template != null && template.MailRegister.HasValue)
+            if (template != null && template.MailRegister.HasValue && !string.IsNullOrEmpty(template.SubjectMailRegister))
             {
-                await SendMailInfoUser(request, password, template.MailRegister.Value, Subject);
+                await SendMailInfoUser(request, password, template.MailRegister.Value, template.SubjectMailRegister);
             }
 
             return methodResult;
@@ -233,6 +233,8 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 methodResult.AddError(eventRegistration.ErrorMessages);
                 return methodResult;
             }
+
+            var template = competitionEvent.EventContent?.ActionConfigs?.FirstOrDefault(p => p.MailRegister.HasValue);
 
             await _eventRegistrationRepository.ExecuteTransactionAsync(async () =>
             {
