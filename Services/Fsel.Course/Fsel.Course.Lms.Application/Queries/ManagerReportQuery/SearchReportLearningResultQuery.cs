@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
     using Fsel.Shared.Enums;
@@ -156,9 +157,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                           from ftr in finalTestGroup.DefaultIfEmpty()
                                           where students.Select(x => x.Id).Contains(baseQ.StudentId) && baseQ.WorkingStatus == EnumWorkingStatus.Active &&
                                           (!request.EndDate.HasValue || (ftr.UpdatedDate ?? ftr.CreatedDate).Date <= request.EndDate.Value.Date) && ftr.Status == EnumResultStatus.Done
-                                          select new
+                                          select new FinalTestResult
                                           {
                                               Percent = ftr.Percent,
+                                              CorrectCount = ftr.CorrectCount,
+                                              CorrectTotal = ftr.CorrectTotal,
                                               StudentId = ftr.StudentId,
                                           }).ToListAsync(cancellationToken);
 

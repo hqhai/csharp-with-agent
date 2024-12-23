@@ -152,9 +152,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                               from ftr in finalTestGroup.DefaultIfEmpty()
                                               where students.Select(x => x.Id).Contains(baseQ.StudentId) && baseQ.WorkingStatus == EnumWorkingStatus.Active &&
                                               (!request.EndDate.HasValue || (ftr.UpdatedDate ?? ftr.CreatedDate).Date <= request.EndDate.Value.Date) && ftr.Status == EnumResultStatus.Done
-                                              select new
+                                              select new FinalTestResult
                                               {
                                                   Percent = ftr.Percent,
+                                                  CorrectCount = ftr.CorrectCount,
+                                                  CorrectTotal = ftr.CorrectTotal,
                                               }).ToListAsync();
                 var overallPercentFinalTest = finalTestResults.Any() ? NumberHelper.ConvertRound(finalTestResults.Average(x => x.Percent)) : ValueDefault;
                 overallReport.OverallAvgPercentFinal = overallPercentFinalTest;

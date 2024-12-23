@@ -461,7 +461,7 @@ namespace Fsel.Course.Infrastructure.Common
                                       (courseResult, course) => course).Select(x => new OverallModuleLearnModel
                                       {
                                           CourseId = x.CourseId,
-                                          Count = x.CountLesson * NumberModuleLesson + x.CountFinalTest + x.CountSkillMockTest + x.CountFinalTest
+                                          Count = x.CountLesson * NumberModuleLesson + x.CountMockTest + x.CountSkillMockTest + x.CountFinalTest
                                       }).ToList();
         }
     }

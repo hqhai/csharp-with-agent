@@ -169,25 +169,25 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
             else
             {
                 var ms1Progress = courseLevelProgress?.FirstOrDefault(x => x.CourseLevel == EnumCourseLevel.MS1);
-                excelWorksheet.Cells["E4"].Value = GetData(excelWorksheet.Cells["E4"].Value, ms1Progress?.TotalStudent ?? default);
+                excelWorksheet.Cells["E4"].Value = GetData(excelWorksheet.Cells["E4"].Value, $"{ms1Progress?.TotalStudent ?? default} hs");
                 var ms1ProgressFirst = ms1Progress?.OverallTestResults?.FirstOrDefault();
                 var ms1ProgressLast = ms1Progress?.OverallTestResults?.LastOrDefault();
-                excelWorksheet.Cells["E5"].Value = GetData(excelWorksheet.Cells["E5"].Value, new string[] { $"{ms1ProgressFirst?.Score ?? default}", $"{ms1ProgressFirst?.TotalStudent ?? default}" });
-                excelWorksheet.Cells["E6"].Value = GetData(excelWorksheet.Cells["E6"].Value, new string[] { $"{ms1ProgressLast?.Score ?? default}", $"{ms1ProgressLast?.TotalStudent ?? default}" });
+                excelWorksheet.Cells["E5"].Value = GetData(excelWorksheet.Cells["E5"].Value, new string[] { $"{ms1ProgressFirst?.Score ?? default}", $"{ms1ProgressFirst?.TotalStudent ?? default} hs" });
+                excelWorksheet.Cells["E6"].Value = GetData(excelWorksheet.Cells["E6"].Value, new string[] { $"{ms1ProgressLast?.Score ?? default}", $"{ms1ProgressLast?.TotalStudent ?? default} hs" });
 
                 var ms2Progress = courseLevelProgress?.FirstOrDefault(x => x.CourseLevel == EnumCourseLevel.MS2);
                 excelWorksheet.Cells["F4"].Value = GetData(excelWorksheet.Cells["F4"].Value, ms2Progress?.TotalStudent ?? default);
                 var ms2ProgressFirst = ms2Progress?.OverallTestResults?.FirstOrDefault();
                 var ms2ProgressLast = ms2Progress?.OverallTestResults?.LastOrDefault();
-                excelWorksheet.Cells["F5"].Value = GetData(excelWorksheet.Cells["F5"].Value, new string[] { $"{ms2ProgressFirst?.Score ?? default}", $"{ms2ProgressFirst?.TotalStudent ?? default}" });
-                excelWorksheet.Cells["F6"].Value = GetData(excelWorksheet.Cells["F6"].Value, new string[] { $"{ms2ProgressLast?.Score ?? default}", $"{ms2ProgressLast?.TotalStudent ?? default}" });
+                excelWorksheet.Cells["F5"].Value = GetData(excelWorksheet.Cells["F5"].Value, new string[] { $"{ms2ProgressFirst?.Score ?? default}", $"{ms2ProgressFirst?.TotalStudent ?? default} hs" });
+                excelWorksheet.Cells["F6"].Value = GetData(excelWorksheet.Cells["F6"].Value, new string[] { $"{ms2ProgressLast?.Score ?? default}", $"{ms2ProgressLast?.TotalStudent ?? default} hs" });
 
                 var ms3Progress = courseLevelProgress?.FirstOrDefault(x => x.CourseLevel == EnumCourseLevel.MS3);
                 excelWorksheet.Cells["G4"].Value = GetData(excelWorksheet.Cells["G4"].Value, ms3Progress?.TotalStudent ?? default);
                 var ms3ProgressFirst = ms3Progress?.OverallTestResults?.FirstOrDefault();
                 var ms3ProgressLast = ms3Progress?.OverallTestResults?.LastOrDefault();
-                excelWorksheet.Cells["G5"].Value = GetData(excelWorksheet.Cells["G5"].Value, new string[] { $"{ms3ProgressFirst?.Score ?? default}", $"{ms3ProgressFirst?.TotalStudent ?? default}" });
-                excelWorksheet.Cells["G6"].Value = GetData(excelWorksheet.Cells["G6"].Value, new string[] { $"{ms3ProgressLast?.Score ?? default}", $"{ms3ProgressLast?.TotalStudent ?? default}" });
+                excelWorksheet.Cells["G5"].Value = GetData(excelWorksheet.Cells["G5"].Value, new string[] { $"{ms3ProgressFirst?.Score ?? default}", $"{ms3ProgressFirst?.TotalStudent ?? default} hs" });
+                excelWorksheet.Cells["G6"].Value = GetData(excelWorksheet.Cells["G6"].Value, new string[] { $"{ms3ProgressLast?.Score ?? default}", $"{ms3ProgressLast?.TotalStudent ?? default} hs" });
             }
         }
 
