@@ -50,7 +50,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<ClassForumReportModel>> methodResult = new MethodResult<IList<ClassForumReportModel>>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
@@ -89,14 +89,16 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var lessonResults = await GetLessonResultsAsync(request, studentId);
             var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
 
-            var classForums = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId)))
-                                                           .ThenInclude(x => x.ClassForumScores)
+            var classForums = await _classForumRepository.Queryable.Include(x => x.Lesson)
+                                                           .Include(x => x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId)))
+                                                           .ThenInclude(x => x.ClassForumDetailResults)
                                                            .Where(x => lessonIds.Contains(x.LessonId))
                                                            .ToListAsync();
             return classForums.OrderBy(x => lessonIds.IndexOf(x.LessonId)).Select(x =>
             {
                 var lessonResult = lessonResults.FirstOrDefault(y => y.LessonId == x.LessonId);
                 var classForumReport = _mapper.Map<ClassForumReportModel>(x);
+                classForumReport.Name = x.Lesson?.Name;
                 classForumReport.LessonResultId = lessonResult?.Id;
                 classForumReport.ClassForumResultScore = x.ClassForumResults.Select(x => new ClassForumResultScoreModel
                 {
@@ -105,6 +107,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     TotalCorrect = x.CorrectTotal,
                     Percent = x.Percent,
                     Status = x.Status,
+                    ProcessDate = x.ClassForumDetailResults.Where(x => x.ProcessDate.HasValue).OrderBy(x => x.CreatedDate).FirstOrDefault()?.ProcessDate
                 }).FirstOrDefault();
                 return classForumReport;
             }).ToList();

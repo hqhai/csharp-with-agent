@@ -111,17 +111,21 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             IList<Guid>? classStudentIds = new List<Guid>();
             var currentClass = await _trainingService.GetClassByStudentId(student.Id);
             classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
-
+            if (classStudentIds == null || classStudentIds.Count == 0)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
             var query = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
-                .Where(x => x.ClassForumId == classForum.Id && classStudentIds!.Contains(x.StudentId) && x.Status != EnumClassForumResultStatus.Denied)
+                .Where(x => x.ClassForumId == classForum.Id && classStudentIds.Contains(x.StudentId) && x.Status.HasValue && x.Status == EnumClassForumResultStatus.Graded)
                 .OrderBy(x => x.CreatedDate)
                 .ToListAsync(cancellationToken);
 
             //Lấy ngẫu nhiên 2 học sinh khác lớp nhưng cùng lesson và course
             var totalRecords = await _classForumResultRepository.Queryable
-                            .Where(x => x.ClassForumId == classForum.Id && !classStudentIds!.Contains(x.StudentId))
+                            .Where(x => x.ClassForumId == classForum.Id && !classStudentIds.Contains(x.StudentId))
                             .CountAsync(cancellationToken);
             var skip = totalRecords < STUDENT_RANDOM_TAKE ? 0 : new Random().Next(0, totalRecords - STUDENT_RANDOM_TAKE);
             var classForumResults = _mapper.Map<IList<ClassForumResultModel>>(query);

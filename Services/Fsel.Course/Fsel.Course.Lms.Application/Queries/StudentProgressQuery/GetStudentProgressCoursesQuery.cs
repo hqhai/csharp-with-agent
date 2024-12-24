@@ -61,13 +61,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
 
             var userId = student.Human?.UserId ?? default;
-            var packageResults = await _orderService.GetPackages();
-            if (!packageResults.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(packageResults));
-                return methodResult;
-            }
-            var packages = packageResults.Content?.Result;
+            //var packageResults = await _orderService.GetPackages();
+            //if (!packageResults.IsSuccessStatusCode)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(packageResults));
+            //    return methodResult;
+            //}
+            //var packages = packageResults.Content?.Result;
             var @classResults = await _trainingService.GetListClassByStudentIdAsync(request.StudentId);
             if (!@classResults.IsSuccessStatusCode)
             {
@@ -77,7 +77,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var @classes = @classResults.Content?.Result;
             if (@classes == null || !@classes.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@classes));
                 return methodResult;
             }
 
@@ -85,7 +84,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var courses = await _courseRepository.GetByIdsAsync(courseIds);
             if (courses == null || !courses.Any())
             {
-                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
@@ -116,12 +114,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     courseStudentProgress.TimeSpent = featureAccessTime?.AccessTime ?? default;
                     courseStudentProgress.Visit = featureAccessTime?.Visit ?? default;
                 }
-                var package = packages?.FirstOrDefault(x => x.Id == student.PackageId);
-                if (package != null)
-                {
-                    courseStudentProgress.PackageId = package.Id;
-                    courseStudentProgress.PackageCode = package.Code;
-                }
+                //var package = packages?.FirstOrDefault(x => x.Id == student.PackageId);
+                //if (package != null)
+                //{
+                //    courseStudentProgress.PackageId = package.Id;
+                //    courseStudentProgress.PackageCode = package.Code;
+                //}
                 var @class = @classes.FirstOrDefault(x => x.CourseId == item.Id);
                 if (@class != null)
                 {
@@ -130,7 +128,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 }
                 courseProgress.Add(courseStudentProgress);
             }
-            methodResult.Result = courseProgress;
+            methodResult.Result = courseProgress.OrderByDescending(x => x.UpdatedDate).ThenByDescending(x => x.CreatedDate).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

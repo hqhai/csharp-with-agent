@@ -99,7 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private async Task<MethodResult<CourseResult>> Validate(GetOverallScoreByClassForumQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<CourseResult>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));

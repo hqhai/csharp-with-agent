@@ -3,13 +3,13 @@
 namespace Fsel.System.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
-    using Fsel.System.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class SchoolModel : BaseModel
     {
         public string? Name { get; set; }
-        public EnumEducationLevel EducationLevel { get; set; }
-        public EnumSchoolType SchoolType { get; set; }
+        public EnumEducationLevel? EducationLevel { get; set; }
+        public EnumSchoolType? SchoolType { get; set; }
         public string? Address { get; set; }
         public string? Phone { get; set; }
 
@@ -31,6 +31,7 @@ namespace Fsel.System.Domain.Models.EntityModels
 
         public string? ShortPath { get; set; }
         public Guid? LocationId { get; set; }
+
         public LocationModel? Location { get; set; }
 
         public bool IsActive { get; set; }

@@ -10,15 +10,32 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public Otp? Otp { get; set; }
         public ConstantUrl? ConstantUrl { get; set; }
         public GoogleSheetConfig? GoogleSheetConfig { get; set; }
+        public SharePointConfig? SharePointConfig { get; set; }
         public new Services? Services { get; set; }
 
         public OpenAiConfig? OpenAiConfig { get; set; }
+        public ConnectionStrings? ConnectionStrings { get; set; }
+    }
+
+    public class ConnectionStrings
+    {
+        public string? CrmConnection { get; set; }
     }
 
     public class OpenAiConfig
     {
         public string? Uri { get; set; }
         public string? ApiKey { get; set; }
+    }
+
+    public class SharePointConfig
+    {
+        public string? ClientId { get; set; }
+        public string? ClientSecret { get; set; }
+        public string? TenantId { get; set; }
+        public string? FSELContentTeamSiteId { get; set; }
+        public string? FSELContentTeamFileId { get; set; }
+        public string? FSELContentTeamSheetName { get; set; }
     }
 
     public class ConstantUrl
@@ -44,7 +61,10 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public string? OrderInfoSheet { get; set; }
         public string? SchoolStudentSheetId { get; set; }
         public string? LuckyTicketSpreadSheetId { get; set; }
+        public string? VoucherForMASpreadSheetId { get; set; }
         public string? RegisterStudentForEventSpreadSheetId { get; set; }
+        public string? ErrorReportExplanationQuestionId { get; set; }
+        public string? ErrorReportExplanationQuestion { get; set; }
     }
 
     public class Services : BaseServices

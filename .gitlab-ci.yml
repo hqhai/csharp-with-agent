@@ -28,7 +28,7 @@ stages:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
 
@@ -40,7 +40,7 @@ build-dev-auth:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
@@ -62,7 +62,7 @@ build-test-auth:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -84,7 +84,7 @@ build-staging-auth:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -97,6 +97,28 @@ build-staging-auth:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-1m-auth:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    DOCKERFILE: "./Environments/Staging/Auth.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Identity/**/*
+    - Services/Shared/**/*
+    refs:
+    - Fsel-1M
 
 build-demo-auth:
   stage: build-image
@@ -128,7 +150,7 @@ build-prod-auth:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -152,7 +174,7 @@ build-dev-gateway:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
@@ -174,7 +196,7 @@ build-test-gateway:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -196,7 +218,7 @@ build-staging-gateway:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -209,6 +231,28 @@ build-staging-gateway:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-1m-gateway:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
+    DOCKERFILE: "./Environments/Staging/Gateway.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
+    - Services/Shared/**/*
+    refs:
+    - Fsel-1M
 
 build-demo-gateway:
   stage: build-image
@@ -240,7 +284,7 @@ build-prod-gateway:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -263,7 +307,7 @@ build-dev-hangfire:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
@@ -285,7 +329,7 @@ build-test-hangfire:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -307,7 +351,7 @@ build-staging-hangfire:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -320,6 +364,28 @@ build-staging-hangfire:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-1m-hangfire:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
+    DOCKERFILE: "./Environments/Staging/Hangfire.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Hangfire/**/*
+    - Services/Shared/**/*
+    refs:
+    - Fsel-1M
 
 build-demo-hangfire:
   stage: build-image
@@ -351,7 +417,7 @@ build-prod-hangfire:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -375,7 +441,7 @@ build-dev-interaction:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
@@ -397,7 +463,7 @@ build-test-interaction:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -419,7 +485,7 @@ build-staging-interaction:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -432,6 +498,28 @@ build-staging-interaction:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-1m-interaction:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
+    DOCKERFILE: "./Environments/Staging/Interaction.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Interaction/**/*
+    - Services/Shared/**/*
+    refs:
+    - Fsel-1M
 
 build-demo-interaction:
   stage: build-image
@@ -463,7 +551,7 @@ build-prod-interaction:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -487,7 +575,7 @@ build-dev-lcmsapi:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
@@ -509,7 +597,7 @@ build-test-lcmsapi:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -531,7 +619,7 @@ build-staging-lcmsapi:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -544,6 +632,28 @@ build-staging-lcmsapi:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-1m-lcmsapi:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
+    DOCKERFILE: "./Environments/Staging/Lcms.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Course/**/*
+    - Services/Shared/**/*
+    refs:
+    - Fsel-1M
 
 build-demo-lcmsapi:
   stage: build-image
@@ -575,7 +685,7 @@ build-prod-lcmsapi:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -599,7 +709,7 @@ build-dev-lmsapi:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
@@ -621,7 +731,7 @@ build-test-lmsapi:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -643,7 +753,7 @@ build-staging-lmsapi:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -656,6 +766,28 @@ build-staging-lmsapi:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-1m-lmsapi:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
+    DOCKERFILE: "./Environments/Staging/Lms.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Course/**/*
+    - Services/Shared/**/*
+    refs:
+    - Fsel-1M
 
 build-demo-lmsapi:
   stage: build-image
@@ -687,7 +819,7 @@ build-prod-lmsapi:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -711,7 +843,7 @@ build-dev-notification:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
@@ -733,7 +865,7 @@ build-test-notification:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -755,7 +887,7 @@ build-staging-notification:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -768,6 +900,28 @@ build-staging-notification:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-1m-notification:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
+    DOCKERFILE: "./Environments/Staging/Notification.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Notification/**/*
+    - Services/Shared/**/*
+    refs:
+    - Fsel-1M
 
 build-demo-notification:
   stage: build-image
@@ -799,7 +953,7 @@ build-prod-notification:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -823,7 +977,7 @@ build-dev-ordering:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
@@ -845,7 +999,7 @@ build-test-ordering:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -867,7 +1021,7 @@ build-staging-ordering:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -880,6 +1034,28 @@ build-staging-ordering:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-1m-ordering:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
+    DOCKERFILE: "./Environments/Staging/Ordering.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Ordering/**/*
+    - Services/Shared/**/*
+    refs:
+    - Fsel-1M
 
 build-demo-ordering:
   stage: build-image
@@ -911,7 +1087,7 @@ build-prod-ordering:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -935,7 +1111,7 @@ build-dev-realtime:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
@@ -957,7 +1133,7 @@ build-test-realtime:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -979,7 +1155,7 @@ build-staging-realtime:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -992,6 +1168,28 @@ build-staging-realtime:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-1m-realtime:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
+    DOCKERFILE: "./Environments/Staging/Realtime.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Realtime/**/*
+    - Services/Shared/**/*
+    refs:
+    - Fsel-1M
 
 build-demo-realtime:
   stage: build-image
@@ -1023,7 +1221,7 @@ build-prod-realtime:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1047,7 +1245,7 @@ build-dev-sender:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
@@ -1069,7 +1267,7 @@ build-test-sender:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1091,7 +1289,7 @@ build-staging-sender:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1104,6 +1302,28 @@ build-staging-sender:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-1m-sender:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
+    DOCKERFILE: "./Environments/Staging/Sender.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Sender/**/*
+    - Services/Shared/**/*
+    refs:
+    - Fsel-1M
 
 build-demo-sender:
   stage: build-image
@@ -1135,7 +1355,7 @@ build-prod-sender:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1159,7 +1379,7 @@ build-dev-storage:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
@@ -1181,7 +1401,7 @@ build-test-storage:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1203,7 +1423,7 @@ build-staging-storage:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1216,6 +1436,28 @@ build-staging-storage:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-1m-storage:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
+    DOCKERFILE: "./Environments/Staging/Storage.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Storage/**/*
+    - Services/Shared/**/*
+    refs:
+    - Fsel-1M
 
 build-demo-storage:
   stage: build-image
@@ -1247,7 +1489,7 @@ build-prod-storage:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1271,7 +1513,7 @@ build-dev-system:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
@@ -1293,7 +1535,7 @@ build-test-system:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1315,7 +1557,7 @@ build-staging-system:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1328,6 +1570,28 @@ build-staging-system:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-1m-system:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
+    DOCKERFILE: "./Environments/Staging/System.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.System/**/*
+    - Services/Shared/**/*
+    refs:
+    - Fsel-1M
 
 build-demo-system:
   stage: build-image
@@ -1359,7 +1623,7 @@ build-prod-system:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1383,7 +1647,7 @@ build-dev-training:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
@@ -1405,7 +1669,7 @@ build-test-training:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1427,7 +1691,7 @@ build-staging-training:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1440,6 +1704,28 @@ build-staging-training:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-1m-training:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
+    DOCKERFILE: "./Environments/Staging/Training.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Training/**/*
+    - Services/Shared/**/*
+    refs:
+    - Fsel-1M
 
 build-demo-training:
   stage: build-image
@@ -1471,7 +1757,7 @@ build-prod-training:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1495,7 +1781,7 @@ build-dev-identity:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
@@ -1517,7 +1803,7 @@ build-test-identity:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1539,7 +1825,7 @@ build-staging-identity:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1552,6 +1838,28 @@ build-staging-identity:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-1m-identity:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
+    DOCKERFILE: "./Environments/Staging/User.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Identity/**/*
+    - Services/Shared/**/*
+    refs:
+    - Fsel-1M
 
 build-demo-identity:
   stage: build-image
@@ -1583,7 +1891,7 @@ build-prod-identity:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1607,7 +1915,7 @@ build-dev-cms-planetdefender:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
@@ -1629,7 +1937,7 @@ build-test-cms-planetdefender:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1651,7 +1959,7 @@ build-staging-cms-planetdefender:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1695,7 +2003,7 @@ build-prod-cms-planetdefender:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:

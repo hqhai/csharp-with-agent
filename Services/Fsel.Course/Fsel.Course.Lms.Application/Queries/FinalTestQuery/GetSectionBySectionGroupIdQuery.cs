@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<SectionGroupDtoModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
@@ -114,7 +114,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             else if (sectionGroupResult.Status != EnumResultStatus.Done)
             {
                 sectionGroupResult.Status = EnumResultStatus.Process;
-                sectionGroupResult = _sectionGroupResultRepository.Update(sectionGroupResult);
+                sectionGroupResult = _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
             return sectionGroupResult;

@@ -62,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<HomeWorkModel> methodResult = new MethodResult<HomeWorkModel>();
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));

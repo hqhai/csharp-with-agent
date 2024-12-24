@@ -8,6 +8,7 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Course.Lms.Application.Commands.TestCmd;
 using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
+using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
 using Fsel.Shared.Attributes;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
@@ -149,6 +150,19 @@ namespace Fsel.Course.Lms.Api.Controllers
 
             MethodResult<bool> queryResult = new MethodResult<bool>();
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Import Module Process
+        /// </summary>
+        [HttpGet("unauthorized")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public IActionResult ActionUnauthorized()
+        {
+            MethodResult<string> commandResult = new MethodResult<string>();
+            commandResult.AddError(StatusCodes.Status401Unauthorized, "Unauthorized");
+            return commandResult.GetActionResult();
         }
     }
 

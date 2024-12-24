@@ -4,6 +4,8 @@ namespace Fsel.System.Application.Queries.SchoolQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
+    using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using Fsel.System.Domain.Models.QueryModels;
@@ -11,6 +13,8 @@ namespace Fsel.System.Application.Queries.SchoolQuery
     using global::System.Linq;
     using global::System.Threading.Tasks;
     using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class SearchSchoolQuery : SearchSchoolQueryModel, IRequest<MethodResult<PagingItemsModel<SchoolModel>>>
     {
@@ -19,16 +23,20 @@ namespace Fsel.System.Application.Queries.SchoolQuery
     public class SearchSchoolQueryHandler : IRequestHandler<SearchSchoolQuery, MethodResult<PagingItemsModel<SchoolModel>>>
     {
         private readonly ISchoolRepository _schoolRepository;
+        private readonly ICrmLocationRepository _crmLocationRepository;
 
-        public SearchSchoolQueryHandler(ISchoolRepository schoolRepository)
+        public SearchSchoolQueryHandler(ISchoolRepository schoolRepository, ICrmLocationRepository crmLocationRepository)
         {
             _schoolRepository = schoolRepository;
+            _crmLocationRepository = crmLocationRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<SchoolModel>>> Handle(SearchSchoolQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var query = _schoolRepository.Queryable;
+            var methodResult = new MethodResult<PagingItemsModel<SchoolModel>>();
+
+            var query = _crmLocationRepository.Queryable.Where(p => p.TypeName == EnumCrmLocationTypeName.School);
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -37,15 +45,39 @@ namespace Fsel.System.Application.Queries.SchoolQuery
 
             if (request.LocationId != null)
             {
-                query = query.Where(m => m.LocationId == request.LocationId);
+                var parent = _crmLocationRepository.Queryable.FirstOrDefault(p => p.GlobalId == request.LocationId);
+                if (parent == null)
+                {
+                    return methodResult;
+                }
+                query = query.Where(m => m.ParentId == parent.Id);
             }
 
             if (request.EducationLevel != null)
             {
-                query = query.Where(m => m.EducationLevel == request.EducationLevel);
+                var educationLevel = (EnumCrmLocationTypeLevel)request.EducationLevel.Value;
+                query = query.Where(m => m.TypeLevel == educationLevel);
             }
 
-            var methodResult = await _schoolRepository.GetListByPageResultAsync<SchoolModel>(query, request, cancellationToken);
+            var model = query.Select(p => new SchoolModel
+            {
+                Id = p.GlobalId,
+                Name = p.Name,
+                LongPath = p.LongPath,
+                ShortPath = p.ShortPath,
+                IdPath = p.IdPath,
+            });
+
+            int totalItem = model.Count();
+            var lists = await model
+                    .ApplySortAndPaging(request)
+                    .OrderBy(x => x.Name)
+                    .AsNoTracking()
+                    .ToListAsync(cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+
+            methodResult.Result = new PagingItemsModel<SchoolModel>(model.ToList(), request, totalItem);
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
     }

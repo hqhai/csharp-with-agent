@@ -22,14 +22,17 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public IList<EventTranslationModel>? Translations { get; set; }
     }
 
-    public class PackageEventModel : BaseModel
+    public class PackageEventModel
     {
+        public Guid? Id { get; set; }
         public decimal Price { get; set; }
         public Guid PackageId { get; set; }
         public decimal PriceMonth { get; set; }
         public int DayBonus { get; set; }
         public int MonthBonus { get; set; }
         public int Month { get; set; }
+        public EnumEventPackageStatus Status { get; set; }
+        public bool PackageEventStatus { get; set; }
         public IList<EnumPackageSuggest>? Suggests { get; set; }
     }
 

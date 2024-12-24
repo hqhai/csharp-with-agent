@@ -87,7 +87,7 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Lưu dữ liệu sự kiện
+        /// Tạo dữ liệu sự kiện
         /// </summary>
         [HttpPost("student-competition-event")]
         [ProducesResponseType(typeof(MethodResult<IList<StudentCompetitionEventsModel>>), (int)HttpStatusCode.OK)]
@@ -194,6 +194,30 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> RemoveStudentFromEvent([FromBody] RemoveStudentFromEventCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        ///  Job run events
+        /// </summary>
+        [HttpPost("job-run-events")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> JobRunEvents()
+        {
+            var commandResult = await _mediator.Send(new JobRunEventsCommand()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Lấy thông tin tất cả học sinh trong sự kiện
+        /// </summary>
+        [HttpGet("get-students-by-event-code")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentsByEventCode([FromQuery] GetStudentsByEventCodeQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

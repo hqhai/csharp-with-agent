@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoTimeCodeModel> methodResult = new MethodResult<VideoTimeCodeModel>();
 
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));
@@ -86,10 +86,15 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             var videoTimeCode = await _videoTimeCodeRepository.Queryable
                                     .Include(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
                                     .Include(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
-                                    .ThenInclude(x => x.Exercise)
-                                    .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
-                                    .ThenInclude(x => x.Question)
-                                    .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => videoResult != null && x.VideoResultId == videoResult.Id && x.VideoTimeCodeId == request.VideoTimeCodeId))
+                                        .ThenInclude(x => x.Exercise)
+                                        .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
+                                        .ThenInclude(x => x.Question)
+                                        .ThenInclude(x => x.QuestionExplanationErrors.Where(x => x.VideoResultId == videoResult.Id))
+                                    .Include(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
+                                        .ThenInclude(x => x.Exercise)
+                                        .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
+                                        .ThenInclude(x => x.Question)
+                                        .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => videoResult != null && x.VideoResultId == videoResult.Id && x.VideoTimeCodeId == request.VideoTimeCodeId))
                                 .Where(x => x.Id == request.VideoTimeCodeId && x.VideoId == request.VideoId)
                                 .AsNoTracking()
                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);

@@ -55,6 +55,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<HomeWorkAnswer> HomeWorkAnswers { get; set; }
         public DbSet<HomeWorkResult> HomeWorkResults { get; set; }
 
+        public DbSet<PlacementTestGroupResult> PlacementTestGroupResults { get; set; }
         public DbSet<PlacementTestSection> PlacementTestSections { get; set; }
         public DbSet<PlacementTestAnswer> PlacementTestAnswers { get; set; }
         public DbSet<PlacementTestResult> PlacementTestResults { get; set; }
@@ -83,6 +84,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForumDetailResult> ClassForumDetailResults { get; set; }
         public DbSet<MockTestAICriteriaSetting> MockTestAICriteriaSettings { get; set; }
         public DbSet<ProsodyScore> ProsodyScore { get; set; }
+        public DbSet<QuestionExplanationError> QuestionExplanationErrors { get; set; }
+        public DbSet<QuestionExplanationLog> QuestionExplanationLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -126,6 +129,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new LessonNoteEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UnitResultEntityTypeConfiguraion());
 
+            modelBuilder.ApplyConfiguration(new PlacementTestGroupResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PlacementTestSectionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PlacementTestAnswerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PlacementTestResultEntityTypeConfiguration());
@@ -154,7 +158,8 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new MockTestAICriteriaSettingTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumDetailResultTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ProsodyScoreEntityTypeConfiguration());
-
+            modelBuilder.ApplyConfiguration(new QuestionExplanationErrorEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestionExplanationLogEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 

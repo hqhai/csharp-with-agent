@@ -49,7 +49,13 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                     break;
 
                 case EnumCourseSourceData.QuestionType:
-                    methodResult.Result = ConvertHelper.EnumToListModel<EnumQuestionType>();
+                    var data = ConvertHelper.EnumToList<EnumQuestionType>().Where(x => (int)x < (int)EnumQuestionType.MultichoiceV1).ToList();
+                    methodResult.Result = (from x in data
+                                           select new EnumModel
+                                           {
+                                               Name = x.GetDescription(),
+                                               Value = x.ToString()
+                                           }).ToList();
                     break;
 
                 case EnumCourseSourceData.TimeCodeType:
@@ -102,6 +108,22 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
 
                 case EnumCourseSourceData.MockTestScoreCriteria:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumMockTestScoreCriteria>();
+                    break;
+
+                case EnumCourseSourceData.CompletionStatus:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumCompletionStatus>();
+                    break;
+
+                case EnumCourseSourceData.LearningStatus:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumLearningStatus>();
+                    break;
+
+                case EnumCourseSourceData.OverallScore:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumOverallScore>();
+                    break;
+
+                case EnumCourseSourceData.LearningProgress:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumLearningProgress>();
                     break;
             }
 

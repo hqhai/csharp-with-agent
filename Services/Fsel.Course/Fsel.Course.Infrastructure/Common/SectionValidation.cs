@@ -3,6 +3,7 @@
 namespace Fsel.Course.Infrastructure.Common
 {
     using Fsel.Shared.Enums;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public static class SectionValidation
     {
@@ -10,11 +11,12 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (courseSkill == EnumCourseSkill.Reading)
             {
-                return ((index == 1 || index == 3) && correctTotal == 13) || (index == 2 && correctTotal == 14);
+                return ((index == 1 || index == 3) && correctTotal <= SectionGroupIELST.MinScoreSkillReading)
+                    || (index == 2 && correctTotal <= SectionGroupIELST.MaxScoreSkillReading);
             }
             else if (courseSkill == EnumCourseSkill.Listening)
             {
-                return correctTotal == 10;
+                return correctTotal <= SectionGroupIELST.MaxScoreSkillListening;
             }
             return false;
         }

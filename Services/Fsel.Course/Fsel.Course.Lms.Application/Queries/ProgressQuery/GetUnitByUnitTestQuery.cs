@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             {
                 request.Type = EnumTimeCodeType.UnitTest;
             }
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));

@@ -12,5 +12,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? Email { get; set; }
         public EnumCourseType Type { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
+        public Guid? SchoolId { get; set; }
     }
 }

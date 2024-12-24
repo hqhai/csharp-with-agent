@@ -11,6 +11,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class SaveUserOtpCodeCommand : IRequest<MethodResult<string>>
     {
@@ -22,44 +23,55 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     {
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly AppSetting _appSetting;
+        private readonly ILogger<SaveUserOtpCodeCommandHandler> _logger;
 
-        public SaveUserOtpCodeCommandHandler(IUserOtpCodeRepository userOtpCodeRepository, AppSetting appSetting)
+        public SaveUserOtpCodeCommandHandler(IUserOtpCodeRepository userOtpCodeRepository, AppSetting appSetting, ILogger<SaveUserOtpCodeCommandHandler> logger)
         {
             _userOtpCodeRepository = userOtpCodeRepository;
             _appSetting = appSetting;
+            _logger = logger;
         }
 
         public async Task<MethodResult<string>> Handle(SaveUserOtpCodeCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<string> methodResult = new MethodResult<string>();
-            var userOtpCode = await _userOtpCodeRepository.Queryable
-                                 .FirstOrDefaultAsync(x => x.UserId == request.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
-            var otp = await GetOtpCode();
 
-            var expiredTime = request.ExpiredTime ?? DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime);
-
-            if (userOtpCode == null)
+            try
             {
-                userOtpCode = new UserOtpCode
+                var userOtpCode = await _userOtpCodeRepository.Queryable
+                                     .FirstOrDefaultAsync(x => x.UserId == request.Id && x.Status == EnumOtpCodeStatus.New, cancellationToken);
+                var otp = NumberHelper.GetRandomCode();
+
+                var expiredTime = request.ExpiredTime ?? DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime);
+
+                if (userOtpCode == null)
                 {
-                    UserId = request.Id,
-                    OTPCode = otp,
-                    Status = EnumOtpCodeStatus.New,
-                    ExpiredTime = expiredTime
-                };
-                _userOtpCodeRepository.Add(userOtpCode);
-            }
-            else
-            {
-                userOtpCode.OTPCode = otp;
-                userOtpCode.ExpiredTime = expiredTime;
-                _userOtpCodeRepository.Update(userOtpCode);
-            }
-            await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    userOtpCode = new UserOtpCode
+                    {
+                        UserId = request.Id,
+                        OTPCode = otp,
+                        Status = EnumOtpCodeStatus.New,
+                        ExpiredTime = expiredTime
+                    };
+                    _userOtpCodeRepository.Add(userOtpCode);
+                }
+                else
+                {
+                    userOtpCode.OTPCode = otp;
+                    userOtpCode.ExpiredTime = expiredTime;
+                    _userOtpCodeRepository.Update(userOtpCode);
+                }
+                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-            methodResult.Result = otp;
-            methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = otp;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "SaveUserOtpCodeCommand encouters error: {message}", ex.Message);
+            }
+
             return methodResult;
         }
 
