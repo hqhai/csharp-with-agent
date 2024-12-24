@@ -124,7 +124,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                 voucherModels = voucherModels.Where(m => (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim(), StringComparison.InvariantCultureIgnoreCase) || (m.Code ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim(), StringComparison.InvariantCultureIgnoreCase)).ToList();
             }
 
-            voucherModels = voucherModels.Where(m => m.Status).ToList();
+            voucherModels = voucherModels.Where(m => m.Status).OrderBy(p => p.EndDate).ThenBy(p => p.Name).ToList();
 
             int totalItem = voucherModels.Count;
             var lists = voucherModels.ApplySortAndPaging(request).ToList();
