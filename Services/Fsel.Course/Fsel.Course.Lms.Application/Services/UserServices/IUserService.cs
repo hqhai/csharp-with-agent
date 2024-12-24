@@ -139,6 +139,9 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Get("/v1/admin-school/student")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsToAdminSchoolAsync();
 
+        [Get("/v1/student/get-by-school-id")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsBySchoolId();
+
         [Get("/v1/user/get-user-profile")]
         Task<IApiResponse<MethodResult<UserModel>>> GetUserProfileAsync();
 
