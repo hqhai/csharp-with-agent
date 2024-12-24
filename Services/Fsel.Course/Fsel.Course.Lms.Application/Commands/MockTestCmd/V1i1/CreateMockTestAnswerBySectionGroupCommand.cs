@@ -122,7 +122,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             }
             else
             {
-                var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+                var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
                 if (!studentResult.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));

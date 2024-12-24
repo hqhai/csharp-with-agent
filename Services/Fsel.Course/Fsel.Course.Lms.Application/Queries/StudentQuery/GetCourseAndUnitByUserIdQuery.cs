@@ -33,7 +33,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StudentCourseUnitModel>();
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(request.UserId);
             if (!studentResult.IsSuccessStatusCode || studentResult.Content?.Result == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));

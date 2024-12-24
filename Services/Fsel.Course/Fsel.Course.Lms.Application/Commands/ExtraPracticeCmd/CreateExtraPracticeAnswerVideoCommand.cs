@@ -61,7 +61,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
 
             #region Validate
 
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var student = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), _authContext.CurrentUserId);

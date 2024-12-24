@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<LessonMockTestResultModel>>();
             var userId = request.UserId ?? _authContext.CurrentUserId;
-            var studentsResult = await _userService.GetStudentByUserIdAsync(userId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(userId);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentsResult));
