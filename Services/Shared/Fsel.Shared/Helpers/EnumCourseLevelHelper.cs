@@ -132,6 +132,16 @@ namespace Fsel.Shared.Helpers
             return default;
         }
 
+        public static IList<EnumCourseLevel> GetCourseLevels(this IList<EnumCourseType>? courseTypes, IList<EnumCourseLevel>? courseLevels)
+        {
+            var listCourseLevels = courseTypes?.SelectMany(x => GetEnumCourseLevels(x)).ToList() ?? new List<EnumCourseLevel>();
+            if (courseLevels != null && courseLevels.Any())
+            {
+                listCourseLevels = courseLevels.ToList();
+            }
+            return listCourseLevels;
+        }
+
         public static EnumPlacementTestLevel GetPlacementTestLevelByCourseLevel(this EnumCourseLevel level)
         {
             foreach (var item in ConvertHelper.EnumToList<EnumPlacementTestLevel>())

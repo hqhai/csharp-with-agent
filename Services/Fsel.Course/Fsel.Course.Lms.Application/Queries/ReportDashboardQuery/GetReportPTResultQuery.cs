@@ -8,9 +8,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels.BaseChart;
+    using Fsel.Course.Domain.Models.EntityModels.BaseChartModels;
     using Fsel.Course.Domain.Models.QueryModels.ReportDashboard;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
@@ -28,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
         private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
+
         public GetReportPTResultQueryHandler(IMapper mapper, IUserService userService, IPlacementTestGroupResultRepository placementTestGroupResultRepository)
         {
             _mapper = mapper;
@@ -76,14 +76,14 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 BaseChartResultModel overallEvaluation = new BaseChartResultModel
                 {
                     Type = EnumChartType.PieChart,
-                    DataCharts = new List<DataChart>
+                    DataCharts = new List<DataChartModel>
                     {
-                        new DataChart
+                        new DataChartModel
                         {
                             Label = ChartConstant.PercentStudentFinishPT,
                             Value = percentStudentFinishPT
                         },
-                        new DataChart
+                        new DataChartModel
                         {
                             Label = ChartConstant.PercentStudentNotFinishPT,
                             Value = percentStudentNotFinishPT
@@ -96,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                     Type = EnumChartType.BarChart,
                     DataCharts = filteredStudents.GroupBy(student => student.CourseLevel)
                                                  .OrderBy(group => group.Key)
-                                                 .Select(group => new DataChart
+                                                 .Select(group => new DataChartModel
                                                  {
                                                      Label = group.Key.ToString(),
                                                      Value = group.Count()
@@ -113,11 +113,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                                                                    })
                                                                    .GroupBy(x => x.ClassName)
                                                                    .OrderBy(classGroup => classGroup.Key)
-                                                                   .Select(classGroup => new StackBarChart
+                                                                   .Select(classGroup => new StackBarChartModel
                                                                    {
                                                                        Label = classGroup.Key,
                                                                        DataColumns = classGroup.OrderBy(levelGroup => levelGroup.CourseLevel)
-                                                                                               .Select(levelGroup => new DataChart
+                                                                                               .Select(levelGroup => new DataChartModel
                                                                                                {
                                                                                                    Label = levelGroup.CourseLevel.ToString(),
                                                                                                    Value = levelGroup.Count
@@ -132,7 +132,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                                                    .ToList();
                 }
 
-                StackBarCharts stackBarCharts = new StackBarCharts
+                StackBarChartsModel stackBarCharts = new StackBarChartsModel
                 {
                     Type = EnumChartType.StackbarChart,
                     DataCharts = amountStudentByLevelAndClass
@@ -146,5 +146,4 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             return methodResult;
         }
     }
-
 }

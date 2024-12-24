@@ -1,31 +1,34 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Models.EntityModels.BaseChart
+namespace Fsel.Course.Domain.Models.EntityModels.BaseChartModels
 {
     using Fsel.Shared.Enums;
 
     public class BaseChartResultModel
     {
         public EnumChartType Type { get; set; }
-        public IList<DataChart>? DataCharts { get; set; }
+        public IList<DataChartModel>? DataCharts { get; set; }
     }
 
-    public class DataChart
+    public class DataChartModel
     {
         public string? Label { get; set; }
         public int Value { get; set; }
     }
 
-    public class StackBarCharts : BaseChartResultModel
+    public class DataPieChartModel : DataChartModel
     {
-        public new IList<StackBarChart> DataCharts { get; set; } = new List<StackBarChart>();
-
+        public int Percent { get; set; }
     }
 
-    public class StackBarChart
+    public class StackBarChartsModel : BaseChartResultModel
+    {
+        public new IList<StackBarChartModel> DataCharts { get; set; } = new List<StackBarChartModel>();
+    }
+
+    public class StackBarChartModel
     {
         public string? Label { get; set; }
-        public IList<DataChart>? DataColumns { get; set; }
-
+        public IList<DataChartModel>? DataColumns { get; set; }
     }
 }

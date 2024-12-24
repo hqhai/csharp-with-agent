@@ -27,6 +27,7 @@ namespace Fsel.Shared.Enums
         MockTestScoreCriteria,
         CompletionStatus,
         LearningStatus,
-        OverallScore
+        OverallScore,
+        LearningProgress
     }
 }

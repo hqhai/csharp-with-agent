@@ -28,10 +28,13 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<string>> methodResult = new MethodResult<IList<string>>();
-
+            if (string.IsNullOrEmpty(request.SchoolGrade))
+            {
+                return methodResult;
+            }
             var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
-            request.SchoolGrade = request.SchoolGrade?.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-            var query = _studentRepository.Queryable.Where(x => string.IsNullOrEmpty(request.SchoolGrade) || (x.SchoolGrade ?? string.Empty).Trim().ToLower() == request.SchoolGrade)
+            request.SchoolGrade = request.SchoolGrade.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+            var query = _studentRepository.Queryable.Where(x => !string.IsNullOrEmpty(request.SchoolGrade) || (x.SchoolGrade ?? string.Empty).Trim().ToLower() == request.SchoolGrade)
                                                     .Where(x => !string.IsNullOrEmpty(x.SchoolClass));
 
             if (schoolId.HasValue)
