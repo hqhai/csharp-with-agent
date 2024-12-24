@@ -1,9 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Entities
+namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
-    using Fsel.Course.Domain.Models.EntityModels;
 
     public class CourseCompleteModel
     {
