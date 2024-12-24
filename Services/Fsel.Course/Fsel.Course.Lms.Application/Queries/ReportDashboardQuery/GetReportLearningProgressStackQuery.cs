@@ -74,6 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StackBarChartsModel>();
             var courseLevels = request.CourseTypes.GetCourseLevels(request.CourseLevels);
+            bool isMaxHoursCompleted = true;
             var userResults = await _userService.GetStudentsDashboardAsync(new GetStudentsDashboardQueryModel
             {
                 EnumCourseLevelStr = string.Join(",", courseLevels),
@@ -110,14 +111,15 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                         join lr in _lessonResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId } equals new { lr.StudentId, lr.CourseId }
                         where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
                          studentIds != null && studentIds.Contains(baseQ.StudentId) &&
-                        (!request.EndDate.HasValue || (lr.CompletionDate ?? lr.UpdatedDate ?? lr.CreatedDate).Date <= request.EndDate.Value.Date) &&
+                        (!request.EndDate.HasValue || (lr.UpdatedDate ?? lr.CreatedDate).Date <= request.EndDate.Value.Date) &&
                         ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
                         lr.Status == EnumResultStatus.Done
                         group new { lr } by new { baseQ.StudentId } into g
                         select new
                         {
                             StudentId = g.Key.StudentId,
-                            IsOnSchedule = g.OrderByDescending(x => x.lr.CompletionDate).ThenByDescending(x => x.lr.UpdatedDate).Select(x => !x.lr.MaxHoursCompleted.HasValue || ((x.lr.CompletionDate ?? x.lr.UpdatedDate) - x.lr.NewDate).GetValueOrDefault().TotalSeconds <= x.lr.MaxHoursCompleted).FirstOrDefault()
+                            IsOnSchedule = isMaxHoursCompleted
+                            //g.OrderByDescending(x => x.lr.CompletionDate).ThenByDescending(x => x.lr.UpdatedDate).Select(x => !x.lr.MaxHoursCompleted.HasValue || ((x.lr.CompletionDate ?? x.lr.UpdatedDate) - x.lr.NewDate).GetValueOrDefault().TotalSeconds <= x.lr.MaxHoursCompleted).FirstOrDefault()
                         };
             var queryChart = await query.ToListAsync(cancellationToken);
 

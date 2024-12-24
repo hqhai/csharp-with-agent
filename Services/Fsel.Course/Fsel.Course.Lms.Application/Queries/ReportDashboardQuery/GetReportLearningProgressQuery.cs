@@ -83,6 +83,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<DashBoardLearningProgressModel>();
             var studentIds = new List<Guid>();
+            bool isMaxHoursCompleted = true;
+
             var courseLevels = request.CourseTypes.GetCourseLevels(request.CourseLevels);
             bool isRoleAdminSchool = _authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString());
             if (isRoleAdminSchool)
@@ -109,12 +111,15 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                         join lr in _lessonResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId } equals new { lr.StudentId, lr.CourseId }
                         where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
                         (!isRoleAdminSchool || ((studentIds == null || !studentIds.Any()) || studentIds.Contains(baseQ.StudentId))) &&
-                        (!request.EndDate.HasValue || (lr.CompletionDate ?? lr.UpdatedDate ?? lr.CreatedDate).Date <= request.EndDate.Value.Date) &&
+                        (!request.EndDate.HasValue || (lr.UpdatedDate ?? lr.CreatedDate).Date <= request.EndDate.Value.Date) &&
                         ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
                         lr.Status == EnumResultStatus.Done
                         group new { lr } by new { baseQ.CourseId, baseQ.StudentId } into g
-                        select g.OrderByDescending(x => x.lr.CompletionDate).ThenByDescending(x => x.lr.UpdatedDate)
-                        .Select(x => !x.lr.MaxHoursCompleted.HasValue || ((x.lr.CompletionDate ?? x.lr.UpdatedDate) - x.lr.NewDate).GetValueOrDefault().TotalSeconds <= x.lr.MaxHoursCompleted).FirstOrDefault();
+                        select g.OrderByDescending(x => x.lr.UpdatedDate).ThenByDescending(x => x.lr.CreatedDate)
+                        .Select(x => isMaxHoursCompleted).FirstOrDefault();
+
+            //.Select(x => !x.lr.MaxHoursCompleted.HasValue || ((x.lr.CompletionDate ?? x.lr.UpdatedDate) - x.lr.NewDate).GetValueOrDefault().TotalSeconds <= x.lr.MaxHoursCompleted).FirstOrDefault();
+
             var queryPieChart = await query.ToListAsync(cancellationToken);
             var reportLearningProgress = new DashBoardLearningProgressModel
             {
