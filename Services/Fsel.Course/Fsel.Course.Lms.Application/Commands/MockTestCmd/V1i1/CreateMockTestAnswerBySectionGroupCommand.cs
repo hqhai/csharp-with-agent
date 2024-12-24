@@ -201,23 +201,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             {
                 return methodResult;
             };
-            try
-            {
-                if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && sectionGroup.Sections.Any() && request.IsSubmit)
-                {
-                    // await _speakingAIService.EvaluationSpeakingAI(request.MockTestResultId, request.SectionGroupId, cancellationToken);
-
-                    SpeakingAIEvaluationModel speakingEvaluationModel = new SpeakingAIEvaluationModel()
-                    {
-                        MockTestResultId = request.MockTestResultId,
-                        SectionGroupId = request.SectionGroupId,
-                    };
-                    await _submitSpeakingAIPublisher.Publish(speakingEvaluationModel, cancellationToken);
-                }
-            }
-            catch
-            {
-            }
 
             try
             {
@@ -259,6 +242,23 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
             sectionGroupResultDto.IsTestDone = mockTestResult.Status == EnumResultStatus.Done;
 
+            try
+            {
+                if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && sectionGroup.Sections.Any() && request.IsSubmit)
+                {
+                    // await _speakingAIService.EvaluationSpeakingAI(request.MockTestResultId, request.SectionGroupId, cancellationToken);
+
+                    SpeakingAIEvaluationModel speakingEvaluationModel = new SpeakingAIEvaluationModel()
+                    {
+                        MockTestResultId = request.MockTestResultId,
+                        SectionGroupId = request.SectionGroupId,
+                    };
+                    await _submitSpeakingAIPublisher.Publish(speakingEvaluationModel, cancellationToken);
+                }
+            }
+            catch
+            {
+            }
             methodResult.Result = sectionGroupResultDto;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
