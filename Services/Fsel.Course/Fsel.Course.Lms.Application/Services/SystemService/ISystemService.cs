@@ -57,9 +57,6 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
         [Post("/v1/google-sheet/add-error-report-explanation-question")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> AddErrorReportExplanationQuestionToGoogleSheet([FromBody] AddErrorReportExplanationQuestionModel model);
 
-        [Get("/v1/school")]
-        Task<IApiResponse<MethodResult<PagingItemsModel<SchoolModel>>>> SearchSchoolAsync([Query] SearchSchoolQueryModel query);
-
         [Post("/v1/school/get-ids")]
         Task<IApiResponse<MethodResult<IList<Guid>>>> GetSchoolIdsAsync([Body] GetSchoolsQueryModel query);
     }

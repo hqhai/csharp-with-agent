@@ -163,18 +163,6 @@ namespace Fsel.Course.Lms.Api.Controllers
             commandResult.AddError(StatusCodes.Status401Unauthorized, "Unauthorized");
             return commandResult.GetActionResult();
         }
-
-        /// <summary>
-        /// Tool Add Data PlacementTestGroupResult
-        /// </summary>
-        [HttpPost("tool-add-data-placement-test-group")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ToolAddData()
-        {
-            MethodResult<bool> queryResult = await _mediator.Send(new ToolAddDataPlacementTestGroupResultCommand()).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
     }
 
     public class QueueTestModel
