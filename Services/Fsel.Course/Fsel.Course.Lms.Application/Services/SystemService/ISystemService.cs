@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels;
+    using Fsel.Shared.Models.ShareModels.QueryModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -63,5 +64,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Post("/v1/google-sheet/add-error-report-explanation-question")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> AddErrorReportExplanationQuestionToGoogleSheet([FromBody] AddErrorReportExplanationQuestionModel model);
+
+        [Post("/v1/feature-access-time/get-feature-access-time-to-modules")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetFeatureAccessTimesAsync([FromBody] GetFeatureAccessTimeToExportQueryModel query);
     }
 }
