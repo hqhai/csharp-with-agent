@@ -77,7 +77,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var @classes = @classResults.Content?.Result;
             if (@classes == null || !@classes.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@classes));
                 return methodResult;
             }
 
@@ -85,7 +84,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var courses = await _courseRepository.GetByIdsAsync(courseIds);
             if (courses == null || !courses.Any())
             {
-                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel

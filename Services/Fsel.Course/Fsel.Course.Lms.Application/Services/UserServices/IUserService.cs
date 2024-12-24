@@ -129,8 +129,18 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Get("/v1/admin/student/management")]
         Task<IApiResponse<MethodResult<PagingItemsModel<StudentSearchAdminModel>>>> SearchStudentAsync([FromQuery] BaseQueryModel query);
 
+        [Post("/v1/admin/student/search")]
+        Task<IApiResponse<MethodResult<PagingItemsModel<StudentDtoModel>>>> SearchStudentSchoolAsync([FromBody] SearchStudentSchoolQueryModel query);
+
+        [RefitCache(CacheSettings.TimeCache.TenMinutes)]
+        [Get("/v1/admin/student/gets")]
+        Task<IApiResponse<MethodResult<IList<StudentDtoModel>>>> GetStudentsSchoolAsync([FromQuery] SearchStudentSchoolQueryModel query);
+
         [Get("/v1/admin-school/student")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsToAdminSchoolAsync();
+
+        [Get("/v1/user/get-user-profile")]
+        Task<IApiResponse<MethodResult<UserModel>>> GetUserProfileAsync();
 
         [Get("/v1/student-ranking/get-students-by-event-code")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByEventCode([Query] string eventCode);
