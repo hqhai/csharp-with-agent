@@ -70,5 +70,11 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Post("/v1/school/get-ids")]
         Task<IApiResponse<MethodResult<IList<Guid>>>> GetSchoolIdsAsync([Body] GetSchoolsQueryModel query);
+
+        [Delete("/v1/course-target-student/{studentId}")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> DeleteCourseTargetStudent([FromRoute] Guid studentId);
+
+        [Post("/v1/feature-access-time/get-feature-accesstime")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetAccessTimeByUserAndFeature([Body] GetAccessTimeByUserAndFeatureQueryModel query);
     }
 }

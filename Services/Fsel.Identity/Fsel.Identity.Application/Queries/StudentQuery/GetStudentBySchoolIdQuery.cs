@@ -13,6 +13,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetStudentBySchoolIdQuery : IRequest<MethodResult<IList<StudentModel>>>
     {
@@ -34,11 +35,18 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<StudentModel>>();
             var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
+
             if (schoolId == null)
             {
                 methodResult.AddError(nameof(EnumSystemErrorCode.DataNotExist), nameof(schoolId));
             }
-            var students = _studentRepository.Queryable.Where(x => x.SchoolId == schoolId).ToList();
+            //var students = _studentRepository.Queryable.Where(x => x.SchoolId == schoolId).ToList();
+
+            var students = await _studentRepository.Queryable
+                .Include(s => s.Human)
+                .Where(x => x.SchoolId == schoolId)
+                .ToListAsync(cancellationToken);
+
             methodResult.Result = _mapper.Map<IList<StudentModel>>(students);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

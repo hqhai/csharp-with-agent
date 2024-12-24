@@ -91,5 +91,17 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             MethodResult<StackBarChartsModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Diligence Report
+        /// </summary>
+        [HttpGet("student-diligence")]
+        [ProducesResponseType(typeof(MethodResult<DashBoardDiligenceModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ReportDashboardDiligence([FromQuery] GetReportDiligenceResultQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
