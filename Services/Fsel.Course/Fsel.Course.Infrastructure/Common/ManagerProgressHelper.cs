@@ -257,7 +257,7 @@ namespace Fsel.Course.Infrastructure.Common
                                             .Select(x => x.clr.Id).Distinct().Count() +
 
                                             g.Where(x => x.lr.Status == EnumResultStatus.Done)
-                                            .Where(x => !arrivalDate.HasValue || (x.lr.CompletionDate ?? x.lr.UpdatedDate ?? x.lr.CreatedDate).Date <= arrivalDate.Value.Date)
+                                            .Where(x => !arrivalDate.HasValue || (x.lr.UpdatedDate ?? x.lr.CreatedDate).Date <= arrivalDate.Value.Date)
                                             .Select(x => x.lr.Id).Distinct().Count() +
 
                                             g.Where(x => x.ftr.Status == EnumResultStatus.Done)
@@ -265,11 +265,11 @@ namespace Fsel.Course.Infrastructure.Common
                                              .Select(x => x.ftr.Id).Distinct().Count() +
 
                                             g.Where(x => x.mtr.Status == EnumResultStatus.Done)
-                                             .Where(x => !arrivalDate.HasValue || (x.mtr.CompletionDate ?? x.mtr.UpdatedDate ?? x.mtr.CreatedDate).Date <= arrivalDate.Value.Date)
+                                             .Where(x => !arrivalDate.HasValue || (x.mtr.UpdatedDate ?? x.mtr.CreatedDate).Date <= arrivalDate.Value.Date)
                                              .Select(x => x.mtr.Id).Distinct().Count() +
 
                                             g.Where(x => x.skmt.Status == EnumResultStatus.Done)
-                                             .Where(x => !arrivalDate.HasValue || (x.skmt.CompletionDate ?? x.skmt.UpdatedDate ?? x.skmt.CreatedDate).Date <= arrivalDate.Value.Date)
+                                             .Where(x => !arrivalDate.HasValue || (x.skmt.UpdatedDate ?? x.skmt.CreatedDate).Date <= arrivalDate.Value.Date)
                                              .Select(x => x.skmt.Id).Distinct().Count(),
                         };
 
@@ -402,7 +402,7 @@ namespace Fsel.Course.Infrastructure.Common
                                              .Select(x => x.clr.Id).Distinct().Count() +
 
                                              g.Where(x => x.lr.Status == EnumResultStatus.Done)
-                                             .Where(x => !arrivalDate.HasValue || (x.lr.CompletionDate ?? x.lr.UpdatedDate ?? x.lr.CreatedDate).Date <= arrivalDate.Value.Date)
+                                             .Where(x => !arrivalDate.HasValue || (x.lr.UpdatedDate ?? x.lr.CreatedDate).Date <= arrivalDate.Value.Date)
                                              .Select(x => x.lr.Id).Distinct().Count() +
 
                                              g.Where(x => x.ftr.Status == EnumResultStatus.Done)
@@ -410,11 +410,11 @@ namespace Fsel.Course.Infrastructure.Common
                                               .Select(x => x.ftr.Id).Distinct().Count() +
 
                                              g.Where(x => x.mtr.Status == EnumResultStatus.Done)
-                                              .Where(x => !arrivalDate.HasValue || (x.mtr.CompletionDate ?? x.mtr.UpdatedDate ?? x.mtr.CreatedDate).Date <= arrivalDate.Value.Date)
+                                              .Where(x => !arrivalDate.HasValue || (x.mtr.UpdatedDate ?? x.mtr.CreatedDate).Date <= arrivalDate.Value.Date)
                                               .Select(x => x.mtr.Id).Distinct().Count() +
 
                                              g.Where(x => x.skmt.Status == EnumResultStatus.Done)
-                                              .Where(x => !arrivalDate.HasValue || (x.skmt.CompletionDate ?? x.skmt.UpdatedDate ?? x.skmt.CreatedDate).Date <= arrivalDate.Value.Date)
+                                              .Where(x => !arrivalDate.HasValue || (x.skmt.UpdatedDate ?? x.skmt.CreatedDate).Date <= arrivalDate.Value.Date)
                                               .Select(x => x.skmt.Id).Distinct().Count(),
 
                             UnitDisplayOrder = g.Select(x => x.ur).Where(x => x.Status != EnumResultStatus.Unfinished)
@@ -427,7 +427,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                 .Select(n => n.Number).FirstOrDefault()).FirstOrDefault(),
 
                             LessonDisplayOrder = g.Select(x => x.lr).Where(x => x.Status != EnumResultStatus.Unfinished)
-                                                .Where(x => !arrivalDate.HasValue || (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                                                .Where(x => !arrivalDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
                                                 .OrderBy(x => x.Status == EnumResultStatus.Process ? ValueOrderIndex.OrderIndexProcess :
                                                               x.Status == EnumResultStatus.New ? ValueOrderIndex.OrderIndexNew :
                                                               x.Status == EnumResultStatus.Done ? ValueOrderIndex.OrderIndexDone : ValueOrderIndex.OrderIndexOther)
