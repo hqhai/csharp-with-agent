@@ -1,0 +1,17 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.System.Domain.Enums.ErrorCodes
+{
+    public enum EnumCourseSuggestConfigErrorCode
+    {
+        RecordWithSameTypeAndLevelHasOverlappingAges,
+
+        NoReviewTypeForA1Level,
+
+        NoChallengeTypeForIELTSLevel,
+
+        AgeMustBeBetweenZeroAndOneHundredFifty,
+
+        ToAgeNotThanFromAge
+    }
+}

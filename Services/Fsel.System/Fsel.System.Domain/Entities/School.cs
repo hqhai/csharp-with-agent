@@ -4,10 +4,10 @@ namespace Fsel.System.Domain.Entities
 {
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
-    using Fsel.System.Domain.Enums;
     using global::System;
     using global::System.ComponentModel.DataAnnotations;
     using global::System.ComponentModel;
+    using Fsel.Shared.Enums;
 
     public class School : Entity
     {

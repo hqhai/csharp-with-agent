@@ -2,8 +2,6 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Enums.ErrorCodes;
-using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Units;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -37,35 +35,22 @@ namespace Fsel.Course.Application.Commands.UnitCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
-            if (request.LessonIds == null || !request.LessonIds.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonIds), request.LessonIds);
-                return methodResult;
-            }
-            Unit unit = _mapper.Map<Unit>(request);
-            var method = await _unitHelper.Validate(unit, request);
+            var method = await _unitHelper.Validate(request);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
+
+            Unit unit = _mapper.Map<Unit>(request);
+            _unitHelper.SetUnitData(unit, request);
+            if (!unit.IsValid())
+            {
+                methodResult.AddErrorBadRequest(unit.ErrorMessages);
+                return methodResult;
+            }
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {
-                unit.UnitLessons = request.LessonIds.Select((x, index) => new UnitLesson
-                {
-                    DisplayOrder = index + 1,
-                    LessonId = x
-                }).ToList();
-                if (request.MockTestId != null)
-                {
-                    unit.UnitSkillMockTests = new List<UnitSkillMockTest>
-                    {
-                        new UnitSkillMockTest
-                        {
-                            MockTestId = request.MockTestId ?? default,
-                        }
-                    };
-                }
                 unit = _unitRepository.Add(unit);
                 await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

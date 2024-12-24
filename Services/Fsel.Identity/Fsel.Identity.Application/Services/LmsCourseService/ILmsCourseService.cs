@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
     using Fsel.Identity.Application.Services.LmsCourseService.QueryModels;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -55,6 +56,9 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
         [Post("/v1/dashboard/active-course-result")]
         Task<IApiResponse<MethodResult<IList<Guid>>>> GetActiveCourseResultByStudentId([FromBody] ActiveCourseResultModel query);
 
+        [Post("/v1.1/course/retake-course")]
+        Task<IApiResponse<MethodResult<CourseResultModel>>> RetakeCourseAsync([FromBody] RetakeCourseResultCommandModel command);
+
         [Get("/v1.1/course/get-course-by-level/{courseLevel}")]
         Task<IApiResponse<MethodResult<CourseModel>>> GetCourseByLevelAsync([FromRoute] EnumCourseLevel courseLevel);
 
@@ -63,5 +67,11 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Post("/v1.1/admin/course")]
         Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetCoursesByIdsAsync([FromBody] IList<Guid> courseIds);
+
+        [Post("/v1.1/admin/course")]
+        Task<IApiResponse<MethodResult<IList<CourseModel>>>> Get([FromBody] IList<Guid> courseIds);
+
+        [Post("/v1.1/admin/other/param-beginner-guide")]
+        Task<IApiResponse<MethodResult<IList<ParamBeginnerGuideModel>>>> GetParamBeginnerGuide([FromBody] IList<Guid> studentIds);
     }
 }

@@ -14,6 +14,7 @@ namespace Fsel.Identity.Application.Queries.UserCourseSettingQuery
 
     public class GetUserCourseSettingsQuery : IRequest<MethodResult<IList<UserCourseSettingModel>>>
     {
+        public Guid? UserId { get; set; }
     }
 
     public class GetUserCourseSettingsQueryHandler : IRequestHandler<GetUserCourseSettingsQuery, MethodResult<IList<UserCourseSettingModel>>>
@@ -33,7 +34,8 @@ namespace Fsel.Identity.Application.Queries.UserCourseSettingQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<UserCourseSettingModel>>();
-            var userCourseSettings = await _userCourseSettingRepository.Queryable.Where(x => x.UserId == _authContext.CurrentUserId).OrderByDescending(x => x.CreatedDate).ToListAsync(cancellationToken);
+            var userId = request.UserId ?? _authContext.CurrentUserId;
+            var userCourseSettings = await _userCourseSettingRepository.Queryable.Where(x => x.UserId == userId).OrderByDescending(x => x.CreatedDate).ToListAsync(cancellationToken);
             methodResult.Result = _mapper.Map<IList<UserCourseSettingModel>>(userCourseSettings);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

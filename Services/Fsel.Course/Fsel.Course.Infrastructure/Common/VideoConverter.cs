@@ -191,6 +191,32 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNameIsExist), nameof(request.Name), request.Name);
                 return methodResult;
             }
+            switch (request.CourseLevel.GetEnumCourseType())
+            {
+                case EnumCourseType.Academic:
+                    break;
+
+                case EnumCourseType.Ielts:
+                    if (request.VideoTimeCodes.Any(x => x.TimeCodeType != EnumTimeCodeType.Standalone))
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.IeltsAcceptsStandalone),
+                            nameof(request.VideoTimeCodes),
+                            request.VideoTimeCodes.Where(x => x.TimeCodeType != EnumTimeCodeType.Standalone).Select(x => x.DisplayTime));
+                        return methodResult;
+                    }
+                    break;
+
+                case EnumCourseType.AdultFoundation:
+                    if (request.VideoTimeCodes.Any(x => x.TimeCodeType == EnumTimeCodeType.SkillTest))
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.AdultFoundationNotAcceptsSkillTest),
+                            nameof(request.VideoTimeCodes),
+                            request.VideoTimeCodes.Where(x => x.TimeCodeType != EnumTimeCodeType.Standalone).Select(x => x.DisplayTime));
+                        return methodResult;
+                    }
+                    break;
+            }
+
             var method = AddTimeCodeToVideo(video, request.VideoTimeCodes);
             if (!method.IsOK)
             {
@@ -281,6 +307,47 @@ namespace Fsel.Course.Infrastructure.Common
             videoResult.Status = EnumResultStatus.Done;
             videoResult.VideoSkillScores = listSkillScore;
             return methodResult;
+        }
+
+        public async Task<(IList<VideoSkillScores>, int? tokenFirst, int? tokenLast)> GetSkillScoreAndTokens(VideoResult videoResult, CancellationToken cancellationToken)
+        {
+            var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoTimeCode)
+                                                .Where(x => x.VideoResultId == videoResult.Id)
+                                                .ToListAsync(cancellationToken);
+            var tokenConfig = videoTimeCodeResults.Where(x => x.VideoTimeCode != null && x.VideoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone && x.VideoResultId == videoResult.Id).GroupBy(x => x.VideoResultId).Select(x => new
+            {
+                TokenFirst = x.Where(x => x.TokenFirstTime.HasValue).Sum(x => x.TokenFirstTime),
+                TokenLast = x.Where(x => x.TokenLastTime.HasValue).Sum(x => x.TokenLastTime),
+            }).FirstOrDefault();
+
+            var skillScores = videoTimeCodeResults.Where(x => x.CorrectTotal > 0 && x.SkillScores != null && x.SkillScores.Any())
+                          .GroupBy(x => new { x.VideoTimeCode!.TimeCodeType })
+                          .SelectMany(g => g.SelectMany(x => x.SkillScores!).GroupBy(x => new { x.Skill, g.Key.TimeCodeType }).Select(x => new
+                          {
+                              Type = x.Key.TimeCodeType,
+                              Skill = x.Key.Skill,
+                              CorrectCount = x.Sum(y => y.CorrectCount),
+                              TotalCount = x.Sum(y => y.TotalCount),
+                              TotalQuestion = x.Sum(x => x.TotalQuestion),
+                              CountQuestion = x.Sum(x => x.CountQuestion)
+                          })).ToList();
+
+            var videoSkillScores = (from type in Enum.GetValues(typeof(EnumTimeCodeType)).Cast<EnumTimeCodeType>()
+                                    select new VideoSkillScores
+                                    {
+                                        Type = type,
+                                        SkillScores = (from skill in Enum.GetValues(typeof(EnumCourseSkill)).Cast<EnumCourseSkill>()
+                                                       join answerTimeCodeQ in skillScores.Where(x => x.Type == type).AsQueryable() on skill equals answerTimeCodeQ.Skill into answerTimeCodeQ_jointable
+                                                       select new SkillScores
+                                                       {
+                                                           Skill = skill,
+                                                           TotalCount = answerTimeCodeQ_jointable.Sum(x => x.TotalCount),
+                                                           CorrectCount = answerTimeCodeQ_jointable.Sum(x => x.CorrectCount),
+                                                           TotalQuestion = answerTimeCodeQ_jointable.Sum(x => x.TotalQuestion),
+                                                           CountQuestion = answerTimeCodeQ_jointable.Sum(x => x.CountQuestion),
+                                                       }).Where(x => x.TotalQuestion != 0).OrderBy(x => x.Skill).ToList()
+                                    }).ToList();
+            return (videoSkillScores, tokenConfig?.TokenFirst, tokenConfig?.TokenLast);
         }
 
         public async Task<(IList<VideoSkillScores>, bool)> GetVideoSkillScores(VideoResult videoResult, CancellationToken cancellationToken)

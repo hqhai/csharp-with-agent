@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Identity.Application.Commands.AdminCmd;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -25,12 +26,14 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly IStudentRepository _studentRepository;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
+        private readonly IMediator _mediator;
 
-        public UpdateStudentBeginnerGuideCommandHandler(IStudentRepository studentRepository, IMapper mapper, AuthContext authContext)
+        public UpdateStudentBeginnerGuideCommandHandler(IStudentRepository studentRepository, IMapper mapper, AuthContext authContext, IMediator mediator)
         {
             _studentRepository = studentRepository;
             _mapper = mapper;
             _authContext = authContext;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<StudentModel>> Handle(UpdateStudentBeginnerGuideCommand request, CancellationToken cancellationToken)
@@ -51,6 +54,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             await _studentRepository.ExecuteTransactionAsync(async () =>
             {
                 student = _studentRepository.Update(student);
+                await _mediator.Send(new ToolUpdateBeginnerGuideStudentCommand { StudentId = student.Id }, cancellationToken);
                 await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<StudentModel>(student);
