@@ -141,7 +141,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                     methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist));
                     return methodResult;
                 }
-                discountPercent = voucher.Percent;
+                discountPercent = voucher.Value;
                 voucherId = voucher.Id;
             }
 
@@ -216,8 +216,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 }
                 else
                 {
-                await _mediator.Send(new SendMailPaymentCommand() { OrderId = newOrder.Id }, cancellationToken);
-            }
+                    await _mediator.Send(new SendMailPaymentCommand() { OrderId = newOrder.Id }, cancellationToken);
+                }
             }
 
             return methodResult;

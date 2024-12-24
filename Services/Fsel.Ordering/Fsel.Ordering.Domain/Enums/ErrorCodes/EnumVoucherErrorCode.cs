@@ -15,6 +15,10 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         VoucherHasExpired,
         VoucherOutOfQuantity,
         NotSubjectToUse,
-        VoucherDoesNotApplyToThisPackage
+        VoucherDoesNotApplyToThisPackage,
+        ValueGreaterThan100,
+        CodeAlreadyExists,
+        CodePrefixAlreadyExists,
+        CodeInValidFormat
     }
 }

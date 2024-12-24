@@ -97,14 +97,14 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 return methodResult;
             }
 
-            if (voucher.VoucherType == EnumVoucherType.NewSale)
-            {
-                if (await _orderRepository.Queryable.AnyAsync(p => p.Status == EnumOrderStatus.Payment && p.UserId == _authContext.CurrentUserId && !p.IsTrial, cancellationToken))
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.NotSubjectToUse));
-                    return methodResult;
-                }
-            }
+            //if (voucher.VoucherType == EnumApplicableSubjectsVoucher.NewSale)
+            //{
+            //    if (await _orderRepository.Queryable.AnyAsync(p => p.Status == EnumOrderStatus.Payment && p.UserId == _authContext.CurrentUserId && !p.IsTrial, cancellationToken))
+            //    {
+            //        methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.NotSubjectToUse));
+            //        return methodResult;
+            //    }
+            //}
 
             var package = await _packageRepository.GetByIdAsync(request.PackageId);
             if (package == null)
@@ -113,7 +113,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 return methodResult;
             }
 
-            var discountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(package.Price * voucher.Percent));
+            var discountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(package.Price * voucher.Value));
             var totalPrice = package.Price - discountPrice;
 
             await ResetUserVoucherLockAsync(_authContext.CurrentUserId, cancellationToken);
@@ -122,7 +122,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             {
                 VoucherId = voucher.Id,
                 DiscountPrice = discountPrice,
-                Percent = voucher.Percent,
+                Percent = voucher.Value,
                 TotalPrice = totalPrice,
             };
 

@@ -80,7 +80,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                     }
                 }
 
-                discountPercent = voucher.Percent;
+                discountPercent = voucher.Value;
                 request.Order.VoucherId = voucher.Id;
             }
             else

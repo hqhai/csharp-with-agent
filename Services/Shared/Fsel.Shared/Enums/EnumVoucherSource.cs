@@ -6,6 +6,7 @@ namespace Fsel.Shared.Enums
     {
         Admin,
         Retail,
-        MasterAgency
+        MasterAgency,
+        Auto
     }
 }

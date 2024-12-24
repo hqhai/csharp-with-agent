@@ -2,9 +2,10 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumVoucherType
+    public enum EnumVoucherCategory
     {
-        All,
-        NewSale
+        Percent,
+        Money,
+        Month
     }
 }

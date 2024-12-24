@@ -2,11 +2,13 @@
 
 namespace Fsel.Ordering.Domain.Models.QueryModels.Vouchers
 {
+    using System;
     using Fsel.Core.Base.BaseModels;
 
-    public class SearchVoucherQueryModel : BaseQueryModel
+    public class SearchDetailHistoryVoucherAutoQueryModel : BaseQueryModel
     {
+        public string? CodePrefix { get; set; }
         public bool? Status { get; set; }
-        public DateTime? CreatedDate { get; set; }
+        public DateTime? Day { get; set; }
     }
 }
