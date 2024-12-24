@@ -158,8 +158,8 @@ namespace Fsel.Shared.Models.ShareModels
 
     public class BannerPromotional
     {
-        public string? BannerWeb { get; set; }
-        public string? BannerMobile { get; set; }
+        public IList<string>? BannerWeb { get; set; }
+        public IList<string>? BannerMobile { get; set; }
     }
 
     #endregion
