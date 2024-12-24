@@ -118,10 +118,13 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
             if (voucher.Source == EnumVoucherSource.Auto)
             {
-                var vouchersAuto = _voucherRepository.Queryable.Where(p => p.CodePrefix == voucher.CodePrefix).ToList();
+                var vouchersAuto = await _voucherRepository.Queryable.Where(p => p.CodePrefix == voucher.CodePrefix).ToListAsync(cancellationToken);
+
                 var voucherIds = vouchersAuto.Select(p => p.Id).ToList();
-                var orders = _orderRepository.Queryable.Where(p => p.UserId == _authContext.CurrentUserId && p.VoucherId.HasValue && voucherIds.Contains(p.VoucherId ?? default)).ToList();
-                if (voucher.NumberOfChanges >= orders.Count)
+
+                var orders = await _orderRepository.Queryable.Where(p => p.UserId == _authContext.CurrentUserId && p.VoucherId.HasValue && voucherIds.Contains(p.VoucherId.Value) && p.Status == EnumOrderStatus.Payment).ToListAsync(cancellationToken);
+
+                if (orders.Count >= voucher.NumberOfChanges)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.TheNumberOfUsesHasExpired));
                     return methodResult;
