@@ -55,6 +55,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<HomeWorkAnswer> HomeWorkAnswers { get; set; }
         public DbSet<HomeWorkResult> HomeWorkResults { get; set; }
 
+        public DbSet<PlacementTestGroupResult> PlacementTestGroupResults { get; set; }
         public DbSet<PlacementTestSection> PlacementTestSections { get; set; }
         public DbSet<PlacementTestAnswer> PlacementTestAnswers { get; set; }
         public DbSet<PlacementTestResult> PlacementTestResults { get; set; }
@@ -128,6 +129,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new LessonNoteEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UnitResultEntityTypeConfiguraion());
 
+            modelBuilder.ApplyConfiguration(new PlacementTestGroupResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PlacementTestSectionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PlacementTestAnswerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PlacementTestResultEntityTypeConfiguration());

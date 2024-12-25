@@ -3,7 +3,6 @@
 namespace Fsel.Identity.Domain.Models.EntityModels
 {
     using Fsel.Common.Helpers;
-    using Fsel.Identity.Domain.Enums;
     using Fsel.Shared.Enums;
 
     public class UserProfileModel

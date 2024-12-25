@@ -50,7 +50,6 @@ namespace Fsel.Course.Lms.Application.Commands.StudentRankingEventCmd
         private const double Process_Ratio = 0.75;
         private const double Overall_Ratio = 0.25;
 
-
         public SetStudentRankingEventCommandHandler(ICourseResultRepository courseResultRepository, ManagerProgressHelper managerProgressHelper, ICourseRepository courseRepository, ITrainingService trainingService, IVideoResultRepository videoResultRepository, IHomeWorkResultRepository homeWorkResultRepository, IFinalTestResultRepository finalTestResultRepository, IClassForumResultRepository classForumResultRepository, StudentRankingEventsPublisher studentRankingEventsPublisher, IUserService userService)
         {
             _courseResultRepository = courseResultRepository;
@@ -71,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentRankingEventCmd
             MethodResult<IList<CompetitionStudentProgressModel>> methodResult = new MethodResult<IList<CompetitionStudentProgressModel>>();
             IList<CompetitionStudentProgressModel> courseProgress = new List<CompetitionStudentProgressModel>();
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(request.UserId);
             if (studentResult?.Content?.Result == null)
             {
                 return methodResult;
@@ -139,6 +138,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentRankingEventCmd
             double videoLessonRatio = courseType == EnumCourseType.Academic ? ValueSettings.AcademicStudentResultRatio.VideoRatio : ValueSettings.IeltsStudentResultRatio.VideoRatio;
             double homeWorkRatio = courseType == EnumCourseType.Academic ? ValueSettings.AcademicStudentResultRatio.HomeWorkRatio : ValueSettings.IeltsStudentResultRatio.HomeWorkRatio;
             double classForumRatio = courseType == EnumCourseType.Academic ? ValueSettings.AcademicStudentResultRatio.ClassForumRatio : ValueSettings.IeltsStudentResultRatio.ClassForumRatio;
+
             #endregion Progress
 
             #region Video
@@ -261,7 +261,6 @@ namespace Fsel.Course.Lms.Application.Commands.StudentRankingEventCmd
                           }).ToList();
 
             #endregion Result
-
 
             var finalResult = result.FirstOrDefault();
             if (finalResult != null && courseResultStudent != null)
@@ -431,6 +430,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentRankingEventCmd
         #endregion QueryResult
 
         #region RankedStudent
+
         private async Task RankedStudentByScore(CompetitionStudentProgressModel finalResult, CourseResult courseResuilt, CancellationToken cancellationToken)
         {
             StudentRankingEventModel model = new StudentRankingEventModel
@@ -446,6 +446,6 @@ namespace Fsel.Course.Lms.Application.Commands.StudentRankingEventCmd
             await _studentRankingEventsPublisher.Publish(model, cancellationToken);
         }
 
-        #endregion
+        #endregion RankedStudent
     }
 }

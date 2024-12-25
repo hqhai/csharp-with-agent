@@ -58,12 +58,13 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             _videoResultRepository = videoResultRepository;
             _sectionGroupResultRepository = sectionGroupResultRepository;
         }
+
         public async Task<MethodResult<bool>> Handle(DeleteListDataUserCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(request.UserId);
 
             if (studentResult == null)
             {

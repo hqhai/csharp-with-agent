@@ -89,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                     UnitId = grouped.Key.UnitId,
                                     CourseName = grouped.First().CourseName,
                                     Code = grouped.First().Code,
-                                    NumberOfStars = grouped.Select(x => x.NumberOfStars).Average(),
+                                    NumberOfStars = grouped.Any() ? grouped.Average(x => x.NumberOfStars) : default,
                                     TotalRating = grouped.Select(x => x.NumberOfStars).Where(x => x <= 2).Count(),
                                     UnitDisplayOrder = grouped.Select(x => x.UnitDisplayOrder).FirstOrDefault(),
                                     LessonDisplayOrder = grouped.Select(x => x.LessonDisplayOrder).FirstOrDefault(),

@@ -262,5 +262,17 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Student by SchoolId
+        /// </summary>
+        [HttpGet("get-by-school-id")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetBySchoolId()
+        {
+            MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(new GetStudentBySchoolIdQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

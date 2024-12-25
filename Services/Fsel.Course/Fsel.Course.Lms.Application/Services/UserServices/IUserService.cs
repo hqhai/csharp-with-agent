@@ -6,10 +6,12 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Lms.Application.Services.UserServices.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels.EntityModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -28,18 +30,25 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Get("/v1/student/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] Guid id);
 
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
+        [Get("/v1/student/get-by-user-id/{id}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdWithCacheAsync([FromRoute] Guid id);
+
         [Get("/v1/student/get-student-by-class-id/{id}")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByClassIdAsync([Body] Guid id);
 
         [Get("/v1/student/get-class-has-too-many-students/{id}")]
         Task<IApiResponse<MethodResult<bool>>> GetStudentByClassIdCheckAsync([FromRoute] Guid id);
 
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
         [Post("/v1/teacher/get-by-ids")]
         Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetTeacherByIdsAsync([Body] GetTeacherByIdsQueryModel command);
 
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
         [Get("/v1/teacher/get-by-id/{id}")]
         Task<IApiResponse<MethodResult<TeacherModel>>> GetTeacherByIdAsync([Body] Guid id);
 
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
         [Get("/v1/teacher/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<TeacherModel>>> GetTeacherByUserIdAsync([FromRoute] Guid id);
 
@@ -49,9 +58,11 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Post("/v1/student/get-by-student-ids")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByStudentIdsAsync([Body] IList<Guid>? studentIds);
 
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
         [Get("/v1/cso/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<CSOModel>>> GetCSOByUserId([FromRoute] Guid id);
 
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
         [Get("/v1/cso/get-by-id/{id}")]
         Task<IApiResponse<MethodResult<CSOModel>>> GetCSOById([FromRoute] Guid id);
 
@@ -118,8 +129,25 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Get("/v1/admin/student/management")]
         Task<IApiResponse<MethodResult<PagingItemsModel<StudentSearchAdminModel>>>> SearchStudentAsync([FromQuery] BaseQueryModel query);
 
+        [Post("/v1/admin/student/search")]
+        Task<IApiResponse<MethodResult<PagingItemsModel<StudentDtoModel>>>> SearchStudentSchoolAsync([FromBody] SearchStudentSchoolQueryModel query);
+
+        [RefitCache(CacheSettings.TimeCache.TenMinutes)]
+        [Get("/v1/admin/student/gets")]
+        Task<IApiResponse<MethodResult<IList<StudentDtoModel>>>> GetStudentsSchoolAsync([FromQuery] SearchStudentSchoolQueryModel query);
+
+        [RefitCache(CacheSettings.TimeCache.TenMinutes)]
+        [Get("/v1/admin/student/get-dashboards")]
+        Task<IApiResponse<MethodResult<IList<StudentDtoModel>>>> GetStudentsDashboardAsync([FromQuery] GetStudentsDashboardQueryModel query);
+
         [Get("/v1/admin-school/student")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsToAdminSchoolAsync();
+
+        [Get("/v1/student/get-by-school-id")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsBySchoolId();
+
+        [Get("/v1/user/get-user-profile")]
+        Task<IApiResponse<MethodResult<UserModel>>> GetUserProfileAsync();
 
         [Get("/v1/student-ranking/get-students-by-event-code")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByEventCode([Query] string eventCode);

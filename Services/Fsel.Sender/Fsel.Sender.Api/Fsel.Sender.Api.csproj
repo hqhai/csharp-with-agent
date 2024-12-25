@@ -64,6 +64,9 @@
     <None Update="Resources\MailRegisterForEventPhuTho.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\MailRegisterForEventThaiNguyen.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\MailRegisterForEventUlis.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

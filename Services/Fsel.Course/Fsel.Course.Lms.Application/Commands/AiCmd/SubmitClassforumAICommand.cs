@@ -74,9 +74,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             _logger.LogCritical($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} Start");
 
-            var classForumDetailResult = await _classForumDetailResultRepository.GetByIdAsync(request.ClassForumDetailResultId);
-            _logger.LogCritical($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 1: {classForumDetailResult.Serialize(options)}");
-
             var userAiConfig = request!.UserAIConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
             var aIResponse = await _mediator.Send(new SubmitAICommand
             {
@@ -91,7 +88,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             }, cancellationToken).ConfigureAwait(false);
 
             #region Retry
-
 
             aIResponse = Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
 
@@ -108,9 +104,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             var classForumDetailResultOwner = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResult).ThenInclude(x => x.LessonResult).ThenInclude(x => x.Lesson).FirstOrDefault(x => x.Id == request.ClassForumDetailResultId);
 
-            var emailUserNeedSupportResult = classForumDetailResultOwner?.CreatedUserId != null ? await _userService.GetStudentByUserIdAsync(classForumDetailResultOwner.CreatedUserId) : null;
+            var emailUserNeedSupportResult = classForumDetailResultOwner?.CreatedUserId != null ? await _userService.GetStudentByUserIdWithCacheAsync(classForumDetailResultOwner.CreatedUserId) : null;
 
             var emailStudent = emailUserNeedSupportResult != null ? emailUserNeedSupportResult!.Content?.Result?.Human?.Email : string.Empty;
+
+            var classForumDetailResult = await _classForumDetailResultRepository.GetByIdAsync(request.ClassForumDetailResultId);
+            _logger.LogCritical($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 1: {classForumDetailResult.Serialize(options)}");
 
             if (classForumDetailResult != null && classForumDetailResult.RetryTime > Max_Time_Retry)
             {
