@@ -82,25 +82,21 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<DashBoardLearningProgressModel>();
-            var studentIds = new List<Guid>();
             bool isMaxHoursCompleted = true;
 
             var courseLevels = request.CourseTypes.GetCourseLevels(request.CourseLevels);
-            bool isRoleAdminSchool = _authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString());
-            if (isRoleAdminSchool)
+
+            var userResults = await _userService.GetStudentsDashboardAsync(new GetStudentsDashboardQueryModel
             {
-                var userResults = await _userService.GetStudentsDashboardAsync(new GetStudentsDashboardQueryModel
-                {
-                    EnumCourseLevelStr = string.Join(",", courseLevels),
-                    SchoolClassStr = request.SchoolClassStr,
-                });
-                if (!userResults.IsSuccessStatusCode)
-                {
-                    methodResult.AddError(userResults.Error);
-                    return methodResult;
-                }
-                studentIds = userResults.Content?.Result?.Select(x => x.Id).ToList() ?? new List<Guid>();
+                EnumCourseLevelStr = string.Join(",", courseLevels),
+                SchoolClassStr = request.SchoolClassStr,
+            });
+            if (!userResults.IsSuccessStatusCode)
+            {
+                methodResult.AddError(userResults.Error);
+                return methodResult;
             }
+            var studentIds = userResults.Content?.Result?.Select(x => x.Id).ToList() ?? new List<Guid>();
 
             if (request.CourseLevels != null && request.CourseLevels.Any())
             {
@@ -109,8 +105,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             var query = from baseQ in _courseResultRepository.Queryable
                         join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
                         join lr in _lessonResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId } equals new { lr.StudentId, lr.CourseId }
-                        where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
-                        (!isRoleAdminSchool || ((studentIds == null || !studentIds.Any()) || studentIds.Contains(baseQ.StudentId))) &&
+                        where baseQ.WorkingStatus == EnumWorkingStatus.Active && studentIds.Contains(baseQ.StudentId) &&
                         (!request.EndDate.HasValue || (lr.UpdatedDate ?? lr.CreatedDate).Date <= request.EndDate.Value.Date) &&
                         ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
                         lr.Status == EnumResultStatus.Done
@@ -143,8 +138,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                                           join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
                                           join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
                                           join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
-                                          where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
-                                          (!isRoleAdminSchool || ((studentIds == null || !studentIds.Any()) || studentIds.Contains(baseQ.StudentId))) &&
+                                          where baseQ.WorkingStatus == EnumWorkingStatus.Active && studentIds.Contains(baseQ.StudentId) &&
                                           ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
                                           (!request.EndDate.HasValue || (ur.CompletionDate ?? ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
                                           group new { cum, ur } by new { cum.Number } into g
@@ -176,8 +170,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                                             join lr in _lessonResultRepository.Queryable on new { ur.StudentId, ur.CourseId, ur.UnitId } equals new { lr.StudentId, lr.CourseId, lr.UnitId }
                                             join ul in _unitLessonRepository.Queryable on new { lr.UnitId, lr.LessonId } equals new { ul.UnitId, ul.LessonId }
 
-                                            where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
-                                            (!isRoleAdminSchool || ((studentIds == null || !studentIds.Any()) || studentIds.Contains(baseQ.StudentId))) &&
+                                            where baseQ.WorkingStatus == EnumWorkingStatus.Active && studentIds.Contains(baseQ.StudentId) &&
                                             ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
                                             (!request.EndDate.HasValue || (ur.CompletionDate ?? ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date) &&
                                             cum.DisplayOrder == request.DisplayOrderUnit

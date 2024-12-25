@@ -37,7 +37,7 @@ namespace Fsel.Shared.Models.ShareModels
 
         public string? FormDescription { get; set; }
         public string? AwardPromotional { get; set; }
-        public string? AwardPromotionalImage { get; set; }
+        public IList<string>? AwardPromotionalImage { get; set; }
 
         public IList<ActionConfig>? ActionConfigs { get; set; }
         public EnumByPassPaymentType ByPassPaymentType { get; set; }
@@ -60,6 +60,7 @@ namespace Fsel.Shared.Models.ShareModels
         public string? BackGroundImage { get; set; }
 
         public IList<string>? TabNames { get; set; }
+        public ButtonNavSettings? ButtonNavSettings { get; set; }
     }
 
     public enum EnumSchoolEventRuleAction
@@ -166,5 +167,10 @@ namespace Fsel.Shared.Models.ShareModels
         public string? BannerMobile { get; set; }
     }
 
+    public class ButtonNavSettings
+    {
+        public string? TextDisplay { get; set; }
+        public string? Link { get; set; }
+    }
     #endregion Prize
 }
