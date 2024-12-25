@@ -58,7 +58,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                                     on s.Id equals p.StudentId
                                     where p.Status == Domain.Enums.EnumResultStatus.Done &&
                                           (!request.ToDate.HasValue || p.CompletionDate <= request.ToDate.Value)
-                                    select s).Distinct().ToList();
+                                    select new
+                                    {
+                                        Student = s,
+                                        PlacementResult = p
+                                    }).ToList();
 
             int totalStudents = student.Count;
             int numberStudentFinishPT = filteredStudents.Count;
@@ -69,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             reportPTResult.OverallStatic.TotalStudentInSchool = totalStudents;
             reportPTResult.OverallStatic.NumberStudentFinishPT = numberStudentFinishPT;
             reportPTResult.OverallStatic.NumberStudentNotFinishPT = numberStudentNotFinishPT;
-            reportPTResult.SchoolName = filteredStudents.FirstOrDefault()?.School;
+            reportPTResult.SchoolName = filteredStudents.FirstOrDefault()?.Student.School;
 
             if (student != null)
             {
@@ -94,37 +98,43 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 BaseChartResultModel amountStudentByLevel = new BaseChartResultModel
                 {
                     Type = EnumChartType.BarChart,
-                    DataCharts = filteredStudents.GroupBy(student => student.CourseLevel)
-                                                 .OrderBy(group => group.Key)
-                                                 .Select(group => new DataChartModel
-                                                 {
-                                                     Label = group.Key.ToString(),
-                                                     Value = group.Count()
-                                                 })
-                                                 .ToList()
+                    DataCharts = filteredStudents.Where(student => student.PlacementResult.ProcessLevel != EnumPlacementTestLevel.IELTS &&
+                                                                   student.PlacementResult.CurrentLevel != EnumCourseLevel.C1 &&
+                                                                   student.PlacementResult.CurrentLevel != null)
+                                                .GroupBy(student => student.PlacementResult.CurrentLevel)
+                                                .OrderBy(group => group.Key)
+                                                .Select(group => new DataChartModel
+                                                {
+                                                    Label = group.Key.ToString(),
+                                                    Value = group.Count()
+                                                })
+                                                .ToList()
                 };
 
-                var amountStudentByLevelAndClass = filteredStudents.GroupBy(student => new { student.SchoolClass, student.CourseLevel })
-                                                                   .Select(group => new
-                                                                   {
-                                                                       ClassName = group.Key.SchoolClass,
-                                                                       CourseLevel = group.Key.CourseLevel,
-                                                                       Count = group.Count()
-                                                                   })
-                                                                   .GroupBy(x => x.ClassName)
-                                                                   .OrderBy(classGroup => classGroup.Key)
-                                                                   .Select(classGroup => new StackBarChartModel
-                                                                   {
-                                                                       Label = classGroup.Key,
-                                                                       DataColumns = classGroup.OrderBy(levelGroup => levelGroup.CourseLevel)
-                                                                                               .Select(levelGroup => new DataChartModel
-                                                                                               {
-                                                                                                   Label = levelGroup.CourseLevel.ToString(),
-                                                                                                   Value = levelGroup.Count
-                                                                                               }).ToList()
-                                                                   })
-                                                                   .ToList();
-
+                var amountStudentByLevelAndClass = filteredStudents.Where(student => student.PlacementResult.CurrentLevel != EnumCourseLevel.C1 &&
+                                                                                       student.PlacementResult.CurrentLevel != null &&
+                                                                                       student.PlacementResult.ProcessLevel != EnumPlacementTestLevel.IELTS &&
+                                                                                       student.Student.SchoolClass != null)
+                                                                     .GroupBy(student => new { student.Student.SchoolClass, student.PlacementResult.CurrentLevel })
+                                                                     .Select(group => new
+                                                                     {
+                                                                         ClassName = group.Key.SchoolClass,
+                                                                         CurrentLevel = group.Key.CurrentLevel,
+                                                                         Count = group.Count()
+                                                                     })
+                                                                     .GroupBy(x => x.ClassName)
+                                                                     .OrderBy(classGroup => classGroup.Key)
+                                                                     .Select(classGroup => new StackBarChartModel
+                                                                     {
+                                                                         Label = classGroup.Key,
+                                                                         DataColumns = classGroup.OrderBy(levelGroup => levelGroup.CurrentLevel)
+                                                                                                 .Select(levelGroup => new DataChartModel
+                                                                                                 {
+                                                                                                     Label = levelGroup.CurrentLevel.ToString(),
+                                                                                                     Value = levelGroup.Count
+                                                                                                 }).ToList()
+                                                                     })
+                                                                     .ToList();
                 if (request.ListClassName.Any())
                 {
                     amountStudentByLevelAndClass = amountStudentByLevelAndClass
