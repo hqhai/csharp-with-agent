@@ -76,6 +76,7 @@ namespace Fsel.Shared.Models.ShareModels
     }
 
     #region FormConfig
+
     public class FormConfig
     {
         public IList<FormSection>? Sections { get; set; }
@@ -102,7 +103,7 @@ namespace Fsel.Shared.Models.ShareModels
         public string? ErrorMessage { get; set; }
     }
 
-    #endregion
+    #endregion FormConfig
 
     public class ProcessStep
     {
@@ -118,6 +119,7 @@ namespace Fsel.Shared.Models.ShareModels
         public DateTime? EndDate { get; set; }
         public StopAtLevelSelectionConfig? StopAtLevelSelectionConfig { get; set; }
         public EnumSenderTemplate? MailRegister { get; set; }
+        public string? SubjectMailRegister { get; set; }
     }
 
     public class StopAtLevelSelectionConfig
@@ -129,6 +131,7 @@ namespace Fsel.Shared.Models.ShareModels
     }
 
     #region Prize
+
     public class WeekEvent
     {
         public string? Title { get; set; }
@@ -162,5 +165,5 @@ namespace Fsel.Shared.Models.ShareModels
         public IList<string>? BannerMobile { get; set; }
     }
 
-    #endregion
+    #endregion Prize
 }
