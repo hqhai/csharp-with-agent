@@ -105,12 +105,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                      return letterPart;
                  }).Take(8)
                  .ToList();
-            var studentIds = studentGroups?.SelectMany(x => x.Select(y => y.Id)).ToList();
+            var studentIds = studentGroups?.SelectMany(x => x.Select(y => y.Id)).ToList() ?? new List<Guid>();
             var query = from baseQ in _courseResultRepository.Queryable
                         join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
                         join lr in _lessonResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId } equals new { lr.StudentId, lr.CourseId }
-                        where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
-                         studentIds != null && studentIds.Contains(baseQ.StudentId) &&
+                        where baseQ.WorkingStatus == EnumWorkingStatus.Active && studentIds.Contains(baseQ.StudentId) &&
                         (!request.EndDate.HasValue || (lr.UpdatedDate ?? lr.CreatedDate).Date <= request.EndDate.Value.Date) &&
                         ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
                         lr.Status == EnumResultStatus.Done

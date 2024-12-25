@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 {
+    using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
@@ -48,24 +49,19 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<DashBoardLearningResultModel>();
-            var studentIds = new List<Guid>();
-            bool isRoleAdminSchool = _authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString());
-            if (isRoleAdminSchool)
+            var userResults = await _userService.GetStudentsDashboardAsync(new GetStudentsDashboardQueryModel());
+            if (!userResults.IsSuccessStatusCode)
             {
-                var userResults = await _userService.GetStudentsDashboardAsync(new GetStudentsDashboardQueryModel());
-                if (!userResults.IsSuccessStatusCode)
-                {
-                    methodResult.AddError(userResults.Error);
-                    return methodResult;
-                }
-                studentIds = userResults.Content?.Result?.Select(x => x.Id).ToList() ?? new List<Guid>();
+                methodResult.AddError(userResults.Error);
+                return methodResult;
             }
+            var studentIds = userResults.Content?.Result?.Select(x => x.Id).ToList() ?? new List<Guid>();
+
             var courseOveralls = await (from baseQ in _courseResultRepository.Queryable
                                         join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
                                         join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
                                         join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
-                                        where baseQ.WorkingStatus == EnumWorkingStatus.Active && ur.Status == EnumResultStatus.Done &&
-                                        (!isRoleAdminSchool || studentIds.Contains(baseQ.StudentId)) &&
+                                        where baseQ.WorkingStatus == EnumWorkingStatus.Active && ur.Status == EnumResultStatus.Done && studentIds.Contains(baseQ.StudentId) &&
                                         (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
                                         group new { baseQ, ur, c } by new { baseQ.CourseId, baseQ.StudentId } into g
                                         select new
@@ -75,21 +71,21 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                                             Percent = g.Select(x => x.ur).Any() ? Math.Round(g.Select(x => x.ur).Average(x => x.Percent)) : default(double),
                                         }).ToListAsync(cancellationToken);
 
-            var unitOveralls = await (from baseQ in _courseResultRepository.Queryable
-                                      join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
-                                      join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
-                                      join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
-                                      where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
-                                      (!isRoleAdminSchool || studentIds.Contains(baseQ.StudentId)) &&
-                                      (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
-                                      group new { cum, ur, c } by new { cum.Number, c.CourseLevel } into g
-                                      select new
-                                      {
-                                          DisplayOrder = g.Key.Number,
-                                          CourseLevel = g.Key.CourseLevel,
-                                          CountPercent = g.Select(x => x.ur).Where(x => x.Status == EnumResultStatus.Done).Count(),
-                                          TotalPercent = g.Select(x => x.ur).Where(x => x.Status == EnumResultStatus.Done).Sum(x => x.Percent),
-                                      }).ToListAsync(cancellationToken);
+            var query = from baseQ in _courseResultRepository.Queryable
+                        join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
+                        join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
+                        join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
+                        where baseQ.WorkingStatus == EnumWorkingStatus.Active && studentIds.Contains(baseQ.StudentId) &&
+                        (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
+                        group new { cum, ur, c } by new { cum.Number, c.CourseLevel } into g
+                        select new
+                        {
+                            DisplayOrder = g.Key.Number,
+                            CourseLevel = g.Key.CourseLevel,
+                            Percents = g.Select(x => x.ur).Where(x => x.Status == EnumResultStatus.Done).Any() ? g.Select(x => x.ur).Where(x => x.Status == EnumResultStatus.Done).Select(x => x.Percent).ToList() : default,
+                        };
+
+            var unitOveralls = await (query).ToListAsync(cancellationToken);
 
             DashBoardLearningResultModel reportLearningResult = new DashBoardLearningResultModel
             {
@@ -123,7 +119,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                             .OrderBy(x => x.Key).Select(x => new DataChartModel
                             {
                                 Label = $"{x.Key}",
-                                Value = x.Where(y => y.CountPercent != 0).Any() ? (int)NumberHelper.ConvertRound(x.Where(x => x.CountPercent != 0).Average(y => y.TotalPercent / y.CountPercent)) : default,
+                                Value = x.Where(x => x.Percents != null && x.Percents.Any()).Any() ? (int)NumberHelper.ConvertRound(x.Where(x => x.Percents != null && x.Percents.Any()).SelectMany(x => x.Percents).Average()) : default,
                             }).ToList(),
                         };
                     }).ToList()
