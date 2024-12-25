@@ -60,7 +60,7 @@ namespace Fsel.Shared.Models.ShareModels
         public string? BackGroundImage { get; set; }
 
         public IList<string>? TabNames { get; set; }
-        public TextButton? TextButton { get; set; }
+        public ButtonNavSettings? ButtonNavSettings { get; set; }
     }
 
     public enum EnumSchoolEventRuleAction
@@ -167,7 +167,7 @@ namespace Fsel.Shared.Models.ShareModels
         public string? BannerMobile { get; set; }
     }
 
-    public class TextButton
+    public class ButtonNavSettings
     {
         public string? TextDisplay { get; set; }
         public string? Link { get; set; }
