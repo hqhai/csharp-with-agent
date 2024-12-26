@@ -7,7 +7,6 @@ namespace Fsel.Ordering.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Ordering.Application.Commands.Products;
     using Fsel.Ordering.Application.Commands.VoucherCmds;
     using Fsel.Ordering.Application.Queries.UserVoucher;
     using Fsel.Ordering.Application.Queries.VoucherQuery;
@@ -64,6 +63,18 @@ namespace Fsel.Ordering.Api.Controllers
         public async Task<IActionResult> GetUserVoucherLockByUser()
         {
             var queryResult = await _mediator.Send(new GetUserVoucherLockByUserQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search voucher
+        /// </summary>
+        [HttpGet("search-voucher-by-user")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<VoucherModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUserVoucherLockByUser([FromQuery] SearchVoucherByUserQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
