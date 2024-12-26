@@ -193,6 +193,9 @@ namespace Fsel.Ordering.Domain.Entities
 
     public class VoucherTranslation : ITranslationObject
     {
+        public string? Name
+        { get { return Description?.Title?.FirstOrDefault(); } }
+
         public string? DescriptionStr { get; set; }
 
         [NotMapped]
