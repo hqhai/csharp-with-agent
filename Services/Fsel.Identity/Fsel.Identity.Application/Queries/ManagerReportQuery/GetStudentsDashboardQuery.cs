@@ -82,15 +82,14 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 query = query.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId);
             }
 
-            if (request.SchoolClasses != null)
+            if (request.SchoolClasses != null && request.SchoolClasses.Any())
             {
-                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolClass) && request.SchoolClasses.Contains(x.SchoolClass));
+                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolClass) && request.SchoolClasses.Any(y => y == x.SchoolClass));
             }
-            if (request.CourseLevels != null)
+            if (request.CourseLevels != null && request.CourseLevels.Any())
             {
                 query = query.Where(x => x.CourseLevel.HasValue && request.CourseLevels.Contains(x.CourseLevel.Value));
             }
-
             var lists = await query.AsNoTracking().ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             methodResult.Result = lists;
             methodResult.StatusCode = StatusCodes.Status200OK;
