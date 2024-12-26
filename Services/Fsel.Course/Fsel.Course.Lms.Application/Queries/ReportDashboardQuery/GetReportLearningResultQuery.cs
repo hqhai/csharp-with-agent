@@ -115,15 +115,16 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                         return new UnitChartModel
                         {
                             CourseType = courseType,
-                            DataColumns = Enumerable.Range(1, courseType == EnumCourseType.Ielts ? CourseProgressValue.CountUnitIELTS : CourseProgressValue.CountUnitAca).SelectMany(item =>
+                            DataColumns = Enumerable.Range(0, courseType == EnumCourseType.Ielts ? CourseProgressValue.CountUnitIELTS : courseType == EnumCourseType.Academic ? CourseProgressValue.CountUnitAca : ValueDefault).Select(item =>
                             {
-                                return unitOveralls.Where(x => x.CourseLevel.GetEnumCourseType() == courseType && x.DisplayOrder == item)
-                                        .GroupBy(x => x.DisplayOrder)
-                                        .Select(x => new DataChartModel
-                                        {
-                                            Label = $"{x.Key}",
-                                            Value = x.Where(x => x.Percents != null && x.Percents.Any()).Any() ? (int)NumberHelper.ConvertRound(x.Where(x => x.Percents != null && x.Percents.Any()).SelectMany(x => x.Percents).Average()) : default,
-                                        }).ToList();
+                                var indexUnit = item + 1;
+                                var overallPercentUnits = unitOveralls.Where(x => x.CourseLevel.GetEnumCourseType() == courseType && x.DisplayOrder == indexUnit && x.Percents != null && x.Percents.Any()).SelectMany(x => x.Percents).ToList();
+                                var percent = overallPercentUnits.Any() ? NumberHelper.ConvertRound(overallPercentUnits.Average()) : ValueDefault;
+                                return new DataChartModel
+                                {
+                                    Label = $"{indexUnit}",
+                                    Value = (int)percent
+                                };
                             }).ToList(),
                         };
                     }).ToList()
