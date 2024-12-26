@@ -117,5 +117,21 @@ namespace Fsel.Course.Lms.Api.Controllers
             }
             return File(queryResult.Result, Settings.Excels.ContentType, "export_file_explanation_question.xlsx");
         }
+
+        /// <summary>
+        /// Expot File PlacementTest Event
+        /// </summary>
+        [HttpPost("export-file-placement-test-event")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportFile([FromQuery] ExportReportPlacementTestEventQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!queryResult.IsOK || queryResult.Result == null)
+            {
+                return queryResult.GetActionResult();
+            }
+            return File(queryResult.Result, Settings.Excels.ContentType, "export_report_placement_test_report.xlsx");
+        }
     }
 }

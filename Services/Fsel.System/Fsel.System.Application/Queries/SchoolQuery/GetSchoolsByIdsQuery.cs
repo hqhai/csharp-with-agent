@@ -43,7 +43,6 @@ namespace Fsel.System.Application.Queries.SchoolQuery
             var schools = await _locationCrmRepository.Queryable.Where(p => request.Ids.Contains(p.GlobalId) && p.TypeName == EnumCrmLocationTypeName.School).ToListAsync(cancellationToken);
             if (schools == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(schools));
                 return methodResult;
             }
             methodResult.Result = schools.Select(p => new SchoolModel

@@ -1,0 +1,83 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
+{
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
+    using Fsel.Identity.Application.Services.SystemService;
+    using Fsel.Identity.Application.Services.SystemService.QueryModels;
+    using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels.EntityModels;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class GetReportCompetitionEventsQuery : IRequest<MethodResult<IList<ReportCompetitionEventModel>>>
+    {
+        public string? EventCode { get; set; }
+        public EnumEducationLevel EducationLevel { get; set; }
+    }
+
+    public class GetReportCompetitionEventsQueryHandler : IRequestHandler<GetReportCompetitionEventsQuery, MethodResult<IList<ReportCompetitionEventModel>>>
+    {
+        private readonly ICompetitionEventsRepository _competitionEventsRepository;
+        private readonly IStudentRepository _studentRepository;
+        private readonly ISystemService _systemService;
+
+        public GetReportCompetitionEventsQueryHandler(ICompetitionEventsRepository competitionEventsRepository,
+            IStudentRepository studentRepository,
+            ISystemService systemService)
+        {
+            _competitionEventsRepository = competitionEventsRepository;
+            _studentRepository = studentRepository;
+            _systemService = systemService;
+        }
+
+        public async Task<MethodResult<IList<ReportCompetitionEventModel>>> Handle(GetReportCompetitionEventsQuery request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<IList<ReportCompetitionEventModel>>();
+            var competition = await _competitionEventsRepository.Queryable.Include(x => x.CompetitionEvents).ThenInclude(x => x.CompetitionEvents).FirstOrDefaultAsync(x => x.EventCode == request.EventCode, cancellationToken);
+            if (competition == null)
+            {
+                return methodResult;
+            }
+            var districtIds = competition.CompetitionEvents.SelectMany(x => x.CompetitionEvents).Where(x => x.LocationId.HasValue).Select(x => x.LocationId.GetValueOrDefault()).ToList();
+            var locationResults = await _systemService.GetLocationByIdsAsync(new GetLocationsByIdsQueryModel { Ids = districtIds });
+            var locationDistricts = locationResults.Content?.Result;
+
+            var schoolIds = competition.CompetitionEvents.SelectMany(x => x.CompetitionEvents).SelectMany(x => x.SchoolIds ?? new List<Guid>()).ToList();
+            var schoolResults = await _systemService.GetSchoolsAsync(new GetSchoolsQueryModel { SchoolIds = schoolIds, EducationLevel = request.EducationLevel });
+            var schools = schoolResults.Content?.Result;
+
+            var studentSchoolIds = await _studentRepository.Queryable.Where(x => x.SchoolId.HasValue && schools != null && schools.Select(x => x.Id).Contains(x.SchoolId.Value))
+                                                             .Select(x => new
+                                                             {
+                                                                 SchoolId = x.SchoolId.GetValueOrDefault(),
+                                                                 StudentId = x.Id
+                                                             })
+                                                             .ToListAsync(cancellationToken);
+            var reportCompetitionEvents = new List<ReportCompetitionEventModel>();
+            foreach (var item in competition.CompetitionEvents.SelectMany(x => x.CompetitionEvents))
+            {
+                var studentDistricts = studentSchoolIds.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.SchoolId)).ToList();
+                var studentIds = studentDistricts.Select(x => x.StudentId).Distinct().ToList();
+                var reportCompetition = new ReportCompetitionEventModel
+                {
+                    DistrictName = locationDistricts?.FirstOrDefault(x => x.LocationId == item.LocationId)?.Name,
+                    NumberRegisteredSchool = schools?.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.Id)).Count() ?? default,
+                    NumberActualParticipatingSchool = studentDistricts.Select(x => x.SchoolId).Count(),
+                    NumberValidStudentAccount = studentIds.Count,
+                    StudentIds = studentIds,
+                };
+
+                reportCompetitionEvents.Add(reportCompetition);
+            }
+
+            methodResult.Result = reportCompetitionEvents;
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+    }
+}

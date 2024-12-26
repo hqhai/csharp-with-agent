@@ -1,0 +1,167 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Lms.Application.Queries.Reports
+{
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
+    using MediatR;
+    using Microsoft.EntityFrameworkCore;
+    using OfficeOpenXml;
+
+    public class ExportReportPlacementTestEventQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
+    {
+        public string? EventCode { get; set; }
+        public EnumEducationLevel EducationLevel { get; set; }
+    }
+
+    public class ExportReportPlacementTestEventQueryHandler : IRequestHandler<ExportReportPlacementTestEventQuery, MethodResult<Stream>>
+    {
+        private readonly IPlacementTestResultRepository _placementTestResultRepository;
+        private readonly IUserService _userService;
+
+        public ExportReportPlacementTestEventQueryHandler(IPlacementTestResultRepository placementTestResultRepository,
+            IUserService userService)
+        {
+            _placementTestResultRepository = placementTestResultRepository;
+            _userService = userService;
+        }
+
+        public async Task<MethodResult<Stream>> Handle(ExportReportPlacementTestEventQuery request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<Stream>();
+            var reportCompetitionEventResults = await _userService.GetReportCompetitionEventAsync(new GetReportCompetitionEventQueryModel
+            {
+                EducationLevel = request.EducationLevel,
+                EventCode = request.EventCode,
+            });
+
+            var reportCompetitionEvents = reportCompetitionEventResults?.Content?.Result;
+            if (reportCompetitionEvents == null)
+            {
+                return methodResult;
+            }
+            var reportPlacementTestEvents = new List<ReportPlacementTestEventModel>();
+
+            Parallel.ForEach(reportCompetitionEvents, async reportCompetitionEvent =>
+            {
+                var placementTestResultGroups = await _placementTestResultRepository.Queryable
+                                   .Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
+                                   .GroupBy(x => x.StudentId)
+                                   .Select(x => new
+                                   {
+                                       StudentId = x.Key,
+                                       PlacementTestStart = x.Select(x => x).OrderBy(x => x.CreatedDate).FirstOrDefault(),
+                                       PlacementTestEnd = x.Select(x => x).OrderByDescending(x => x.CreatedDate).FirstOrDefault(),
+                                   })
+                                   .ToListAsync(cancellationToken);
+                var placementTestResultReports = reportCompetitionEvent.StudentIds?.Select(item =>
+                {
+                    var placementTestGroupResult = placementTestResultGroups.FirstOrDefault(x => x.StudentId == item);
+                    var placementTestResultEnd = placementTestGroupResult?.PlacementTestEnd;
+                    var placementTestResultStart = placementTestGroupResult?.PlacementTestStart;
+                    if (placementTestResultEnd != null)
+                    {
+                        var (levelCompleted, isLock) = placementTestResultEnd.Level.GetLevelInScore(placementTestResultEnd.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultStart?.Level, default));
+                        return new PlacementTestResultReportGroupModel { StudentId = item, IsDonePT = isLock, CourseLevel = levelCompleted };
+                    }
+                    return new PlacementTestResultReportGroupModel { StudentId = item };
+                });
+                var reportPlacementTestEvent = new ReportPlacementTestEventModel
+                {
+                    LocationName = reportCompetitionEvent.DistrictName,
+                    NumberRegisteredSchool = reportCompetitionEvent.NumberRegisteredSchool,
+                    NumberActualParticipatingSchool = reportCompetitionEvent.NumberActualParticipatingSchool,
+                    NumberValidStudentAccount = reportCompetitionEvent.NumberValidStudentAccount,
+                    NumberStudentsCompletedPT = placementTestResultReports?.Where(x => x.IsDonePT).Count() ?? default,
+                    ReportCourseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic).Select(courseLevel =>
+                    {
+                        var numberStudentOfLevel = placementTestResultReports?.Where(x => x.IsDonePT && x.CourseLevel == courseLevel).Count() ?? default;
+                        return new ReportCourseLevelModel
+                        {
+                            CourseLevel = courseLevel,
+                            TotalStudent = numberStudentOfLevel,
+                            Percent = NumberHelper.GetPercent(numberStudentOfLevel, placementTestResultReports?.Where(x => x.IsDonePT).Count() ?? default)
+                        };
+                    }).ToList()
+                };
+                reportPlacementTestEvents.Add(reportPlacementTestEvent);
+            });
+            methodResult.Result = ExportExcelTemplate(reportPlacementTestEvents, request);
+            return methodResult;
+        }
+
+        public static Stream ExportExcelTemplate(IList<ReportPlacementTestEventModel>? reportPlacementTestEvents, ExportReportPlacementTestEventQuery request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            MemoryStream memoryStream = new MemoryStream();
+
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.ReportPTEvent)))
+            {
+                var excelWorksheet = excelPackage.Workbook.Worksheets[0];
+                excelWorksheet.Cells["A5"].Value = GetData(excelWorksheet.Cells["I2"].Value, request.EducationLevel.GetDescription());
+
+                int startRow = 9;
+                if (reportPlacementTestEvents != null && reportPlacementTestEvents.Any())
+                {
+                    foreach (var item in reportPlacementTestEvents)
+                    {
+                        excelWorksheet.Cells[startRow, 1].Value = reportPlacementTestEvents.IndexOf(item) + 1;
+                        excelWorksheet.Cells[startRow, 2].Value = item.LocationName;
+                        excelWorksheet.Cells[startRow, 3].Value = item.NumberRegisteredSchool;
+                        excelWorksheet.Cells[startRow, 4].Value = item.NumberActualParticipatingSchool;
+                        excelWorksheet.Cells[startRow, 5].Value = item.ActualSchoolParticipationRate;
+                        excelWorksheet.Cells[startRow, 6].Value = item.NumberValidStudentAccount;
+                        excelWorksheet.Cells[startRow, 7].Value = item.NumberStudentsCompletedPT;
+                        excelWorksheet.Cells[startRow, 8].Value = item.CompletionRate;
+                        if (item.ReportCourseLevels != null)
+                        {
+                            var rowReportLevel = 9;
+                            foreach (var reportLevel in item.ReportCourseLevels)
+                            {
+                                excelWorksheet.Cells[startRow, rowReportLevel].Value = reportLevel.TotalStudent;
+                                excelWorksheet.Cells[startRow, rowReportLevel++].Value = reportLevel.Percent;
+                                rowReportLevel++;
+                            }
+                        }
+                        startRow++;
+                    }
+                }
+
+                excelPackage.SaveAs(memoryStream);
+            }
+
+            memoryStream.Position = 0L;
+            return memoryStream;
+        }
+
+        private static string GetData(object data, object? param)
+        {
+            string objStr = data?.ToString() ?? string.Empty;
+            return string.Format(objStr, param);
+        }
+
+        private class ReportCourseLevelPTModel
+        {
+            public EnumCourseLevel CourseLevel { get; set; }
+            public double Percent { get; set; }
+        }
+
+        private class PlacementTestResultReportGroupModel
+        {
+            public Guid StudentId { get; set; }
+            public bool IsDonePT { get; set; }
+            public EnumCourseLevel? CourseLevel { get; set; }
+        }
+    }
+}
