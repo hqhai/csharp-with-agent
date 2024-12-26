@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
     using System.Linq;
     using System.Text.Json.Serialization;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -41,18 +42,21 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
     {
         private readonly IStudentRepository _studentRepository;
         private readonly IUserSchoolRepository _userSchoolRepository;
+        private readonly AuthContext _authContext;
 
-        public GetStudentsDashboardQueryHandler(IStudentRepository studentRepository, IUserSchoolRepository userSchoolRepository)
+        public GetStudentsDashboardQueryHandler(IStudentRepository studentRepository,
+            IUserSchoolRepository userSchoolRepository,
+            AuthContext authContext)
         {
             _studentRepository = studentRepository;
             _userSchoolRepository = userSchoolRepository;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<IList<StudentDtoModel>>> Handle(GetStudentsDashboardQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<StudentDtoModel>> methodResult = new MethodResult<IList<StudentDtoModel>>();
-            var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
             var query = _studentRepository.Queryable.Where(x => x.CourseId.HasValue).Select(i => new StudentDtoModel
             {
                 Id = i.Id,
@@ -71,10 +75,13 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 UserId = i.Human.UserId,
                 CreatedDate = i.CreatedDate,
             });
-            if (schoolId.HasValue)
+
+            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
             {
-                query = query.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId.Value);
+                var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
+                query = query.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId);
             }
+
             if (request.SchoolClasses != null)
             {
                 query = query.Where(x => !string.IsNullOrEmpty(x.SchoolClass) && request.SchoolClasses.Contains(x.SchoolClass));
