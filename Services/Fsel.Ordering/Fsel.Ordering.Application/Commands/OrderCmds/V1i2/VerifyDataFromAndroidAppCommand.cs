@@ -50,7 +50,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             }
             var subscriptionPurchaseStr = subscriptionPurchase.Serialize();
-            _logger.LogError(subscriptionPurchaseStr);
+            _logger.LogInformation(subscriptionPurchaseStr);
             if (!subscriptionPurchase.PaymentState.HasValue || subscriptionPurchase.PaymentState != 1)
             {
                 _logger.LogError($"subscriptionPurchase.PaymentState is null or != 1");
@@ -64,7 +64,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             }
             var subscriptionPurchaseJson = subscriptionPurchase.Serialize();
-            _logger.LogError(subscriptionPurchaseJson);
+            _logger.LogInformation(subscriptionPurchaseJson);
             await _mediator.Send(new OrderCmds.ChangeStatusOrderCommand()
             {
                 OrderId = new Guid(subscriptionPurchase.OrderId),
