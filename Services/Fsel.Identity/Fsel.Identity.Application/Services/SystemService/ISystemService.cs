@@ -43,6 +43,6 @@ namespace Fsel.Identity.Application.Services.SystemService
         Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetLocationByIdsAsync([Query] GetLocationsByIdsQueryModel query);
 
         [Post("/v1/school/gets")]
-        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolsAsync([Body] GetSchoolsQueryModel query);
+        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolsAsync([Body] GetListSchoolQueryModel query);
     }
 }
