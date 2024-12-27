@@ -91,7 +91,7 @@ namespace Fsel.Ordering.Application.Commands.Products
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
-            if (product.ExpireDate.Date < currentDate)
+            if (product.ExpireDate < currentDate)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.ExchangeExpirationDate));
                 return methodResult;
