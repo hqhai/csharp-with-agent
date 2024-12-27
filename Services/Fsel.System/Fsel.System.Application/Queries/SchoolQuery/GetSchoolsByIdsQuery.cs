@@ -4,7 +4,6 @@ namespace Fsel.System.Application.Queries.SchoolQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
@@ -15,6 +14,7 @@ namespace Fsel.System.Application.Queries.SchoolQuery
 
     public class GetSchoolsByIdsQuery : IRequest<MethodResult<IList<SchoolModel>>>
     {
+        public EnumEducationLevel? EducationLevel { get; set; }
         public IList<Guid>? Ids { get; set; }
     }
 
@@ -40,11 +40,14 @@ namespace Fsel.System.Application.Queries.SchoolQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var schools = await _locationCrmRepository.Queryable.Where(p => request.Ids.Contains(p.GlobalId) && p.TypeName == EnumCrmLocationTypeName.School).ToListAsync(cancellationToken);
-            if (schools == null)
+            var query = _locationCrmRepository.Queryable.Where(p => request.Ids.Contains(p.GlobalId) && p.TypeName == EnumCrmLocationTypeName.School);
+            if (request.EducationLevel.HasValue)
             {
-                return methodResult;
+                var educationLevel = (EnumCrmLocationTypeLevel)request.EducationLevel.Value;
+                query = query.Where(m => m.TypeLevel == educationLevel);
             }
+            var schools = await query.ToListAsync(cancellationToken);
+
             methodResult.Result = schools.Select(p => new SchoolModel
             {
                 Id = p.GlobalId,

@@ -9,6 +9,6 @@ namespace Fsel.Identity.Application.Services.SystemService.QueryModels
     public class GetListSchoolQueryModel
     {
         public EnumEducationLevel? EducationLevel { get; set; }
-        public IList<Guid>? SchoolIds { get; set; }
+        public IList<Guid>? Ids { get; set; }
     }
 }

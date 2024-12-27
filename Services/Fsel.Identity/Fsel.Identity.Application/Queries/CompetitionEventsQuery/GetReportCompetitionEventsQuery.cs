@@ -51,7 +51,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             var locationDistricts = locationResults.Content?.Result;
 
             var schoolIds = competition.CompetitionEvents.SelectMany(x => x.CompetitionEvents).SelectMany(x => x.SchoolIds ?? new List<Guid>()).Distinct().ToList();
-            var schoolResults = await _systemService.GetSchoolsAsync(new GetListSchoolQueryModel { SchoolIds = schoolIds, EducationLevel = request.EducationLevel });
+            var schoolResults = await _systemService.GetSchoolsAsync(new GetListSchoolQueryModel { Ids = schoolIds, EducationLevel = request.EducationLevel });
             var schools = schoolResults.Content?.Result;
 
             //var studentSchoolIds = await _studentRepository.Queryable

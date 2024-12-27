@@ -75,7 +75,7 @@ namespace Fsel.System.Api.Controllers
         [HttpPost("gets")]
         [ProducesResponseType(typeof(MethodResult<IList<SchoolModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Gets([FromBody] GetSchoolsQuery query)
+        public async Task<IActionResult> Gets([FromBody] GetSchoolsByIdsQuery query)
         {
             MethodResult<IList<SchoolModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
