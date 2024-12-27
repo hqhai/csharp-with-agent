@@ -72,7 +72,7 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Get List School
         /// </summary>
-        [HttpGet("gets")]
+        [HttpPost("gets")]
         [ProducesResponseType(typeof(MethodResult<IList<SchoolModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Gets([FromBody] GetSchoolsQuery query)

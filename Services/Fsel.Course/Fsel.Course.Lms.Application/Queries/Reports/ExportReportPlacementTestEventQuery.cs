@@ -2,9 +2,9 @@
 
 namespace Fsel.Course.Lms.Application.Queries.Reports
 {
+    using System.Collections.Concurrent;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -14,10 +14,9 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
-    using Microsoft.EntityFrameworkCore;
     using OfficeOpenXml;
 
-    public class ExportReportPlacementTestEventQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
+    public class ExportReportPlacementTestEventQuery : IRequest<MethodResult<Stream>>
     {
         public string? EventCode { get; set; }
         public EnumEducationLevel EducationLevel { get; set; }
@@ -50,20 +49,24 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 return methodResult;
             }
-            var reportPlacementTestEvents = new List<ReportPlacementTestEventModel>();
+            var reportPlacementTestEvents = new ConcurrentBag<ReportPlacementTestEventModel>();
 
-            Parallel.ForEach(reportCompetitionEvents, async reportCompetitionEvent =>
+            var studentIds = reportCompetitionEvents.Where(x => x.StudentIds != null && x.StudentIds.Any()).SelectMany(x => x.StudentIds ?? new List<Guid>()).ToList();
+
+            var placementTestResultGroups = _placementTestResultRepository.Queryable
+                                  .Where(x => studentIds.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
+                                  .GroupBy(x => x.StudentId)
+                                  .Select(x => new
+                                  {
+                                      StudentId = x.Key,
+                                      PlacementTestStart = x.Select(x => x).OrderBy(x => x.CreatedDate).FirstOrDefault(),
+                                      PlacementTestEnd = x.Select(x => x).OrderByDescending(x => x.CreatedDate).FirstOrDefault(),
+                                  })
+                                  .ToList();
+
+            Parallel.ForEach(reportCompetitionEvents, reportCompetitionEvent =>
             {
-                var placementTestResultGroups = await _placementTestResultRepository.Queryable
-                                   .Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
-                                   .GroupBy(x => x.StudentId)
-                                   .Select(x => new
-                                   {
-                                       StudentId = x.Key,
-                                       PlacementTestStart = x.Select(x => x).OrderBy(x => x.CreatedDate).FirstOrDefault(),
-                                       PlacementTestEnd = x.Select(x => x).OrderByDescending(x => x.CreatedDate).FirstOrDefault(),
-                                   })
-                                   .ToListAsync(cancellationToken);
+                var placementTestResultGroupStudents = placementTestResultGroups.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).ToList();
                 var placementTestResultReports = reportCompetitionEvent.StudentIds?.Select(item =>
                 {
                     var placementTestGroupResult = placementTestResultGroups.FirstOrDefault(x => x.StudentId == item);
@@ -96,7 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 };
                 reportPlacementTestEvents.Add(reportPlacementTestEvent);
             });
-            methodResult.Result = ExportExcelTemplate(reportPlacementTestEvents, request);
+            methodResult.Result = ExportExcelTemplate(reportPlacementTestEvents.ToList(), request);
             return methodResult;
         }
 
@@ -109,7 +112,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.ReportPTEvent)))
             {
                 var excelWorksheet = excelPackage.Workbook.Worksheets[0];
-                excelWorksheet.Cells["A5"].Value = GetData(excelWorksheet.Cells["I2"].Value, request.EducationLevel.GetDescription());
+                excelWorksheet.Cells["A5"].Value = GetData(excelWorksheet.Cells["A5"].Value, $"{request.EducationLevel.GetDescription()}");
 
                 int startRow = 9;
                 if (reportPlacementTestEvents != null && reportPlacementTestEvents.Any())
@@ -120,18 +123,18 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                         excelWorksheet.Cells[startRow, 2].Value = item.LocationName;
                         excelWorksheet.Cells[startRow, 3].Value = item.NumberRegisteredSchool;
                         excelWorksheet.Cells[startRow, 4].Value = item.NumberActualParticipatingSchool;
-                        excelWorksheet.Cells[startRow, 5].Value = item.ActualSchoolParticipationRate;
+                        excelWorksheet.Cells[startRow, 5].Value = item.ActualSchoolParticipationRate + "%";
                         excelWorksheet.Cells[startRow, 6].Value = item.NumberValidStudentAccount;
                         excelWorksheet.Cells[startRow, 7].Value = item.NumberStudentsCompletedPT;
-                        excelWorksheet.Cells[startRow, 8].Value = item.CompletionRate;
+                        excelWorksheet.Cells[startRow, 8].Value = item.CompletionRate + "%";
                         if (item.ReportCourseLevels != null)
                         {
                             var rowReportLevel = 9;
                             foreach (var reportLevel in item.ReportCourseLevels)
                             {
                                 excelWorksheet.Cells[startRow, rowReportLevel].Value = reportLevel.TotalStudent;
-                                excelWorksheet.Cells[startRow, rowReportLevel++].Value = reportLevel.Percent;
-                                rowReportLevel++;
+                                excelWorksheet.Cells[startRow, rowReportLevel + 1].Value = reportLevel.Percent + "%";
+                                rowReportLevel += 2;
                             }
                         }
                         startRow++;

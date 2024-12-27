@@ -2,9 +2,7 @@
 
 namespace Fsel.System.Application.Queries.SchoolQuery
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;

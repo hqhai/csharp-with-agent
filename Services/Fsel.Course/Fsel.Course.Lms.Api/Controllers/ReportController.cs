@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
@@ -17,6 +18,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/report")]
     [ApiController]
+    [Permission]
     public class ReportController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -43,7 +45,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// </summary>
         [HttpPost("export-progress-student")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        [Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> Export([FromForm] ExportFileProgressStudentQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -59,7 +61,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// </summary>
         [HttpPost("export-overall")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        [Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> Export([FromQuery] ExportFileProgressStudentsToEmailsQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -75,7 +77,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// </summary>
         [HttpPost("export-time-report")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        [Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> Export([FromForm] ExportTimeReportStudentQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -91,7 +93,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// </summary>
         [HttpPost("export-progress-ielts")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        [Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> Export([FromForm] ExportFileProgressStudentIELTSToEmailsQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -124,6 +126,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("export-file-placement-test-event")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> ExportFile([FromQuery] ExportReportPlacementTestEventQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -131,7 +134,7 @@ namespace Fsel.Course.Lms.Api.Controllers
             {
                 return queryResult.GetActionResult();
             }
-            return File(queryResult.Result, Settings.Excels.ContentType, "export_report_placement_test_report.xlsx");
+            return File(queryResult.Result, Settings.Excels.ContentType, "export_report_placement_test_event.xlsx");
         }
     }
 }

@@ -39,10 +39,10 @@ namespace Fsel.Identity.Application.Services.SystemService
         [Post("/v1/google-sheet/register-student-for-event")]
         Task<IApiResponse<MethodResult<bool>>> RegisterStudentForEvent([Body] RegisterStudentForEventCommandModel model);
 
-        [Get("/v1/location/gets")]
+        [Get("/v1/location/get-by-ids")]
         Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetLocationByIdsAsync([Query] GetLocationsByIdsQueryModel query);
 
-        [Get("/v1/school/gets")]
-        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolsAsync([Query] GetSchoolsQueryModel query);
+        [Post("/v1/school/gets")]
+        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolsAsync([Body] GetSchoolsQueryModel query);
     }
 }
