@@ -6,7 +6,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.QueryModels
 
     public class GetReportCompetitionEventQueryModel
     {
-        public string? EventCode { get; set; }
+        public string? EventCodeStr { get; set; }
         public EnumEducationLevel EducationLevel { get; set; }
     }
 }

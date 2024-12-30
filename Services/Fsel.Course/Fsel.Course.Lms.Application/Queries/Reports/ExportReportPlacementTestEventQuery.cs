@@ -18,7 +18,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
     public class ExportReportPlacementTestEventQuery : IRequest<MethodResult<Stream>>
     {
-        public string? EventCode { get; set; }
+        public string? EventCodeStr { get; set; }
         public EnumEducationLevel EducationLevel { get; set; }
     }
 
@@ -41,7 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             var reportCompetitionEventResults = await _userService.GetReportCompetitionEventAsync(new GetReportCompetitionEventQueryModel
             {
                 EducationLevel = request.EducationLevel,
-                EventCode = request.EventCode,
+                EventCodeStr = request.EventCodeStr,
             });
 
             var reportCompetitionEvents = reportCompetitionEventResults?.Content?.Result;
