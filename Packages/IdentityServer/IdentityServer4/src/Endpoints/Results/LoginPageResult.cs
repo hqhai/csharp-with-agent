@@ -15,6 +15,8 @@ using IdentityServer4.Stores;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using static IdentityServer4.Constants;
+using IdentityModel;
+using System.Linq;
 
 namespace IdentityServer4.Endpoints.Results
 {
@@ -83,6 +85,12 @@ namespace IdentityServer4.Endpoints.Results
             var pageUrl = _options.UserInteraction.LoginUrl;
 
             var authContext = await _interaction.GetAuthorizationContextAsync(returnUrl);
+
+            if (authContext.Parameters.AllKeys.Contains(AuthorizationParamsHeader.ImpersonationClientSecret))
+            {
+                pageUrl = _options.UserInteraction.ImpersonationUrl;
+            }
+
             if (bool.TryParse(authContext?.Parameters[AuthorizationParamsHeader.IsRegister], out var isRegister) && isRegister)
             {
                 pageUrl = _options.UserInteraction.RegisterUrl;

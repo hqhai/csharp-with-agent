@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>IdentityServer4.EntityFramework.Storage</PackageId>
+    <IsUseCore>false</IsUseCore>
     <TargetFrameworks>net7.0</TargetFrameworks>
     
     <Description>EntityFramework persistence layer for IdentityServer4</Description>

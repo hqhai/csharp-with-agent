@@ -22,6 +22,9 @@ namespace IdentityServer4.Models
         public static ICollection<string> Code =>
             new[] { GrantType.AuthorizationCode };
 
+        public static ICollection<string> CodeAndImpersonation =>
+            new[] { GrantType.AuthorizationCode, GrantType.Impersonation };
+
         public static ICollection<string> CodeAndClientCredentials =>
             new[] { GrantType.AuthorizationCode, GrantType.ClientCredentials };
 

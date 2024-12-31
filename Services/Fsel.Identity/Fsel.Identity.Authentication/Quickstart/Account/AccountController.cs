@@ -564,6 +564,23 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         }
 
         /// <summary>
+        /// Impersonation
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> Impersonation(string? returnUrl)
+        {
+            var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+            var clientSecret = context?.Parameters[RequestHeaderSetting.ImpersonationClientSecret]?.ToString();
+            if (context != null && !string.IsNullOrEmpty(clientSecret) && context.Client.ClientSecrets.Any(x => x.Value == clientSecret.ToSha256()))
+            {
+                var userId = context.Parameters[RequestHeaderSetting.UserId]?.ToString();
+                var user = await _userManager.FindByIdAsync(userId ?? string.Empty);
+                return await LoginWithoutPassword(user, returnUrl);
+            }
+            return await Login(returnUrl);
+        }
+
+        /// <summary>
         /// Entry point into the login workflow
         /// </summary>
         [HttpGet]

@@ -28,6 +28,14 @@ namespace IdentityServer4.Configuration
         public string RegisterUrl { get; set; } = Constants.UIConstants.DefaultRoutePaths.Register.EnsureLeadingSlash();
 
         /// <summary>
+        /// Gets or sets the impersonation URL. If a local URL, the value must start with a leading slash.
+        /// </summary>
+        /// <value>
+        /// The register URL.
+        /// </value>
+        public string ImpersonationUrl { get; set; } = Constants.UIConstants.DefaultRoutePaths.Impersonation.EnsureLeadingSlash();
+
+        /// <summary>
         /// Gets or sets the login return URL parameter.
         /// </summary>
         /// <value>

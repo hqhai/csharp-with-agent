@@ -38,7 +38,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                 {
                     ClientId = "app.fsel.angular",
 
-                    AllowedGrantTypes = GrantTypes.Code,
+                    AllowedGrantTypes = GrantTypes.CodeAndImpersonation,
 
                     ClientSecrets =
                     {

@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>IdentityServer4.AspNetIdentity</PackageId>
+    <IsUseCore>false</IsUseCore>
     <TargetFrameworks>net7.0</TargetFrameworks>
     
     <Description>ASP.NET Core Identity Integration for IdentityServer4</Description>

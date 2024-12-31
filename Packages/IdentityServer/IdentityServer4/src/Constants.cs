@@ -188,6 +188,7 @@ namespace IdentityServer4
             {
                 public const string Login = "/account/login";
                 public const string Register = "/account/register";
+                public const string Impersonation = "/account/impersonation";
                 public const string Logout = "/account/logout";
                 public const string Consent = "/consent";
                 public const string Error = "/home/error";
@@ -334,6 +335,8 @@ namespace IdentityServer4
         public static class AuthorizationParamsHeader
         {
             public const string IsRegister = "IsRegister";
+            public const string ImpersonationClientSecret = "ImpersonationClientSecret";
+            public const string UserId = "UserId";
         }
 
         public static class CurveOids
