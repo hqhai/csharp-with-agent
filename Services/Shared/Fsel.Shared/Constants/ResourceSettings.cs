@@ -77,5 +77,6 @@ namespace Fsel.Shared.Constants
         public const string SchoolEventRules = "Resources//SchoolEventRules.json";
 
         public const string ReportPTEvent = "Resources//ExportExcelTemplates//ReportPTEvent.xlsx";
+        public const string ReportPTEventSchool = "Resources//ExportExcelTemplates//ReportPTEventSchool.xlsx";
     }
 }

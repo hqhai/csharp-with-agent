@@ -17,6 +17,9 @@
     <None Update="Resources\ExportExcelTemplates\ReportPTEvent.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\ExportExcelTemplates\ReportPTEventSchool.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\MailTemplates\Chart.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
