@@ -73,12 +73,12 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                                          (m.PhoneNumber ?? string.Empty).Trim().ToLower().Contains(request.Keyword) ||
                                          (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword));
             }
-
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
             {
                 var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
-                query = query.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId.Value);
+                query = query.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId);
             }
+
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.Admin.ToString()))
             {
                 var schoolIdResults = await _systemService.GetSchoolIdsAsync(new GetSchoolsQueryModel
