@@ -137,7 +137,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
             }
 
             int totalItem = voucherModels.Count;
-            var lists = voucherModels.ApplySortAndPaging(request).ToList();
+            var lists = voucherModels.ApplyPaging(request).ToList();
 
             methodResult.Result = new PagingItemsModel<VoucherModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
