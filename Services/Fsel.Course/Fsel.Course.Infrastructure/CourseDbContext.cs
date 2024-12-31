@@ -85,6 +85,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ProsodyScore> ProsodyScore { get; set; }
         public DbSet<QuestionExplanationError> QuestionExplanationErrors { get; set; }
         public DbSet<QuestionExplanationLog> QuestionExplanationLogs { get; set; }
+        public DbSet<QuestionShuffle> QuestionShuffles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -158,6 +159,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new ProsodyScoreEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionExplanationErrorEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionExplanationLogEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestionShuffleEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
