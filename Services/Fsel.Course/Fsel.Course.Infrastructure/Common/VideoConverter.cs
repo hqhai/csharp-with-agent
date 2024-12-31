@@ -206,7 +206,7 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                     break;
 
-                case EnumCourseType.AdultFoundation:
+                case EnumCourseType.EnglishFoundation:
                     if (request.VideoTimeCodes.Any(x => x.TimeCodeType == EnumTimeCodeType.SkillTest))
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.AdultFoundationNotAcceptsSkillTest),
