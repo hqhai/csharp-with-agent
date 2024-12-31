@@ -70,6 +70,18 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
+        /// Get List School
+        /// </summary>
+        [HttpPost("gets")]
+        [ProducesResponseType(typeof(MethodResult<IList<SchoolModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Gets([FromBody] GetSchoolsByIdsQuery query)
+        {
+            MethodResult<IList<SchoolModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get Schools Query
         /// </summary>
         [HttpPost("get-ids")]

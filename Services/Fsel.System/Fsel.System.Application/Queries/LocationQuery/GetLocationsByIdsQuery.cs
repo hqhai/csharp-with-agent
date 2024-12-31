@@ -4,7 +4,6 @@ namespace Fsel.System.Application.Queries.LocationQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
@@ -39,12 +38,6 @@ namespace Fsel.System.Application.Queries.LocationQuery
                 return methodResult;
             }
             var locations = await _locationCrmRepository.Queryable.Where(p => request.Ids.Contains(p.GlobalId) && p.TypeName == EnumCrmLocationTypeName.Site).ToListAsync(cancellationToken);
-            if (locations == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(locations));
-                return methodResult;
-            }
-
             methodResult.Result = _mapper.Map<IList<LocationModel>>(locations);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

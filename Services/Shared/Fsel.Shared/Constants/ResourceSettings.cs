@@ -86,5 +86,6 @@ namespace Fsel.Shared.Constants
         public const string ManagerReportStudentAssiduityExcel = "Resources//ManagerReports//BaoCaoChuyenCan.xlsx";
         public const string ManagerReportLearningResultAcaExcel = "Resources//ManagerReports//BaoCaoKetQuaHocTapAca.xlsx";
         public const string ManagerReportLearningResultIELTSExcel = "Resources//ManagerReports//BaoCaoKetQuaHocTapIELTS.xlsx";
+        public const string ReportPTEvent = "Resources//ExportExcelTemplates//ReportPTEvent.xlsx";
     }
 }
