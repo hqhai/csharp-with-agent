@@ -7,6 +7,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels.EntityModels;
@@ -36,16 +37,19 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
         private readonly IStudentRepository _studentRepository;
         private readonly ISystemService _systemService;
         private readonly IEventRegistrationRepository _eventRegistrationRepository;
+        private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
 
         public GetReportCompetitionEventSchoolsQueryHandler(ICompetitionEventsRepository competitionEventsRepository,
             IStudentRepository studentRepository,
             ISystemService systemService,
-            IEventRegistrationRepository eventRegistrationRepository)
+            IEventRegistrationRepository eventRegistrationRepository,
+            IStudentCompetitionEventsRepository studentCompetitionEventsRepository)
         {
             _competitionEventsRepository = competitionEventsRepository;
             _studentRepository = studentRepository;
             _systemService = systemService;
             _eventRegistrationRepository = eventRegistrationRepository;
+            _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
         }
 
         public async Task<MethodResult<IList<ReportCompetitionEventModel>>> Handle(GetReportCompetitionEventSchoolsQuery request, CancellationToken cancellationToken)
@@ -76,6 +80,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 
             var studentSchoolIds = await (from baseQ in _studentRepository.Queryable
                                           join er in _eventRegistrationRepository.Queryable on baseQ.Id equals er.StudentId
+                                          join sce in _studentCompetitionEventsRepository.Queryable on baseQ.Id equals sce.StudentId
                                           where baseQ.SchoolId.HasValue && schools != null && schools.Select(x => x.Id).Contains(baseQ.SchoolId.Value)
                                           && competitions.Select(x => x.Id).Contains(er.CompetitionEventId)
                                           group baseQ

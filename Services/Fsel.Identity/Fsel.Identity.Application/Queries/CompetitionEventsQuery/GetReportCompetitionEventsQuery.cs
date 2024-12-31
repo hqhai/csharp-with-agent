@@ -34,16 +34,19 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
         private readonly IStudentRepository _studentRepository;
         private readonly ISystemService _systemService;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
+        private readonly IEventRegistrationRepository _eventRegistrationRepository;
 
         public GetReportCompetitionEventsQueryHandler(ICompetitionEventsRepository competitionEventsRepository,
             IStudentRepository studentRepository,
             ISystemService systemService,
-            IStudentCompetitionEventsRepository studentCompetitionEventsRepository)
+            IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
+            IEventRegistrationRepository eventRegistrationRepository)
         {
             _competitionEventsRepository = competitionEventsRepository;
             _studentRepository = studentRepository;
             _systemService = systemService;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
+            _eventRegistrationRepository = eventRegistrationRepository;
         }
 
         public async Task<MethodResult<IList<ReportCompetitionEventModel>>> Handle(GetReportCompetitionEventsQuery request, CancellationToken cancellationToken)
@@ -65,6 +68,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 
             var studentSchoolIds = await (from baseQ in _studentRepository.Queryable
                                           join sce in _studentCompetitionEventsRepository.Queryable on baseQ.Id equals sce.StudentId
+                                          join ev in _eventRegistrationRepository.Queryable on baseQ.Id equals ev.StudentId
                                           where baseQ.SchoolId.HasValue && schools != null && schools.Select(x => x.Id).Contains(baseQ.SchoolId.Value)
                                           && competitions.Select(x => x.Id).Contains(sce.CompetitionEventId)
                                           select new
