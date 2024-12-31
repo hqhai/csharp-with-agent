@@ -52,6 +52,35 @@ namespace Fsel.Course.Domain.Models.EntityModels
         }
 
         public IList<ReportCourseLevelModel>? ReportCourseLevels { get; set; }
+        public IList<ReportPlacementTestEventSchoolModel> ReportPlacementTestEventSchools { get; set; } = new List<ReportPlacementTestEventSchoolModel>();
+    }
+
+    public class ReportPlacementTestEventSchoolModel
+    {
+        public string? SchoolName { get; set; }
+
+        /// <summary>
+        /// Số học sinh đăng ký tài khoản hợp lệ
+        /// </summary>
+        public int NumberValidStudentAccount { get; set; }
+
+        /// <summary>
+        /// Số học sinh đã hoàn thành PT
+        /// </summary>
+        public int NumberStudentsCompletedPT { get; set; }
+
+        /// <summary>
+        /// Tỷ lệ HS Hoàn thành PT/Đăng ký TK
+        /// </summary>
+        public double CompletionRate
+        {
+            get
+            {
+                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount);
+            }
+        }
+
+        public IList<ReportCourseLevelModel>? ReportCourseLevels { get; set; }
     }
 
     public class ReportCourseLevelModel
