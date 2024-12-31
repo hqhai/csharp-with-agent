@@ -18,7 +18,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/report")]
     [ApiController]
-    [Permission]
     public class ReportController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -126,7 +125,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("export-file-placement-test-event")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> ExportFile([FromQuery] ExportReportPlacementTestEventQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -135,6 +133,22 @@ namespace Fsel.Course.Lms.Api.Controllers
                 return queryResult.GetActionResult();
             }
             return File(queryResult.Result, Settings.Excels.ContentType, "export_report_placement_test_event.xlsx");
+        }
+
+        /// <summary>
+        /// Expot File PlacementTest Event
+        /// </summary>
+        [HttpPost("export-file-placement-test-school-event")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportFile([FromQuery] ExportReportPlacementTestEventSchoolQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!queryResult.IsOK || queryResult.Result == null)
+            {
+                return queryResult.GetActionResult();
+            }
+            return File(queryResult.Result, Settings.Excels.ContentType, "export_report_placement_test_school_event.xlsx");
         }
     }
 }
