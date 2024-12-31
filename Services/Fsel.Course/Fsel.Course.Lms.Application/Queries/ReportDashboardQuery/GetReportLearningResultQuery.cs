@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class GetReportLearningResultQuery : IRequest<MethodResult<DashBoardLearningResultModel>>
     {
@@ -102,7 +103,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                             Label = enumScore.ToString(),
                             TotalStudentAca = overallPercents.Count(x => x.CourseLevel.GetEnumCourseType() == EnumCourseType.Academic),
                             TotalStudentIELST = overallPercents.Count(x => x.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts),
-                            Value = (int)NumberHelper.ConvertPercentDouble((double)overallPercents.Count() / courseOveralls.Count),
+                            Value = (int)NumberHelper.GetPercent(overallPercents.Count(), courseOveralls.Count),
                         };
                     }).ToList()
                 },
@@ -114,12 +115,16 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                         return new UnitChartModel
                         {
                             CourseType = courseType,
-                            DataColumns = unitOveralls.Where(x => x.CourseLevel.GetEnumCourseType() == courseType)
-                            .GroupBy(x => x.DisplayOrder)
-                            .OrderBy(x => x.Key).Select(x => new DataChartModel
+                            DataColumns = Enumerable.Range(0, courseType == EnumCourseType.Ielts ? CourseProgressValue.CountUnitIELTS : courseType == EnumCourseType.Academic ? CourseProgressValue.CountUnitAca : ValueDefault).Select(item =>
                             {
-                                Label = $"{x.Key}",
-                                Value = x.Where(x => x.Percents != null && x.Percents.Any()).Any() ? (int)NumberHelper.ConvertRound(x.Where(x => x.Percents != null && x.Percents.Any()).SelectMany(x => x.Percents).Average()) : default,
+                                var indexUnit = item + 1;
+                                var overallPercentUnits = unitOveralls.Where(x => x.CourseLevel.GetEnumCourseType() == courseType && x.DisplayOrder == indexUnit && x.Percents != null && x.Percents.Any()).SelectMany(x => x.Percents).ToList();
+                                var percent = overallPercentUnits.Any() ? NumberHelper.ConvertRound(overallPercentUnits.Average()) : ValueDefault;
+                                return new DataChartModel
+                                {
+                                    Label = $"{indexUnit}",
+                                    Value = (int)percent
+                                };
                             }).ToList(),
                         };
                     }).ToList()

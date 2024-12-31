@@ -8,7 +8,6 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -24,22 +23,19 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
         private readonly IMapper _mapper;
         private readonly IStudentRepository _studentRepository;
         private readonly IUserSchoolRepository _userSchoolRepository;
+
         public GetStudentBySchoolIdQueryHandler(IMapper mapper, IStudentRepository studentRepository, IUserSchoolRepository userSchoolRepository)
         {
             _mapper = mapper;
             _studentRepository = studentRepository;
             _userSchoolRepository = userSchoolRepository;
         }
+
         public async Task<MethodResult<IList<StudentModel>>> Handle(GetStudentBySchoolIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<StudentModel>>();
             var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
-
-            if (schoolId == null)
-            {
-                methodResult.AddError(nameof(EnumSystemErrorCode.DataNotExist), nameof(schoolId));
-            }
             //var students = _studentRepository.Queryable.Where(x => x.SchoolId == schoolId).ToList();
 
             var students = await _studentRepository.Queryable
