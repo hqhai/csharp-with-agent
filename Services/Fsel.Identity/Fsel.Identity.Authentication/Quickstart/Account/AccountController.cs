@@ -577,7 +577,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 var user = await _userManager.FindByIdAsync(userId ?? string.Empty);
                 return await LoginWithoutPassword(user, returnUrl);
             }
-            return await Login(returnUrl);
+            return RedirectToAction(nameof(Login), new { returnUrl });
         }
 
         /// <summary>
