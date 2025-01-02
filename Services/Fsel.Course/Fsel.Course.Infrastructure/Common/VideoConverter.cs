@@ -329,7 +329,8 @@ namespace Fsel.Course.Infrastructure.Common
                               CorrectCount = x.Sum(y => y.CorrectCount),
                               TotalCount = x.Sum(y => y.TotalCount),
                               TotalQuestion = x.Sum(x => x.TotalQuestion),
-                              CountQuestion = x.Sum(x => x.CountQuestion)
+                              CountQuestion = x.Sum(x => x.CountQuestion),
+                              TokenReceived = x.Sum(x => x.TokenReceived)
                           })).ToList();
 
             var videoSkillScores = (from type in Enum.GetValues(typeof(EnumTimeCodeType)).Cast<EnumTimeCodeType>()
@@ -345,6 +346,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                            CorrectCount = answerTimeCodeQ_jointable.Sum(x => x.CorrectCount),
                                                            TotalQuestion = answerTimeCodeQ_jointable.Sum(x => x.TotalQuestion),
                                                            CountQuestion = answerTimeCodeQ_jointable.Sum(x => x.CountQuestion),
+                                                           TokenReceived = answerTimeCodeQ_jointable.Sum(x => x.TokenReceived),
                                                        }).Where(x => x.TotalQuestion != 0).OrderBy(x => x.Skill).ToList()
                                     }).ToList();
             return (videoSkillScores, tokenConfig?.TokenFirst, tokenConfig?.TokenLast);
@@ -364,7 +366,8 @@ namespace Fsel.Course.Infrastructure.Common
                                 Type = x.Key.TimeCodeType,
                                 Skill = x.Key.Skill,
                                 CorrectCount = x.Sum(y => y.CorrectCount),
-                                TotalAnswer = x.Sum(y => y.CountQuestion)
+                                TotalAnswer = x.Sum(y => y.CountQuestion),
+                                TokenReceived = x.Sum(x => x.TokenReceived)
                             })).ToList();
             var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Include(x => x.TimeCodeExercises)
                                     .ThenInclude(x => x.Exercise)
@@ -417,6 +420,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                     CorrectCount = answerTimeCodeQJ != null ? answerTimeCodeQJ.CorrectCount : default,
                                                     TotalQuestion = questionTimeCodeQJ.TotalQuestion,
                                                     CountQuestion = answerTimeCodeQJ != null ? answerTimeCodeQJ.TotalAnswer : default,
+                                                    TokenReceived = answerTimeCodeQJ != null ? answerTimeCodeQJ.TokenReceived : default,
                                                 }).ToList()
                              };
             return (scoreQuery.ToList(), listGroupQuestion.Sum(x => x.TotalQuestion) != answers.Sum(x => x.TotalAnswer));
