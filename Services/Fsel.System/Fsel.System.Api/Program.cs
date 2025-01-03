@@ -73,6 +73,7 @@ builder.Services.AddScoped<IBannerStudentRepository, BannerStudentRepository>();
 builder.Services.AddScoped<ISharePointService, SharePointService>();
 
 builder.Services.AddScoped<IFselRatingRepository, FselRatingRepository>();
+builder.Services.AddScoped<IDisplayOrderConfigRepository, DisplayOrderConfigRepository>();
 
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();

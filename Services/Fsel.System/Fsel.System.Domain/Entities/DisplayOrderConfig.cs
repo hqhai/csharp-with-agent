@@ -1,11 +1,11 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Models.EntityModels
+namespace Fsel.System.Domain.Entities
 {
-    using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
 
-    public class DisplayOrderConfigModel : BaseModel
+    public class DisplayOrderConfig : Entity
     {
         public int DisplayOrder { get; set; }
 

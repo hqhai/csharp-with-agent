@@ -2,10 +2,14 @@
 
 namespace Fsel.System.Application.Queries.DisplayOrderConfigQuery
 {
+    using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetDisplayOrderConfigQuery : IRequest<MethodResult<IList<DisplayOrderConfigModel>>>
     {
@@ -13,58 +17,29 @@ namespace Fsel.System.Application.Queries.DisplayOrderConfigQuery
 
     public class GetDisplayOrderConfigQueryHandler : IRequestHandler<GetDisplayOrderConfigQuery, MethodResult<IList<DisplayOrderConfigModel>>>
     {
+        private readonly IDisplayOrderConfigRepository _displayOrderConfigRepository;
+        private readonly IMapper _mapper;
+
+        public GetDisplayOrderConfigQueryHandler(IDisplayOrderConfigRepository displayOrderConfigRepository,
+                                                 IMapper mapper)
+        {
+            _displayOrderConfigRepository = displayOrderConfigRepository;
+            _mapper = mapper;
+        }
+
         public async Task<MethodResult<IList<DisplayOrderConfigModel>>> Handle(GetDisplayOrderConfigQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<DisplayOrderConfigModel>> methodResult = new MethodResult<IList<DisplayOrderConfigModel>>();
 
-            List<DisplayOrderConfigModel> displayOrderConfigs = new List<DisplayOrderConfigModel>
+            var displayOrderConfigs = await _displayOrderConfigRepository.Queryable.ToListAsync(cancellationToken);
+            if (displayOrderConfigs == null)
             {
-                new DisplayOrderConfigModel
-                {
-                    DisplayOrder = 1,
-                    Name = Shared.Enums.EnumDisplayOrder.Popup,
-                    Status = true
-                },
-                new DisplayOrderConfigModel
-                {
-                    DisplayOrder = 2,
-                    Name = Shared.Enums.EnumDisplayOrder.Heading,
-                    Status = true
-                },
-                new DisplayOrderConfigModel
-                {
-                    DisplayOrder = 3,
-                    Name = Shared.Enums.EnumDisplayOrder.GoodMorning,
-                    Status = true
-                },
-                new DisplayOrderConfigModel
-                {
-                    DisplayOrder = 4,
-                    Name = Shared.Enums.EnumDisplayOrder.FselCoin,
-                    Status = true
-                },
-                new DisplayOrderConfigModel
-                {
-                    DisplayOrder = 5,
-                    Name = Shared.Enums.EnumDisplayOrder.StreakTimeCode,
-                    Status = true
-                },
-                new DisplayOrderConfigModel
-                {
-                    DisplayOrder = 6,
-                    Name = Shared.Enums.EnumDisplayOrder.TwentyFiveMinutesBreak,
-                    Status = true
-                },
-                new DisplayOrderConfigModel
-                {
-                    DisplayOrder = 7,
-                    Name = Shared.Enums.EnumDisplayOrder.Beginner,
-                    Status = true
-                }
-            };
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(displayOrderConfigs));
+                return methodResult;
+            }
 
-            methodResult.Result = displayOrderConfigs;
+            methodResult.Result = _mapper.Map<IList<DisplayOrderConfigModel>>(displayOrderConfigs.OrderBy(x => x.DisplayOrder));
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
