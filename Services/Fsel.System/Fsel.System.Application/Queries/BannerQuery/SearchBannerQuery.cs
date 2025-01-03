@@ -42,31 +42,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
 
             var query = _bannerRepository.Queryable
                                          .Include(x => x.BannerScopes)
-                                         .Select(x => new BannerModel
-                                         {
-                                             Id = x.Id,
-                                             Name = x.Name,
-                                             Code = x.Code,
-                                             CreatedDate = x.CreatedDate,
-                                             CreatedFullName = x.CreatedFullName,
-                                             CreatedUserId = x.CreatedUserId,
-                                             Content = x.Content,
-                                             FilePath = x.FilePath,
-                                             StartDate = x.StartDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam),
-                                             EndDate = x.EndDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam),
-                                             Type = x.Type,
-                                             UpdatedDate = x.UpdatedDate,
-                                             UpdatedFullName = x.UpdatedFullName,
-                                             UpdatedUserId = x.UpdatedUserId,
-                                             Url = x.Url,
-                                             BannerFrequency = x.BannerFrequency,
-                                             DisplayStartDate = x.DisplayStartDate,
-                                             DisplayEndDate = x.DisplayEndDate,
-                                             DisplayStartTime = x.DisplayStartTime,
-                                             DisplayEndTime = x.DisplayEndTime,
-                                             Status = x.Status,
-                                             BannerScopes = _mapper.Map<IList<BannerScopeModel>>(x.BannerScopes)
-                                         });
+                                         .AsQueryable();
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -86,7 +62,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
             int totalItem = await query.CountAsync(cancellationToken);
             var lists = await query.ApplySortAndPaging(request).ToListAsync(cancellationToken);
 
-            methodResult.Result = new PagingItemsModel<BannerModel>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<BannerModel>(_mapper.Map<IList<BannerModel>>(lists), request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
