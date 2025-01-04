@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.Reports
 {
     using System.Collections.Concurrent;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Enums;
@@ -14,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
     using OfficeOpenXml;
 
     public class ExportReportPlacementTestEventQuery : IRequest<MethodResult<Stream>>
@@ -25,15 +27,23 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     public class ExportReportPlacementTestEventQueryHandler : IRequestHandler<ExportReportPlacementTestEventQuery, MethodResult<Stream>>
     {
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
+        private readonly IMapper _mapper;
         private readonly IUserService _userService;
 
         public ExportReportPlacementTestEventQueryHandler(IPlacementTestResultRepository placementTestResultRepository,
+            IMapper mapper,
             IUserService userService)
         {
             _placementTestResultRepository = placementTestResultRepository;
+            _mapper = mapper;
             _userService = userService;
         }
-
+        private class PlacementTestGroupStudentResultModel
+        {
+            public Guid StudentId { get; set; }
+            public PlacementTestResultModel? PlacementTestStart { get; set; }
+            public PlacementTestResultModel? PlacementTestEnd { get; set; }
+        }
         public async Task<MethodResult<Stream>> Handle(ExportReportPlacementTestEventQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -52,17 +62,34 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             var reportPlacementTestEvents = new ConcurrentBag<ReportPlacementTestEventModel>();
 
             var studentIds = reportCompetitionEvents.Where(x => x.StudentIds != null && x.StudentIds.Any()).SelectMany(x => x.StudentIds ?? new List<Guid>()).ToList();
+            var placementTestResultGroups = new List<PlacementTestGroupStudentResultModel>();
 
-            var placementTestResultGroups = _placementTestResultRepository.Queryable
-                                  .Where(x => studentIds.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
-                                  .GroupBy(x => x.StudentId)
-                                  .Select(x => new
-                                  {
-                                      StudentId = x.Key,
-                                      PlacementTestStart = x.Select(x => x).OrderBy(x => x.CreatedDate).FirstOrDefault(),
-                                      PlacementTestEnd = x.Select(x => x).OrderByDescending(x => x.CreatedDate).FirstOrDefault(),
-                                  })
-                                  .ToList();
+            int batchSize = 5000; // Số lượng bản ghi mỗi lần truy vấn
+
+            // Chia danh sách thành từng nhóm
+            var batches = studentIds
+                .Select((id, index) => new { id, index })
+                .GroupBy(x => x.index / batchSize)
+                .Select(g => g.Select(x => x.id).ToList())
+                .ToList();
+
+            // Thực hiện truy vấn từng nhóm
+            foreach (var batch in batches)
+            {
+                var placementTestGroups = await _placementTestResultRepository.Queryable
+                                    .Where(x => batch.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
+                                    .GroupBy(x => x.StudentId)
+                                    .Select(x => new PlacementTestGroupStudentResultModel
+                                    {
+                                        StudentId = x.Key,
+                                        PlacementTestStart = _mapper.Map<PlacementTestResultModel>(x.Select(x => x).OrderBy(x => x.CreatedDate).FirstOrDefault()),
+                                        PlacementTestEnd = _mapper.Map<PlacementTestResultModel>(x.Select(x => x).OrderByDescending(x => x.CreatedDate).FirstOrDefault()),
+                                    })
+                                    .ToListAsync(cancellationToken);
+
+                // Thêm vào danh sách kết quả
+                placementTestResultGroups.AddRange(placementTestGroups);
+            }
 
             Parallel.ForEach(reportCompetitionEvents, reportCompetitionEvent =>
             {
