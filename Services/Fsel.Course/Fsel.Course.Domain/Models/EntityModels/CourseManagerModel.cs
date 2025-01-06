@@ -30,6 +30,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? LessonType { get; set; }
         public int? LessonDisplayOrder { get; set; }
         public EnumCourseSkill? CourseSkill { get; set; }
+        public double BandScores { get; set; }
+        public double TargetBandScores { get; set; }
 
         public double ProgressPercent { get; set; }
         public bool? IsCheckPercentColor { get; set; }

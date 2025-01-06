@@ -126,6 +126,28 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             sectionGroupResult.SkillScores = skillScores;
             sectionGroupResult.CorrectCount += (int)score;
 
+            if (mockTestResult.SkillScores != null && mockTestResult.SkillScores.Count > 1)
+            {
+                if (skillScores.Any())
+                {
+                    // Bước 1: Clone danh sách mà không chứa phần tử có Skill là Speaking
+                    var clonedSkillScores = mockTestResult.SkillScores
+                        .Where(x => x.Skill != EnumCourseSkill.Speaking)
+                        .ToList(); // Chuyển đổi thành danh sách
+
+                    // Bước 2: Thêm phần tử từ skillScores.Single() vào danh sách đã clone
+                    var skillScoreToAdd = skillScores.Single();
+                    clonedSkillScores.Add(skillScoreToAdd);
+
+                    // Bước 3: Gán ngược giá trị đã chỉnh sửa vào mockTestResult.SkillScores
+                    mockTestResult.SkillScores = clonedSkillScores;
+                }
+            }
+            else
+            {
+                mockTestResult.SkillScores = skillScores;
+            }
+
             await SendToWebSocket(mockTestScores, cancellationToken);
 
             await SaveMockTestScoresToDatabase(mockTestScores, cancellationToken);
@@ -233,7 +255,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
         private async Task SaveSectionGroupResultToDatabase(SectionGroupResult sectionGroupResult, CancellationToken cancellationToken)
         {
-            _sectionGroupResultRepository.Update(sectionGroupResult);
+            _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
 
             await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             //await _mockTestScoreRepository.ExecuteTransactionAsync(async () =>

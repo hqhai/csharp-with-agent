@@ -17,6 +17,7 @@ using Fsel.System.Infrastructure;
 using Fsel.System.Infrastructure.Common;
 using Fsel.System.Infrastructure.Repositories;
 using Fsel.System.Infrastructure.ValueSettings;
+using Microsoft.EntityFrameworkCore;
 using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +28,9 @@ builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<SystemDbContext>();
+
+builder.Services.AddDbContext<CrmDbContext>(
+        options => options.UseSqlServer(appSetting?.ConnectionStrings?.CrmConnection));
 
 builder.Services.AddScoped<ILiveTimeFrameRepository, LiveTimeFrameRepository>();
 builder.Services.AddScoped<ICourseTimeConfigRepository, CourseTimeConfigRepository>();
@@ -53,15 +57,22 @@ builder.Services.AddScoped<IChatbotConfigRepository, ChatbotConfigRepository>();
 builder.Services.AddScoped<IErrorReportRepository, ErrorReportRepository>();
 builder.Services.AddScoped<ITokenHistoryRepository, TokenHistoryRepository>();
 builder.Services.AddScoped<IChatBotRepository, ChatBotRepository>();
+builder.Services.AddScoped<ICrmLocationRepository, CrmLocationRepository>();
 builder.Services.AddScoped<IUserConfigRepository, UserConfigRepository>();
 builder.Services.AddScoped<ITechieRepository, TechieRepository>();
 builder.Services.AddScoped<ITechieActionRepository, TechieActionRepository>();
 builder.Services.AddScoped<IStudentTechieRepository, StudentTechieRepository>();
 builder.Services.AddScoped<ILuckyTicketRepository, LuckyTicketRepository>();
+
+builder.Services.AddScoped<IFselRatingRepository, FselRatingRepository>();
+
+builder.Services.AddScoped<ICourseTargetConfigRepository, CourseTargetConfigRepository>();
+builder.Services.AddScoped<ICourseSuggestConfigRepository, CourseSuggestConfigRepository>();
 builder.Services.AddScoped<IBannerRepository, BannerRepository>();
 builder.Services.AddScoped<IBannerStudentRepository, BannerStudentRepository>();
-builder.Services.AddScoped<IBannerSettingRepository, BannerSettingRepository>();
-builder.Services.AddScoped<IBannerScopeRepository, BannerScopeRepository>();
+builder.Services.AddScoped<ISharePointService, SharePointService>();
+
+builder.Services.AddScoped<IFselRatingRepository, FselRatingRepository>();
 
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();
@@ -95,7 +106,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.SystemQueue.NameQueue.QuestBoard, typeof(DoQuestBoardConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.TechieAction, typeof(TechieConsumer) },
     { QueueSettings.LmsQueue.NameQueue.Techie, typeof(TechieConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.CreateLuckyTicket, typeof(CreateLuckyTicketConsumer) }
+    { QueueSettings.SystemQueue.NameQueue.CreateLuckyTicket, typeof(CreateLuckyTicketConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.NoticeAccessTime, typeof(NoticeAccessFeatureConsumer) },
 });
 
 var app = builder.Build();

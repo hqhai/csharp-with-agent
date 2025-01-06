@@ -11,6 +11,7 @@ namespace Fsel.System.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.System.Application.Commands.NoticeAccessFeatureCmd;
 
     [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/log-action")]
@@ -47,5 +48,20 @@ namespace Fsel.System.Api.Controllers
             MethodResult<IList<LogActionDaysModel>> commandResult = await _mediator.Send(new GetListLogActionByUserIdsQuery { Ids = ids }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+
+        /// <summary>
+        /// Get LogActions by UserIds
+        /// </summary>
+        [HttpPost("test")]
+        [ProducesResponseType(typeof(MethodResult<IList<bool>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetFeatureAccessTime()
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new NoticeFeatureAccessCommand()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+
     }
 }

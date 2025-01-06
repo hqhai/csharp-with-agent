@@ -10,13 +10,16 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class CreateMockTestCommand : CreateMockTestCommandModel, IRequest<MethodResult<MockTestModel>>
     {
@@ -43,6 +46,13 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<MockTestModel> methodResult = new MethodResult<MockTestModel>();
 
+            var maxVersion = await _mockTestRepository.Queryable.MaxAsync(x => x.Version, cancellationToken);
+            if (request.Version < maxVersion)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.VersionTooLow), nameof(request.Version));
+                return methodResult;
+            }
+
             #region Validation
 
             if (request.SectionGroups == null || (!request.SectionGroups.Any() || request.SectionGroups.Any(x => x == null)))
@@ -61,7 +71,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 return methodResult;
             }
 
-            request.SectionGroups = request.SectionGroups.OrderBy(obj => obj.CourseSkill).ToList();
             MockTest mockTest = _mapper.Map<MockTest>(request);
             if (!mockTest.IsValid())
             {
@@ -71,25 +80,28 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             foreach (var sectionGroup in request.SectionGroups)
             {
-                if (sectionGroup == null || sectionGroup.Sections == null)
+                if (sectionGroup == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                     return methodResult;
                 }
-
-                sectionGroup.Sections = sectionGroup.Sections.OrderBy(x => x.DisplayOrder).Select((x, index) => { x.DisplayOrder = index; return x; }).ToList();
                 SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                if (!newSectionGroup.IsValid())
+                if (sectionGroup.Sections != null && sectionGroup.Sections.Any())
                 {
-                    methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
-                    return methodResult;
+                    newSectionGroup.Sections = newSectionGroup.Sections.OrderBy(x => x.DisplayOrder).Select((x, index) => { x.DisplayOrder = index; return x; }).ToList();
+                    if (!newSectionGroup.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
+                        return methodResult;
+                    }
+                    var method = _sectionGroupManagerConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
+                    if (!method.IsOK)
+                    {
+                        methodResult.AddErrorBadRequest(method.ErrorMessages);
+                        return methodResult;
+                    }
                 }
-                var method = _sectionGroupManagerConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
-                if (!method.IsOK)
-                {
-                    methodResult.AddErrorBadRequest(method.ErrorMessages);
-                    return methodResult;
-                }
+                newSectionGroup.ExecutionTime = sectionGroup.CourseSkill.GetTimeSkill(sectionGroup.AudioPath);
                 mockTest.MockTestSections.Add(new MockTestSection
                 {
                     SectionGroup = newSectionGroup

@@ -2,6 +2,8 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
+    using Fsel.Shared.Enums;
+
     public class CompetitionStudentProgressModel
     {
         public Guid CourseId { get; set; }
@@ -10,5 +12,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid StudentId { get; set; }
         public double TotalScore { get; set; }
         public Guid CourseResultId { get; set; }
+        public EnumCourseType CourseType { get; set; }
     }
 }

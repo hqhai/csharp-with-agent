@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
     using Fsel.Course.Lms.Application.Services.UserServices.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
+    using Fsel.Shared.Models.ShareModels.EntityModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -113,5 +114,20 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Get("/v1/student-ranking/school-event")]
         Task<IApiResponse<MethodResult<PagingItemStudentRankingModel>>> GetLeaderBoardDataAsync([FromQuery] GetStudentCompetitionByEventCodeQueryModel query);
+
+        [Get("/v1/admin/student/management")]
+        Task<IApiResponse<MethodResult<PagingItemsModel<StudentSearchAdminModel>>>> SearchStudentAsync([FromQuery] BaseQueryModel query);
+
+        [Get("/v1/admin-school/student")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsToAdminSchoolAsync();
+
+        [Get("/v1/student-ranking/get-students-by-event-code")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByEventCode([Query] string eventCode);
+
+        [Get("/v1/other/report-competition-event")]
+        Task<IApiResponse<MethodResult<IList<ReportCompetitionEventModel>>>> GetReportCompetitionEventAsync([Query] GetReportCompetitionEventQueryModel query);
+
+        [Get("/v1/other/report-competition-event-school")]
+        Task<IApiResponse<MethodResult<IList<ReportCompetitionEventModel>>>> GetReportCompetitionEventSchoolAsync([Query] GetReportCompetitionEventQueryModel query);
     }
 }

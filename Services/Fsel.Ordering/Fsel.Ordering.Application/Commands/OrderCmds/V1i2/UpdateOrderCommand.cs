@@ -18,6 +18,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class UpdateOrderCommand : UpdateOrderCommandModel, IRequest<MethodResult<OrderModel>>
     {
@@ -58,22 +59,27 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
 
             if (!string.IsNullOrEmpty(request.VoucherCode))
             {
-                var checkVoucher = await _mediator.Send(new CheckVoucherCommand()
-                {
-                    Code = request.VoucherCode,
-                    PackageId = request.Package.Id,
-                }, cancellationToken);
-                if (!checkVoucher.IsOK)
-                {
-                    methodResult.AddError(checkVoucher.ErrorMessages);
-                    return methodResult;
-                }
-                var voucher = await _voucherRepository.GetByIdAsync(checkVoucher.Result?.VoucherId ?? default);
+                var voucher = await _voucherRepository.Queryable.FirstOrDefaultAsync(p => p.Code.ToLower() == request.VoucherCode.ToLower(), cancellationToken);
                 if (voucher == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Package));
                     return methodResult;
                 }
+
+                if (!request.Order.VoucherId.HasValue || voucher.Id != request.Order.VoucherId)
+                {
+                    var checkVoucher = await _mediator.Send(new CheckVoucherCommand()
+                    {
+                        Code = request.VoucherCode,
+                        PackageId = request.Package.Id,
+                    }, cancellationToken);
+                    if (!checkVoucher.IsOK)
+                    {
+                        methodResult.AddError(checkVoucher.ErrorMessages);
+                        return methodResult;
+                    }
+                }
+
                 discountPercent = voucher.Percent;
                 request.Order.VoucherId = voucher.Id;
             }
@@ -96,6 +102,20 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<OrderModel>(request.Order);
+                if (request.Order.TotalPrice == 0)
+                {
+                    var changeStatusOrdersResult = await _mediator.Send(new ChangeStatusOrderCommand()
+                    {
+                        OrderIds = new[] { request.Order.Id },
+                        RevenueType = EnumPaymentRevenueType.NotRevenue,
+                        Status = EnumOrderStatus.Payment
+                    });
+                    if (!changeStatusOrdersResult.IsOK)
+                    {
+                        methodResult.AddError(changeStatusOrdersResult.ErrorMessages);
+                        return methodResult;
+                    }
+                }
                 return methodResult;
             });
 
@@ -120,6 +140,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             order.CompanyName = request.CompanyName;
             order.CompanyAddress = request.CompanyAddress;
             order.CompanyTaxCode = request.CompanyTaxCode;
+            order.CompanyEmail = request.CompanyEmail;
             order.ReferralCode = request.ReferralCode;
             order.EventId = request.EventId;
         }

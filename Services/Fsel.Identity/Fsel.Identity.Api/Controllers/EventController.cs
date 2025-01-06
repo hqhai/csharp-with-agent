@@ -1,16 +1,19 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Net;
+using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
-using Fsel.Identity.Domain.Models.EntityModels;
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using Asp.Versioning;
-using Fsel.Shared.Constants;
+using Fsel.Core.Base;
+using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.CompetitionEventsCmd;
 using Fsel.Identity.Application.Queries.CompetitionEventsQuery;
 using Fsel.Identity.Application.Services.SystemService.Model;
+using Fsel.Identity.Domain.IRepositories;
+using Fsel.Identity.Domain.Models.EntityModels;
+using Fsel.Shared.Constants;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Identity.Api.Controllers
 {
@@ -18,13 +21,15 @@ namespace Fsel.Identity.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/event")]
     [ApiController]
-    public class EventController : ControllerBase
+    public class EventController : BaseController
     {
         private readonly IMediator _mediator;
+        private readonly ICompetitionEventsRepository _competitionEventsRepository;
 
-        public EventController(IMediator mediator)
+        public EventController(IMediator mediator, ICompetitionEventsRepository competitionEventsRepository)
         {
             _mediator = mediator;
+            _competitionEventsRepository = competitionEventsRepository;
         }
 
         /// <summary>
@@ -66,14 +71,12 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Lấy danh sách trường học theo mã sự kiện
         /// </summary>
-        [HttpGet("schools/{eventCode}")]
+        [HttpGet("schools")]
         [ProducesResponseType(typeof(MethodResult<IList<SchoolModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetSchoolsByEventCode([FromRoute] string? eventCode)
+        public async Task<IActionResult> GetSchoolsByEventCode([FromQuery] GetSchoolsByEventCodeQuery query)
         {
-            ArgumentException.ThrowIfNullOrEmpty(nameof(eventCode));
-            GetSchoolsByEventCodeQuery query = new GetSchoolsByEventCodeQuery();
-            query.EventCode = eventCode;
+            ArgumentException.ThrowIfNullOrEmpty(nameof(query));
             MethodResult<IList<SchoolModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
@@ -88,6 +91,34 @@ namespace Fsel.Identity.Api.Controllers
         {
             MethodResult<IList<CompetitionEventsModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Execute-list-query
+        /// </summary>
+        [HttpGet("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExecuteList([FromQuery] BaseQueryModel query)
+        {
+            var result = await _competitionEventsRepository.GetListResultAsync<CompetitionEventsModel>(query);
+            return result.GetActionResult();
+        }
+
+        /// <summary>
+        /// Export-LandingPage-By-EventCode
+        /// </summary>
+        [HttpGet("export-landing-page")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportLandingPageByEventCode([FromQuery] ExportLandingPageByEventCodeQuery query)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, $"LandingPageEventCode.xlsx");
         }
     }
 }

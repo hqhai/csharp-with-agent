@@ -2,8 +2,6 @@
 
 namespace Fsel.Ordering.Domain.Models.CommandModels.Orders
 {
-    using Fsel.Shared.Enums;
-
     public class SavePackagesCommandModel
     {
         public IList<SavePackageCommandModel>? Packages { get; set; }
@@ -11,10 +9,12 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders
 
     public class SavePackageCommandModel
     {
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
+        public string? Name { get; set; }
         public decimal Price { get; set; }
         public decimal PriceMonth { get; set; }
-        public double MonthBonusNumber { get; set; }
-        public EnumPackageSuggest? Suggest { get; set; }
+        public int MonthNumber { get; set; }
+        public string? Description { get; set; }
+        public int ReferToken { get; set; }
     }
 }

@@ -93,8 +93,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 if (@eventResults.IsSuccessStatusCode && @eventResults.Content?.Result != null)
                 {
                     var @events = @eventResults.Content?.Result;
-                    var actions = @events?.Select(p => p.EventContent).Where(p => p.Actions != null && p.Actions.Count > 0).SelectMany(p => p.Actions!).ToList();
+                    var actions = @events?.Select(p => p.EventContent).Where(p => p != null && p.Actions != null && p.Actions.Count > 0).SelectMany(p => p.Actions!).ToList();
+                    var actionConfigs = @events?.Select(p => p.EventContent).Where(p => p != null && p.ActionConfigs != null && p.ActionConfigs.Count > 0).SelectMany(p => p.ActionConfigs!).ToList();
                     settingStudentModel.Actions = actions;
+                    settingStudentModel.ActionConfigs = actionConfigs;
                 }
 
                 var status = await _orderService.GetCurrentStatusAsync(_authContext.CurrentUserId);
