@@ -57,7 +57,6 @@ builder.Services.AddScoped<IHomeWorkQuestionRepository, HomeWorkQuestionReposito
 builder.Services.AddScoped<IHomeWorkResultRepository, HomeWorkResultRepository>();
 builder.Services.AddScoped<IProsodyScoreRepository, ProsodyScoreRepository>();
 
-
 builder.Services.AddScoped<IPlacementTestResultRepository, PlacementTestResultRepository>();
 builder.Services.AddScoped<IPlacementTestAnswerRepository, PlacementTestAnswerRepository>();
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
@@ -75,6 +74,7 @@ builder.Services.AddScoped<IClassForumResultRepository, ClassForumResultReposito
 builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRepository>();
 builder.Services.AddScoped<IMockTestAISettingRepository, MockTestAISettingRepository>();
 builder.Services.AddScoped<IStudentFeedbackRepository, StudentFeedbackRepository>();
+builder.Services.AddScoped<IQuestionShuffleRepository, QuestionShuffleRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();
