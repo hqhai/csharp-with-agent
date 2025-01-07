@@ -106,37 +106,37 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 {
                     continue;
                 }
-                try
-                {
-                    var user = new User();
-                    user.UserName = item.Email;
-                    user.Email = item.Email;
-                    user.FullName = item.FullName ?? item.Email;
-                    user.EmailConfirmed = true;
-                    if (Guid.TryParse(item.SchoolId, out Guid schoolId))
+                    try
                     {
-                        user.UserSchools = new List<UserSchool>
+                        var user = new User();
+                        user.UserName = item.Email;
+                        user.Email = item.Email;
+                        user.FullName = item.FullName ?? item.Email;
+                        user.EmailConfirmed = true;
+                        if (Guid.TryParse(item.SchoolId, out Guid schoolId))
                         {
-                            new UserSchool { SchoolId = schoolId }
-                        };
-                    }
+                            user.UserSchools = new List<UserSchool>
+                            {
+                                new UserSchool { SchoolId = schoolId }
+                            };
+                        }
 
-                    if (!user.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(user.ErrorMessages);
-                        return methodResult;
+                        if (!user.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(user.ErrorMessages);
+                            return methodResult;
+                        }
+                        var resultUser = await _userManager.CreateAsync(user, item.Password ?? DefaultPassword);
+                        if (!resultUser.Succeeded)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
+                            return methodResult;
+                        }
+                        await _userManager.AddToRoleAsync(user, nameof(EnumRole.AdminSchool));
                     }
-                    var resultUser = await _userManager.CreateAsync(user, item.Password ?? DefaultPassword);
-                    if (!resultUser.Succeeded)
+                    catch
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
-                        return methodResult;
-                    }
-                    await _userManager.AddToRoleAsync(user, nameof(EnumRole.AdminSchool));
-                }
-                catch
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr));
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr));
                     return methodResult;
                 }
             }

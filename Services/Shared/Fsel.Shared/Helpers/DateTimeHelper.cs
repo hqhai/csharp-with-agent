@@ -107,6 +107,18 @@ namespace Fsel.Shared.Helpers
             return weekDays;
         }
 
+        public static (DateTime Monday, DateTime Sunday) GetMondayAndSunday(DateTime date)
+        {
+            // Tìm ngày Thứ Hai
+            int diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
+            DateTime monday = date.AddDays(-1 * diff).Date;
+
+            // Tìm ngày Chủ Nhật
+            DateTime sunday = monday.AddDays(6).Date;
+
+            return (monday, sunday);
+        }
+
         public static string ConvertSecondsToTimeString(long totalSeconds)
         {
             int hours = (int)totalSeconds / 3600;
@@ -114,9 +126,10 @@ namespace Fsel.Shared.Helpers
             return string.Format(CultureInfo.InvariantCulture, "{0}h{1:D2}'", hours, minutes);
         }
 
-        public static int ConvertSecondsToHours(long seconds)
+        public static object ConvertSecondsToHours(long seconds)
         {
-            return (int)seconds / 3600;
+            double hours = (double)seconds / 3600;
+            return hours >= 1 ? (object)(int)hours : Math.Round(hours, 1);
         }
 
         public static int ConvertSecondsToHoursRoundUp(long seconds)
@@ -135,18 +148,6 @@ namespace Fsel.Shared.Helpers
             int minutes = (int)(seconds % 3600) / 60;
 
             return $"{hours} giờ {minutes:D2} phút";
-        }
-
-        public static (DateTime Monday, DateTime Sunday) GetMondayAndSunday(DateTime date)
-        {
-            // Tìm ngày Thứ Hai
-            int diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
-            DateTime monday = date.AddDays(-1 * diff).Date;
-
-            // Tìm ngày Chủ Nhật
-            DateTime sunday = monday.AddDays(6).Date;
-
-            return (monday, sunday);
         }
 
         public static bool IsCurrentDateInRange(DateTime? startDate, DateTime? endDate)

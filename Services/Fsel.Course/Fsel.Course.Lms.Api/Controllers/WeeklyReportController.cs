@@ -75,5 +75,17 @@ namespace Fsel.Course.Lms.Api.Controllers
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// send mail reminder to do pt
+        /// </summary>
+        [HttpPost("send-mail-reminder-pt-and-kickoff-event")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendMailReminderToDoPT([FromForm] SendMailReminderPTAndKickOffEventCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

@@ -3,6 +3,7 @@
 namespace Fsel.Ordering.Application.Queries.OrderQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Shared.Enums;
@@ -32,7 +33,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             MethodResult<EnumTrialRegistrationStatus?> methodResult = new MethodResult<EnumTrialRegistrationStatus?>();
             var currentStatus = EnumTrialRegistrationStatus.New;
 
-            var query = _orderRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefault(x => x.UserId == request.UserId);
+            var query = _orderRepository.Queryable.Where(x => x.UserId == request.UserId && x.Status == EnumOrderStatus.Payment).OrderByDescending(x => x.CreatedDate).FirstOrDefault();
 
             if (query == null)
             {
@@ -54,14 +55,14 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 return methodResult;
             }
 
-            DateTime currentDate = DateTime.UtcNow;
+            DateTime currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
             var currentExpireDate = student.ExpiredDate ?? query.ExpireDate;
 
             if (!currentExpireDate.HasValue)
             {
                 currentStatus = EnumTrialRegistrationStatus.New;
             }
-            else if (currentExpireDate.Value.Date < currentDate.Date)
+            else if (currentExpireDate.Value < currentDate)
             {
                 currentStatus = EnumTrialRegistrationStatus.Expired;
             }

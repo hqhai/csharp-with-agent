@@ -3,7 +3,6 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
-using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Units;
@@ -41,30 +40,14 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             #region Validation
 
-            if (request.LessonIds == null || !request.LessonIds.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonIds), request.LessonIds);
-                return methodResult;
-            }
-
-            var unit = await _unitRepository.Queryable
-                                    .Include(e => e.UnitLessons)
-                                    .Include(e => e.UnitSkillMockTests)
-                                    .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
-            if (unit == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
-                return methodResult;
-            }
-
             var isUnitUsed = await _unitRepository.IsUnitUsed(request.Id);
             if (isUnitUsed)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitUsed), nameof(request.Id), request.Id);
                 return methodResult;
             }
-            _mapper.Map(request, unit);
-            var method = await _unitHelper.Validate(unit, request);
+
+            var method = await _unitHelper.Validate(request);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
@@ -73,23 +56,25 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             #endregion Validation
 
+            var unit = await _unitRepository.Queryable
+                                  .Include(e => e.UnitLessons)
+                                  .Include(e => e.UnitSkillMockTests)
+                                  .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
+            if (unit == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
+                return methodResult;
+            }
+            _mapper.Map(request, unit);
+            _unitHelper.SetUnitData(unit, request);
+            if (!unit.IsValid())
+            {
+                methodResult.AddErrorBadRequest(unit.ErrorMessages);
+                return methodResult;
+            }
+
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {
-                unit.UnitLessons = request.LessonIds!.Select((x, index) => new UnitLesson
-                {
-                    DisplayOrder = index + 1,
-                    LessonId = x
-                }).ToList();
-                if (request.MockTestId != null)
-                {
-                    unit.UnitSkillMockTests = new List<UnitSkillMockTest>
-                    {
-                        new UnitSkillMockTest
-                        {
-                            MockTestId = request.MockTestId ?? default,
-                        }
-                    };
-                }
                 unit = _unitRepository.Update(unit);
                 await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

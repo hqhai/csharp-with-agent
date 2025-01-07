@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/placement-test-result")]
     [ApiController]
+    [Common.Attributes.Permission]
     public class PlacementTestResultController : ControllerBase
     {
         private readonly IMediator _mediator;

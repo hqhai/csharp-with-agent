@@ -7,6 +7,8 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
+    using Fsel.System.Application.Commands.OtherCmd;
     using Fsel.System.Application.Queries.TokenHistoryQuery;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;

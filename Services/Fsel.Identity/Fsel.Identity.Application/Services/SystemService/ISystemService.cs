@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Services.SystemService
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Services.SystemService.Model;
+    using Fsel.Identity.Application.Services.SystemService.QueryModels;
     using Fsel.Identity.Domain.Models.CommandModels.LandingPages;
     using Fsel.Shared.Models.ShareModels;
     using Microsoft.AspNetCore.Mvc;
@@ -26,9 +27,6 @@ namespace Fsel.Identity.Application.Services.SystemService
         [Get("/v1/school/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<SchoolModel>>>> ExecuteListSchoolQueryAsync([Query] BaseQueryModel query);
 
-        [Post("/v1/school/get-school-by-ids")]
-        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolByIds([Body] IList<Guid> ids);
-
         [Post("/v1/feature-access-time/get-feature-access-time-by-userIds")]
         Task<IApiResponse<MethodResult<IList<GetFeatureAccessTimeQueryModel>>>> GetFeatureAccessTimeByUserIds([FromBody] IList<Guid> userIds);
 
@@ -36,9 +34,15 @@ namespace Fsel.Identity.Application.Services.SystemService
         Task<IApiResponse<MethodResult<bool>>> AddContactInfoToGoogleSheet([Body] ReceiveDataFromLandingPageCommandModel model);
 
         [Post("/v1/school/get-by-ids")]
-        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolsAsync([Body] IList<Guid>? ids);
+        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolByIds([Body] IList<Guid>? ids);
 
         [Post("/v1/google-sheet/register-student-for-event")]
         Task<IApiResponse<MethodResult<bool>>> RegisterStudentForEvent([Body] RegisterStudentForEventCommandModel model);
+
+        [Get("/v1/location/get-by-ids")]
+        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetLocationByIdsAsync([Query] GetLocationsByIdsQueryModel query);
+
+        [Post("/v1/school/gets")]
+        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolsAsync([Body] GetListSchoolQueryModel query);
     }
 }

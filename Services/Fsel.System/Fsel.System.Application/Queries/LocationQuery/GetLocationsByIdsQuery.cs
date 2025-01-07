@@ -4,10 +4,12 @@ namespace Fsel.System.Application.Queries.LocationQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using Fsel.System.Domain.Models.QueryModels;
     using MediatR;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
     public class GetLocationsByIdsQuery : GetLocationsByIdsQueryModel, IRequest<MethodResult<IList<LocationModel>>>
@@ -16,12 +18,12 @@ namespace Fsel.System.Application.Queries.LocationQuery
 
     public class GetLocationByIdsQueryHandler : IRequestHandler<GetLocationsByIdsQuery, MethodResult<IList<LocationModel>>>
     {
-        private readonly ILocationRepository _locationRepository;
         private readonly IMapper _mapper;
+        private readonly ICrmLocationRepository _locationCrmRepository;
 
-        public GetLocationByIdsQueryHandler(ILocationRepository locationRepository, IMapper mapper)
+        public GetLocationByIdsQueryHandler(ICrmLocationRepository locationCrmRepository, IMapper mapper)
         {
-            _locationRepository = locationRepository;
+            _locationCrmRepository = locationCrmRepository;
             _mapper = mapper;
         }
 
@@ -30,13 +32,14 @@ namespace Fsel.System.Application.Queries.LocationQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<LocationModel>>();
 
-            if (request.Ids == null || request.Ids.Count == 0)
+            if (request.Ids == null || !request.Ids.Any())
             {
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-
-            var locations = await _locationRepository.Queryable.Where(p => request.Ids.Contains(p.Id)).ToListAsync(cancellationToken);
+            var locations = await _locationCrmRepository.Queryable.Where(p => request.Ids.Contains(p.GlobalId) && p.TypeName == EnumCrmLocationTypeName.Site).ToListAsync(cancellationToken);
             methodResult.Result = _mapper.Map<IList<LocationModel>>(locations);
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
     }

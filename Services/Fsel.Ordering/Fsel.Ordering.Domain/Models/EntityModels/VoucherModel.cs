@@ -24,6 +24,8 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
 
         public EnumVoucherType VoucherType { get; set; }
 
+        public EnumVoucherSource Source { get; set; }
+
         public bool IsActive { get; set; }
 
         public ICollection<VoucherPackageModel>? VoucherPackages { get; set; }

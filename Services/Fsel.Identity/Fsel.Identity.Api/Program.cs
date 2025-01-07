@@ -54,6 +54,7 @@ builder.Services.AddScoped<IStudentCompetitionEventsRepository, StudentCompetiti
 builder.Services.AddScoped<IStudentRankingEventRepository, StudentRankingEventRepository>();
 builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
 builder.Services.AddScoped<IEventRegistrationRepository, EventRegistrationRepository>();
+builder.Services.AddScoped<IUserDeletionRepository, UserDeletionRepository>();
 builder.Services.AddScoped<IUserSchoolRepository, UserSchoolRepository>();
 
 //Publisher
@@ -84,7 +85,11 @@ queues: new Dictionary<string, Type>
     { QueueSettings.TrainingQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
     { QueueSettings.UserQueue.NameQueue.AddExpiredDateForStudent, typeof(AddExpiredDateForStudentConsumer) },
     { QueueSettings.LmsQueue.NameQueue.StudentRankingEvent, typeof(StudentRankingEventsConsumer) },
-    { QueueSettings.UserQueue.NameQueue.AddFeatureMission, typeof(AddFeatureMissionConsumer) }
+    { QueueSettings.UserQueue.NameQueue.AddFeatureMission, typeof(AddFeatureMissionConsumer) },
+    { QueueSettings.UserQueue.NameQueue.NoticeExtend, typeof(NoticeExtendPackageConsumer) },
+    { QueueSettings.UserQueue.NameQueue.WeeklyNotice, typeof(WeeklyNoticeConsumer) },
+    { QueueSettings.UserQueue.NameQueue.JobRunEvents, typeof(JobRunEventsConsumer) },
+    { QueueSettings.UserQueue.NameQueue.CheckUserDeletion, typeof(CheckUserDeletionConsumer) }
 });
 var app = builder.Build();
 app.UseServices();

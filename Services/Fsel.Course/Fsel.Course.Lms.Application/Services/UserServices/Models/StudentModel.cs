@@ -19,6 +19,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
         public double NumberOfToken { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
+        public Guid? CourseId { get; set; }
         public Guid? SchoolId { get; set; }
         public Guid? SenderId { get; set; }
         public DateTime? ExpiredDate { get; set; }

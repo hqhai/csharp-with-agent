@@ -19,10 +19,15 @@ namespace Fsel.Hangfire.Host.Jobs
             JobExtensions.SetRecurringJob<SyncStudentShieldEveryDayWorker>(WorkerSettings.JobName.SyncStudentShieldEveryDayJob, Cron.Daily());
             JobExtensions.SetRecurringJob<UpdateOcCheckInClassForumResultWorker>(WorkerSettings.JobName.UpdateTeacherGradingInClassForumAndMockTestJob, Cron.MinuteInterval(15));
             JobExtensions.SetRecurringJob<LeaderBoardWorker>(WorkerSettings.JobName.LeaderBoardJob, Cron.HourInterval(1));
-            JobExtensions.SetRecurringJob<NoticeAccessTimeWorker>(WorkerSettings.JobName.NoticeAccessTime, Cron.Daily());
+            JobExtensions.SetRecurringJob<NoticeAccessTimeWorker>(WorkerSettings.JobName.NoticeAccessTime, Cron.HourInterval(1));
+            JobExtensions.SetRecurringJob<NoticeExtendPackageWorker>(WorkerSettings.JobName.NoticeExtendPackage, Cron.HourInterval(1));
             //JobExtensions.SetRecurringJob<WeeklyReportWorker>(WorkerSettings.JobName.WeeklyReport, Cron.Weekly(DayOfWeek.Monday, 2, 0));
-            JobExtensions.SetRecurringJob<JobActiveEventWorker>(WorkerSettings.JobName.ActiveEvent, Cron.Daily(17, 0));
+            JobExtensions.SetRecurringJob<TreasureZMatterWorker>(WorkerSettings.JobName.TreasureZMatter, Cron.Weekly(DayOfWeek.Wednesday, 9, 0));
+            JobExtensions.SetRecurringJob<EnergyOfPlanetWorker>(WorkerSettings.JobName.EnergyOfPlanet, Cron.Weekly(DayOfWeek.Sunday, 9, 0));
+            //JobExtensions.SetRecurringJob<JobActiveEventWorker>(WorkerSettings.JobName.ActiveEvent, Cron.Daily(17, 0));
+            JobExtensions.SetRecurringJob<JobRunEventsWorker>(WorkerSettings.JobName.RunEvents, Cron.Daily(17, 0));
             JobExtensions.SetRecurringJob<WeeklySnapShotLeaderBoardWorker>(WorkerSettings.JobName.WeeklySnapShot, Cron.Weekly(DayOfWeek.Sunday, 23, 30), EnumCountryKey.Vietnam.FindSystemTimeZoneInfo());
+            JobExtensions.SetRecurringJob<CheckUserDeletionWorker>(WorkerSettings.JobName.CheckUserDeletionJob, Cron.Daily());
             //JobExtensions.SetRecurringJob<TestWorker>(WorkerSettings.JobName.TestWorkerJob, Cron.Daily);
         }
     }

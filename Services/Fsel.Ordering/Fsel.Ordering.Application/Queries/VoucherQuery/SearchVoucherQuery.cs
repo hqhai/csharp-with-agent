@@ -2,7 +2,6 @@
 
 namespace Fsel.Ordering.Application.Queries.VoucherQuery
 {
-    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -12,7 +11,6 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Ordering.Domain.Models.QueryModels.Vouchers;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -47,8 +45,11 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                                 Quantity = x.Quantity,
                                 Percent = x.Percent,
                                 IsActive = x.IsActive,
+                                Source = x.Source,
                                 QuantityUsed = x.Orders.Where(p => p.Status == EnumOrderStatus.New || p.Status == EnumOrderStatus.Payment).Count(),
                             });
+
+            voucherQuery = voucherQuery.Where(p => request.Source == EnumVoucherSource.Admin ? p.Source == EnumVoucherSource.Admin : p.Source != EnumVoucherSource.Admin);
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {

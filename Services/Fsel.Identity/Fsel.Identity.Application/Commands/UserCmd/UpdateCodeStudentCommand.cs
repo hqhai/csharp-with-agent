@@ -17,6 +17,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -89,7 +90,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             user.Human.Student.SchoolId = request.SchoolId;
             if (request.SchoolId.HasValue)
             {
-                var schoolResults = await _systemService.GetSchoolsAsync(new List<Guid> { request.SchoolId.Value });
+                var schoolResults = await _systemService.GetSchoolByIds(new List<Guid> { request.SchoolId.Value });
                 if (schoolResults.IsSuccessStatusCode)
                 {
                     user.Human.Student.School = schoolResults.Content?.Result?.FirstOrDefault()?.Name;
@@ -139,7 +140,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
         private async Task<string> GeneratorCodeAsync(UpdateCodeStudentCommand request)
         {
-            var stt = await _studentRepository.Queryable.CountAsync();
+            var stt = _studentRepository.GetNextSequenceValue<int>(SqlSettings.Sequence.UserSequence);
             var currentDate = DateTime.UtcNow;
             var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
             var lastDigitOfYear = currentDate.Year % 10;

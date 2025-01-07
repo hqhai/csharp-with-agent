@@ -49,7 +49,7 @@ namespace Fsel.System.Application.Commands.CourseTimeConfigCmd
                 return methodResult;
             });
 
-            return methodResult;    
+            return methodResult;
         }
     }
 }

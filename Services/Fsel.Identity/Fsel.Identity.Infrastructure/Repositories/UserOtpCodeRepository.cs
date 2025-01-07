@@ -23,7 +23,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
         {
             if (!string.IsNullOrEmpty(email) && _appSetting.Otp != null && otpCode == _appSetting.Otp.ByPassOtpValue && _appSetting.Otp.IsByPassOtp)
             {
-                return await Queryable.Include(x => x.User).FirstOrDefaultAsync(x => x.User != null && x.Status == EnumOtpCodeStatus.New && x.User.Email == email);
+                return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.Email == email);
             }
             return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.OTPCode == otpCode);
         }
