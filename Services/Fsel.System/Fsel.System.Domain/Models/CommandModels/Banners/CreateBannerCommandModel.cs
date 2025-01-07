@@ -3,18 +3,14 @@
 namespace Fsel.System.Domain.Models.CommandModels.Banners
 {
     using Fsel.Shared.Enums;
+    using Fsel.System.Domain.Models.CommandModels.BannerImages;
     using Fsel.System.Domain.Models.CommandModels.BannerScopes;
-    using global::System.ComponentModel.DataAnnotations;
 
     public class CreateBannerCommandModel
     {
         public string? Code { get; set; }
 
         public string? Name { get; set; }
-
-        public string? Url { get; set; }
-
-        public string? FilePath { get; set; }
 
         public string? Content { get; set; }
 
@@ -33,9 +29,13 @@ namespace Fsel.System.Domain.Models.CommandModels.Banners
         public long? DisplayStartTime { get; set; }
 
         public long? DisplayEndTime { get; set; }
-        public EnumBannerLink? RouteScreen { get; set; }
 
-        [Required]
-        public IList<CreateBannerScopeCommandModel> BannerScopes { get; set; } = new List<CreateBannerScopeCommandModel>();
+        public bool MixPanel { get; set; }
+
+        public bool Status { get; set; }
+
+        public IList<CreateBannerScopeCommandModel>? BannerScopes { get; set; }
+
+        public IList<CreateBannerImageCommandModel>? BannerImages { get; set; }
     }
 }

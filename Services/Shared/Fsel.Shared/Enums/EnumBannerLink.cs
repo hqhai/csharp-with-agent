@@ -5,6 +5,7 @@ namespace Fsel.Shared.Enums
     public enum EnumBannerLink
     {
         QuestBoard,
-        MySubcription
+        MySubcription,
+        Custom
     }
 }

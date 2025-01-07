@@ -7,5 +7,7 @@ namespace Fsel.System.Domain.Models.CommandModels.BannerSettings
         public int MaximumPerDay { get; set; }
 
         public long DisplayIntervalTime { get; set; }
+
+        public long TimeSlideShow { get; set; }
     }
 }

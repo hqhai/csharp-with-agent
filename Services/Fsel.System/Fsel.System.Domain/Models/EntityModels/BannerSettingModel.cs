@@ -9,5 +9,7 @@ namespace Fsel.System.Domain.Models.EntityModels
         public int MaximumPerDay { get; set; }
 
         public long DisplayIntervalTime { get; set; }
+
+        public long TimeSlideShow { get; set; }
     }
 }

@@ -3,7 +3,9 @@
 namespace Fsel.System.Application.Commands.BannerCmd
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Shared.Enums;
+    using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -11,7 +13,13 @@ namespace Fsel.System.Application.Commands.BannerCmd
 
     public class CheckBannerPriorityExistenceCommand : IRequest<MethodResult<BannerPriorityExistenceModel>>
     {
+        public Guid? Id { get; set; }
+
+        public EnumBannerType Type { get; set; }
+
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
+
+        public IList<Guid>? CompetitionEventIds { get; set; }
 
         public DateTime StartDate { get; set; }
 
@@ -33,11 +41,30 @@ namespace Fsel.System.Application.Commands.BannerCmd
 
             MethodResult<BannerPriorityExistenceModel> methodResult = new MethodResult<BannerPriorityExistenceModel>();
 
+            request.StartDate = request.StartDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
+            request.EndDate = request.EndDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
+
             var bannerScopes = await _bannerScopeRepository.Queryable
                                                            .Include(x => x.Banner)
-                                                           .Where(x => x.Banner != null && request.StartDate <= x.Banner.EndDate && request.EndDate >= x.Banner.StartDate && x.IsPriority)
-                                                           .Where(x => request.CourseLevels != null ? request.CourseLevels.Contains(x.CourseLevel) : (x.Banner!.Type == EnumBannerType.Warning))
+                                                           .Where(x => x.Banner != null && request.StartDate <= x.Banner.EndDate && request.EndDate >= x.Banner.StartDate && x.Banner!.Type == request.Type)
                                                            .ToListAsync(cancellationToken);
+
+            if (request.Type == EnumBannerType.Popup && request.CourseLevels != null)
+            {
+                bannerScopes = bannerScopes.Where(x => x.IsPriority && x.CourseLevel.HasValue && request.CourseLevels.Contains(x.CourseLevel.Value)).ToList();
+            }
+
+            if ((request.CourseLevels != null || request.CompetitionEventIds != null) && (request.Type == EnumBannerType.Left || request.Type == EnumBannerType.Warning))
+            {
+                if (request.Id.HasValue)
+                {
+                    bannerScopes = bannerScopes.Where(x => x.Banner!.Id != request.Id).ToList();
+                }
+
+                bannerScopes = bannerScopes.Where(x => x.Banner!.Status && ((x.CourseLevel.HasValue && request.CourseLevels != null && request.CourseLevels.Contains(x.CourseLevel.Value)) ||
+                                                 (x.CompetitionEventId.HasValue && request.CompetitionEventIds != null && request.CompetitionEventIds.Contains(x.CompetitionEventId.Value))))
+                                           .ToList();
+            }
 
             if (bannerScopes == null)
             {

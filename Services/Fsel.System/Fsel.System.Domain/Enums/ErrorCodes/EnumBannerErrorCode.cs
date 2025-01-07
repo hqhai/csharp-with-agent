@@ -24,12 +24,26 @@ namespace Fsel.System.Domain.Enums.ErrorCodes
 
         ApplicableUserGroupsRequired,
 
-        CompetitionEventIdsRequired,
+        CompetitionEventIdNotNull,
 
         MaximumPerDayMustGreaterThanZero,
 
         DisplayIntervalTimeMustGreaterThanZero,
 
-        CodeAlreadyExist
+        CodeAlreadyExist,
+
+        BannerImageNotNull,
+
+        ContentNotNull,
+
+        BannerScopeNotNull,
+
+        CourseLevelNotNull,
+
+        TargetUserNotNull,
+
+        FilePathNotNull,
+
+        UrlNotNull
     }
 }

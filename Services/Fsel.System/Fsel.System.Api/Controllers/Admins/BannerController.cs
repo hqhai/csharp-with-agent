@@ -21,7 +21,7 @@ namespace Fsel.System.Api.Controllers.Admins
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/banner")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+    //[Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class BannerController : ControllerBase
     {
         private readonly IMediator _mediator;

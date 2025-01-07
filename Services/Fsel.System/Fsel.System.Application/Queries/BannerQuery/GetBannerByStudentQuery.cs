@@ -13,6 +13,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
+    using global::System.Linq;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -103,11 +104,11 @@ namespace Fsel.System.Application.Queries.BannerQuery
             // banner trong event
             if (eventIds != null && eventIds.Any())
             {
-                banners = banners.Where(x => x.BannerScopes.Any(c => (c.CompetitionEventIds != null && c.CompetitionEventIds.Any(v => eventIds.Contains(v))) || (c.ApplicableUserGroups!.Any(v => v == EnumApplicableUserGroup.Default)))).ToList();
+                banners = banners.Where(x => x.BannerScopes.Any(c => c.CompetitionEventId.HasValue && eventIds.Contains(c.CompetitionEventId.Value) || (c.ApplicableUser == EnumApplicableUserGroup.Default))).ToList();
             }
             else
             {
-                banners = banners.Where(x => x.BannerScopes.Any(c => c.ApplicableUserGroups!.Any(v => v == EnumApplicableUserGroup.Default))).ToList();
+                banners = banners.Where(x => x.BannerScopes.Any(c => c.ApplicableUser == EnumApplicableUserGroup.Default)).ToList();
             }
 
             // bỏ các banner đã hiện thị trong ngày

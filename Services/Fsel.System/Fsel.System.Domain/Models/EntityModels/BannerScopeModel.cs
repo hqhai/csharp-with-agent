@@ -7,14 +7,14 @@ namespace Fsel.System.Domain.Models.EntityModels
 
     public class BannerScopeModel : BaseModel
     {
+        public EnumApplicableUserGroup ApplicableUser { get; set; }
+
         public bool IsPriority { get; set; }
 
         public IList<EnumTargetUser>? TargetUsers { get; set; }
 
-        public EnumCourseLevel CourseLevel { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
 
-        public IList<EnumApplicableUserGroup>? ApplicableUserGroups { get; set; }
-
-        public IList<Guid>? CompetitionEventIds { get; set; }
+        public Guid? CompetitionEventId { get; set; }
     }
 }

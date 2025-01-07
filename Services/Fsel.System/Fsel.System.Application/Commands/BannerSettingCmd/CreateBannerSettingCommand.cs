@@ -52,6 +52,7 @@ namespace Fsel.System.Application.Commands.BannerSettingCmd
                 {
                     bannerSetting.MaximumPerDay = request.MaximumPerDay;
                     bannerSetting.DisplayIntervalTime = request.DisplayIntervalTime;
+                    bannerSetting.TimeSlideShow = request.TimeSlideShow;
                     _bannerSettingRepository.Update(bannerSetting);
                     methodResult.Result = _mapper.Map<BannerSettingModel>(bannerSetting);
                 }

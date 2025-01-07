@@ -14,7 +14,6 @@ namespace Fsel.System.Infrastructure.Maps
         {
             CreateMap<BannerScope, BannerScopeModel>().IgnoreAllNonExisting();
             CreateMap<CreateBannerScopeCommandModel, BannerScope>().IgnoreAllNonExisting();
-            CreateMap<UpdateBannerScopeCommandModel, BannerScope>().IgnoreAllNonExisting();
         }
     }
 }

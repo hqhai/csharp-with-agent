@@ -9,6 +9,8 @@ namespace Fsel.System.Domain.Entities
 
     public class BannerScope : Entity
     {
+        public EnumApplicableUserGroup ApplicableUser { get; set; }
+
         public bool IsPriority { get; set; }
 
         public string? TargetUserStr { get; set; }
@@ -21,27 +23,9 @@ namespace Fsel.System.Domain.Entities
             set { TargetUserStr = ConvertHelper.Serialize(value); }
         }
 
-        public EnumCourseLevel CourseLevel { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
 
-        public string? ApplicableUserGroupsStr { get; set; }
-
-        [NotMapped]
-        public IList<EnumApplicableUserGroup>? ApplicableUserGroups
-
-        {
-            get { return ConvertHelper.Deserialize<IList<EnumApplicableUserGroup>>(ApplicableUserGroupsStr); }
-            set { ApplicableUserGroupsStr = ConvertHelper.Serialize(value); }
-        }
-
-        public string? CompetitionEventIdsStr { get; set; }
-
-        [NotMapped]
-        public IList<Guid>? CompetitionEventIds
-
-        {
-            get { return ConvertHelper.Deserialize<IList<Guid>>(CompetitionEventIdsStr); }
-            set { CompetitionEventIdsStr = ConvertHelper.Serialize(value); }
-        }
+        public Guid? CompetitionEventId { get; set; }
 
         public Guid BannerId { get; set; }
 

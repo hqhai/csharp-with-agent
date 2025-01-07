@@ -51,7 +51,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
 
             if (request.ListCourseLevels != null && request.ListCourseLevels.Any())
             {
-                query = query.Where(x => x.BannerScopes != null && x.BannerScopes.Any(c => request.ListCourseLevels.Contains(c.CourseLevel)));
+                query = query.Where(x => x.BannerScopes != null && x.BannerScopes.Any(c => c.CourseLevel.HasValue && request.ListCourseLevels.Contains(c.CourseLevel.Value)));
             }
 
             if (request.StartDate.HasValue && request.EndDate.HasValue)
