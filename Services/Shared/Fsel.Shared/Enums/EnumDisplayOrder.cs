@@ -4,6 +4,7 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumDisplayOrder
     {
+        Disconnected,
         Popup,
         Heading,
         GoodMorning,
