@@ -13,8 +13,6 @@ namespace Fsel.System.Application.Queries.BannerQuery
 
     public class PreviewBannerByDateQuery : IRequest<MethodResult<IList<BannerModel>>>
     {
-        public Guid? Id { get; set; }
-
         public DateTime Date { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
@@ -39,11 +37,6 @@ namespace Fsel.System.Application.Queries.BannerQuery
             var banners = await _bannerRepository.Queryable
                                                  .Where(x => x.Status && x.StartDate.Date <= request.Date.Date && x.EndDate.Date >= request.Date.Date && x.BannerScopes.Any(c => c.CourseLevel == request.CourseLevel))
                                                  .OrderBy(x => x.DisplayStartDate).ToListAsync(cancellationToken);
-
-            if (request.Id.HasValue)
-            {
-                banners = banners.Where(x => x.Id == request.Id).ToList();
-            }
 
             methodResult.Result = _mapper.Map<IList<BannerModel>>(banners);
             methodResult.StatusCode = StatusCodes.Status200OK;

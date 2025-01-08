@@ -9,5 +9,9 @@ namespace Fsel.System.Domain.Models.EntityModels
         public bool IsBanner { get; set; }
 
         public bool IsHeading { get; set; }
+
+        public bool IsHome { get; set; }
+
+        public bool IsLeft { get; set; }
     }
 }

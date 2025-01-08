@@ -59,7 +59,9 @@ namespace Fsel.System.Application.Queries.BannerQuery
                 {
                     Date = date.Date,
                     IsBanner = bannerDays.Any(x => x.Type == EnumBannerType.Popup),
-                    IsHeading = bannerDays.Any(x => x.Type == EnumBannerType.Warning)
+                    IsHeading = bannerDays.Any(x => x.Type == EnumBannerType.Warning),
+                    IsHome = bannerDays.Any(x => x.Type == EnumBannerType.Home),
+                    IsLeft = bannerDays.Any(x => x.Type == EnumBannerType.Left)
                 };
 
                 bannerInDays.Add(bannerInDay);

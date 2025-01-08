@@ -4,7 +4,6 @@ namespace Fsel.System.Application.Queries.BannerQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.System.Domain.IRepositories;
@@ -42,6 +41,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
 
             var query = _bannerRepository.Queryable
                                          .Include(x => x.BannerScopes)
+                                         .Include(x => x.BannerImages)
                                          .AsQueryable();
 
             if (!string.IsNullOrEmpty(request.Keyword))

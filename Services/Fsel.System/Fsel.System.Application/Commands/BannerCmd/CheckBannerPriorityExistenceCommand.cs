@@ -3,9 +3,7 @@
 namespace Fsel.System.Application.Commands.BannerCmd
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Helpers;
     using Fsel.Shared.Enums;
-    using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -41,9 +39,6 @@ namespace Fsel.System.Application.Commands.BannerCmd
 
             MethodResult<BannerPriorityExistenceModel> methodResult = new MethodResult<BannerPriorityExistenceModel>();
 
-            request.StartDate = request.StartDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
-            request.EndDate = request.EndDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
-
             var bannerScopes = await _bannerScopeRepository.Queryable
                                                            .Include(x => x.Banner)
                                                            .Where(x => x.Banner != null && request.StartDate <= x.Banner.EndDate && request.EndDate >= x.Banner.StartDate && x.Banner!.Type == request.Type)
@@ -66,7 +61,7 @@ namespace Fsel.System.Application.Commands.BannerCmd
                                            .ToList();
             }
 
-            if (bannerScopes == null)
+            if (bannerScopes == null || !bannerScopes.Any())
             {
                 return methodResult;
             }
@@ -75,7 +70,7 @@ namespace Fsel.System.Application.Commands.BannerCmd
             bannerPriorityExistence.IsWarring = true;
             bannerPriorityExistence.BannerPriorityExistenceDetails = new List<BannerPriorityExistenceDetailModel>();
 
-            foreach (var bannerScope in bannerScopes)
+            foreach (var bannerScope in bannerScopes.DistinctBy(x => x.Banner!.Id))
             {
                 BannerPriorityExistenceDetailModel bannerPriorityExistenceDetail = new BannerPriorityExistenceDetailModel();
                 bannerPriorityExistenceDetail.Code = bannerScope.Banner?.Code;
