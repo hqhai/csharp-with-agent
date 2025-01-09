@@ -65,13 +65,14 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 var batchIds = batch.Select(v => v.Id).ToList();
                 var batchResults = await _videoTimeCodeAnswerRepository
                                         .Queryable
-                                        .Where(x => x.VideoTimeCodeResultId.HasValue && batchIds.Contains(x.VideoTimeCodeResultId.Value))
+                                        .Where(x => x.VideoTimeCodeResultId.HasValue && batchIds.Contains(x.VideoTimeCodeResultId.Value) && x.TokenReceived == 0)
                                         .ToListAsync(cancellationToken);
                 listVideoTimeCodeAnswer.AddRange(batchResults);
             }
 
             foreach (var batch in batches)
             {
+                List<VideoTimeCodeAnswer> listVideoTimeCodeAnswerTemp = new List<VideoTimeCodeAnswer>();
                 foreach (var videoTimeCodeResult in batch)
                 {
                     if (videoTimeCodeResult == null || videoTimeCodeResult.VideoResult == null || videoTimeCodeResult.VideoTimeCode == null)
@@ -93,9 +94,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         var token = tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
                         videoTimeCodeAnswer.TokenReceived = (int)token * videoTimeCodeAnswer.CorrectCount;
                     }
-                    _videoTimeCodeAnswerRepository.UpdateList(videoTimeCodeAnswers);
-                    await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    listVideoTimeCodeAnswerTemp.AddRange(videoTimeCodeAnswers);
                 }
+                _videoTimeCodeAnswerRepository.UpdateList(listVideoTimeCodeAnswerTemp);
+                await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             methodResult.Result = true;
             return methodResult;
