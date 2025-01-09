@@ -10,9 +10,9 @@ namespace Fsel.System.Domain.Enums.ErrorCodes
 
         BannerNotExist,
 
-        CustomFrequencyRequiresDisplayDate,
+        DisplayDatesNotNull,
 
-        DisplayStartDateGreaterThanDisplayEndDate,
+        DisplayDateOutOfRange,
 
         DisplayStartTimeGreaterThanDisplayEndTime,
 

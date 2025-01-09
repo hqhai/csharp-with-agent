@@ -23,9 +23,7 @@ namespace Fsel.System.Domain.Models.CommandModels.Banners
 
         public EnumBannerFrequency BannerFrequency { get; set; }
 
-        public DateTime? DisplayStartDate { get; set; }
-
-        public DateTime? DisplayEndDate { get; set; }
+        public IList<DateTime>? DisplayDates { get; set; }
 
         public long? DisplayStartTime { get; set; }
 

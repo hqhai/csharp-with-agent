@@ -57,7 +57,6 @@ namespace Fsel.System.Application.Queries.BannerQuery
             var banners = await _bannerRepository.Queryable
                                                  .Include(x => x.BannerScopes)
                                                  .Where(x => (x.StartDate <= request.Date && x.EndDate >= request.Date) && (x.Status) &&
-                                                             ((x.DisplayStartDate.HasValue && x.DisplayEndDate.HasValue && x.BannerFrequency == EnumBannerFrequency.Custom) ? (x.DisplayStartDate <= request.Date && x.DisplayEndDate >= request.Date) : (!x.DisplayStartDate.HasValue && !x.DisplayEndDate.HasValue)) &&
                                                              ((x.DisplayStartTime.HasValue && x.DisplayEndTime.HasValue) ? (x.DisplayStartTime <= timeOfDay && x.DisplayEndTime >= timeOfDay) : (!x.DisplayStartTime.HasValue && !x.DisplayEndTime.HasValue)))
                                                  .ToListAsync(cancellationToken);
 

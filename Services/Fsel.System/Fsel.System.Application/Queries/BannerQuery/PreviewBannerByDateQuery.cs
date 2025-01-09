@@ -36,7 +36,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
 
             var banners = await _bannerRepository.Queryable
                                                  .Where(x => x.Status && x.StartDate.Date <= request.Date.Date && x.EndDate.Date >= request.Date.Date && x.BannerScopes.Any(c => c.CourseLevel == request.CourseLevel))
-                                                 .OrderBy(x => x.DisplayStartDate).ToListAsync(cancellationToken);
+                                                 .ToListAsync(cancellationToken);
 
             methodResult.Result = _mapper.Map<IList<BannerModel>>(banners);
             methodResult.StatusCode = StatusCodes.Status200OK;

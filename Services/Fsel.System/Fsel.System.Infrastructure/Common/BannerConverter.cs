@@ -7,6 +7,7 @@ namespace Fsel.System.Infrastructure.Common
     using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.Banners;
+    using Microsoft.AspNetCore.Components.Forms;
     using Microsoft.EntityFrameworkCore;
 
     public class BannerConverter
@@ -111,19 +112,14 @@ namespace Fsel.System.Infrastructure.Common
                 return (false, nameof(EnumBannerErrorCode.BannerScopeNotNull), nameof(request.BannerScopes), request.BannerScopes);
             }
 
-            if (request.BannerFrequency == EnumBannerFrequency.Custom && (request.DisplayStartDate >= request.DisplayEndDate))
+            if (request.BannerFrequency == EnumBannerFrequency.Custom && (request.DisplayDates == null || !request.DisplayDates.Any()))
             {
-                return (false, nameof(EnumBannerErrorCode.DisplayStartDateGreaterThanDisplayEndDate), nameof(request.DisplayStartDate), request.DisplayStartDate);
+                return (false, nameof(EnumBannerErrorCode.DisplayDatesNotNull), nameof(request.DisplayDates), request.DisplayDates);
             }
 
-            if (request.BannerFrequency == EnumBannerFrequency.Custom && !request.DisplayStartDate.HasValue)
+            if (request.DisplayDates != null && request.DisplayDates.Any(x => x.Date < request.StartDate.Date || x.Date > request.EndDate.Date))
             {
-                return (false, nameof(EnumBannerErrorCode.CustomFrequencyRequiresDisplayDate), nameof(request.DisplayStartDate), request.DisplayStartDate);
-            }
-
-            if (request.BannerFrequency == EnumBannerFrequency.Custom && !request.DisplayEndDate.HasValue)
-            {
-                return (false, nameof(EnumBannerErrorCode.CustomFrequencyRequiresDisplayDate), nameof(request.DisplayStartDate), request.DisplayStartDate);
+                return (false, nameof(EnumBannerErrorCode.DisplayDateOutOfRange), nameof(request.DisplayDates), request.DisplayDates);
             }
 
             if (request.DisplayStartTime.HasValue && request.DisplayEndTime.HasValue && request.DisplayStartTime >= request.DisplayEndTime)

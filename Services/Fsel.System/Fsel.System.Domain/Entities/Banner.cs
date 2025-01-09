@@ -3,10 +3,12 @@
 namespace Fsel.System.Domain.Entities
 {
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.Enums.ErrorCodes;
     using global::System.ComponentModel.DataAnnotations;
+    using global::System.ComponentModel.DataAnnotations.Schema;
 
     public class Banner : Entity
     {
@@ -29,9 +31,15 @@ namespace Fsel.System.Domain.Entities
 
         public EnumBannerFrequency BannerFrequency { get; set; }
 
-        public DateTime? DisplayStartDate { get; set; }
+        public string? DisplayDateStr { get; set; }
 
-        public DateTime? DisplayEndDate { get; set; }
+        [NotMapped]
+        public IList<DateTime>? DisplayDates
+
+        {
+            get { return ConvertHelper.Deserialize<IList<DateTime>>(DisplayDateStr); }
+            set { DisplayDateStr = ConvertHelper.Serialize(value); }
+        }
 
         [Range(0, long.MaxValue, ErrorMessage = nameof(EnumBannerErrorCode.DisplayStartTimeMustGreaterThanZero))]
         public long? DisplayStartTime { get; set; }
