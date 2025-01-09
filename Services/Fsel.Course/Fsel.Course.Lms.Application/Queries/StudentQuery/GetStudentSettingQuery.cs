@@ -20,6 +20,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
 
     public class GetStudentSettingQuery : IRequest<MethodResult<StudentSettingModel>>
     {
+        public Guid? UserId { get; set; }
     }
 
     public class SettingStudentCheckQueryHandler : IRequestHandler<GetStudentSettingQuery, MethodResult<StudentSettingModel>>
@@ -54,7 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StudentSettingModel>();
             var settingStudentModel = new StudentSettingModel();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId ?? request.UserId ?? _authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
@@ -89,7 +90,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 settingStudentModel.IsLockPT = isLock;
                 settingStudentModel.StartPTLevel = placementTestResultInitial == null ? student.CourseLevel : placementTestResultInitial.Level.GetCourseLevelByPlacementTestLevel();
 
-                var @eventResults = await _userService.GetEventByUserId(_authContext.CurrentUserId);
+                var @eventResults = await _userService.GetEventByUserId(request.UserId ?? _authContext.CurrentUserId);
                 if (@eventResults.IsSuccessStatusCode && @eventResults.Content?.Result != null)
                 {
                     var @events = @eventResults.Content?.Result;
@@ -99,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                     settingStudentModel.ActionConfigs = actionConfigs;
                 }
 
-                var status = await _orderService.GetCurrentStatusAsync(_authContext.CurrentUserId);
+                var status = await _orderService.GetCurrentStatusAsync(request.UserId ?? _authContext.CurrentUserId);
                 if (!status.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(status));

@@ -45,7 +45,7 @@ namespace Fsel.System.Application.Services.CourseServices
         [Get("/v1/quest-board/percent-course")]
         Task<IApiResponse<MethodResult<QuestBoardCategoryModel>>> GetPercentCourseResult([Query] GetFinishOneQueryModel query);
 
-        [Get("/v1/student/student-setting")]
-        Task<IApiResponse<MethodResult<StudentSettingModel>>> GetStudentSetting();
+        [Get("/v1/student/student-setting/{userId}")]
+        Task<IApiResponse<MethodResult<StudentSettingModel>>> GetStudentSetting([FromRoute] Guid? userId);
     }
 }

@@ -5,62 +5,69 @@ namespace Fsel.System.Application.Queries.BannerQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Core.Base;
+    using Fsel.Common.Helpers;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
+    using Fsel.System.Application.Queues.Publisher;
     using Fsel.System.Application.Services.CourseServices;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
-    using Fsel.System.Domain.Models.EntityModels;
     using global::System.Linq;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetBannerByStudentQuery : IRequest<MethodResult<IList<BannerStudentModel>>>
+    public class GetBannerByStudentQuery : IRequest<MethodResult<IList<BannerStudentQueueModel>>>
     {
         public DateTime Date { get; set; }
+
+        public Guid UserId { get; set; }
     }
 
-    public class GetBannerByStudentQueryHandler : IRequestHandler<GetBannerByStudentQuery, MethodResult<IList<BannerStudentModel>>>
+    public class GetBannerByStudentQueryHandler : IRequestHandler<GetBannerByStudentQuery, MethodResult<IList<BannerStudentQueueModel>>>
     {
         private readonly IBannerRepository _bannerRepository;
         private readonly IMapper _mapper;
-        private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IBannerStudentRepository _bannerStudentRepository;
         private readonly ICourseService _courseService;
+        private readonly BannerPublisher _bannerPublisher;
 
         public GetBannerByStudentQueryHandler(IBannerRepository bannerRepository,
                                               IMapper mapper,
-                                              AuthContext authContext,
                                               IUserService userService,
                                               IBannerStudentRepository bannerStudentRepository,
-                                              ICourseService courseService)
+                                              ICourseService courseService,
+                                              BannerPublisher bannerPublisher)
         {
             _bannerRepository = bannerRepository;
             _mapper = mapper;
-            _authContext = authContext;
             _userService = userService;
             _bannerStudentRepository = bannerStudentRepository;
             _courseService = courseService;
+            _bannerPublisher = bannerPublisher;
         }
 
-        public async Task<MethodResult<IList<BannerStudentModel>>> Handle(GetBannerByStudentQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<BannerStudentQueueModel>>> Handle(GetBannerByStudentQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<BannerStudentModel>> methodResult = new MethodResult<IList<BannerStudentModel>>();
+            MethodResult<IList<BannerStudentQueueModel>> methodResult = new MethodResult<IList<BannerStudentQueueModel>>();
+
+            DateTime date = request.Date.ConvertTimeToUtc(EnumCountryKey.Vietnam);
 
             var timeOfDay = request.Date.ConvertDateTimeToSeconds();
 
             var banners = await _bannerRepository.Queryable
                                                  .Include(x => x.BannerScopes)
-                                                 .Where(x => (x.StartDate <= request.Date && x.EndDate >= request.Date) && (x.Status) &&
+                                                 .Include(x => x.BannerImages)
+                                                 .Where(x => (x.StartDate <= date && x.EndDate >= date) && (x.Status) &&
+                                                             ((x.DisplayDates != null && x.BannerFrequency == EnumBannerFrequency.Custom) ? (x.DisplayDates.Any(x => x.Date == date.Date)) : (x.DisplayDates == null)) &&
                                                              ((x.DisplayStartTime.HasValue && x.DisplayEndTime.HasValue) ? (x.DisplayStartTime <= timeOfDay && x.DisplayEndTime >= timeOfDay) : (!x.DisplayStartTime.HasValue && !x.DisplayEndTime.HasValue)))
                                                  .ToListAsync(cancellationToken);
 
-            var eventResults = await _userService.GetEventsByUserId(_authContext.CurrentUserId);
+            var eventResults = await _userService.GetEventsByUserId(request.UserId);
             if (!eventResults.IsSuccessStatusCode)
             {
                 methodResult.AddError(eventResults.Error);
@@ -68,7 +75,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
             }
             var eventIds = eventResults.Content?.Result?.Select(x => x.Id).ToList();
 
-            var studentSettingResult = await _courseService.GetStudentSetting();
+            var studentSettingResult = await _courseService.GetStudentSetting(request.UserId);
             if (!studentSettingResult.IsSuccessStatusCode)
             {
                 methodResult.AddError(studentSettingResult.Error);
@@ -97,7 +104,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
                 targetUser = EnumTargetUser.Expired;
             }
 
-            // banner thuốc course level và dúng trạng thái của user
+            // banner thuốc course level và đúng trạng thái của user
             banners = banners.Where(x => x.BannerScopes.Any(c => c.CourseLevel == studentSetting.Level && c.TargetUsers != null && c.TargetUsers.Any(p => p == targetUser))).ToList();
 
             // banner trong event
@@ -111,7 +118,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
             }
 
             // bỏ các banner đã hiện thị trong ngày
-            var bannerUsedTodays = await _bannerStudentRepository.Queryable.Where(x => x.CreatedDate.Date == request.Date.Date && x.StudentId == studentSetting.StudentId).ToListAsync(cancellationToken);
+            var bannerUsedTodays = await _bannerStudentRepository.Queryable.Where(x => x.CreatedDate.Date == date.Date && x.StudentId == studentSetting.StudentId).ToListAsync(cancellationToken);
             var bannerIds = bannerUsedTodays.Select(x => x.BannerId).ToList();
 
             if (bannerIds != null)
@@ -120,12 +127,11 @@ namespace Fsel.System.Application.Queries.BannerQuery
             }
 
             // check tần suất hiện thị của banner
-
             List<Banner> bannerRemoves = new List<Banner>();
 
             foreach (var item in banners)
             {
-                await CheckBannerFrequency(item, request.Date, studentSetting.StudentId, bannerRemoves);
+                await CheckBannerFrequency(item, date, studentSetting.StudentId, bannerRemoves);
             }
 
             banners.RemoveAll(c => bannerRemoves.Contains(c));
@@ -133,20 +139,37 @@ namespace Fsel.System.Application.Queries.BannerQuery
             // lấy banner được ưu tiên
             var bannerPriority = banners.FirstOrDefault(x => x.Type == EnumBannerType.Popup && x.BannerScopes.Any(c => c.IsPriority));
 
+            // lấy dữ liệu
             var banner = bannerPriority != null ? bannerPriority : banners.FirstOrDefault(x => x.Type == EnumBannerType.Popup);
             var heading = banners.FirstOrDefault(x => x.Type == EnumBannerType.Warning);
+            var homes = banners.Where(x => x.Type == EnumBannerType.Home).ToList();
+            var left = banners.FirstOrDefault(x => x.Type == EnumBannerType.Left);
 
-            List<BannerStudentModel> bannerStudents = new List<BannerStudentModel>();
+            // gán dữ liệu
+            List<BannerStudentQueueModel> bannerStudents = new List<BannerStudentQueueModel>();
 
             if (banner != null)
             {
-                bannerStudents.Add(_mapper.Map<BannerStudentModel>(banner));
+                bannerStudents.Add(_mapper.Map<BannerStudentQueueModel>(banner));
             }
 
             if (heading != null)
             {
-                bannerStudents.Add(_mapper.Map<BannerStudentModel>(heading));
+                bannerStudents.Add(_mapper.Map<BannerStudentQueueModel>(heading));
             }
+
+            if (homes != null)
+            {
+                bannerStudents.AddRange(_mapper.Map<IList<BannerStudentQueueModel>>(homes));
+            }
+
+            if (left != null)
+            {
+                bannerStudents.Add(_mapper.Map<BannerStudentQueueModel>(left));
+            }
+
+            // bắn web socket
+            await _bannerPublisher.Publish(new BannerStudentsQueueModel { UserId = request.UserId, BannerStudents = bannerStudents }, cancellationToken);
 
             methodResult.Result = bannerStudents;
             methodResult.StatusCode = StatusCodes.Status200OK;

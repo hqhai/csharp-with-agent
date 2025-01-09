@@ -113,5 +113,15 @@ namespace Fsel.Shared.Constants
                 public const string Payment = $"Payment";
             }
         }
+
+        public static class BannerHub
+        {
+            public const string Pattern = $"/banner";
+
+            public static class Methods
+            {
+                public const string Banner = $"Banner";
+            }
+        }
     }
 }

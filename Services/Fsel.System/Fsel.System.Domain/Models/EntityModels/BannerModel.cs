@@ -4,6 +4,7 @@ namespace Fsel.System.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
 
     public class BannerModel : BaseModel
     {
