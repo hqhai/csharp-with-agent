@@ -9,7 +9,17 @@ namespace Fsel.Sender.Domain.ValueSettings
         public Smtp? Smtp { get; set; }
         public SmtpGoogle? SmtpGoogle { get; set; }
         public EmailConfig? EmailConfig { get; set; }
+        public IRISConfig? IRISConfig { get; set; }
         public new Services? Services { get; set; }
+    }
+
+    public class IRISConfig
+    {
+        public string? UserName { get; set; }
+        public string? Password { get; set; }
+        public string? BrandName { get; set; }
+        public string? ContentType { get; set; }
+        public string? GrantType { get; set; }
     }
 
     public class EmailConfig
@@ -40,5 +50,6 @@ namespace Fsel.Sender.Domain.ValueSettings
     public class Services : BaseServices
     {
         public string? SystemApiUrl { get; set; }
+        public string? IRISApiUrl { get; set; }
     }
 }
