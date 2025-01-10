@@ -14,6 +14,8 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
     public class GetCompetitionEventsQuery : IRequest<MethodResult<CompetitionEventsModel>>
     {
         public string? EventCode { get; set; }
+
+        public bool IsLeaderBoard { get; set; }
     }
     public class GetCompetitionEventsQueryHandler : IRequestHandler<GetCompetitionEventsQuery, MethodResult<CompetitionEventsModel>>
     {
@@ -32,6 +34,12 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 
             var competition = _competitionEventsRepository.Queryable.FirstOrDefault(x => x.EventCode == request.EventCode);
             methodResult.Result = _mapper.Map<CompetitionEventsModel>(competition);
+
+            if (request.IsLeaderBoard && competition != null)
+            {
+                methodResult.Result.EventContent = competition.LBConfig;
+            }
+
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
