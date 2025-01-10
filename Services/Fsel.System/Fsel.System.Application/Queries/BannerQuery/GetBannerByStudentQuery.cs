@@ -63,7 +63,6 @@ namespace Fsel.System.Application.Queries.BannerQuery
                                                  .Include(x => x.BannerScopes)
                                                  .Include(x => x.BannerImages)
                                                  .Where(x => (x.StartDate <= date && x.EndDate >= date) && (x.Status) &&
-                                                             ((x.DisplayDates != null && x.BannerFrequency == EnumBannerFrequency.Custom) ? (x.DisplayDates.Any(x => x.Date == date.Date)) : (x.DisplayDates == null)) &&
                                                              ((x.DisplayStartTime.HasValue && x.DisplayEndTime.HasValue) ? (x.DisplayStartTime <= timeOfDay && x.DisplayEndTime >= timeOfDay) : (!x.DisplayStartTime.HasValue && !x.DisplayEndTime.HasValue)))
                                                  .ToListAsync(cancellationToken);
 
@@ -210,6 +209,10 @@ namespace Fsel.System.Application.Queries.BannerQuery
                 {
                     banners.Add(banner);
                 }
+            }
+            else if (banner.BannerFrequency == EnumBannerFrequency.Custom && banner.DisplayDates != null && !banner.DisplayDates.Any(x => x.Date == date.Date))
+            {
+                banners.Add(banner);
             }
 
             return methodResult;
