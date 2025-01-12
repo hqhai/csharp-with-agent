@@ -63,7 +63,7 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                     break;
 
-                case EnumCourseType.AdultFoundation:
+                case EnumCourseType.EnglishFoundation:
                     if (countLesson > 5)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.InvalidLessonQuantity), nameof(request.LessonIds), countLesson);

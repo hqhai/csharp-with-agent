@@ -293,8 +293,8 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case EnumCourseType.Academic:
-                case EnumCourseType.AdultFoundation:
-                    if (request.CourseLevel == EnumCourseLevel.AF1 && unitIds.Count > 10)
+                case EnumCourseType.EnglishFoundation:
+                    if (request.CourseLevel == EnumCourseLevel.EFA1 && unitIds.Count > 10)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.InvalidUnitQuantity), nameof(unitIds), unitIds.Count);
                         return methodResult;

@@ -358,7 +358,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
                 if (!courseUnitMockTest.UnitId.HasValue && !courseUnitMockTest.FinalTestId.HasValue && !courseUnitMockTest.MockTestId.HasValue)
                 {
-                    break;
+                    continue;
                 }
 
                 if (!checkUnitResult && courseUnitMockTest.UnitId.HasValue)

@@ -6,6 +6,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using MediatR;
@@ -35,24 +36,27 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
+
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
             await _studentRepository.ExecuteTransactionAsync(async () =>
             {
                 if (request.Month.HasValue || request.Day.HasValue)
                 {
-                    if (!student.ExpiredDate.HasValue || student.ExpiredDate.Value.Date < DateTime.UtcNow.Date)
+                    if (!student.ExpiredDate.HasValue || student.ExpiredDate.Value < currentDate)
                     {
                         if (request.Month.HasValue && request.Day.HasValue)
                         {
-                            student.ExpiredDate = DateTime.UtcNow.AddMonths(request.Month.Value);
+                            student.ExpiredDate = currentDate.AddMonths(request.Month.Value);
                             student.ExpiredDate = student.ExpiredDate.Value.AddDays(request.Day.Value);
                         }
                         else if (request.Month.HasValue)
                         {
-                            student.ExpiredDate = DateTime.UtcNow.AddMonths(request.Month.Value);
+                            student.ExpiredDate = currentDate.AddMonths(request.Month.Value);
                         }
                         else if (request.Day.HasValue)
                         {
-                            student.ExpiredDate = DateTime.UtcNow.AddDays(request.Day.Value);
+                            student.ExpiredDate = currentDate.AddDays(request.Day.Value);
                         }
                     }
                     else

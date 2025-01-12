@@ -131,5 +131,14 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Get("/v1/admin-school/student")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsToAdminSchoolAsync();
+
+        [Get("/v1/student-ranking/get-students-by-event-code")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByEventCode([Query] string eventCode);
+
+        [Get("/v1/other/report-competition-event")]
+        Task<IApiResponse<MethodResult<IList<ReportCompetitionEventModel>>>> GetReportCompetitionEventAsync([Query] GetReportCompetitionEventQueryModel query);
+
+        [Get("/v1/other/report-competition-event-school")]
+        Task<IApiResponse<MethodResult<IList<ReportCompetitionEventModel>>>> GetReportCompetitionEventSchoolAsync([Query] GetReportCompetitionEventQueryModel query);
     }
 }
