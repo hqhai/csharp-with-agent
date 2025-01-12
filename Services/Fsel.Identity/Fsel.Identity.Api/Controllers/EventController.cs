@@ -92,5 +92,21 @@ namespace Fsel.Identity.Api.Controllers
             var result = await _competitionEventsRepository.GetListResultAsync<CompetitionEventsModel>(query);
             return result.GetActionResult();
         }
+
+        /// <summary>
+        /// Export-LandingPage-By-EventCode
+        /// </summary>
+        [HttpGet("export-landing-page")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportLandingPageByEventCode([FromQuery] ExportLandingPageByEventCodeQuery query)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, $"LandingPageEventCode.xlsx");
+        }
     }
 }

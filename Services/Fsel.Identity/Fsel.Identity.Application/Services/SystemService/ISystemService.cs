@@ -6,6 +6,7 @@ namespace Fsel.Identity.Application.Services.SystemService
     using Fsel.Common.Attributes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Services.SystemService.Model;
+    using Fsel.Identity.Application.Services.SystemService.QueryModels;
     using Fsel.Identity.Domain.Models.CommandModels.LandingPages;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels;
@@ -40,5 +41,11 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Post("/v1/google-sheet/register-student-for-event")]
         Task<IApiResponse<MethodResult<bool>>> RegisterStudentForEvent([Body] RegisterStudentForEventCommandModel model);
+
+        [Get("/v1/location/get-by-ids")]
+        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetLocationByIdsAsync([Query] GetLocationsByIdsQueryModel query);
+
+        [Post("/v1/school/gets")]
+        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolsAsync([Body] GetListSchoolQueryModel query);
     }
 }

@@ -208,5 +208,17 @@ namespace Fsel.Identity.Api.Controllers
             var commandResult = await _mediator.Send(new JobRunEventsCommand()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Lấy thông tin tất cả học sinh trong sự kiện
+        /// </summary>
+        [HttpGet("get-students-by-event-code")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentsByEventCode([FromQuery] GetStudentsByEventCodeQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

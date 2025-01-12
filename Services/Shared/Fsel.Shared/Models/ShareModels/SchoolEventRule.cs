@@ -2,6 +2,8 @@
 
 namespace Fsel.Shared.Models.ShareModels
 {
+    using Fsel.Shared.Enums;
+
     public class SchoolEventRule
     {
         public bool LuckySpin { get; set; }
@@ -15,6 +17,26 @@ namespace Fsel.Shared.Models.ShareModels
             get { return _actions?.Union(ActionConfigs?.Select(x => x.Action) ?? Enumerable.Empty<EnumSchoolEventRuleAction>()).ToList(); }
             set { _actions = value; }
         }
+
+        public string? FselLogo { get; set; }
+        public string? EventLogo { get; set; }
+
+        public string? EventTitle { get; set; }
+
+        public string? EventDescription { get; set; }
+
+        public string? PromotionalVideo { get; set; }
+
+        public IList<ProcessStep>? ProcessSteps { get; set; }
+        public LearningNotice? LearningNotice { get; set; }
+        public BannerPromotional? BannerPromotional { get; set; }
+        public IList<string>? HowToParticipate { get; set; }
+
+        public string? InstructionalVideo { get; set; }
+
+        public string? FormDescription { get; set; }
+        public string? AwardPromotional { get; set; }
+        public IList<string>? AwardPromotionalImage { get; set; }
 
         public IList<ActionConfig>? ActionConfigs { get; set; }
         public EnumByPassPaymentType ByPassPaymentType { get; set; }
@@ -31,7 +53,14 @@ namespace Fsel.Shared.Models.ShareModels
         public string? LuckySpinGiftImage { get; set; }
         public IList<WeekEvent>? WeekEvents { get; set; }
         public IList<WeekEvent>? LuckyStarRules { get; set; }
+        public FormConfig? FormConfig { get; set; }
         public Guid? LocationId { get; set; }
+
+        public string? BackGroundImage { get; set; }
+
+        public IList<string>? TabNames { get; set; }
+        public ButtonNavSettings? ButtonNavSettings { get; set; }
+        public bool? AutoGenAge { get; set; }
     }
 
     public enum EnumSchoolEventRuleAction
@@ -48,11 +77,51 @@ namespace Fsel.Shared.Models.ShareModels
         Date
     }
 
+    #region FormConfig
+
+    public class FormConfig
+    {
+        public IList<FormSection>? Sections { get; set; }
+        public string? Description { get; set; }
+        public string? HotLine { get; set; }
+    }
+
+    public class FormSection
+    {
+        public string? Name { get; set; }
+        public bool IsShow { get; set; }
+        public IList<IList<FormRow>>? Rows { get; set; }
+    }
+
+    public class FormRow
+    {
+        public string? FieldName { get; set; }
+        public string? PlaceHolder { get; set; }
+        public string? Property { get; set; }
+        public bool IsVisible { get; set; }
+        public bool Required { get; set; }
+        public string? Type { get; set; }
+        public string? RequiredMessage { get; set; }
+        public string? ErrorMessage { get; set; }
+    }
+
+    #endregion FormConfig
+
+    public class ProcessStep
+    {
+        public string? Content { get; set; }
+        public string? Description { get; set; }
+
+        public int Step { get; set; }
+    }
+
     public class ActionConfig
     {
         public EnumSchoolEventRuleAction Action { get; set; }
         public DateTime? EndDate { get; set; }
         public StopAtLevelSelectionConfig? StopAtLevelSelectionConfig { get; set; }
+        public EnumSenderTemplate? MailRegister { get; set; }
+        public string? SubjectMailRegister { get; set; }
     }
 
     public class StopAtLevelSelectionConfig
@@ -62,6 +131,8 @@ namespace Fsel.Shared.Models.ShareModels
         public IList<string>? Content { get; set; }
         public IList<string>? Footer { get; set; }
     }
+
+    #region Prize
 
     public class WeekEvent
     {
@@ -83,4 +154,23 @@ namespace Fsel.Shared.Models.ShareModels
         public string? RewardImagine { get; set; }
         public int Rank { get; set; }
     }
+
+    public class LearningNotice
+    {
+        public string? Title { get; set; }
+        public IList<string>? Images { get; set; }
+    }
+
+    public class BannerPromotional
+    {
+        public IList<string>? BannerWeb { get; set; }
+        public IList<string>? BannerMobile { get; set; }
+    }
+
+    public class ButtonNavSettings
+    {
+        public string? TextDisplay { get; set; }
+        public string? Link { get; set; }
+    }
+    #endregion Prize
 }

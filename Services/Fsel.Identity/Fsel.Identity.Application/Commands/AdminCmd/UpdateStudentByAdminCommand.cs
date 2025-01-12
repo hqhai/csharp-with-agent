@@ -13,7 +13,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -73,6 +72,10 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 return methodResult;
             }
             var isCheckEmail = !string.IsNullOrEmpty(request.Email) && user.Email != request.Email;
+            if (isCheckEmail)
+            {
+                await CheckDuplicateAsync(user, request.Email);
+            }
 
             #region Validate User
 
@@ -85,7 +88,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(user.ErrorMessages);
                 return methodResult;
             }
-            var method = await Validate(user.Human, cancellationToken);
+            var method = Validate(user.Human);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
@@ -111,7 +114,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             if (isCheckEmail)
             {
                 user.EmailConfirmed = false;
-                var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
+                var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id, ExpiredTime = DateTime.UtcNow.AddDays(_appSetting!.Otp!.StepDayWithAdmin) }, cancellationToken);
                 var param = new SendOtpTemplateModel
                 {
                     OtpCode = userOtpCode.Result,
@@ -130,11 +133,45 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             #endregion validate and Send OTP
 
             await _userManager.UpdateAsync(user).ConfigureAwait(false);
+
             _humanRepository.Update(user.Human ?? new Human());
             await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = await GetUser(user, student);
             return methodResult;
+        }
+
+        private async Task CheckDuplicateAsync(User user, string? otherEmail)
+        {
+            var userOther = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Email == otherEmail && x.Id != user.Id);
+            if (userOther == null)
+            {
+                return;
+            }
+            await UpdateUserToEmailAsync(userOther, user.Email);
+        }
+
+        private async Task UpdateUserToEmailAsync(User user, string? email)
+        {
+            int dem = 1;
+            var emailCheck = email;
+            while (await _userManager.Users.AnyAsync(x => x.Email.ToLower().Trim() == emailCheck.ToLower().Trim()))
+            {
+                emailCheck = dem + email;
+                dem++;
+            }
+            email = emailCheck;
+
+            //email cần thay đổi
+            user.Email = email;
+            user.NormalizedEmail = email;
+            user.UserName = email;
+            user.NormalizedUserName = email;
+            if (user.Human != null)
+            {
+                user.Human.Email = email;
+            }
+            await _userManager.UpdateAsync(user).ConfigureAwait(false);
         }
 
         private async Task<StudentModel> GetUser(User user, Student? student)
@@ -176,7 +213,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 human = _mapper.Map<Human>(request.Parent);
                 human.Parent = _mapper.Map<Parent>(request.Parent);
                 human.Parent.ParentStudents.Add(new ParentStudent { Student = student });
-                var validation = await ValidateAndHandleErrors(human, methodResult, cancellationToken);
+                var validation = ValidateAndHandleErrors(human, methodResult, cancellationToken);
                 if (!validation)
                 {
                     return methodResult;
@@ -187,7 +224,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 _mapper.Map(request.Parent, human);
                 _mapper.Map(request.Parent, human.Parent);
-                var validation = await ValidateAndHandleErrors(human, methodResult, cancellationToken);
+                var validation = ValidateAndHandleErrors(human, methodResult, cancellationToken);
                 if (!validation)
                 {
                     return methodResult;
@@ -198,9 +235,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             return methodResult;
         }
 
-        private async Task<bool> ValidateAndHandleErrors(Human human, VoidMethodResult methodResult, CancellationToken cancellationToken)
+        private bool ValidateAndHandleErrors(Human human, VoidMethodResult methodResult, CancellationToken cancellationToken)
         {
-            var method = await Validate(human, cancellationToken);
+            var method = Validate(human);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
@@ -209,59 +246,23 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             return true;
         }
 
-        public async Task<VoidMethodResult> Validate(Human? human, CancellationToken cancellationToken)
+        public VoidMethodResult Validate(Human? human)
         {
             ArgumentNullException.ThrowIfNull(human);
             var methodResult = new VoidMethodResult();
-            if (!string.IsNullOrEmpty(human.Email))
-            {
-                var emailCheck = await CheckDuplicateAsync(human.Email, human.Id, nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(human.Email), cancellationToken);
-                if (emailCheck != null)
-                {
-                    return emailCheck;
-                }
-            }
-            if (!string.IsNullOrEmpty(human.PhoneNumber))
-            {
-                var phoneNumberCheck = await CheckDuplicateAsync(human.PhoneNumber, human.Id, nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(human.PhoneNumber), cancellationToken);
-                if (phoneNumberCheck != null)
-                {
-                    return phoneNumberCheck;
-                }
-            }
-
             if (!human.IsValid())
             {
                 methodResult.AddErrorBadRequest(human.ErrorMessages);
             }
-
             if (human.Parent != null && !human.Parent.IsValid())
             {
                 methodResult.AddErrorBadRequest(human.Parent.ErrorMessages);
             }
-
             if (human.Student != null && !human.Student.IsValid())
             {
                 methodResult.AddErrorBadRequest(human.Student.ErrorMessages);
             }
-
             return methodResult;
-        }
-
-        private async Task<VoidMethodResult?> CheckDuplicateAsync(string? fieldValue, Guid? currentId, string errorCode, string fieldName, CancellationToken cancellationToken)
-        {
-            var humanOther = await _humanRepository.Queryable
-                .Where(x => (x.Email == fieldValue || x.PhoneNumber == fieldValue) && x.Id != currentId)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (humanOther != null)
-            {
-                var methodResult = new VoidMethodResult();
-                methodResult.AddErrorBadRequest(errorCode, fieldName);
-                return methodResult;
-            }
-
-            return null;
         }
     }
 }

@@ -15,6 +15,8 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public AzureAiConfig? AzureAiConfig { get; set; }
 
         public CustomerSupportConfig? CustomerSupportConfig { get; set; }
+
+        public GoogleSheetConfig? GoogleSheetConfig { get; set; }
     }
 
     public class ConstantUrl
@@ -27,6 +29,11 @@ namespace Fsel.Course.Infrastructure.ValueSettings
     {
         public string? Email { get; set; }
         public IList<string> CCEmail { get; set; } = new List<string>();
+    }
+
+    public class GoogleSheetConfig
+    {
+        public string? StudentGetErrorClassForumSheetId { get; set; }
     }
 
     public class ResourceContent
