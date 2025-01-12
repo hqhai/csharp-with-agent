@@ -4,6 +4,7 @@ namespace Fsel.System.Api.Controllers
 {
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Shared.Constants;
     using Fsel.System.Application.Commands.GoogleSheets;
@@ -29,6 +30,7 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Get data from file i18n
         /// </summary>
+        [ServerCache(CacheSettings.TimeCache.OneHour)]
         [HttpGet("file-i18n")]
         [ProducesResponseType(typeof(MethodResult<I18NModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]

@@ -47,5 +47,8 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Post("/v1/school/gets")]
         Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolsAsync([Body] GetListSchoolQueryModel query);
+
+        [Post("/v1/school/get-ids")]
+        Task<IApiResponse<MethodResult<IList<Guid>>>> GetSchoolIdsAsync([Body] GetSchoolsQueryModel query);
     }
 }

@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Shared.Constants;
+    using Fsel.Course.Lms.Application.Services.SystemService.QueryModels;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.Shared.Models.ShareModels.QueryModels;
     using Microsoft.AspNetCore.Mvc;
@@ -65,5 +66,14 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Post("/v1/feature-access-time/get-feature-access-time-to-modules")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetFeatureAccessTimesAsync([FromBody] GetFeatureAccessTimeToExportQueryModel query);
+
+        [Post("/v1/school/get-ids")]
+        Task<IApiResponse<MethodResult<IList<Guid>>>> GetSchoolIdsAsync([Body] GetSchoolsQueryModel query);
+
+        [Delete("/v1/course-target-student/{studentId}")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> DeleteCourseTargetStudent([FromRoute] Guid studentId);
+
+        [Post("/v1/feature-access-time/get-feature-accesstime")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetAccessTimeByUserAndFeature([Body] GetAccessTimeByUserAndFeatureQueryModel query);
     }
 }

@@ -2,9 +2,11 @@
 
 namespace Fsel.Ordering.Application.Queries.IntegrationQuery
 {
+    using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Ordering.Application.Services.CourseService;
+    using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using MediatR;
@@ -13,9 +15,9 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
 
     public class GetOrderByStatusIntegrationQuery : IRequest<MethodResult<IList<OrderSearchModel>>>
     {
-        public DateTime StartDate { get; set; }
+        public DateTime? StartDate { get; set; }
 
-        public DateTime EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
         public bool Status { get; set; }
 
@@ -40,23 +42,51 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<OrderSearchModel>>();
 
-            var orderInTimePeriods = await _orderRepository.Queryable
-                                                           .Include(p => p.Package)
-                                                           .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate))
-                                                           .ToListAsync(cancellationToken);
+            List<Order> orders = new List<Order>();
 
-            var orderInTimePeriodDistincts = orderInTimePeriods.Select(x => x.UserId).Distinct().ToList();
-
-            var orderCombines = new List<Guid>();
-            if (request.UserIds != null && request.UserIds.Any())
+            if (request.UserIds == null && request.StartDate.HasValue && request.EndDate.HasValue)
             {
-                orderCombines = (orderInTimePeriodDistincts.Concat(request.UserIds)).Distinct().ToList();
+                orders = await _orderRepository.Queryable
+                                               .Include(p => p.Package)
+                                               .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate))
+                                               .ToListAsync(cancellationToken);
+
+                await CheckLeadOrClient(orders, request, cancellationToken);
+                methodResult.Result = _mapper.Map(orders, methodResult.Result);
             }
 
-            var orders = await _orderRepository.Queryable
+            else if (request.UserIds != null && request.UserIds.Any())
+            {
+                orders = await _orderRepository.Queryable
                                                .Include(p => p.Package)
-                                               .Where(x => orderCombines.Contains(x.UserId))
+                                               .Where(x => request.UserIds.Contains(x.UserId))
                                                .ToListAsync(cancellationToken);
+
+                await CheckLeadOrClient(orders, request, cancellationToken);
+                methodResult.Result = _mapper.Map(orders, methodResult.Result);
+
+                if (methodResult.Result != null && methodResult.Result.Any())
+                {
+                    var userIds = methodResult.Result.Select(x => x.UserId).Distinct().ToList();
+                    var courseResults = await _lmsCourseService.GetCourseResultsByUserIds(userIds);
+                    if (courseResults.IsSuccessStatusCode)
+                    {
+                        foreach (var item in methodResult.Result)
+                        {
+                            item.CourseName = courseResults.Content?.Result?.FirstOrDefault(x => x.CourseId == item.CourseId)?.CourseLevel;
+                            item.StatusCourseResult = courseResults.Content?.Result?.FirstOrDefault(x => x.CourseId == item.CourseId && x.UserId == item.UserId)?.Status;
+                        }
+                    }
+                }
+            }
+
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+
+        private async Task<VoidMethodResult> CheckLeadOrClient(IList<Order> orders, GetOrderByStatusIntegrationQuery request, CancellationToken cancellationToken)
+        {
+            VoidMethodResult methodResult = new VoidMethodResult();
 
             var orderClients = orders.Where(x => x.ExpireDate.HasValue && x.ExpireDate.Value > DateTime.UtcNow && !x.IsTrial).Select(x => x.UserId).ToList();
 
@@ -73,35 +103,21 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
 
                 orders = orders.Where(x => !orderClients.Contains(x.UserId)).ToList();
 
-                if (userExpire != null && userExpire.Any())
+                if (userExpire == null || !userExpire.Any())
                 {
-                    foreach (var item in userExpire)
+                    return methodResult;
+                }
+
+                // lấy nhưng order hết hạn đưa vào leads
+                foreach (var item in userExpire)
+                {
+                    if (!orders.Any(x => x.Id == item.Id))
                     {
-                        if (!orders.Any(x => x.Id == item.Id))
-                        {
-                            orders.Add(item);
-                        }
+                        orders.Add(item);
                     }
                 }
             }
 
-            methodResult.Result = _mapper.Map(orders, methodResult.Result);
-
-            if (methodResult.Result != null && methodResult.Result.Any())
-            {
-                var userIds = methodResult.Result.Select(x => x.UserId).Distinct().ToList();
-                var courseResults = await _lmsCourseService.GetCourseResultsByUserIds(userIds);
-                if (courseResults.IsSuccessStatusCode)
-                {
-                    foreach (var item in methodResult.Result)
-                    {
-                        item.CourseName = courseResults.Content?.Result?.FirstOrDefault(x => x.CourseId == item.CourseId)?.CourseLevel;
-                        item.StatusCourseResult = courseResults.Content?.Result?.FirstOrDefault(x => x.CourseId == item.CourseId && x.UserId == item.UserId)?.Status;
-                    }
-                }
-            }
-
-            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
     }

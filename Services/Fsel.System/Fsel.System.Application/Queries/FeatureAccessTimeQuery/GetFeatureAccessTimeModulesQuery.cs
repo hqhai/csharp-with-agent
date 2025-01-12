@@ -31,32 +31,31 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             foreach (var item in request.FeatureAccessTimes)
             {
                 FeatureAccessTimeModel? featureAccessTime;
-                var query = _featureAccessTimeRepository.Queryable.Where(x => x.CreatedUserId == request.UserId && (!item.CourseId.HasValue || x.CourseId == item.CourseId) && x.ObjectId.HasValue);
+                var userId = request.UserId == Guid.Empty ? item.UserId : request.UserId;
+                var query = _featureAccessTimeRepository.Queryable.Where(x => x.CreatedUserId == userId && (!item.CourseId.HasValue || x.CourseId == item.CourseId) && x.ObjectId.HasValue);
+
                 if (item.UnitId.HasValue)
                 {
                     query = query.Where(x => x.UnitId == item.UnitId);
                 }
-
                 if (item.LessonId.HasValue)
                 {
                     query = query.Where(x => x.LessonId == item.LessonId);
                 }
-
                 if (item.ObjectId.HasValue)
                 {
                     query = query.Where(x => x.ObjectId == item.ObjectId);
                 }
-
                 if (item.EnumFeature.HasValue)
                 {
                     query = query.Where(x => x.EnumFeature == item.EnumFeature);
                 }
-
                 if (item.EnumFeature.HasValue && !item.CourseId.HasValue)
                 {
                     featureAccessTime = await query.GroupBy(x => x.EnumFeature).Select(x => new FeatureAccessTimeModel
                     {
                         AccessTime = x.Sum(x => x.AccessTime),
+                        UserId = userId,
                         Visit = x.Sum(x => x.Visit),
                         LastVisited = x.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
                         EnumFeature = x.Key,
@@ -68,6 +67,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                     {
                         AccessTime = x.Sum(x => x.AccessTime),
                         Visit = x.Sum(x => x.Visit),
+                        UserId = userId,
                         LastVisited = x.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
                         EnumFeature = x.Key.EnumFeature,
                         CourseId = x.Key.CourseId,
@@ -79,6 +79,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                     {
                         AccessTime = x.Sum(x => x.AccessTime),
                         Visit = x.Sum(x => x.Visit),
+                        UserId = userId,
                         LastVisited = x.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
                         CourseId = x.Key,
                     }).FirstOrDefaultAsync(cancellationToken);
@@ -89,6 +90,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                     {
                         AccessTime = x.AccessTime,
                         Visit = x.Visit,
+                        UserId = userId,
                         LastVisited = x.LastVisited
                     }).FirstOrDefaultAsync(cancellationToken);
                 }
