@@ -49,5 +49,17 @@ namespace Fsel.Identity.Api.Controllers
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// RetakeCourse School
+        /// </summary>
+        [HttpGet("report-competition-event-school")]
+        [ProducesResponseType(typeof(MethodResult<IList<ReportCompetitionEventModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ReportCompetitionEvent([FromQuery] GetReportCompetitionEventSchoolsQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
