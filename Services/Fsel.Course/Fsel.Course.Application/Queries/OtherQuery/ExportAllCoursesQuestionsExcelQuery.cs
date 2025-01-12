@@ -78,8 +78,8 @@ namespace Fsel.Course.Application.Queries.OtherQuery
             List<CourseModuleQuestionExportModel> courseModuleQuestionExports = new List<CourseModuleQuestionExportModel>();
             foreach (var courseGroupLevel in courseGroupLevels)
             {
-                var unitCourses = units.Where(x => courseGroupLevel.UnitIds.Contains(x.Id)).ToList();
-                var lessonIds = unitCourses.SelectMany(x => x.LessonIds).ToList();
+                var unitCourses = courseGroupLevel.UnitIds.Select(x => units.FirstOrDefault(y => y.Id == x)).ToList();
+                var lessonIds = unitCourses.Where(x => x != null).SelectMany(x => x!.LessonIds).ToList();
                 var totalFullMockTest = await GetTotalQuestionMockTestAsync(courseGroupLevel.MockTestIds);
                 var totalFinalTest = await GetTotalQuestionFinalTestAsync(courseGroupLevel.FinalTestIds);
                 var totalHomeWork = await GetTotalQuestionHomeWorkAsync(lessonIds);
@@ -91,7 +91,7 @@ namespace Fsel.Course.Application.Queries.OtherQuery
                     TotalQuestionFullMockTest = totalFullMockTest,
                     TotalQuestionHomeWork = totalHomeWork,
                 };
-                var skillMockTestIds = unitCourses.Where(x => x.MockTestId != Guid.Empty).Select(x => x.MockTestId).ToList();
+                var skillMockTestIds = unitCourses.Where(x => x != null && x.MockTestId != Guid.Empty).Select(x => x!.MockTestId).ToList();
                 if (skillMockTestIds.Any())
                 {
                     courseModuleQuestionExport.TotalQuestionSkillMockTest = await GetTotalQuestionMockTestAsync(skillMockTestIds);
