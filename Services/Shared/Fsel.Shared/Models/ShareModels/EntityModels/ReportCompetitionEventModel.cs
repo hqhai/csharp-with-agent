@@ -22,5 +22,6 @@ namespace Fsel.Shared.Models.ShareModels.EntityModels
         public int NumberValidStudentAccount { get; set; }
 
         public IList<Guid>? StudentIds { get; set; }
+        public IList<ReportCompetitionEventSchoolModel> ReportCompetitionEventSchools { get; set; } = new List<ReportCompetitionEventSchoolModel>();
     }
 }

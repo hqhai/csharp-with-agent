@@ -2,10 +2,12 @@
 
 namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 {
+    using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels.EntityModels;
@@ -13,9 +15,10 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetReportCompetitionEventsQuery : IRequest<MethodResult<IList<ReportCompetitionEventModel>>>
+    public class GetReportCompetitionEventSchoolsQuery : IRequest<MethodResult<IList<ReportCompetitionEventModel>>>
     {
         public string? EventCodeStr { get; set; }
+        public string? DistrictName { get; set; }
 
         public IList<string>? EventCodes
         {
@@ -28,28 +31,28 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
         public EnumEducationLevel EducationLevel { get; set; }
     }
 
-    public class GetReportCompetitionEventsQueryHandler : IRequestHandler<GetReportCompetitionEventsQuery, MethodResult<IList<ReportCompetitionEventModel>>>
+    public class GetReportCompetitionEventSchoolsQueryHandler : IRequestHandler<GetReportCompetitionEventSchoolsQuery, MethodResult<IList<ReportCompetitionEventModel>>>
     {
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly ISystemService _systemService;
-        private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IEventRegistrationRepository _eventRegistrationRepository;
+        private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
 
-        public GetReportCompetitionEventsQueryHandler(ICompetitionEventsRepository competitionEventsRepository,
+        public GetReportCompetitionEventSchoolsQueryHandler(ICompetitionEventsRepository competitionEventsRepository,
             IStudentRepository studentRepository,
             ISystemService systemService,
-            IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
-            IEventRegistrationRepository eventRegistrationRepository)
+            IEventRegistrationRepository eventRegistrationRepository,
+            IStudentCompetitionEventsRepository studentCompetitionEventsRepository)
         {
             _competitionEventsRepository = competitionEventsRepository;
             _studentRepository = studentRepository;
             _systemService = systemService;
-            _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _eventRegistrationRepository = eventRegistrationRepository;
+            _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
         }
 
-        public async Task<MethodResult<IList<ReportCompetitionEventModel>>> Handle(GetReportCompetitionEventsQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<ReportCompetitionEventModel>>> Handle(GetReportCompetitionEventSchoolsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<ReportCompetitionEventModel>>();
@@ -58,37 +61,60 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             {
                 return methodResult;
             }
-            var districtIds = competitions.SelectMany(x => x.CompetitionEvents).Where(x => x.LocationId.HasValue).Select(x => x.LocationId.GetValueOrDefault()).ToList();
+            var competitionEvents = competitions.SelectMany(x => x.CompetitionEvents).ToList();
+
+            var districtIds = competitionEvents.Where(x => x.LocationId.HasValue).Select(x => x.LocationId.GetValueOrDefault()).ToList();
             var locationResults = await _systemService.GetLocationByIdsAsync(new GetLocationsByIdsQueryModel { IdsStr = string.Join(",", districtIds) });
             var locationDistricts = locationResults.Content?.Result;
 
-            var schoolIds = competitions.SelectMany(x => x.CompetitionEvents).SelectMany(x => x.SchoolIds ?? new List<Guid>()).ToList();
+            if (!string.IsNullOrEmpty(request.DistrictName))
+            {
+                request.DistrictName = request.DistrictName.ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim();
+                var district = locationDistricts?.FirstOrDefault(x => x.Name.ToLower().Trim() == request.DistrictName);
+                competitionEvents = competitionEvents.Where(x => district != null && x.LocationId == district.Id).ToList();
+            }
+
+            var schoolIds = competitionEvents.SelectMany(x => x.SchoolIds ?? new List<Guid>()).ToList();
             var schoolResults = await _systemService.GetSchoolsAsync(new GetListSchoolQueryModel { Ids = schoolIds, EducationLevel = request.EducationLevel });
             var schools = schoolResults.Content?.Result;
 
             var studentSchoolIds = await (from baseQ in _studentRepository.Queryable
+                                          join er in _eventRegistrationRepository.Queryable on baseQ.Id equals er.StudentId
                                           join sce in _studentCompetitionEventsRepository.Queryable on baseQ.Id equals sce.StudentId
-                                          join ev in _eventRegistrationRepository.Queryable on baseQ.Id equals ev.StudentId
                                           where baseQ.SchoolId.HasValue && schools != null && schools.Select(x => x.Id).Contains(baseQ.SchoolId.Value)
-                                          && competitions.Select(x => x.Id).Contains(sce.CompetitionEventId)
+                                          && competitions.Select(x => x.Id).Contains(er.CompetitionEventId)
+                                          group baseQ
+                                          by baseQ.SchoolId into g
                                           select new
                                           {
-                                              SchoolId = baseQ.SchoolId.GetValueOrDefault(),
-                                              StudentId = baseQ.Id
+                                              SchoolId = g.Key.GetValueOrDefault(),
+                                              StudentIds = g.Select(x => x.Id).Distinct().ToList(),
                                           }).ToListAsync(cancellationToken);
 
             var reportCompetitionEvents = new List<ReportCompetitionEventModel>();
-            foreach (var item in competitions.SelectMany(x => x.CompetitionEvents))
+            foreach (var item in competitionEvents)
             {
                 var studentDistricts = studentSchoolIds.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.SchoolId)).ToList();
-                var studentIds = studentDistricts.Select(x => x.StudentId).Distinct().ToList();
+                var studentIds = studentDistricts.SelectMany(x => x.StudentIds).Distinct().ToList();
+                var schoolDistricts = schools?.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.Id));
+
                 var reportCompetition = new ReportCompetitionEventModel
                 {
                     DistrictName = locationDistricts?.FirstOrDefault(x => x.Id == item.LocationId)?.Name,
-                    NumberRegisteredSchool = schools?.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.Id)).Count() ?? default,
+                    NumberRegisteredSchool = schoolDistricts?.Count() ?? default,
                     NumberActualParticipatingSchool = studentDistricts.Select(x => x.SchoolId).Distinct().Count(),
                     NumberValidStudentAccount = studentIds.Count,
                     StudentIds = studentIds,
+                    ReportCompetitionEventSchools = schoolDistricts?.Select(school =>
+                    {
+                        var schoolDistrict = studentDistricts.FirstOrDefault(x => x.SchoolId == school.Id);
+                        return new ReportCompetitionEventSchoolModel
+                        {
+                            SchoolName = schools?.FirstOrDefault(x => x.Id == school.Id)?.Name,
+                            NumberValidStudentAccount = schoolDistrict?.StudentIds.Count ?? default,
+                            StudentIds = schoolDistrict?.StudentIds ?? new List<Guid>()
+                        };
+                    }).ToList() ?? new List<ReportCompetitionEventSchoolModel>()
                 };
 
                 reportCompetitionEvents.Add(reportCompetition);
