@@ -247,7 +247,18 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return 1;
             }
-            return section.SectionParts.Any() ? section.SectionParts.SelectMany(x => x.SectionQuestions).Count() : section.SectionQuestions.Where(x => x.Question != null).Select(x => x.Question!.SubQuestionNumber).Sum();
+            if (section.SectionParts.Any())
+            {
+                return section.SectionParts.SelectMany(x => x.SectionQuestions).Count();
+            }
+            if (section.SectionQuestions.Select(x => x.Question).Any() && section.SectionQuestions.Select(x => x.Question).Any(x => x != null && x.SubQuestionIndexs != null && x.SubQuestionIndexs.Any()))
+            {
+                return section.SectionQuestions.Where(x => x.Question != null).Select(x => x.Question!.SubQuestionNumber).Sum();
+            }
+            else
+            {
+                return section.SectionQuestions.Count;
+            }
         }
 
         private static IList<Guid>? GetUnansweredMockTests(IList<Section>? sections, SectionGroup sectionGroup)
