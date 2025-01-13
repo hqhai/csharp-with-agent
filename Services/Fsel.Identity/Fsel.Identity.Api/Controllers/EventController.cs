@@ -62,9 +62,9 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("{eventCode}")]
         [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetCompetitionEvents([FromRoute] string? eventCode)
+        public async Task<IActionResult> GetCompetitionEvents([FromRoute] string? eventCode, [FromQuery] bool isLeaderBoard)
         {
-            MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(new GetCompetitionEventsQuery { EventCode = eventCode }).ConfigureAwait(false);
+            MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(new GetCompetitionEventsQuery { EventCode = eventCode, IsLeaderBoard = isLeaderBoard }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
