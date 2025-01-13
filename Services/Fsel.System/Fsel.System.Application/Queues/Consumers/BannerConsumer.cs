@@ -25,7 +25,6 @@ namespace Fsel.System.Application.Queues.Consumers
 
             await _mediator.Send(new GetBannerByStudentQuery
             {
-                Date = message.Date,
                 UserId = message.UserId
             }).ConfigureAwait(false);
         }

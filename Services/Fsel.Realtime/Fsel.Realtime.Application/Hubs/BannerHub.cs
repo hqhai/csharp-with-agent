@@ -2,14 +2,12 @@
 
 namespace Fsel.Realtime.Application.Hubs
 {
-    using System.Globalization;
     using Fsel.Core.Base;
     using Fsel.Core.Extensions;
     using Fsel.Core.Services.IpApiServices;
     using Fsel.Realtime.Application.Queues.Publishers;
     using Fsel.Realtime.Application.Trackers;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.SignalR;
 
     public class BannerHub : BaseHub
     {
@@ -34,13 +32,7 @@ namespace Fsel.Realtime.Application.Hubs
 
         public async Task GetBanner()
         {
-            string date = (Context.GetHttpContext()?.Request.Query["Date"].ToString()!);
-            if (string.IsNullOrEmpty(date))
-            {
-                return;
-            }
-
-            await _bannerPublisher.Publish(new Shared.Models.ShareModels.BannerMessageModel { Date = DateTime.Parse(date, CultureInfo.InvariantCulture), UserId = _authContext.CurrentUserId }, CancellationToken.None);
+            await _bannerPublisher.Publish(new Shared.Models.ShareModels.BannerMessageModel { UserId = _authContext.CurrentUserId }, CancellationToken.None);
         }
     }
 }

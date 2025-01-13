@@ -14,6 +14,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
+    using global::System.Globalization;
     using global::System.Linq;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -21,8 +22,6 @@ namespace Fsel.System.Application.Queries.BannerQuery
 
     public class GetBannerByStudentQuery : IRequest<MethodResult<IList<BannerStudentQueueModel>>>
     {
-        public DateTime Date { get; set; }
-
         public Guid UserId { get; set; }
     }
 
@@ -55,9 +54,10 @@ namespace Fsel.System.Application.Queries.BannerQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<BannerStudentQueueModel>> methodResult = new MethodResult<IList<BannerStudentQueueModel>>();
 
-            DateTime date = request.Date.ConvertTimeToUtc(EnumCountryKey.Vietnam);
+            DateTime date = DateTime.UtcNow;
 
-            var timeOfDay = request.Date.ConvertDateTimeToSeconds();
+            DateTime dateVietNam = date.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+            var timeOfDay = dateVietNam.ConvertDateTimeToSeconds();
 
             var banners = await _bannerRepository.Queryable
                                                  .Include(x => x.BannerScopes)
