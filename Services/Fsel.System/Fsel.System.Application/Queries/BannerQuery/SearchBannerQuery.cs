@@ -2,10 +2,8 @@
 
 namespace Fsel.System.Application.Queries.BannerQuery
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Core.Extensions;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using Fsel.System.Domain.Models.QueryModels.Banners;
@@ -20,12 +18,10 @@ namespace Fsel.System.Application.Queries.BannerQuery
     public class SearchBannerQueryHandler : IRequestHandler<SearchBannerQuery, MethodResult<PagingItemsModel<BannerModel>>>
     {
         private readonly IBannerRepository _bannerRepository;
-        private readonly IMapper _mapper;
 
-        public SearchBannerQueryHandler(IBannerRepository bannerRepository, IMapper mapper)
+        public SearchBannerQueryHandler(IBannerRepository bannerRepository)
         {
             _bannerRepository = bannerRepository;
-            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<BannerModel>>> Handle(SearchBannerQuery request, CancellationToken cancellationToken)
@@ -59,12 +55,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
                 query = query.Where(x => request.StartDate.Value.Date <= x.EndDate.Date && request.EndDate.Value.Date >= x.StartDate.Date);
             }
 
-            int totalItem = await query.CountAsync(cancellationToken);
-            var lists = await query.ApplySortAndPaging(request).ToListAsync(cancellationToken);
-
-            methodResult.Result = new PagingItemsModel<BannerModel>(_mapper.Map<IList<BannerModel>>(lists), request, totalItem);
-            methodResult.StatusCode = StatusCodes.Status200OK;
-            return methodResult;
+            return await _bannerRepository.GetListByPageResultAsync<BannerModel>(query, request, cancellationToken);
         }
     }
 }

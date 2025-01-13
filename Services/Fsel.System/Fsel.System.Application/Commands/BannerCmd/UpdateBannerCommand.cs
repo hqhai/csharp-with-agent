@@ -48,6 +48,7 @@ namespace Fsel.System.Application.Commands.BannerCmd
 
             var banner = await _bannerRepository.Queryable
                                                 .Include(x => x.BannerScopes)
+                                                .Include(x => x.BannerImages)
                                                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (banner == null)
             {
