@@ -18,6 +18,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
     public class ConvertSpeechToTextCommandHandler : IRequestHandler<ConvertSpeechToTextCommand, MethodResult<string>>
     {
         private readonly IOpenAIService _openAIService;
+        private const string Model = "whisper-1";
 
         public ConvertSpeechToTextCommandHandler(IOpenAIService openAIService)
         {
@@ -54,8 +55,13 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
                 // Gửi yêu cầu GET để tải file từ URL
                 using (HttpResponseMessage response = await client.GetAsync(url))
                 {
-                    string contentType = response.Content.Headers.ContentType?.ToString() ?? "application/octet-stream";
+                    string contentType = response.Content.Headers.ContentType?.ToString() ?? string.Empty;
                     string fileName = Path.GetFileName(new Uri(url).LocalPath);
+
+                    if (string.IsNullOrEmpty(contentType) || string.IsNullOrEmpty(fileName))
+                    {
+                        return methodResult;
+                    }
 
                     // Tải nội dung dưới dạng Stream
                     using (Stream stream = await response.Content.ReadAsStreamAsync())
@@ -64,7 +70,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
                         var streamPart = new StreamPart(stream, fileName, contentType);
 
                         // Call chatgpt
-                        var textResult = await _openAIService.SpeechToTextByAIAsync(streamPart, "whisper-1");
+                        var textResult = await _openAIService.SpeechToTextByAIAsync(streamPart, Model);
                         if (!textResult.IsSuccessStatusCode)
                         {
                             methodResult.AddErrorBadRequest(textResult.Error?.Message);
