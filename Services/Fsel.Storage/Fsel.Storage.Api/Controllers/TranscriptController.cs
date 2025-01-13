@@ -9,6 +9,7 @@ using Fsel.Shared.Attributes;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using Fsel.Storage.Application.Command.ChatbotCmd;
+using Fsel.Storage.Application.Command.SpeechToTextCmd;
 using Fsel.Storage.Application.Services.AmazonS3Services;
 using Fsel.Storage.Domain.Models.CommandModels;
 using Fsel.Storage.Domain.Models.EntityModels;
@@ -100,6 +101,18 @@ namespace Fsel.Storage.Api.Controllers
             MethodResult<string> result = new MethodResult<string>();
             result.Result = await _cognitiveProvider.GetTranscriptionAsync(request?.Url ?? string.Empty);
             return result.GetActionResult();
+        }
+
+        /// <summary>
+        /// convert speech to text
+        /// </summary>
+        [HttpPost("speech-to-text")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ConvertSpeechToText([FromBody] ConvertSpeechToTextCommand request)
+        {
+            var methodResult = await _mediator.Send(request);
+            return methodResult.GetActionResult();
         }
     }
 }
