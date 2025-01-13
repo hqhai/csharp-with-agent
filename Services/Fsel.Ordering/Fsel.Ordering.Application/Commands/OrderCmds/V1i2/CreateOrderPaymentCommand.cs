@@ -12,6 +12,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
     using Fsel.Ordering.Application.Commands.VoucherCmds;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Application.Queues.Publishers;
+    using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums;
@@ -42,8 +43,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
         private readonly IVoucherRepository _voucherRepository;
         private readonly AddExpiredDateForStudentPublisher _addExpiredDateForStudentPublisher;
         private readonly AppSetting _appSetting;
+        private readonly ILmsCourseService _lmsCourseService;
 
-        public CreateOrderPaymentCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, IPackageRepository packageRepository, IUserService userService, IEventRepository eventRepository, AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher, IVoucherRepository voucherRepository, AppSetting appSetting)
+        public CreateOrderPaymentCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, IPackageRepository packageRepository, IUserService userService, IEventRepository eventRepository, AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher, IVoucherRepository voucherRepository, AppSetting appSetting, ILmsCourseService lmsCourseService)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
@@ -54,20 +56,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             _addExpiredDateForStudentPublisher = addExpiredDateForStudentPublisher;
             _voucherRepository = voucherRepository;
             _appSetting = appSetting;
+            _lmsCourseService = lmsCourseService;
         }
 
         public async Task<MethodResult<OrderModel>> Handle(CreateOrderPaymentCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OrderModel>();
-
-            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
-            if (!studentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddError(studentResult.Error);
-                return methodResult;
-            }
-            var student = studentResult.Content?.Result;
 
             if (string.IsNullOrEmpty(request.FullName) || string.IsNullOrEmpty(request.Email))
             {
@@ -81,7 +76,16 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             }
 
-            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.MonthNumber == request.MonthNumber, cancellationToken);
+            Package? package = null;
+            if (request.MonthNumber.HasValue)
+            {
+                package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.MonthNumber == request.MonthNumber, cancellationToken);
+            }
+            else
+            {
+                package = await _packageRepository.Queryable.OrderBy(p => p.MonthNumber).FirstOrDefaultAsync(cancellationToken);
+            }
+
             if (package == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
@@ -145,7 +149,20 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 voucherId = voucher.Id;
             }
 
-            var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student?.Human?.Code }, cancellationToken).ConfigureAwait(false);
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(studentResult.Error);
+                return methodResult;
+            }
+            var student = studentResult.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
+            var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student.Human?.Code }, cancellationToken).ConfigureAwait(false);
             string code = codeSend.Result ?? string.Empty;
 
             if (string.IsNullOrEmpty(code) || await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken))
@@ -165,7 +182,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             newOrder.TotalPrice = packageEvent.Price - newOrder.DiscountPrice;
             newOrder.UserId = request.UserId;
             newOrder.Status = EnumOrderStatus.Payment;
-            newOrder.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber);
+            newOrder.ExpireDate = currentDate.AddMonths(package.MonthNumber);
             newOrder.RevenueType = request.IsRevenue ? EnumPaymentRevenueType.Revenue : EnumPaymentRevenueType.NotRevenue;
             newOrder.VoucherId = voucherId;
             newOrder.OrderTransactions.Add(new OrderTransaction()
@@ -187,10 +204,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
 
                 await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
                 {
-                    StudentId = student!.Id,
-                    Month = package.MonthNumber + packageEvent.MonthBonus,
-                    Day = packageEvent.DayBonus,
-                    ExpiredDate = null,
+                    StudentId = student.Id,
+                    Month = request.MonthNumber.HasValue ? package.MonthNumber + packageEvent.MonthBonus : null,
+                    Day = request.MonthNumber.HasValue ? packageEvent.DayBonus : null,
+                    ExpiredDate = request.ExpireDate ?? null,
                 }, cancellationToken);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
@@ -216,8 +233,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 }
                 else
                 {
-                await _mediator.Send(new SendMailPaymentCommand() { OrderId = newOrder.Id }, cancellationToken);
+                    await _mediator.Send(new SendMailPaymentCommand() { OrderId = newOrder.Id }, cancellationToken);
+                }
             }
+
+            var updateNextUnitResult = await _lmsCourseService.UpdateNextUnit(newOrder.UserId);
+            if (!updateNextUnitResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(updateNextUnitResult.Error);
+                return methodResult;
             }
 
             return methodResult;

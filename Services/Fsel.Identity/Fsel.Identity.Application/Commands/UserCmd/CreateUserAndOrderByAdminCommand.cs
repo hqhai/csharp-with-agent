@@ -71,6 +71,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 Email = request.Email,
                 PhoneNumber = request.PhoneNumber,
                 MonthNumber = request.MonthNumber,
+                ExpireDate = request.ExpireDate,
                 IsRevenue = request.IsRevenue,
                 IsSendMail = request.IsSendMail,
                 VoucherCode = request.VoucherCode,
