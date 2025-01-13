@@ -18,7 +18,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
     public class ConvertSpeechToTextCommandHandler : IRequestHandler<ConvertSpeechToTextCommand, MethodResult<string>>
     {
         private readonly IOpenAIService _openAIService;
-        private const string Model = "whisper-1";
+        private const string AIModel = "whisper-1";
 
         public ConvertSpeechToTextCommandHandler(IOpenAIService openAIService)
         {
@@ -70,7 +70,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
                         var streamPart = new StreamPart(stream, fileName, contentType);
 
                         // Call chatgpt
-                        var textResult = await _openAIService.SpeechToTextByAIAsync(streamPart, Model);
+                        var textResult = await _openAIService.SpeechToTextByAIAsync(streamPart, AIModel);
                         if (!textResult.IsSuccessStatusCode)
                         {
                             methodResult.AddErrorBadRequest(textResult.Error?.Message);
