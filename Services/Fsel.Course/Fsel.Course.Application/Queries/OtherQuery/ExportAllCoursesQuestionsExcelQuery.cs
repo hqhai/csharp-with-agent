@@ -29,6 +29,7 @@ namespace Fsel.Course.Application.Queries.OtherQuery
         private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
         private readonly IExerciseQuestionRepository _exerciseQuestionRepository;
         private readonly ILessonHomeWorkRepository _lessonHomeWorkRepository;
+        private readonly ILessonVideoRepository _lessonVideoRepository;
 
         public ExportAllCoursesQuestionsExcelQueryHandler(ICourseRepository courseRepository,
             IUnitRepository unitRepository,
@@ -39,7 +40,8 @@ namespace Fsel.Course.Application.Queries.OtherQuery
             IVideoTimeCodeRepository videoTimeCodeRepository,
             ITimeCodeExerciseRepository timeCodeExerciseRepository,
             IExerciseQuestionRepository exerciseQuestionRepository,
-            ILessonHomeWorkRepository lessonHomeWorkRepository)
+            ILessonHomeWorkRepository lessonHomeWorkRepository,
+            ILessonVideoRepository lessonVideoRepository)
 
         {
             _courseRepository = courseRepository;
@@ -52,6 +54,7 @@ namespace Fsel.Course.Application.Queries.OtherQuery
             _timeCodeExerciseRepository = timeCodeExerciseRepository;
             _exerciseQuestionRepository = exerciseQuestionRepository;
             _lessonHomeWorkRepository = lessonHomeWorkRepository;
+            _lessonVideoRepository = lessonVideoRepository;
         }
 
         public async Task<MethodResult<Stream>> Handle(ExportAllCoursesQuestionsExcelQuery request, CancellationToken cancellationToken)
@@ -105,11 +108,11 @@ namespace Fsel.Course.Application.Queries.OtherQuery
 
         private async Task GetTotalQuestionVideosAsync(CourseModuleQuestionExportModel courseModuleQuestionExport, IList<Guid> lessonIds)
         {
-            var videoLessons = await _videoRepository.Queryable.Where(x => x.LessonVideos.Any(y => lessonIds.Contains(y.LessonId)))
+            var videoLessons = await _lessonVideoRepository.Queryable.Where(x => lessonIds.Contains(x.LessonId))
                 .Select(x => new
                 {
-                    VideoId = x.Id,
-                    LessonId = x.LessonVideos.Select(x => x.Lesson != null ? x.Lesson.Id : x.LessonId).FirstOrDefault()
+                    VideoId = x.VideoId,
+                    LessonId = x.LessonId
                 })
                 .ToListAsync();
 
