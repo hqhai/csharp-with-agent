@@ -280,13 +280,13 @@ namespace Fsel.Identity.Api.Controllers.Admin
         }
 
         /// <summary>
-        /// Forgot Password
+        /// Change Password
         /// </summary>
-        [HttpPost("forgot-password")]
+        [HttpPost("reset-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(role: nameof(EnumRole.Admin))]
-        public async Task<IActionResult> ForgotPassword([FromBody] ChangePasswordUserCommand command)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordUserCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

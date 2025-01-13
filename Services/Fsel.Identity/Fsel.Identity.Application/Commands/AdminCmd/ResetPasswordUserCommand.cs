@@ -10,20 +10,20 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Microsoft.AspNetCore.Http;
     using UserManager = Fsel.Core.Base.Managers.UserManager<Domain.Entities.User>;
 
-    public class ChangePasswordUserCommand : ChangePasswordCommandModel, IRequest<MethodResult<bool>>
+    public class ResetPasswordUserCommand : ChangePasswordCommandModel, IRequest<MethodResult<bool>>
     {
     }
 
-    public class ChangePasswordUserCommandHandler : IRequestHandler<ChangePasswordUserCommand, MethodResult<bool>>
+    public class ResetPasswordUserCommandHandler : IRequestHandler<ResetPasswordUserCommand, MethodResult<bool>>
     {
         private readonly UserManager _userManager;
 
-        public ChangePasswordUserCommandHandler(UserManager userManager)
+        public ResetPasswordUserCommandHandler(UserManager userManager)
         {
             _userManager = userManager;
         }
 
-        public async Task<MethodResult<bool>> Handle(ChangePasswordUserCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(ResetPasswordUserCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
