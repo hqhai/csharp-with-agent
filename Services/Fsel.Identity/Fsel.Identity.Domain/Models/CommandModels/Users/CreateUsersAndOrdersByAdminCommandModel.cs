@@ -18,7 +18,8 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
         public Guid? SchoolId { get; set; }
         public DateTime DateOfBirth { get; set; }
         public string? ReferralCode { get; set; }
-        public int MonthNumber { get; set; }
+        public int? MonthNumber { get; set; }
+        public DateTime? ExpireDate { get; set; }
         public bool IsRevenue { get; set; }
         public bool IsSendMail { get; set; }
         public string? VoucherCode { get; set; }
