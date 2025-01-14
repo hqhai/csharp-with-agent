@@ -139,7 +139,6 @@ namespace Fsel.Shared.Models.ShareModels
     {
         public string? Title { get; set; }
         public IList<WeekRule>? Rules { get; set; }
-       
         public int PrizeCount { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -147,6 +146,7 @@ namespace Fsel.Shared.Models.ShareModels
         public EnumLeaderBoardType LeaderBoardType { get; set; }
         public string? FormOfAward { get; set; }
         public string? Rule { get; set; }
+        public IList<CollectiveAward>? CollectiveAwards { get; set; }
     }
 
     public class WeekRule
@@ -156,6 +156,12 @@ namespace Fsel.Shared.Models.ShareModels
         public string? Detail { get; set; }
         public string? RewardImagine { get; set; }
         public int Rank { get; set; }
+    }
+
+    public class CollectiveAward
+    {
+        public string? Title { get; set; }
+        public string? Description { get; set; }
     }
 
     public class LearningNotice
