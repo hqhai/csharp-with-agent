@@ -12,16 +12,13 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Common.Models.Excels;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
-    using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
-    using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
-    using MassTransit;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -304,62 +301,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         //return result;
                     }
                 });
-
-                //var resultUsers = await Task.WhenAll(tasks);
-
-                //foreach (var student in students)
-                //{
-                //    Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
-                //    int age = Shared.Helpers.DateTimeHelper.GetYearOld(Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture));
-                //    var user = new User()
-                //    {
-                //        UserName = student.Email!.Trim(),
-                //        Email = student.Email.Trim(),
-                //        FullName = student.FullName!.Trim(),
-                //        PhoneNumber = student.PhoneNumber!.Trim(),
-                //        EmailConfirmed = false,
-                //        PhoneNumberConfirmed = false,
-                //        Status = EnumUserStatus.Inactive,
-                //        Human = new Human()
-                //        {
-                //            FullName = student.FullName.Trim(),
-                //            PhoneNumber = student.PhoneNumber.Trim(),
-                //            Birthday = Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture),
-                //            Email = student.Email.Trim(),
-                //            Code = GeneratorCodeAsync(Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture), null),
-                //            Student = new Student()
-                //            {
-                //                CreatedByParent = false,
-                //                Occupation = nameof(Student),
-                //                School = request.SchoolName,
-                //                SchoolClass = student.SchoolClass,
-                //                SchoolGrade = student.SchoolGrade,
-                //                SchoolId = request.SchoolId,
-                //                CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
-                //            }
-                //        },
-                //        UserPlatforms = new List<UserPlatform>()
-                //                            {
-                //                                new UserPlatform()
-                //                                {
-                //                                    PlatformId = platform.Id
-                //                                }
-                //                            },
-                //        UserSettings = new List<UserSetting>()
-                //            {
-                //                new UserSetting(true)
-                //            }
-                //    };
-
-                //    var password = Shared.Helpers.StringHelper.GeneratePassword(8);
-
-                //    identityStudentResult = await _userManager.CreateAsync(user, password);
-                //    if (identityStudentResult.Succeeded)
-                //    {
-                //        await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
-                //        studentIds.Add(user.Human.Student.Id);
-                //    }
-                //};
 
                 var studentCompetitionEvents = new List<StudentCompetitionEvent>();
                 studentIds.ForEach(p =>

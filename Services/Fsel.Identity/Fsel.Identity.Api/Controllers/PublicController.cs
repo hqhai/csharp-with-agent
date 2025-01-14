@@ -43,6 +43,8 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// create students to event from file
         /// </summary>
+        [RequestSizeLimit(1 * 1024 * 1024)] // 1 MB
+        [RequestFormLimits(MultipartBodyLengthLimit = 1 * 1024 * 1024)] // 1 MB
         [HttpPost("create-students-to-event-from-file")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
