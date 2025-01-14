@@ -54,6 +54,7 @@ namespace Fsel.Shared.Models.ShareModels
         public string? LuckySpinGiftImage { get; set; }
         public IList<WeekEvent>? WeekEvents { get; set; }
         public IList<WeekEvent>? LuckyStarRules { get; set; }
+        public IList<CollectiveAward>? CollectiveAwards { get; set; }
         public FormConfig? FormConfig { get; set; }
         public Guid? LocationId { get; set; }
 
@@ -139,10 +140,13 @@ namespace Fsel.Shared.Models.ShareModels
     {
         public string? Title { get; set; }
         public IList<WeekRule>? Rules { get; set; }
+       
         public int PrizeCount { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int WeekNumber { get; set; }
+        public EnumLeaderBoardType LeaderBoardType { get; set; }
+        public string? FormOfAward { get; set; }
         public string? Rule { get; set; }
         public IList<CollectiveAward>? CollectiveAwards { get; set; }
     }
