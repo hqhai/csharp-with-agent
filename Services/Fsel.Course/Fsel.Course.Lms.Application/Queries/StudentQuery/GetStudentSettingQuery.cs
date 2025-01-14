@@ -29,7 +29,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
         private readonly IOrderService _orderService;
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
-        private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
 
         public SettingStudentCheckQueryHandler(IUserService userService,
@@ -37,7 +36,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             IOrderService orderService,
             ICourseRepository courseRepository,
             IMapper mapper,
-            ITrainingService trainingService,
             AuthContext authContext)
         {
             _userService = userService;
@@ -45,7 +43,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             _orderService = orderService;
             _courseRepository = courseRepository;
             _mapper = mapper;
-            _trainingService = trainingService;
             _authContext = authContext;
         }
 
@@ -71,10 +68,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                                                                               .ToListAsync(cancellationToken);
 
                 var placementTestResultLast = placementTestResults.FirstOrDefault();
-
-                var placementTestResultInitial = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == student.Id)
-                                                                               .OrderBy(x => x.CreatedDate)
-                                                                               .FirstOrDefaultAsync(cancellationToken);
+                var placementTestResultInitial = placementTestResults.OrderBy(x => x.CreatedDate).FirstOrDefault();
 
                 var (levelNext, isLock) = placementTestResultLast?.Level.GetLevelInScore(placementTestResultLast.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age)) ?? (null, default);
 
@@ -105,22 +99,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                     return methodResult;
                 }
                 settingStudentModel.Status = status?.Content?.Result;
-                var classResult = await _trainingService.GetClassByStudentId(student.Id);
-                if (!classResult.IsSuccessStatusCode)
+                if (student.CourseId.HasValue)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));
-                    return methodResult;
-                }
-                var @class = classResult?.Content?.Result;
-                if (@class == null)
-                {
-                    methodResult.StatusCode = StatusCodes.Status200OK;
-                    methodResult.Result = settingStudentModel;
-                    return methodResult;
-                }
-                var course = await _courseRepository.GetByIdAsync(@class.CourseId);
-                if (course != null)
-                {
+                    var course = await _courseRepository.GetByIdAsync(student.CourseId.Value);
                     settingStudentModel.Course = _mapper.Map<CourseModel>(course);
                 }
             }
