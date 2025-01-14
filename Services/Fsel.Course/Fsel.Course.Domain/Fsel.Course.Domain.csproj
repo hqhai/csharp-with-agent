@@ -10,7 +10,6 @@
     <Compile Remove="Models\CommandModels\ChatBot\**" />
     <EmbeddedResource Remove="Models\CommandModels\ChatBot\**" />
     <None Remove="Models\CommandModels\ChatBot\**" />
-   
   </ItemGroup>
 
   <ItemGroup>
