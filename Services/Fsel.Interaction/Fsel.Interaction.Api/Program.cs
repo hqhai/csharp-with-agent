@@ -4,6 +4,7 @@ using Fsel.Common.Constants;
 using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Interaction.Application.Queues.Publishers;
+using Fsel.Interaction.Application.Services.AIService;
 using Fsel.Interaction.Application.Services.CourseServices;
 using Fsel.Interaction.Application.Services.HarmfulContentService;
 using Fsel.Interaction.Application.Services.NotificationService;
@@ -52,6 +53,15 @@ builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseA
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(INotificationService), appSetting?.Services?.NotificationApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
+
+builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
+{
+    httpClient.BaseAddress = new Uri(appSetting?.OpenAiConfig?.Uri ?? string.Empty);
+    if (!string.IsNullOrEmpty(appSetting?.OpenAiConfig?.ApiKey))
+    {
+        httpClient.DefaultRequestHeaders.Add("Authorization", $"{Settings.Bearer} {appSetting?.OpenAiConfig?.ApiKey}");
+    }
+});
 
 builder.Services.AddRefitClient<IHarmfulContentWordsService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
 {

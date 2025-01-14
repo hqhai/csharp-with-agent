@@ -10,11 +10,18 @@ namespace Fsel.Interaction.Infrastructure.ValueSettings
         public ConstantUrl? ConstantUrl { get; set; }
         public HarmfulContentConfigs? HarmfulContentConfigs { get; set; }
         public new Services? Services { get; set; }
+        public OpenAiConfig? OpenAiConfig { get; set; }
     }
 
     public class ConstantUrl
     {
         public string? ConfirmOtpUrl { get; set; }
+    }
+
+    public class OpenAiConfig
+    {
+        public string? Uri { get; set; }
+        public string? ApiKey { get; set; }
     }
 
     public class HarmfulContentConfigs

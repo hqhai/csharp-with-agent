@@ -2,6 +2,7 @@
 
 namespace Fsel.Interaction.Application.Commands.CommentCmd
 {
+    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -9,19 +10,19 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using Fsel.Common.Models;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Interaction.Application.Commands.AiCmd;
     using Fsel.Interaction.Application.Queues.Publishers;
+    using Fsel.Interaction.Application.Services.AIService.Models;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Application.Services.CourseServices.Models;
     using Fsel.Interaction.Application.Services.CourseServices.QueryModel;
     using Fsel.Interaction.Application.Services.SystemService;
     using Fsel.Interaction.Application.Services.UserServices;
-    using Fsel.Interaction.Application.Services.UserServices.Models;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Comments;
     using Fsel.Interaction.Domain.Models.EntityModels;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -44,8 +45,23 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private readonly IUserService _userService;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly IPostRepository _postRepository;
+        private readonly IMediator _mediator;
+        private const int MinLength = 20;
+        private const int MaxLength = 225;
+        private const string ModelAI = "gpt-4";
+        private const string ContentAICheckComment = "You are a meticulous and thorough content moderator who maintains a rigid no-tolerance policy for (User-submitted Text) which contains any of the three items listed under the (Prohibited) section below. You always follow the (Instructions) listed below step-by-step.Prohibited:1. Curse words, 2. Hurtful speech, 3. Nonsensical content, 4. Topics which are politically, religiously, or socially sensitive in the context of Vietnam, 5. Content in languages other than English (individual words or phrases from foreign languages are acceptable)Instructions: 1. Carefully inspect the text string under (User-submitted Text) for any of the 5 items listed under the (Prohibited) section., 2. Determine whether the (User-submitted Text) contains any content which violates any of the prohibited content types listed under the (Prohibited) section., 3. Output a value of (YES) in the (determination) key-value pair string if the content DOES violate even one of the prohibited content types. Output a value of (NO) in the (determination) key-value pair string if the content DOES NOT violate any of the prohibited content types. Ensure that all standard JSON syntax conventions are followed., 4. Output a 1-sentence text string containing a reason for your determination in the (reason) key-value pair string. Ensure that all standard JSON syntax conventions are followed., Output Format:{(determination): null,(reason): null}";
 
-        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher notificationMessagePublisher, ICourseService courseService, ISystemService systemService, IUserService userService, QuestBoardPublisher questBoardPublisher, IPostRepository postRepository)
+        public CreateCommentCommandHandler(IMapper mapper,
+                                           ICommentRepository commentRepository,
+                                           AuthContext authContext,
+                                           DiscussionBoardCommentPublisher discussionBoardCommentPublisher,
+                                           NotificationMessagePublisher notificationMessagePublisher,
+                                           ICourseService courseService,
+                                           ISystemService systemService,
+                                           IUserService userService,
+                                           QuestBoardPublisher questBoardPublisher,
+                                           IPostRepository postRepository,
+                                           IMediator mediator)
         {
             _mapper = mapper;
             _commentRepository = commentRepository;
@@ -57,13 +73,19 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             _userService = userService;
             _questBoardPublisher = questBoardPublisher;
             _postRepository = postRepository;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<CommentModel>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            ArgumentNullException.ThrowIfNull(request.Content);
             MethodResult<CommentModel> methodResult = new MethodResult<CommentModel>();
+
+            if (string.IsNullOrEmpty(request.Content))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCommentErrorCode.ContentNotNull), nameof(request.Content), request.Content);
+                return methodResult;
+            }
 
             Comment comment = _mapper.Map<Comment>(request);
             comment.UserId = _authContext.CurrentUserId;
@@ -73,17 +95,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 return methodResult;
             }
 
-            #region Check từ khoá cấm
-
-            var listForbiddenWordResult = await _systemService.CheckContainForbiddenWord(request.Content);
-            var forbiddenWord = listForbiddenWordResult.Content?.Result;
-            if (forbiddenWord == null || forbiddenWord.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCommentErrorCode.ContainsForbiddenKeywords), string.Join(", ", forbiddenWord));
-                return methodResult;
-            }
-
-            #endregion Check từ khoá cấm
+            // check các tiêu chí
+            await AIHandler(request, comment);
 
             await _commentRepository.ExecuteTransactionAsync(async () =>
             {
@@ -298,6 +311,46 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             };
 
             await _notificationMessagePublisher.Publish(model, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<VoidMethodResult> AIHandler(CreateCommentCommandModel request, Comment comment)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(request.Content);
+            VoidMethodResult methodResult = new VoidMethodResult();
+
+            // Check từ khoá cấm
+            var listForbiddenWordResult = await _systemService.CheckContainForbiddenWord(request.Content);
+            var forbiddenWord = listForbiddenWordResult.Content?.Result;
+
+            // Check max length
+            int length = request.Content.Count(c => char.IsLetterOrDigit(c));
+
+            if ((forbiddenWord != null && forbiddenWord.Any()) || length <= MinLength || length >= MaxLength)
+            {
+                comment.Status = EnumCommentStatus.NotValid;
+                return methodResult;
+            }
+
+            // Call ChatGpt
+            var checkContentForAI = await _mediator.Send(new SubmitAICommand { SettingModel = ModelAI, SystemRoleAlConfig = ContentAICheckComment, UserAIConfig = request.Content });
+            if (string.IsNullOrEmpty(checkContentForAI))
+            {
+                comment.Status = EnumCommentStatus.Pending;
+                return methodResult;
+            }
+
+            var determination = JsonSerializer.Deserialize<DeterminationData>(checkContentForAI);
+            if (determination != null && !string.IsNullOrEmpty(determination.Determination))
+            {
+                comment.Status = determination.Determination == "YES" ? EnumCommentStatus.NotValid : EnumCommentStatus.Approver;
+            }
+            else
+            {
+                comment.Status = EnumCommentStatus.Pending;
+            }
+
+            return methodResult;
         }
     }
 }

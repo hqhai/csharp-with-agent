@@ -87,7 +87,7 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                     commentModel.IsLiked = actionLikes.Any(x => x.UserId == _authContext.CurrentUserId);
                     commentModel.ObjectId = item.Comment.ObjectId;
                     commentModel.IsFlagged = item.IsFlagged;
-
+                    commentModel.Status = item.Comment.Status;
                     results.Add(commentModel);
                 }
 
