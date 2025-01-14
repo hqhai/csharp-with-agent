@@ -54,5 +54,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public Guid CourseResultId { get; set; }
 
         public WeekEvent? WeekEvent { get; set; }
+
+        public Guid? SchoolId { get; set; }
     }
 }
