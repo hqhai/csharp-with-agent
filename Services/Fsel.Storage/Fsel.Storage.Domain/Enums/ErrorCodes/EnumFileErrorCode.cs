@@ -6,6 +6,6 @@ namespace Fsel.Storage.Domain.Enums.ErrorCodes
     {
         FileCannotEmpty,
         FileIsLargerThanAllowedSize,
-        UrlNotNull
+        FormFileNotNull
     }
 }

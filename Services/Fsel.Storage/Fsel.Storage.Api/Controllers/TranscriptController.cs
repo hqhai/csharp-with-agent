@@ -106,10 +106,13 @@ namespace Fsel.Storage.Api.Controllers
         /// <summary>
         /// convert speech to text
         /// </summary>
+        [DisableFormValueModelBinding]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
         [HttpPost("speech-to-text")]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ConvertSpeechToText([FromBody] ConvertSpeechToTextCommand request)
+        public async Task<IActionResult> ConvertSpeechToText([FromQuery] ConvertSpeechToTextCommand request)
         {
             var methodResult = await _mediator.Send(request);
             return methodResult.GetActionResult();
