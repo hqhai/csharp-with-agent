@@ -2,10 +2,8 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumMessageHistoryType
+    public enum EnumSMSBrand
     {
-        IRISSMS,
-        GAPITSMS,
-        Email
+        GAPIT, IRIS
     }
 }

@@ -1,10 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Sender.Application.Services.SMSServices.Models
+namespace Fsel.Sender.Application.Services.SMSServices.IRIS.Models
 {
     using System.Text.Json.Serialization;
 
-    public class SMSTokenModel
+    public class IRISSMSTokenResponseModel
     {
         [JsonPropertyName("token_type")]
         public string? TokenType { get; set; }

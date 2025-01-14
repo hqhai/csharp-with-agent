@@ -1,10 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Sender.Application.Services.SMSServices.Models
+namespace Fsel.Sender.Application.Services.SMSServices.IRIS.Models
 {
     using System.Collections.Generic;
 
-    public class SendSMSRequestModels
+    public class IRISSendSMSRequestModels
     {
         public IList<SMSRequestModel> SendingList { get; set; } = new List<SMSRequestModel>();
     }

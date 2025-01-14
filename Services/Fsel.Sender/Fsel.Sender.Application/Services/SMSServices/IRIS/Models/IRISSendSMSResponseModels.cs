@@ -1,8 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Sender.Application.Services.SMSServices.Models
+namespace Fsel.Sender.Application.Services.SMSServices.IRIS.Models
 {
-    public class SendSMSResponseModels
+    public class IRISSendSMSResponseModels
     {
         public IList<SMSResponseModel>? ResultList { get; set; }
     }

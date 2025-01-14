@@ -27,12 +27,12 @@ namespace Fsel.Sender.Api.Controllers
         /// <summary>
         /// Send SMS
         /// </summary>
-        [HttpPost]
+        [HttpPost("send-sms")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SendSMS([FromBody] SendSMSByIRISCommand command)
+        public async Task<IActionResult> SendSMSByIRIS([FromBody] SendSMSCommand command)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

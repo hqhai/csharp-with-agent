@@ -7,8 +7,9 @@ using Fsel.Sender.Domain.ValueSettings;
 using Fsel.Sender.Application.Services.SystemServices;
 using Fsel.Sender.Domain.IRepositories;
 using Fsel.Sender.Infrastructure.Repositories;
-using Fsel.Sender.Application.Services.SMSServices;
 using Fsel.Sender.Infrastructure;
+using Fsel.Sender.Application.Services.SMSServices.IRIS;
+using Fsel.Sender.Application.Services.SMSServices.GAPIT;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,7 @@ builder.Services.AddScoped<IMessageHistoryRepository, MessageHistoryRepository>(
 builder.Services.AddScoped<SESWrapper>();
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IIRISService), appSetting?.Services?.IRISApiUrl);
+builder.AddRefitClients(typeof(IGAPITService), appSetting?.Services?.GAPITApiUrl);
 var app = builder.Build();
 app.UseServices();
 app.Run();
