@@ -1,6 +1,7 @@
 namespace Fsel.Identity.Application.Queries.StudentRanking
 
 {
+    using System.Globalization;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -10,6 +11,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
     using Fsel.Identity.Application.Commands.StudentCompetitionSnapShotCmd;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.LmsCourseService.Model;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
     using Fsel.Identity.Domain.IRepositories;
@@ -25,6 +27,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
         public EnumCourseType CourseType { get; set; }
         public string? EventCode { get; set; }
         public int WeekNumber { get; set; }
+        public bool? IsSearching { get; set; }
 
         public bool IsCityLeaderBoard { get; set; }
     }
@@ -43,6 +46,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
         private const double Process_Ratio = 0.75;
         private const double Overall_Ratio = 0.25;
+        private const int NumberStudentOnLeaderboard = 200;
         private const string Special_Event = "EVThaiNguyenTHPT";
         private const string Parent_Special_Event = "ThaiNguyen";
 
@@ -64,6 +68,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemStudentRankingModel> methodResult = new MethodResult<PagingItemStudentRankingModel>();
             List<StudentRankingModel> result = new List<StudentRankingModel>();
+            List<StudentRankingModel> resultTemp = new List<StudentRankingModel>();
 
             var timeNowVI = DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam);
 
@@ -166,6 +171,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                               }).ToList();
                 }
 
+                resultTemp = result;
+
                 #region Filter
 
                 var eventStudentIds = result.Select(x => x.StudentId).ToList();
@@ -199,6 +206,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 }
 
                 result = result.DistinctBy(x => x.CourseResultId).Where(x => activeCourseResultIds.Contains(x.CourseResultId)).ToList();
+                resultTemp = result;
+                result = result.Take(NumberStudentOnLeaderboard).ToList();
 
                 #endregion
             }
@@ -206,13 +215,78 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             {
                 result = ConvertHelper.Deserialize<IList<StudentRankingModel>>(resultSnapShots.WeekCompetitionData)?.ToList() ?? new List<StudentRankingModel>();
             }
+            #region Search
 
-            #region Filter
-
-            if (!string.IsNullOrEmpty(request.Keyword))
+            if (request.IsSearching == true)
             {
-                result = result.Where(x => (x.FullName != null && x.FullName.ToLower().Contains(request.Keyword.ToLower().Trim())) || (x.Email != null && x.Email.ToLower() == request.Keyword.ToLower().Trim())).ToList();
+                var resultSearch = result.Select((item, index) =>
+                new StudentRankingModel
+                {
+                    StudentId = item.StudentId,
+                    SchoolName = item.SchoolName,
+                    Grade = item.Grade,
+                    OverallScore = item.OverallScore,
+                    Process = item.Process,
+                    FullName = item.FullName,
+                    Email = item.Email,
+                    AvatarPath = item.AvatarPath,
+                    UserId = item.UserId,
+                    RankingScore = item.RankingScore,
+                    CourseResultId = item.CourseResultId,
+                    CourseType = item.CourseType,
+                    EventRankingPosition = (index + 1).ToString(CultureInfo.CurrentCulture)
+                }).ToList();
+
+                if (!string.IsNullOrEmpty(request.Keyword))
+                {
+                    resultSearch = resultSearch.Where(x => (x.FullName != null && x.FullName.ToLower().Contains(request.Keyword.ToLower().Trim())) || (x.Email != null && x.Email.ToLower() == request.Keyword.ToLower().Trim())).ToList();
+                    resultSearch.AddRange(resultTemp
+                                         .Where(x =>
+                                             (x.FullName != null && x.FullName.ToLower().Contains(request.Keyword.ToLower().Trim())) ||
+                                             (x.Email != null && x.Email.ToLower() == request.Keyword.ToLower().Trim()))
+                                         .ToList()
+                                         .Where(newItem => !resultSearch.Any(existingItem => existingItem.StudentId == newItem.StudentId))
+                                         .Select(newItem => new StudentRankingModel
+                                         {
+                                             StudentId = newItem.StudentId,
+                                             SchoolName = newItem.SchoolName,
+                                             Grade = newItem.Grade,
+                                             OverallScore = newItem.OverallScore,
+                                             Process = newItem.Process != null ? newItem.Process : 0, // Thêm kiểm tra null và mặc định giá trị nếu null
+                                             FullName = newItem.FullName ?? string.Empty,
+                                             Email = newItem.Email ?? string.Empty,
+                                             AvatarPath = newItem.AvatarPath ?? string.Empty, // Thêm kiểm tra null và mặc định giá trị nếu null
+                                             UserId = newItem.UserId != Guid.Empty ? newItem.UserId : Guid.NewGuid(),
+                                             RankingScore = newItem.RankingScore,
+                                             CourseResultId = newItem.CourseResultId,
+                                             CourseType = newItem.CourseType,
+                                             EventRankingPosition = "200+"
+                                         }).ToList()
+                    );
+                }
+
+                if (resultSearch.Count == 0)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                    return methodResult;
+                }
+
+                var listsSearch = resultSearch.ApplyPaging(request).ToList();
+                int totalItemSearch = resultSearch.Count;
+                var resultPagingSearch = new PagingItemsModel<StudentRankingModel>(listsSearch, request, totalItemSearch);
+
+                methodResult.Result = new PagingItemStudentRankingModel
+                {
+                    Items = resultPagingSearch.Items,
+                    PagingInfo = resultPagingSearch.PagingInfo,
+                    WeekEvent = weekEventRules
+                };
+
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
             }
+            #endregion
+            #region Filter
 
             //result = result.Where(x => x.CourseType == request.CourseType || request.IsCityLeaderBoard).ToList();
 
