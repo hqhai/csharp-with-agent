@@ -46,18 +46,18 @@ namespace Fsel.Identity.Api.Controllers
         [RequestSizeLimit(1 * 1024 * 1024)] // 1 MB
         [RequestFormLimits(MultipartBodyLengthLimit = 1 * 1024 * 1024)] // 1 MB
         [HttpPost("create-students-to-event-from-file")]
-        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<CreateStudentsToEventFromFileCommandModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ImportStudentsIntoPlatform([FromForm] CreateStudentsToEventFromFileCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
 
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            if (!commandResult.IsOK || commandResult.Result == null)
+            if (!commandResult.IsOK || commandResult.Result?.Stream == null)
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result, Settings.Excels.ContentType, "[Template_Import_StudentHN]_Error.xlsx");
+            return File(commandResult.Result.Stream, Settings.Excels.ContentType, $"File lỗi tạo tài khoản.xlsx");
         }
     }
 }

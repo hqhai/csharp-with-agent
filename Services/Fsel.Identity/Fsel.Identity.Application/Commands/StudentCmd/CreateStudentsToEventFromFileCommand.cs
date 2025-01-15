@@ -26,14 +26,20 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using OfficeOpenXml;
     using OfficeOpenXml.Style;
 
-    public class CreateStudentsToEventFromFileCommand : BaseImportCommandModel, IRequest<MethodResult<Stream>>
+    public class CreateStudentsToEventFromFileCommandModel
+    {
+        public Stream? Stream { get; set; }
+        public int? NumberOfStudent { get; set; }
+    }
+
+    public class CreateStudentsToEventFromFileCommand : BaseImportCommandModel, IRequest<MethodResult<CreateStudentsToEventFromFileCommandModel>>
     {
         public Guid DistrictId { get; set; }
         public Guid SchoolId { get; set; }
         public string? SchoolName { get; set; }
     }
 
-    public class CreateStudentsToEventFromFileCommandHandler : IRequestHandler<CreateStudentsToEventFromFileCommand, MethodResult<Stream>>
+    public class CreateStudentsToEventFromFileCommandHandler : IRequestHandler<CreateStudentsToEventFromFileCommand, MethodResult<CreateStudentsToEventFromFileCommandModel>>
     {
         private readonly UserManager<User> _userManager;
         private readonly IOrderService _orderService;
@@ -60,10 +66,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             _serviceProvider = serviceProvider;
         }
 
-        public async Task<MethodResult<Stream>> Handle(CreateStudentsToEventFromFileCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<CreateStudentsToEventFromFileCommandModel>> Handle(CreateStudentsToEventFromFileCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<Stream>();
+            var methodResult = new MethodResult<CreateStudentsToEventFromFileCommandModel>();
 
             if (request.FormFile == null)
             {
@@ -123,11 +129,29 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             {
                                 worksheet.Cells[targetRow, num.Value].Style.Fill.PatternType = ExcelFillStyle.Solid;
                                 worksheet.Cells[targetRow, num.Value].Style.Fill.BackgroundColor.SetColor(Color.Red);
+                                worksheet.Cells[targetRow, num.Value].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                                worksheet.Cells[targetRow, num.Value].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                                worksheet.Cells[targetRow, num.Value].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                                worksheet.Cells[targetRow, num.Value].Style.Border.Right.Style = ExcelBorderStyle.Thin;
                             }
                         }
                     }
                     var messages = Shared.Helpers.StringHelper.JoinWithComma(errorMessages.Distinct().ToList());
                     worksheet.Cells[targetRow, lastColumn + 1].Value = messages;
+                }
+            };
+
+            Action<ExcelWorksheet, Dictionary<string, int?>?, int, int, CreateStudentToEventFromFileModel> defaultHandlerAction = (worksheet, columnIndexes, row, num, model) =>
+            {
+                worksheet.Cells[row, num].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                worksheet.Cells[row, num].Style.Fill.BackgroundColor.SetColor(Color.White);
+                worksheet.Cells[row, num].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[row, num].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[row, num].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[row, num].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                if (num == 7)
+                {
+                    worksheet.Cells[row, num].Value = null;
                 }
             };
 
@@ -212,13 +236,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 }
 
                 return await Task.FromResult(errors.Count == 0);
-            },
+            }, defaultHandlerAction,
             errorHandlerAction);
 
             if (result.Stream != null)
             {
-                methodResult.Result = result.Stream;
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.Result = new CreateStudentsToEventFromFileCommandModel() { Stream = result.Stream };
                 return methodResult;
             }
 
@@ -241,7 +264,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             try
             {
-                Parallel.ForEach(students, async student =>
+                await Parallel.ForEachAsync(students, async (student, cancellationToken) =>
                 {
                     using (var scope = _serviceProvider.CreateScope())
                     {
@@ -251,8 +274,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         int age = Shared.Helpers.DateTimeHelper.GetYearOld(Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture));
                         var user = new User()
                         {
-                            UserName = student.Email!.Trim(),
-                            Email = student.Email.Trim(),
+                            UserName = student.PhoneNumber!.Trim(),
+                            Email = student.Email!.Trim(),
                             FullName = student.FullName!.Trim(),
                             PhoneNumber = student.PhoneNumber!.Trim(),
                             EmailConfirmed = false,
@@ -295,10 +318,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         if (identityStudentResult.Succeeded)
                         {
                             await userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
-                            studentIds.Add(user.Human.Student.Id);
+                            lock (studentIds)
+                            {
+                                studentIds.Add(user.Human.Student.Id);
+                            }
                         }
-
-                        //return result;
                     }
                 });
 
@@ -317,6 +341,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     await _studentCompetitionEventsRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     return methodResult;
                 });
+                methodResult.Result = new CreateStudentsToEventFromFileCommandModel() { NumberOfStudent = studentIds.Count };
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -324,11 +349,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             {
                 methodResult.AddErrorBadRequest(ex.Message);
             }
-
             return methodResult;
         }
 
-        private string GeneratorCodeAsync(IStudentRepository studentRepository, DateTime birthDay, EnumGender? gender)
+        private static string GeneratorCodeAsync(IStudentRepository studentRepository, DateTime birthDay, EnumGender? gender)
         {
             var stt = studentRepository.GetNextSequenceValue<int>(SqlSettings.Sequence.UserSequence);
             var currentDate = DateTime.UtcNow;
