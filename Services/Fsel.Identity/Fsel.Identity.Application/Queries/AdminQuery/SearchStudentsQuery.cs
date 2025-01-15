@@ -6,13 +6,9 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Core.Base.Managers;
     using Fsel.Core.Extensions;
-    using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
-    using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -27,11 +23,15 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     {
         private readonly IStudentRepository _studentRepository;
         private readonly IUserSchoolRepository _userSchoolRepository;
+        private readonly AuthContext _authContext;
 
-        public SearchStudentsQueryHandler(IStudentRepository studentRepository, IUserSchoolRepository userSchoolRepository)
+        public SearchStudentsQueryHandler(IStudentRepository studentRepository,
+            IUserSchoolRepository userSchoolRepository,
+            AuthContext authContext)
         {
             _studentRepository = studentRepository;
             _userSchoolRepository = userSchoolRepository;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<PagingItemsModel<StudentSearchAdminModel>>> Handle(SearchStudentsQuery request, CancellationToken cancellationToken)
@@ -43,7 +43,6 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
             var query = _studentRepository.Queryable.Include(x => x.Human).Select(x => new StudentSearchAdminModel
             {
                 Id = x.Id,
@@ -67,9 +66,10 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                     query = query.Where(m => m.Id.ToString() == request.Keyword || (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
                 }
             }
-            if (schoolId.HasValue)
+            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
             {
-                query = query.Where(x => x.SchoolId == schoolId.Value);
+                var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
+                query = query.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId);
             }
 
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

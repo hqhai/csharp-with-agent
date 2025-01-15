@@ -15,32 +15,32 @@ namespace Fsel.System.Application.Queries.LocationQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetLocationsQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<LocationModel>>>
+    public class SearchLocationsQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<LocationModel>>>
     {
         public EnumLocationType LocationType { get; set; }
         public Guid? ParentId { get; set; }
     }
 
-    public class GetLocationsQueryHandler : IRequestHandler<GetLocationsQuery, MethodResult<PagingItemsModel<LocationModel>>>
+    public class SearchLocationsQueryHandler : IRequestHandler<SearchLocationsQuery, MethodResult<PagingItemsModel<LocationModel>>>
     {
         private readonly IMapper _mapper;
         private readonly ICrmLocationRepository _locationCrmRepository;
 
-        public GetLocationsQueryHandler(ICrmLocationRepository locationCrmRepository, IMapper mapper)
+        public SearchLocationsQueryHandler(ICrmLocationRepository locationCrmRepository, IMapper mapper)
         {
             _locationCrmRepository = locationCrmRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<PagingItemsModel<LocationModel>>> Handle(GetLocationsQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<LocationModel>>> Handle(SearchLocationsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<LocationModel>>();
 
-            if (request.LocationType != EnumLocationType.Province && request.LocationType != EnumLocationType.District)
-            {
-                return methodResult;
-            }
+            //if (request.LocationType != EnumLocationType.Province && request.LocationType != EnumLocationType.District)
+            //{
+            //    return methodResult;
+            //}
 
             var locations = _locationCrmRepository.Queryable.Where(p => p.Level.HasValue && p.Level == (EnumCrmLocationLevel)request.LocationType);
 
@@ -52,8 +52,14 @@ namespace Fsel.System.Application.Queries.LocationQuery
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                     return methodResult;
                 }
-
-                locations = locations.Where(p => p.ParentId == parent.Id);
+                if (parent.Level == EnumCrmLocationLevel.Country)
+                {
+                    locations = locations.Where(p => p.Parent != null && p.Parent.ParentId == parent.Id);
+                }
+                else
+                {
+                    locations = locations.Where(p => p.ParentId == parent.Id);
+                }
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))

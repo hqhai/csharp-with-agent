@@ -84,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                     Code = group.Key.Code,
                     CourseLevel = group.Key.CourseLevel,
                     CreatedDate = group.Key.CreatedDate,
-                    Stars = group.Average(x => x.Stars)
+                    Stars = group.Any() ? group.Average(x => x.Stars) : default
                 });
 
             if (request.NumberOfStars != null)

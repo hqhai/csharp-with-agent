@@ -3,11 +3,10 @@
 namespace Fsel.System.Application.Queries.SchoolQuery
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities;
-    using Fsel.System.Domain.Enums;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using Fsel.System.Domain.Models.QueryModels;
@@ -42,7 +41,7 @@ namespace Fsel.System.Application.Queries.SchoolQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                query = query.Where(m => m.GlobalId.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             if (request.LocationId != null)

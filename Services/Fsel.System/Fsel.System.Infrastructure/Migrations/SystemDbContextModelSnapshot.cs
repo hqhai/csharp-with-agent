@@ -849,6 +849,9 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<double>("HoursCompleted")
+                        .HasColumnType("float");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -856,7 +859,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<int>("LessonNumberPerWeek")
                         .HasColumnType("int");
 
-                    b.Property<int>("MaxHoursPerLesson")
+                    b.Property<int>("MaxHoursCompleted")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -2056,7 +2059,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Hoàn thành Diễn đàn lớp học đầu tiên",
+                            Description = "Hoàn thành đăng bài trong Diễn đàn lớp học đầu tiên",
                             ImagePath = "",
                             IsActive = true,
                             IsDeleted = false,
@@ -2104,7 +2107,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Hoàn thành Focus Mode đầu tiên",
+                            Description = "Hoàn thành Mục tiêu học tập ngày đầu tiên",
                             ImagePath = "",
                             IsActive = true,
                             IsDeleted = false,
@@ -2370,7 +2373,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2024, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Hoàn thành 7 lần Focus Mode",
+                            Description = "Hoàn thành 7 lần Mục tiêu học tập ngày",
                             Energy = 20,
                             ImagePath = "",
                             IsActive = true,

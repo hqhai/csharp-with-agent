@@ -45,7 +45,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         /// Search product
         /// </summary>
         [HttpGet("search")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<OrderSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ProductModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> Search([FromQuery] SearchProductQuery query)

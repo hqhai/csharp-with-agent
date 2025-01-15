@@ -72,9 +72,21 @@ namespace Fsel.Shared.Constants
         public const string SpeakingFluency = "Resources//SpeakingAiConfig//FluencyConfig.txt";
         public const string SpeakingLexical = "Resources//SpeakingAiConfig//LexicalResourceConfig.txt";
 
+
+        public const string AIClassForumRole = "Resources//AIPrompt//Role//ApprovalClassForumRole.txt";
+        public const string AIClassForumInstruction = "Resources//AIPrompt//Instruction//ApprovalClassForumInstruction.txt";
+
         public const string IeltsStudentResult = "Resources//IeltsStudentsResult.json";
         public const string AcademicStudentsResult = "Resources//AcademicStudentsResult.json";
         public const string SchoolEventRules = "Resources//SchoolEventRules.json";
 
+        public const string ManagerReportPlacementTestExcel = "Resources//ManagerReports//BaoCaoPlacmentTest.xlsx";
+        public const string ManagerReportLearningProgressAcaExcel = "Resources//ManagerReports//BaoCaoTienDoHocTapAca.xlsx";
+        public const string ManagerReportLearningProgressIELTSExcel = "Resources//ManagerReports//BaoCaoTienDoHocTapIELTS.xlsx";
+        public const string ManagerReportStudentAssiduityExcel = "Resources//ManagerReports//BaoCaoChuyenCan.xlsx";
+        public const string ManagerReportLearningResultAcaExcel = "Resources//ManagerReports//BaoCaoKetQuaHocTapAca.xlsx";
+        public const string ManagerReportLearningResultIELTSExcel = "Resources//ManagerReports//BaoCaoKetQuaHocTapIELTS.xlsx";
+        public const string ReportPTEvent = "Resources//ExportExcelTemplates//ReportPTEvent.xlsx";
+        public const string ReportPTEventSchool = "Resources//ExportExcelTemplates//ReportPTEventSchool.xlsx";
     }
 }

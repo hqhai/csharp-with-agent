@@ -14,6 +14,8 @@ namespace Fsel.Identity.Infrastructure.Maps
         {
             CreateMap<CompetitionEvent, CompetitionEventsModel>().IgnoreAllNonExisting();
             CreateMap<CreateCompetitionEventCommandModel, CompetitionEvent>().IgnoreAllNonExisting();
+            CreateMap<EventRegistration, ExportLandingPageByEventCodeModel>()
+                .ForMember(x => x.Address, x => x.MapFrom(y => y.District != null ? y.District : null));
         }
     }
 }

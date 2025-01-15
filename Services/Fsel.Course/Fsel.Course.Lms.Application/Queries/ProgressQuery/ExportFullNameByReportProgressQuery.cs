@@ -25,11 +25,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ExportEmailByReportProgressQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
+    public class ExportFullNameByReportProgressQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
     }
 
-    public class ExportEmailByReportProgressQueryHandler : IRequestHandler<ExportEmailByReportProgressQuery, MethodResult<Stream>>
+    public class ExportFullNameByReportProgressQueryHandler : IRequestHandler<ExportFullNameByReportProgressQuery, MethodResult<Stream>>
     {
         private readonly IUserService _userService;
         private readonly IOrderService _orderService;
@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
-        public ExportEmailByReportProgressQueryHandler(
+        public ExportFullNameByReportProgressQueryHandler(
             IUserService userService,
             IOrderService orderService,
             ICourseRepository courseRepository,
@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
-        public async Task<MethodResult<Stream>> Handle(ExportEmailByReportProgressQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<Stream>> Handle(ExportFullNameByReportProgressQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<Stream>();
@@ -86,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return await Task.FromResult(errors.Count == 0);
             });
             listEmailData = result.Datas.ToList();
-            var fullNames = listEmailData.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).ToList();
+            var fullNames = listEmailData.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!.ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim()).ToList();
             var studentResultToEmail = await _userService.GetStudentByFullNamesAsync(fullNames);
             if (!studentResultToEmail.IsSuccessStatusCode)
             {
@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                         CourseName = courseResult?.Course?.Name,
                         PhoneNumber = student?.Human?.PhoneNumber,
                         CreatedDate = student?.CreatedDate,
-                        CourseLevel = courseResult?.Course?.CourseLevel,
+                        CourseLevel = EnumCourseLevelHelper.GetCodeByEnumCourseLevel(courseResult?.Course?.CourseLevel),
                         SchoolName = student?.School
                     };
                     (reportProgress.PTStatus, reportProgress.PTLevel) = await GetStatusPTAsync(student, courseResult != null, cancellationToken);
@@ -170,7 +170,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 }
             }
 
-            methodResult.Result = reportStudents.OrderBy(x => fullNames.IndexOf(x.FullName!)).ToList().ExportExcel();
+            methodResult.Result = reportStudents.OrderBy(x => fullNames.IndexOf(x.FullName?.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture) ?? string.Empty)).ToList().ExportExcel();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

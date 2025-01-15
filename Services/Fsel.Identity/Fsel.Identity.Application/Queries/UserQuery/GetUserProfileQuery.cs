@@ -5,9 +5,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Models;
     using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.OrderService;
@@ -111,6 +109,12 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                                       .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 }
             }
+            else if (userRoles.FirstOrDefault() == EnumRole.AdminSchool.ToString())
+            {
+                userView = await _userManager.Users.Include(x => x.Human)
+                                                   .Include(x => x.UserSchools)
+                                                   .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId && x.EmailConfirmed, cancellationToken);
+            }
             else if (userRoles.FirstOrDefault() == EnumRole.Moderator.ToString() || userRoles.FirstOrDefault() == EnumRole.MasterAdmin.ToString() || userRoles.FirstOrDefault() == EnumRole.Admin.ToString())
             {
                 userView = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
@@ -203,7 +207,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                     }
                 }
             }
-
             if (userRoles.FirstOrDefault() == EnumRole.Parent.ToString())
             {
                 var parent = userView?.Human?.Parent;
@@ -229,7 +232,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                     }
                 }
             }
-
             if (userRoles.FirstOrDefault() == EnumRole.Teacher.ToString())
             {
                 var teacher = userView?.Human?.Teacher;
@@ -239,12 +241,20 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                     _mapper.Map(teacher, userModel);
                 }
             }
-
             if (userRoles.FirstOrDefault() == EnumRole.CSO.ToString())
             {
                 _mapper.Map(userView?.Human?.CSO, userModel);
             }
-
+            if (userRoles.FirstOrDefault() == EnumRole.AdminSchool.ToString())
+            {
+                var schoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
+                if (schoolId.HasValue)
+                {
+                    var schoolResult = await _systemService.GetSchoolByIds(new List<Guid> { schoolId.Value });
+                    userModel.School = schoolResult.Content?.Result?.FirstOrDefault()?.Name;
+                    userModel.SchoolName = schoolResult.Content?.Result?.FirstOrDefault()?.Name;
+                }
+            }
             userModel.Roles = userRoles;
             methodResult.Result = userModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

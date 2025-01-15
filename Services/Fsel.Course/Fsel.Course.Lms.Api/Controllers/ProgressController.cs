@@ -20,6 +20,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/progress")]
     [ApiController]
+    [Common.Attributes.Permission]
     public class ProgressController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -291,7 +292,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("export-report-progress-student")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
-        public async Task<IActionResult> ExportProgressStudent([FromQuery] ExportEmailByReportProgressQuery query)
+        public async Task<IActionResult> ExportProgressStudent([FromQuery] ExportFullNameByReportProgressQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             if (!commandResult.IsOK || commandResult.Result == null)

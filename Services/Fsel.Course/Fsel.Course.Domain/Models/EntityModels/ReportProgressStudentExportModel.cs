@@ -19,6 +19,15 @@ namespace Fsel.Course.Domain.Models.EntityModels
         [EpplusTableColumn(Header = "Course Name")]
         public string? CourseName { get; set; }
 
+        [EpplusTableColumn(Header = "Content Progress")]
+        public string? ContentProgress { get; set; }
+
+        [EpplusTableColumn(Header = "Percent Progress")]
+        public string? PercentProgress { get; set; }
+
+        [EpplusTableColumn(Header = "Total Lesson Done")]
+        public int? TotalLessonDone { get; set; }
+
         [EpplusTableColumn(Header = "Unit Name")]
         public string? UnitName { get; set; }
 
