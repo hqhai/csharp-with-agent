@@ -63,6 +63,7 @@ namespace Fsel.Shared.Models.ShareModels
         public IList<string>? TabNames { get; set; }
         public ButtonNavSettings? ButtonNavSettings { get; set; }
         public bool? AutoGenAge { get; set; }
+        public string? NoticeDescription { get; set; }
     }
 
     public enum EnumSchoolEventRuleAction
