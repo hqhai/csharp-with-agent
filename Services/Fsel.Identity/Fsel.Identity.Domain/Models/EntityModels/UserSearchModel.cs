@@ -19,6 +19,5 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? FullName { get; set; }
         public Guid? TeacherId { get; set; }
         public Guid? CSOId { get; set; }
-        public EnumUserStatus? UserStatus { get; set; }
     }
 }

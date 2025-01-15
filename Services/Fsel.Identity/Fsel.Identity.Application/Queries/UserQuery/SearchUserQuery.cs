@@ -75,8 +75,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 Email = u.Email,
                                 TeacherId = t.Id,
                                 CreatedDate = i.CreatedDate,
-                                Status = u.LockoutEnabled,
-                                UserStatus = u.Status,
+                                Status = !u.Status.HasValue || u.Status == EnumUserStatus.Active,
                             };
 
                 if (request.RoleTeachers != null && request.RoleTeachers.Any(x => x == EnumRoleTeacher.Teacher))
@@ -103,8 +102,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 Email = u.Email,
                                 CSOId = cso.Id,
                                 CreatedDate = i.CreatedDate,
-                                Status = u.LockoutEnabled,
-                                UserStatus = u.Status,
+                                Status = !u.Status.HasValue || u.Status == EnumUserStatus.Active,
                             };
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.Moderator)
@@ -121,8 +119,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 Email = u.Email,
                                 NumberClass = 0,
                                 CreatedDate = i.CreatedDate,
-                                Status = u.LockoutEnabled,
-                                UserStatus = u.Status,
+                                Status = !u.Status.HasValue || u.Status == EnumUserStatus.Active,
                             };
             }
 
