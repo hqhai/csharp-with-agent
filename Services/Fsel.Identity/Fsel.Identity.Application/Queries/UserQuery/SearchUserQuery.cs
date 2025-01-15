@@ -76,6 +76,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 TeacherId = t.Id,
                                 CreatedDate = i.CreatedDate,
                                 Status = u.LockoutEnabled,
+                                UserStatus = u.Status,
                             };
 
                 if (request.RoleTeachers != null && request.RoleTeachers.Any(x => x == EnumRoleTeacher.Teacher))
@@ -103,6 +104,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 CSOId = cso.Id,
                                 CreatedDate = i.CreatedDate,
                                 Status = u.LockoutEnabled,
+                                UserStatus = u.Status,
                             };
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.Moderator)
@@ -120,6 +122,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 NumberClass = 0,
                                 CreatedDate = i.CreatedDate,
                                 Status = u.LockoutEnabled,
+                                UserStatus = u.Status,
                             };
             }
 
