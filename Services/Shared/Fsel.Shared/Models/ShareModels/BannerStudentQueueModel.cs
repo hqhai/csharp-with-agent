@@ -25,6 +25,8 @@ namespace Fsel.Shared.Models.ShareModels
     {
         public Guid UserId { get; set; }
 
+        public long TimeSlideShow { get; set; }
+
         public IList<BannerStudentQueueModel>? BannerStudents { get; set; }
     }
 }

@@ -24,7 +24,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
         {
             if (message != null)
             {
-                await _bannerHub.GetGroup(message.UserId.ToString()).SendAsync(RealtimeSettings.BannerHub.Methods.Banner, message.BannerStudents);
+                await _bannerHub.GetGroup(message.UserId.ToString()).SendAsync(RealtimeSettings.BannerHub.Methods.Banner, message);
             }
         }
     }

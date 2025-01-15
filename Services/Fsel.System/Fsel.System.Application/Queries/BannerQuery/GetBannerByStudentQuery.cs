@@ -14,7 +14,6 @@ namespace Fsel.System.Application.Queries.BannerQuery
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
-    using global::System.Globalization;
     using global::System.Linq;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -33,13 +32,15 @@ namespace Fsel.System.Application.Queries.BannerQuery
         private readonly IBannerStudentRepository _bannerStudentRepository;
         private readonly ICourseService _courseService;
         private readonly BannerPublisher _bannerPublisher;
+        private readonly IBannerSettingRepository _bannerSettingRepository;
 
         public GetBannerByStudentQueryHandler(IBannerRepository bannerRepository,
                                               IMapper mapper,
                                               IUserService userService,
                                               IBannerStudentRepository bannerStudentRepository,
                                               ICourseService courseService,
-                                              BannerPublisher bannerPublisher)
+                                              BannerPublisher bannerPublisher,
+                                              IBannerSettingRepository bannerSettingRepository)
         {
             _bannerRepository = bannerRepository;
             _mapper = mapper;
@@ -47,6 +48,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
             _bannerStudentRepository = bannerStudentRepository;
             _courseService = courseService;
             _bannerPublisher = bannerPublisher;
+            _bannerSettingRepository = bannerSettingRepository;
         }
 
         public async Task<MethodResult<IList<BannerStudentQueueModel>>> Handle(GetBannerByStudentQuery request, CancellationToken cancellationToken)
@@ -167,8 +169,11 @@ namespace Fsel.System.Application.Queries.BannerQuery
                 bannerStudents.Add(_mapper.Map<BannerStudentQueueModel>(left));
             }
 
+            // lấy time slide show
+            var bannerSetting = await _bannerSettingRepository.Queryable.FirstOrDefaultAsync(cancellationToken);
+
             // bắn web socket
-            await _bannerPublisher.Publish(new BannerStudentsQueueModel { UserId = request.UserId, BannerStudents = bannerStudents }, cancellationToken);
+            await _bannerPublisher.Publish(new BannerStudentsQueueModel { UserId = request.UserId, TimeSlideShow = bannerSetting?.TimeSlideShow ?? default, BannerStudents = bannerStudents }, cancellationToken);
 
             methodResult.Result = bannerStudents;
             methodResult.StatusCode = StatusCodes.Status200OK;
