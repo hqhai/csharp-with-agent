@@ -12,6 +12,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
     using Fsel.Storage.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Newtonsoft.Json;
     using Refit;
 
     public class ConvertSpeechToTextCommand : IRequest<MethodResult<TranscriptFileModel>>
@@ -53,8 +54,8 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
             }
 
             var fileInfomation = await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, request.FormFile, EnumFolderType.Videos, false, false);
-
-            methodResult.Result = new TranscriptFileModel { FilePath = fileInfomation.Result, Content = content.Content };
+            var convertContent = !string.IsNullOrEmpty(content.Content) ? JsonConvert.DeserializeObject<ContentModel>(content.Content)?.Text : string.Empty;
+            methodResult.Result = new TranscriptFileModel { FilePath = fileInfomation.Result, Content = convertContent };
             return methodResult;
         }
     }
