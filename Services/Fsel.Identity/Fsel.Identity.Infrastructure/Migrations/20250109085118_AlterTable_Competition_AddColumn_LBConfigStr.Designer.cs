@@ -745,6 +745,18 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         },
                         new
                         {
+                            Id = new Guid("5f2e50c7-74b3-4d41-b8d2-f805cad9be24"),
+                            Code = "LMSAdmin",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "",
+                            IsDeleted = false,
+                            Name = "Learning Management System Admin",
+                            Type = "Admin"
+                        },
+                        new
+                        {
                             Id = new Guid("f144a094-3f49-4ca8-8f1e-7234289dd1a5"),
                             Code = "PlanetDefender",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),

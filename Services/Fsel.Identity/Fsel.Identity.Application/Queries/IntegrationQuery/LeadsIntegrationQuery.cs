@@ -224,9 +224,14 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             List<LeadsIntegrationModel> leadsIntegrations = new List<LeadsIntegrationModel>();
             leadsIntegrations = _mapper.Map(userCombines, leadsIntegrations);
 
-            leadsIntegrations.ForEach(item =>
+            foreach (var item in leadsIntegrations)
             {
-                var orderItem = orderResults.Where(x => x.UserId == item.UserId).OrderByDescending(x => x.UpdatedDate != null ? x.UpdatedDate : x.CreatedDate).FirstOrDefault();
+                var orderItem = orderResults.Where(x => x.UserId == item.UserId).OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault();
+                if (orderItem != null && !orderItem.IsTrial)
+                {
+                    continue;
+                }
+
                 var ptTestResult = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId);
                 var unitResult = unitResults.FirstOrDefault(x => x.UserId == item.UserId);
                 item.LastDate = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item.UserId)?.LastVisited;
@@ -242,7 +247,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 var dateUser = userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.UpdatedDate != null ? userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.UpdatedDate : userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.CreatedDate;
 
                 var dateEdits = new[] { dateOrder, ptTestResult?.DateEdit, unitResult?.DateEdit, dateUser };
-                if (dateEdits != null && dateEdits.Any())
+                if (dateEdits.Any() && dateEdits.Any(x => x.HasValue))
                 {
                     item.DateEdit = dateEdits.Where(d => d.HasValue).Max(d => d.Value);
                 }
@@ -289,16 +294,12 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
                     item.CourseLevel = orderItem.CourseName.ToString() ?? string.Empty;
                 }
-
-            });
+            };
             #endregion
 
             leadsIntegrations = leadsIntegrations.OrderByDescending(x => x.Status).ToList();
-
-            int totalItem = leadsIntegrations.Count;
-            var lists = leadsIntegrations.ApplySortAndPaging(request).ToList();
-
-            methodResult.Result = new PagingItemsModel<LeadsIntegrationModel>(lists, request, totalItem);
+            int totalItem = distinctUserIds.Count;
+            methodResult.Result = new PagingItemsModel<LeadsIntegrationModel>(leadsIntegrations, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

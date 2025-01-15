@@ -17,6 +17,14 @@
     "createdDate": "2023-07-21"
   },
   {
+    "id": "5f2e50c7-74b3-4d41-b8d2-f805cad9be24",
+    "type": "Admin",
+    "code": "LMSAdmin",
+    "name": "Learning Management System Admin",
+    "description": "",
+    "createdDate": "2023-07-21"
+  },
+  {
     "id": "f144a094-3f49-4ca8-8f1e-7234289dd1a5",
     "type": "Game",
     "code": "PlanetDefender",
