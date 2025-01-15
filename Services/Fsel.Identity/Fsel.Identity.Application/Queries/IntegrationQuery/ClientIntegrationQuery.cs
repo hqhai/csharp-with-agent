@@ -151,6 +151,9 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 return methodResult;
             }
 
+            // xoá những user không phải là client trong list user id
+            paging = paging.Where(x => orderResults.Select(x => x.UserId).Contains(x)).ToList();
+
             // lấy Pt
             var courseIntegrationQueryModel = new CourseIntegrationQueryModel
             {
@@ -224,7 +227,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 var dateUser = userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.UpdatedDate != null ? userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.UpdatedDate : userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.CreatedDate;
 
                 var dateEdits = new[] { dateOrder, ptTestResult?.DateEdit, unitResult?.DateEdit, dateUser };
-                if (dateEdits != null && dateEdits.Any())
+                if (dateEdits != null && dateEdits.Any() && dateEdits.Any(x => x.HasValue))
                 {
                     item.DateEdit = dateEdits.Where(d => d.HasValue).Max(d => d.Value);
                 }
@@ -268,10 +271,8 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             });
             #endregion
 
-            int totalItem = clientsIntegrations.Count;
-            var lists = clientsIntegrations.ApplySortAndPaging(request).ToList();
-
-            methodResult.Result = new PagingItemsModel<ClientsIntegrationModel>(lists, request, totalItem);
+            int totalItem = distinctUserIds.Count;
+            methodResult.Result = new PagingItemsModel<ClientsIntegrationModel>(clientsIntegrations, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
