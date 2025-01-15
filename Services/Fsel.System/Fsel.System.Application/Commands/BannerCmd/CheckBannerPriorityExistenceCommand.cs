@@ -47,6 +47,10 @@ namespace Fsel.System.Application.Commands.BannerCmd
             if (request.Type == EnumBannerType.Popup && request.CourseLevels != null)
             {
                 bannerScopes = bannerScopes.Where(x => x.IsPriority && x.CourseLevel.HasValue && request.CourseLevels.Contains(x.CourseLevel.Value)).ToList();
+                if (request.Id.HasValue)
+                {
+                    bannerScopes = bannerScopes.Where(x => x.Banner!.Id != request.Id).ToList();
+                }
             }
 
             if ((request.CourseLevels != null || request.CompetitionEventIds != null) && (request.Type == EnumBannerType.Left || request.Type == EnumBannerType.Warning))
