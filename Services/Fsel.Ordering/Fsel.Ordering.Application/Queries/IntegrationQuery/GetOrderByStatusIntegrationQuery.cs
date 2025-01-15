@@ -51,8 +51,8 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
                                                .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate))
                                                .ToListAsync(cancellationToken);
 
-                await CheckLeadOrClient(orders, request, cancellationToken);
-                methodResult.Result = _mapper.Map(orders, methodResult.Result);
+                var checkLeadOrClient = await CheckLeadOrClient(orders, request, cancellationToken);
+                methodResult.Result = _mapper.Map(checkLeadOrClient.Result, methodResult.Result);
             }
 
             else if (request.UserIds != null && request.UserIds.Any())
@@ -62,8 +62,8 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
                                                .Where(x => request.UserIds.Contains(x.UserId))
                                                .ToListAsync(cancellationToken);
 
-                await CheckLeadOrClient(orders, request, cancellationToken);
-                methodResult.Result = _mapper.Map(orders, methodResult.Result);
+                var checkLeadOrClient = await CheckLeadOrClient(orders, request, cancellationToken);
+                methodResult.Result = _mapper.Map(checkLeadOrClient.Result, methodResult.Result);
 
                 if (methodResult.Result != null && methodResult.Result.Any())
                 {
@@ -84,9 +84,9 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
             return methodResult;
         }
 
-        private async Task<VoidMethodResult> CheckLeadOrClient(IList<Order> orders, GetOrderByStatusIntegrationQuery request, CancellationToken cancellationToken)
+        private async Task<MethodResult<IList<Order>>> CheckLeadOrClient(IList<Order> orders, GetOrderByStatusIntegrationQuery request, CancellationToken cancellationToken)
         {
-            VoidMethodResult methodResult = new VoidMethodResult();
+            MethodResult<IList<Order>> methodResult = new MethodResult<IList<Order>>();
 
             var orderClients = orders.Where(x => x.ExpireDate.HasValue && x.ExpireDate.Value > DateTime.UtcNow && !x.IsTrial).Select(x => x.UserId).ToList();
 
@@ -118,6 +118,7 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
                 }
             }
 
+            methodResult.Result = orders;
             return methodResult;
         }
     }
