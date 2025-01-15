@@ -39,12 +39,14 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             _mapper = mapper;
             _userService = userService;
         }
+
         private class PlacementTestGroupStudentResultModel
         {
             public Guid StudentId { get; set; }
             public PlacementTestResultModel? PlacementTestStart { get; set; }
             public PlacementTestResultModel? PlacementTestEnd { get; set; }
         }
+
         public async Task<MethodResult<Stream>> Handle(ExportReportPlacementTestEventSchoolQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -67,7 +69,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
             var placementTestResultGroups = new List<PlacementTestGroupStudentResultModel>();
 
-            int batchSize = 5000; // Số lượng bản ghi mỗi lần truy vấn
+            int batchSize = 2000; // Số lượng bản ghi mỗi lần truy vấn
 
             // Chia danh sách thành từng nhóm
             var batches = studentIds
