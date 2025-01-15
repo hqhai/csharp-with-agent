@@ -57,7 +57,7 @@ namespace Fsel.Identity.Api.Controllers
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result.Stream, Settings.Excels.ContentType, $"File lỗi tạo tài khoản.xlsx");
+            return File(commandResult.Result.Stream, Settings.Excels.ContentType, "File lỗi tạo tài khoản.xlsx");
         }
     }
 }
