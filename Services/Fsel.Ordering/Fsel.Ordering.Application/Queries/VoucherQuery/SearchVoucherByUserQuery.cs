@@ -14,12 +14,13 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Ordering.Domain.Models.QueryModels.Vouchers;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchVoucherByUserQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<VoucherModel>>>
+    public class SearchVoucherByUserQuery : SearchVoucherByUserQueryModel, IRequest<MethodResult<PagingItemsModel<VoucherModel>>>
     {
     }
 
@@ -66,6 +67,8 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                 x.ItemStatus = quantityUsed < x.Quantity ? Still : OutOfStock;
                 x.Duration = currentDate < x.EndDate ? StillValid : Expire;
             });
+
+            voucherModels = voucherModels.Where(m => m.Status).ToList();
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
@@ -124,10 +127,17 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                 voucherModels = voucherModels.Where(m => (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim(), StringComparison.InvariantCultureIgnoreCase) || (m.Code ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim(), StringComparison.InvariantCultureIgnoreCase)).ToList();
             }
 
-            voucherModels = voucherModels.Where(m => m.Status).OrderBy(p => p.EndDate).ThenBy(p => p.Name).ToList();
+            if (!request.Sort)
+            {
+                voucherModels = voucherModels.OrderByDescending(p => p.CreatedDate).ThenBy(p => p.Name).ToList();
+            }
+            else
+            {
+                voucherModels = voucherModels.OrderBy(p => p.EndDate).ThenBy(p => p.Name).ToList();
+            }
 
             int totalItem = voucherModels.Count;
-            var lists = voucherModels.ApplySortAndPaging(request).ToList();
+            var lists = voucherModels.ApplyPaging(request).ToList();
 
             methodResult.Result = new PagingItemsModel<VoucherModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
