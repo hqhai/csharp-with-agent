@@ -72,8 +72,6 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
             var timeNowVI = DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam);
 
-
-
             #region for CITY-THAINGUYEN-THPT
 
             if (request.EventCode == Special_Event)
@@ -83,8 +81,6 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             }
 
             #endregion
-
-
             var competitionEvents = _competitionEventsRepository.Queryable
                                     .FirstOrDefault(x => !string.IsNullOrEmpty(x.EventContentStr) && x.EventCode == request.EventCode);
 
@@ -111,11 +107,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 return methodResult;
             }
 
-
-
-
             var resultSnapShots = _studentCompetitionSnapShotRepository.Queryable.FirstOrDefault(x => x.EventCode == request.EventCode && x.StartDate == weekEventRules.StartDate && x.EndDate == weekEventRules.EndDate);
-
 
             List<Guid> schoolCompetitionIds = new List<Guid>();
             if (competitionEvents.SchoolIds != null)
@@ -126,8 +118,9 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             if (resultSnapShots == null)
             {
                 result = (from studentEvent in _eventRepository.Queryable
-                          join studentCompetitionEvent in _studentCompetitionEventsRepository.Queryable.Where(x => (x.CompetitionEventId == competitionEvents.Id && !request.IsCityLeaderBoard) ||
+                          join studentCompetitionEvent in _studentCompetitionEventsRepository.Queryable.Where(x => (x.CompetitionEventId == competitionEvents.Id) ||
                                                                                                             (x.CompetitionEventId == competitionEvents.ParentEventId && !request.IsCityLeaderBoard))
+
                           on studentEvent.StudentId equals studentCompetitionEvent.StudentId
                           join student in _studentRepository.Queryable.Include(x => x.Human) on studentCompetitionEvent.StudentId equals student.Id into resultGroup
                           from student in resultGroup.DefaultIfEmpty()
@@ -147,7 +140,6 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                               CourseType = studentEvent.CourseType,
                               SchoolId = student.SchoolId
                           }).OrderByDescending(x => x.RankingScore).ToList();
-
 
 
                 if (competitionEvents.ParentEventId.HasValue)
@@ -190,11 +182,10 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 };
                 var highSchoolResult = await _systemService.GetSchoolByIds(schoolIds);
                 var highSchool = highSchoolResult?.Content?.Result;
-                var highSchoolFilter = highSchool?.Where(x => x.EducationLevel == EnumEducationLevel.Secondary || x.EducationLevel == EnumEducationLevel.InterLevel).Select(x => x.Id) ?? null;
+                var highSchoolFilter = !request.IsCityLeaderBoard ? highSchool?.Where(x => x.EducationLevel == EnumEducationLevel.Secondary || x.EducationLevel == EnumEducationLevel.InterLevel).Select(x => x.Id) : highSchool?.Where(x => x.EducationLevel == EnumEducationLevel.HighSchool || x.EducationLevel == EnumEducationLevel.InterLevel).Select(x => x.Id);
+
                 result = request.IsCityLeaderBoard ? CustomLeaderBoardForHighSchool(highSchoolFilter, result) : result;
                 #endregion
-
-
 
                 var activeCourseResult = await _lmsCourseService.GetActiveCourseResultByStudentId(query);
                 var activeCourseResultIds = activeCourseResult?.Content?.Result;
@@ -353,8 +344,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             if (highSchoolFilter != null)
             {
                 result = (from r in result
-                          join hs in highSchoolFilter on r.SchoolId equals hs into highSchoolGroup
-                          from hs in highSchoolGroup.DefaultIfEmpty()
+                          join hs in highSchoolFilter on r.SchoolId equals hs
                           select new StudentRankingModel
                           {
                               StudentId = r.StudentId,
