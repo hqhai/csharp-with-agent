@@ -46,7 +46,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
         private const double Process_Ratio = 0.75;
         private const double Overall_Ratio = 0.25;
-        private const int NumberStudentOnLeaderboard = 10;
+        private const int NumberStudentOnLeaderboard = 200;
         private const string Special_Event = "EVThaiNguyenTHPT";
         private const string Parent_Special_Event = "ThaiNguyen";
 
