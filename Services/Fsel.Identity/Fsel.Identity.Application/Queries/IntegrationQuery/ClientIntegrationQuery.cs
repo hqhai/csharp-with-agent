@@ -151,6 +151,9 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 return methodResult;
             }
 
+            // xoá những user không phải là client trong list user id
+            paging = paging.Where(x => orderResults.Select(x => x.UserId).Contains(x)).ToList();
+
             // lấy Pt
             var courseIntegrationQueryModel = new CourseIntegrationQueryModel
             {
