@@ -294,11 +294,8 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             #endregion
 
             leadsIntegrations = leadsIntegrations.OrderByDescending(x => x.Status).ToList();
-
-            int totalItem = leadsIntegrations.Count;
-            var lists = leadsIntegrations.ApplySortAndPaging(request).ToList();
-
-            methodResult.Result = new PagingItemsModel<LeadsIntegrationModel>(lists, request, totalItem);
+            int totalItem = distinctUserIds.Count;
+            methodResult.Result = new PagingItemsModel<LeadsIntegrationModel>(leadsIntegrations, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
