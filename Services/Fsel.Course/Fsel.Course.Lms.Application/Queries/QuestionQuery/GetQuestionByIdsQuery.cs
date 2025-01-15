@@ -39,8 +39,17 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IMapper _mapper;
+        private readonly IQuestionShuffleRepository _questionShuffleRepository;
 
-        public GetQuestionByIdQueryHandler(IQuestionRepository questionRepository, IPlacementTestResultRepository placementTestResultRepository, AnswerTypeConverter answerTypeConverter, IFinalTestResultRepository finalTestResultRepository, IExtraPracticeResultRepository extraPracticeResultRepository, IMockTestResultRepository mockTestResultRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper)
+        public GetQuestionByIdQueryHandler(IQuestionRepository questionRepository,
+            IPlacementTestResultRepository placementTestResultRepository,
+            AnswerTypeConverter answerTypeConverter,
+            IFinalTestResultRepository finalTestResultRepository,
+            IExtraPracticeResultRepository extraPracticeResultRepository,
+            IMockTestResultRepository mockTestResultRepository,
+            QuestionTypeConverter questionTypeConverter,
+            IMapper mapper,
+            IQuestionShuffleRepository questionShuffleRepository)
         {
             _questionRepository = questionRepository;
             _placementTestResultRepository = placementTestResultRepository;
@@ -50,6 +59,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             _mockTestResultRepository = mockTestResultRepository;
             _questionTypeConverter = questionTypeConverter;
             _mapper = mapper;
+            _questionShuffleRepository = questionShuffleRepository;
         }
 
         public async Task<MethodResult<IList<QuestionModel>>> Handle(GetQuestionByIdsQuery request, CancellationToken cancellationToken)
@@ -89,7 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            return questions.Select(x => GetQuestion(x, mockTestResult.Status, x.SectionQuestions.SelectMany(n => n.MockTestAnswers).FirstOrDefault())).ToList();
+            return await GetQuestionsAsync(questions, mockTestResult.StudentId, mockTestResult.Status);
         }
 
         private async Task<IList<QuestionModel>?> GetQuestionByExtraPratice(GetQuestionByIdsQuery request)
@@ -106,7 +116,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            return questions.Select(x => GetQuestion(x, extraPracticeResult.Status, x.ExtraPracticeAnswers.FirstOrDefault())).ToList();
+            return await GetQuestionsAsync(questions, extraPracticeResult.StudentId, extraPracticeResult.Status);
         }
 
         private async Task<IList<QuestionModel>?> GetQuestionByFinalTest(GetQuestionByIdsQuery request)
@@ -125,7 +135,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            return questions.Select(x => GetQuestion(x, finalTestResult.Status, x.SectionQuestions.SelectMany(n => n.FinalTestAnswers).FirstOrDefault())).ToList();
+            return await GetQuestionsAsync(questions, finalTestResult.StudentId, finalTestResult.Status);
         }
 
         private async Task<IList<QuestionModel>?> GetQuestionByPlacementTest(GetQuestionByIdsQuery request)
@@ -144,29 +154,86 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            return questions.Select(x => GetQuestion(x, placementTestResult.Status, x.SectionQuestions.SelectMany(n => n.PlacementTestAnswers).FirstOrDefault())).ToList();
+            return await GetQuestionsAsync(questions, placementTestResult.StudentId, placementTestResult.Status);
         }
 
-        private QuestionModel GetQuestion(Question question, EnumResultStatus status, object? answer = null)
+        private async Task<IList<QuestionModel>> GetQuestionsAsync(IList<Question>? questions, Guid studentId, EnumResultStatus status)
         {
-            var questionModel = _mapper.Map<QuestionModel>(question);
-            var isShowAnswer = status == EnumResultStatus.Done;
-            questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isShowAnswer).Item1;
-            questionModel.CorrectStatus = GetCorrectStatus(_mapper.Map<BaseAnswer>(answer));
-            questionModel.SectionId = question.SectionQuestions.Any() ? question.SectionQuestions.Select(x => x.SectionId ?? x.SectionPart?.SectionId).FirstOrDefault() : default;
-            if (answer != null)
+            var listQuestion = new List<QuestionModel>();
+            if (questions == null || !questions.Any())
             {
-                var answerDto = _mapper.Map<AnswerModel>(answer);
-                answerDto.Answer = _answerTypeConverter.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, false, status, isShowAnswer);
-                if (!isShowAnswer)
-                {
-                    answerDto.Status = EnumAnswerStatus.Process;
-                    answerDto.CorrectCount = default;
-                    answerDto.IsCorrect = null;
-                }
-                questionModel.ResultAnswer = answerDto;
+                return new List<QuestionModel>();
             }
-            return questionModel;
+            var listQuestionShuffle = new List<QuestionShuffle>();
+            var questionShuffles = await _questionShuffleRepository.Queryable.Where(x => questions.Select(x => x!.Id).Contains(x.QuestionId) && x.StudentId == studentId).ToListAsync();
+            foreach (var question in questions)
+            {
+                bool isShowAnswer = status == EnumResultStatus.Done;
+                var answer = GetAnswer(question);
+                var questionModel = _mapper.Map<QuestionModel>(question);
+
+                questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isShowAnswer).Item1;
+
+                var questionShuffle = questionShuffles.FirstOrDefault(x => x.QuestionId == question.Id);
+                (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, questionShuffle?.ShuffleConfigs);
+
+                if (!string.IsNullOrEmpty(questionShuffleStr) && (questionShuffle == null || questionShuffle.ShuffleConfigStr != questionShuffleStr))
+                {
+                    if (questionShuffle == null)
+                    {
+                        questionShuffle = new QuestionShuffle
+                        {
+                            QuestionId = question.Id,
+                            StudentId = studentId,
+                            ShuffleConfigStr = questionShuffleStr
+                        };
+                    }
+                    else
+                    {
+                        questionShuffle.ShuffleConfigStr = questionShuffleStr;
+                    }
+                    listQuestionShuffle.Add(questionShuffle);
+                }
+
+                questionModel.CorrectStatus = GetCorrectStatus(_mapper.Map<BaseAnswer>(answer));
+                questionModel.SectionId = question.SectionQuestions.Any() ? question.SectionQuestions.Select(x => x.SectionId ?? x.SectionPart?.SectionId).FirstOrDefault() : default;
+                if (answer != null)
+                {
+                    var answerDto = _mapper.Map<AnswerModel>(answer);
+                    answerDto.Answer = _answerTypeConverter.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, false, status, isShowAnswer);
+                    if (!isShowAnswer)
+                    {
+                        answerDto.Status = EnumAnswerStatus.Process;
+                        answerDto.CorrectCount = default;
+                        answerDto.IsCorrect = null;
+                    }
+                    questionModel.ResultAnswer = answerDto;
+                }
+                listQuestion.Add(questionModel);
+            }
+
+            await _questionShuffleRepository.SaveQuestionShufflesAsync(listQuestionShuffle);
+            return listQuestion;
+        }
+
+        private static object? GetAnswer(Question question)
+        {
+            var finalAnswer = question.SectionQuestions.SelectMany(x => x.FinalTestAnswers).FirstOrDefault();
+            if (finalAnswer != null)
+            {
+                return finalAnswer;
+            }
+            var mockAnswer = question.SectionQuestions.SelectMany(x => x.MockTestAnswers).FirstOrDefault();
+            if (mockAnswer != null)
+            {
+                return mockAnswer;
+            }
+            var placementAnswer = question.SectionQuestions.SelectMany(x => x.PlacementTestAnswers).FirstOrDefault();
+            if (placementAnswer != null)
+            {
+                return placementAnswer;
+            }
+            return null;
         }
 
         private static EnumCorrectStatus? GetCorrectStatus(BaseAnswer? answer)
