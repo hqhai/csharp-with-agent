@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using Fsel.Shared.Constants;
     using MediatR;
@@ -26,11 +27,13 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly IMediator _mediator;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private const string AIAccessContext = "NO";
-
-        public AutoApprovalClassForumCommandHandler(IMediator mediator, IClassForumResultRepository classForumResultRepository)
+        private const string ApprovalAiModel = "gpt-4o-mini";
+        private readonly AppSetting _appSetting;
+        public AutoApprovalClassForumCommandHandler(IMediator mediator, IClassForumResultRepository classForumResultRepository, AppSetting appSetting)
         {
             _mediator = mediator;
             _classForumResultRepository = classForumResultRepository;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<bool>> Handle(AutoApprovalClassForumCommand request, CancellationToken cancellationToken)
@@ -74,6 +77,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             string systemConfig = File.ReadAllText(ResourceSettings.AIClassForumInstruction);
             var userAiConfig = role!.Replace("{0}", classForumResult?.WordContent ?? string.Empty, StringComparison.CurrentCulture);
             var aiApprovalAndComment = new List<AIApprovalModel>();
+            var aiApprovalModel = _appSetting.OpenAiConfig?.ApprovalAIModel ?? ApprovalAiModel;
 
             if (mediator == null)
             {
@@ -82,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             var aIResponse = await mediator.Send(new SubmitAICommand
             {
-                SettingModel = classForumResult!.ClassForum!.SettingModel,
+                SettingModel = aiApprovalModel,
                 SettingTemperature = classForumResult!.ClassForum!.SettingTemperature,
                 SettingFrequecy = classForumResult!.ClassForum!.SettingFrequecy,
                 SettingWordMaxLength = classForumResult!.ClassForum!.SettingWordMaxLength,
