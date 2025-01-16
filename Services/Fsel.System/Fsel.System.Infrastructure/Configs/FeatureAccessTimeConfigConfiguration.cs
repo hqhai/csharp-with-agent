@@ -19,6 +19,9 @@ namespace Fsel.System.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumFeature>());
+
+            builder.HasIndex(c => new { c.CreatedUserId, c.IsDeleted, c.EnumFeature });
+            builder.HasIndex(c => new { c.CreatedUserId, c.IsDeleted, c.CourseId, c.UnitId, c.ObjectId });
         }
     }
 }
