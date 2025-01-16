@@ -4,6 +4,7 @@ using Fsel.Identity.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250115100146_Update_CompetitionEvent_Add_Field_Name")]
+    partial class Update_CompetitionEvent_Add_Field_Name
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2363,6 +2366,12 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
+                    b.Property<bool>("NotifiCourseTarget")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NotifiDelayCourseTarget")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("NotifiEmail")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -2378,6 +2387,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("NotifiLesson")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NotifiTimeCourseTarget")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("UpdatedDate")

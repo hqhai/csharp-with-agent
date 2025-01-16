@@ -108,5 +108,18 @@ namespace Fsel.Identity.Api.Controllers
             }
             return File(commandResult.Result, Settings.Excels.ContentType, $"LandingPageEventCode.xlsx");
         }
+
+        /// <summary>
+        /// Lấy danh sách Events theo ParentIds
+        /// </summary>
+        [HttpGet("get-events-by-parent-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetEventsByParentIds([FromQuery] GetCompetitionEventsByParentIdsQuery query)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(nameof(query));
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
