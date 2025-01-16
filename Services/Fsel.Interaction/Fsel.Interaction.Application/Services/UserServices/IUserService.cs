@@ -33,5 +33,8 @@ namespace Fsel.Interaction.Application.Services.UserServices
         [Put("/v1/student/update-student-token")]
         Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByTokenAsync([Body] UpdateStudentByTokenModel command);
 
+        [Get("/v1/student-ranking/get-events-by-user-id")]
+        Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>>>> GetEventByUserId([Query] Guid? userId);
+
     }
 }

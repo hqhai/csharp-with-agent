@@ -70,6 +70,7 @@ namespace Fsel.Shared.Enums
         PhaseIV,
         PhaseV,
         PhaseVI,
+        SurveyEvent,
 
         #region QuestBoard
 

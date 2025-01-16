@@ -8,16 +8,16 @@ namespace Fsel.Interaction.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class SurveyQuestionEntityTypeConfiguration : IEntityTypeConfiguration<SurveyQuestion>
+    public class CustomerSurveyGroupEntityTypeConfiguration : IEntityTypeConfiguration<CustomerSurveyGroup>
     {
-        public void Configure(EntityTypeBuilder<SurveyQuestion> builder)
+        public void Configure(EntityTypeBuilder<CustomerSurveyGroup> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.Property(e => e.Type)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumSurveyQuestion>());
+            builder.Property(e => e.Status)
+                   .HasMaxLength(100)
+                   .HasConversion(
+                       v => v.ToString(),
+                       v => v.EnumParse<EnumSurveyGroupStatus>());
 
             builder.Property(e => e.SurveyFormType)
                    .HasMaxLength(100)
