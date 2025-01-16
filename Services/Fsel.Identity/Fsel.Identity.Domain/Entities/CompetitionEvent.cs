@@ -10,6 +10,8 @@ namespace Fsel.Identity.Domain.Entities
     {
         public string? EventCode { get; set; }
 
+        public string? Name { get; set; }
+
         public string? EventContentStr { get; set; }
 
         public string? LBConfigStr { get; set; }

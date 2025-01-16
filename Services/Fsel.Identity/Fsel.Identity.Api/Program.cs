@@ -62,6 +62,8 @@ builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
+builder.Services.AddScoped<CreateStudentsFromFilePublisher>();
+builder.Services.AddScoped<SendStudentsFromFilePublisher>();
 
 //Refit
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
@@ -89,7 +91,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.UserQueue.NameQueue.NoticeExtend, typeof(NoticeExtendPackageConsumer) },
     { QueueSettings.UserQueue.NameQueue.WeeklyNotice, typeof(WeeklyNoticeConsumer) },
     { QueueSettings.UserQueue.NameQueue.JobRunEvents, typeof(JobRunEventsConsumer) },
-    { QueueSettings.UserQueue.NameQueue.CheckUserDeletion, typeof(CheckUserDeletionConsumer) }
+    { QueueSettings.UserQueue.NameQueue.CheckUserDeletion, typeof(CheckUserDeletionConsumer) },
+    { QueueSettings.UserQueue.NameQueue.CreateStudentsFromFile, typeof(CreateStudentsFromFileConsumer) }
 });
 var app = builder.Build();
 app.UseServices();
