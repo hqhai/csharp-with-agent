@@ -22,6 +22,7 @@ namespace Fsel.Shared.Models.ShareModels
         public string? EventLogo { get; set; }
 
         public string? EventTitle { get; set; }
+        public string? EventName { get; set; }
 
         public string? EventDescription { get; set; }
 

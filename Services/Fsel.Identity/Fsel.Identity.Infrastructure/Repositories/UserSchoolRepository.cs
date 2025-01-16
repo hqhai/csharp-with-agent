@@ -23,14 +23,14 @@ namespace Fsel.Identity.Infrastructure.Repositories
             _mapper = mapper;
         }
 
-        public async Task<Guid?> GetSchoolIdAsync()
+        public async Task<Guid> GetSchoolIdAsync()
         {
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
             {
                 var userSchool = await Queryable.FirstOrDefaultAsync(x => x.UserId == _authContext.CurrentUserId);
-                return userSchool?.SchoolId;
+                return userSchool?.SchoolId ?? default;
             }
-            return null;
+            return default;
         }
 
         public async Task<IList<StudentModel>> GetStudentsByRoleAdminSchoolAsync()

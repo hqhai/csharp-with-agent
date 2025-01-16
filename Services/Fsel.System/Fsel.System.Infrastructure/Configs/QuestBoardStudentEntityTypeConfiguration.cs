@@ -29,6 +29,8 @@ namespace Fsel.System.Infrastructure.Configs
                     .WithMany(b => b.QuestBoardStudents)
                     .HasForeignKey(b => b.QuestBoardOverallStudentId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasIndex(c => new { c.IsDeleted, c.QuestBoardId, c.StudentId, c.CreatedDate });
         }
     }
 }

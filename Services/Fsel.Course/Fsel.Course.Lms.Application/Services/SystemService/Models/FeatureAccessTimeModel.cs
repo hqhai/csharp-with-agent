@@ -16,5 +16,6 @@ namespace Fsel.Course.Lms.Application.Services.SystemService.Models
         public Guid? CourseId { get; set; }
         public Guid? UnitId { get; set; }
         public Guid? LessonId { get; set; }
+        public Guid? UserId { get; set; }
     }
 }
