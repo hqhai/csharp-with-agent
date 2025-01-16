@@ -4,11 +4,9 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Diagnostics;
     using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -79,12 +77,11 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             var listCourseComplete = new ConcurrentBag<CourseCompleteModel>();
             var courseStudentResults = new ConcurrentBag<CourseResultModel>();
             var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType);
-            int batchSize = 500; // Số lượng bản ghi mỗi lần truy vấn
 
             // Chia danh sách thành từng nhóm
             var batches = studentEventRegistrations.Select(x => x.StudentId)
                 .Select((id, index) => new { id, index })
-                .GroupBy(x => x.index / batchSize)
+                .GroupBy(x => x.index / BatchSize)
                 .Select(g => g.Select(x => x.id).ToList())
                 .ToList();
             await Parallel.ForEachAsync(batches, async (batche, cancellationToken) =>
@@ -106,7 +103,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             var studentIds = studentEventRegistrations.Select(x => x.StudentId).ToList();
             var batcheStudents = studentIds
                 .Select((id, index) => new { id, index })
-                .GroupBy(x => x.index / batchSize)
+                .GroupBy(x => x.index / BatchSize)
                 .Select(g => g.Select(x => x.id).ToList())
                 .ToList();
             await Parallel.ForEachAsync(batches, async (batche, cancellationToken) =>
@@ -159,7 +156,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             });
             var courseResultGroups = studentEventRegistrations
                                     .Select((id, index) => new { id, index })
-                                    .GroupBy(x => x.index / batchSize)
+                                    .GroupBy(x => x.index / BatchSize)
                                     .Select(g => g.Select(x => x.id).ToList())
                                     .ToList();
 

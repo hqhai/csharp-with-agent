@@ -21,6 +21,7 @@ namespace Fsel.Shared.Constants
         public const int AmountTrialDays = 14;
         public const int MaxSendingRateApp = 3;
         public const int MinCompletePercent = 75;
+        public const int BatchSize = 500; // Số lượng bản ghi mỗi lần truy vấn
 
         public static class AgeMilestone
         {

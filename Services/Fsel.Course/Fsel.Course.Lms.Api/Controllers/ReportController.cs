@@ -18,6 +18,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/report")]
     [ApiController]
+    [Permission]
     public class ReportController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -125,6 +126,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("export-file-placement-test-event")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> ExportFile([FromQuery] ExportReportPlacementTestEventQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -141,6 +143,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("export-file-placement-test-school-event")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> ExportFile([FromQuery] ExportReportPlacementTestEventSchoolQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -157,6 +160,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("export-file-learning-process-district")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> ExportFile([FromQuery] ExportReportLearningProcessToDistrictQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -173,6 +177,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("export-file-learning-process-schools")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> ExportFile([FromQuery] ExportReportLearningProcessToSchoolsQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -189,6 +194,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("export-file-learning-process-students")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> ExportFile([FromQuery] ExportReportLearningProcessStudentQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);

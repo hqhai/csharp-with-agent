@@ -76,10 +76,9 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             var studentIds = reportCompetitionEvents.Where(x => x.StudentIds != null && x.StudentIds.Any()).SelectMany(x => x.StudentIds ?? new List<Guid>()).ToList();
             var placementTestResultGroups = new ConcurrentBag<PlacementTestResultReportGroupModel>();
 
-            int batchSize = 500; // Số lượng bản ghi mỗi lần truy vấn
             var batches = studentIds
                 .Select((id, index) => new { id, index })
-                .GroupBy(x => x.index / batchSize)
+                .GroupBy(x => x.index / ValueSettings.BatchSize)
                 .Select(g => g.Select(x => x.id).ToList())
                 .ToList();
 
