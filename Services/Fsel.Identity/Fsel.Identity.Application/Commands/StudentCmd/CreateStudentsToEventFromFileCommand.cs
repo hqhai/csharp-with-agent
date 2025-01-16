@@ -262,67 +262,81 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var users = new List<User>();
             var studentIds = new List<Guid>();
 
+            var maxDegreeOfParallelism = 100;
+            using var semaphore = new SemaphoreSlim(maxDegreeOfParallelism);
+
             try
             {
                 await Parallel.ForEachAsync(students, async (student, cancellationToken) =>
                 {
-                    using (var scope = _serviceProvider.CreateScope())
+                    // Chờ để có slot trống trong Semaphore
+                    await semaphore.WaitAsync(cancellationToken);
+
+                    try
                     {
-                        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-                        var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
-                        Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
-                        int age = Shared.Helpers.DateTimeHelper.GetYearOld(Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture));
-                        var user = new User()
+                        using (var scope = _serviceProvider.CreateScope())
                         {
-                            UserName = student.PhoneNumber!.Trim(),
-                            Email = student.Email!.Trim(),
-                            FullName = student.FullName!.Trim(),
-                            PhoneNumber = student.PhoneNumber!.Trim(),
-                            EmailConfirmed = false,
-                            PhoneNumberConfirmed = false,
-                            Status = EnumUserStatus.Inactive,
-                            Human = new Human()
+                            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+                            var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
+                            Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
+                            int age = Shared.Helpers.DateTimeHelper.GetYearOld(Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture));
+                            var user = new User()
                             {
-                                FullName = student.FullName.Trim(),
-                                PhoneNumber = student.PhoneNumber.Trim(),
-                                Birthday = Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture),
-                                Email = student.Email.Trim(),
-                                Code = GeneratorCodeAsync(studentRepository, Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture), null),
-                                Student = new Student()
+                                UserName = student.PhoneNumber!.Trim(),
+                                Email = student.Email!.Trim(),
+                                FullName = student.FullName!.Trim(),
+                                PhoneNumber = student.PhoneNumber!.Trim(),
+                                EmailConfirmed = false,
+                                PhoneNumberConfirmed = false,
+                                Status = EnumUserStatus.Inactive,
+                                Human = new Human()
                                 {
-                                    CreatedByParent = false,
-                                    Occupation = nameof(Student),
-                                    School = request.SchoolName,
-                                    SchoolClass = student.SchoolClass,
-                                    SchoolGrade = student.SchoolGrade,
-                                    SchoolId = request.SchoolId,
-                                    CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
-                                }
-                            },
-                            UserPlatforms = new List<UserPlatform>()
-                                            {
-                                                new UserPlatform()
-                                                {
-                                                    PlatformId = platform.Id
-                                                }
-                                            },
-                            UserSettings = new List<UserSetting>()
-                            {
-                                new UserSetting(true)
-                            }
-                        };
-
-                        var password = Shared.Helpers.StringHelper.GeneratePassword(8);
-
-                        identityStudentResult = await userManager.CreateAsync(user, password);
-                        if (identityStudentResult.Succeeded)
+                                    FullName = student.FullName.Trim(),
+                                    PhoneNumber = student.PhoneNumber.Trim(),
+                                    Birthday = Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture),
+                                    Email = student.Email.Trim(),
+                                    Code = GeneratorCodeAsync(studentRepository, Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture), null),
+                                    Student = new Student()
+                                    {
+                                        CreatedByParent = false,
+                                        Occupation = nameof(Student),
+                                        School = request.SchoolName,
+                                        SchoolClass = student.SchoolClass,
+                                        SchoolGrade = student.SchoolGrade,
+                                        SchoolId = request.SchoolId,
+                                        CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
+                                    }
+                                },
+                                UserPlatforms = new List<UserPlatform>()
+                    {
+                        new UserPlatform()
                         {
-                            await userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
-                            lock (studentIds)
+                            PlatformId = platform.Id
+                        }
+                    },
+                                UserSettings = new List<UserSetting>()
+                    {
+                        new UserSetting(true)
+                    }
+                            };
+
+                            var password = Shared.Helpers.StringHelper.GeneratePassword(8);
+
+                            identityStudentResult = await userManager.CreateAsync(user, password);
+                            if (identityStudentResult.Succeeded)
                             {
-                                studentIds.Add(user.Human.Student.Id);
+                                await userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
+                                lock (studentIds)
+                                {
+                                    studentIds.Add(user.Human.Student.Id);
+                                }
                             }
                         }
+                    }
+                    finally
+                    {
+                        // Giải phóng Semaphore để cho phép task khác tiếp tục
+                        semaphore.Release();
                     }
                 });
 
@@ -349,6 +363,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             {
                 methodResult.AddErrorBadRequest(ex.Message);
             }
+
             return methodResult;
         }
 
