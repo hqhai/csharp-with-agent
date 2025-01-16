@@ -48,6 +48,7 @@ namespace Fsel.Course.Infrastructure.Configs
             builder.HasIndex(c => new { c.SectionGroupId, c.MockTestResultId }).IsUnique();
             builder.HasIndex(c => new { c.SectionGroupId, c.FinalTestResultId }).IsUnique();
             builder.HasIndex(c => new { c.SectionGroupId, c.PlacementTestResultId }).IsUnique();
+            builder.HasIndex(c => new { c.StudentId });
         }
     }
 }

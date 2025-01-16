@@ -18,6 +18,9 @@ namespace Fsel.Course.Infrastructure.Configs
                   .HasConversion(
                       v => v.ToString(),
                       v => v.EnumParse<EnumTimeCodeType>());
+
+            builder.HasIndex(c => new { c.IsDeleted, c.TimeCodeType, c.VideoId });
+            builder.HasIndex(c => new { c.IsDeleted, c.VideoId });
         }
     }
 }
