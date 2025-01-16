@@ -199,7 +199,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.EmptyBirthDayVN });
                 }
-                else if (!DateTime.TryParse(x.DateOfBirth, out DateTime dob))
+                else if (!Shared.Helpers.DateTimeHelper.IsValidDateTime(x.DateOfBirth))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
                 }
@@ -307,7 +307,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 {
                                     FullName = student.FullName.Trim(),
                                     PhoneNumber = student.PhoneNumber.Trim(),
-                                    Birthday = Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture),
+                                    Birthday = Shared.Helpers.DateTimeHelper.ConvertToDateTime(student.DateOfBirth),
                                     Email = student.Email.Trim(),
                                     Code = GeneratorCodeAsync(studentRepository, Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture), null),
                                     Student = new Student()
@@ -386,6 +386,17 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             }
 
             return methodResult;
+        }
+
+        public static bool IsValidDateTime(string input, string format = "dd-MM-yyyy")
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return false;
+
+            DateTime parsedDate;
+            var culture = CultureInfo.InvariantCulture;
+
+            return DateTime.TryParseExact(input, format, culture, DateTimeStyles.None, out parsedDate);
         }
 
         private static string GeneratorCodeAsync(IStudentRepository studentRepository, DateTime birthDay, EnumGender? gender)
