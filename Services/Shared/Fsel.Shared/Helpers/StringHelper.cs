@@ -244,5 +244,11 @@ namespace Fsel.Shared.Helpers
         {
             return Regex.IsMatch(input, "^[a-zA-Z0-9]+$");
         }
+
+        public static string FormatStringWithParam(object data, params object[]? param)
+        {
+            string objStr = data?.ToString() ?? string.Empty;
+            return string.Format(objStr, param ?? Array.Empty<object>());
+        }
     }
 }

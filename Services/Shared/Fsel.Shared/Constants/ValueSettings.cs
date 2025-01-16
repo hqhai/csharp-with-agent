@@ -129,6 +129,20 @@ namespace Fsel.Shared.Constants
             public const int MoreThanOneDevice = 1;
         }
 
+        public static class CourseProgressValue
+        {
+            public const int ProgressAcademic = 217;
+            public const int ProgressIELTS = 106;
+            public const int CountUnitAca = 12;
+            public const int CountUnitIELTS = 8;
+            public const int CountFullMockTest = 2;
+            public const int CountFinalTest = 1;
+            public const int MockTestPosition = 5;
+            public const int SkillFullMocKTest = 4;
+            public const int CountLessonAca = 6;
+            public const int CountLessonIELTS = 4;
+        }
+
         public static class ValueOrderIndex
         {
             public const int OrderIndexProcess = 0;

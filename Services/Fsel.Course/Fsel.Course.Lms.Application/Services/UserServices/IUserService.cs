@@ -129,5 +129,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Get("/v1/other/report-competition-event-school")]
         Task<IApiResponse<MethodResult<IList<ReportCompetitionEventModel>>>> GetReportCompetitionEventSchoolAsync([Query] GetReportCompetitionEventQueryModel query);
+
+        [Get("/v1/other/get-student-event-registrations")]
+        Task<IApiResponse<MethodResult<IList<EventRegistrationModel>>>> GetStudentEventRegistrationsAsync([Query] GetReportCompetitionEventQueryModel query);
     }
 }

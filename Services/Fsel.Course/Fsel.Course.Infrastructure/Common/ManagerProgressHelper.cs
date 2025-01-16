@@ -200,12 +200,6 @@ namespace Fsel.Course.Infrastructure.Common
             return (counts.Sum(), totalModules.Sum());
         }
 
-        private class OverallModuleLearnModel
-        {
-            public Guid CourseId { get; set; }
-            public int Count { get; set; }
-        }
-
         public async Task<double> GetOverallCompleteAsync(IList<CourseResultModel>? courseResults, DateTime? arrivalDate = default)
         {
             if (courseResults == null || !courseResults.Any())

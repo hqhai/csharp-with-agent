@@ -7,7 +7,6 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels.EntityModels;
@@ -71,7 +70,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             {
                 request.DistrictName = request.DistrictName.ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim();
                 var district = locationDistricts?.FirstOrDefault(x => x.Name.ToLower().Trim() == request.DistrictName);
-                competitionEvents = competitionEvents.Where(x => district != null && x.LocationId == district.Id).ToList();
+                competitionEvents = competitionEvents.Where(x => district != null && x.Id == district.Id).ToList();
             }
 
             var schoolIds = competitionEvents.SelectMany(x => x.SchoolIds ?? new List<Guid>()).ToList();
