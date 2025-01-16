@@ -7,6 +7,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Models;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
@@ -23,6 +24,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Comments;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -49,7 +51,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private const int MinLength = 20;
         private const int MaxLength = 225;
         private const string ModelAI = "gpt-4";
-        private const string ContentAICheckComment = "You are a meticulous and thorough content moderator who maintains a rigid no-tolerance policy for (User-submitted Text) which contains any of the three items listed under the (Prohibited) section below. You always follow the (Instructions) listed below step-by-step.Prohibited:1. Curse words, 2. Hurtful speech, 3. Nonsensical content, 4. Topics which are politically, religiously, or socially sensitive in the context of Vietnam, 5. Content in languages other than English (individual words or phrases from foreign languages are acceptable)Instructions: 1. Carefully inspect the text string under (User-submitted Text) for any of the 5 items listed under the (Prohibited) section., 2. Determine whether the (User-submitted Text) contains any content which violates any of the prohibited content types listed under the (Prohibited) section., 3. Output a value of (YES) in the (determination) key-value pair string if the content DOES violate even one of the prohibited content types. Output a value of (NO) in the (determination) key-value pair string if the content DOES NOT violate any of the prohibited content types. Ensure that all standard JSON syntax conventions are followed., 4. Output a 1-sentence text string containing a reason for your determination in the (reason) key-value pair string. Ensure that all standard JSON syntax conventions are followed., Output Format:{(determination): null,(reason): null}";
 
         public CreateCommentCommandHandler(IMapper mapper,
                                            ICommentRepository commentRepository,
@@ -87,8 +88,25 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 return methodResult;
             }
 
-            Comment comment = _mapper.Map<Comment>(request);
-            comment.UserId = _authContext.CurrentUserId;
+            Comment comment = new Comment();
+            if (request.IsUpdate)
+            {
+                var commentQuery = await _commentRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.ObjectId, cancellationToken);
+                if (commentQuery == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ObjectId), request.ObjectId);
+                    return methodResult;
+                }
+
+                comment = commentQuery;
+                comment.Content = request.Content;
+            }
+            else
+            {
+                comment = _mapper.Map<Comment>(request);
+                comment.UserId = _authContext.CurrentUserId;
+            }
+
             if (!comment.IsValid())
             {
                 methodResult.AddErrorBadRequest(comment.ErrorMessages);
@@ -100,7 +118,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 
             await _commentRepository.ExecuteTransactionAsync(async () =>
             {
-                comment = _commentRepository.Add(comment);
+                comment = request.IsUpdate ? _commentRepository.Update(comment) : _commentRepository.Add(comment);
                 await _commentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 List<object> paramLinksValue = new List<object>();
@@ -333,7 +351,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             }
 
             // Call ChatGpt
-            var checkContentForAI = await _mediator.Send(new SubmitAICommand { SettingModel = ModelAI, SystemRoleAlConfig = ContentAICheckComment, UserAIConfig = request.Content });
+            var contentAICheckComment = File.ReadAllText(ResourceSettings.ContentAICheckComment);
+            var checkContentForAI = await _mediator.Send(new SubmitAICommand { SettingModel = ModelAI, SystemRoleAlConfig = contentAICheckComment, UserAIConfig = request.Content });
             if (string.IsNullOrEmpty(checkContentForAI))
             {
                 comment.Status = EnumCommentStatus.Pending;

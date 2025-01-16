@@ -78,5 +78,7 @@ namespace Fsel.Shared.Constants
 
         public const string ReportPTEvent = "Resources//ExportExcelTemplates//ReportPTEvent.xlsx";
         public const string ReportPTEventSchool = "Resources//ExportExcelTemplates//ReportPTEventSchool.xlsx";
+
+        public const string ContentAICheckComment = "Resources//ContentAICheckComment.txt";
     }
 }
