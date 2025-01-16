@@ -23,7 +23,8 @@ builder.Services.AddScoped<IAmazonSimpleEmailService, AmazonSimpleEmailServiceCl
 builder.Services.AddScoped<IMessageHistoryRepository, MessageHistoryRepository>();
 builder.Services.AddScoped<SESWrapper>();
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
-builder.AddRefitClients(typeof(IIRISService), appSetting?.Services?.IRISApiUrl);
+builder.AddRefitClients(typeof(IIRISServiceDC), appSetting?.Services?.IRISApiUrlDC);
+builder.AddRefitClients(typeof(IIRISServiceDR), appSetting?.Services?.IRISApiUrlDR);
 builder.AddRefitClients(typeof(IGAPITService), appSetting?.Services?.GAPITApiUrl);
 var app = builder.Build();
 app.UseServices();

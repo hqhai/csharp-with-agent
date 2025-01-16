@@ -6,7 +6,7 @@ namespace Fsel.Sender.Application.Services.SMSServices.IRIS
     using Fsel.Sender.Application.Services.SMSServices.IRIS.Models;
     using Refit;
 
-    public interface IIRISService
+    public interface IIRISServiceDC
     {
         [Post("/oauth2/token")]
         [Headers("Content-Type: application/x-www-form-urlencoded")]

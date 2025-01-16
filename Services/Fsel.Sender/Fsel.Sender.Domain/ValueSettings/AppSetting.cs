@@ -68,7 +68,8 @@ namespace Fsel.Sender.Domain.ValueSettings
     public class Services : BaseServices
     {
         public string? SystemApiUrl { get; set; }
-        public string? IRISApiUrl { get; set; }
+        public string? IRISApiUrlDC { get; set; }
+        public string? IRISApiUrlDR { get; set; }
         public string? GAPITApiUrl { get; set; }
     }
 }

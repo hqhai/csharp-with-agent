@@ -18,6 +18,7 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
 
     public class SendSMSByIRISCommand : SendSMSCommandModel, IRequest<MethodResult<bool>>
     {
@@ -25,15 +26,19 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
 
     public class SendSMSByIRISCommandHandler : IRequestHandler<SendSMSByIRISCommand, MethodResult<bool>>
     {
-        private readonly IIRISService _iRISService;
+        private readonly IIRISServiceDC _iRISServiceDC;
+        private readonly IIRISServiceDR _iRISServiceDR;
         private readonly AppSetting _appSetting;
         private readonly IMessageHistoryRepository _messageHistoryRepository;
+        private readonly ILogger<SendSMSByIRISCommand> _logger;
 
-        public SendSMSByIRISCommandHandler(IIRISService iRISService, AppSetting appSetting, IMessageHistoryRepository messageHistoryRepository)
+        public SendSMSByIRISCommandHandler(IIRISServiceDC iRISServiceDC, AppSetting appSetting, IMessageHistoryRepository messageHistoryRepository, IIRISServiceDR iRISServiceDR, ILogger<SendSMSByIRISCommand> logger)
         {
-            _iRISService = iRISService;
+            _iRISServiceDC = iRISServiceDC;
             _appSetting = appSetting;
             _messageHistoryRepository = messageHistoryRepository;
+            _iRISServiceDR = iRISServiceDR;
+            _logger = logger;
         }
 
         public async Task<MethodResult<bool>> Handle(SendSMSByIRISCommand request, CancellationToken cancellationToken)
@@ -56,12 +61,43 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
 
             string authorizationHeader = $"Basic {encodeStr}";
 
-            var tokenResult = await _iRISService.GetToken(new IRISSMSTokenRequestModel() { GrantType = grantType }, authorizationHeader);
-            if (!tokenResult.IsSuccessStatusCode)
+            string token = string.Empty;
+
+            try
+            {
+                var tokenResult = await _iRISServiceDC.GetToken(new IRISSMSTokenRequestModel() { GrantType = grantType }, authorizationHeader);
+                if (!tokenResult.IsSuccessStatusCode)
+                {
+                    return methodResult;
+                }
+                token = $"{tokenResult.Content?.TokenType} {tokenResult.Content?.AccessToken}";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
+
+            if (string.IsNullOrEmpty(token))
+            {
+                try
+                {
+                    var tokenResult = await _iRISServiceDR.GetToken(new IRISSMSTokenRequestModel() { GrantType = grantType }, authorizationHeader);
+                    if (!tokenResult.IsSuccessStatusCode)
+                    {
+                        return methodResult;
+                    }
+                    token = $"{tokenResult.Content?.TokenType} {tokenResult.Content?.AccessToken}";
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex.Message);
+                }
+            }
+
+            if (string.IsNullOrEmpty(token))
             {
                 return methodResult;
             }
-            var token = $"{tokenResult.Content?.TokenType} {tokenResult.Content?.AccessToken}";
 
             var requests = new IRISSendSMSRequestModels();
             var messageHistories = new List<MessageHistory>();
@@ -99,7 +135,7 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
                     Priority = ((int)request.Priority).ToString(CultureInfo.InvariantCulture),
                     SmsId = smsId,
                     PhoneNumber = x,
-                    Content = request.Content,
+                    Content = content,
                     ContentType = _appSetting.SMSConfig?.IRISConfig?.ContentType,
                 };
                 requests.SendingList.Add(smsRequest);
@@ -113,8 +149,30 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
                 });
             });
 
-            var sendSMSResults = await _iRISService.SendSMSs(requests, token);
-            var results = sendSMSResults.Content;
+            IRISSendSMSResponseModels? results = null;
+
+            try
+            {
+                var sendSMSResults = await _iRISServiceDC.SendSMSs(requests, token);
+                results = sendSMSResults.Content;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
+
+            if (results == null || results.ResultList == null || results.ResultList.Count == 0)
+            {
+                try
+                {
+                    var sendSMSResults = await _iRISServiceDR.SendSMSs(requests, token);
+                    results = sendSMSResults.Content;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex.Message);
+                }
+            }
 
             messageHistories.ForEach(x =>
             {
