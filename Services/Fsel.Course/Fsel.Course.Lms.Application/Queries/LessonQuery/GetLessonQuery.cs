@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LessonsMockTestModel> methodResult = new MethodResult<LessonsMockTestModel>();
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId).ConfigureAwait(false);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId).ConfigureAwait(false);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));

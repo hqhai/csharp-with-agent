@@ -25,8 +25,6 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             _mediator = mediator;
         }
 
-
-
         /// <summary>
         /// Search class forum result
         /// </summary>

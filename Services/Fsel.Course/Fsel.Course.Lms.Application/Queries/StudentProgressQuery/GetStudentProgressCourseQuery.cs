@@ -61,13 +61,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
             var studentId = student.Id;
             var userId = student.Human?.UserId ?? default;
-            var packageResults = await _orderService.GetPackages();
-            if (!packageResults.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(packageResults));
-                return methodResult;
-            }
-            var packages = packageResults.Content?.Result;
+            //var packageResults = await _orderService.GetPackages();
+            //if (!packageResults.IsSuccessStatusCode)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(packageResults));
+            //    return methodResult;
+            //}
+            //var packages = packageResults.Content?.Result;
             var @classResults = await _trainingService.GetListClassByStudentIdAsync(student.Id);
             if (!@classResults.IsSuccessStatusCode)
             {
@@ -121,12 +121,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 courseProgress.Visit = featureAccessTime.Visit;
                 courseProgress.TimeSpent = featureAccessTime.AccessTime;
             }
-            var package = packages?.FirstOrDefault(x => x.Id == student.PackageId);
-            if (package != null)
-            {
-                courseProgress.PackageId = package.Id;
-                courseProgress.PackageCode = package.Code;
-            }
+            //var package = packages?.FirstOrDefault(x => x.Id == student.PackageId);
+            //if (package != null)
+            //{
+            //    courseProgress.PackageId = package.Id;
+            //    courseProgress.PackageCode = package.Code;
+            //}
             methodResult.Result = courseProgress;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

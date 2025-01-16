@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoTimeCodeModel> methodResult = new MethodResult<VideoTimeCodeModel>();
 
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));
@@ -110,8 +110,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
-            var videoTimeCodeModel = _videoConverter.GetVideoTimeCode(videoTimeCode, method.Result, request.IsShowSubStatus);
-            methodResult.Result = videoTimeCodeModel;
+
+            methodResult.Result = await _videoConverter.GetVideoTimeCodeAsync(videoTimeCode, method.Result, request.IsShowSubStatus);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
@@ -133,24 +133,24 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             if (isErrorCode)
             {
                 methodResult.AddErrorBadRequest(new List<ErrorResult>
-                    {
-                        new ErrorResult
-                          {
-                            ErrorCode = nameof(EnumVideoResultErrorCode.VideoTimeCodeNotCompleted),
-                            Errors = new List<Error>
+                {
+                    new ErrorResult
+                      {
+                        ErrorCode = nameof(EnumVideoResultErrorCode.VideoTimeCodeNotCompleted),
+                        Errors = new List<Error>
+                        {
+                            new Error
                             {
-                                new Error
+                                FieldName = nameof(videoTimeCodes),
+                                ErrorValues = displayTimeCodes.Select(x=> new
                                 {
-                                    FieldName = nameof(videoTimeCodes),
-                                    ErrorValues = displayTimeCodes.Select(x=> new
-                                    {
-                                        DisplayOrder = x.Item1,
-                                        VideoTimeCodeId = x.Item2
-                                    }).Deserialize<IList<object>>()
-                                }
+                                    DisplayOrder = x.Item1,
+                                    VideoTimeCodeId = x.Item2
+                                }).Deserialize<IList<object>>()
                             }
-                          }
-                    });
+                        }
+                      }
+                });
                 return methodResult;
             }
 

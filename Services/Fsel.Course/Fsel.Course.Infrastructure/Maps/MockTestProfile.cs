@@ -24,9 +24,6 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<CreateMockTestScoreCommandModel, MockTestScore>().IgnoreAllNonExisting();
             CreateMap<MockTest, MockTestModel>()
                  .ForMember(x => x.IsActive, p => p.MapFrom(o => o.CourseUnitMockTests.Any()));
-
-
-
         }
     }
 }

@@ -14,6 +14,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public IList<string>? Roles { get; set; }
         public bool? IsSurvey { get; set; } = true;
         public bool? IsOrder { get; set; } = true;
+        public Guid? SchoolId { get; set; }
         public bool? IsPlacementTest { get; set; } = true;
     }
 }

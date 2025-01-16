@@ -46,7 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             MethodResult<OverallScoreReportModel> methodResult = new MethodResult<OverallScoreReportModel>();
             OverallScoreReportModel overallScoreReport = new OverallScoreReportModel();
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));

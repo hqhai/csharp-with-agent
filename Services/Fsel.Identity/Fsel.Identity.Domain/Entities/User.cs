@@ -1,8 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Identity.Domain.Entities
 {
@@ -11,6 +13,8 @@ namespace Fsel.Identity.Domain.Entities
         [Required]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FullName { get; set; }
+
+        public EnumUserStatus? Status { get; set; } = EnumUserStatus.Active;
 
         public virtual Human? Human { get; set; }
 

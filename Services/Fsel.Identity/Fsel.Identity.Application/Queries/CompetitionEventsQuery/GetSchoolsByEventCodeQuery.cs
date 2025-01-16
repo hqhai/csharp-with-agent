@@ -10,6 +10,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
     using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Shared.Enums;
     using MassTransit.Initializers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -20,6 +21,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
         public string? EventCode { get; set; }
 
         public Guid? LocationId { get; set; }
+        public EnumEducationLevel? EducationLevel { get; set; }
     }
     public class GetSchoolsByEventCodeQueryHandler : IRequestHandler<GetSchoolsByEventCodeQuery, MethodResult<IList<SchoolModel>>>
     {
@@ -67,14 +69,18 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 
             IList<Guid> schoolIds = competitionEvent.SchoolIds;
             var listSchool = await _systemService.GetSchoolByIds(schoolIds);
-
             if (listSchool == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
+            var listSchoolTemp = listSchool.Content?.Result;
+            if (request.EducationLevel != null)
+            {
+                listSchoolTemp = listSchoolTemp?.Where(x => x.EducationLevel == request.EducationLevel || x.EducationLevel == EnumEducationLevel.InterLevel).ToList();
+            }
 
-            methodResult.Result = listSchool.Content?.Result;
+            methodResult.Result = listSchoolTemp;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

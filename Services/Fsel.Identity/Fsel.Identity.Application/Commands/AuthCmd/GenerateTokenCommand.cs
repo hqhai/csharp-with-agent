@@ -64,7 +64,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
-            var user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.Student).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var user = await _userManager.Users.Include(x => x.UserSchools).Include(x => x.Human).ThenInclude(x => x!.Student).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (user == null)
             {
                 methodResult.StatusCode = StatusCodes.Status401Unauthorized;
@@ -144,6 +144,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 {
                     tokenLogin.IsSurvey = isSurvey?.Content?.Result;
                 }
+            }
+            if (userRoles.Contains(EnumRole.AdminSchool.ToString()))
+            {
+                tokenLogin.SchoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
             }
 
             methodResult.Result = tokenLogin;

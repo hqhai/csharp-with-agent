@@ -8,7 +8,7 @@ namespace Fsel.Notification.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class NotificationEntityTypeConfiguration : IEntityTypeConfiguration<NotificationMessage>
+    public class NotificationMessageEntityTypeConfiguration : IEntityTypeConfiguration<NotificationMessage>
     {
         public void Configure(EntityTypeBuilder<NotificationMessage> builder)
         {
@@ -18,6 +18,9 @@ namespace Fsel.Notification.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumNotificationStatus>());
+
+            builder.HasIndex(c => new { c.IsDeleted, c.UserId });
+            builder.HasIndex(c => new { c.IsDeleted, c.UserId, c.Status });
         }
     }
 }
