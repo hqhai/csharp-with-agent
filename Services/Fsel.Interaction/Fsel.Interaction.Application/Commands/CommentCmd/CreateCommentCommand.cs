@@ -24,6 +24,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Comments;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Interaction.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -48,9 +49,9 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly IPostRepository _postRepository;
         private readonly IMediator _mediator;
+        private readonly AppSetting _appSetting;
         private const int MinLength = 20;
         private const int MaxLength = 225;
-        private const string ModelAI = "gpt-4";
 
         public CreateCommentCommandHandler(IMapper mapper,
                                            ICommentRepository commentRepository,
@@ -62,7 +63,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                                            IUserService userService,
                                            QuestBoardPublisher questBoardPublisher,
                                            IPostRepository postRepository,
-                                           IMediator mediator)
+                                           IMediator mediator,
+                                           AppSetting appSetting )
         {
             _mapper = mapper;
             _commentRepository = commentRepository;
@@ -75,6 +77,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             _questBoardPublisher = questBoardPublisher;
             _postRepository = postRepository;
             _mediator = mediator;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<CommentModel>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
@@ -352,7 +355,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 
             // Call ChatGpt
             var contentAICheckComment = File.ReadAllText(ResourceSettings.ContentAICheckComment);
-            var checkContentForAI = await _mediator.Send(new SubmitAICommand { SettingModel = ModelAI, SystemRoleAlConfig = contentAICheckComment, UserAIConfig = request.Content });
+            var checkContentForAI = await _mediator.Send(new SubmitAICommand { SettingModel = _appSetting.OpenAiConfig?.ModelCommentAI, SystemRoleAlConfig = contentAICheckComment, UserAIConfig = request.Content });
             if (string.IsNullOrEmpty(checkContentForAI))
             {
                 comment.Status = EnumCommentStatus.Pending;

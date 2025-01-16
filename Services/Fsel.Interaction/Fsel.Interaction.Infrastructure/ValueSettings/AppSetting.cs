@@ -22,6 +22,7 @@ namespace Fsel.Interaction.Infrastructure.ValueSettings
     {
         public string? Uri { get; set; }
         public string? ApiKey { get; set; }
+        public string? ModelCommentAI { get; set; }
     }
 
     public class HarmfulContentConfigs
