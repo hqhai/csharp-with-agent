@@ -2,8 +2,10 @@
 
 namespace Fsel.Identity.Application.Commands.StudentCmd
 {
+    using System.Collections;
     using System.Drawing;
     using System.Globalization;
+    using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -12,6 +14,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Common.Models.Excels;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Queues.Publishers;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Domain.Entities;
@@ -19,6 +22,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -26,20 +30,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using OfficeOpenXml;
     using OfficeOpenXml.Style;
 
-    public class CreateStudentsToEventFromFileCommandModel
+    public class CreateStudentsToEventFromFileCommand : CreateStudentsToEventFromByteModel, IRequest<MethodResult<CreateStudentsToEventFromFileModel>>
     {
-        public Stream? Stream { get; set; }
-        public int? NumberOfStudent { get; set; }
     }
 
-    public class CreateStudentsToEventFromFileCommand : BaseImportCommandModel, IRequest<MethodResult<CreateStudentsToEventFromFileCommandModel>>
-    {
-        public Guid DistrictId { get; set; }
-        public Guid SchoolId { get; set; }
-        public string? SchoolName { get; set; }
-    }
-
-    public class CreateStudentsToEventFromFileCommandHandler : IRequestHandler<CreateStudentsToEventFromFileCommand, MethodResult<CreateStudentsToEventFromFileCommandModel>>
+    public class CreateStudentsToEventFromFileCommandHandler : IRequestHandler<CreateStudentsToEventFromFileCommand, MethodResult<CreateStudentsToEventFromFileModel>>
     {
         private readonly UserManager<User> _userManager;
         private readonly IOrderService _orderService;
@@ -51,8 +46,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IServiceProvider _serviceProvider;
+        private readonly SendStudentsFromFilePublisher _sendStudentsFromFilePublisher;
 
-        public CreateStudentsToEventFromFileCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IMediator mediator, IHumanRepository humanRepository, ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IStudentRepository studentRepository, IServiceProvider serviceProvider)
+        public CreateStudentsToEventFromFileCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IMediator mediator, IHumanRepository humanRepository, ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IStudentRepository studentRepository, IServiceProvider serviceProvider, SendStudentsFromFilePublisher sendStudentsFromFilePublisher)
         {
             _userManager = userManager;
             _orderService = orderService;
@@ -64,14 +60,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _studentRepository = studentRepository;
             _serviceProvider = serviceProvider;
+            _sendStudentsFromFilePublisher = sendStudentsFromFilePublisher;
         }
 
-        public async Task<MethodResult<CreateStudentsToEventFromFileCommandModel>> Handle(CreateStudentsToEventFromFileCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<CreateStudentsToEventFromFileModel>> Handle(CreateStudentsToEventFromFileCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<CreateStudentsToEventFromFileCommandModel>();
+            var methodResult = new MethodResult<CreateStudentsToEventFromFileModel>();
 
-            if (request.FormFile == null)
+            if (request.File == null)
             {
                 methodResult.AddError(nameof(EnumSystemErrorCode.ImportFileRequired));
                 return methodResult;
@@ -155,7 +152,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 }
             };
 
-            var result = request.FormFile.ImportAndValidateExcel(async (CreateStudentToEventFromFileModel x, IList<CreateStudentToEventFromFileModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
+            var stream = new MemoryStream(request.File);
+            IFormFile formFile = new FormFile(stream, 0, request.File.Length, "name", "fileName");
+
+            var result = formFile.ImportAndValidateExcel(async (CreateStudentToEventFromFileModel x, IList<CreateStudentToEventFromFileModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
                 if (string.IsNullOrEmpty(x.FullName))
                 {
@@ -241,7 +241,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             if (result.Stream != null)
             {
-                methodResult.Result = new CreateStudentsToEventFromFileCommandModel() { Stream = result.Stream };
+                var file = ConvertHelper.StreamToByteArray(result.Stream);
+                //methodResult.Result = new CreateStudentsToEventFromFileModel() { Stream = result.Stream };
+                await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
+                {
+                    StatusCode = StatusCodes.Status400BadRequest,
+                    File = file,
+                    Key = request.Key,
+                    Message = "Dữ liệu lỗi"
+                }, cancellationToken);
                 return methodResult;
             }
 
@@ -256,6 +264,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             if (students == null || students.Count == 0)
             {
                 methodResult.AddErrorBadRequest("File tải lên không có dữ liệu");
+                await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
+                {
+                    StatusCode = StatusCodes.Status400BadRequest,
+                    Key = request.Key,
+                    Message = "File tải lên không có dữ liệu"
+                }, cancellationToken);
                 return methodResult;
             }
 
@@ -355,8 +369,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     await _studentCompetitionEventsRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     return methodResult;
                 });
-                methodResult.Result = new CreateStudentsToEventFromFileCommandModel() { NumberOfStudent = studentIds.Count };
+                methodResult.Result = new CreateStudentsToEventFromFileModel() { NumberOfStudent = studentIds.Count };
                 methodResult.StatusCode = StatusCodes.Status200OK;
+                await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
+                {
+                    StatusCode = StatusCodes.Status200OK,
+                    Key = request.Key,
+                    Message = "Thành công",
+                    NumberOfStudent = studentIds.Count,
+                }, cancellationToken);
                 return methodResult;
             }
             catch (Exception ex)

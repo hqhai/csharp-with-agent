@@ -40,24 +40,15 @@ namespace Fsel.Identity.Api.Controllers
             return File(commandResult.Result, Settings.Excels.ContentType, "Template_Import_StudentHN.xlsx");
         }
 
-        /// <summary>
-        /// create students to event from file
-        /// </summary>
         [RequestSizeLimit(1 * 1024 * 1024)] // 1 MB
-        [RequestFormLimits(MultipartBodyLengthLimit = 1 * 1024 * 1024)] // 1 MB
+        [RequestFormLimits(MultipartBodyLengthLimit = 1 * 1024 * 1024)]
         [HttpPost("create-students-to-event-from-file")]
-        [ProducesResponseType(typeof(MethodResult<CreateStudentsToEventFromFileCommandModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ImportStudentsIntoPlatform([FromForm] CreateStudentsToEventFromFileCommand command)
+        public async Task<IActionResult> CreateStudentsFromFile([FromForm] CreateStudentsFromFileCommand command)
         {
-            ArgumentNullException.ThrowIfNull(command);
-
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            if (!commandResult.IsOK || commandResult.Result?.Stream == null)
-            {
-                return commandResult.GetActionResult();
-            }
-            return File(commandResult.Result.Stream, Settings.Excels.ContentType, "File lỗi tạo tài khoản.xlsx");
+            return commandResult.GetActionResult();
         }
     }
 }
