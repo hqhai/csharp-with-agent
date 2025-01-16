@@ -3,11 +3,13 @@
 namespace Fsel.Sender.Application.Commands.SendSMSCmd
 {
     using System.Globalization;
+    using System.Net;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Caching;
     using Fsel.Sender.Application.Services.SMSServices.IRIS;
     using Fsel.Sender.Application.Services.SMSServices.IRIS.Models;
     using Fsel.Sender.Domain.Entities;
@@ -31,14 +33,16 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
         private readonly AppSetting _appSetting;
         private readonly IMessageHistoryRepository _messageHistoryRepository;
         private readonly ILogger<SendSMSByIRISCommand> _logger;
+        private readonly ICacheService<IRISSMSTokenResponseModel> _cache;
 
-        public SendSMSByIRISCommandHandler(IIRISServiceDC iRISServiceDC, AppSetting appSetting, IMessageHistoryRepository messageHistoryRepository, IIRISServiceDR iRISServiceDR, ILogger<SendSMSByIRISCommand> logger)
+        public SendSMSByIRISCommandHandler(IIRISServiceDC iRISServiceDC, AppSetting appSetting, IMessageHistoryRepository messageHistoryRepository, IIRISServiceDR iRISServiceDR, ILogger<SendSMSByIRISCommand> logger, ICacheService<IRISSMSTokenResponseModel> cache)
         {
             _iRISServiceDC = iRISServiceDC;
             _appSetting = appSetting;
             _messageHistoryRepository = messageHistoryRepository;
             _iRISServiceDR = iRISServiceDR;
             _logger = logger;
+            _cache = cache;
         }
 
         public async Task<MethodResult<bool>> Handle(SendSMSByIRISCommand request, CancellationToken cancellationToken)
@@ -55,44 +59,7 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
                 return methodResult;
             }
 
-            string credentials = $"{username}:{password}";
-
-            string encodeStr = Convert.ToBase64String(Encoding.UTF8.GetBytes(credentials));
-
-            string authorizationHeader = $"Basic {encodeStr}";
-
-            string token = string.Empty;
-
-            try
-            {
-                var tokenResult = await _iRISServiceDC.GetToken(new IRISSMSTokenRequestModel() { GrantType = grantType }, authorizationHeader);
-                if (!tokenResult.IsSuccessStatusCode)
-                {
-                    return methodResult;
-                }
-                token = $"{tokenResult.Content?.TokenType} {tokenResult.Content?.AccessToken}";
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-            }
-
-            if (string.IsNullOrEmpty(token))
-            {
-                try
-                {
-                    var tokenResult = await _iRISServiceDR.GetToken(new IRISSMSTokenRequestModel() { GrantType = grantType }, authorizationHeader);
-                    if (!tokenResult.IsSuccessStatusCode)
-                    {
-                        return methodResult;
-                    }
-                    token = $"{tokenResult.Content?.TokenType} {tokenResult.Content?.AccessToken}";
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex.Message);
-                }
-            }
+            string? token = await GetTokenAsync(username, password, grantType);
 
             if (string.IsNullOrEmpty(token))
             {
@@ -154,6 +121,11 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
             try
             {
                 var sendSMSResults = await _iRISServiceDC.SendSMSs(requests, token);
+                if (sendSMSResults.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    token = await GetTokenAsync(username, password, grantType);
+                    sendSMSResults = await _iRISServiceDC.SendSMSs(requests, token);
+                }
                 results = sendSMSResults.Content;
             }
             catch (Exception ex)
@@ -166,6 +138,11 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
                 try
                 {
                     var sendSMSResults = await _iRISServiceDR.SendSMSs(requests, token);
+                    if (sendSMSResults.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        token = await GetTokenAsync(username, password, grantType);
+                        sendSMSResults = await _iRISServiceDR.SendSMSs(requests, token);
+                    }
                     results = sendSMSResults.Content;
                 }
                 catch (Exception ex)
@@ -190,6 +167,41 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
                 return methodResult;
             });
             return methodResult;
+        }
+
+        private async Task<string> GetTokenAsync(string username, string password, string grantType)
+        {
+            const string CacheKey = "IRIS_Token";
+            string credentials = $"{username}:{password}";
+            string encodeStr = Convert.ToBase64String(Encoding.UTF8.GetBytes(credentials));
+            string authorizationHeader = $"Basic {encodeStr}";
+
+            var tokenModel = await _cache.GetAsync(CacheKey, TimeSpan.FromSeconds(1800), async () =>
+            {
+                return await GetToken(grantType, authorizationHeader);
+            },
+            _logger);
+
+            if (tokenModel == null || tokenModel.ExpiresAt <= DateTime.UtcNow)
+            {
+                tokenModel = await GetToken(grantType, authorizationHeader);
+            }
+            return $"{tokenModel.TokenType} {tokenModel.AccessToken}";
+        }
+
+        private async Task<IRISSMSTokenResponseModel> GetToken(string grantType, string authorizationHeader)
+        {
+            var tokenResult = await _iRISServiceDC.GetToken(new IRISSMSTokenRequestModel() { GrantType = grantType }, authorizationHeader);
+
+            if (tokenResult.IsSuccessStatusCode)
+            {
+                return tokenResult.Content ?? new IRISSMSTokenResponseModel();
+            }
+            else
+            {
+                _logger.LogError($"Failed to retrieve token: {tokenResult.ReasonPhrase}");
+                return new IRISSMSTokenResponseModel();
+            }
         }
     }
 }

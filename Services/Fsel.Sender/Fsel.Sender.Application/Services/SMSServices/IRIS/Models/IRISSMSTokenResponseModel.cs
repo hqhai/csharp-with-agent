@@ -12,7 +12,21 @@ namespace Fsel.Sender.Application.Services.SMSServices.IRIS.Models
         [JsonPropertyName("access_token")]
         public string? AccessToken { get; set; }
 
+        private int? expiresIn;
+
         [JsonPropertyName("expires_in")]
-        public int? ExpiresIn { get; set; }
+        public int? ExpiresIn
+        {
+            get { return expiresIn; }
+            set
+            {
+                value = expiresIn;
+                ExpiresAt = DateTime.UtcNow.AddSeconds(value ?? default);
+
+            }
+        }
+
+        [JsonIgnore]
+        public DateTime? ExpiresAt { get; set; }
     }
 }
