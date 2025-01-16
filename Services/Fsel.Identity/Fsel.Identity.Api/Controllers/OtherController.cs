@@ -7,10 +7,7 @@ namespace Fsel.Identity.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Identity.Application.Commands.OtherCmd;
-    using Fsel.Identity.Application.Queries.CompetitionEventsQuery;
-    using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -37,42 +34,6 @@ namespace Fsel.Identity.Api.Controllers
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return Redirect(commandResult.Result ?? string.Empty);
-        }
-
-        /// <summary>
-        /// RetakeCourse
-        /// </summary>
-        [HttpGet("report-competition-event")]
-        [ProducesResponseType(typeof(MethodResult<IList<ReportCompetitionEventModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ReportCompetitionEvent([FromQuery] GetReportCompetitionEventsQuery query)
-        {
-            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// RetakeCourse School
-        /// </summary>
-        [HttpGet("report-competition-event-school")]
-        [ProducesResponseType(typeof(MethodResult<IList<ReportCompetitionEventModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ReportCompetitionEvent([FromQuery] GetReportCompetitionEventSchoolsQuery query)
-        {
-            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get Student Event Registration
-        /// </summary>
-        [HttpGet("get-student-event-registrations")]
-        [ProducesResponseType(typeof(MethodResult<IList<EventRegistrationModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] GetStudentEventRegistrationsQuery query)
-        {
-            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
-            return commandResult.GetActionResult();
         }
     }
 }
