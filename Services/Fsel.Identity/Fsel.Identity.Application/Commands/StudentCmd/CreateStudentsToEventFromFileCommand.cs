@@ -2,17 +2,17 @@
 
 namespace Fsel.Identity.Application.Commands.StudentCmd
 {
-    using System.Collections;
+    using System;
     using System.Drawing;
     using System.Globalization;
     using System.IO;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Common.Models.Excels;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Queues.Publishers;
     using Fsel.Identity.Application.Services.InteractionService;
@@ -22,6 +22,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -86,6 +87,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             Action<ExcelWorksheet, Dictionary<string, int?>?, IList<ValidateExcelModel>> errorHandlerAction = (worksheet, columnIndexes, errors) =>
             {
+                worksheet.Cells[1, 7].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 7].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 7].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 7].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 7].Value = "Error Message";
+                worksheet.Cells[1, 7].Style.Font.Bold = true;
                 foreach (var error in errors.GroupBy(x => x.RowIndex).Select(x => x).OrderBy(x => x.Key))
                 {
                     var row = error.Key;
@@ -165,17 +172,17 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.EmptyPhoneNumberVN });
                 }
-                else if (!x.PhoneNumber.Trim().IsValidPhoneNumber())
+                else if (!Shared.Helpers.StringHelper.IsValidPhoneNumber(x.PhoneNumber))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.InvalidPhoneNumberVN });
                 }
-                else if (phoneNumbers.Contains(x.PhoneNumber))
+                else if (phoneNumbers.Contains(Shared.Helpers.StringHelper.NormalizeToDomesticFormat(x.PhoneNumber)))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.PhoneNumberAlreadyExistInListVN });
                 }
                 else
                 {
-                    phoneNumbers.Add(x.PhoneNumber);
+                    phoneNumbers.Add(Shared.Helpers.StringHelper.NormalizeToDomesticFormat(x.PhoneNumber));
                 }
 
                 if (string.IsNullOrEmpty(x.Email))
@@ -303,17 +310,17 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             int age = Shared.Helpers.DateTimeHelper.GetYearOld(Convert.ToDateTime(birthDay, CultureInfo.CurrentCulture));
                             var user = new User()
                             {
-                                UserName = student.PhoneNumber!.Trim(),
+                                UserName = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
                                 Email = student.Email!.Trim(),
                                 FullName = student.FullName!.Trim(),
-                                PhoneNumber = student.PhoneNumber!.Trim(),
+                                PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
                                 EmailConfirmed = false,
                                 PhoneNumberConfirmed = false,
                                 Status = EnumUserStatus.Inactive,
                                 Human = new Human()
                                 {
                                     FullName = student.FullName.Trim(),
-                                    PhoneNumber = student.PhoneNumber.Trim(),
+                                    PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
                                     Birthday = birthDay,
                                     Email = student.Email.Trim(),
                                     Code = GeneratorCodeAsync(studentRepository, Convert.ToDateTime(birthDay, CultureInfo.CurrentCulture), null),
