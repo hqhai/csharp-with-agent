@@ -21,6 +21,7 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Logging;
+    using Polly;
 
     public class SendSMSByIRISCommand : SendSMSCommandModel, IRequest<MethodResult<bool>>
     {
@@ -178,7 +179,7 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
 
             var tokenModel = await _cache.GetAsync(CacheKey, TimeSpan.FromSeconds(1800), async () =>
             {
-                return await GetToken(grantType, authorizationHeader);
+                return await GetToken(grantType, authorizationHeader) ?? new IRISSMSTokenResponseModel();
             },
             _logger);
 
@@ -186,21 +187,65 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
             {
                 tokenModel = await GetToken(grantType, authorizationHeader);
             }
-            return $"{tokenModel.TokenType} {tokenModel.AccessToken}";
+            return $"{tokenModel?.TokenType} {tokenModel?.AccessToken}";
         }
 
-        private async Task<IRISSMSTokenResponseModel> GetToken(string grantType, string authorizationHeader)
+        private async Task<IRISSMSTokenResponseModel?> GetToken(string grantType, string authorizationHeader)
         {
-            var tokenResult = await _iRISServiceDC.GetToken(new IRISSMSTokenRequestModel() { GrantType = grantType }, authorizationHeader);
-
-            if (tokenResult.IsSuccessStatusCode)
+            var retryPolicyDC = Policy
+                .Handle<Exception>()
+                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(retryAttempt), (exception, timeSpan, retryCount, context) =>
+                {
+                    Console.WriteLine($"Retry {retryCount} cho API DC thất bại: {exception.Message}");
+                });
+            try
             {
-                return tokenResult.Content ?? new IRISSMSTokenResponseModel();
+                return await retryPolicyDC.ExecuteAsync(async () =>
+                {
+                    var tokenResult = await _iRISServiceDC.GetToken(new IRISSMSTokenRequestModel() { GrantType = grantType }, authorizationHeader);
+                    if (tokenResult.IsSuccessStatusCode)
+                    {
+                        return tokenResult.Content;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                });
             }
-            else
+            catch (Exception ex)
             {
-                _logger.LogError($"Failed to retrieve token: {tokenResult.ReasonPhrase}");
-                return new IRISSMSTokenResponseModel();
+                Console.WriteLine($"API chính (DC) thất bại sau retry: {ex.Message}");
+            }
+
+            // Nếu API chính thất bại, chuyển sang API dự phòng (_iRISServiceDR)
+
+            var retryPolicyDR = Policy
+                .Handle<Exception>()
+                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(retryAttempt), (exception, timeSpan, retryCount, context) =>
+                {
+                    Console.WriteLine($"Retry {retryCount} cho API DR thất bại: {exception.Message}");
+                });
+
+            try
+            {
+                return await retryPolicyDR.ExecuteAsync(async () =>
+                {
+                    var tokenResult = await _iRISServiceDR.GetToken(new IRISSMSTokenRequestModel() { GrantType = grantType }, authorizationHeader);
+                    if (tokenResult.IsSuccessStatusCode)
+                    {
+                        return tokenResult.Content;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"API dự phòng (DR) thất bại sau retry: {ex.Message}");
+                return null;
             }
         }
     }
