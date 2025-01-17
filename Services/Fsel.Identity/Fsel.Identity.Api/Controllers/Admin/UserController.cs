@@ -278,5 +278,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "import_file_admin-school.xlsx");
         }
+        /// <summary>
+        /// Tool get otp of student
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpGet("tool-get-otp")]
+        [ProducesResponseType(typeof(MethodResult<UserOtpCodeModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ToolGetOtp([FromQuery] ToolGetOtpQuery query)
+        {
+            MethodResult<UserOtpCodeModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
