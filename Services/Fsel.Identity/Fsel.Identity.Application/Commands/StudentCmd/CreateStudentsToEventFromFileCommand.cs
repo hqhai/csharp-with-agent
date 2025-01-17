@@ -194,14 +194,18 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 {
                     emails.Add(x.Email);
                 }
-
-                if (string.IsNullOrEmpty(x.DateOfBirth))
+                int yearOfBirth = 0;
+                if (string.IsNullOrEmpty(x.YearOfBirth))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.EmptyBirthDayVN });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.YearOfBirth), Message = ErrorMassageSetting.EmptyBirthDayVN });
                 }
-                else if (!Shared.Helpers.DateTimeHelper.IsValidDateTime(x.DateOfBirth))
+                else if (!int.TryParse(x.YearOfBirth, out yearOfBirth))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.YearOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
+                }
+                else if (yearOfBirth <= 1920 || yearOfBirth > DateTime.UtcNow.Year)
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.YearOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
                 }
                 if (string.IsNullOrEmpty(x.SchoolGrade))
                 {
@@ -293,7 +297,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
                             var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
                             Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
-                            int age = Shared.Helpers.DateTimeHelper.GetYearOld(Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture));
+                            int yearOfBirth = DateTime.UtcNow.Year;
+                            var isYearOfBirth = int.TryParse(student.YearOfBirth, out yearOfBirth);
+                            var birthDay = new DateTime(yearOfBirth, 1, 1);
+                            int age = Shared.Helpers.DateTimeHelper.GetYearOld(Convert.ToDateTime(birthDay, CultureInfo.CurrentCulture));
                             var user = new User()
                             {
                                 UserName = student.PhoneNumber!.Trim(),
@@ -307,9 +314,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 {
                                     FullName = student.FullName.Trim(),
                                     PhoneNumber = student.PhoneNumber.Trim(),
-                                    Birthday = Shared.Helpers.DateTimeHelper.ConvertToDateTime(student.DateOfBirth),
+                                    Birthday = birthDay,
                                     Email = student.Email.Trim(),
-                                    Code = GeneratorCodeAsync(studentRepository, Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture), null),
+                                    Code = GeneratorCodeAsync(studentRepository, Convert.ToDateTime(birthDay, CultureInfo.CurrentCulture), null),
                                     Student = new Student()
                                     {
                                         CreatedByParent = false,
