@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -27,12 +28,14 @@ namespace Fsel.Identity.Application.Queries.UserQuery
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
         private readonly ITrainingService _trainingService;
+        private readonly ISystemService _systemService;
 
-        public GetUserQueryHandler(IMapper mapper, UserManager<User> userManager, ITrainingService trainingService)
+        public GetUserQueryHandler(IMapper mapper, UserManager<User> userManager, ITrainingService trainingService, ISystemService systemService)
         {
             _mapper = mapper;
             _userManager = userManager;
             _trainingService = trainingService;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<UserProfileModel>> Handle(GetUserQuery request, CancellationToken cancellationToken)
@@ -41,7 +44,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             MethodResult<UserProfileModel> methodResult = new MethodResult<UserProfileModel>();
 
             var user = await _userManager.FindByIdAsync(request.UserId.ToString());
-
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
@@ -84,6 +86,12 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                    .ThenInclude(x => x!.Parent)
                                                    .ThenInclude(x => x!.ParentStudents.Where(y => !y.IsDeleted))
                                                    .ThenInclude(x => x.Student)
+                                                   .FirstOrDefaultAsync(x => x.Id == request.UserId && x.EmailConfirmed, cancellationToken);
+            }
+            else if (userRoles.FirstOrDefault() == EnumRole.AdminSchool.ToString())
+            {
+                userView = await _userManager.Users.Include(x => x.Human)
+                                                   .Include(x => x.UserSchools)
                                                    .FirstOrDefaultAsync(x => x.Id == request.UserId && x.EmailConfirmed, cancellationToken);
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Moderator.ToString() || userRoles.FirstOrDefault() == EnumRole.MasterAdmin.ToString() || userRoles.FirstOrDefault() == EnumRole.Admin.ToString())
@@ -133,6 +141,16 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                 if (userRoles.FirstOrDefault() == EnumRole.CSO.ToString())
                 {
                     _mapper.Map(userView!.Human!.CSO, userModel);
+                }
+                if (userRoles.FirstOrDefault() == EnumRole.AdminSchool.ToString())
+                {
+                    var schoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
+                    if (schoolId.HasValue)
+                    {
+                        var schoolResult = await _systemService.GetSchoolByIds(new List<Guid> { schoolId.Value });
+                        userModel.School = schoolResult.Content?.Result?.FirstOrDefault()?.Name;
+                        userModel.SchoolName = schoolResult.Content?.Result?.FirstOrDefault()?.Name;
+                    }
                 }
                 userModel.Roles = userRoles;
             }

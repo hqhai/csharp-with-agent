@@ -242,8 +242,14 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
+                    b.Property<string>("LBConfigStr")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid?>("LocationId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("ParentEventId")
                         .HasColumnType("uniqueidentifier");
@@ -1121,6 +1127,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasIndex("CompetitionEventId");
 
+                    b.HasIndex("IsDeleted", "StudentId");
+
                     b.ToTable("StudentCompetitionEvents");
                 });
 
@@ -1268,6 +1276,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasIndex("StudentId");
 
+                    b.HasIndex("IsDeleted", "StudentId");
+
                     b.ToTable("StudentDailyStreak");
                 });
 
@@ -1338,6 +1348,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnOrder(102);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted", "StudentId", "CreatedDate");
+
+                    b.HasIndex("IsDeleted", "StudentId", "CreatedDate", "TargetTime");
 
                     b.ToTable("StudentFocusTimes");
                 });
@@ -1811,6 +1825,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");

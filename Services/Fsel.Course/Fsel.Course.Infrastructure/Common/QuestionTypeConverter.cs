@@ -7,6 +7,7 @@ namespace Fsel.Course.Infrastructure.Common
     using System.Text.Json;
     using System.Text.RegularExpressions;
     using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Entities.QuestionTypeConfigs;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions.V1i1;
     using Fsel.Shared.Constants;
@@ -619,14 +620,47 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
-        private static IList<T>? GenerateRandomLoop<T>(IList<T>? datas)
+        private static IList<T>? GenerateRandomLoop<T>(IList<T>? datas, IList<SubQuestionConfig>? shuffleConfigs = null)
         {
-            var rand = new Random();
-            if (datas != null)
+            if (datas == null)
             {
+                return datas;
+            }
+            if (shuffleConfigs == null || !shuffleConfigs.Any())
+            {
+                var rand = new Random();
                 return datas.OrderBy(_ => rand.Next()).ToList();
             }
-            return datas;
+            else
+            {
+                return datas.OrderBy(x => shuffleConfigs.FirstOrDefault(y => y.Id == x.GetPropValue("Id")?.ToString())?.Index ?? default).ThenBy(x => x.GetPropValue("Id")).ToList();
+            }
+        }
+
+        public (object?, string?) QuestionShuffleConverterObject(object? config, EnumQuestionType type, IList<SubQuestionConfig>? shuffleConfigs = null)
+        {
+            object? result = config;
+            string questionShuffleStr = shuffleConfigs != null ? shuffleConfigs.Serialize() : string.Empty;
+            switch (type)
+            {
+                case EnumQuestionType.MatchingType1:
+                    var matchingTypeQuestion = config.Deserialize<MatchingTypeQuestion>();
+                    if (matchingTypeQuestion != null)
+                    {
+                        matchingTypeQuestion.To = GenerateRandomLoop(matchingTypeQuestion.To, shuffleConfigs);
+                        if (shuffleConfigs == null)
+                        {
+                            questionShuffleStr = matchingTypeQuestion.To?.Select((x, index) => new SubQuestionConfig
+                            {
+                                Id = $"{x.Id}",
+                                Index = index
+                            }).Serialize() ?? string.Empty;
+                        }
+                    }
+                    result = matchingTypeQuestion;
+                    break;
+            }
+            return (result, questionShuffleStr);
         }
     }
 }

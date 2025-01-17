@@ -100,6 +100,10 @@ namespace Fsel.Notification.Infrastructure.Migrations
 
                     b.HasIndex("NotificationTypeId");
 
+                    b.HasIndex("IsDeleted", "UserId");
+
+                    b.HasIndex("IsDeleted", "UserId", "Status");
+
                     b.ToTable("NotificationMessages");
                 });
 
@@ -899,8 +903,8 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "",
-                            TemplateMessage = "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được 100 xu, nhấn để xem chi tiết",
+                            TemplateLink = "/invite-friends",
+                            TemplateMessage = "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được {1} xu, nhấn để xem chi tiết",
                             Type = "LinkPage"
                         },
                         new
@@ -913,8 +917,8 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "",
-                            TemplateMessage = "{0} đã hoàn thành unit 1,bạn vừa nhận được 500 xu, nhấn để xem chi tiết ",
+                            TemplateLink = "/invite-friends",
+                            TemplateMessage = "{0} đã hoàn thành unit 1,bạn vừa nhận được {1} xu, nhấn để xem chi tiết ",
                             Type = "LinkPage"
                         },
                         new
@@ -1901,7 +1905,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "vi-VN",
                             NotificationTypeId = new Guid("5e7e39f8-750a-4709-82b2-12805fc9e2e9"),
-                            TemplateMessage = "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được 100 xu, nhấn để xem chi tiết"
+                            TemplateMessage = "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được {1} xu, nhấn để xem chi tiết"
                         },
                         new
                         {
@@ -1912,7 +1916,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "en-US",
                             NotificationTypeId = new Guid("5e7e39f8-750a-4709-82b2-12805fc9e2e9"),
-                            TemplateMessage = "{0} has completed the placement test, and you have just received 100 xu. Tap to see details."
+                            TemplateMessage = "{0} has completed the placement test, and you have just received {1} xu. Tap to see details."
                         },
                         new
                         {
@@ -1923,7 +1927,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "fr-FR",
                             NotificationTypeId = new Guid("5e7e39f8-750a-4709-82b2-12805fc9e2e9"),
-                            TemplateMessage = "{0} a terminé le test de positionnement, et vous venez de recevoir 100 xu. Appuyez pour voir les détails."
+                            TemplateMessage = "{0} a terminé le test de positionnement, et vous venez de recevoir {1} xu. Appuyez pour voir les détails."
                         },
                         new
                         {
@@ -1934,7 +1938,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "vi-VN",
                             NotificationTypeId = new Guid("a3d6129b-9844-448d-aa1c-d6155b89ce6b"),
-                            TemplateMessage = "{0} đã hoàn thành unit 1,bạn vừa nhận được 500 xu, nhấn để xem chi tiết "
+                            TemplateMessage = "{0} đã hoàn thành unit 1,bạn vừa nhận được {1} xu, nhấn để xem chi tiết "
                         },
                         new
                         {
@@ -1945,7 +1949,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "en-US",
                             NotificationTypeId = new Guid("a3d6129b-9844-448d-aa1c-d6155b89ce6b"),
-                            TemplateMessage = "{0} has completed Unit 1, and you have just received 500 xu. Tap to see details"
+                            TemplateMessage = "{0} has completed Unit 1, and you have just received {1} xu. Tap to see details"
                         },
                         new
                         {
@@ -1956,7 +1960,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "fr-FR",
                             NotificationTypeId = new Guid("a3d6129b-9844-448d-aa1c-d6155b89ce6b"),
-                            TemplateMessage = "{0} a terminé l'Unité 1, et vous venez de recevoir 500 xu. Appuyez pour voir les détails."
+                            TemplateMessage = "{0} a terminé l'Unité 1, et vous venez de recevoir {1} xu. Appuyez pour voir les détails."
                         },
                         new
                         {

@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UnitModel>();
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentsResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentsResult));

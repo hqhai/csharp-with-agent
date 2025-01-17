@@ -67,6 +67,9 @@
     <None Update="Resources\Chatbots\Role\WritingRole.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\ManagerReports\BaoCaoChuyenCan.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

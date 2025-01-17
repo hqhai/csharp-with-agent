@@ -245,6 +245,48 @@ namespace Fsel.Shared.Helpers
             return Regex.IsMatch(input, "^[a-zA-Z0-9]+$");
         }
 
+        public static string GeneratePassword(int length)
+        {
+            if (length < 3)
+            {
+                throw new ArgumentException("Độ dài mật khẩu phải lớn hơn hoặc bằng 3 để đảm bảo các yêu cầu.");
+            }
+
+            // Danh sách các ký tự
+            const string upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const string lowerCase = "abcdefghijklmnopqrstuvwxyz";
+            const string digits = "0123456789";
+            const string specialChars = "!@#$%^&*()_-+=<>?";
+            const string allChars = upperCase + lowerCase + digits;
+
+            Random random = new Random();
+
+            // Đảm bảo có ít nhất 1 ký tự viết hoa, 1 ký tự đặc biệt
+            string upper = upperCase[random.Next(upperCase.Length)].ToString();
+            string special = specialChars[random.Next(specialChars.Length)].ToString();
+            string number = digits[random.Next(digits.Length)].ToString();
+
+            // Các ký tự còn lại được chọn ngẫu nhiên
+            string remainingChars = new string(Enumerable.Repeat(allChars, length - 3)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+
+            // Ghép lại tất cả và xáo trộn vị trí
+            string password = upper + special + number + remainingChars;
+            return new string(password.OrderBy(_ => random.Next()).ToArray());
+        }
+
+        public static string JoinWithComma(ICollection<string> items)
+        {
+            // Kiểm tra nếu danh sách rỗng hoặc null
+            if (items == null || items.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            // Sử dụng string.Join để nối các phần tử với dấu phẩy
+            return string.Join(", ", items);
+        }
+
         public static string FormatStringWithParam(object data, params object[]? param)
         {
             string objStr = data?.ToString() ?? string.Empty;
