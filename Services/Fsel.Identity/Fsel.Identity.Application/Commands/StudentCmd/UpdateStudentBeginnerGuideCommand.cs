@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Entities.BeginnerGuideConfigs;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
@@ -50,26 +51,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            StudentBeginnerGuide studentBeginnerGuide = (student.BeginnerGuide) != null ? student.BeginnerGuide : new StudentBeginnerGuide();
 
-            var oldOther = student.BeginnerGuide?.Other?.Split(',').Where(x => !string.IsNullOrWhiteSpace(x)).ToList() ?? new List<string>();
-            var newOther = request.BeginnerGuide?.Other?.Split(',').Where(x => !string.IsNullOrWhiteSpace(x)).ToList() ?? new List<string>();
-
-            var addOther = newOther.Except(oldOther).ToList();
-
-            foreach (var item in addOther)
-            {
-                var keysToAdd = FindKeyByValue(item).Where(key => !newOther.Contains(key));
-                newOther.AddRange(keysToAdd);
-
-                var valuesToAdd = FindValueByKey(item).Where(value => !newOther.Contains(value));
-                newOther.AddRange(valuesToAdd);
-            }
-            studentBeginnerGuide.BeginnerGuides = request.BeginnerGuide?.BeginnerGuides;
-            studentBeginnerGuide.Other = string.Join(",", newOther.Distinct());
-            studentBeginnerGuide.QuestionTypes = request.BeginnerGuide?.QuestionTypes?.Distinct().ToList();
-
-            student.BeginnerGuide = studentBeginnerGuide;
+            student.BeginnerGuide = ExcuteBeginnerGuide(student, request);
             await _studentRepository.ExecuteTransactionAsync(async () =>
             {
                 student = _studentRepository.Update(student);
@@ -147,5 +130,26 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             new KeyValuePair<string, string>( "i18n_beginnerGuide_classForum_step5", "keyHomeWork"),
             new KeyValuePair<string, string>( "i18n_beginnerGuide_homeWork_step1", "keyItemHomeWork"),
         };
+        private StudentBeginnerGuide ExcuteBeginnerGuide (Student student, UpdateStudentBeginnerGuideCommandModel request)
+        {
+            StudentBeginnerGuide studentBeginnerGuide = (student.BeginnerGuide) != null ? student.BeginnerGuide : new StudentBeginnerGuide();
+            var oldOther = student.BeginnerGuide?.Other?.Split(',').Where(x => !string.IsNullOrWhiteSpace(x)).ToList() ?? new List<string>();
+            var newOther = request.BeginnerGuide?.Other?.Split(',').Where(x => !string.IsNullOrWhiteSpace(x)).ToList() ?? new List<string>();
+
+            var addOther = newOther.Except(oldOther).ToList();
+
+            foreach (var item in addOther)
+            {
+                var keysToAdd = FindKeyByValue(item).Where(key => !newOther.Contains(key));
+                newOther.AddRange(keysToAdd);
+
+                var valuesToAdd = FindValueByKey(item).Where(value => !newOther.Contains(value));
+                newOther.AddRange(valuesToAdd);
+            }
+            studentBeginnerGuide.BeginnerGuides = request.BeginnerGuide?.BeginnerGuides;
+            studentBeginnerGuide.Other = string.Join(",", newOther.Distinct());
+            studentBeginnerGuide.QuestionTypes = request.BeginnerGuide?.QuestionTypes?.Distinct().ToList();
+            return studentBeginnerGuide;
+        }
     }
 }
