@@ -140,7 +140,9 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                               CourseResultId = studentEvent.CourseResultId,
                               CourseType = studentEvent.CourseType,
                               SchoolId = student.SchoolId
-                          }).OrderByDescending(x => x.RankingScore).ToList();
+                          })
+                          .OrderByDescending(x => x.RankingScore)
+                          .ThenBy(x => x.FullName).ToList();
 
 
                 result = await GetSingleStudentRanking(result, competitionEvents.Id, competitionEvents.ParentEventId, 0, request.IsCityLeaderBoard, request.IsFinalLeaderBoard, cancellationToken);
@@ -440,7 +442,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             var resultHighSchool = await GetSingleStudentRanking(result, childCodeHighSchool, competitionParent.Id, TakeTopNineLeaderBoardCity, true, false, cancellationToken);
             resultSecondarySchool.AddRange(resultHighSchool);
 
-            return resultSecondarySchool.OrderByDescending(x => x.RankingScore).ToList();
+            return resultSecondarySchool.OrderByDescending(x => x.RankingScore).ThenBy(x => x.FullName).ToList();
         }
 
 
