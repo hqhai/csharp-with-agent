@@ -23,8 +23,5 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Students
 
         [EpplusTableColumn(Header = "Class")]
         public string? SchoolClass { get; set; }
-
-        [EpplusTableColumn(Header = "Error Message")]
-        public string? ErrorMessage { get; set; }
     }
 }

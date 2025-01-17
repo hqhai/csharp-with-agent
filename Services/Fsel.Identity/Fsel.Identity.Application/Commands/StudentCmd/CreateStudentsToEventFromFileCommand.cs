@@ -90,7 +90,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 {
                     var row = error.Key;
 
-                    int lastColumn = worksheet.Dimension.End.Column - 1;
+                    int lastColumn = 7;
 
                     // Tạo biến lưu trữ dữ liệu dòng hiện tại
                     List<object?> rowData = new List<object?>();
@@ -134,7 +134,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         }
                     }
                     var messages = Shared.Helpers.StringHelper.JoinWithComma(errorMessages.Distinct().ToList());
-                    worksheet.Cells[targetRow, lastColumn + 1].Value = messages;
+                    worksheet.Cells[targetRow, lastColumn].Value = messages;
                 }
             };
 
@@ -146,9 +146,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 worksheet.Cells[row, num].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
                 worksheet.Cells[row, num].Style.Border.Left.Style = ExcelBorderStyle.Thin;
                 worksheet.Cells[row, num].Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                if (num == 7)
+                if (num == 6)
                 {
-                    worksheet.Cells[row, num].Value = null;
+                    worksheet.Cells[row, num + 1].Value = null;
                 }
             };
 
