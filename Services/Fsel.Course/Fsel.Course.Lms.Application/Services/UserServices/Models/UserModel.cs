@@ -8,6 +8,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
     {
         public string? FullName { get; set; }
         public string? PhoneNumber { get; set; }
+        public string? School { get; set; }
+        public string? SchoolName { get; set; }
         public HumanModel? Human { get; set; }
     }
 }

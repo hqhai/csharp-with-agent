@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
 
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));
@@ -91,7 +91,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 return methodResult;
             }
             var videoModel = _mapper.Map<VideoModel>(video);
-            videoModel.VideoTimeCodes = _videoConverter.GetTimeCodes(video, videoResult);
+            videoModel.VideoTimeCodes = await _videoConverter.GetTimeCodes(video, videoResult);
             videoModel.VideoResult = _mapper.Map<VideoResultModel>(videoResult);
             methodResult.Result = videoModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

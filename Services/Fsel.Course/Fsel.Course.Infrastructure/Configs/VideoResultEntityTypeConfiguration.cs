@@ -31,6 +31,8 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.EnumParse<EnumResultStatus>());
 
             builder.HasIndex(c => new { c.LessonResultId, c.VideoId, c.StudentId }).IsUnique();
+            builder.HasIndex(c => new { c.Status, c.StudentId });
+            builder.HasIndex(c => new { c.StudentId });
         }
     }
 }

@@ -71,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
 
             #region Validation
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(userId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(userId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
