@@ -145,7 +145,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                           .ThenBy(x => x.FullName).ToList();
 
 
-                result = await GetSingleStudentRanking(result, competitionEvents.Id, competitionEvents.ParentEventId, 0, request.IsCityLeaderBoard, request.IsFinalLeaderBoard, cancellationToken);
+                result = await GetSingleStudentRanking(result, competitionEvents.Id, competitionEvents.ParentEventId, 0, request.IsCityLeaderBoard, request.IsFinalLeaderBoard, true, cancellationToken);
 
 
                 if (request.IsFinalLeaderBoard)
@@ -322,7 +322,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                               UserId = r.UserId,
                               RankingScore = r.RankingScore,
                               CourseResultId = r.CourseResultId,
-                              CourseType = r.CourseType
+                              CourseType = r.CourseType,
+                              SchoolId = r.SchoolId,
                           }).ToList();
 
             }
@@ -343,7 +344,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
         /// <param name="isFinalLeaderBoard"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        private async Task<List<StudentRankingModel>> GetSingleStudentRanking(List<StudentRankingModel> result, Guid competitionEventId, Guid? parentCompetitionEventId, int takeRecord, bool isCityLeaderBoard, bool isFinalLeaderBoard, CancellationToken cancellationToken)
+        private async Task<List<StudentRankingModel>> GetSingleStudentRanking(List<StudentRankingModel> result, Guid competitionEventId, Guid? parentCompetitionEventId, int takeRecord, bool isCityLeaderBoard, bool isFinalLeaderBoard, bool firstTime, CancellationToken cancellationToken)
         {
             var competitionEvents = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.Id == competitionEventId, cancellationToken);
             List<Guid> schoolCompetitionIds = new List<Guid>();
@@ -354,7 +355,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             }
 
             #region filter Event Thường
-            if (competitionEvents.SchoolIds != null)
+            if (competitionEvents.SchoolIds != null && !isFinalLeaderBoard)
             {
                 schoolCompetitionIds = competitionEvents.SchoolIds.ToList();
             }
@@ -376,19 +377,13 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                               UserId = r.UserId,
                               RankingScore = r.RankingScore,
                               CourseResultId = r.CourseResultId,
-                              CourseType = r.CourseType
+                              CourseType = r.CourseType,
+                              SchoolId = r.SchoolId,
                           }).ToList();
             }
             #endregion
 
-            #region filter theo cấp
-            IList<Guid>? schoolIds = result.Where(x => x.SchoolId != null).Select(x => (Guid)x.SchoolId!).ToList();
-            var highSchoolResult = await _systemService.GetSchoolByIds(schoolIds);
-            var highSchool = highSchoolResult?.Content?.Result;
-            var highSchoolFilter = !isCityLeaderBoard ? highSchool?.Where(x => x.EducationLevel == EnumEducationLevel.Secondary || x.EducationLevel == EnumEducationLevel.InterLevel).Select(x => x.Id) : highSchool?.Where(x => x.EducationLevel == EnumEducationLevel.HighSchool || x.EducationLevel == EnumEducationLevel.InterLevel).Select(x => x.Id);
 
-            result = isCityLeaderBoard ? CustomLeaderBoardForHighSchool(highSchoolFilter, result) : result;
-            #endregion
 
             #region filter theo trạng thái của học sinh
             var eventStudentIds = result.Select(x => x.StudentId).ToList();
@@ -405,6 +400,17 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
                 return new List<StudentRankingModel>();
             }
+            #endregion
+
+            #region filter theo cấp
+            IList<Guid>? schoolIds = result.Where(x => x.SchoolId != null).Select(x => (Guid)x.SchoolId!).ToList();
+            var highSchoolResult = await _systemService.GetSchoolByIds(schoolIds);
+            var highSchool = highSchoolResult?.Content?.Result;
+            var highSchoolFilter = !isCityLeaderBoard ? highSchool?.Where(x => x.EducationLevel == EnumEducationLevel.Secondary || x.EducationLevel == EnumEducationLevel.InterLevel).Select(x => x.Id) : highSchool?.Where(x => x.EducationLevel == EnumEducationLevel.HighSchool || x.EducationLevel == EnumEducationLevel.InterLevel).Select(x => x.Id);
+
+
+            var tempHighSchool = !isCityLeaderBoard ? highSchool?.Where(x => x.EducationLevel == EnumEducationLevel.Secondary || x.EducationLevel == EnumEducationLevel.InterLevel) : highSchool?.Where(x => x.EducationLevel == EnumEducationLevel.HighSchool || x.EducationLevel == EnumEducationLevel.InterLevel);
+            result = firstTime ? result : CustomLeaderBoardForHighSchool(highSchoolFilter, result);
             #endregion
 
             result = result.DistinctBy(x => x.CourseResultId).Where(x => activeCourseResultIds.Contains(x.CourseResultId)).ToList();
@@ -433,13 +439,13 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
             foreach (var childCode in childrenCodes)
             {
-                var everEvent = await GetSingleStudentRanking(result, childCode, competitionParent.Id, TakeTopLeaderBoardEverEvent, false, false, cancellationToken);
+                var everEvent = await GetSingleStudentRanking(result, childCode, competitionParent.Id, TakeTopLeaderBoardEverEvent, false, false, false, cancellationToken);
                 resultSecondarySchool.AddRange(everEvent);
             };
 
 
             Guid childCodeHighSchool = competitionParent!.CompetitionEvents.Where(x => x.EventCode == Special_Event).Select(x => x.Id).FirstOrDefault();
-            var resultHighSchool = await GetSingleStudentRanking(result, childCodeHighSchool, competitionParent.Id, TakeTopNineLeaderBoardCity, true, false, cancellationToken);
+            var resultHighSchool = await GetSingleStudentRanking(result, childCodeHighSchool, competitionParent.Id, TakeTopNineLeaderBoardCity, true, false, false, cancellationToken);
             resultSecondarySchool.AddRange(resultHighSchool);
 
             return resultSecondarySchool.OrderByDescending(x => x.RankingScore).ThenBy(x => x.FullName).ToList();
