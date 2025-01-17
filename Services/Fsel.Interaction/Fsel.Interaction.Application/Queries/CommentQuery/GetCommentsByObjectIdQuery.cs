@@ -77,6 +77,11 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
             {
                 foreach (var item in comments)
                 {
+                    if (item.Comment.Status != EnumCommentStatus.Approver && item.Comment.UserId != _authContext.CurrentUserId)
+                    {
+                        continue;
+                    }
+
                     var commentModel = _mapper.Map<CommentModel>(item.Comment);
                     var actionLikes = _interactionActionRepository.Queryable.Where(x => x.ObjectId == item.Comment.Id && x.Type == EnumInteractionActionType.Like).ToList();
                     commentModel.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.Comment.UserId)?.AvatarPath;
