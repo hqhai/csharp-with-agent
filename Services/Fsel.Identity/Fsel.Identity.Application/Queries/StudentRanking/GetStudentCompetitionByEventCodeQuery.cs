@@ -144,8 +144,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                           .OrderByDescending(x => x.RankingScore)
                           .ThenBy(x => x.FullName).ToList();
 
-
-                result = await GetSingleStudentRanking(result, competitionEvents.Id, competitionEvents.ParentEventId, 0, request.IsCityLeaderBoard, request.IsFinalLeaderBoard, true, cancellationToken);
+                int take = request.IsCityLeaderBoard ? 9 : 0;
+                result = await GetSingleStudentRanking(result, competitionEvents.Id, competitionEvents.ParentEventId, take, request.IsCityLeaderBoard, request.IsFinalLeaderBoard, true, cancellationToken);
 
 
                 if (request.IsFinalLeaderBoard)
@@ -406,11 +406,11 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             IList<Guid>? schoolIds = result.Where(x => x.SchoolId != null).Select(x => (Guid)x.SchoolId!).ToList();
             var highSchoolResult = await _systemService.GetSchoolByIds(schoolIds);
             var highSchool = highSchoolResult?.Content?.Result;
-            var highSchoolFilter = !isCityLeaderBoard ? highSchool?.Where(x => x.EducationLevel == EnumEducationLevel.Secondary || x.EducationLevel == EnumEducationLevel.InterLevel).Select(x => x.Id) : highSchool?.Where(x => x.EducationLevel == EnumEducationLevel.HighSchool || x.EducationLevel == EnumEducationLevel.InterLevel).Select(x => x.Id);
+            var highSchoolFilter = !isCityLeaderBoard ? highSchool?.Where(x => x.EducationLevel == EnumEducationLevel.Secondary || x.EducationLevel == EnumEducationLevel.InterLevel).Select(x => x.Id) : highSchool?.Where(x => x.EducationLevel == EnumEducationLevel.HighSchool).Select(x => x.Id);
 
 
-            var tempHighSchool = !isCityLeaderBoard ? highSchool?.Where(x => x.EducationLevel == EnumEducationLevel.Secondary || x.EducationLevel == EnumEducationLevel.InterLevel) : highSchool?.Where(x => x.EducationLevel == EnumEducationLevel.HighSchool || x.EducationLevel == EnumEducationLevel.InterLevel);
-            result = firstTime ? result : CustomLeaderBoardForHighSchool(highSchoolFilter, result);
+            var tempHighSchool = !isCityLeaderBoard ? highSchool?.Where(x => x.EducationLevel == EnumEducationLevel.Secondary || x.EducationLevel == EnumEducationLevel.InterLevel) : highSchool?.Where(x => x.EducationLevel == EnumEducationLevel.HighSchool);
+            result = (firstTime && !isCityLeaderBoard) ? result : CustomLeaderBoardForHighSchool(highSchoolFilter, result);
             #endregion
 
             result = result.DistinctBy(x => x.CourseResultId).Where(x => activeCourseResultIds.Contains(x.CourseResultId)).ToList();
