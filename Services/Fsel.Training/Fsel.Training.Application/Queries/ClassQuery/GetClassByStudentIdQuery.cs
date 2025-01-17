@@ -25,14 +25,14 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     public class GetClassByStudentIdQueryHandler : IRequestHandler<GetClassByStudentIdQuery, MethodResult<ClassModel>>
     {
         private readonly IMapper _mapper;
-        private readonly IClassRepository _classRepository;
+        private readonly IClassStudentRepository _classStudentRepository;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
 
-        public GetClassByStudentIdQueryHandler(IMapper mapper, IClassRepository classRepository, IUserService userService, AuthContext authContext)
+        public GetClassByStudentIdQueryHandler(IMapper mapper, IClassStudentRepository classStudentRepository, IUserService userService, AuthContext authContext)
         {
             _mapper = mapper;
-            _classRepository = classRepository;
+            _classStudentRepository = classStudentRepository;
             _userService = userService;
             _authContext = authContext;
         }
@@ -54,9 +54,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            var @class = await _classRepository.Queryable.Include(x => x.ClassStudents.Where(n => !n.IsDeleted))
-                                            .FirstOrDefaultAsync(e => e.ClassStudents.Any(x => x.StudentId == student.Id && x.ClassId == student.ClassId), cancellationToken);
-            methodResult.Result = _mapper.Map<ClassModel>(@class);
+            var classStudent = await _classStudentRepository.Queryable.Include(x => x.Class).FirstOrDefaultAsync(x => x.StudentId == student.Id && x.ClassId == student.ClassId, cancellationToken);
+            methodResult.Result = _mapper.Map<ClassModel>(classStudent?.Class);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
