@@ -10,4 +10,10 @@
     <ProjectReference Include="..\Fsel.Interaction.Application\Fsel.Interaction.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Resources\ContentAICheckComment.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
