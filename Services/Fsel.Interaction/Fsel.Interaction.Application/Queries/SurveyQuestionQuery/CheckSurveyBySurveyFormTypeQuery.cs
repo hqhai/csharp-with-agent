@@ -50,6 +50,12 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
                 return methodResult;
             }
 
+            if (request.SurveyFormType == EnumSurveyFormType.Event && !request.CompetitionEventId.HasValue)
+            {
+                methodResult.Result = false;
+                return methodResult;
+            }
+
             var customerSurveyGroups = await _customerSurveyGroupRepository.Queryable
                                                                            .Where(x => x.SurveyFormType == request.SurveyFormType && x.UserId == _authContext.CurrentUserId)
                                                                            .ToListAsync(cancellationToken);
