@@ -3,7 +3,6 @@
 namespace Fsel.Sender.Domain.Models.Commands
 {
     using Fsel.Shared.Enums;
-    using MediatR;
 
     public class SendSMSCommandModel
     {
