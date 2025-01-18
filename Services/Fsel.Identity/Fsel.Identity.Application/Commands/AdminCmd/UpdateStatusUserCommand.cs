@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -40,7 +41,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 return methodResult;
             }
 
-            user.LockoutEnabled = request.Status;
+            user.Status = request.Status ? EnumUserStatus.Active : EnumUserStatus.Inactive;
             await _userManager.UpdateAsync(user);
 
             methodResult.StatusCode = StatusCodes.Status200OK;

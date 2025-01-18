@@ -12,6 +12,9 @@ namespace Fsel.Identity.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<StudentFocusTime> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+
+            builder.HasIndex(c => new { c.IsDeleted, c.StudentId, c.CreatedDate });
+            builder.HasIndex(c => new { c.IsDeleted, c.StudentId, c.CreatedDate, c.TargetTime });
         }
     }
 }

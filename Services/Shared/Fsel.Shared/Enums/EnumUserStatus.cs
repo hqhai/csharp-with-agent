@@ -2,9 +2,9 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumVoucherType
+    public enum EnumUserStatus
     {
-        All,
-        NewSale
+        Active,
+        Inactive,
     }
 }

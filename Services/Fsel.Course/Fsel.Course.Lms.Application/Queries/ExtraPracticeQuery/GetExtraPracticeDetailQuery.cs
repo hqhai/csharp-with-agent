@@ -50,7 +50,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             MethodResult<ExtraPracticeModel> methodResult = new MethodResult<ExtraPracticeModel>();
             ExtraPracticeModel extraPracticeModel = new ExtraPracticeModel();
 
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));

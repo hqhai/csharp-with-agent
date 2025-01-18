@@ -17,6 +17,8 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public CustomerSupportConfig? CustomerSupportConfig { get; set; }
 
         public GoogleSheetConfig? GoogleSheetConfig { get; set; }
+
+
     }
 
     public class ConstantUrl
@@ -46,6 +48,8 @@ namespace Fsel.Course.Infrastructure.ValueSettings
     {
         public string? Uri { get; set; }
         public string? ApiKey { get; set; }
+
+        public string? ApprovalAIModel { get; set; }
     }
 
     public class AzureAiConfig

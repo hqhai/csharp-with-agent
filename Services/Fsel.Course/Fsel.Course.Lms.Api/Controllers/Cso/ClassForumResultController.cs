@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
     using Fsel.Shared.Attributes;
@@ -97,6 +98,15 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
         public async Task<IActionResult> GetClassForumResultByLessonResultId([FromQuery] GetClassForumResultByLessonResultIdQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpPut("ai-approval-class-forum/{classForumId}")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AutoApproval([FromRoute] Guid classForumId)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new AutoApprovalClassForumCommand { ClassForumResulId = classForumId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

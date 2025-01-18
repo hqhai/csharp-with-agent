@@ -34,6 +34,8 @@ namespace Fsel.Ordering.Infrastructure.Configs
                .WithMany(b => b.OrderTransactions)
                .HasForeignKey(b => b.ProductId)
                .OnDelete(DeleteBehavior.ClientCascade);
+
+            builder.HasIndex(c => new { c.CreatedUserId, c.IsDeleted, c.Status, c.Type });
         }
     }
 }

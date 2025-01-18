@@ -32,6 +32,7 @@ namespace Fsel.Shared.Constants
                 public const string WeeklyNotice = $"{KeyQueue}_WeeklyNotice";
                 public const string JobRunEvents = $"{KeyQueue}_JobRunEvents";
                 public const string CheckUserDeletion = $"{KeyQueue}_CheckUserDeletion";
+                public const string CreateStudentsFromFile = $"{KeyQueue}_CreateStudentsFromFile";
             }
         }
 
@@ -53,6 +54,7 @@ namespace Fsel.Shared.Constants
                 public const string MockTestWriting = $"{KeyQueue}_MockTestWriting";
                 public const string MockTestSpeaking = $"{KeyQueue}_MockTestSpeaking";
                 public const string TechieAction = $"{KeyQueue}_TechieAction";
+                public const string SendStudentsFromFile = $"{KeyQueue}_SendStudentsFromFile";
             }
         }
 
