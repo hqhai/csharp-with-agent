@@ -70,7 +70,8 @@ namespace Fsel.Shared.Models.ShareModels
         StopAtLevelSelection,
         ShowStoreFSEL,
         RegisterAndCreateUser,
-        DisableLeaderBoard
+        DisableLeaderBoard,
+        DisableLevelChangeSelection
     }
 
     public enum EnumByPassPaymentType
@@ -182,5 +183,6 @@ namespace Fsel.Shared.Models.ShareModels
         public string? TextDisplay { get; set; }
         public string? Link { get; set; }
     }
+
     #endregion Prize
 }
