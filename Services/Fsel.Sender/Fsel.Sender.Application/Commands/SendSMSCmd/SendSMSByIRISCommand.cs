@@ -7,16 +7,17 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Caching;
     using Fsel.Sender.Application.Services.SMSServices.IRIS;
     using Fsel.Sender.Application.Services.SMSServices.IRIS.Models;
     using Fsel.Sender.Domain.Entities;
     using Fsel.Sender.Domain.IRepositories;
-    using Fsel.Sender.Domain.Models.Commands;
     using Fsel.Sender.Domain.ValueSettings;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Logging;
@@ -57,6 +58,7 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(grantType) || request.PhoneNumbers == null || request.PhoneNumbers.Count == 0 || request == null)
             {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
                 return methodResult;
             }
 
@@ -64,6 +66,7 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
 
             if (string.IsNullOrEmpty(token))
             {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
                 return methodResult;
             }
 
@@ -90,6 +93,7 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
 
             if (string.IsNullOrEmpty(content))
             {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
                 return methodResult;
             }
 

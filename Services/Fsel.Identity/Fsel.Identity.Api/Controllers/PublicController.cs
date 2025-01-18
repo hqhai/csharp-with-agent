@@ -7,6 +7,7 @@ namespace Fsel.Identity.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Identity.Application.Commands.StudentCmd;
+    using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -46,6 +47,30 @@ namespace Fsel.Identity.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateStudentsFromFile([FromForm] CreateStudentsFromFileCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// send otp
+        /// </summary>
+        [HttpPost("send-otp")]
+        [ProducesResponseType(typeof(MethodResult<EnumActionSaveOTPForEventHaNoi>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendOTP([FromBody] SaveOTPForUserEventHaNoiCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// send otp
+        /// </summary>
+        [HttpPost("verify-otp")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> VerifyOTP([FromBody] VerifyOTPForUserEventHaNoiCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

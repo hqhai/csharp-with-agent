@@ -27,7 +27,7 @@ namespace Fsel.Sender.Api.Controllers
         /// <summary>
         /// Send SMS
         /// </summary>
-        [HttpPost("send-sms")]
+        [HttpPost]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SendSMSByIRIS([FromBody] SendSMSCommand command)

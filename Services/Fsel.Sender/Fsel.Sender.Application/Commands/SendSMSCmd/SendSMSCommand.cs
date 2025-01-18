@@ -5,9 +5,9 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Sender.Domain.Models.Commands;
     using Fsel.Sender.Domain.ValueSettings;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
 
     public class SendSMSCommand : SendSMSCommandModel, IRequest<MethodResult<bool>>
@@ -39,7 +39,7 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
 
             if (brand.Value == EnumSMSBrand.IRIS)
             {
-                await _mediator.Send(new SendSMSByIRISCommand()
+                var result = await _mediator.Send(new SendSMSByIRISCommand()
                 {
                     PhoneNumbers = request.PhoneNumbers,
                     Content = request.Content,
@@ -48,10 +48,15 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
                     IsCheckDuplicate = request.IsCheckDuplicate,
                     Priority = request.Priority,
                 }, cancellationToken);
+                if (!result.IsOK)
+                {
+                    methodResult.AddError(result.ErrorMessages);
+                    return methodResult;
+                }
             }
             else if (brand.Value == EnumSMSBrand.GAPIT)
             {
-                await _mediator.Send(new SendSMSByGAPITCommand()
+                var result = await _mediator.Send(new SendSMSByGAPITCommand()
                 {
                     PhoneNumbers = request.PhoneNumbers,
                     Content = request.Content,
@@ -60,6 +65,11 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
                     IsCheckDuplicate = request.IsCheckDuplicate,
                     Priority = request.Priority,
                 }, cancellationToken);
+                if (!result.IsOK)
+                {
+                    methodResult.AddError(result.ErrorMessages);
+                    return methodResult;
+                }
             }
             return methodResult;
         }

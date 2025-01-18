@@ -1,7 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Sender.Domain.Models.Commands
+namespace Fsel.Shared.Models.ShareModels
 {
+    using System.Collections.Generic;
     using Fsel.Shared.Enums;
 
     public class SendSMSCommandModel

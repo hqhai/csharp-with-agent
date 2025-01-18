@@ -12,10 +12,10 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
     using Fsel.Sender.Application.Services.SMSServices.GAPIT.Models;
     using Fsel.Sender.Domain.Entities;
     using Fsel.Sender.Domain.IRepositories;
-    using Fsel.Sender.Domain.Models.Commands;
     using Fsel.Sender.Domain.ValueSettings;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 

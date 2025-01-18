@@ -2,9 +2,9 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumSendSMSTemplate
+    public enum EnumUserOtpCodeType
     {
-        SMSTemplate,
-        SendOTP
+        Email,
+        SMS
     }
 }
