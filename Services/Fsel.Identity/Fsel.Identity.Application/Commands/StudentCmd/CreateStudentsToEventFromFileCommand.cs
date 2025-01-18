@@ -18,6 +18,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Shared.Constants;
@@ -48,8 +49,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly IStudentRepository _studentRepository;
         private readonly IServiceProvider _serviceProvider;
         private readonly SendStudentsFromFilePublisher _sendStudentsFromFilePublisher;
+        private readonly ISchoolImportHistoryRepository _schoolImportHistoryRepository;
 
-        public CreateStudentsToEventFromFileCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IMediator mediator, IHumanRepository humanRepository, ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IStudentRepository studentRepository, IServiceProvider serviceProvider, SendStudentsFromFilePublisher sendStudentsFromFilePublisher)
+        public CreateStudentsToEventFromFileCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IMediator mediator, IHumanRepository humanRepository, ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IStudentRepository studentRepository, IServiceProvider serviceProvider, SendStudentsFromFilePublisher sendStudentsFromFilePublisher, ISchoolImportHistoryRepository schoolImportHistoryRepository)
         {
             _userManager = userManager;
             _orderService = orderService;
@@ -62,6 +64,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             _studentRepository = studentRepository;
             _serviceProvider = serviceProvider;
             _sendStudentsFromFilePublisher = sendStudentsFromFilePublisher;
+            _schoolImportHistoryRepository = schoolImportHistoryRepository;
         }
 
         public async Task<MethodResult<CreateStudentsToEventFromFileModel>> Handle(CreateStudentsToEventFromFileCommand request, CancellationToken cancellationToken)
@@ -82,6 +85,14 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             if (competitionEvent == null)
             {
                 methodResult.AddError(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
+            // check trường đã thực hiện import chưa
+            var checkImportSchool = await _schoolImportHistoryRepository.Queryable.AnyAsync(x => x.SchoolId == request.SchoolId && x.CompetitionEventId == competitionEvent.ParentEventId, cancellationToken);
+            if (checkImportSchool)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumUserSchoolErrorCode.SchoolAlreadyImported), nameof(request.SchoolId), request.SchoolId);
                 return methodResult;
             }
 
@@ -392,6 +403,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     Message = "Thành công",
                     NumberOfStudent = studentIds.Count,
                 }, cancellationToken);
+
+                if (competitionEvent.ParentEventId.HasValue)
+                {
+                    await CreateSchoolImportHistory(request.SchoolId, competitionEvent.ParentEventId.Value);
+                }
+
                 return methodResult;
             }
             catch (Exception ex)
@@ -423,6 +440,18 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var number = gender == EnumGender.Male ? 0 : gender == EnumGender.Female ? 1 : 2;
             var code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfBirthDay}{stt:D3}";
             return code;
+        }
+
+        private async Task CreateSchoolImportHistory(Guid schoolId, Guid competitionEventId)
+        {
+            var schoolImportHistory = new SchoolImportHistory
+            {
+                SchoolId = schoolId,
+                CompetitionEventId = competitionEventId
+            };
+
+            _schoolImportHistoryRepository.Add(schoolImportHistory);
+            await _schoolImportHistoryRepository.UnitOfWork.SaveChangesAsync();
         }
     }
 }
