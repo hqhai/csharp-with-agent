@@ -38,7 +38,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.LocationId == request.DistrictId, cancellationToken);
             if (competitionEvent == null)
             {
-                methodResult.AddError(nameof(EnumSystemErrorCode.DataNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent));
                 return methodResult;
             }
 
