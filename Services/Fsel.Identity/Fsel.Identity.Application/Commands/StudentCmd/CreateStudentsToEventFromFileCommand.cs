@@ -81,7 +81,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var emails = new List<string>();
             var phoneNumbers = new List<string>();
 
-            var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.LocationId == request.DistrictId, cancellationToken);
+            var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.Id == request.DistrictId, cancellationToken);
             if (competitionEvent == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent));
