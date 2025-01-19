@@ -193,7 +193,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 }
                 else
                 {
-                    phoneNumbers.Add(Shared.Helpers.StringHelper.NormalizeToDomesticFormat(x.PhoneNumber));
+                    x.PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(x.PhoneNumber);
+                    phoneNumbers.Add(x.PhoneNumber);
                 }
 
                 if (string.IsNullOrEmpty(x.Email))
