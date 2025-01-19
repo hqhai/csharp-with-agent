@@ -8,6 +8,8 @@ namespace Fsel.Identity.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Identity.Application.Commands.StudentCmd;
     using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
+    using Fsel.Identity.Application.Queries.StudentQuery;
+    using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -73,6 +75,30 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> VerifyOTP([FromBody] VerifyOTPForUserEventHaNoiCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// update password
+        /// </summary>
+        [HttpPost("update-password")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordForUserEventHaNoiCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get info by phone number
+        /// </summary>
+        [HttpGet("get-info-by-phone-number")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetInfo([FromQuery] GetStudentByEmailQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

@@ -10,6 +10,7 @@ namespace Fsel.Shared.Enums.ErrorCodes
         NotInEventHN,
         OTPNotSentYet,
         WrongOTP,
-        SentWithin30Seconds
+        SentWithin30Seconds,
+        OTPNotVerified
     }
 }
