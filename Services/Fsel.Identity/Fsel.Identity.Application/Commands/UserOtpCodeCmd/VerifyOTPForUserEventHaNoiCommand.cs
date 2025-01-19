@@ -70,13 +70,10 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 return methodResult;
             }
 
-            user.Status = EnumUserStatus.Active;
-            user.EmailConfirmed = true;
-            user.PhoneNumberConfirmed = true;
-            await _userManager.UpdateAsync(user);
-
             await _userOtpCodeRepository.ExecuteTransactionAsync(async () =>
             {
+                user.Status = EnumUserStatus.Active;
+                await _userManager.UpdateAsync(user);
                 lastOTP.Status = EnumOtpCodeStatus.Verified;
                 _userOtpCodeRepository.Update(lastOTP);
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

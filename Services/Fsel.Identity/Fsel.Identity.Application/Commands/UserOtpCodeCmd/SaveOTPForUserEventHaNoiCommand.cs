@@ -26,13 +26,19 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
         LMS
     }
 
-    public class SaveOTPForUserEventHaNoiCommand : IRequest<MethodResult<EnumActionSaveOTPForEventHaNoi>>
+    public class SaveOTPForUserEventHaNoiCommandModel
+    {
+        public EnumActionSaveOTPForEventHaNoi Action { get; set; }
+        public int CountOTP { get; set; }
+    }
+
+    public class SaveOTPForUserEventHaNoiCommand : IRequest<MethodResult<SaveOTPForUserEventHaNoiCommandModel>>
     {
         public string? PhoneNumber { get; set; }
         public string? EventCode { get; set; }
     }
 
-    public class SaveOTPForUserEventHaNoiCommandHandler : IRequestHandler<SaveOTPForUserEventHaNoiCommand, MethodResult<EnumActionSaveOTPForEventHaNoi>>
+    public class SaveOTPForUserEventHaNoiCommandHandler : IRequestHandler<SaveOTPForUserEventHaNoiCommand, MethodResult<SaveOTPForUserEventHaNoiCommandModel>>
     {
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly UserManager<User> _userManager;
@@ -49,10 +55,10 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             _senderService = senderService;
         }
 
-        public async Task<MethodResult<EnumActionSaveOTPForEventHaNoi>> Handle(SaveOTPForUserEventHaNoiCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<SaveOTPForUserEventHaNoiCommandModel>> Handle(SaveOTPForUserEventHaNoiCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<EnumActionSaveOTPForEventHaNoi>();
+            var methodResult = new MethodResult<SaveOTPForUserEventHaNoiCommandModel>();
 
             if (string.IsNullOrEmpty(request.PhoneNumber) || string.IsNullOrEmpty(request.EventCode))
             {
@@ -73,7 +79,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 return methodResult;
             }
 
-            var countOTPSMS = user.UserOtpCodes.Where(p => p.Type == EnumUserOtpCodeType.Email).Count();
+            var countOTPSMS = user.UserOtpCodes.Where(p => p.Type == EnumUserOtpCodeType.SMS).Count();
             if (countOTPSMS >= 3)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.AttemptsExhausted), nameof(request.PhoneNumber), request.PhoneNumber);
@@ -109,12 +115,12 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 
             if (lastOTP != null && lastOTP.Type == EnumUserOtpCodeType.SMS && lastOTP.Status == EnumOtpCodeStatus.Verified && !user.PhoneNumberConfirmed && !user.EmailConfirmed)
             {
-                methodResult.Result = EnumActionSaveOTPForEventHaNoi.UpdateInFo;
+                methodResult.Result = new SaveOTPForUserEventHaNoiCommandModel { Action = EnumActionSaveOTPForEventHaNoi.UpdateInFo, CountOTP = 0 };
                 return methodResult;
             }
             else if (lastOTP != null && lastOTP.Type == EnumUserOtpCodeType.SMS && lastOTP.Status == EnumOtpCodeStatus.Verified && user.PhoneNumberConfirmed && user.EmailConfirmed)
             {
-                methodResult.Result = EnumActionSaveOTPForEventHaNoi.LMS;
+                methodResult.Result = new SaveOTPForUserEventHaNoiCommandModel { Action = EnumActionSaveOTPForEventHaNoi.LMS, CountOTP = 0 };
                 return methodResult;
             }
 
@@ -143,7 +149,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 });
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = EnumActionSaveOTPForEventHaNoi.Success;
+                methodResult.Result = new SaveOTPForUserEventHaNoiCommandModel { Action = EnumActionSaveOTPForEventHaNoi.LMS, CountOTP = countOTPSMS + 1 };
                 return methodResult;
             });
             return methodResult;
