@@ -286,5 +286,50 @@ namespace Fsel.Shared.Helpers
             // Sử dụng string.Join để nối các phần tử với dấu phẩy
             return string.Join(", ", items);
         }
+
+        public static bool IsValidPhoneNumber(string? phoneNumber)
+        {
+            if (string.IsNullOrEmpty(phoneNumber))
+            {
+                return false;
+            }
+
+            phoneNumber = phoneNumber.Replace(" ", "", StringComparison.InvariantCultureIgnoreCase);
+
+            string pattern = @"^(0\d{9})$|^(84\d{9})$|^\+84\d{9}$|^\d{9}$";
+            Regex regex = new Regex(pattern);
+
+            return regex.IsMatch(phoneNumber);
+        }
+
+        public static string NormalizeToDomesticFormat(string? phoneNumber)
+        {
+            if (string.IsNullOrEmpty(phoneNumber))
+            {
+                return string.Empty;
+            }
+
+            var stringComparison = StringComparison.InvariantCultureIgnoreCase;
+            phoneNumber = phoneNumber.Replace(" ", "", stringComparison);
+
+            if (phoneNumber.StartsWith("+84", stringComparison) && phoneNumber.Length == 12)
+            {
+                return string.Concat("0", phoneNumber.AsSpan(3));
+            }
+            else if (phoneNumber.StartsWith("84", stringComparison) && phoneNumber.Length == 11)
+            {
+                return string.Concat("0", phoneNumber.AsSpan(2));
+            }
+            else if (phoneNumber.StartsWith("0", stringComparison) && phoneNumber.Length == 10)
+            {
+                return phoneNumber;
+            }
+            else if (!phoneNumber.StartsWith("0", stringComparison) && phoneNumber.Length == 9)
+            {
+                return "0" + phoneNumber;
+            }
+
+            return phoneNumber;
+        }
     }
 }
