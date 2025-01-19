@@ -29,6 +29,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.IdentityModel.Tokens;
     using OfficeOpenXml;
     using OfficeOpenXml.Style;
 
@@ -243,14 +244,14 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                 foreach (var user in usersExist)
                 {
-                    var dataByEmail = datas.Values.FirstOrDefault(x => x.Email == user.Email);
+                    var dataByEmail = datas.Values.Where(x => !x.Email.IsNullOrEmpty()).FirstOrDefault(x => x.Email == user.Email);
                     if (dataByEmail != null)
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
                         errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Email), Message = ErrorMassageSetting.EmailAlreadyExistVN });
                     }
 
-                    var dataByPhoneNumber = datas.Values.FirstOrDefault(x => x.PhoneNumber == user.PhoneNumber);
+                    var dataByPhoneNumber = datas.Values.Where(x => !x.PhoneNumber.IsNullOrEmpty()).FirstOrDefault(x => x.PhoneNumber == user.PhoneNumber);
                     if (dataByPhoneNumber != null)
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByPhoneNumber).Key;
