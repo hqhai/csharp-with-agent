@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -17,6 +17,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 maxLength: 100,
                 nullable: false,
                 defaultValue: "");
+
+            migrationBuilder.Sql(
+                "UPDATE UserOtpCodes set Type = 'Email'"
+            );
         }
 
         /// <inheritdoc />
