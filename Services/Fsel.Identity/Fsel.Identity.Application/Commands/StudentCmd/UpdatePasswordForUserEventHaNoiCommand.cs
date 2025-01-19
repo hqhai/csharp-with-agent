@@ -6,22 +6,22 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
-    using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Fsel.Shared.Helpers;
-    using Fsel.Common.Helpers;
-    using Fsel.Shared.Constants;
 
     public class UpdatePasswordForUserEventHaNoiCommand : IRequest<MethodResult<bool>>
     {
         public string? Password { get; set; }
         public string? PhoneNumber { get; set; }
+        public string? Email { get; set; }
         public string? ParentEmail { get; set; }
         public string? ParentPhoneNumber { get; set; }
     }
@@ -83,7 +83,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             user.PasswordHash = hashPassword;
             user.EmailConfirmed = true;
             user.PhoneNumberConfirmed = true;
-            user.Human!.Student!.ParentEmail = request.ParentEmail;
+            user.Email = request.Email;
+            user.Human!.Email = request.Email;
+            user.Human.Student!.ParentEmail = request.ParentEmail;
             user.Human.Student.ParentPhoneNumber = request.ParentPhoneNumber;
             await _userManager.UpdateAsync(user);
 
