@@ -82,7 +82,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var emails = new List<string>();
             var phoneNumbers = new List<string>();
 
-            var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.Id == request.DistrictId, cancellationToken);
+            var competitionEvent = await _competitionEventsRepository.Queryable.Include(x => x.CompetitionEventParent).FirstOrDefaultAsync(p => p.Id == request.DistrictId, cancellationToken);
             if (competitionEvent == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent));
@@ -402,9 +402,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     NumberOfStudent = studentIds.Count,
                 }, cancellationToken);
 
-                if (competitionEvent.ParentEventId.HasValue)
+                if (competitionEvent.CompetitionEventParent != null && competitionEvent.CompetitionEventParent.ParentEventId.HasValue)
                 {
-                    await CreateSchoolImportHistory(request.SchoolId, competitionEvent.ParentEventId.Value);
+                    await CreateSchoolImportHistory(request.SchoolId, competitionEvent.CompetitionEventParent.ParentEventId.Value);
                 }
 
                 return methodResult;

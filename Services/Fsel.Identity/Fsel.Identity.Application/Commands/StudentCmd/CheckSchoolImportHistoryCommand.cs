@@ -35,14 +35,14 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.Id == request.DistrictId, cancellationToken);
-            if (competitionEvent == null)
+            var competitionEvent = await _competitionEventsRepository.Queryable.Include(x => x.CompetitionEventParent).FirstOrDefaultAsync(p => p.Id == request.DistrictId, cancellationToken);
+            if (competitionEvent == null || competitionEvent.CompetitionEventParent == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent));
                 return methodResult;
             }
 
-            var checkImportSchool = await _schoolImportHistoryRepository.Queryable.AnyAsync(x => x.SchoolId == request.SchoolId && x.CompetitionEventId == competitionEvent.ParentEventId, cancellationToken);
+            var checkImportSchool = await _schoolImportHistoryRepository.Queryable.AnyAsync(x => x.SchoolId == request.SchoolId && x.CompetitionEventId == competitionEvent.CompetitionEventParent.ParentEventId, cancellationToken);
             if (checkImportSchool)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUserSchoolErrorCode.SchoolAlreadyImported), nameof(request.SchoolId), request.SchoolId);
