@@ -15,8 +15,8 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Students
         [EpplusTableColumn(Header = "Email")]
         public string? Email { get; set; }
 
-        [EpplusTableColumn(Header = "Date Of Birth")]
-        public string? DateOfBirth { get; set; }
+        [EpplusTableColumn(Header = "Year Of Birth")]
+        public string? YearOfBirth { get; set; }
 
         [EpplusTableColumn(Header = "Grade")]
         public string? SchoolGrade { get; set; }
