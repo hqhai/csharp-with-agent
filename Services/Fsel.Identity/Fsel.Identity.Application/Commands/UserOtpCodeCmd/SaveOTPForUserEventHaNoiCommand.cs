@@ -96,18 +96,18 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 
             var studentId = user.Human?.Student?.Id;
 
-            var studentCompetitionEvent = await _studentCompetitionEventsRepository.Queryable.Include(p => p.CompetitionEvents).FirstOrDefaultAsync(p => p.StudentId == studentId, cancellationToken);
+            var studentCompetitionEvent = await _studentCompetitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.StudentId == studentId, cancellationToken);
             if (studentCompetitionEvent == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.NotInEventHN), nameof(request.PhoneNumber), request.PhoneNumber);
                 return methodResult;
             }
 
-            var competitionEventId = studentCompetitionEvent.CompetitionEvents?.ParentEventId ?? studentCompetitionEvent.CompetitionEvents?.Id;
+            var competitionEvent = await _competitionEventsRepository.Queryable.Include(p => p.CompetitionEventParent).ThenInclude(p => p.CompetitionEventParent).FirstOrDefaultAsync(p => p.Id == studentCompetitionEvent.CompetitionEventId, cancellationToken);
 
-            var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.Id == competitionEventId, cancellationToken);
+            var parentCompetitionEvent = competitionEvent?.CompetitionEventParent?.CompetitionEventParent;
 
-            if (competitionEvent == null || competitionEvent.EventCode != request.EventCode)
+            if (parentCompetitionEvent == null || parentCompetitionEvent.EventCode != request.EventCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.NotInEventHN), nameof(request.PhoneNumber), request.PhoneNumber);
                 return methodResult;
