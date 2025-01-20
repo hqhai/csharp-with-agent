@@ -149,7 +149,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 });
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = new SaveOTPForUserEventHaNoiCommandModel { Action = EnumActionSaveOTPForEventHaNoi.LMS, CountOTP = countOTPSMS + 1 };
+                methodResult.Result = new SaveOTPForUserEventHaNoiCommandModel { Action = EnumActionSaveOTPForEventHaNoi.Success, CountOTP = countOTPSMS + 1 };
                 return methodResult;
             });
             return methodResult;
