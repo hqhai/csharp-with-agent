@@ -331,5 +331,11 @@ namespace Fsel.Shared.Helpers
 
             return phoneNumber;
         }
+
+        public static string FormatStringWithParam(object data, params object[]? param)
+        {
+            string objStr = data?.ToString() ?? string.Empty;
+            return string.Format(objStr, param ?? Array.Empty<object>());
+        }
     }
 }
