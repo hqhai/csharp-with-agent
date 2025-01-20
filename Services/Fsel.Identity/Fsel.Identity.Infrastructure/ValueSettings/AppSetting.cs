@@ -14,7 +14,6 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public GoogleSheetConfig? GoogleSheetConfig { get; set; }
         public UserReferralConfig? UserReferralConfig { get; set; }
         public UserDeletionConfig? UserDeletionConfig { get; set; }
-        public SenderConfig? SenderConfig { get; set; }
     }
 
     public class UserReferralConfig
@@ -52,6 +51,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public int StepDayWithAdmin { get; set; }
         public bool IsByPassOtp { get; set; }
         public string? ByPassOtpValue { get; set; }
+        public int MaxSendOtpSms { get; set; }
     }
 
     public class Smtp
@@ -73,10 +73,5 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     {
         public int DeletionDays { get; set; }
         public int DeletionMinutes { get; set; }
-    }
-
-    public class SenderConfig
-    {
-        public int MaxSendOtpSms { get; set; }
     }
 }

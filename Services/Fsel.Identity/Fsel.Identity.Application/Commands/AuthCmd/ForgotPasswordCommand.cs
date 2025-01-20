@@ -93,7 +93,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
 
             var countOTPSMS = user.UserOtpCodes.Where(p => p.Type == EnumUserOtpCodeType.SMS).Count();
-            if (countOTPSMS >= _appSetting.SenderConfig?.MaxSendOtpSms && !string.IsNullOrEmpty(request.PhoneNumber))
+            if (countOTPSMS >= _appSetting.Otp?.MaxSendOtpSms && !string.IsNullOrEmpty(request.PhoneNumber))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.AttemptsExhausted), nameof(request.PhoneNumber), request.PhoneNumber);
                 return methodResult;
