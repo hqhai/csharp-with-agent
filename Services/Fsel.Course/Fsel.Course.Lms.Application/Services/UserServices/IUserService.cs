@@ -136,8 +136,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Get("/v1/admin/student/gets")]
         Task<IApiResponse<MethodResult<IList<StudentDtoModel>>>> GetStudentsSchoolAsync([FromQuery] SearchStudentSchoolQueryModel query);
 
-        [RefitCache(CacheSettings.TimeCache.TenMinutes)]
         [Get("/v1/admin/student/get-dashboards")]
+        [RefitCache(CacheSettings.TimeCache.TenMinutes)]
         Task<IApiResponse<MethodResult<IList<StudentDtoModel>>>> GetStudentsDashboardAsync([FromQuery] GetStudentsDashboardQueryModel query);
 
         [Get("/v1/admin-school/student")]
@@ -151,5 +151,14 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Get("/v1/student-ranking/get-students-by-event-code")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByEventCode([Query] string eventCode);
+
+        [Get("/v1/other/report-competition-event")]
+        Task<IApiResponse<MethodResult<IList<ReportCompetitionEventModel>>>> GetReportCompetitionEventAsync([Query] GetReportCompetitionEventQueryModel query);
+
+        [Get("/v1/other/report-competition-event-school")]
+        Task<IApiResponse<MethodResult<IList<ReportCompetitionEventModel>>>> GetReportCompetitionEventSchoolAsync([Query] GetReportCompetitionEventQueryModel query);
+
+        [Get("/v1/student/get-student/{eventCode}")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByEventCode([FromRoute] string eventCode);
     }
 }

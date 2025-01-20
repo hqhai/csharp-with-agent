@@ -390,6 +390,10 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.HasIndex("VoucherId");
 
+                    b.HasIndex("IsDeleted", "UserId");
+
+                    b.HasIndex("IsDeleted", "Status", "UserId", "IsTrial");
+
                     b.ToTable("Orders");
                 });
 
@@ -474,6 +478,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("CreatedUserId", "IsDeleted", "Status", "Type");
 
                     b.ToTable("OrderTransactions");
                 });

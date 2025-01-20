@@ -18,7 +18,6 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public IList<EnumApplicableSubjectsVoucher>? ApplicableSubjects { get; set; }
-        public EnumApplicableSubjectsVoucher VoucherType { get; set; }
         public EnumVoucherCategory Category { get; set; }
         public EnumVoucherSource Source { get; set; }
         public bool Status { get; set; }

@@ -3,7 +3,9 @@
 namespace Fsel.Identity.Application.Queries.ManagerReportQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -17,29 +19,30 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
     {
         private readonly IStudentRepository _studentRepository;
         private readonly IUserSchoolRepository _userSchoolRepository;
+        private readonly AuthContext _authContext;
 
-        public GetSchoolClassBySchoolGradeQueryHandler(IStudentRepository studentRepository, IUserSchoolRepository userSchoolRepository)
+        public GetSchoolClassBySchoolGradeQueryHandler(IStudentRepository studentRepository,
+            IUserSchoolRepository userSchoolRepository,
+            AuthContext authContext)
         {
             _studentRepository = studentRepository;
             _userSchoolRepository = userSchoolRepository;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<IList<string>>> Handle(GetSchoolClassBySchoolGradeQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<string>> methodResult = new MethodResult<IList<string>>();
-            if (string.IsNullOrEmpty(request.SchoolGrade))
-            {
-                return methodResult;
-            }
-            var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
-            request.SchoolGrade = request.SchoolGrade.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-            var query = _studentRepository.Queryable.Where(x => !string.IsNullOrEmpty(request.SchoolGrade) || (x.SchoolGrade ?? string.Empty).Trim().ToLower() == request.SchoolGrade)
+
+            request.SchoolGrade = request.SchoolGrade?.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+            var query = _studentRepository.Queryable.Where(x => string.IsNullOrEmpty(request.SchoolGrade) || (x.SchoolGrade ?? string.Empty).Trim().ToLower() == request.SchoolGrade)
                                                     .Where(x => !string.IsNullOrEmpty(x.SchoolClass));
 
-            if (schoolId.HasValue)
+            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
             {
-                query = query.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId.Value);
+                var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
+                query = query.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId);
             }
 
             var schoolClass = await query.Select(x => x.SchoolClass!).Distinct().ToListAsync(cancellationToken);
