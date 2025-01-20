@@ -74,7 +74,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
 
-            if (await _userManager.Users.AnyAsync(p => p.Id != user.Id && !string.IsNullOrEmpty(p.UserName) && !string.IsNullOrEmpty(p.Email) && p.UserName.ToLower() == request.Email.ToLower() || p.Email.ToLower() == request.Email.ToLower(), cancellationToken))
+            if (await _userManager.Users.AnyAsync(p => p.Id != user.Id && !string.IsNullOrEmpty(p.UserName) && !string.IsNullOrEmpty(p.Email) && (p.UserName.ToLower() == request.Email.ToLower() || p.Email.ToLower() == request.Email.ToLower()), cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.EmailDoesNotExist), nameof(request.Email), request.Email);
                 return methodResult;
