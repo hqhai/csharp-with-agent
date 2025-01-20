@@ -10,6 +10,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -29,10 +30,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     public class UpdatePasswordForUserEventHaNoiCommandHandle : IRequestHandler<UpdatePasswordForUserEventHaNoiCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
+        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
 
-        public UpdatePasswordForUserEventHaNoiCommandHandle(UserManager<User> userManager)
+        public UpdatePasswordForUserEventHaNoiCommandHandle(UserManager<User> userManager, IUserOtpCodeRepository userOtpCodeRepository)
         {
             _userManager = userManager;
+            _userOtpCodeRepository = userOtpCodeRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(UpdatePasswordForUserEventHaNoiCommand request, CancellationToken cancellationToken)
@@ -91,6 +94,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
 
+            var smsOTPs = await _userOtpCodeRepository.Queryable.Where(p => p.UserId == user.Id && p.Type == EnumUserOtpCodeType.SMS).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
+
             var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.Password);
             user.PasswordHash = hashPassword;
             user.EmailConfirmed = true;
@@ -100,6 +105,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             user.Human.Student!.ParentEmail = request.ParentEmail;
             user.Human.Student.ParentPhoneNumber = request.ParentPhoneNumber;
             await _userManager.UpdateAsync(user);
+
+            await _userOtpCodeRepository.ExecuteTransactionAsync(async () =>
+            {
+                await _userOtpCodeRepository.DeleteListAsync(smsOTPs);
+                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = true;
+                return methodResult;
+            });
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = true;

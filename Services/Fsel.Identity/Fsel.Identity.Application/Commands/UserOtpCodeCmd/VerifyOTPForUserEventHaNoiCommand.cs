@@ -76,7 +76,6 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             {
                 lastOTP.Status = EnumOtpCodeStatus.Verified;
                 _userOtpCodeRepository.Update(lastOTP);
-                await _userOtpCodeRepository.DeleteListAsync(smsOTPs);
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
