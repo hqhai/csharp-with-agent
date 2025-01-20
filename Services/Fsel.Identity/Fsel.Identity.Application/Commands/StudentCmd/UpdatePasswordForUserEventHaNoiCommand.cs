@@ -52,6 +52,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
 
+            if (!request.Email.IsValidEmail())
+            {
+                methodResult.AddErrorBadRequest(ErrorMassageSetting.InvalidEmailVN);
+                return methodResult;
+            }
+
             if (!string.IsNullOrEmpty(request.ParentEmail) && !request.ParentEmail.IsValidEmail())
             {
                 methodResult.AddErrorBadRequest(ErrorMassageSetting.InvalidEmailVN);
