@@ -36,5 +36,8 @@ namespace Fsel.Interaction.Application.Services.UserServices
         [Get("/v1/student-ranking/get-events-by-user-id")]
         Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>>>> GetEventByUserId([Query] Guid? userId);
 
+        [Get("/v1/event/get-event-parent/{id}")]
+        Task<IApiResponse<MethodResult<Guid>>> GetParentEventId([FromRoute] Guid? id);
+
     }
 }
