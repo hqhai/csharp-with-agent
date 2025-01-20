@@ -51,6 +51,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly IServiceProvider _serviceProvider;
         private readonly SendStudentsFromFilePublisher _sendStudentsFromFilePublisher;
         private readonly ISchoolImportHistoryRepository _schoolImportHistoryRepository;
+        private const string ErrorTemplate = "Template bị sai, kiểm tra lại tên cột, bạn cần download template ở nút Tải Template mẫu";
+        private const string Success = "Thành công";
+        private const string ErrorMessage = "Error Message\n(Thông báo lỗi)";
+        private const string FileNull = "File tải lên không có dữ liệu";
+        private const string DataError = "Dữ liệu bị trống hoặc sai định dạng";
 
         public CreateStudentsToEventFromFileCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IMediator mediator, IHumanRepository humanRepository, ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IStudentRepository studentRepository, IServiceProvider serviceProvider, SendStudentsFromFilePublisher sendStudentsFromFilePublisher, ISchoolImportHistoryRepository schoolImportHistoryRepository)
         {
@@ -103,7 +108,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 worksheet.Cells[1, 7].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
                 worksheet.Cells[1, 7].Style.Border.Left.Style = ExcelBorderStyle.Thin;
                 worksheet.Cells[1, 7].Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                worksheet.Cells[1, 7].Value = "Error Message";
+                worksheet.Cells[1, 7].Value = ErrorMessage;
                 worksheet.Cells[1, 7].Style.Font.Bold = true;
                 foreach (var error in errors.GroupBy(x => x.RowIndex).Select(x => x).OrderBy(x => x.Key))
                 {
@@ -176,60 +181,58 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             var result = formFile.ImportAndValidateExcel(async (CreateStudentToEventFromFileModel x, IList<CreateStudentToEventFromFileModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
-                if (string.IsNullOrEmpty(x.FullName))
+                if (!string.IsNullOrEmpty(x.FullName) || !string.IsNullOrEmpty(x.PhoneNumber) || !string.IsNullOrEmpty(x.DateOfBirth) || !string.IsNullOrEmpty(x.SchoolGrade) || !string.IsNullOrEmpty(x.SchoolClass))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.EmptyFullNameVN });
-                }
-                if (string.IsNullOrEmpty(x.PhoneNumber))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.EmptyPhoneNumberVN });
-                }
-                else if (!Shared.Helpers.StringHelper.IsValidPhoneNumber(x.PhoneNumber))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.InvalidPhoneNumberVN });
-                }
-                else if (phoneNumbers.Contains(Shared.Helpers.StringHelper.NormalizeToDomesticFormat(x.PhoneNumber)))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.PhoneNumberAlreadyExistInListVN });
-                }
-                else
-                {
-                    x.PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(x.PhoneNumber);
-                    phoneNumbers.Add(x.PhoneNumber);
-                }
+                    if (string.IsNullOrEmpty(x.FullName))
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.EmptyFullNameVN });
+                    }
+                    if (string.IsNullOrEmpty(x.PhoneNumber))
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.EmptyPhoneNumberVN });
+                    }
+                    else if (!Shared.Helpers.StringHelper.IsValidPhoneNumber(x.PhoneNumber))
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.InvalidPhoneNumberVN });
+                    }
+                    else if (phoneNumbers.Contains(Shared.Helpers.StringHelper.NormalizeToDomesticFormat(x.PhoneNumber)))
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.PhoneNumberAlreadyExistInListVN });
+                    }
+                    else
+                    {
+                        x.PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(x.PhoneNumber);
+                        phoneNumbers.Add(x.PhoneNumber);
+                    }
 
-                if (!string.IsNullOrEmpty(x.Email) && !x.Email.Trim().IsValidEmail())
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
-                }
-                else if (!string.IsNullOrEmpty(x.Email) && emails.Contains(x.Email))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.EmailAlreadyExistInListVN });
-                }
-                else if (!string.IsNullOrEmpty(x.Email))
-                {
-                    emails.Add(x.Email);
-                }
-                int yearOfBirth = 0;
-                if (string.IsNullOrEmpty(x.YearOfBirth))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.YearOfBirth), Message = ErrorMassageSetting.EmptyBirthDayVN });
-                }
-                else if (!int.TryParse(x.YearOfBirth, out yearOfBirth))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.YearOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
-                }
-                else if (yearOfBirth <= 1920 || yearOfBirth > DateTime.UtcNow.Year)
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.YearOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
-                }
-                if (string.IsNullOrEmpty(x.SchoolGrade))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.SchoolGrade), Message = ErrorMassageSetting.EmptyGradeVN });
-                }
-                if (string.IsNullOrEmpty(x.SchoolClass))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.SchoolClass), Message = ErrorMassageSetting.EmptyClassVN });
+                    if (!string.IsNullOrEmpty(x.Email) && !x.Email.Trim().IsValidEmail())
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
+                    }
+                    else if (!string.IsNullOrEmpty(x.Email) && emails.Contains(x.Email))
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.EmailAlreadyExistInListVN });
+                    }
+                    else if (!string.IsNullOrEmpty(x.Email))
+                    {
+                        emails.Add(x.Email);
+                    }
+                    if (string.IsNullOrEmpty(x.DateOfBirth))
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.EmptyBirthDayVN });
+                    }
+                    else if (!Shared.Helpers.DateTimeHelper.IsValidDateTime(x.DateOfBirth))
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
+                    }
+                    if (string.IsNullOrEmpty(x.SchoolGrade))
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.SchoolGrade), Message = ErrorMassageSetting.EmptyGradeVN });
+                    }
+                    if (string.IsNullOrEmpty(x.SchoolClass))
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.SchoolClass), Message = ErrorMassageSetting.EmptyClassVN });
+                    }
                 }
 
                 return await Task.FromResult(errors.Count == 0);
@@ -259,6 +262,17 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             }, defaultHandlerAction,
             errorHandlerAction);
 
+            if (!result.IsValidHeader)
+            {
+                await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
+                {
+                    StatusCode = StatusCodes.Status400BadRequest,
+                    Key = request.Key,
+                    Message = ErrorTemplate,
+                }, cancellationToken);
+                return methodResult;
+            }
+
             if (result.Stream != null)
             {
                 var file = ConvertHelper.StreamToByteArray(result.Stream);
@@ -268,7 +282,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     StatusCode = StatusCodes.Status400BadRequest,
                     File = file,
                     Key = request.Key,
-                    Message = "Dữ liệu lỗi"
+                    Message = DataError
                 }, cancellationToken);
                 return methodResult;
             }
@@ -283,12 +297,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var students = result.Datas.ToList();
             if (students == null || students.Count == 0)
             {
-                methodResult.AddErrorBadRequest("File tải lên không có dữ liệu");
+                methodResult.AddErrorBadRequest(FileNull);
                 await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
                 {
                     StatusCode = StatusCodes.Status400BadRequest,
                     Key = request.Key,
-                    Message = "File tải lên không có dữ liệu"
+                    Message = FileNull
                 }, cancellationToken);
                 return methodResult;
             }
@@ -303,77 +317,77 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             {
                 await Parallel.ForEachAsync(students, async (student, cancellationToken) =>
                 {
-                    // Chờ để có slot trống trong Semaphore
-                    await semaphore.WaitAsync(cancellationToken);
-
-                    try
+                    if (!string.IsNullOrEmpty(student.PhoneNumber))
                     {
-                        using (var scope = _serviceProvider.CreateScope())
+                        // Chờ để có slot trống trong Semaphore
+                        await semaphore.WaitAsync(cancellationToken);
+
+                        try
                         {
-                            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-                            var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
-                            Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
-                            int yearOfBirth = DateTime.UtcNow.Year;
-                            var isYearOfBirth = int.TryParse(student.YearOfBirth, out yearOfBirth);
-                            var birthDay = new DateTime(yearOfBirth, 1, 1);
-                            int age = Shared.Helpers.DateTimeHelper.GetYearOld(Convert.ToDateTime(birthDay, CultureInfo.CurrentCulture));
-                            var user = new User()
+                            using (var scope = _serviceProvider.CreateScope())
                             {
-                                UserName = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
-                                Email = !string.IsNullOrEmpty(student.Email) ? student.Email.Trim() : null,
-                                FullName = student.FullName!.Trim(),
-                                PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
-                                EmailConfirmed = false,
-                                PhoneNumberConfirmed = false,
-                                Status = EnumUserStatus.Inactive,
-                                Human = new Human()
+                                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+                                var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
+                                Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
+                                int age = Shared.Helpers.DateTimeHelper.GetYearOld(Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture));
+                                var user = new User()
                                 {
-                                    FullName = student.FullName.Trim(),
-                                    PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
-                                    Birthday = birthDay,
+                                    UserName = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
                                     Email = !string.IsNullOrEmpty(student.Email) ? student.Email.Trim() : null,
-                                    Code = GeneratorCodeAsync(studentRepository, Convert.ToDateTime(birthDay, CultureInfo.CurrentCulture), null),
-                                    Student = new Student()
+                                    FullName = student.FullName!.Trim(),
+                                    PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
+                                    EmailConfirmed = false,
+                                    PhoneNumberConfirmed = false,
+                                    Status = EnumUserStatus.Inactive,
+                                    Human = new Human()
                                     {
-                                        CreatedByParent = false,
-                                        Occupation = nameof(Student),
-                                        School = request.SchoolName,
-                                        SchoolClass = student.SchoolClass,
-                                        SchoolGrade = student.SchoolGrade,
-                                        SchoolId = request.SchoolId,
-                                        CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
-                                    }
-                                },
-                                UserPlatforms = new List<UserPlatform>()
+                                        FullName = student.FullName.Trim(),
+                                        PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
+                                        Birthday = Shared.Helpers.DateTimeHelper.ConvertToDateTime(student.DateOfBirth),
+                                        Email = !string.IsNullOrEmpty(student.Email) ? student.Email.Trim() : null,
+                                        Code = GeneratorCodeAsync(studentRepository, Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture), null),
+                                        Student = new Student()
+                                        {
+                                            CreatedByParent = false,
+                                            Occupation = nameof(Student),
+                                            School = request.SchoolName,
+                                            SchoolClass = student.SchoolClass,
+                                            SchoolGrade = student.SchoolGrade,
+                                            SchoolId = request.SchoolId,
+                                            CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
+                                        }
+                                    },
+                                    UserPlatforms = new List<UserPlatform>()
                     {
                         new UserPlatform()
                         {
                             PlatformId = platform.Id
                         }
                     },
-                                UserSettings = new List<UserSetting>()
+                                    UserSettings = new List<UserSetting>()
                     {
                         new UserSetting(true)
                     }
-                            };
+                                };
 
-                            var password = Shared.Helpers.StringHelper.GeneratePassword(8);
+                                var password = Shared.Helpers.StringHelper.GeneratePassword(8);
 
-                            identityStudentResult = await userManager.CreateAsync(user, password);
-                            if (identityStudentResult.Succeeded)
-                            {
-                                await userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
-                                lock (studentIds)
+                                identityStudentResult = await userManager.CreateAsync(user, password);
+                                if (identityStudentResult.Succeeded)
                                 {
-                                    studentIds.Add(user.Human.Student.Id);
+                                    await userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
+                                    lock (studentIds)
+                                    {
+                                        studentIds.Add(user.Human.Student.Id);
+                                    }
                                 }
                             }
                         }
-                    }
-                    finally
-                    {
-                        // Giải phóng Semaphore để cho phép task khác tiếp tục
-                        semaphore.Release();
+                        finally
+                        {
+                            // Giải phóng Semaphore để cho phép task khác tiếp tục
+                            semaphore.Release();
+                        }
                     }
                 });
 
@@ -398,7 +412,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 {
                     StatusCode = StatusCodes.Status200OK,
                     Key = request.Key,
-                    Message = "Thành công",
+                    Message = Success,
                     NumberOfStudent = studentIds.Count,
                 }, cancellationToken);
 
@@ -415,17 +429,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             }
 
             return methodResult;
-        }
-
-        public static bool IsValidDateTime(string input, string format = "dd-MM-yyyy")
-        {
-            if (string.IsNullOrWhiteSpace(input))
-                return false;
-
-            DateTime parsedDate;
-            var culture = CultureInfo.InvariantCulture;
-
-            return DateTime.TryParseExact(input, format, culture, DateTimeStyles.None, out parsedDate);
         }
 
         private static string GeneratorCodeAsync(IStudentRepository studentRepository, DateTime birthDay, EnumGender? gender)
