@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.DependencyInjection;
     using OfficeOpenXml;
 
     public class ExportReportPlacementTestEventQuery : IRequest<MethodResult<Stream>>
@@ -26,24 +27,18 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
     public class ExportReportPlacementTestEventQueryHandler : IRequestHandler<ExportReportPlacementTestEventQuery, MethodResult<Stream>>
     {
-        private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
+        private readonly IServiceProvider _serviceProvider;
 
-        public ExportReportPlacementTestEventQueryHandler(IPlacementTestResultRepository placementTestResultRepository,
+        public ExportReportPlacementTestEventQueryHandler(
             IMapper mapper,
-            IUserService userService)
+            IUserService userService,
+            IServiceProvider serviceProvider)
         {
-            _placementTestResultRepository = placementTestResultRepository;
             _mapper = mapper;
             _userService = userService;
-        }
-
-        private class PlacementTestGroupStudentResultModel
-        {
-            public Guid StudentId { get; set; }
-            public PlacementTestResultModel? PlacementTestStart { get; set; }
-            public PlacementTestResultModel? PlacementTestEnd { get; set; }
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<MethodResult<Stream>> Handle(ExportReportPlacementTestEventQuery request, CancellationToken cancellationToken)
@@ -62,52 +57,54 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 return methodResult;
             }
             var reportPlacementTestEvents = new ConcurrentBag<ReportPlacementTestEventModel>();
+            var placementTestResultGroups = new ConcurrentBag<PlacementTestResultReportGroupModel>();
 
             var studentIds = reportCompetitionEvents.Where(x => x.StudentIds != null && x.StudentIds.Any()).SelectMany(x => x.StudentIds ?? new List<Guid>()).ToList();
-            var placementTestResultGroups = new List<PlacementTestGroupStudentResultModel>();
-
-            int batchSize = 2000; // Số lượng bản ghi mỗi lần truy vấn
 
             // Chia danh sách thành từng nhóm
             var batches = studentIds
                 .Select((id, index) => new { id, index })
-                .GroupBy(x => x.index / batchSize)
+                .GroupBy(x => x.index / ValueSettings.BatchSize)
                 .Select(g => g.Select(x => x.id).ToList())
                 .ToList();
 
             // Thực hiện truy vấn từng nhóm
-            foreach (var batch in batches)
+            await Parallel.ForEachAsync(batches, async (batche, cancellationToken) =>
             {
-                var placementTestGroups = await _placementTestResultRepository.Queryable
-                                    .Where(x => batch.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
-                                    .GroupBy(x => x.StudentId)
-                                    .Select(x => new PlacementTestGroupStudentResultModel
-                                    {
-                                        StudentId = x.Key,
-                                        PlacementTestStart = _mapper.Map<PlacementTestResultModel>(x.Select(x => x).OrderBy(x => x.CreatedDate).FirstOrDefault()),
-                                        PlacementTestEnd = _mapper.Map<PlacementTestResultModel>(x.Select(x => x).OrderByDescending(x => x.CreatedDate).FirstOrDefault()),
-                                    })
-                                    .ToListAsync(cancellationToken);
-
-                // Thêm vào danh sách kết quả
-                placementTestResultGroups.AddRange(placementTestGroups);
-            }
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var placementTestResultRepository = scope.ServiceProvider.GetRequiredService<IPlacementTestResultRepository>();
+                    var placementTestGroups = await placementTestResultRepository.Queryable
+                        .Where(x => batche.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
+                        .GroupBy(x => x.StudentId)
+                        .Select(x => new PlacementTestGroupStudentResultModel
+                        {
+                            StudentId = x.Key,
+                            PlacementTestStart = _mapper.Map<PlacementTestResultModel>(x.Select(x => x).OrderBy(x => x.CreatedDate).FirstOrDefault()),
+                            PlacementTestEnd = _mapper.Map<PlacementTestResultModel>(x.Select(x => x).OrderByDescending(x => x.CreatedDate).FirstOrDefault()),
+                        })
+                        .ToListAsync(cancellationToken);
+                    var placementTestResultReports = placementTestGroups?.Select(item =>
+                    {
+                        var placementTestResultEnd = item.PlacementTestEnd;
+                        var placementTestResultStart = item.PlacementTestStart;
+                        if (placementTestResultEnd != null)
+                        {
+                            var (levelCompleted, isLock) = placementTestResultEnd.Level.GetLevelInScore(placementTestResultEnd.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultStart?.Level, default));
+                            return new PlacementTestResultReportGroupModel { StudentId = item.StudentId, IsDonePT = isLock, CourseLevel = levelCompleted };
+                        }
+                        return new PlacementTestResultReportGroupModel { StudentId = item.StudentId };
+                    }).ToList() ?? new List<PlacementTestResultReportGroupModel>();
+                    foreach (var item in placementTestResultReports)
+                    {
+                        placementTestResultGroups.Add(item);
+                    }
+                }
+            });
 
             Parallel.ForEach(reportCompetitionEvents, reportCompetitionEvent =>
             {
-                var placementTestResultGroupStudents = placementTestResultGroups.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).ToList();
-                var placementTestResultReports = reportCompetitionEvent.StudentIds?.Select(item =>
-                {
-                    var placementTestGroupResult = placementTestResultGroups.FirstOrDefault(x => x.StudentId == item);
-                    var placementTestResultEnd = placementTestGroupResult?.PlacementTestEnd;
-                    var placementTestResultStart = placementTestGroupResult?.PlacementTestStart;
-                    if (placementTestResultEnd != null)
-                    {
-                        var (levelCompleted, isLock) = placementTestResultEnd.Level.GetLevelInScore(placementTestResultEnd.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultStart?.Level, default));
-                        return new PlacementTestResultReportGroupModel { StudentId = item, IsDonePT = isLock, CourseLevel = levelCompleted };
-                    }
-                    return new PlacementTestResultReportGroupModel { StudentId = item };
-                });
+                var placementTestResultReports = placementTestResultGroups.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).ToList();
                 var reportPlacementTestEvent = new ReportPlacementTestEventModel
                 {
                     LocationName = reportCompetitionEvent.DistrictName,
@@ -141,7 +138,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.ReportPTEvent)))
             {
                 var excelWorksheet = excelPackage.Workbook.Worksheets[0];
-                excelWorksheet.Cells["A5"].Value = GetData(excelWorksheet.Cells["A5"].Value, $"{request.EducationLevel.GetDescription()}");
+                excelWorksheet.Cells["A5"].Value = Shared.Helpers.StringHelper.FormatStringWithParam(excelWorksheet.Cells["A5"].Value, $"{request.EducationLevel.GetDescription()}");
 
                 int startRow = 9;
                 if (reportPlacementTestEvents != null && reportPlacementTestEvents.Any())
@@ -175,25 +172,6 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
             memoryStream.Position = 0L;
             return memoryStream;
-        }
-
-        private static string GetData(object data, object? param)
-        {
-            string objStr = data?.ToString() ?? string.Empty;
-            return string.Format(objStr, param);
-        }
-
-        private class ReportCourseLevelPTModel
-        {
-            public EnumCourseLevel CourseLevel { get; set; }
-            public double Percent { get; set; }
-        }
-
-        private class PlacementTestResultReportGroupModel
-        {
-            public Guid StudentId { get; set; }
-            public bool IsDonePT { get; set; }
-            public EnumCourseLevel? CourseLevel { get; set; }
         }
     }
 }
