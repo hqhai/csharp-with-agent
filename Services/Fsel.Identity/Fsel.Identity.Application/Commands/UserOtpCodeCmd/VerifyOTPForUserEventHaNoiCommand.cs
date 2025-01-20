@@ -56,7 +56,9 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 return methodResult;
             }
 
-            var lastOTP = await _userOtpCodeRepository.Queryable.Where(p => p.UserId == user.Id && p.Type == EnumUserOtpCodeType.SMS).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+            var smsOTPs = await _userOtpCodeRepository.Queryable.Where(p => p.UserId == user.Id && p.Type == EnumUserOtpCodeType.SMS).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
+
+            var lastOTP = smsOTPs.FirstOrDefault();
 
             if (lastOTP == null || lastOTP.Status == EnumOtpCodeStatus.Verified)
             {
@@ -72,10 +74,9 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 
             await _userOtpCodeRepository.ExecuteTransactionAsync(async () =>
             {
-                user.Status = EnumUserStatus.Active;
-                await _userManager.UpdateAsync(user);
                 lastOTP.Status = EnumOtpCodeStatus.Verified;
                 _userOtpCodeRepository.Update(lastOTP);
+                await _userOtpCodeRepository.DeleteListAsync(smsOTPs);
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
