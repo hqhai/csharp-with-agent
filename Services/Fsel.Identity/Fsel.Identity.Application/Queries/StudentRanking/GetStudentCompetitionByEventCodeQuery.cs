@@ -53,6 +53,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
         private const string Parent_Special_Event = "ThaiNguyen";
         private const int TakeTopLeaderBoardEverEvent = 1;
         private const int TakeTopNineLeaderBoardCity = 9;
+        private const int TakeAllLeaderBoard = 0;
+        private const string? PositionOutOfTop = "200+";
 
         public GetStudentCompetitionByEventCodeQueryHandler(IStudentRankingEventRepository eventRepository, IStudentRepository studentRepository, ICompetitionEventsRepository competitionEventsRepository, IMediator mediator, IMapper mapper, IStudentCompetitionSnapShotRepository studentCompetitionSnapShotRepository, ILmsCourseService lmsCourseService, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, ISystemService systemService)
         {
@@ -144,23 +146,27 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                           .OrderByDescending(x => x.RankingScore)
                           .ThenBy(x => x.FullName).ToList();
 
-                int take = request.IsCityLeaderBoard ? 9 : 0;
-                result = await GetSingleStudentRanking(result, competitionEvents.Id, competitionEvents.ParentEventId, take, request.IsCityLeaderBoard, request.IsFinalLeaderBoard, true, cancellationToken);
+                int take = request.IsCityLeaderBoard ? TakeTopNineLeaderBoardCity : TakeAllLeaderBoard;
 
 
                 if (request.IsFinalLeaderBoard)
                 {
                     result = await GetFinalLeaderBoard(result, competitionEvents.Id, cancellationToken);
                 }
+                else if (request.IsCityLeaderBoard)
+                {
+                    result = await GetSingleStudentRanking(result, competitionEvents.Id, competitionEvents.ParentEventId, take, request.IsCityLeaderBoard, request.IsFinalLeaderBoard, true, cancellationToken);
+                }
+                else
+                {
+                    result = await GetSingleStudentRanking(result, competitionEvents.Id, competitionEvents.ParentEventId, take, request.IsCityLeaderBoard, request.IsFinalLeaderBoard, false, cancellationToken);
+                }
                 resultTemp = result;
-
             }
             else
             {
                 result = ConvertHelper.Deserialize<IList<StudentRankingModel>>(resultSnapShots.WeekCompetitionData)?.ToList() ?? new List<StudentRankingModel>();
             }
-
-
 
             #region Search
             if (request.IsSearching == true)
@@ -206,7 +212,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                                              RankingScore = newItem.RankingScore,
                                              CourseResultId = newItem.CourseResultId,
                                              CourseType = newItem.CourseType,
-                                             EventRankingPosition = "200+"
+                                             EventRankingPosition = PositionOutOfTop
                                          }).ToList()
                     );
                 }
@@ -418,8 +424,6 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
             return result;
         }
-
-
 
 
         /// <summary>
