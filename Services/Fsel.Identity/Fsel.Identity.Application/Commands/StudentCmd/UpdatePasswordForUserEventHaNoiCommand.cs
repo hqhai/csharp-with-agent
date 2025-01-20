@@ -94,8 +94,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
 
-            var smsOTPs = await _userOtpCodeRepository.Queryable.Where(p => p.UserId == user.Id && p.Type == EnumUserOtpCodeType.SMS).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
-
             var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.Password);
             user.PasswordHash = hashPassword;
             user.EmailConfirmed = true;
@@ -105,15 +103,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             user.Human.Student!.ParentEmail = request.ParentEmail;
             user.Human.Student.ParentPhoneNumber = request.ParentPhoneNumber;
             await _userManager.UpdateAsync(user);
-
-            await _userOtpCodeRepository.ExecuteTransactionAsync(async () =>
-            {
-                await _userOtpCodeRepository.DeleteListAsync(smsOTPs);
-                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = true;
-                return methodResult;
-            });
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = true;
