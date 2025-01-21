@@ -68,7 +68,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 return methodResult;
             }
             var reportPlacementTestEvents = new ConcurrentBag<ReportPlacementTestEventModel>();
-            var placementTestResultGroups = new ConcurrentBag<PlacementTestResultReportGroupModel>();
+            var placementTestResultGroups = new ConcurrentStack<PlacementTestResultReportGroupModel>();
             var courseStudentResults = new ConcurrentBag<CourseResultModel>();
 
             var studentIds = reportCompetitionEvents.Where(x => x.StudentIds != null && x.StudentIds.Any()).SelectMany(x => x.StudentIds ?? new List<Guid>()).ToList();
@@ -104,57 +104,43 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                    var placementTestResultRepository = scope.ServiceProvider.GetRequiredService<IPlacementTestResultRepository>();
-                    var placementTestGroups = await placementTestResultRepository.Queryable
-                        .Where(x => batche.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
-                        .GroupBy(x => x.StudentId)
-                        .Select(x => new PlacementTestGroupStudentResultModel
-                        {
-                            StudentId = x.Key,
-                            PlacementTestStart = _mapper.Map<PlacementTestResultModel>(x.Select(x => x).OrderBy(x => x.CreatedDate).FirstOrDefault()),
-                            PlacementTestEnd = _mapper.Map<PlacementTestResultModel>(x.Select(x => x).OrderByDescending(x => x.CreatedDate).FirstOrDefault()),
-                        })
-                        .ToListAsync(cancellationToken);
-                    var placementTestResultReports = placementTestGroups?.Select(item =>
-                    {
-                        var placementTestResultEnd = item.PlacementTestEnd;
-                        var placementTestResultStart = item.PlacementTestStart;
-                        if (placementTestResultEnd != null)
-                        {
-                            var (levelCompleted, isLock) = placementTestResultEnd.Level.GetLevelInScore(placementTestResultEnd.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultStart?.Level, default));
-                            return new PlacementTestResultReportGroupModel { StudentId = item.StudentId, IsDonePT = isLock, CourseLevel = levelCompleted };
-                        }
-                        return new PlacementTestResultReportGroupModel { StudentId = item.StudentId };
-                    }).ToList() ?? new List<PlacementTestResultReportGroupModel>();
-                    foreach (var item in placementTestResultReports)
-                    {
-                        placementTestResultGroups.Add(item);
-                    }
+                    var placementTestGroupResultRepository = scope.ServiceProvider.GetRequiredService<IPlacementTestGroupResultRepository>();
+                    var placementTestGroups = await placementTestGroupResultRepository.Queryable
+                                                    .Where(x => batche.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
+                                                    .Select(x => new PlacementTestResultReportGroupModel
+                                                    {
+                                                        CourseLevel = x.SuggetLevel,
+                                                        StudentId = x.StudentId,
+                                                        IsDonePT = true
+                                                    })
+                                                    .ToListAsync(cancellationToken);
+                    placementTestResultGroups.PushRange(placementTestGroups.ToArray());
                 }
             });
 
             await Parallel.ForEachAsync(reportCompetitionEvents, async (reportCompetitionEvent, cancellationToken) =>
             {
-                var placementTestResultReports = placementTestResultGroups.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).ToList();
+                var placementTestResultReports = placementTestResultGroups.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).Select(x => x.StudentId).Distinct().ToList();
+                var studentIds = courseStudentResults.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).Select(x => x.StudentId).Distinct().ToList();
                 var reportPlacementTestEvent = new ReportPlacementTestEventModel
                 {
                     LocationName = reportCompetitionEvent.DistrictName,
                     NumberRegisteredSchool = reportCompetitionEvent.NumberRegisteredSchool,
                     NumberActualParticipatingSchool = reportCompetitionEvent.NumberActualParticipatingSchool,
                     NumberValidStudentAccount = reportCompetitionEvent.NumberValidStudentAccount,
-                    NumberStudentsCompletedPT = placementTestResultReports?.Where(x => x.IsDonePT).Count() ?? default,
-                    NumberStudentToLearn = courseStudentResults.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).Select(x => x.StudentId).Count(),
+                    NumberStudentsCompletedPT = placementTestResultReports?.Count ?? default,
+                    NumberStudentToLearn = studentIds.Count,
                 };
 
                 await Parallel.ForEachAsync(reportCompetitionEvent.ReportCompetitionEventSchools, async (eventSchool, cancellationToken) =>
                 {
-                    var placementTestResultSchools = placementTestResultReports?.Where(x => eventSchool.StudentIds != null && eventSchool.StudentIds.Contains(x.StudentId)).ToList();
-                    var studentIds = courseStudentResults.Where(x => eventSchool.StudentIds != null && eventSchool.StudentIds.Contains(x.StudentId)).Select(x => x.StudentId).ToList();
+                    var placementTestResultSchools = placementTestResultReports?.Where(studentId => eventSchool.StudentIds != null && eventSchool.StudentIds.Contains(studentId)).Distinct().ToList();
+                    var studentIds = courseStudentResults.Where(x => eventSchool.StudentIds != null && eventSchool.StudentIds.Contains(x.StudentId)).Select(x => x.StudentId).Distinct().ToList();
 
                     reportPlacementTestEvent.ReportPlacementTestEventSchools.Add(new ReportPlacementTestEventSchoolModel
                     {
                         SchoolName = eventSchool.SchoolName,
-                        NumberStudentsCompletedPT = placementTestResultSchools?.Where(x => x.IsDonePT).Count() ?? default,
+                        NumberStudentsCompletedPT = placementTestResultSchools?.Count ?? default,
                         NumberValidStudentAccount = eventSchool.NumberValidStudentAccount,
                         NumberStudentToLearn = studentIds.Count,
                         LearningProgressLearns = await GetStudyPositionAsync(request.CourseType, studentIds),
@@ -184,7 +170,9 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 {
                     foreach (var item in reportPlacementTestEvents)
                     {
-                        var excelWorksheet = excelPackage.Workbook.Worksheets.Copy(originalWorksheet.Name, item.LocationName);
+                        var index = reportPlacementTestEvents.Where(x => x.LocationName == item.LocationName).Count();
+
+                        var excelWorksheet = excelPackage.Workbook.Worksheets.Copy(originalWorksheet.Name, index == 1 ? item.LocationName : $"{item.LocationName} {reportPlacementTestEvents.IndexOf(item)}");
                         excelWorksheet.Cells["A2"].Value = Shared.Helpers.StringHelper.FormatStringWithParam(excelWorksheet.Cells["A2"].Value, $"{request.EducationLevel.GetDescription()}");
                         excelWorksheet.Cells["F4"].Value = Shared.Helpers.StringHelper.FormatStringWithParam(excelWorksheet.Cells["F4"].Value, $"{request.CourseType.GetDescription()}");
 
@@ -383,14 +371,13 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
                                                       where
                                                           baseQ.WorkingStatus == EnumWorkingStatus.Active && batche.Contains(baseQ.StudentId) &&
-                                                          cum.UnitId.HasValue &&
-                                                          !new[] { EnumResultStatus.Done, EnumResultStatus.Unfinished }.Contains(lr.Status)
+                                                          cum.UnitId.HasValue
                                                       group lr by new { DisplayOrder = cum.DisplayOrder, LessonDisplayOrder = (int?)ul.DisplayOrder } into g
                                                       select new LearningProgressLearnModel
                                                       {
                                                           UnitDisplayOrder = g.Key.DisplayOrder,
                                                           DisplayOrder = g.Key.LessonDisplayOrder,
-                                                          StudentCount = g.Count(),
+                                                          StudentCount = g.Count(x => (x != null && !new[] { EnumResultStatus.Done, EnumResultStatus.Unfinished }.Contains(x.Status))),
                                                       }).Concat(from baseQ in courseResultRepository.Queryable
 
                                                                 join cum in courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
