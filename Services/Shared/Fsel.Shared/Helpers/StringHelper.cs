@@ -286,5 +286,11 @@ namespace Fsel.Shared.Helpers
             // Sử dụng string.Join để nối các phần tử với dấu phẩy
             return string.Join(", ", items);
         }
+
+        public static string FormatStringWithParam(object data, params object[]? param)
+        {
+            string objStr = data?.ToString() ?? string.Empty;
+            return string.Format(objStr, param ?? Array.Empty<object>());
+        }
     }
 }

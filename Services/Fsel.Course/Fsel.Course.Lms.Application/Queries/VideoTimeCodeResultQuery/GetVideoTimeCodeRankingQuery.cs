@@ -174,7 +174,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                                             Score = x.Sum(x => x.CorrectCount),
                                             StudentId = x.Key,
                                             WorkingTime = x.Sum(x => x.WorkingTime),
-                                            Percent = NumberHelper.GetPercent(x.Sum(x => x.CorrectCount), x.Sum(x => x.CorrectTotal)),
+                                            Percent = NumberHelper.GetPercent(x.Sum(x => x.CorrectCount), x.Sum(x => x.CorrectTotal), 0),
                                             Status = x.Select(x => x.VideoResult).Select(x => x!.Status).FirstOrDefault(),
                                         })
                                         .FirstOrDefaultAsync(cancellationToken);

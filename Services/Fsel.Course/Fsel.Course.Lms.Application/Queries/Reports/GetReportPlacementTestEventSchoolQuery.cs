@@ -5,7 +5,6 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using System.Collections.Concurrent;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -17,22 +16,21 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
-    using OfficeOpenXml;
 
-    public class ExportReportPlacementTestEventSchoolQuery : IRequest<MethodResult<Stream>>
+    public class GetReportPlacementTestEventSchoolQuery : IRequest<MethodResult<IList<ReportPlacementTestEventModel>>>
     {
         public string? EventCodeStr { get; set; }
         public string? DistrictName { get; set; }
         public EnumEducationLevel EducationLevel { get; set; }
     }
 
-    public class ExportReportPlacementTestEventSchoolQueryHandler : IRequestHandler<ExportReportPlacementTestEventSchoolQuery, MethodResult<Stream>>
+    public class GetReportPlacementTestEventSchoolQueryHandler : IRequestHandler<GetReportPlacementTestEventSchoolQuery, MethodResult<IList<ReportPlacementTestEventModel>>>
     {
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
         private readonly IServiceProvider _serviceProvider;
 
-        public ExportReportPlacementTestEventSchoolQueryHandler(
+        public GetReportPlacementTestEventSchoolQueryHandler(
             IMapper mapper,
             IUserService userService,
             IServiceProvider serviceProvider)
@@ -42,10 +40,10 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             _serviceProvider = serviceProvider;
         }
 
-        public async Task<MethodResult<Stream>> Handle(ExportReportPlacementTestEventSchoolQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<ReportPlacementTestEventModel>>> Handle(GetReportPlacementTestEventSchoolQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<Stream>();
+            var methodResult = new MethodResult<IList<ReportPlacementTestEventModel>>();
             var reportCompetitionEventResults = await _userService.GetReportCompetitionEventSchoolAsync(new GetReportCompetitionEventQueryModel
             {
                 EducationLevel = request.EducationLevel,
@@ -130,6 +128,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                             SchoolName = eventSchool.SchoolName,
                             NumberStudentsCompletedPT = placementTestResultSchools?.Where(x => x.IsDonePT).Count() ?? default,
                             NumberValidStudentAccount = eventSchool.NumberValidStudentAccount,
+                            NumberStudentVerifiedSchool = eventSchool.NumberStudentVerifiedSchool,
                             ReportCourseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic).Select(courseLevel =>
                             {
                                 var numberStudentOfLevel = placementTestResultSchools?.Where(x => x.IsDonePT && x.CourseLevel == courseLevel).Count() ?? default;
@@ -145,57 +144,8 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 };
                 reportPlacementTestEvents.Add(reportPlacementTestEvent);
             });
-            methodResult.Result = ExportExcelTemplate(reportPlacementTestEvents.ToList(), request);
+            methodResult.Result = reportPlacementTestEvents.ToList();
             return methodResult;
-        }
-
-        public static Stream ExportExcelTemplate(IList<ReportPlacementTestEventModel>? reportPlacementTestEvents, ExportReportPlacementTestEventSchoolQuery request)
-        {
-            MemoryStream memoryStream = new MemoryStream();
-
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.ReportPTEventSchool)))
-            {
-                var originalWorksheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
-                if (originalWorksheet == null)
-                {
-                    throw new InvalidOperationException("The Excel file does not contain any worksheets.");
-                }
-                if (reportPlacementTestEvents != null && reportPlacementTestEvents.Any())
-                {
-                    foreach (var item in reportPlacementTestEvents)
-                    {
-                        var excelWorksheet = excelPackage.Workbook.Worksheets.Copy(originalWorksheet.Name, item.LocationName);
-                        excelWorksheet.Cells["A5"].Value = Shared.Helpers.StringHelper.FormatStringWithParam(excelWorksheet.Cells["A5"].Value, new[] { request.EducationLevel.GetDescription(), item.LocationName });
-                        int startRow = 9;
-
-                        foreach (var reportPt in item.ReportPlacementTestEventSchools)
-                        {
-                            excelWorksheet.Cells[startRow, 1].Value = item.ReportPlacementTestEventSchools.IndexOf(reportPt) + 1;
-                            excelWorksheet.Cells[startRow, 2].Value = reportPt.SchoolName;
-                            excelWorksheet.Cells[startRow, 3].Value = reportPt.NumberValidStudentAccount;
-                            excelWorksheet.Cells[startRow, 4].Value = reportPt.NumberStudentsCompletedPT;
-                            excelWorksheet.Cells[startRow, 5].Value = reportPt.CompletionRate + "%";
-                            if (reportPt.ReportCourseLevels != null)
-                            {
-                                var rowReportLevel = 6;
-                                foreach (var reportLevel in reportPt.ReportCourseLevels)
-                                {
-                                    excelWorksheet.Cells[startRow, rowReportLevel].Value = reportLevel.TotalStudent;
-                                    excelWorksheet.Cells[startRow, rowReportLevel + 1].Value = reportLevel.Percent + "%";
-                                    rowReportLevel += 2;
-                                }
-                            }
-                            startRow++;
-                        }
-                    }
-                }
-
-                excelPackage.SaveAs(memoryStream);
-            }
-
-            memoryStream.Position = 0L;
-            return memoryStream;
         }
     }
 }

@@ -4,8 +4,10 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 {
     using System.Linq;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
@@ -38,18 +40,24 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
         private readonly ISystemService _systemService;
         private readonly IEventRegistrationRepository _eventRegistrationRepository;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
+        private readonly UserManager<User> _userManager;
+        private readonly IHumanRepository _humanRepository;
 
         public GetReportCompetitionEventSchoolsQueryHandler(ICompetitionEventsRepository competitionEventsRepository,
             IStudentRepository studentRepository,
             ISystemService systemService,
             IEventRegistrationRepository eventRegistrationRepository,
-            IStudentCompetitionEventsRepository studentCompetitionEventsRepository)
+            IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
+            UserManager<User> userManager,
+            IHumanRepository humanRepository)
         {
             _competitionEventsRepository = competitionEventsRepository;
             _studentRepository = studentRepository;
             _systemService = systemService;
             _eventRegistrationRepository = eventRegistrationRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
+            _userManager = userManager;
+            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<IList<ReportCompetitionEventModel>>> Handle(GetReportCompetitionEventSchoolsQuery request, CancellationToken cancellationToken)
@@ -81,14 +89,18 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             var studentSchoolIds = await (from baseQ in _studentRepository.Queryable
                                           join er in _eventRegistrationRepository.Queryable on baseQ.Id equals er.StudentId
                                           join sce in _studentCompetitionEventsRepository.Queryable on baseQ.Id equals sce.StudentId
-                                          where baseQ.SchoolId.HasValue && schools != null && schools.Select(x => x.Id).Contains(baseQ.SchoolId.Value)
+                                          join human in _humanRepository.Queryable on baseQ.HumanId equals human.Id
+                                          join user in _userManager.Users on human.UserId equals user.Id
+                                          where schools != null && baseQ.SchoolId.HasValue && schools.Select(x => x.Id).Contains(baseQ.SchoolId.Value)
                                           && competitions.Select(x => x.Id).Contains(er.CompetitionEventId)
-                                          group baseQ
+                                          group new { baseQ, human, user }
                                           by baseQ.SchoolId into g
                                           select new
                                           {
                                               SchoolId = g.Key.GetValueOrDefault(),
-                                              StudentIds = g.Select(x => x.Id).Distinct().ToList(),
+                                              StudentIds = g.Select(x => x.baseQ.Id).Distinct().ToList(),
+                                              UserIds = g.Where(x => x.human.UserId.HasValue).Select(x => x.human.UserId.GetValueOrDefault()).Distinct().ToList(),
+                                              NumberStudentVerifiedSchool = g.Select(x => x.user).Where(x => x.Status == EnumUserStatus.Active).Distinct().Count(),
                                           }).ToListAsync(cancellationToken);
 
             var reportCompetitionEvents = new List<ReportCompetitionEventModel>();
@@ -104,7 +116,9 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                     NumberRegisteredSchool = schoolDistricts?.Count() ?? default,
                     NumberActualParticipatingSchool = studentDistricts.Select(x => x.SchoolId).Distinct().Count(),
                     NumberValidStudentAccount = studentIds.Count,
+                    NumberStudentVerifiedDistrict = studentDistricts.Sum(x => x.NumberStudentVerifiedSchool),
                     StudentIds = studentIds,
+                    UserIds = studentDistricts.SelectMany(x => x.UserIds).Distinct().ToList(),
                     ReportCompetitionEventSchools = schoolDistricts?.Select(school =>
                     {
                         var schoolDistrict = studentDistricts.FirstOrDefault(x => x.SchoolId == school.Id);
@@ -112,7 +126,9 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                         {
                             SchoolName = schools?.FirstOrDefault(x => x.Id == school.Id)?.Name,
                             NumberValidStudentAccount = schoolDistrict?.StudentIds.Count ?? default,
-                            StudentIds = schoolDistrict?.StudentIds ?? new List<Guid>()
+                            NumberStudentVerifiedSchool = schoolDistrict?.NumberStudentVerifiedSchool ?? default,
+                            StudentIds = schoolDistrict?.StudentIds ?? new List<Guid>(),
+                            UserIds = schoolDistrict?.UserIds ?? new List<Guid>(),
                         };
                     }).ToList() ?? new List<ReportCompetitionEventSchoolModel>()
                 };

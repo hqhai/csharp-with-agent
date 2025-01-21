@@ -1,13 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Models.EntityModels
+namespace Fsel.Interaction.Application.Services.CourseServices.Models
 {
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
     public class ReportPlacementTestEventModel
     {
-        public Guid LocationId { get; set; }
         public string? LocationName { get; set; }
 
         /// <summary>
@@ -27,7 +26,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         {
             get
             {
-                return NumberRegisteredSchool == 0 ? 0 : NumberHelper.GetPercent(NumberActualParticipatingSchool, NumberRegisteredSchool, 2);
+                return NumberRegisteredSchool == 0 ? 0 : NumberHelper.GetPercent(NumberActualParticipatingSchool, NumberRegisteredSchool);
             }
         }
 
@@ -48,7 +47,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         {
             get
             {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount, 2);
+                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount);
             }
         }
 
@@ -77,7 +76,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         {
             get
             {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount, 2);
+                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount);
             }
         }
 

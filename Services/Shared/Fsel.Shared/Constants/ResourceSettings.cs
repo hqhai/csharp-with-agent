@@ -72,7 +72,6 @@ namespace Fsel.Shared.Constants
         public const string SpeakingFluency = "Resources//SpeakingAiConfig//FluencyConfig.txt";
         public const string SpeakingLexical = "Resources//SpeakingAiConfig//LexicalResourceConfig.txt";
 
-
         public const string AIClassForumRole = "Resources//AIPrompt//Role//ApprovalClassForumRole.txt";
         public const string AIClassForumInstruction = "Resources//AIPrompt//Instruction//ApprovalClassForumInstruction.txt";
 
@@ -88,5 +87,8 @@ namespace Fsel.Shared.Constants
         public const string ManagerReportLearningResultIELTSExcel = "Resources//ManagerReports//BaoCaoKetQuaHocTapIELTS.xlsx";
         public const string ReportPTEvent = "Resources//ExportExcelTemplates//ReportPTEvent.xlsx";
         public const string ReportPTEventSchool = "Resources//ExportExcelTemplates//ReportPTEventSchool.xlsx";
+
+        public const string ReportSurveyQuestionEvent = "Resources//ExportExcelTemplates//SurveyQuestionReport.xlsx";
+        public const string ReportSurveyQuestionEventSchool = "Resources//ExportExcelTemplates//SurveyQuestionReportSchool.xlsx";
     }
 }

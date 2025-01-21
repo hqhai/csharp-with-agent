@@ -22,6 +22,7 @@ namespace Fsel.Shared.Constants
         public const int AmountStudentSending = 1000;
         public const int MaxSendingRateApp = 3;
         public const int MinCompletePercent = 75;
+        public const int BatchSize = 500;
 
         public static class AgeMilestone
         {
