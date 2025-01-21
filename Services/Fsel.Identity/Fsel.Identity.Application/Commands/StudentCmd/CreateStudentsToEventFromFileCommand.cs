@@ -9,7 +9,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Amazon.Runtime.Internal.Util;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -29,7 +28,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Microsoft.IdentityModel.Tokens;
     using OfficeOpenXml;
@@ -264,8 +262,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 }
 
                 return await Task.FromResult(errors.Count == 0);
-            }, defaultHandlerAction,
-            errorHandlerAction);
+            },
+            defaultHandlerAction,
+            errorHandlerAction,
+            true);
 
             if (!result.IsValidHeader)
             {
@@ -281,7 +281,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             if (result.Stream != null)
             {
                 var file = ConvertHelper.StreamToByteArray(result.Stream);
-                //methodResult.Result = new CreateStudentsToEventFromFileModel() { Stream = result.Stream };
                 await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
                 {
                     StatusCode = StatusCodes.Status400BadRequest,
@@ -315,24 +314,19 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var users = new List<User>();
             var studentIds = new List<Guid>();
 
-            var maxDegreeOfParallelism = 100;
-            using var semaphore = new SemaphoreSlim(maxDegreeOfParallelism);
-
             try
             {
-                await Parallel.ForEachAsync(students, async (student, cancellationToken) =>
+                foreach (var student in students)
                 {
                     if (!string.IsNullOrEmpty(student.PhoneNumber))
                     {
                         // Chờ để có slot trống trong Semaphore
-                        await semaphore.WaitAsync(cancellationToken);
-
                         try
                         {
-                            using (var scope = _serviceProvider.CreateScope())
+                            //using (var scope = _serviceProvider.CreateScope())
                             {
-                                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-                                var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
+                                //var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+                                //var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
                                 Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
                                 int age = Shared.Helpers.DateTimeHelper.GetYearOld(Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture));
                                 var user = new User()
@@ -350,7 +344,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                         PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
                                         Birthday = Shared.Helpers.DateTimeHelper.ConvertToDateTime(student.DateOfBirth),
                                         Email = !string.IsNullOrEmpty(student.Email) ? student.Email.Trim() : null,
-                                        Code = GeneratorCodeAsync(studentRepository, Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture), null),
+                                        Code = GeneratorCodeAsync(_studentRepository, Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture), null),
                                         Student = new Student()
                                         {
                                             CreatedByParent = false,
@@ -363,28 +357,26 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                         }
                                     },
                                     UserPlatforms = new List<UserPlatform>()
-                    {
-                        new UserPlatform()
-                        {
-                            PlatformId = platform.Id
-                        }
-                    },
+                                    {
+                                        new UserPlatform()
+                                        {
+                                            PlatformId = platform.Id
+                                        }
+                                    },
                                     UserSettings = new List<UserSetting>()
-                    {
-                        new UserSetting(true)
-                    }
+                                    {
+                                        new UserSetting(true)
+                                    }
                                 };
 
                                 var password = Shared.Helpers.StringHelper.GeneratePassword(8);
 
-                                identityStudentResult = await userManager.CreateAsync(user, password);
+                                identityStudentResult = await _userManager.CreateAsync(user, password);
                                 if (identityStudentResult.Succeeded)
                                 {
-                                    await userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
-                                    lock (studentIds)
-                                    {
-                                        studentIds.Add(user.Human.Student.Id);
-                                    }
+                                    await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
+
+                                    studentIds.Add(user.Human.Student.Id);
                                 }
                             }
                         }
@@ -392,13 +384,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         {
                             _logger.LogError(ex, "CreateAsync error");
                         }
-                        finally
-                        {
-                            // Giải phóng Semaphore để cho phép task khác tiếp tục
-                            semaphore.Release();
-                        }
                     }
-                });
+                }
 
                 var studentCompetitionEvents = new List<StudentCompetitionEvent>();
                 studentIds.ForEach(p =>
