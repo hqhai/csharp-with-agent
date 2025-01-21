@@ -243,14 +243,14 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                 foreach (var user in usersExist)
                 {
-                    var dataByEmail = datas.Values.Where(x => !x.Email.IsNullOrEmpty()).FirstOrDefault(x => x.Email == user.Email);
+                    var dataByEmail = datas.Values.Where(x => !x.Email.IsNullOrEmpty()).FirstOrDefault(x => x.Email.ToLower() == user.Email.ToLower() || x.Email.ToLower() == user.UserName.ToLower());
                     if (dataByEmail != null)
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
                         errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Email), Message = ErrorMassageSetting.EmailAlreadyExistVN });
                     }
 
-                    var dataByPhoneNumber = datas.Values.Where(x => !x.PhoneNumber.IsNullOrEmpty()).FirstOrDefault(x => x.PhoneNumber == user.PhoneNumber);
+                    var dataByPhoneNumber = datas.Values.Where(x => !x.PhoneNumber.IsNullOrEmpty()).FirstOrDefault(x => x.PhoneNumber == user.PhoneNumber || x.PhoneNumber == user.UserName);
                     if (dataByPhoneNumber != null)
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByPhoneNumber).Key;
