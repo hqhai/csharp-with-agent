@@ -28,7 +28,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
     using Microsoft.IdentityModel.Tokens;
     using OfficeOpenXml;
     using OfficeOpenXml.Style;
@@ -51,13 +51,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly IServiceProvider _serviceProvider;
         private readonly SendStudentsFromFilePublisher _sendStudentsFromFilePublisher;
         private readonly ISchoolImportHistoryRepository _schoolImportHistoryRepository;
+        private readonly ILogger<CreateStudentsToEventFromFileCommand> _logger;
+
         private const string ErrorTemplate = "Template bị sai, kiểm tra lại tên cột, bạn cần download template ở nút Tải Template mẫu";
         private const string Success = "Thành công";
         private const string ErrorMessage = "Error Message\n(Thông báo lỗi)";
         private const string FileNull = "File tải lên không có dữ liệu";
         private const string DataError = "Dữ liệu bị trống hoặc sai định dạng";
 
-        public CreateStudentsToEventFromFileCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IMediator mediator, IHumanRepository humanRepository, ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IStudentRepository studentRepository, IServiceProvider serviceProvider, SendStudentsFromFilePublisher sendStudentsFromFilePublisher, ISchoolImportHistoryRepository schoolImportHistoryRepository)
+        public CreateStudentsToEventFromFileCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IMediator mediator, IHumanRepository humanRepository, ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IStudentRepository studentRepository, IServiceProvider serviceProvider, SendStudentsFromFilePublisher sendStudentsFromFilePublisher, ISchoolImportHistoryRepository schoolImportHistoryRepository, ILogger<CreateStudentsToEventFromFileCommand> logger)
         {
             _userManager = userManager;
             _orderService = orderService;
@@ -71,6 +73,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             _serviceProvider = serviceProvider;
             _sendStudentsFromFilePublisher = sendStudentsFromFilePublisher;
             _schoolImportHistoryRepository = schoolImportHistoryRepository;
+            _logger = logger;
         }
 
         public async Task<MethodResult<CreateStudentsToEventFromFileModel>> Handle(CreateStudentsToEventFromFileCommand request, CancellationToken cancellationToken)
@@ -95,7 +98,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             }
 
             // check trường đã thực hiện import chưa
-            var checkImportSchool = await _schoolImportHistoryRepository.Queryable.AnyAsync(x => x.SchoolId == request.SchoolId && x.CompetitionEventId == competitionEvent.ParentEventId, cancellationToken);
+            var checkImportSchool = (competitionEvent.CompetitionEventParent != null && competitionEvent.CompetitionEventParent.ParentEventId.HasValue && await _schoolImportHistoryRepository.Queryable.AnyAsync(x => x.SchoolId == request.SchoolId && x.CompetitionEventId == competitionEvent.CompetitionEventParent.ParentEventId.Value, cancellationToken));
             if (checkImportSchool)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUserSchoolErrorCode.SchoolAlreadyImported), nameof(request.SchoolId), request.SchoolId);
@@ -243,7 +246,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                 foreach (var user in usersExist)
                 {
-                    var dataByEmail = datas.Values.Where(x => !x.Email.IsNullOrEmpty()).FirstOrDefault(x => x.Email.ToLower() == user.Email.ToLower() || x.Email.ToLower() == user.UserName.ToLower());
+                    var dataByEmail = datas.Values.Where(x => !x.Email.IsNullOrEmpty()).FirstOrDefault(x => ((!string.IsNullOrEmpty(user.Email)) && x.Email.ToLower() == user.Email.ToLower()) || ((!string.IsNullOrEmpty(user.UserName)) && x.Email.ToLower() == user.UserName.ToLower()));
                     if (dataByEmail != null)
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
@@ -259,8 +262,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 }
 
                 return await Task.FromResult(errors.Count == 0);
-            }, defaultHandlerAction,
-            errorHandlerAction);
+            },
+            defaultHandlerAction,
+            errorHandlerAction,
+            true);
 
             if (!result.IsValidHeader)
             {
@@ -276,7 +281,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             if (result.Stream != null)
             {
                 var file = ConvertHelper.StreamToByteArray(result.Stream);
-                //methodResult.Result = new CreateStudentsToEventFromFileModel() { Stream = result.Stream };
                 await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
                 {
                     StatusCode = StatusCodes.Status400BadRequest,
@@ -310,26 +314,21 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var users = new List<User>();
             var studentIds = new List<Guid>();
 
-            var maxDegreeOfParallelism = 100;
-            using var semaphore = new SemaphoreSlim(maxDegreeOfParallelism);
-
             try
             {
-                await Parallel.ForEachAsync(students, async (student, cancellationToken) =>
+                foreach (var student in students)
                 {
                     if (!string.IsNullOrEmpty(student.PhoneNumber))
                     {
                         // Chờ để có slot trống trong Semaphore
-                        await semaphore.WaitAsync(cancellationToken);
-
                         try
                         {
-                            using (var scope = _serviceProvider.CreateScope())
+                            //using (var scope = _serviceProvider.CreateScope())
                             {
-                                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-                                var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
+                                //var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+                                //var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
                                 Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
-                                int age = Shared.Helpers.DateTimeHelper.GetYearOld(Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture));
+                                int age = Shared.Helpers.DateTimeHelper.GetYearOld(Shared.Helpers.DateTimeHelper.ConvertToDateTime(student.DateOfBirth));
                                 var user = new User()
                                 {
                                     UserName = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
@@ -345,7 +344,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                         PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
                                         Birthday = Shared.Helpers.DateTimeHelper.ConvertToDateTime(student.DateOfBirth),
                                         Email = !string.IsNullOrEmpty(student.Email) ? student.Email.Trim() : null,
-                                        Code = GeneratorCodeAsync(studentRepository, Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture), null),
+                                        Code = GeneratorCodeAsync(_studentRepository, Shared.Helpers.DateTimeHelper.ConvertToDateTime(student.DateOfBirth), null),
                                         Student = new Student()
                                         {
                                             CreatedByParent = false,
@@ -358,38 +357,35 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                         }
                                     },
                                     UserPlatforms = new List<UserPlatform>()
-                    {
-                        new UserPlatform()
-                        {
-                            PlatformId = platform.Id
-                        }
-                    },
+                                    {
+                                        new UserPlatform()
+                                        {
+                                            PlatformId = platform.Id
+                                        }
+                                    },
                                     UserSettings = new List<UserSetting>()
-                    {
-                        new UserSetting(true)
-                    }
+                                    {
+                                        new UserSetting(true)
+                                    }
                                 };
 
                                 var password = Shared.Helpers.StringHelper.GeneratePassword(8);
 
-                                identityStudentResult = await userManager.CreateAsync(user, password);
+                                identityStudentResult = await _userManager.CreateAsync(user, password);
                                 if (identityStudentResult.Succeeded)
                                 {
-                                    await userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
-                                    lock (studentIds)
-                                    {
-                                        studentIds.Add(user.Human.Student.Id);
-                                    }
+                                    await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
+
+                                    studentIds.Add(user.Human.Student.Id);
                                 }
                             }
                         }
-                        finally
+                        catch (Exception ex)
                         {
-                            // Giải phóng Semaphore để cho phép task khác tiếp tục
-                            semaphore.Release();
+                            _logger.LogError(ex, "CreateAsync error");
                         }
                     }
-                });
+                }
 
                 var studentCompetitionEvents = new List<StudentCompetitionEvent>();
                 studentIds.ForEach(p =>
