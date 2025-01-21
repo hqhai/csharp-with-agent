@@ -328,7 +328,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 //var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
                                 //var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
                                 Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
-                                int age = Shared.Helpers.DateTimeHelper.GetYearOld(Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture));
+                                int age = Shared.Helpers.DateTimeHelper.GetYearOld(Shared.Helpers.DateTimeHelper.ConvertToDateTime(student.DateOfBirth));
                                 var user = new User()
                                 {
                                     UserName = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
@@ -344,7 +344,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                         PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
                                         Birthday = Shared.Helpers.DateTimeHelper.ConvertToDateTime(student.DateOfBirth),
                                         Email = !string.IsNullOrEmpty(student.Email) ? student.Email.Trim() : null,
-                                        Code = GeneratorCodeAsync(_studentRepository, Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture), null),
+                                        Code = GeneratorCodeAsync(_studentRepository, Shared.Helpers.DateTimeHelper.ConvertToDateTime(student.DateOfBirth), null),
                                         Student = new Student()
                                         {
                                             CreatedByParent = false,
