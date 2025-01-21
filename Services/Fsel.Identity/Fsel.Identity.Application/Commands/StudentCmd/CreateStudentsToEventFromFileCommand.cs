@@ -243,7 +243,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                 foreach (var user in usersExist)
                 {
-                    var dataByEmail = datas.Values.Where(x => !x.Email.IsNullOrEmpty()).FirstOrDefault(x => x.Email.ToLower() == user.Email.ToLower() || x.Email.ToLower() == user.UserName.ToLower());
+                    var dataByEmail = datas.Values.Where(x => !x.Email.IsNullOrEmpty()).FirstOrDefault(x => ((!string.IsNullOrEmpty(user.Email)) && x.Email.ToLower() == user.Email.ToLower()) || ((!string.IsNullOrEmpty(user.UserName)) && x.Email.ToLower() == user.UserName.ToLower()));
                     if (dataByEmail != null)
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
