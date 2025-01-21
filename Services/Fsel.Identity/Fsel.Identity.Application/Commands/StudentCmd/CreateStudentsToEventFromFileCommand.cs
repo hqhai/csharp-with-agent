@@ -95,7 +95,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             }
 
             // check trường đã thực hiện import chưa
-            var checkImportSchool = await _schoolImportHistoryRepository.Queryable.AnyAsync(x => x.SchoolId == request.SchoolId && x.CompetitionEventId == competitionEvent.ParentEventId, cancellationToken);
+            var checkImportSchool = (competitionEvent.CompetitionEventParent != null && competitionEvent.CompetitionEventParent.ParentEventId.HasValue && await _schoolImportHistoryRepository.Queryable.AnyAsync(x => x.SchoolId == request.SchoolId && x.CompetitionEventId == competitionEvent.CompetitionEventParent.ParentEventId.Value, cancellationToken));
             if (checkImportSchool)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUserSchoolErrorCode.SchoolAlreadyImported), nameof(request.SchoolId), request.SchoolId);
