@@ -466,44 +466,6 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             dem++;
         }
 
-        public async Task<string> ConvertStreamToBase64Async(Stream stream)
-        {
-            using (var memoryStream = new MemoryStream())
-            {
-                await stream.CopyToAsync(memoryStream); // Copy nội dung Stream vào MemoryStream
-                byte[] byteArray = memoryStream.ToArray(); // Chuyển MemoryStream sang mảng byte
-                return Convert.ToBase64String(byteArray); // Encode mảng byte sang Base64
-            }
-        }
-
-        private static async Task<string?> UploadFileAsync(string debugPath, string randomFileName)
-        {
-            string uploadUrl = "https://fsel-gateway-testing-api.fsel.edu.vn/storage-gateway/v1/file/Files?bucketType=FselPublic";
-            using (var httpClient = new HttpClient())
-            {
-                using (var form = new MultipartFormDataContent())
-                {
-                    byte[] fileBytes = File.ReadAllBytes(debugPath);
-                    form.Add(new ByteArrayContent(fileBytes), "file", randomFileName);
-
-                    using (var response = await httpClient.PostAsync(uploadUrl, form))
-                    {
-                        if (response.IsSuccessStatusCode)
-                        {
-                            var responseContent = await response.Content.ReadAsStringAsync();
-                            var responseObject = JsonConvert.DeserializeObject<dynamic>(responseContent);
-                            return responseObject.result;
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Lỗi khi tải lên file {randomFileName}: {response.StatusCode}");
-                            return string.Empty;
-                        }
-                    }
-                }
-            }
-        }
-
         public async Task<IList<LearningProgressLearnModel>> GetStudyPositionAsync(EnumCourseType courseType, IList<Guid> studentIds)
         {
             var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(courseType);
