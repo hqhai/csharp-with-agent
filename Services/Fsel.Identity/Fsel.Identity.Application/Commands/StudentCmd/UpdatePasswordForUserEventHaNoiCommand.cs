@@ -10,6 +10,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -29,10 +30,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     public class UpdatePasswordForUserEventHaNoiCommandHandle : IRequestHandler<UpdatePasswordForUserEventHaNoiCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
+        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
 
-        public UpdatePasswordForUserEventHaNoiCommandHandle(UserManager<User> userManager)
+        public UpdatePasswordForUserEventHaNoiCommandHandle(UserManager<User> userManager, IUserOtpCodeRepository userOtpCodeRepository)
         {
             _userManager = userManager;
+            _userOtpCodeRepository = userOtpCodeRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(UpdatePasswordForUserEventHaNoiCommand request, CancellationToken cancellationToken)
@@ -52,6 +55,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
 
+            if (!request.Email.IsValidEmail())
+            {
+                methodResult.AddErrorBadRequest(ErrorMassageSetting.InvalidEmailVN);
+                return methodResult;
+            }
+
             if (!string.IsNullOrEmpty(request.ParentEmail) && !request.ParentEmail.IsValidEmail())
             {
                 methodResult.AddErrorBadRequest(ErrorMassageSetting.InvalidEmailVN);
@@ -62,6 +71,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
+            if (await _userManager.Users.AnyAsync(p => p.Id != user.Id && !string.IsNullOrEmpty(p.UserName) && !string.IsNullOrEmpty(p.Email) && (p.UserName.ToLower() == request.Email.ToLower() || p.Email.ToLower() == request.Email.ToLower()), cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.EmailDoesNotExist), nameof(request.Email), request.Email);
                 return methodResult;
             }
 

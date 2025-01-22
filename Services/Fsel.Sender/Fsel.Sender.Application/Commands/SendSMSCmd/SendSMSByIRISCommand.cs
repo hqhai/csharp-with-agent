@@ -121,13 +121,11 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
                 });
             });
 
-            IRISSendSMSResponseModels? results = null;
-
             var sendSMSResults = await SendSMS(requests, token);
 
             messageHistories.ForEach(x =>
             {
-                var response = results?.ResultList?.FirstOrDefault(p => p.SmsId == x.SMSId);
+                var response = sendSMSResults?.ResultList?.FirstOrDefault(p => p.SmsId == x.SMSId);
                 x.Status = response != null && response.Code == "0" ? EnumMessageHistoryStatus.Success : EnumMessageHistoryStatus.False;
                 x.ResponseBody = response != null ? response.Serialize() : null;
             });
@@ -164,6 +162,7 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
                     await _cache.SetAsync(CacheKey, tokenModel, TimeSpan.FromSeconds(1800));
                 }
             }
+            _logger.LogInformation($"Token model: {tokenModel.Serialize()}");
             return $"{tokenModel?.TokenType} {tokenModel?.AccessToken}";
         }
 
