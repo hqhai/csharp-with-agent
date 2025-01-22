@@ -88,5 +88,8 @@ namespace Fsel.Shared.Constants
         public const string ManagerReportLearningResultIELTSExcel = "Resources//ManagerReports//BaoCaoKetQuaHocTapIELTS.xlsx";
         public const string ReportPTEvent = "Resources//ExportExcelTemplates//ReportPTEvent.xlsx";
         public const string ReportPTEventSchool = "Resources//ExportExcelTemplates//ReportPTEventSchool.xlsx";
+        public const string ReportLearningDistrictEvent = "Resources//ExportExcelTemplates//ReportLearningDistrictEvent.xlsx";
+        public const string ReportLearningSchoolEvent = "Resources//ExportExcelTemplates//ReportLearningSchoolEvent.xlsx";
+        public const string BaoCaoReportStudentEvent = "Resources//ExportExcelTemplates//BaoCaoReportStudentEvent.xlsx";
     }
 }

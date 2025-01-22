@@ -121,5 +121,16 @@ namespace Fsel.Identity.Api.Controllers
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+
+        [HttpGet("get-event-parent/{id}")]
+        [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetParentEvent([FromRoute] Guid id)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(nameof(id));
+            var commandResult = await _mediator.Send(new GetParentEventByIdQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

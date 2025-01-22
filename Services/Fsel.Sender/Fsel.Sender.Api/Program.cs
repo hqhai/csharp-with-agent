@@ -5,6 +5,11 @@ using Fsel.Core.Extensions;
 using Fsel.Sender.Application.Services;
 using Fsel.Sender.Domain.ValueSettings;
 using Fsel.Sender.Application.Services.SystemServices;
+using Fsel.Sender.Domain.IRepositories;
+using Fsel.Sender.Infrastructure.Repositories;
+using Fsel.Sender.Infrastructure;
+using Fsel.Sender.Application.Services.SMSServices.IRIS;
+using Fsel.Sender.Application.Services.SMSServices.GAPIT;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,11 +17,15 @@ var builder = WebApplication.CreateBuilder(args);
 var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
+builder.AddDbContexts<SenderDBContext>();
 builder.AddAuthenticationJwtBearers(appSetting);
-
 builder.Services.AddScoped<IAmazonSimpleEmailService, AmazonSimpleEmailServiceClient>();
+builder.Services.AddScoped<IMessageHistoryRepository, MessageHistoryRepository>();
 builder.Services.AddScoped<SESWrapper>();
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
+builder.AddRefitClients(typeof(IIRISServiceDC), appSetting?.Services?.IRISApiUrlDC);
+builder.AddRefitClients(typeof(IIRISServiceDR), appSetting?.Services?.IRISApiUrlDR);
+builder.AddRefitClients(typeof(IGAPITService), appSetting?.Services?.GAPITApiUrl);
 var app = builder.Build();
 app.UseServices();
 app.Run();
