@@ -10,13 +10,12 @@ using Fsel.Identity.Application.Services;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
-using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.EntityModels;
+using Fsel.Identity.Infrastructure.Common;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Enums.ErrorCodes;
-using Fsel.Shared.Helpers;
 using Fsel.Shared.Models.SenderTemplates;
 using Fsel.Shared.Models.ShareModels;
 using MediatR;
@@ -37,25 +36,26 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IMediator _mediator;
         private readonly AppSetting _appSetting;
         private readonly ISenderService _senderService;
-        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
+        private readonly SaveOtpCodeConverter _saveOtpCodeConverter;
 
         public ForgotPasswordCommandHandler(UserManager<User> userManager,
                                             IMediator mediator,
                                             AppSetting appSetting,
                                             ISenderService senderService,
-                                            IUserOtpCodeRepository userOtpCodeRepository)
+                                            SaveOtpCodeConverter saveOtpCodeConverter)
         {
             _userManager = userManager;
             _mediator = mediator;
             _appSetting = appSetting;
             _senderService = senderService;
-            _userOtpCodeRepository = userOtpCodeRepository;
+            _saveOtpCodeConverter = saveOtpCodeConverter;
         }
 
         public async Task<MethodResult<ForgotPasswordResultModel>> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ForgotPasswordResultModel> methodResult = new MethodResult<ForgotPasswordResultModel>();
+            int countOtp = default;
 
             if (string.IsNullOrEmpty(request.Email) && string.IsNullOrEmpty(request.PhoneNumber))
             {
@@ -92,8 +92,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            var countOTPSMS = user.UserOtpCodes.Where(p => p.Type == EnumUserOtpCodeType.SMS).Count();
-            if (countOTPSMS >= _appSetting.Otp?.MaxSendOtpSms && !string.IsNullOrEmpty(request.PhoneNumber))
+            var lastOtp = user.UserOtpCodes.FirstOrDefault(p => p.Type == EnumUserOtpCodeType.SMS && p.Status == EnumOtpCodeStatus.New);
+            if (lastOtp?.RetryCount >= _appSetting.Otp?.MaxSendOtpSms && !string.IsNullOrEmpty(request.PhoneNumber))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.AttemptsExhausted), nameof(request.PhoneNumber), request.PhoneNumber);
                 return methodResult;
@@ -127,23 +127,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
                     return methodResult;
                 }
-
-                countOTPSMS = 0;
             }
 
             else if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
-                var otp = NumberHelper.GetRandomCode();
-                var userOtpCode = new UserOtpCode
-                {
-                    UserId = user.Id,
-                    OTPCode = otp,
-                    Status = EnumOtpCodeStatus.New,
-                    Type = EnumUserOtpCodeType.SMS,
-                    ExpiredTime = DateTime.MaxValue,
-                };
-                _userOtpCodeRepository.Add(userOtpCode);
-                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                var otp = await _saveOtpCodeConverter.SaveOTpCodeBySmsCommand(lastOtp, user.Id, cancellationToken);
 
                 var sendSMSResult = await _senderService.SendSMSAsync(new SendSMSCommandModel()
                 {
@@ -155,10 +143,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     }
                 });
 
-                countOTPSMS = countOTPSMS + 1;
+                countOtp = lastOtp == null ? 1 : lastOtp.RetryCount;
             }
 
-            methodResult.Result = new ForgotPasswordResultModel { IsSuccess = true, CountOTP = countOTPSMS };
+            methodResult.Result = new ForgotPasswordResultModel { IsSuccess = true, CountOTP = countOtp };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
