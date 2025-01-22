@@ -101,6 +101,13 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             {
                 userOtpCode.Status = EnumOtpCodeStatus.Verified;
                 _userOtpCodeRepository.Update(userOtpCode);
+
+                var userTypeSMS = user.UserOtpCodes.FirstOrDefault(p => p.Type == EnumUserOtpCodeType.SMS && p.Status == EnumOtpCodeStatus.New);
+                if (userTypeSMS != null && !request.Email.IsNullOrEmpty())
+                {
+                    userTypeSMS.Status = EnumOtpCodeStatus.Verified;
+                }
+
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.Result = _mapper.Map<UserOtpCodeModel>(userOtpCode);
