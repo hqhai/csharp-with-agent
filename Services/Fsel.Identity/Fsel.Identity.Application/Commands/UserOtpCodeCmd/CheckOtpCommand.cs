@@ -65,9 +65,8 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     return methodResult;
                 }
 
-                var lastOTP = user.UserOtpCodes.Where(p => p.Type == EnumUserOtpCodeType.SMS).OrderByDescending(p => p.CreatedDate).FirstOrDefault();
-
-                if (lastOTP == null || lastOTP.Status == EnumOtpCodeStatus.Verified)
+                var lastOTP = user.UserOtpCodes.FirstOrDefault(p => p.Type == EnumUserOtpCodeType.SMS && p.Status == EnumOtpCodeStatus.New);
+                if (lastOTP == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.OTPNotSentYet), nameof(request.Otp), request.Otp);
                     return methodResult;
