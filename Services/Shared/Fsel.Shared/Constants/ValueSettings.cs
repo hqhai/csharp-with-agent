@@ -22,6 +22,7 @@ namespace Fsel.Shared.Constants
         public const int AmountStudentSending = 1000;
         public const int MaxSendingRateApp = 3;
         public const int MinCompletePercent = 75;
+        public const int BatchSize = 500; // Số lượng bản ghi mỗi lần truy vấn
 
         public static class AgeMilestone
         {
@@ -137,10 +138,11 @@ namespace Fsel.Shared.Constants
             public const int CountUnitAca = 12;
             public const int CountUnitIELTS = 8;
             public const int CountFullMockTest = 2;
-            public const int CountFinalTest = 2;
+            public const int CountFinalTest = 1;
             public const int MockTestPosition = 5;
             public const int SkillFullMocKTest = 4;
             public const int CountLessonAca = 6;
+            public const int CountLessonIELTS = 4;
         }
 
         public static class ValueOrderIndex
