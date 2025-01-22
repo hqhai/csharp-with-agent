@@ -7,6 +7,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Infrastructure.ValueSettings;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -52,6 +53,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                         UserId = request.Id,
                         OTPCode = otp,
                         Status = EnumOtpCodeStatus.New,
+                        Type = EnumUserOtpCodeType.Email,
                         ExpiredTime = expiredTime
                     };
                     _userOtpCodeRepository.Add(userOtpCode);
