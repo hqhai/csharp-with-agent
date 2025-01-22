@@ -14,6 +14,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
     using Fsel.Common.Helpers;
     using Fsel.Shared.Constants;
     using MimeKit;
+    using Fsel.Shared.Enums;
 
     public class SendMailUsingSMTPCommand : SendEmailCommandModel, IRequest<MethodResult<bool>>
     {
@@ -23,11 +24,13 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
     {
         private readonly AppSetting _appSetting;
         private readonly ISystemService _systemService;
+        private readonly IMediator _mediator;
 
-        public SendMailUsingSMTPCommandHandler(AppSetting appSetting, ISystemService systemService)
+        public SendMailUsingSMTPCommandHandler(AppSetting appSetting, ISystemService systemService, IMediator mediator)
         {
             _appSetting = appSetting;
             _systemService = systemService;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<bool>> Handle(SendMailUsingSMTPCommand request, CancellationToken cancellationToken)
@@ -77,6 +80,18 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
                 {
                     await Send(emailMessage);
                 }
+
+                // lưu lại lịch sử gửi mail
+                await _mediator.Send(new SaveMessageHistoryByTypeEmailCommand
+                {
+                    ToEmails = request.ToEmails,
+                    CcEmails = request.CcEmails,
+                    BccEmails = request.BccEmails,
+                    Content = request.Content,
+                    Status = EnumMessageHistoryStatus.Success,
+                    Template = request.Template
+                }, cancellationToken);
+
             }
             catch (Exception)
             {
