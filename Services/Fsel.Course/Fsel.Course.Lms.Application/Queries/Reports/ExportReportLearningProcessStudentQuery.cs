@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 {
     using System;
     using System.Collections.Concurrent;
+    using System.IO;
     using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -11,24 +12,24 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.StorageServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
+    using Newtonsoft.Json;
     using OfficeOpenXml;
     using OfficeOpenXml.Style;
+    using Refit;
     using static Fsel.Shared.Constants.ValueSettings;
 
-    public class ExportReportLearningProcessStudentQuery : IRequest<MethodResult<Stream>>
+    public class ExportReportLearningProcessStudentQuery : ExportReportStudentLearningProcessQueueModel, IRequest<MethodResult<Stream>>
     {
-        public string? EventCodeStr { get; set; }
-        public string? DistrictName { get; set; }
-        public Guid? StudentId { get; set; }
-        public EnumCourseType CourseType { get; set; }
     }
 
     public class ExportReportLearningProcessStudentQueryHandler : IRequestHandler<ExportReportLearningProcessStudentQuery, MethodResult<Stream>>
@@ -38,6 +39,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         private readonly IServiceProvider _serviceProvider;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
+        private readonly IStorageService _storageService;
         private const int RowExportReport = 1;
         private const int NumberModuleLesson = 3;
 
@@ -46,13 +48,15 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             IUserService userService,
             IServiceProvider serviceProvider,
             ICourseResultRepository courseResultRepository,
-            ICourseUnitMockTestRepository courseUnitMockTestRepository)
+            ICourseUnitMockTestRepository courseUnitMockTestRepository,
+            IStorageService storageService)
         {
             _mapper = mapper;
             _userService = userService;
             _serviceProvider = serviceProvider;
             _courseResultRepository = courseResultRepository;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
+            _storageService = storageService;
         }
 
         public async Task<MethodResult<Stream>> Handle(ExportReportLearningProcessStudentQuery request, CancellationToken cancellationToken)
@@ -271,7 +275,18 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             });
 
             methodResult.Result = ExportExcelTemplate(studentEventLearnProcesses.ToList(), request);
+            await UploadFileExcel(methodResult.Result, request.FileName);
             return methodResult;
+        }
+
+        private async Task UploadFileExcel(Stream stream, string? fileName)
+        {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return;
+            }
+            var filePart = new StreamPart(stream, fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            await _storageService.UpLoadFile(EnumFolderType.Files, EnumBucketType.FselPublic, filePart, isAddSuffix: false);
         }
 
         public static Stream ExportExcelTemplate(IList<StudentEventLearnProcessModel>? studentEventLearnProcesses, ExportReportLearningProcessStudentQuery request)
