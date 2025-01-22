@@ -144,7 +144,9 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                         SchoolClass = request.SchoolClass,
                         SchoolGrade = request.SchoolGrade,
                         ProvinceId = request.ProvinceId,
-                        DistrictId = request.DistrictId
+                        DistrictId = request.DistrictId,
+                        ParentEmail = request.ParentEmail,
+                        ParentPhoneNumber = request.ParentPhoneNumber,
                     }
                 },
                 UserPlatforms = new List<UserPlatform>()
