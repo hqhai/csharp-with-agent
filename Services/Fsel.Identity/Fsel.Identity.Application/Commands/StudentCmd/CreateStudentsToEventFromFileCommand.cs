@@ -186,7 +186,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                 var result = formFile.ImportAndValidateExcel(async (CreateStudentToEventFromFileModel x, IList<CreateStudentToEventFromFileModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
                 {
-                    if (!string.IsNullOrEmpty(x.FullName) || !string.IsNullOrEmpty(x.PhoneNumber) || !string.IsNullOrEmpty(x.DateOfBirth) || !string.IsNullOrEmpty(x.SchoolGrade) || !string.IsNullOrEmpty(x.SchoolClass))
+                    if (!string.IsNullOrEmpty(x.FullName) || !string.IsNullOrEmpty(x.PhoneNumber) || x.DateOfBirth == null || !string.IsNullOrEmpty(x.SchoolGrade) || !string.IsNullOrEmpty(x.SchoolClass))
                     {
                         if (string.IsNullOrEmpty(x.FullName))
                         {
@@ -222,14 +222,14 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         {
                             emails.Add(x.Email);
                         }
-                        if (string.IsNullOrEmpty(x.DateOfBirth))
+                        if (x.DateOfBirth == null)
                         {
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.EmptyBirthDayVN });
                         }
-                        else if (!Shared.Helpers.DateTimeHelper.IsValidDateTime(x.DateOfBirth))
-                        {
-                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
-                        }
+                        //else if (!Shared.Helpers.DateTimeHelper.IsValidDateTime(x.DateOfBirth))
+                        //{
+                        //    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
+                        //}
                         if (string.IsNullOrEmpty(x.SchoolGrade))
                         {
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.SchoolGrade), Message = ErrorMassageSetting.EmptyGradeVN });
@@ -328,7 +328,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 //var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
                                 //var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
                                 Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
-                                int age = Shared.Helpers.DateTimeHelper.GetYearOld(Shared.Helpers.DateTimeHelper.ConvertToDateTime(student.DateOfBirth));
+                                int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.DateOfBirth);
                                 var user = new User()
                                 {
                                     UserName = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
@@ -342,9 +342,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                     {
                                         FullName = student.FullName.Trim(),
                                         PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
-                                        Birthday = Shared.Helpers.DateTimeHelper.ConvertToDateTime(student.DateOfBirth),
+                                        Birthday = student.DateOfBirth,
                                         Email = !string.IsNullOrEmpty(student.Email) ? student.Email.Trim() : null,
-                                        Code = GeneratorCodeAsync(_studentRepository, Shared.Helpers.DateTimeHelper.ConvertToDateTime(student.DateOfBirth), null),
+                                        Code = GeneratorCodeAsync(_studentRepository, student.DateOfBirth ?? DateTime.MinValue, null),
                                         Student = new Student()
                                         {
                                             CreatedByParent = false,
