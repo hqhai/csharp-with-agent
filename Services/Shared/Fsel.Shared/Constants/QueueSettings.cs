@@ -147,6 +147,7 @@ namespace Fsel.Shared.Constants
             {
                 public const string SendNotification = $"{KeyQueue}_SendNotification";
                 public const string InteractionAction = $"{KeyQueue}_InterationAction";
+                public const string CreateTokenHistory = $"{KeyQueue}_CreateTokenHistory";
             }
         }
 
