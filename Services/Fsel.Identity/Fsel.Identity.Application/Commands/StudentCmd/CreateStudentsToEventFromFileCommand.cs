@@ -426,7 +426,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 {
                     StatusCode = StatusCodes.Status400BadRequest,
                     Key = request.Key,
-                    Message = DataError
+                    Message = ErrorTemplate
                 }, cancellationToken);
                 _logger.LogError(ex, "CreateStudentsToEventFromFileCommandHandler error");
             }
