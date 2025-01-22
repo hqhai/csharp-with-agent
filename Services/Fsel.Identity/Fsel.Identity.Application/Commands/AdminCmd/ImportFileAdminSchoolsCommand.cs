@@ -60,10 +60,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null or malformed" });
                 }
-                if (await _userManager.Users.AnyAsync(y => y.Email.Trim().ToLower().Contains(x.Email.Trim().ToLower()), cancellationToken))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = $"{nameof(x.Email)} {nameof(EnumSystemErrorCode.DataAlreadyExist)}" });
-                }
                 if (!string.IsNullOrEmpty(x.Password))
                 {
                     foreach (IPasswordValidator<User> passwordValidator in _userManager.PasswordValidators)
@@ -115,9 +111,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     if (Guid.TryParse(item.SchoolId, out Guid schoolId))
                     {
                         user.UserSchools = new List<UserSchool>
-                            {
-                                new UserSchool { SchoolId = schoolId }
-                            };
+                        {
+                            new UserSchool { SchoolId = schoolId }
+                        };
                     }
 
                     if (!user.IsValid())
@@ -133,9 +129,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     }
                     await _userManager.AddToRoleAsync(user, nameof(EnumRole.AdminSchool));
                 }
-                catch
+                catch (Exception e)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr));
+                    methodResult.AddError(nameof(EnumAuthUserErrorCode.SendAuthErorr), e.Message);
                     return methodResult;
                 }
             }
