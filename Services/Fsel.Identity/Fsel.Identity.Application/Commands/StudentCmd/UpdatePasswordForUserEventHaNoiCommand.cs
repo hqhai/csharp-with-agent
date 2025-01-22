@@ -25,6 +25,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         public string? Email { get; set; }
         public string? ParentEmail { get; set; }
         public string? ParentPhoneNumber { get; set; }
+        public DateTime Birthday { get; set; }
     }
 
     public class UpdatePasswordForUserEventHaNoiCommandHandle : IRequestHandler<UpdatePasswordForUserEventHaNoiCommand, MethodResult<bool>>
@@ -100,6 +101,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             user.PhoneNumberConfirmed = true;
             user.Email = request.Email;
             user.Human!.Email = request.Email;
+            user.Human.Birthday = request.Birthday;
             user.Human.Student!.ParentEmail = request.ParentEmail;
             user.Human.Student.ParentPhoneNumber = request.ParentPhoneNumber;
             await _userManager.UpdateAsync(user);
