@@ -79,16 +79,15 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 return methodResult;
             }
 
-            var countOTPSMS = user.UserOtpCodes.Where(p => p.Type == EnumUserOtpCodeType.SMS).Count();
-            if (countOTPSMS >= 3)
+            var lastOTP = await _userOtpCodeRepository.Queryable.Where(p => p.UserId == user.Id && p.Type == EnumUserOtpCodeType.SMS).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+
+            if (lastOTP != null && lastOTP.Status == EnumOtpCodeStatus.New && lastOTP.RetryCount >= 3)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.AttemptsExhausted), nameof(request.PhoneNumber), request.PhoneNumber);
                 return methodResult;
             }
 
-            var lastOTP = user.UserOtpCodes.Where(p => p.Type == EnumUserOtpCodeType.SMS).OrderByDescending(p => p.CreatedDate).FirstOrDefault();
-
-            if (lastOTP != null && IsValidTime(lastOTP.CreatedDate, DateTime.UtcNow))
+            if (lastOTP != null && IsValidTime(lastOTP.UpdatedDate ?? lastOTP.CreatedDate, DateTime.UtcNow))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.SentWithin30Seconds));
                 return methodResult;
@@ -127,15 +126,26 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             await _userOtpCodeRepository.ExecuteTransactionAsync(async () =>
             {
                 var otp = NumberHelper.GetRandomCode();
-                var userOtpCode = new UserOtpCode
+                if (lastOTP == null)
                 {
-                    UserId = user.Id,
-                    OTPCode = otp,
-                    Status = EnumOtpCodeStatus.New,
-                    Type = EnumUserOtpCodeType.SMS,
-                    ExpiredTime = DateTime.MaxValue,
-                };
-                _userOtpCodeRepository.Add(userOtpCode);
+                    lastOTP = new UserOtpCode
+                    {
+                        UserId = user.Id,
+                        OTPCode = otp,
+                        Status = EnumOtpCodeStatus.New,
+                        Type = EnumUserOtpCodeType.SMS,
+                        RetryCount = 1,
+                        ExpiredTime = DateTime.MaxValue,
+                    };
+                    _userOtpCodeRepository.Add(lastOTP);
+                }
+                else
+                {
+                    lastOTP.OTPCode = otp;
+                    lastOTP.RetryCount += 1;
+                    lastOTP = _userOtpCodeRepository.Update(lastOTP);
+                }
+
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 var sendSMSResult = await _senderService.SendSMSAsync(new SendSMSCommandModel()
@@ -149,7 +159,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 });
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = new SaveOTPForUserEventHaNoiCommandModel { Action = EnumActionSaveOTPForEventHaNoi.LMS, CountOTP = countOTPSMS + 1 };
+                methodResult.Result = new SaveOTPForUserEventHaNoiCommandModel { Action = EnumActionSaveOTPForEventHaNoi.Success, CountOTP = lastOTP.RetryCount };
                 return methodResult;
             });
             return methodResult;

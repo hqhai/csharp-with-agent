@@ -15,6 +15,8 @@ namespace Fsel.Identity.Domain.Entities
 
         public DateTime ExpiredTime { get; set; }
 
+        public int RetryCount { get; set; }
+
         public virtual User? User { get; set; }
 
         public EnumOtpCodeStatus Status { get; set; }
