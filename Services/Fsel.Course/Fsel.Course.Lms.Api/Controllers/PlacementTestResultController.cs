@@ -144,9 +144,9 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("get-config-placement-test")]
         [ProducesResponseType(typeof(MethodResult<PlacementTestReportOveallModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetConfigPlacementTest([FromQuery] GetConfigPlacementTestQuery query)
+        public async Task<IActionResult> GetConfigPlacementTest()
         {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(new GetConfigPlacementTestQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
