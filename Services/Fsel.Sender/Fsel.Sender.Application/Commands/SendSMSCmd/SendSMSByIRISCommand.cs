@@ -148,7 +148,7 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
             string encodeStr = Convert.ToBase64String(Encoding.UTF8.GetBytes(credentials));
             string authorizationHeader = $"Basic {encodeStr}";
 
-            var tokenModel = await _cache.GetAsync(CacheKey, TimeSpan.FromSeconds(1800), async () =>
+            var tokenModel = await _cache.GetAsync(CacheKey, TimeSpan.FromSeconds(1200), async () =>
             {
                 return await GetToken(grantType, authorizationHeader) ?? new IRISSMSTokenResponseModel();
             },
