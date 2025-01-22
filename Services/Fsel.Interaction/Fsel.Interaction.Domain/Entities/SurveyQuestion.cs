@@ -24,9 +24,11 @@ namespace Fsel.Interaction.Domain.Entities
 
         public float DisplayOrder { get; set; }
 
-        public bool? IsPilot { get; set; }
-
         public int DisplayLevel { get; set; }
+
+        public EnumSurveyFormType SurveyFormType { get; set; }
+
+        public bool? IsPilot { get; set; }
 
         public EnumSurveyQuestion Type { get; set; }
 
@@ -39,6 +41,8 @@ namespace Fsel.Interaction.Domain.Entities
             get { return ConvertHelper.Deserialize<object>(AnswerStr); }
             set { AnswerStr = ConvertHelper.Serialize(value); }
         }
+
+        public Guid? CompetitionEventId { get; set; }
 
         public IList<CustomerSurvey> CustomerSurveys { get; set; } = new List<CustomerSurvey>();
 
@@ -65,6 +69,7 @@ namespace Fsel.Interaction.Domain.Entities
         }
 
         public Guid SurveyQuestionId { get; set; }
+
         public SurveyQuestion? SurveyQuestion { get; set; }
 
         public string? Language { get; set; }

@@ -6,10 +6,11 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
 
     public class ChangePasswordCommandModel
     {
-        [Required]
         public string? OldPassword { get; set; }
 
         [Required]
         public string? Password { get; set; }
+
+        public Guid? UserId { get; set; }
     }
 }
