@@ -166,6 +166,7 @@ builder.Services.AddScoped<GetTimeModulePublisher>();
 builder.Services.AddScoped<SubmitSpeakingAIPublisher>();
 builder.Services.AddScoped<StudentRankingEventsPublisher>();
 builder.Services.AddScoped<RankedStudentPublisher>();
+builder.Services.AddScoped<ExportFileExcelStudentLearningProcessPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -201,6 +202,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.RetryClassForumAction, typeof(RetryClassForumConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SpeakingAI, typeof(SpeakingAIEvaluationConsumer) },
     { QueueSettings.LmsQueue.NameQueue.RankedStudent, typeof(RankedStudentConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.ExportExcelStudentLearningProcess, typeof(ExportFileExcelStudentLearningProcessConsumer) },
 });
 
 var app = builder.Build();

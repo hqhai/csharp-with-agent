@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 {
     using System;
     using System.Collections.Concurrent;
+    using System.IO;
     using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -16,19 +17,17 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
+    using Newtonsoft.Json;
     using OfficeOpenXml;
     using OfficeOpenXml.Style;
     using static Fsel.Shared.Constants.ValueSettings;
 
-    public class ExportReportLearningProcessStudentQuery : IRequest<MethodResult<Stream>>
+    public class ExportReportLearningProcessStudentQuery : ExportReportStudentLearningProcessQueueModel, IRequest<MethodResult<Stream>>
     {
-        public string? EventCodeStr { get; set; }
-        public string? DistrictName { get; set; }
-        public Guid? StudentId { get; set; }
-        public EnumCourseType CourseType { get; set; }
     }
 
     public class ExportReportLearningProcessStudentQueryHandler : IRequestHandler<ExportReportLearningProcessStudentQuery, MethodResult<Stream>>
@@ -271,7 +270,18 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             });
 
             methodResult.Result = ExportExcelTemplate(studentEventLearnProcesses.ToList(), request);
+            await UploadFileExcel(methodResult.Result, request.FileName);
             return methodResult;
+        }
+
+        private async Task UploadFileExcel(Stream stream, string? fileName)
+        {
+            var base64Data = await ConvertStreamToBase64Async(stream);
+            byte[] imageBytes = Convert.FromBase64String(base64Data);
+            string debugPath = Path.Combine(Directory.GetCurrentDirectory(), fileName ?? string.Empty);
+            File.WriteAllBytes(debugPath, imageBytes);
+            await UploadFileAsync(debugPath, fileName ?? string.Empty);
+            File.Delete(debugPath);
         }
 
         public static Stream ExportExcelTemplate(IList<StudentEventLearnProcessModel>? studentEventLearnProcesses, ExportReportLearningProcessStudentQuery request)
@@ -449,6 +459,44 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             fullMockTestCounter++;
             ExcelReportHelper.ProcessCell(worksheet, RowExportReport, dem, dem + 1, $"{nameof(EnumMockTestType.FullMockTest)} {fullMockTestCounter}");
             dem++;
+        }
+
+        public async Task<string> ConvertStreamToBase64Async(Stream stream)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                await stream.CopyToAsync(memoryStream); // Copy nội dung Stream vào MemoryStream
+                byte[] byteArray = memoryStream.ToArray(); // Chuyển MemoryStream sang mảng byte
+                return Convert.ToBase64String(byteArray); // Encode mảng byte sang Base64
+            }
+        }
+
+        private static async Task<string?> UploadFileAsync(string debugPath, string randomFileName)
+        {
+            string uploadUrl = "https://fsel-gateway-testing-api.fsel.edu.vn/storage-gateway/v1/file/Files?bucketType=FselPublic";
+            using (var httpClient = new HttpClient())
+            {
+                using (var form = new MultipartFormDataContent())
+                {
+                    byte[] fileBytes = File.ReadAllBytes(debugPath);
+                    form.Add(new ByteArrayContent(fileBytes), "file", randomFileName);
+
+                    using (var response = await httpClient.PostAsync(uploadUrl, form))
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var responseContent = await response.Content.ReadAsStringAsync();
+                            var responseObject = JsonConvert.DeserializeObject<dynamic>(responseContent);
+                            return responseObject.result;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Lỗi khi tải lên file {randomFileName}: {response.StatusCode}");
+                            return string.Empty;
+                        }
+                    }
+                }
+            }
         }
 
         public async Task<IList<LearningProgressLearnModel>> GetStudyPositionAsync(EnumCourseType courseType, IList<Guid> studentIds)
