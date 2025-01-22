@@ -8,7 +8,9 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
 
@@ -51,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 return methodResult;
             }
 
-            string fileName = "Student_Learning_Process" + DateTime.Now.Ticks.ToString() + ".xlsx";
+            string fileName = $"Student_Learning_Process_{NumberHelper.GenerateCodeNumber(5)}_{DateTime.Now.Ticks}.xlsx";
             await _exportFileExcelStudentLearningProcessPublisher.Publish(new ExportReportStudentLearningProcessQueueModel
             {
                 CourseType = request.CourseType,
@@ -61,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 FileName = fileName
             }, cancellationToken);
 
-            methodResult.Result = "https://s3-sgn10.fptcloud.com/fsel-public/Files/" + fileName;
+            methodResult.Result = ValueSettings.FSEL_PUBLIC_FILES_URL + fileName;
             return methodResult;
         }
     }
