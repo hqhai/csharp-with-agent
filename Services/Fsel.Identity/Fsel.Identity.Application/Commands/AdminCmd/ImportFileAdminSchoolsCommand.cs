@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Application.Commands.AdminCmd
 {
+    using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -80,6 +81,27 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 return methodResult;
             }
             var emails = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!.Trim()).ToList();
+            var emailsDuplicates = emails.GroupBy(x => x).Where(x => x.Count() > 1).Select(x => x.Key).ToList();
+
+            if (emailsDuplicates.Any())
+            {
+                methodResult.AddErrorBadRequest(new List<ErrorResult>
+                {
+                    new ErrorResult
+                    {
+                        ErrorCode = nameof(emailsDuplicates),
+                        Errors = new List<Error>
+                        {
+                            new Error
+                            {
+                                FieldName  = nameof(emailsDuplicates),
+                                ErrorValues = emailsDuplicates.Cast<object>().ToList()
+                            }
+                        }
+                    }
+                });
+                return methodResult;
+            }
             var role = await _roleManager.FindByNameAsync(nameof(EnumRole.AdminSchool));
             if (role == null)
             {
