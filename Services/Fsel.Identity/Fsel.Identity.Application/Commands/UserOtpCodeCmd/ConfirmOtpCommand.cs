@@ -77,9 +77,8 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     return methodResult;
                 }
 
-                userOtpCode = user.UserOtpCodes.Where(p => p.Type == EnumUserOtpCodeType.SMS).OrderByDescending(p => p.CreatedDate).FirstOrDefault();
-
-                if (userOtpCode == null || userOtpCode.Status == EnumOtpCodeStatus.Verified)
+                userOtpCode = user.UserOtpCodes.FirstOrDefault(p => p.Type == EnumUserOtpCodeType.SMS && p.Status == EnumOtpCodeStatus.New);
+                if (userOtpCode == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.OTPNotSentYet), nameof(request.Otp), request.Otp);
                     return methodResult;
@@ -102,13 +101,6 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             {
                 userOtpCode.Status = EnumOtpCodeStatus.Verified;
                 _userOtpCodeRepository.Update(userOtpCode);
-
-                var otps = user.UserOtpCodes.Where(p => p.Type == EnumUserOtpCodeType.SMS).ToList();
-                if (otps != null && otps.Any())
-                {
-                    await _userOtpCodeRepository.DeleteListAsync(otps);
-                }
-
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.Result = _mapper.Map<UserOtpCodeModel>(userOtpCode);
