@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
                                                           .FirstOrDefault()?.Percent, IeltsScoreHelper.GetInitialAge(x.OrderBy(x => x.CreatedDate)
                                                           .FirstOrDefault()?.Level, DateTimeHelper.GetYearOld(userResults.FirstOrDefault(c => c.Human?.UserId == x.Key)?.Human?.Birthday))).Item1!.Value : null,
                                                  Status = x.OrderByDescending(x => x.CreatedDate).FirstOrDefault() != null ? x.OrderByDescending(x => x.CreatedDate).FirstOrDefault()!.Status.ToString() : default,
-                                                 PlacementTestResults = x.Select(c => new IntegrationPlacementTestResultModels
+                                                 PlacementTestResults = x.OrderBy(x => x.CreatedDate).Select(c => new IntegrationPlacementTestResultModels
                                                  {
                                                      Level = c.Level,
                                                      CorrectCount = c.CorrectCount,
