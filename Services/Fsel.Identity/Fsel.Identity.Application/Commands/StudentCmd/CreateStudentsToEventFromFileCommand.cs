@@ -28,6 +28,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Microsoft.IdentityModel.Tokens;
     using OfficeOpenXml;
@@ -315,18 +316,21 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                 var users = new List<User>();
                 var studentIds = new List<Guid>();
+                var parallelOptions = new ParallelOptions
+                {
+                    MaxDegreeOfParallelism = 50
+                };
 
-                foreach (var student in students)
+                await Parallel.ForEachAsync(students, parallelOptions, async (student, cancellationToken) =>
                 {
                     if (!string.IsNullOrEmpty(student.PhoneNumber))
                     {
-                        // Chờ để có slot trống trong Semaphore
                         try
                         {
-                            //using (var scope = _serviceProvider.CreateScope())
+                            using (var scope = _serviceProvider.CreateScope())
                             {
-                                //var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-                                //var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
+                                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+                                var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
                                 Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
                                 int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.DateOfBirth);
                                 var user = new User()
@@ -344,7 +348,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                         PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
                                         Birthday = student.DateOfBirth,
                                         Email = !string.IsNullOrEmpty(student.Email) ? student.Email.Trim() : null,
-                                        Code = GeneratorCodeAsync(_studentRepository, student.DateOfBirth ?? DateTime.MinValue, null),
+                                        Code = GeneratorCodeAsync(studentRepository, student.DateOfBirth ?? DateTime.MinValue, null),
                                         Student = new Student()
                                         {
                                             CreatedByParent = false,
@@ -371,10 +375,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                                 var password = Shared.Helpers.StringHelper.GeneratePassword(8);
 
-                                identityStudentResult = await _userManager.CreateAsync(user, password);
+                                identityStudentResult = await userManager.CreateAsync(user, password);
                                 if (identityStudentResult.Succeeded)
                                 {
-                                    await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
+                                    await userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
 
                                     studentIds.Add(user.Human.Student.Id);
                                 }
@@ -385,7 +389,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             _logger.LogError(ex, "CreateAsync error");
                         }
                     }
-                }
+                });
 
                 var studentCompetitionEvents = new List<StudentCompetitionEvent>();
                 studentIds.ForEach(p =>
