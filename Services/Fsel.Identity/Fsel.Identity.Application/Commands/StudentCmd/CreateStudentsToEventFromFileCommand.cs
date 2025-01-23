@@ -380,7 +380,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 {
                                     await userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
 
-                                    studentIds.Add(user.Human.Student.Id);
+                                    lock (studentIds)
+                                    {
+                                        studentIds.Add(user.Human.Student.Id);
+                                    }
                                 }
                             }
                         }
