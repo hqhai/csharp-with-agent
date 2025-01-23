@@ -323,7 +323,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                 await Parallel.ForEachAsync(students, parallelOptions, async (student, cancellationToken) =>
                 {
-                    if (!string.IsNullOrEmpty(student.PhoneNumber))
+                    if (!string.IsNullOrEmpty(student.PhoneNumber?.Trim()))
                     {
                         try
                         {
