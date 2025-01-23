@@ -179,7 +179,18 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
             {
                 var tokenResult = await retryPolicyDC.ExecuteAsync(async () =>
                 {
-                    return await _iRISServiceDC.GetToken(new IRISSMSTokenRequestModel() { GrantType = grantType }, authorizationHeader);
+                    var tokenResult = await _iRISServiceDC.GetToken(new IRISSMSTokenRequestModel() { GrantType = grantType }, authorizationHeader);
+                    if (!tokenResult.IsSuccessStatusCode)
+                    {
+                        var request = new
+                        {
+                            AuthorizationHeader = authorizationHeader,
+                            Body = new IRISSMSTokenRequestModel() { GrantType = grantType }
+                        }.Serialize();
+                        var response = tokenResult?.Content.Serialize();
+                        _logger.LogError($"Lấy Token của API DC thất bại: Status Code {(int)tokenResult.StatusCode} - {tokenResult.StatusCode.ToString()}, Request {request}, Response {response}");
+                    }
+                    return tokenResult;
                 });
                 return tokenResult?.Content;
             }
@@ -200,7 +211,18 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
             {
                 var tokenResult = await retryPolicyDR.ExecuteAsync(async () =>
                 {
-                    return await _iRISServiceDR.GetToken(new IRISSMSTokenRequestModel() { GrantType = grantType }, authorizationHeader);
+                    var tokenResult = await _iRISServiceDR.GetToken(new IRISSMSTokenRequestModel() { GrantType = grantType }, authorizationHeader);
+                    if (!tokenResult.IsSuccessStatusCode)
+                    {
+                        var request = new
+                        {
+                            AuthorizationHeader = authorizationHeader,
+                            Body = new IRISSMSTokenRequestModel() { GrantType = grantType }
+                        }.Serialize();
+                        var response = tokenResult?.Content.Serialize();
+                        _logger.LogError($"Lấy Token của API DR thất bại: Status Code {(int)tokenResult.StatusCode} - {tokenResult.StatusCode.ToString()}, Request {request}, Response {response}");
+                    }
+                    return tokenResult;
                 });
                 return tokenResult?.Content;
             }
@@ -225,7 +247,18 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
             {
                 var tokenResult = await retryPolicyDC.ExecuteAsync(async () =>
                 {
-                    return await _iRISServiceDC.SendSMSs(requestModels, authorizationHeader);
+                    var tokenResult = await _iRISServiceDC.SendSMSs(requestModels, authorizationHeader);
+                    if (!tokenResult.IsSuccessStatusCode)
+                    {
+                        var request = new
+                        {
+                            AuthorizationHeader = authorizationHeader,
+                            Body = requestModels
+                        }.Serialize();
+                        var response = tokenResult?.Content.Serialize();
+                        _logger.LogError($"Send message cho API DC thất bại: Status Code {(int)tokenResult.StatusCode} - {tokenResult.StatusCode.ToString()}, Request {request}, Response {response}");
+                    }
+                    return tokenResult;
                 });
                 return tokenResult?.Content;
             }
@@ -246,7 +279,18 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
             {
                 var tokenResult = await retryPolicyDR.ExecuteAsync(async () =>
                 {
-                    return await _iRISServiceDR.SendSMSs(requestModels, authorizationHeader);
+                    var tokenResult = await _iRISServiceDR.SendSMSs(requestModels, authorizationHeader);
+                    if (!tokenResult.IsSuccessStatusCode)
+                    {
+                        var request = new
+                        {
+                            AuthorizationHeader = authorizationHeader,
+                            Body = requestModels
+                        }.Serialize();
+                        var response = tokenResult?.Content.Serialize();
+                        _logger.LogError($"Send message cho API DR thất bại: Status Code {(int)tokenResult.StatusCode} - {tokenResult.StatusCode.ToString()}, Request {request}, Response {response}");
+                    }
+                    return tokenResult;
                 });
                 return tokenResult?.Content;
             }
