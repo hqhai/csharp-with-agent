@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class GetConfigPlacementTestQuery : IRequest<MethodResult<PlacementTestReportOveallModel>>
     {
@@ -76,11 +77,15 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             var pathConfigViewReportLevel = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.ConfigViewReportLevel);
             var configPlacementTestViews = ConvertHelper.DeserializeFromFilePath<IList<PlacementTestReportViewConfigModel>>(pathConfigViewReportLevel);
 
+            bool isPreA1 = placementTestGroupResult.CurrentLevel == EnumCourseLevel.A1 && placementTestGroupResult.Percent < MinCompletePercent;
+            var currentLevel = isPreA1 ? ValueCourseLevel.PreA1 : EnumCourseLevelHelper.GetCodeByEnumCourseLevel(placementTestGroupResult.CurrentLevel);
+
             var placementTestReportOveall = new PlacementTestReportOveallModel
             {
                 FullName = student.Human.FullName,
                 SuggetLevel = placementTestGroupResult.SuggetLevel,
-                CurrentLevel = placementTestGroupResult.CurrentLevel,
+                CurrentLevel = currentLevel,
+                IsPreA1 = isPreA1,
                 PlacementTestViewReport = GetPlacementTestReportViewConfig(configPlacementTestViews, age, placementTestGroupResult.SuggetLevel, student.Human.FullName),
             };
             var placementTestAgeLevels = placementTestConfigAgeLevels.Where(x => x.AgeStart <= age && (!x.AgeEnd.HasValue || age < x.AgeEnd)).ToList();
@@ -88,37 +93,37 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
 
             if (placementTestAgeLevels.Any(x => x.CurrentLevel == placementTestGroupResult.CurrentLevel))
             {
-                placementTestReportOveall.PlacementTestReportConfig = GetPlacementTestReportConfig(configPlacementTests, EnumTestResultScenario.EqualToSuggestedLevel, placementTestGroupResult.CurrentLevel);
+                placementTestReportOveall.PlacementTestReportConfig = GetPlacementTestReportConfig(configPlacementTests, EnumTestResultScenario.EqualToSuggestedLevel, currentLevel);
             }
             else if (placementTestAgeLevel != null && placementTestGroupResult.CurrentLevel.HasValue)
             {
                 if ((int)placementTestAgeLevel.CurrentLevel > (int)placementTestGroupResult.CurrentLevel)
                 {
-                    placementTestReportOveall.PlacementTestReportConfig = GetPlacementTestReportConfig(configPlacementTests, EnumTestResultScenario.BelowSuggestedLevelAndAge, placementTestGroupResult.CurrentLevel);
+                    placementTestReportOveall.PlacementTestReportConfig = GetPlacementTestReportConfig(configPlacementTests, EnumTestResultScenario.BelowSuggestedLevelAndAge, currentLevel);
                 }
                 else
                 {
-                    placementTestReportOveall.PlacementTestReportConfig = GetPlacementTestReportConfig(configPlacementTests, EnumTestResultScenario.AboveSuggestedLevel, placementTestGroupResult.CurrentLevel);
+                    placementTestReportOveall.PlacementTestReportConfig = GetPlacementTestReportConfig(configPlacementTests, EnumTestResultScenario.AboveSuggestedLevel, currentLevel);
                 }
             }
             methodResult.Result = placementTestReportOveall;
             return methodResult;
         }
 
-        private static PlacementTestReportConfigModel? GetPlacementTestReportConfig(IList<PlacementTestReportConfigModel>? configPlacementTests, EnumTestResultScenario enumTestResult, EnumCourseLevel? currentLevel)
+        private static PlacementTestReportConfigModel? GetPlacementTestReportConfig(IList<PlacementTestReportConfigModel>? configPlacementTests, EnumTestResultScenario enumTestResult, string? currentLevel)
         {
             var configPlacementTest = configPlacementTests?.FirstOrDefault(x => x.ResultScenario == enumTestResult);
             if (configPlacementTest != null)
             {
                 if (!string.IsNullOrEmpty(configPlacementTest.Subtitle))
                 {
-                    configPlacementTest.Subtitle = string.Format(configPlacementTest.Subtitle, EnumCourseLevelHelper.GetCodeByEnumCourseLevel(currentLevel));
+                    configPlacementTest.Subtitle = string.Format(configPlacementTest.Subtitle, currentLevel);
                 }
                 foreach (var item in configPlacementTest.Translations)
                 {
                     if (!string.IsNullOrEmpty(item.Subtitle))
                     {
-                        item.Subtitle = string.Format(item.Subtitle, EnumCourseLevelHelper.GetCodeByEnumCourseLevel(currentLevel));
+                        item.Subtitle = string.Format(item.Subtitle, currentLevel);
                     }
                 }
             }
