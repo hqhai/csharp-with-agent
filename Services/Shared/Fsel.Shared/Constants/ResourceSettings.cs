@@ -89,6 +89,6 @@ namespace Fsel.Shared.Constants
         public const string ReportPTEventSchool = "Resources//ExportExcelTemplates//ReportPTEventSchool.xlsx";
 
         public const string ConfigPlacementTest = "Resources//PlacementTestConfigAgeLevel.json";
-        public const string ConfigViewReportLevel = "Resources//PlacementTestReportViewConfigModel.json";
+        public const string ConfigViewReportLevel = "Resources//PlacementTestReportViewConfig.json";
     }
 }
