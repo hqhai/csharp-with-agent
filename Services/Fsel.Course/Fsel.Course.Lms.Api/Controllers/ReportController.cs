@@ -189,20 +189,16 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Expot File Learning Process students
+        /// Get Overall Report By Student
         /// </summary>
-        [HttpPost("export-file-learning-process-students")]
-        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-file-learning-process-students")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(role: nameof(EnumRole.Admin))]
-        public async Task<IActionResult> ExportFile([FromQuery] ExportReportLearningProcessStudentQuery query)
+        public async Task<IActionResult> Get([FromQuery] GetFileExcelStudentLearningReportQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            if (!queryResult.IsOK || queryResult.Result == null)
-            {
-                return queryResult.GetActionResult();
-            }
-            return File(queryResult.Result, Settings.Excels.ContentType, "export_file_learning_process_students.xlsx");
+            return queryResult.GetActionResult();
         }
     }
 }
