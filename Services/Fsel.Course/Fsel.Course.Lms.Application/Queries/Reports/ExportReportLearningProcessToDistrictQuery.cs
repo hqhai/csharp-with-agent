@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
     using Fsel.Shared.Constants;
@@ -74,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             var courseStudentResults = new ConcurrentBag<CourseResultModel>();
 
             var studentIds = reportCompetitionEvents.Where(x => x.StudentIds != null && x.StudentIds.Any()).SelectMany(x => x.StudentIds ?? new List<Guid>()).ToList();
-            var placementTestResultGroups = new ConcurrentBag<PlacementTestResultReportGroupModel>();
+            var placementTestResultGroups = new ConcurrentStack<PlacementTestResultReportGroupModel>();
 
             var batches = studentIds
                 .Select((id, index) => new { id, index })
@@ -107,46 +108,31 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                    var placementTestResultRepository = scope.ServiceProvider.GetRequiredService<IPlacementTestResultRepository>();
-                    var placementTestGroups = await placementTestResultRepository.Queryable
-                        .Where(x => batche.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
-                        .GroupBy(x => x.StudentId)
-                        .Select(x => new PlacementTestGroupStudentResultModel
-                        {
-                            StudentId = x.Key,
-                            PlacementTestStart = _mapper.Map<PlacementTestResultModel>(x.Select(x => x).OrderBy(x => x.CreatedDate).FirstOrDefault()),
-                            PlacementTestEnd = _mapper.Map<PlacementTestResultModel>(x.Select(x => x).OrderByDescending(x => x.CreatedDate).FirstOrDefault()),
-                        })
-                        .ToListAsync(cancellationToken);
-                    var placementTestResultReports = placementTestGroups?.Select(item =>
-                    {
-                        var placementTestResultEnd = item.PlacementTestEnd;
-                        var placementTestResultStart = item.PlacementTestStart;
-                        if (placementTestResultEnd != null)
-                        {
-                            var (levelCompleted, isLock) = placementTestResultEnd.Level.GetLevelInScore(placementTestResultEnd.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultStart?.Level, default));
-                            return new PlacementTestResultReportGroupModel { StudentId = item.StudentId, IsDonePT = isLock, CourseLevel = levelCompleted };
-                        }
-                        return new PlacementTestResultReportGroupModel { StudentId = item.StudentId };
-                    }).ToList() ?? new List<PlacementTestResultReportGroupModel>();
-                    foreach (var item in placementTestResultReports)
-                    {
-                        placementTestResultGroups.Add(item);
-                    }
+                    var placementTestGroupResultRepository = scope.ServiceProvider.GetRequiredService<IPlacementTestGroupResultRepository>();
+                    var placementTestGroups = await placementTestGroupResultRepository.Queryable
+                                                    .Where(x => batche.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
+                                                    .Select(x => new PlacementTestResultReportGroupModel
+                                                    {
+                                                        CourseLevel = x.SuggetLevel,
+                                                        StudentId = x.StudentId,
+                                                        IsDonePT = true
+                                                    })
+                                                    .ToListAsync(cancellationToken);
+                    placementTestResultGroups.PushRange(placementTestGroups.ToArray());
                 }
             });
 
             await Parallel.ForEachAsync(reportCompetitionEvents, async (reportCompetitionEvent, cancellationToken) =>
             {
-                var placementTestResultReports = placementTestResultGroups.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).ToList();
-                var studentIds = courseStudentResults.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).Select(x => x.StudentId).ToList();
+                var placementTestResultReports = placementTestResultGroups.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).Select(x => x.StudentId).Distinct().ToList();
+                var studentIds = courseStudentResults.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).Select(x => x.StudentId).Distinct().ToList();
                 var reportPlacementTestEvent = new ReportPlacementTestEventModel
                 {
                     LocationName = reportCompetitionEvent.DistrictName,
                     NumberRegisteredSchool = reportCompetitionEvent.NumberRegisteredSchool,
                     NumberActualParticipatingSchool = reportCompetitionEvent.NumberActualParticipatingSchool,
                     NumberValidStudentAccount = reportCompetitionEvent.NumberValidStudentAccount,
-                    NumberStudentsCompletedPT = placementTestResultReports?.Where(x => x.IsDonePT).Count() ?? default,
+                    NumberStudentsCompletedPT = placementTestResultReports?.Count ?? default,
                     NumberStudentToLearn = studentIds.Count,
                     LearningProgressLearns = await GetStudyPositionAsync(request.CourseType, studentIds),
                 };
@@ -324,32 +310,34 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     var mockTestResultRepository = scope.ServiceProvider.GetRequiredService<IMockTestResultRepository>();
                     if (courseType == EnumCourseType.Academic)
                     {
-                        var learningProgress = await (from baseQ in courseResultRepository.Queryable
-                                                      join course in courseRepository.Queryable on baseQ.CourseId equals course.Id
+                        var query = from baseQ in courseResultRepository.Queryable
+                                    join course in courseRepository.Queryable on baseQ.CourseId equals course.Id
 
-                                                      join courseUnitMockTest in courseUnitMockTestRepository.Queryable on course.Id equals courseUnitMockTest.CourseId
+                                    join courseUnitMockTest in courseUnitMockTestRepository.Queryable on course.Id equals courseUnitMockTest.CourseId
 
-                                                      join ftr in finalTestResultRepository.Queryable
-                                                       on new { baseQ.StudentId, baseQ.CourseId, FinalTestId = courseUnitMockTest.FinalTestId } equals new { ftr.StudentId, ftr.CourseId, FinalTestId = (Guid?)ftr.FinalTestId } into ftrGroup
-                                                      from ftr in ftrGroup.DefaultIfEmpty()
+                                    join ftr in finalTestResultRepository.Queryable
+                                     on new { baseQ.StudentId, baseQ.CourseId, FinalTestId = courseUnitMockTest.FinalTestId } equals new { ftr.StudentId, ftr.CourseId, FinalTestId = (Guid?)ftr.FinalTestId } into ftrGroup
+                                    from ftr in ftrGroup.DefaultIfEmpty()
 
-                                                      join ul in unitLessonRepository.Queryable
-                                                      on courseUnitMockTest.UnitId equals (Guid?)ul.UnitId into ulGroup
-                                                      from ul in ulGroup.DefaultIfEmpty()
+                                    join ul in unitLessonRepository.Queryable
+                                    on courseUnitMockTest.UnitId equals (Guid?)ul.UnitId into ulGroup
+                                    from ul in ulGroup.DefaultIfEmpty()
 
-                                                      join lr in lessonResultRepository.Queryable
-                                                      on new { baseQ.StudentId, ul.UnitId, baseQ.CourseId, ul.LessonId } equals new { lr.StudentId, lr.UnitId, lr.CourseId, lr.LessonId } into lrGroup
-                                                      from lr in lrGroup.DefaultIfEmpty()
-                                                      where baseQ.WorkingStatus == EnumWorkingStatus.Active && batche.Contains(baseQ.StudentId)
-                                                      group new { ul, courseUnitMockTest, ftr, lr } by new { DisplayOrder = (int?)ul.DisplayOrder, UnitDisplayOrder = courseUnitMockTest.DisplayOrder } into groupedData
-                                                      select new LearningProgressLearnModel
-                                                      {
-                                                          DisplayOrder = groupedData.Key.DisplayOrder,
-                                                          UnitDisplayOrder = groupedData.Key.UnitDisplayOrder,
-                                                          StudentCount = groupedData.Count(g =>
-                                                              (g.ftr != null && !new[] { EnumResultStatus.Done, EnumResultStatus.Unfinished }.Contains(g.ftr.Status)) ||
-                                                              (g.lr != null && !new[] { EnumResultStatus.Done, EnumResultStatus.Unfinished }.Contains(g.lr.Status)))
-                                                      }).OrderBy(x => x.UnitDisplayOrder).ThenBy(x => x.DisplayOrder).ToListAsync(CancellationToken.None);
+                                    join lr in lessonResultRepository.Queryable
+                                    on new { baseQ.StudentId, ul.UnitId, baseQ.CourseId, ul.LessonId } equals new { lr.StudentId, lr.UnitId, lr.CourseId, lr.LessonId } into lrGroup
+                                    from lr in lrGroup.DefaultIfEmpty()
+                                    where baseQ.WorkingStatus == EnumWorkingStatus.Active && batche.Contains(baseQ.StudentId)
+                                    group new { ul, courseUnitMockTest, ftr, lr } by new { DisplayOrder = (int?)ul.DisplayOrder, UnitDisplayOrder = courseUnitMockTest.DisplayOrder } into groupedData
+                                    select new LearningProgressLearnModel
+                                    {
+                                        DisplayOrder = groupedData.Key.DisplayOrder,
+                                        UnitDisplayOrder = groupedData.Key.UnitDisplayOrder,
+                                        StudentCount = groupedData.Count(g =>
+                                            (g.ftr != null && !new[] { EnumResultStatus.Done, EnumResultStatus.Unfinished }.Contains(g.ftr.Status)) ||
+                                            (g.lr != null && !new[] { EnumResultStatus.Done, EnumResultStatus.Unfinished }.Contains(g.lr.Status)))
+                                    };
+
+                        var learningProgress = await query.OrderBy(x => x.UnitDisplayOrder).ThenBy(x => x.DisplayOrder).ToListAsync(CancellationToken.None);
                         foreach (var item in learningProgress)
                         {
                             listLearningProcess.Add(item);
@@ -357,56 +345,59 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     }
                     else if (courseType == EnumCourseType.Ielts)
                     {
-                        var learningProgress = await (from baseQ in courseResultRepository.Queryable
-                                                      join cum in courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
+                        var query = (from baseQ in courseResultRepository.Queryable
+                                     join cum in courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
 
-                                                      join ul in unitLessonRepository.Queryable
-                                                      on cum.UnitId equals (Guid?)ul.UnitId into ulGroup
-                                                      from ul in ulGroup.DefaultIfEmpty()
+                                     join ul in unitLessonRepository.Queryable
+                                     on cum.UnitId equals (Guid?)ul.UnitId into ulGroup
+                                     from ul in ulGroup.DefaultIfEmpty()
 
-                                                      join lr in lessonResultRepository.Queryable
-                                                      on new { baseQ.StudentId, ul.UnitId, baseQ.CourseId, ul.LessonId } equals new { lr.StudentId, lr.UnitId, lr.CourseId, lr.LessonId } into lrGroup
-                                                      from lr in lrGroup.DefaultIfEmpty()
+                                     join lr in lessonResultRepository.Queryable
+                                     on new { baseQ.StudentId, ul.UnitId, baseQ.CourseId, ul.LessonId } equals new { lr.StudentId, lr.UnitId, lr.CourseId, lr.LessonId } into lrGroup
+                                     from lr in lrGroup.DefaultIfEmpty()
 
-                                                      where
-                                                          baseQ.WorkingStatus == EnumWorkingStatus.Active && batche.Contains(baseQ.StudentId) &&
-                                                          cum.UnitId.HasValue
-                                                      group new { lr } by new { DisplayOrder = cum.DisplayOrder, LessonDisplayOrder = (int?)ul.DisplayOrder } into g
-                                                      select new LearningProgressLearnModel
-                                                      {
-                                                          UnitDisplayOrder = g.Key.DisplayOrder,
-                                                          DisplayOrder = g.Key.LessonDisplayOrder,
-                                                          StudentCount = g.Count(x => (x.lr != null && !new[] { EnumResultStatus.Done, EnumResultStatus.Unfinished }.Contains(x.lr.Status))),
-                                                      }).Concat(from baseQ in courseResultRepository.Queryable
+                                     where
+                                         baseQ.WorkingStatus == EnumWorkingStatus.Active && batche.Contains(baseQ.StudentId) &&
+                                         cum.UnitId.HasValue
+                                     group new { lr } by new { DisplayOrder = cum.DisplayOrder, LessonDisplayOrder = (int?)ul.DisplayOrder } into g
+                                     select new LearningProgressLearnModel
+                                     {
+                                         UnitDisplayOrder = g.Key.DisplayOrder,
+                                         DisplayOrder = g.Key.LessonDisplayOrder,
+                                         StudentCount = g.Count(x => (x.lr != null && !new[] { EnumResultStatus.Done, EnumResultStatus.Unfinished }.Contains(x.lr.Status))),
+                                     }).Concat(from baseQ in courseResultRepository.Queryable
 
-                                                                join cum in courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
+                                               join cum in courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
 
-                                                                join usm in unitSkillMockTestRepository.Queryable
-                                                                on new { UnitId = cum.UnitId } equals new { UnitId = (Guid?)usm.UnitId } into usmGroup
-                                                                from usm in usmGroup.DefaultIfEmpty()
+                                               join usm in unitSkillMockTestRepository.Queryable
+                                               on new { UnitId = cum.UnitId } equals new { UnitId = (Guid?)usm.UnitId } into usmGroup
+                                               from usm in usmGroup.DefaultIfEmpty()
 
-                                                                join mtrs in mockTestResultRepository.Queryable
-                                                                on new { baseQ.StudentId, UnitId = (Guid?)usm.UnitId, baseQ.CourseId, usm.MockTestId } equals new { mtrs.StudentId, UnitId = mtrs.UnitId, mtrs.CourseId, mtrs.MockTestId } into mtrsGroup
-                                                                from mtrs in mtrsGroup.DefaultIfEmpty()
+                                               join mtrs in mockTestResultRepository.Queryable
+                                               on new { baseQ.StudentId, UnitId = (Guid?)usm.UnitId, baseQ.CourseId, usm.MockTestId } equals new { mtrs.StudentId, UnitId = mtrs.UnitId, mtrs.CourseId, mtrs.MockTestId } into mtrsGroup
+                                               from mtrs in mtrsGroup.DefaultIfEmpty()
 
-                                                                join mtr in mockTestResultRepository.Queryable
-                                                                on new { baseQ.StudentId, baseQ.CourseId, MockTestId = cum.MockTestId } equals new { mtr.StudentId, mtr.CourseId, MockTestId = (Guid?)mtr.MockTestId } into mtrGroup
-                                                                from mtr in mtrGroup.DefaultIfEmpty()
+                                               join mtr in mockTestResultRepository.Queryable
+                                               on new { baseQ.StudentId, baseQ.CourseId, MockTestId = cum.MockTestId } equals new { mtr.StudentId, mtr.CourseId, MockTestId = (Guid?)mtr.MockTestId } into mtrGroup
+                                               from mtr in mtrGroup.DefaultIfEmpty()
 
-                                                                where baseQ.WorkingStatus == EnumWorkingStatus.Active && batche.Contains(baseQ.StudentId)
-                                                                group new { mtr, mtrs } by new { cum.DisplayOrder } into g
-                                                                select new LearningProgressLearnModel
-                                                                {
-                                                                    UnitDisplayOrder = g.Key.DisplayOrder,
-                                                                    DisplayOrder = null,
-                                                                    StudentCount = g.Count(x =>
-                                                                    (x.mtr != null && !new[] { EnumResultStatus.Done, EnumResultStatus.Unfinished }.Contains(x.mtr.Status)) ||
-                                                                    (x.mtrs != null && !new[] { EnumResultStatus.Done, EnumResultStatus.Unfinished }.Contains(x.mtrs.Status)))
-                                                                }).OrderBy(r => r.UnitDisplayOrder)
-                                                                  .OrderBy(r => r.DisplayOrder.HasValue ? 0 : 1)
-                                                                  .OrderBy(r => r.DisplayOrder)
-                                                                  .ThenByDescending(r => r.StudentCount)
-                                                                  .ToListAsync(CancellationToken.None);
+                                               where baseQ.WorkingStatus == EnumWorkingStatus.Active && batche.Contains(baseQ.StudentId)
+                                               group new { mtr, mtrs } by new { cum.DisplayOrder } into g
+                                               select new LearningProgressLearnModel
+                                               {
+                                                   UnitDisplayOrder = g.Key.DisplayOrder,
+                                                   DisplayOrder = null,
+                                                   StudentCount = g.Count(x =>
+                                                   (x.mtr != null && !new[] { EnumResultStatus.Done, EnumResultStatus.Unfinished }.Contains(x.mtr.Status)) ||
+                                                   (x.mtrs != null && !new[] { EnumResultStatus.Done, EnumResultStatus.Unfinished }.Contains(x.mtrs.Status)))
+                                               });
+
+                        query = query.OrderBy(r => r.UnitDisplayOrder)
+                                                          .OrderBy(r => r.DisplayOrder.HasValue ? 0 : 1)
+                                                          .OrderBy(r => r.DisplayOrder)
+                                                          .ThenByDescending(r => r.StudentCount);
+
+                        var learningProgress = await query.ToListAsync(CancellationToken.None);
 
                         foreach (var item in learningProgress)
                         {
@@ -415,6 +406,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     }
                 }
             });
+
             return listLearningProcess.GroupBy(x => new { x.DisplayOrder, x.UnitDisplayOrder }).Select(x => new LearningProgressLearnModel
             {
                 DisplayOrder = x.Key.DisplayOrder,
