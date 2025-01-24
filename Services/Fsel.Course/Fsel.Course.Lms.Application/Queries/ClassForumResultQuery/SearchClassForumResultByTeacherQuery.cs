@@ -131,7 +131,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             foreach (var item in lists)
             {
-                var classResult = await _trainingService.GetClassByStudentId(item.StudentId);
+                var classResult = await _trainingService.GetClassToStudentIdAsync(item.StudentId);
                 item.ClassCode = classResult?.Content?.Result?.Code;
                 item.PostArea = "L" + item.LessonDisplayOrder + "_" + "U" + item.UnitDisplayOrder + "_" + item.CourseCode;
             }
