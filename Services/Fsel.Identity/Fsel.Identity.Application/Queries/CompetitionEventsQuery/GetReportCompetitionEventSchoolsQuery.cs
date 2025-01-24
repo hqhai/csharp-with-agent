@@ -78,10 +78,9 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             var schools = schoolResults.Content?.Result;
 
             var studentSchoolIds = await (from baseQ in _studentRepository.Queryable
-                                          join er in _eventRegistrationRepository.Queryable on baseQ.Id equals er.StudentId
                                           join sce in _studentCompetitionEventsRepository.Queryable on baseQ.Id equals sce.StudentId
                                           where baseQ.SchoolId.HasValue && schools != null && schools.Select(x => x.Id).Contains(baseQ.SchoolId.Value)
-                                          && competitions.Select(x => x.Id).Contains(er.CompetitionEventId)
+                                          && competitions.Select(x => x.Id).Contains(sce.CompetitionEventId)
                                           group baseQ
                                           by baseQ.SchoolId into g
                                           select new
