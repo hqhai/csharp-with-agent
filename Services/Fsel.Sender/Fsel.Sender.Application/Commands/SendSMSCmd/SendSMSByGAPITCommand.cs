@@ -114,8 +114,8 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
             });
 
             var sendSMSResults = await _gapitService.SendSMSs(requests, authorizationHeader);
-            _logger.LogError($"StatusCode: {sendSMSResults.StatusCode}, Error: {sendSMSResults.Error}");
             var results = sendSMSResults.Content;
+            _logger.LogError($"StatusCode: {sendSMSResults.StatusCode}, Response: {sendSMSResults.Content.Serialize()}");
 
             messageHistories.ForEach(x =>
             {
