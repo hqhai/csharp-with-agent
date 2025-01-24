@@ -143,34 +143,26 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
 
         private async Task<string> GetTokenAsync(string username, string password, string grantType)
         {
-            //const string CacheKey = "IRIS_Token";
+            const string CacheKey = "IRIS_Token";
             string credentials = $"{username}:{password}";
             string encodeStr = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(credentials));
             string authorizationHeader = $"Basic {encodeStr}";
 
-            var tokenModelResult = await _iRISServiceDC.GetToken(new IRISSMSTokenRequestModel() { GrantType = grantType }, authorizationHeader);
-            if (!tokenModelResult.IsSuccessStatusCode)
+            var tokenModel = await _cache.GetAsync(CacheKey, TimeSpan.FromSeconds(1200), async () =>
             {
-                _logger.LogError($"StatusCode: {tokenModelResult.StatusCode}, Error: {tokenModelResult.Error}");
-                return string.Empty;
+                return await GetToken(grantType, authorizationHeader) ?? new IRISSMSTokenResponseModel();
+            },
+            _logger);
+
+            if (tokenModel == null || string.IsNullOrEmpty(tokenModel.AccessToken) || tokenModel.ExpiresAt <= DateTime.UtcNow)
+            {
+                tokenModel = await GetToken(grantType, authorizationHeader);
+                if (tokenModel != null)
+                {
+                    await _cache.SetAsync(CacheKey, tokenModel, TimeSpan.FromSeconds(1800));
+                }
             }
-            var tokenModel = tokenModelResult.Content;
-
-            //var tokenModel = await _cache.GetAsync(CacheKey, TimeSpan.FromSeconds(1200), async () =>
-            //{
-            //    return await GetToken(grantType, authorizationHeader) ?? new IRISSMSTokenResponseModel();
-            //},
-            //_logger);
-
-            //if (tokenModel == null || string.IsNullOrEmpty(tokenModel.AccessToken) || tokenModel.ExpiresAt <= DateTime.UtcNow)
-            //{
-            //    tokenModel = await GetToken(grantType, authorizationHeader);
-            //    if (tokenModel != null)
-            //    {
-            //        await _cache.SetAsync(CacheKey, tokenModel, TimeSpan.FromSeconds(1800));
-            //    }
-            //}
-            //_logger.LogInformation($"Token model: {tokenModel.Serialize()}");
+            _logger.LogInformation($"Token model: {tokenModel.Serialize()}");
             return $"{tokenModel?.TokenType} {tokenModel?.AccessToken}";
         }
 
