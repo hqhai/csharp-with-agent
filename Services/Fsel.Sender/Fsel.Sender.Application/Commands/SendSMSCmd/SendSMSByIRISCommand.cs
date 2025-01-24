@@ -145,7 +145,7 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
         {
             const string CacheKey = "IRIS_Token";
             string credentials = $"{username}:{password}";
-            string encodeStr = Convert.ToBase64String(Encoding.UTF8.GetBytes(credentials));
+            string encodeStr = Convert.ToBase64String(Encoding.ASCII.GetBytes(credentials));
             string authorizationHeader = $"Basic {encodeStr}";
 
             var tokenModel = await _cache.GetAsync(CacheKey, TimeSpan.FromSeconds(1200), async () =>
