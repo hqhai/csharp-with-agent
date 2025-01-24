@@ -106,7 +106,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
                 if (userRoles.FirstOrDefault() == EnumRole.Student.ToString() && userView.Human?.Student?.CreatedByParent == false && userView.Human?.Student?.ParentStudents.Count > 0)
                 {
-                    var classStudent = await _trainingService.GetClassByStudentId(userView!.Human!.Student.Id);
+                    var classStudent = await _trainingService.GetClassToStudentId(userView!.Human!.Student.Id);
                     userModel!.Parent = _mapper.Map<ParentProfileModel>(userView!.Human!.Student!.ParentStudents!.FirstOrDefault()!.Parent);
                     _mapper.Map(userView!.Human!.Student, userModel);
                     if (classStudent.Content?.Result != null)
@@ -122,7 +122,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
                     foreach (var student in userModel!.Students)
                     {
-                        var classStudent = await _trainingService.GetClassByStudentId(student!.Id);
+                        var classStudent = await _trainingService.GetClassToStudentId(student!.Id);
                         if (classStudent.Content?.Result != null)
                         {
                             student.CodeClass = classStudent!.Content!.Result!.Code;
