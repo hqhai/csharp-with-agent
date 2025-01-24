@@ -37,7 +37,9 @@ builder.Services.AddScoped<IStudentReviewRepository, StudentReviewRepository>();
 builder.Services.AddScoped<ISupportCategoryRepository, SupportCategoryRepository>();
 builder.Services.AddScoped<ISupportQuestionRepository, SupportQuestionRepository>();
 builder.Services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
+builder.Services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
 builder.Services.AddScoped<IFlagRepository, FlagRepository>();
+builder.Services.AddScoped<ICustomerSurveyGroupRepository, CustomerSurveyGroupRepository>();
 builder.Services.AddScoped<DiscussionBoardCommentPublisher>();
 builder.Services.AddScoped<DiscussionBoardLikePublisher>();
 builder.Services.AddScoped<InterationActionPublisher>();
@@ -45,6 +47,7 @@ builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<DeleteClassForumByFlagPublisher>();
 builder.Services.AddScoped<CompleteApprovalPostPublisher>();
 builder.Services.AddScoped<QuestBoardPublisher>();
+builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.TrainingApiUrl);

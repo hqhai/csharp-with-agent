@@ -11,6 +11,7 @@ using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
+using Fsel.Identity.Infrastructure.Common;
 using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 
@@ -62,6 +63,9 @@ builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<CreateStudentsFromFilePublisher>();
 builder.Services.AddScoped<SendStudentsFromFilePublisher>();
+
+//Common
+builder.Services.AddScoped<SaveOtpCodeConverter>();
 
 //Refit
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);

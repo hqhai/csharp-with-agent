@@ -3,6 +3,8 @@
 namespace Fsel.Identity.Application.Queries.StudentRanking
 {
     using System.Collections.Generic;
+    using System.Text.Json.Serialization;
+    using System.Text.Json;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
@@ -49,7 +51,13 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 .ToListAsync(cancellationToken);
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
-            var competitionEvents = studentRankingEvents.Where(x => x.CompetitionEvents != null && x.CompetitionEvents.EventContent != null && ((!x.CompetitionEvents.EventContent.StartDate.HasValue && !x.CompetitionEvents.EventContent.EndDate.HasValue) || (x.CompetitionEvents.EventContent.StartDate.HasValue && x.CompetitionEvents.EventContent.EndDate.HasValue && x.CompetitionEvents.EventContent.StartDate.Value.Date <= currentDate.Date && x.CompetitionEvents.EventContent.EndDate.Value.Date >= currentDate.Date)))
+            var competitionEvents = studentRankingEvents.Where(x => x.CompetitionEvents != null &&
+            x.CompetitionEvents.EventContent != null &&
+            ((!x.CompetitionEvents.EventContent.StartDate.HasValue && !x.CompetitionEvents.EventContent.EndDate.HasValue) ||
+            (x.CompetitionEvents.EventContent.StartDate.HasValue &&
+            x.CompetitionEvents.EventContent.EndDate.HasValue &&
+            x.CompetitionEvents.EventContent.StartDate.Value.Date <= currentDate.Date &&
+            x.CompetitionEvents.EventContent.EndDate.Value.Date >= currentDate.Date)))
                 .Select(x => x.CompetitionEvents);
 
             if (request.Action.HasValue)
