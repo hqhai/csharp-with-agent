@@ -40,5 +40,8 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
 
         [Get("/v1/class/gets-by-course-ids")]
         Task<IApiResponse<MethodResult<IList<ClassModel>>>> GetsByCourseIdsAsync([FromQuery] GetsByCourseIdsQueryModel query);
+
+        [Get("/v1/class/get-class-to-student/{studentId}")]
+        Task<IApiResponse<MethodResult<ClassModel>>> GetClassToStudentIdAsync([FromRoute] Guid studentId);
     }
 }

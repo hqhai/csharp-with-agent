@@ -137,7 +137,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                     userModel.CountPTResult = countResult?.Content?.Result ?? default;
                     if (student.CreatedByParent == false)
                     {
-                        var classStudent = await _trainingService.GetClassByStudentId(student.Id);
+                        var classStudent = await _trainingService.GetClassToStudentId(student.Id);
                         if (!classStudent.IsSuccessStatusCode)
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError), nameof(classStudent));
@@ -217,7 +217,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
                     foreach (var student in userModel.Students)
                     {
-                        var classStudent = await _trainingService.GetClassByStudentId(student.Id);
+                        var classStudent = await _trainingService.GetClassToStudentId(student.Id);
                         if (!classStudent.IsSuccessStatusCode)
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError), nameof(classStudent));

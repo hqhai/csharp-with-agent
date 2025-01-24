@@ -123,7 +123,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 return methodResult;
             }
             var studentId = studentsResult.Content?.Result?.Id;
-            var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
+            var classResult = await _trainingService.GetClassToStudentIdAsync(studentId ?? default);
             if (!classResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));
