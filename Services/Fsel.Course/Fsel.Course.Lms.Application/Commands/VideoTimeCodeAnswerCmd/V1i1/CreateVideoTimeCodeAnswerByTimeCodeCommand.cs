@@ -370,7 +370,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             {
                 var correctCount = await _videoConverter.UpdateVideoAnswers(videoTimeCode, videoTimeCodeResult, isDoneTimeCode);
                 videoTimeCodeResult = await GetTokenVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode, course.CourseType, correctCount);
-                await SendTokenHistoryAsync(videoTimeCodeResult, courseResultId, student, cancellationToken).ConfigureAwait(false);
+                await SendTokenHistoryAsync(videoTimeCodeResult, videoTimeCode, courseResultId, student, cancellationToken).ConfigureAwait(false);
                 var (skillScoreUngradeds, skillScores, isDone) = await GetSkillScoresAsync(videoTimeCodeResult, cancellationToken);
                 if (skillScoreUngradeds != null && skillScoreUngradeds.Any())
                 {
@@ -413,7 +413,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             _logger.LogInformation($"Log_CreateVideoTimeCodeAnswerByTimeCodeCommand_Handle_UpdateVideoTimeCodeResultAsync_Update_2 : {requestInfoUpdate2}");
         }
 
-        private async Task SendTokenHistoryAsync(VideoTimeCodeResult videoTimeCodeResult, Guid? courseResultId, StudentModel student, CancellationToken cancellationToken)
+        private async Task SendTokenHistoryAsync(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode, Guid? courseResultId, StudentModel student, CancellationToken cancellationToken)
         {
             if (videoTimeCodeResult.Status == EnumResultStatus.Done)
             {
@@ -424,15 +424,19 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             {
                 return;
             }
+
+            var feature = videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone ? EnumTokenFeature.Learn : EnumTokenFeature.Test;
+            var mission = videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone ? videoTimeCodeResult.Status == EnumResultStatus.New ? EnumTokenMission.TimeCodeFirstSubmit : EnumTokenMission.TimeCodeSecondSubmit :
+                          videoTimeCode.TimeCodeType == EnumTimeCodeType.UnitTest ? EnumTokenMission.UnitTest : EnumTokenMission.SkillTest;
             var listToken = new List<TokenHistoryQueueModel>
             {
                 new TokenHistoryQueueModel
                 {
                     ObjectId = videoTimeCodeResult.Id,
                     VolatileToken = tokensAchieved,
-                    Feature = EnumTokenFeature.Learn,
+                    Feature = feature,
                     CourseResultId =  courseResultId,
-                    Mission = videoTimeCodeResult.Status == EnumResultStatus.New ? EnumTokenMission.TimeCodeFirstSubmit : EnumTokenMission.TimeCodeSecondSubmit,
+                    Mission = mission,
                     Type = EnumTokenHistoryType.Recevived,
                     UserId = student.Human?.UserId ?? default,
                 }

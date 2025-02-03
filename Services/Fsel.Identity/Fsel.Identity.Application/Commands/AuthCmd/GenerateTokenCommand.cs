@@ -128,7 +128,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 var student = user.Human?.Student;
                 tokenLogin.IsOrder = false;
                 tokenLogin.ClassId = student?.ClassId;
-                var classStudent = await _trainingService.GetClassByStudentId(student?.Id ?? default);
+                var classStudent = await _trainingService.GetClassToStudentId(student?.Id ?? default);
                 var @class = classStudent?.Content?.Result;
                 var isPlacementTest = await _lmsCourseService.IsPlacementTestAsync(student?.Id ?? default);
                 var isSurvey = await _interactionService.IsSurveyCompleted(request.Id ?? default);

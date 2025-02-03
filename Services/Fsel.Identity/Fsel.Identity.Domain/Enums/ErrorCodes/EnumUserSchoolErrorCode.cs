@@ -8,5 +8,7 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// Student Not In School
         /// </summary>
         StudentNotInSchool,
+
+        SchoolAlreadyImported
     }
 }

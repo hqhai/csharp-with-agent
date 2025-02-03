@@ -56,9 +56,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 return methodResult;
             }
 
-            var smsOTPs = await _userOtpCodeRepository.Queryable.Where(p => p.UserId == user.Id && p.Type == EnumUserOtpCodeType.SMS).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
-
-            var lastOTP = smsOTPs.FirstOrDefault();
+            var lastOTP = await _userOtpCodeRepository.Queryable.Where(p => p.UserId == user.Id && p.Type == EnumUserOtpCodeType.SMS).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
 
             if (lastOTP == null || lastOTP.Status == EnumOtpCodeStatus.Verified)
             {

@@ -51,7 +51,13 @@ namespace Fsel.Course.Domain.Models.EntityModels
             }
         }
 
+        /// <summary>
+        /// Số học sinh đã Học trong hệ thống
+        /// </summary>
+        public int NumberStudentToLearn { get; set; }
+
         public IList<ReportCourseLevelModel>? ReportCourseLevels { get; set; }
+        public IList<LearningProgressLearnModel> LearningProgressLearns { get; set; } = new List<LearningProgressLearnModel>();
         public IList<ReportPlacementTestEventSchoolModel> ReportPlacementTestEventSchools { get; set; } = new List<ReportPlacementTestEventSchoolModel>();
     }
 
@@ -70,6 +76,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int NumberStudentsCompletedPT { get; set; }
 
         /// <summary>
+        /// Số học sinh đã Học trong hệ thống
+        /// </summary>
+        public int NumberStudentToLearn { get; set; }
+
+        /// <summary>
         /// Tỷ lệ HS Hoàn thành PT/Đăng ký TK
         /// </summary>
         public double CompletionRate
@@ -80,6 +91,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
             }
         }
 
+        public IList<LearningProgressLearnModel> LearningProgressLearns { get; set; } = new List<LearningProgressLearnModel>();
         public IList<ReportCourseLevelModel>? ReportCourseLevels { get; set; }
     }
 

@@ -20,6 +20,15 @@
     <None Update="Resources\AIPrompt\Role\ApprovalClassForumRole.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\ExportExcelTemplates\BaoCaoReportStudentEvent.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\ExportExcelTemplates\ReportLearningDistrictEvent.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\ExportExcelTemplates\ReportLearningSchoolEvent.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\ExportExcelTemplates\ReportPTEvent.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

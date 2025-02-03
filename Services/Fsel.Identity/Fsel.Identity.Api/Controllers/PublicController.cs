@@ -101,5 +101,17 @@ namespace Fsel.Identity.Api.Controllers
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// check trường đã import chưa
+        /// </summary>
+        [HttpPost("check-school-import")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckSchoolImportHistory([FromQuery] CheckSchoolImportHistoryCommand comand)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(comand).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
