@@ -18,6 +18,7 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
 
     public class SendSMSByGAPITCommand : SendSMSCommandModel, IRequest<MethodResult<bool>>
     {
@@ -28,12 +29,14 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
         private readonly AppSetting _appSetting;
         private readonly IMessageHistoryRepository _messageHistoryRepository;
         private readonly IGAPITService _gapitService;
+        private readonly ILogger<SendSMSByGAPITCommand> _logger;
 
-        public SendSMSByGAPITCommandHandler(AppSetting appSetting, IMessageHistoryRepository messageHistoryRepository, IGAPITService gapitService)
+        public SendSMSByGAPITCommandHandler(AppSetting appSetting, IMessageHistoryRepository messageHistoryRepository, IGAPITService gapitService, ILogger<SendSMSByGAPITCommand> logger)
         {
             _appSetting = appSetting;
             _messageHistoryRepository = messageHistoryRepository;
             _gapitService = gapitService;
+            _logger = logger;
         }
 
         public async Task<MethodResult<bool>> Handle(SendSMSByGAPITCommand request, CancellationToken cancellationToken)
@@ -112,6 +115,7 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
 
             var sendSMSResults = await _gapitService.SendSMSs(requests, authorizationHeader);
             var results = sendSMSResults.Content;
+            _logger.LogError($"StatusCode: {sendSMSResults.StatusCode}, Response: {sendSMSResults.Content.Serialize()}");
 
             messageHistories.ForEach(x =>
             {

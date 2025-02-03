@@ -145,7 +145,7 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
         {
             const string CacheKey = "IRIS_Token";
             string credentials = $"{username}:{password}";
-            string encodeStr = Convert.ToBase64String(Encoding.UTF8.GetBytes(credentials));
+            string encodeStr = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(credentials));
             string authorizationHeader = $"Basic {encodeStr}";
 
             var tokenModel = await _cache.GetAsync(CacheKey, TimeSpan.FromSeconds(1200), async () =>
@@ -184,11 +184,11 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
                     {
                         var request = new
                         {
-                            AuthorizationHeader = authorizationHeader,
+                            Authorization = authorizationHeader,
                             Body = new IRISSMSTokenRequestModel() { GrantType = grantType }
                         }.Serialize();
                         var response = tokenResult?.Content.Serialize();
-                        _logger.LogError($"Lấy Token của API DC thất bại: Status Code {(int)tokenResult.StatusCode} - {tokenResult.StatusCode.ToString()}, Request {request}, Response {response}");
+                        _logger.LogError($"Lấy Token của API DC thất bại: Api url {_appSetting.Services.IRISApiUrlDC}, Status Code {(int)tokenResult.StatusCode} - {tokenResult.StatusCode.ToString()}, Request {request}, Response {response}");
                     }
                     return tokenResult;
                 });
@@ -216,11 +216,11 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
                     {
                         var request = new
                         {
-                            AuthorizationHeader = authorizationHeader,
+                            Authorization = authorizationHeader,
                             Body = new IRISSMSTokenRequestModel() { GrantType = grantType }
                         }.Serialize();
                         var response = tokenResult?.Content.Serialize();
-                        _logger.LogError($"Lấy Token của API DR thất bại: Status Code {(int)tokenResult.StatusCode} - {tokenResult.StatusCode.ToString()}, Request {request}, Response {response}");
+                        _logger.LogError($"Lấy Token của API DR thất bại: Api url {_appSetting.Services.IRISApiUrlDR}, Status Code {(int)tokenResult.StatusCode} - {tokenResult.StatusCode.ToString()}, Request {request}, Response {response}");
                     }
                     return tokenResult;
                 });
@@ -252,11 +252,11 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
                     {
                         var request = new
                         {
-                            AuthorizationHeader = authorizationHeader,
+                            Authorization = authorizationHeader,
                             Body = requestModels
                         }.Serialize();
                         var response = tokenResult?.Content.Serialize();
-                        _logger.LogError($"Send message cho API DC thất bại: Status Code {(int)tokenResult.StatusCode} - {tokenResult.StatusCode.ToString()}, Request {request}, Response {response}");
+                        _logger.LogError($"Send message cho API DC thất bại: Api url {_appSetting.Services.IRISApiUrlDC}, Status Code {(int)tokenResult.StatusCode} - {tokenResult.StatusCode.ToString()}, Request {request}, Response {response}");
                     }
                     return tokenResult;
                 });
@@ -284,11 +284,11 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
                     {
                         var request = new
                         {
-                            AuthorizationHeader = authorizationHeader,
+                            Authorization = authorizationHeader,
                             Body = requestModels
                         }.Serialize();
                         var response = tokenResult?.Content.Serialize();
-                        _logger.LogError($"Send message cho API DR thất bại: Status Code {(int)tokenResult.StatusCode} - {tokenResult.StatusCode.ToString()}, Request {request}, Response {response}");
+                        _logger.LogError($"Send message cho API DR thất bại: Api url {_appSetting.Services.IRISApiUrlDR}, Status Code {(int)tokenResult.StatusCode} - {tokenResult.StatusCode.ToString()}, Request {request}, Response {response}");
                     }
                     return tokenResult;
                 });
