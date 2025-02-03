@@ -9,6 +9,7 @@ using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.CompetitionEventsCmd;
 using Fsel.Identity.Application.Queries.CompetitionEventsQuery;
 using Fsel.Identity.Application.Services.SystemService.Model;
+using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
@@ -122,7 +123,6 @@ namespace Fsel.Identity.Api.Controllers
             return commandResult.GetActionResult();
         }
 
-
         [HttpGet("get-event-parent/{id}")]
         [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -130,6 +130,16 @@ namespace Fsel.Identity.Api.Controllers
         {
             ArgumentException.ThrowIfNullOrEmpty(nameof(id));
             var commandResult = await _mediator.Send(new GetParentEventByIdQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpGet("get-child-events/{id}")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEvent>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetChildPEvents([FromRoute] Guid id)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(nameof(id));
+            var commandResult = await _mediator.Send(new GetChildEventsByParentIdQuery { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
