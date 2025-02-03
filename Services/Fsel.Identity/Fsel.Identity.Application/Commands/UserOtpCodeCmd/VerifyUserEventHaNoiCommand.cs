@@ -4,17 +4,16 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Identity.Domain.Models.EntityModels;
-    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
-    using AutoMapper;
 
     public class VerifyUserEventHaNoiCommand : IRequest<MethodResult<bool>>
     {
@@ -50,7 +49,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 return methodResult;
             }
 
-            var user = await _userManager.Users.Include(p => p.Human).ThenInclude(p => p.Student).ThenInclude(p => p.Human).FirstOrDefaultAsync(p => p.UserName == request.PhoneNumber, cancellationToken);
+            var user = await _userManager.Users.Include(p => p.Human).ThenInclude(p => p.Student).FirstOrDefaultAsync(p => p.UserName == request.PhoneNumber, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.UserDoesNotExist), nameof(request.PhoneNumber), request.PhoneNumber);
