@@ -64,6 +64,8 @@ namespace Fsel.Shared.Models.ShareModels
         public ButtonNavSettings? ButtonNavSettings { get; set; }
         public bool? AutoGenAge { get; set; }
         public string? NoticeDescription { get; set; }
+        public bool? IsDisplayGift { get; set; }
+        public bool? IsParentEvent { get; set; }
     }
 
     public enum EnumSchoolEventRuleAction
