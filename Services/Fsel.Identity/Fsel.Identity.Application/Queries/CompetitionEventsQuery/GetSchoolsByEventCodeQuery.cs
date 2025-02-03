@@ -51,14 +51,20 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 
             if (!string.IsNullOrEmpty(request.EventCode) && request.LocationId == null)
             {
-                competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.EventCode == request.EventCode, cancellationToken);
+                competitionEvent = await _competitionEventsRepository.Queryable.Include(x => x.CompetitionEvents).FirstOrDefaultAsync(x => x.EventCode == request.EventCode, cancellationToken);
 
             }
             else
             {
-                var parentEventId = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.EventCode == request.EventCode, cancellationToken).Select(x => x.Id);
+                var parentEvent = await _competitionEventsRepository.Queryable.Include(x => x.CompetitionEvents).FirstOrDefaultAsync(x => x.EventCode == request.EventCode, cancellationToken);
 
-                competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.LocationId == request.LocationId && x.ParentEventId == parentEventId, cancellationToken);
+                var parentEventId = parentEvent?.Id ?? default;
+
+
+                var childEvent = parentEvent?.CompetitionEvents.Select(x => x.Id).ToList() ?? default;
+
+
+                competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.LocationId == request.LocationId && (x.ParentEventId == parentEventId || (x.ParentEventId != null && childEvent != null && childEvent.Contains(x.ParentEventId.Value))), cancellationToken);
             }
 
             if (competitionEvent == null || competitionEvent.SchoolIds == null)
