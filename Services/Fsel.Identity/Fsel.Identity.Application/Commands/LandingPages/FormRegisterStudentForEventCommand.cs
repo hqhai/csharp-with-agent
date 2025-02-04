@@ -168,6 +168,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                         DistrictId = request.DistrictId,
                         ParentEmail = request.ParentEmail,
                         ParentPhoneNumber = request.ParentPhoneNumber,
+                        SchoolFaculty = request.SchoolFaculty,
                     }
                 },
                 UserPlatforms = new List<UserPlatform>()
