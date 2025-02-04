@@ -4,10 +4,10 @@ namespace Fsel.System.Infrastructure.Common
 {
     using Fsel.Common.ActionResults;
     using Fsel.Shared.Enums;
+    using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.Banners;
-    using Microsoft.AspNetCore.Components.Forms;
     using Microsoft.EntityFrameworkCore;
 
     public class BannerConverter
@@ -27,23 +27,36 @@ namespace Fsel.System.Infrastructure.Common
             ArgumentNullException.ThrowIfNull(request);
             VoidMethodResult methodResult = new VoidMethodResult();
 
+            var applicableUserDefaults = request.BannerScopes?.Where(x => x.ApplicableUser == EnumApplicableUserGroup.Default).ToList();
+            var applicableUserEvents = request.BannerScopes?.Where(x => x.ApplicableUser == EnumApplicableUserGroup.Event).ToList();
+
             if (request.Type == EnumBannerType.Warning || request.Type == EnumBannerType.Left)
             {
-                var courseLevels = request.BannerScopes!.Where(x => x.CourseLevel.HasValue).Select(x => x.CourseLevel).ToList();
-                var competitionEventIds = request.BannerScopes!.Where(x => x.CompetitionEventId.HasValue).Select(x => x.CompetitionEventId).ToList();
+                var bannerQuerys = await _bannerRepository.Queryable
+                                                          .Include(x => x.BannerScopes)
+                                                          .Where(x => x.Status && x.Type == request.Type && request.StartDate.Date <= x.EndDate.Date && request.EndDate.Date >= x.StartDate.Date)
+                                                          .ToListAsync(cancellationToken);
 
-                var banners = await _bannerRepository.Queryable
-                                                    .Include(x => x.BannerScopes)
-                                                    .Where(x => x.Status && x.Type == request.Type && request.StartDate.Date <= x.EndDate.Date && request.EndDate.Date >= x.StartDate.Date &&
-                                                                (x.BannerScopes.Any(c => courseLevels.Contains(c.CourseLevel) || competitionEventIds.Contains(c.CompetitionEventId))))
-                                                    .ToListAsync(cancellationToken);
+                List<Banner> banners = new List<Banner>();
+
+                if (applicableUserDefaults != null && applicableUserDefaults.Any())
+                {
+                    var bannerDefaults = bannerQuerys.Where(x => x.BannerScopes.Any(c => !c.CompetitionEventId.HasValue && applicableUserDefaults.Any(p => p.CourseLevel == c.CourseLevel))).ToList();
+                    banners.AddRange(bannerDefaults);
+                }
+
+                if (applicableUserEvents != null && applicableUserEvents.Any())
+                {
+                    var bannerEvents = bannerQuerys.Where(x => (x.BannerScopes.Any(c => applicableUserEvents.Any(p => p.CourseLevel == c.CourseLevel && p.CompetitionEventId == c.CompetitionEventId)))).ToList();
+                    banners.AddRange(bannerEvents);
+                }
 
                 if (bannerId.HasValue)
                 {
                     banners = banners.Where(x => x.Id != bannerId).ToList();
                 }
 
-                if (banners != null && banners.Any())
+                if (banners.Any())
                 {
                     foreach (var banner in banners)
                     {
@@ -56,14 +69,26 @@ namespace Fsel.System.Infrastructure.Common
 
             if (request.Type == EnumBannerType.Popup)
             {
-                var courseLevels = request.BannerScopes!.Where(x => x.IsPriority).Select(x => x.CourseLevel).ToList();
-                var priorityBanners = await _bannerScopeRepository.Queryable
-                                                                  .Include(x => x.Banner)
-                                                                  .Where(x => x.Banner != null && request.StartDate <= x.Banner.EndDate && request.EndDate >= x.Banner.StartDate)
-                                                                  .Where(x => (courseLevels.Contains(x.CourseLevel) && x.IsPriority))
-                                                                  .ToListAsync(cancellationToken);
+                var bannerScopeQuerys = await _bannerScopeRepository.Queryable
+                                                                    .Include(x => x.Banner)
+                                                                    .Where(x => x.Banner != null && request.StartDate <= x.Banner.EndDate && request.EndDate >= x.Banner.StartDate && x.IsPriority)
+                                                                    .ToListAsync(cancellationToken);
 
-                if (priorityBanners != null && priorityBanners.Any())
+                List<BannerScope> priorityBanners = new List<BannerScope>();
+
+                if (applicableUserDefaults != null && applicableUserDefaults.Any())
+                {
+                    var bannerScopeDefaults = bannerScopeQuerys.Where(x => !x.CompetitionEventId.HasValue && applicableUserDefaults.Any(p => p.IsPriority && p.CourseLevel == x.CourseLevel)).ToList();
+                    priorityBanners.AddRange(bannerScopeDefaults);
+                }
+
+                if (applicableUserEvents != null && applicableUserEvents.Any())
+                {
+                    var bannerScopeEvents = bannerScopeQuerys.Where(x => applicableUserEvents.Any(p => p.IsPriority && p.CourseLevel == x.CourseLevel && p.CompetitionEventId == x.CompetitionEventId)).ToList();
+                    priorityBanners.AddRange(bannerScopeEvents);
+                }
+
+                if (priorityBanners.Any())
                 {
                     foreach (var priorityBanner in priorityBanners)
                     {
@@ -127,12 +152,12 @@ namespace Fsel.System.Infrastructure.Common
                 return (false, nameof(EnumBannerErrorCode.DisplayStartTimeGreaterThanDisplayEndTime), nameof(request.DisplayStartTime), request.DisplayStartTime);
             }
 
-            if (request.BannerScopes.Any(x => x.ApplicableUser == EnumApplicableUserGroup.Default && !x.CourseLevel.HasValue))
+            if (request.BannerScopes.Any(x => !x.CourseLevel.HasValue))
             {
                 return (false, nameof(EnumBannerErrorCode.CourseLevelNotNull), nameof(request.BannerScopes), request.BannerScopes);
             }
 
-            if (request.BannerScopes.Any(x => x.ApplicableUser == EnumApplicableUserGroup.Default && x.CourseLevel.HasValue && (x.TargetUsers == null || !x.TargetUsers.Any())))
+            if (request.BannerScopes.Any(x => x.CourseLevel.HasValue && (x.TargetUsers == null || !x.TargetUsers.Any())))
             {
                 return (false, nameof(EnumBannerErrorCode.TargetUserNotNull), nameof(request.BannerScopes), request.BannerScopes);
             }
