@@ -96,6 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     NumberRegisteredSchool = reportCompetitionEvent.NumberRegisteredSchool,
                     NumberActualParticipatingSchool = reportCompetitionEvent.NumberActualParticipatingSchool,
                     NumberValidStudentAccount = reportCompetitionEvent.NumberValidStudentAccount,
+                    NumberStudentCompleteVerify = reportCompetitionEvent.NumberStudentCompleteVerify,
                     NumberStudentsCompletedPT = placementTestResultReports?.Select(x => x.StudentId).Distinct().Count() ?? default,
                     ReportCourseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic).Select(courseLevel =>
                     {
@@ -136,11 +137,13 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                         excelWorksheet.Cells[startRow, 4].Value = item.NumberActualParticipatingSchool;
                         excelWorksheet.Cells[startRow, 5].Value = item.ActualSchoolParticipationRate + "%";
                         excelWorksheet.Cells[startRow, 6].Value = item.NumberValidStudentAccount;
-                        excelWorksheet.Cells[startRow, 7].Value = item.NumberStudentsCompletedPT;
-                        excelWorksheet.Cells[startRow, 8].Value = item.CompletionRate + "%";
+                        excelWorksheet.Cells[startRow, 7].Value = item.NumberStudentCompleteVerify;
+                        excelWorksheet.Cells[startRow, 8].Value = item.CompleteVerifyRate + "%";
+                        excelWorksheet.Cells[startRow, 9].Value = item.NumberStudentsCompletedPT;
+                        excelWorksheet.Cells[startRow, 10].Value = item.CompletionRate + "%";
                         if (item.ReportCourseLevels != null)
                         {
-                            var rowReportLevel = 9;
+                            var rowReportLevel = 11;
                             foreach (var reportLevel in item.ReportCourseLevels)
                             {
                                 excelWorksheet.Cells[startRow, rowReportLevel].Value = reportLevel.TotalStudent;

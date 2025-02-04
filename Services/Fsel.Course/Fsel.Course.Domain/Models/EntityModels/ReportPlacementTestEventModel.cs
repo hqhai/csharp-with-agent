@@ -36,6 +36,21 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int NumberValidStudentAccount { get; set; }
 
         /// <summary>
+        /// Số học sinh xác thực thành công
+        /// </summary>
+        public int NumberStudentCompleteVerify { get; set; }
+
+        /// Tỷ lệ HS xác thực thành công/Đăng ký TK
+        /// </summary>
+        public double CompleteVerifyRate
+        {
+            get
+            {
+                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentCompleteVerify, NumberValidStudentAccount);
+            }
+        }
+
+        /// <summary>
         /// Số học sinh đã hoàn thành PT
         /// </summary>
         public int NumberStudentsCompletedPT { get; set; }
@@ -47,7 +62,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         {
             get
             {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount);
+                return NumberStudentCompleteVerify == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberStudentCompleteVerify);
             }
         }
 
@@ -76,6 +91,21 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int NumberStudentsCompletedPT { get; set; }
 
         /// <summary>
+        /// Số học sinh xác thực thành công
+        /// </summary>
+        public int NumberStudentCompleteVerify { get; set; }
+
+        /// Tỷ lệ HS xác thực thành công/Đăng ký TK
+        /// </summary>
+        public double CompleteVerifyRate
+        {
+            get
+            {
+                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentCompleteVerify, NumberValidStudentAccount);
+            }
+        }
+
+        /// <summary>
         /// Số học sinh đã Học trong hệ thống
         /// </summary>
         public int NumberStudentToLearn { get; set; }
@@ -87,7 +117,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         {
             get
             {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount);
+                return NumberStudentCompleteVerify == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberStudentCompleteVerify);
             }
         }
 
