@@ -185,7 +185,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 userModel.Parent = _mapper.Map<ParentProfileModel>(parentStudent.Parent.Human);
                 userModel.Parent.Occupation = parentStudent.Parent.Occupation;
             }
-            var classStudent = await _trainingService.GetClassByStudentId(student?.Id ?? default);
+            var classStudent = await _trainingService.GetClassToStudentId(student?.Id ?? default);
             var @class = classStudent?.Content?.Result;
             if (@class != null)
             {
