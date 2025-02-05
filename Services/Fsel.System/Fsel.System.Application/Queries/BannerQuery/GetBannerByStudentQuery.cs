@@ -105,13 +105,13 @@ namespace Fsel.System.Application.Queries.BannerQuery
                 targetUser = EnumTargetUser.Expired;
             }
 
-            // banner thuốc course level và đúng trạng thái của user
+            // banner thuộc course level và đúng trạng thái của user
             banners = banners.Where(x => x.BannerScopes.Any(c => c.CourseLevel == studentSetting.Level && c.TargetUsers != null && c.TargetUsers.Any(p => p == targetUser))).ToList();
 
             // banner trong event
             if (eventIds != null && eventIds.Any())
             {
-                banners = banners.Where(x => x.BannerScopes.Any(c => c.CompetitionEventId.HasValue && eventIds.Contains(c.CompetitionEventId.Value) || (c.ApplicableUser == EnumApplicableUserGroup.Default))).ToList();
+                banners = banners.Where(x => x.BannerScopes.Any(c => c.CompetitionEventId.HasValue && eventIds.Contains(c.CompetitionEventId.Value))).ToList();
             }
             else
             {
@@ -138,7 +138,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
             banners.RemoveAll(c => bannerRemoves.Contains(c));
 
             // lấy banner được ưu tiên
-            var bannerPriority = banners.FirstOrDefault(x => x.Type == EnumBannerType.Popup && x.BannerScopes.Any(c => c.IsPriority));
+            var bannerPriority = banners.FirstOrDefault(x => x.Type == EnumBannerType.Popup && x.BannerScopes.Any(c => c.IsPriority && c.CourseLevel == studentSetting.Level && c.TargetUsers != null && c.TargetUsers.Any(p => p == targetUser)));
 
             // lấy dữ liệu
             var banner = bannerPriority != null ? bannerPriority : banners.FirstOrDefault(x => x.Type == EnumBannerType.Popup);
