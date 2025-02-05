@@ -332,6 +332,10 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
                 excelWorksheet.Cells[3, currentColumn + 1 - (answers.Count * 2)].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                 excelWorksheet.Cells[3, currentColumn + 1 - (answers.Count * 2)].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             }
+            if (currentColumn == 8)
+            {
+                return;
+            }
             excelWorksheet.Cells[1, 1, 1, currentColumn].Merge = true;
             excelWorksheet.Cells[2, surveyColumn + 1].Value = "Câu hỏi Khảo sát trên Hệ thống FSEL";
             excelWorksheet.Cells[2, surveyColumn + 1, 2, currentColumn].Merge = true;

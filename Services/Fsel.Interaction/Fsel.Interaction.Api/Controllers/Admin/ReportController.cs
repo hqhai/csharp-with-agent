@@ -17,7 +17,6 @@ namespace Fsel.Interaction.Api.Controllers.Admin
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/report")]
     [ApiController]
-    [Permission(role: nameof(EnumRole.Admin))]
     public class ReportController : ControllerBase
     {
         private readonly IMediator _mediator;

@@ -15,6 +15,7 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
     using Fsel.Interaction.Domain.Entities.SurveyQuestionConfigs;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Interaction.Infrastructure.Repositories;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -26,6 +27,7 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
 
     public class ExportReportSurveyQuestionEventQuery : IRequest<MethodResult<Stream>>
     {
+        public string? HighEventCode { get; set; }
         public string? EventCodeStr { get; set; }
         public EnumEducationLevel EducationLevel { get; set; }
     }
@@ -65,7 +67,7 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
 
             var competitionEventResults = await _userService.GetEventToEventCodeStrAsync(new GetReportCompetitionEventQueryModel
             {
-                EventCodeStr = request.EventCodeStr
+                EventCodeStr = request.HighEventCode
             });
             var competitionEvents = competitionEventResults.Content?.Result;
             if (competitionEvents == null)
@@ -88,6 +90,7 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
             var listCustomerSurveyGroup = new ConcurrentStack<CustomerSurveyGroup>();
             var listCustomerSurveyReport = new ConcurrentStack<CustomerSurveyUserReportModel>();
             var listCustomerSurveyQuestionReport = new ConcurrentBag<CustomerSurveyQuestionReportModel>();
+            var listQuestionReport = new ConcurrentBag<QuestionUserReportModel>();
 
             // Chia danh sách thành từng nhóm
             var batches = userIds
@@ -114,17 +117,15 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
                 .GroupBy(x => x.index / ValueSettings.BatchSize)
                 .Select(g => g.Select(x => x.id).ToList())
                 .ToList();
-
+            var surveyQuestions = await _surveyQuestionRepository.Queryable.Where(x => x.CompetitionEventId.HasValue && competitionEvents.Select(x => x.Id).Contains(x.CompetitionEventId.Value))
+                                                                             .OrderBy(x => x.DisplayLevel)
+                                                                             .ThenBy(x => x.DisplayOrder)
+                                                                             .ToListAsync(cancellationToken);
             await Parallel.ForEachAsync(batchetCustomerSurveys, async (batchetCustomerSurvey, cancellationToken) =>
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var customerSurveyRepository = scope.ServiceProvider.GetRequiredService<ICustomerSurveyRepository>();
-                    var surveyQuestionRepository = scope.ServiceProvider.GetRequiredService<ISurveyQuestionRepository>();
-                    var surveyQuestions = await surveyQuestionRepository.Queryable.Where(x => x.CompetitionEventId.HasValue && competitionEvents.Select(x => x.Id).Contains(x.CompetitionEventId.Value))
-                                                                                  .OrderBy(x => x.DisplayLevel)
-                                                                                  .ThenBy(x => x.DisplayOrder)
-                                                                                  .ToListAsync(cancellationToken);
 
                     var customerSurveyGroups = await customerSurveyRepository.Queryable.Where(x => x.CustomerSurveyGroupId.HasValue && batchetCustomerSurvey.Select(x => x.Id).Contains(x.CustomerSurveyGroupId.Value))
                                                                                        .ToListAsync(cancellationToken);
@@ -142,6 +143,14 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
                         {
                             continue;
                         }
+
+                        listQuestionReport.Add(new QuestionUserReportModel
+                        {
+                            SurveyQuestionId = surveyQuestion.Id,
+                            DisplayLevel = surveyQuestion.DisplayLevel,
+                            DisplayOrder = surveyQuestion.DisplayOrder,
+                            TotalStudent = customerSurveyQuestionAnswers.Count(x => x.Answers != null && x.Answers.Any()),
+                        });
                         listCustomerSurveyReport.PushRange(customerSurveyQuestionAnswers.SelectMany(x =>
                         {
                             return answers?.Select(answer =>
@@ -165,18 +174,35 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
                 LocationId = um.LocationId,
                 SurveyQuestionUserReports = um.UserIds
                                               .Join(listCustomerSurveyReport.ToList(), userId => userId, record => record.UserId, (userId, record) => record)
-                                              .GroupBy(x => new { x.DisplayLevel, x.DisplayOrder, x.Id, x.SurveyQuestionId })
+                                              .GroupBy(x => new { x.DisplayLevel, x.DisplayOrder, x.SurveyQuestionId })
                                               .Select(x => new SurveyQuestionUserReportModel
                                               {
-                                                  Id = x.Key.Id,
                                                   DisplayLevel = x.Key.DisplayLevel,
                                                   DisplayOrder = x.Key.DisplayOrder,
                                                   SurveyQuestionId = x.Key.SurveyQuestionId,
                                                   TotalCount = x.Sum(x => x.NumberSubQuestion),
                                               }).OrderBy(x => x.DisplayLevel)
                                                 .ThenBy(x => x.DisplayOrder)
-                                                .ThenBy(x => x.Id)
                                                 .ToList()
+            }).ToList();
+
+            var customerSubSurveyQuestionReports = reportCompetitionEvents.Select(um => new CustomerSurveyQuestionReportModel
+            {
+                LocationId = um.LocationId,
+                SurveyQuestionUserReports = um.UserIds
+                                            .Join(listCustomerSurveyReport.ToList(), userId => userId, record => record.UserId, (userId, record) => record)
+                                            .GroupBy(x => new { x.DisplayLevel, x.DisplayOrder, x.Id, x.SurveyQuestionId })
+                                            .Select(x => new SurveyQuestionUserReportModel
+                                            {
+                                                Id = x.Key.Id,
+                                                DisplayLevel = x.Key.DisplayLevel,
+                                                DisplayOrder = x.Key.DisplayOrder,
+                                                SurveyQuestionId = x.Key.SurveyQuestionId,
+                                                TotalCount = x.Sum(x => x.NumberSubQuestion),
+                                            }).OrderBy(x => x.DisplayLevel)
+                                              .ThenBy(x => x.DisplayOrder)
+                                              .ThenBy(x => x.Id)
+                                              .ToList()
             }).ToList();
 
             var listGroupSurveyReport = listCustomerSurveyReport.GroupBy(x => new { x.Id, x.DisplayLevel, x.DisplayOrder }).Select(x => new CustomerSurveyUserReportModel
@@ -199,24 +225,20 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
             {
                 var reportPlacementTestEvent = reportPlacementTestEvents?.FirstOrDefault(x => x.LocationName == reportCompetitionEvent.DistrictName);
                 var groupSurveyReport = customerSurveyQuestionReports.FirstOrDefault(x => x.LocationId == reportCompetitionEvent.LocationId);
-
+                var groupSubSurveyReport = customerSubSurveyQuestionReports.FirstOrDefault(x => x.LocationId == reportCompetitionEvent.LocationId);
                 var surveyQuestionReportDistrict = new SurveyQuestionReportDistrictModel
                 {
                     LocationName = reportCompetitionEvent.DistrictName,
                     NumberActualParticipatingSchool = reportPlacementTestEvent?.NumberActualParticipatingSchool ?? default,
                     NumberRegisteredSchool = reportPlacementTestEvent?.NumberRegisteredSchool ?? default,
                     NumberStudentsCompletedPT = reportPlacementTestEvent?.NumberStudentsCompletedPT ?? default,
-                    NumberStudentVerified = reportCompetitionEvent.NumberStudentVerifiedDistrict,
+                    NumberStudentVerified = reportCompetitionEvent.NumberStudentCompleteVerify,
                     NumberValidStudentAccount = reportPlacementTestEvent?.NumberValidStudentAccount ?? default,
-                    NumberStudentsCompletedSurvey = listCustomerSurveyGroup.Where(x => reportCompetitionEvent.UserIds != null && reportCompetitionEvent.UserIds.Contains(x.UserId)).Count(),
-                    SurveyQuestionUserReports = groupSurveyReport?.SurveyQuestionUserReports.ToList() ?? new List<SurveyQuestionUserReportModel>()
+                    SurveyQuestionUserReports = groupSurveyReport?.SurveyQuestionUserReports.ToList() ?? new List<SurveyQuestionUserReportModel>(),
+                    SubSurveyQuestionUserReports = groupSubSurveyReport?.SurveyQuestionUserReports.ToList() ?? new List<SurveyQuestionUserReportModel>(),
                 };
                 surveyQuestionReportDistricts.Add(surveyQuestionReportDistrict);
             });
-            var surveyQuestions = await _surveyQuestionRepository.Queryable.Where(x => x.CompetitionEventId.HasValue && competitionEvents.Select(x => x.Id).Contains(x.CompetitionEventId.Value))
-                                                                           .OrderBy(x => x.DisplayLevel)
-                                                                           .ThenBy(x => x.DisplayOrder)
-                                                                           .ToListAsync(cancellationToken);
 
             methodResult.Result = ExportExcelTemplate(surveyQuestionReportDistricts.ToList(), surveyQuestions, request);
             return methodResult;
@@ -246,15 +268,22 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
                         excelWorksheet.Cells[startRow, 6].Value = item.NumberValidStudentAccount;
                         excelWorksheet.Cells[startRow, 7].Value = item.NumberStudentsCompletedPT;
                         excelWorksheet.Cells[startRow, 8].Value = item.CompletionRate + "%";
-                        excelWorksheet.Cells[startRow, 9].Value = item.NumberStudentsCompletedSurvey;
-                        excelWorksheet.Cells[startRow, 10].Value = item.PercentageCompletionSurvey + "%";
+                        var rowReportLevel = 9;
                         if (item.SurveyQuestionUserReports != null)
                         {
-                            var rowReportLevel = 11;
                             foreach (var reportLevel in item.SurveyQuestionUserReports)
                             {
                                 excelWorksheet.Cells[startRow, rowReportLevel].Value = reportLevel.TotalCount;
-                                excelWorksheet.Cells[startRow, rowReportLevel + 1].Value = NumberHelper.GetPercent(reportLevel.TotalCount, item.NumberStudentsCompletedSurvey) + "%";
+                                rowReportLevel++;
+                            }
+                        }
+                        if (item.SubSurveyQuestionUserReports != null)
+                        {
+                            foreach (var reportLevel in item.SubSurveyQuestionUserReports)
+                            {
+                                var numberQuestion = item.SurveyQuestionUserReports?.FirstOrDefault(x => x.SurveyQuestionId == reportLevel.SurveyQuestionId)?.TotalCount ?? default;
+                                excelWorksheet.Cells[startRow, rowReportLevel].Value = reportLevel.TotalCount;
+                                excelWorksheet.Cells[startRow, rowReportLevel + 1].Value = NumberHelper.GetPercent(reportLevel.TotalCount, numberQuestion) + "%";
                                 rowReportLevel += 2;
                             }
                         }

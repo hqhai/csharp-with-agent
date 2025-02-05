@@ -59,7 +59,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 return methodResult;
             }
             var reportPlacementTestEvents = new ConcurrentBag<ReportPlacementTestEventModel>();
-            var placementTestResultGroups = new ConcurrentBag<PlacementTestResultReportGroupModel>();
+            var placementTestResultGroups = new ConcurrentStack<PlacementTestResultReportGroupModel>();
 
             var studentIds = reportCompetitionEvents.Where(x => x.StudentIds != null && x.StudentIds.Any()).SelectMany(x => x.StudentIds ?? new List<Guid>()).ToList();
 
@@ -75,32 +75,17 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                    var placementTestResultRepository = scope.ServiceProvider.GetRequiredService<IPlacementTestResultRepository>();
-                    var placementTestGroups = await placementTestResultRepository.Queryable
-                        .Where(x => batche.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
-                        .GroupBy(x => x.StudentId)
-                        .Select(x => new PlacementTestGroupStudentResultModel
-                        {
-                            StudentId = x.Key,
-                            PlacementTestStart = _mapper.Map<PlacementTestResultModel>(x.Select(x => x).OrderBy(x => x.CreatedDate).FirstOrDefault()),
-                            PlacementTestEnd = _mapper.Map<PlacementTestResultModel>(x.Select(x => x).OrderByDescending(x => x.CreatedDate).FirstOrDefault()),
-                        })
-                        .ToListAsync(cancellationToken);
-                    var placementTestResultReports = placementTestGroups?.Select(item =>
-                    {
-                        var placementTestResultEnd = item.PlacementTestEnd;
-                        var placementTestResultStart = item.PlacementTestStart;
-                        if (placementTestResultEnd != null)
-                        {
-                            var (levelCompleted, isLock) = placementTestResultEnd.Level.GetLevelInScore(placementTestResultEnd.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultStart?.Level, default));
-                            return new PlacementTestResultReportGroupModel { StudentId = item.StudentId, IsDonePT = isLock, CourseLevel = levelCompleted };
-                        }
-                        return new PlacementTestResultReportGroupModel { StudentId = item.StudentId };
-                    }).ToList() ?? new List<PlacementTestResultReportGroupModel>();
-                    foreach (var item in placementTestResultReports)
-                    {
-                        placementTestResultGroups.Add(item);
-                    }
+                    var placementTestGroupResultRepository = scope.ServiceProvider.GetRequiredService<IPlacementTestGroupResultRepository>();
+                    var placementTestGroups = await placementTestGroupResultRepository.Queryable
+                                                    .Where(x => batche.Contains(x.StudentId))
+                                                    .Select(x => new PlacementTestResultReportGroupModel
+                                                    {
+                                                        CourseLevel = x.SuggetLevel,
+                                                        StudentId = x.StudentId,
+                                                        IsDonePT = x.Status == EnumResultStatus.Done
+                                                    })
+                                                    .ToListAsync(cancellationToken);
+                    placementTestResultGroups.PushRange(placementTestGroups.ToArray());
                 }
             });
 

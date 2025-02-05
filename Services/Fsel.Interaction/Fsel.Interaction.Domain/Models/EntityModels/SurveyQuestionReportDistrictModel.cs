@@ -17,7 +17,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         {
             get
             {
-                return NumberRegisteredSchool == 0 ? 0 : NumberHelper.GetPercent(NumberActualParticipatingSchool, NumberRegisteredSchool, 2);
+                return NumberRegisteredSchool == 0 ? 0 : NumberHelper.GetPercent(NumberActualParticipatingSchool, NumberRegisteredSchool);
             }
         }
 
@@ -38,7 +38,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         {
             get
             {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentVerified, NumberValidStudentAccount, 2);
+                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentVerified, NumberValidStudentAccount);
             }
         }
 
@@ -54,26 +54,12 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         {
             get
             {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount, 2);
-            }
-        }
-
-        /// Số học sinh đã hoàn thành Survey
-        /// </summary>
-        public int NumberStudentsCompletedSurvey { get; set; }
-
-        /// <summary>
-        /// Tỷ lệ học sinh đã hoàn thành Survey
-        /// </summary>
-        public double PercentageCompletionSurvey
-        {
-            get
-            {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedSurvey, NumberValidStudentAccount, 2);
+                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount);
             }
         }
 
         public IList<SurveyQuestionReportSchoolModel> SurveyQuestionReportSchools { get; set; } = new List<SurveyQuestionReportSchoolModel>();
+        public IList<SurveyQuestionUserReportModel> SubSurveyQuestionUserReports { get; set; } = new List<SurveyQuestionUserReportModel>();
         public IList<SurveyQuestionUserReportModel> SurveyQuestionUserReports { get; set; } = new List<SurveyQuestionUserReportModel>();
     }
 
@@ -98,7 +84,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         {
             get
             {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentVerified, NumberValidStudentAccount, 2);
+                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentVerified, NumberValidStudentAccount);
             }
         }
 
@@ -114,7 +100,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         {
             get
             {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount, 2);
+                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount);
             }
         }
 
@@ -129,7 +115,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         {
             get
             {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedSurvey, NumberValidStudentAccount, 2);
+                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedSurvey, NumberValidStudentAccount);
             }
         }
 
@@ -162,7 +148,14 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public int DisplayLevel { get; set; }
         public float DisplayOrder { get; set; }
         public int TotalCount { get; set; }
-        public int NumberSubQuestion { get; set; }
+    }
+
+    public class QuestionUserReportModel
+    {
+        public Guid SurveyQuestionId { get; set; }
+        public int DisplayLevel { get; set; }
+        public float DisplayOrder { get; set; }
+        public int TotalStudent { get; set; }
     }
 
     public class CustomerSurveyQuestionReportModel

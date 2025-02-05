@@ -128,7 +128,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                             SchoolName = eventSchool.SchoolName,
                             NumberStudentsCompletedPT = placementTestResultSchools?.Where(x => x.IsDonePT).Count() ?? default,
                             NumberValidStudentAccount = eventSchool.NumberValidStudentAccount,
-                            NumberStudentVerifiedSchool = eventSchool.NumberStudentVerifiedSchool,
+                            NumberStudentVerifiedSchool = eventSchool.NumberStudentCompleteVerify,
                             ReportCourseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic).Select(courseLevel =>
                             {
                                 var numberStudentOfLevel = placementTestResultSchools?.Where(x => x.IsDonePT && x.CourseLevel == courseLevel).Count() ?? default;

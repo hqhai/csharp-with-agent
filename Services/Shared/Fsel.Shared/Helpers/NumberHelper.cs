@@ -81,14 +81,14 @@ namespace Fsel.Shared.Helpers
             return convertedValue;
         }
 
-        public static double GetPercent(this double correctCount, double correctTotal, int digits = 0)
+        public static double GetPercent(this double correctCount, double correctTotal)
         {
-            return correctTotal > 0 ? ConvertPercentDouble(correctCount / correctTotal, digits) : default;
+            return correctTotal > 0 ? ConvertPercentDouble(correctCount / correctTotal) : default;
         }
 
-        public static double GetPercent(this int correctCount, int correctTotal, int digits = 0)
+        public static double GetPercent(this int correctCount, int correctTotal)
         {
-            return correctTotal > 0 ? ConvertPercentDouble((double)correctCount / correctTotal, digits) : default;
+            return correctTotal > 0 ? ConvertPercentDouble((double)correctCount / correctTotal) : default;
         }
 
         public static long CalculateAverage(ICollection<long> secondsList)

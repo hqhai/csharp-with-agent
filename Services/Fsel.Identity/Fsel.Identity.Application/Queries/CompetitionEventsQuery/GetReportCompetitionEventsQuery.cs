@@ -88,7 +88,6 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                                               StudentId = baseQ.Id,
                                               IsConfirmed = user.EmailConfirmed || user.PhoneNumberConfirmed,
                                               UserId = human.UserId.GetValueOrDefault(),
-                                              EnumUserStatus = user.Status,
                                           }).ToListAsync(cancellationToken);
 
             var reportCompetitionEvents = new List<ReportCompetitionEventModel>();
@@ -106,7 +105,6 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                     NumberStudentCompleteVerify = studentDistricts.Count(x => x.IsConfirmed),
                     StudentIds = studentIds,
                     UserIds = studentDistricts.Select(x => x.UserId).Distinct().ToList(),
-                    NumberStudentVerifiedDistrict = studentDistricts.Where(x => x.EnumUserStatus == EnumUserStatus.Active).Count(),
                 };
                 reportCompetitionEvents.Add(reportCompetition);
             }

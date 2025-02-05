@@ -27,12 +27,7 @@ namespace Fsel.Shared.Models.ShareModels.EntityModels
         /// </summary>
         public int NumberStudentCompleteVerify { get; set; }
 
-        /// <summary>
-        /// Số HS trong quận đã xác thực sau khi được đăng ký
-        /// </summary>
-        public int NumberStudentVerifiedDistrict { get; set; }
-
-        public IList<Guid>? StudentIds { get; set; }
+        public IList<Guid> StudentIds { get; set; } = new List<Guid>();
         public IList<Guid> UserIds { get; set; } = new List<Guid>();
         public IList<ReportCompetitionEventSchoolModel> ReportCompetitionEventSchools { get; set; } = new List<ReportCompetitionEventSchoolModel>();
     }

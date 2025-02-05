@@ -38,7 +38,6 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly ISystemService _systemService;
-        private readonly IEventRegistrationRepository _eventRegistrationRepository;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IHumanRepository _humanRepository;
         private readonly UserManager<User> _userManager;
@@ -46,7 +45,6 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
         public GetReportCompetitionEventSchoolsQueryHandler(ICompetitionEventsRepository competitionEventsRepository,
             IStudentRepository studentRepository,
             ISystemService systemService,
-            IEventRegistrationRepository eventRegistrationRepository,
             IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
             IHumanRepository humanRepository,
             UserManager<User> userManager)
@@ -54,7 +52,6 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             _competitionEventsRepository = competitionEventsRepository;
             _studentRepository = studentRepository;
             _systemService = systemService;
-            _eventRegistrationRepository = eventRegistrationRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _humanRepository = humanRepository;
             _userManager = userManager;
@@ -103,7 +100,6 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                                               SchoolId = g.Key.GetValueOrDefault(),
                                               StudentIds = g.Select(x => x.baseQ.Id).Distinct().ToList(),
                                               UserIds = g.Where(x => x.human.UserId.HasValue).Select(x => x.human.UserId.GetValueOrDefault()).Distinct().ToList(),
-                                              NumberStudentVerifiedSchool = g.Select(x => x.user).Where(x => x.Status == EnumUserStatus.Active).Distinct().Count(),
                                               CountCompleteVerify = g.Count(x => x.user.EmailConfirmed || x.user.PhoneNumberConfirmed)
                                           }).ToListAsync(cancellationToken);
 
@@ -120,7 +116,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                     NumberRegisteredSchool = schoolDistricts?.Count() ?? default,
                     NumberActualParticipatingSchool = studentDistricts.Select(x => x.SchoolId).Distinct().Count(),
                     NumberValidStudentAccount = studentIds.Count,
-                    NumberStudentVerifiedDistrict = studentDistricts.Sum(x => x.NumberStudentVerifiedSchool),
+                    NumberStudentCompleteVerify = studentDistricts.Sum(x => x.CountCompleteVerify),
                     StudentIds = studentIds,
                     UserIds = studentDistricts.SelectMany(x => x.UserIds).Distinct().ToList(),
                     ReportCompetitionEventSchools = schoolDistricts?.Select(school =>
@@ -129,9 +125,8 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                         return new ReportCompetitionEventSchoolModel
                         {
                             SchoolName = schools?.FirstOrDefault(x => x.Id == school.Id)?.Name,
-                            NumberStudentCompleteVerify = schoolDistrict?.CountCompleteVerify ?? default,
                             NumberValidStudentAccount = schoolDistrict?.StudentIds.Count ?? default,
-                            NumberStudentVerifiedSchool = schoolDistrict?.NumberStudentVerifiedSchool ?? default,
+                            NumberStudentCompleteVerify = schoolDistrict?.CountCompleteVerify ?? default,
                             StudentIds = schoolDistrict?.StudentIds ?? new List<Guid>(),
                             UserIds = schoolDistrict?.UserIds ?? new List<Guid>(),
                         };

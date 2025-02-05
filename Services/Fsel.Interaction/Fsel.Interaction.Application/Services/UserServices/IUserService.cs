@@ -41,10 +41,10 @@ namespace Fsel.Interaction.Application.Services.UserServices
         [Get("/v1/event/get-event-parent/{id}")]
         Task<IApiResponse<MethodResult<Guid>>> GetParentEventId([FromRoute] Guid? id);
 
-        [Get("/v1/other/report-competition-event")]
+        [Get("/v1/admin/other/report-competition-event")]
         Task<IApiResponse<MethodResult<IList<ReportCompetitionEventModel>>>> GetReportCompetitionEventAsync([Query] GetReportCompetitionEventQueryModel query);
 
-        [Get("/v1/other/report-competition-event-school")]
+        [Get("/v1/admin/other/report-competition-event-school")]
         Task<IApiResponse<MethodResult<IList<ReportCompetitionEventModel>>>> GetReportCompetitionEventSchoolAsync([Query] GetReportCompetitionEventQueryModel query);
 
         [Get("/v1/event/get-events-by-event-code-str")]
