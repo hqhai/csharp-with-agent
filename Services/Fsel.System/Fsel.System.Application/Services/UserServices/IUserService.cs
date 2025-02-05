@@ -80,5 +80,8 @@ namespace Fsel.System.Application.Services.UserServices
 
         [Post("/v1/user/get-users-by-userids")]
         Task<IApiResponse<MethodResult<IList<UserModel>>>> GetUsersByUserIdsAsync([FromBody] IList<Guid>? userIds);
+
+        [Post("/v1/event/event-ids")]
+        Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>>>> GetEventByIds([FromBody] GetEventByIdsModel query);
     }
 }

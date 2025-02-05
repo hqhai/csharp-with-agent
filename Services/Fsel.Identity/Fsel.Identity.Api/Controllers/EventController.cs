@@ -120,5 +120,17 @@ namespace Fsel.Identity.Api.Controllers
             }
             return File(commandResult.Result, Settings.Excels.ContentType, $"LandingPageEventCode.xlsx");
         }
+
+        /// <summary>
+        /// Get event by ids
+        /// </summary>
+        [HttpPost("event-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetEventByIds([FromBody] GetCompetitionEventByIdsQuery query)
+        {
+            MethodResult<IList<CompetitionEventsModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
