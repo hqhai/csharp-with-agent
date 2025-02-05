@@ -75,12 +75,12 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 {
                     var placementTestGroupResultRepository = scope.ServiceProvider.GetRequiredService<IPlacementTestGroupResultRepository>();
                     var placementTestGroups = await placementTestGroupResultRepository.Queryable
-                                                    .Where(x => batche.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
+                                                    .Where(x => batche.Contains(x.StudentId))
                                                     .Select(x => new PlacementTestResultReportGroupModel
                                                     {
                                                         CourseLevel = x.SuggetLevel,
                                                         StudentId = x.StudentId,
-                                                        IsDonePT = true
+                                                        IsDonePT = x.Status == EnumResultStatus.Done
                                                     })
                                                     .ToListAsync(cancellationToken);
                     placementTestResultGroups.PushRange(placementTestGroups.ToArray());
@@ -96,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     NumberRegisteredSchool = reportCompetitionEvent.NumberRegisteredSchool,
                     NumberActualParticipatingSchool = reportCompetitionEvent.NumberActualParticipatingSchool,
                     NumberValidStudentAccount = reportCompetitionEvent.NumberValidStudentAccount,
-                    NumberStudentsCompletedPT = placementTestResultReports?.Select(x => x.StudentId).Distinct().Count() ?? default,
+                    NumberStudentsCompletedPT = placementTestResultReports?.Where(x => x.IsDonePT).Select(x => x.StudentId).Distinct().Count() ?? default,
                     ReportCourseLevels = placementTestResultReports != null && placementTestResultReports.Any() ? EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic).Select(courseLevel =>
                     {
                         var numberStudentOfLevel = placementTestResultReports?.Where(x => x.CourseLevel == courseLevel).Select(x => x.StudentId).Distinct().Count() ?? default;
