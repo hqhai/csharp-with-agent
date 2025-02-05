@@ -9,7 +9,6 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels.EntityModels;
@@ -79,7 +78,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             {
                 request.DistrictName = request.DistrictName.ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim();
                 var district = locationDistricts?.FirstOrDefault(x => x.Name.ToLower().Trim() == request.DistrictName);
-                competitionEvents = competitionEvents.Where(x => district != null && x.LocationId == district.Id).ToList();
+                competitionEvents = competitionEvents.Where(x => district != null && x.Id == district.Id).ToList();
             }
 
             var schoolIds = competitionEvents.SelectMany(x => x.SchoolIds ?? new List<Guid>()).ToList();
@@ -87,12 +86,11 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             var schools = schoolResults.Content?.Result;
 
             var studentSchoolIds = await (from baseQ in _studentRepository.Queryable
-                                          join er in _eventRegistrationRepository.Queryable on baseQ.Id equals er.StudentId
                                           join sce in _studentCompetitionEventsRepository.Queryable on baseQ.Id equals sce.StudentId
                                           join human in _humanRepository.Queryable on baseQ.HumanId equals human.Id
                                           join user in _userManager.Users on human.UserId equals user.Id
                                           where schools != null && baseQ.SchoolId.HasValue && schools.Select(x => x.Id).Contains(baseQ.SchoolId.Value)
-                                          && competitions.Select(x => x.Id).Contains(er.CompetitionEventId)
+                                          && competitions.Select(x => x.Id).Contains(sce.CompetitionEventId)
                                           group new { baseQ, human, user }
                                           by baseQ.SchoolId into g
                                           select new

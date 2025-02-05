@@ -11,17 +11,14 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
-    using Fsel.Identity.Application.Queries.UserCourseSettingQuery;
     using Fsel.Identity.Application.Services;
     using Fsel.Identity.Application.Services.InteractionService;
-    using Fsel.Identity.Application.Services.InteractionService.Models;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -257,6 +254,9 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                         SchoolId = request.SchoolId,
                         SchoolClass = request.SchoolClass,
                         SchoolGrade = request.SchoolGrade,
+                        ParentPhoneNumber = request.ParentPhoneNumber,
+                        ParentEmail = request.ParentEmail,
+                        SchoolFaculty = request.SchoolFaculty,
                     }
                 },
                 UserPlatforms = new List<UserPlatform>()

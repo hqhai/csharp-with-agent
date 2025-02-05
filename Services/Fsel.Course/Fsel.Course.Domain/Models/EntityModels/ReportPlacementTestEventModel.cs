@@ -27,7 +27,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         {
             get
             {
-                return NumberRegisteredSchool == 0 ? 0 : NumberHelper.GetPercent(NumberActualParticipatingSchool, NumberRegisteredSchool, 2);
+                return NumberRegisteredSchool == 0 ? 0 : NumberHelper.GetPercent(NumberActualParticipatingSchool, NumberRegisteredSchool);
             }
         }
 
@@ -48,11 +48,17 @@ namespace Fsel.Course.Domain.Models.EntityModels
         {
             get
             {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount, 2);
+                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount);
             }
         }
 
+        /// <summary>
+        /// Số học sinh đã Học trong hệ thống
+        /// </summary>
+        public int NumberStudentToLearn { get; set; }
+
         public IList<ReportCourseLevelModel>? ReportCourseLevels { get; set; }
+        public IList<LearningProgressLearnModel> LearningProgressLearns { get; set; } = new List<LearningProgressLearnModel>();
         public IList<ReportPlacementTestEventSchoolModel> ReportPlacementTestEventSchools { get; set; } = new List<ReportPlacementTestEventSchoolModel>();
     }
 
@@ -71,17 +77,23 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int NumberStudentsCompletedPT { get; set; }
 
         /// <summary>
+        /// Số học sinh đã Học trong hệ thống
+        /// </summary>
+        public int NumberStudentToLearn { get; set; }
+
+        /// <summary>
         /// Tỷ lệ HS Hoàn thành PT/Đăng ký TK
         /// </summary>
         public double CompletionRate
         {
             get
             {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount, 2);
+                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount);
             }
         }
 
         public int NumberStudentVerifiedSchool { get; set; }
+        public IList<LearningProgressLearnModel> LearningProgressLearns { get; set; } = new List<LearningProgressLearnModel>();
         public IList<ReportCourseLevelModel>? ReportCourseLevels { get; set; }
     }
 

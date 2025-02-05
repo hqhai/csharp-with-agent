@@ -2,6 +2,8 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
+    using System;
+
     public class PlacementTestGroupStudentResultModel
     {
         public Guid StudentId { get; set; }

@@ -173,7 +173,6 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
                                                   DisplayOrder = x.Key.DisplayOrder,
                                                   SurveyQuestionId = x.Key.SurveyQuestionId,
                                                   TotalCount = x.Sum(x => x.NumberSubQuestion),
-                                                  NumberSubQuestion =
                                               }).OrderBy(x => x.DisplayLevel)
                                                 .ThenBy(x => x.DisplayOrder)
                                                 .ThenBy(x => x.Id)

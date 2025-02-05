@@ -69,7 +69,10 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
 
                 var eventResult = eventResults.Content?.Result?.FirstOrDefault();
 
-                surveyQuestions = surveyQuestions.Where(x => x.CompetitionEventId == eventResult?.Id).ToList();
+                var parentEventResult = await _userService.GetParentEventId(eventResult?.Id);
+                var eventId = parentEventResult?.Content?.Result;
+
+                surveyQuestions = surveyQuestions.Where(x => x.CompetitionEventId == eventId).ToList();
             }
 
             methodResult.Result = _mapper.Map<IList<SurveyQuestionModel>>(surveyQuestions);

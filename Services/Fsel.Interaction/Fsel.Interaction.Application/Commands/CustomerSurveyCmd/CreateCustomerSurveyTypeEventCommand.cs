@@ -82,16 +82,19 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 
                 var eventResult = eventResults.Content?.Result?.FirstOrDefault();
 
-                if (customerSurveyGroups.Any(x => x.CompetitionEventId == eventResult?.Id))
+                var parentEventResult = await _userService.GetParentEventId(eventResult?.Id);
+                var eventId = parentEventResult?.Content?.Result;
+
+                if (customerSurveyGroups.Any(x => x.CompetitionEventId == eventId))
                 {
-                    customerSurveyGroup = customerSurveyGroups.FirstOrDefault(x => x.CompetitionEventId == eventResult?.Id)!;
+                    customerSurveyGroup = customerSurveyGroups.FirstOrDefault(x => x.CompetitionEventId == eventId)!;
                 }
                 else
                 {
-                    customerSurveyGroup.CompetitionEventId = eventResult?.Id;
+                    customerSurveyGroup.CompetitionEventId = eventId;
                 }
 
-                countSurveyQuestion = countSurveyQuestion.Where(x => x.CompetitionEventId == eventResult?.Id).ToList();
+                countSurveyQuestion = countSurveyQuestion.Where(x => x.CompetitionEventId == eventId).ToList();
                 customerSurveyGroup.Coin = _appSetting.CoinConfig?.SurveyEvent;
             }
             else
