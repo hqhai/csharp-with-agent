@@ -64,7 +64,6 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     return methodResult;
                 }
             }
-
             else if (!request.PhoneNumber.IsNullOrEmpty())
             {
                 user = await _userManager.Users

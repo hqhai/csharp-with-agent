@@ -14,6 +14,11 @@ namespace Fsel.Shared.Models.ShareModels.EntityModels
         /// </summary>
         public int NumberValidStudentAccount { get; set; }
 
+        /// <summary>
+        /// Số học sinh xác thực thành công
+        /// </summary>
+        public int NumberStudentCompleteVerify { get; set; }
+
         public int NumberStudentVerifiedSchool { get; set; }
 
         public IList<Guid>? StudentIds { get; set; }

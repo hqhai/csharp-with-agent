@@ -23,6 +23,11 @@ namespace Fsel.Shared.Models.ShareModels.EntityModels
         public int NumberValidStudentAccount { get; set; }
 
         /// <summary>
+        /// Số học sinh xác minh thành công
+        /// </summary>
+        public int NumberStudentCompleteVerify { get; set; }
+
+        /// <summary>
         /// Số HS trong quận đã xác thực sau khi được đăng ký
         /// </summary>
         public int NumberStudentVerifiedDistrict { get; set; }
