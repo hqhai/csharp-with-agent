@@ -28,7 +28,10 @@ namespace Fsel.Identity.Infrastructure.Configs
             builder.HasIndex(x => x.NormalizedUserName)
                 .HasFilter("[NormalizedUserName] IS NOT NULL AND [IsDeleted] = 0");
 
+            builder.HasIndex(x => new { x.IsDeleted, x.UserName });
             builder.HasIndex(x => new { x.IsDeleted, x.Email });
+            builder.HasIndex(x => new { x.IsDeleted, x.PhoneNumber });
+            builder.HasIndex(x => new { x.IsDeleted, x.Id, x.UserName, x.Email });
         }
     }
 }
