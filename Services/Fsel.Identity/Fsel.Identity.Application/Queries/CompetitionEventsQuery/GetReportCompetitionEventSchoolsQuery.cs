@@ -102,7 +102,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                                           {
                                               SchoolId = g.Key.GetValueOrDefault(),
                                               StudentIds = g.Select(x => x.baseQ.Id).Distinct().ToList(),
-                                              CountCompleteVerify = g.Count(x => x.user.Status == EnumUserStatus.Active)
+                                              CountCompleteVerify = g.Count(x => x.user.EmailConfirmed || x.user.PhoneNumberConfirmed)
                                           }).ToListAsync(cancellationToken);
 
             var reportCompetitionEvents = new List<ReportCompetitionEventModel>();

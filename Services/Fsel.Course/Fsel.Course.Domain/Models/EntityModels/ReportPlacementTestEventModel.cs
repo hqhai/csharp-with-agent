@@ -51,6 +51,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
         }
 
         /// <summary>
+        /// Số học sinh đang làm bài PT
+        /// </summary>
+        public int NumberStudentsProcessPT { get; set; }
+
+        /// <summary>
         /// Số học sinh đã hoàn thành PT
         /// </summary>
         public int NumberStudentsCompletedPT { get; set; }
@@ -84,6 +89,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
         /// Số học sinh đăng ký tài khoản hợp lệ
         /// </summary>
         public int NumberValidStudentAccount { get; set; }
+
+        /// <summary>
+        /// Số học sinh đang làm bài PT
+        /// </summary>
+        public int NumberStudentsProcessPT { get; set; }
 
         /// <summary>
         /// Số học sinh đã hoàn thành PT

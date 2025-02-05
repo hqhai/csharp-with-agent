@@ -86,7 +86,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                                           {
                                               SchoolId = baseQ.SchoolId.GetValueOrDefault(),
                                               StudentId = baseQ.Id,
-                                              Status = user.Status,
+                                              IsConfirmed = user.EmailConfirmed || user.PhoneNumberConfirmed,
                                           }).ToListAsync(cancellationToken);
 
             var reportCompetitionEvents = new List<ReportCompetitionEventModel>();
@@ -100,7 +100,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                     NumberRegisteredSchool = schools?.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.Id)).Count() ?? default,
                     NumberActualParticipatingSchool = studentDistricts.Select(x => x.SchoolId).Distinct().Count(),
                     NumberValidStudentAccount = studentIds.Count,
-                    NumberStudentCompleteVerify = studentDistricts.Where(x => x.Status == EnumUserStatus.Active).Count(),
+                    NumberStudentCompleteVerify = studentDistricts.Count(x => x.IsConfirmed),
                     StudentIds = studentIds,
                 };
                 reportCompetitionEvents.Add(reportCompetition);
