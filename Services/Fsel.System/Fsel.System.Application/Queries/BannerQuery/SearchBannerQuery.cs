@@ -9,7 +9,6 @@ namespace Fsel.System.Application.Queries.BannerQuery
     using Fsel.System.Domain.Models.QueryModels.Banners;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class SearchBannerQuery : SearchBannerQueryModel, IRequest<MethodResult<PagingItemsModel<BannerModel>>>
     {
@@ -35,10 +34,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
                 return methodResult;
             }
 
-            var query = _bannerRepository.Queryable
-                                         .Include(x => x.BannerScopes)
-                                         .Include(x => x.BannerImages)
-                                         .AsQueryable();
+            var query = _bannerRepository.Queryable.AsQueryable();
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -53,6 +49,16 @@ namespace Fsel.System.Application.Queries.BannerQuery
             if (request.StartDate.HasValue && request.EndDate.HasValue)
             {
                 query = query.Where(x => request.StartDate.Value.Date <= x.EndDate.Date && request.EndDate.Value.Date >= x.StartDate.Date);
+            }
+
+            if (request.Type.HasValue)
+            {
+                query = query.Where(x => x.Type == request.Type);
+            }
+
+            if (request.Status.HasValue)
+            {
+                query = query.Where(x => x.Status == request.Status);
             }
 
             return await _bannerRepository.GetListByPageResultAsync<BannerModel>(query, request, cancellationToken);

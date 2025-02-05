@@ -19,5 +19,9 @@ namespace Fsel.System.Domain.Models.QueryModels.Banners
         [JsonIgnore]
         public IList<EnumCourseLevel>? ListCourseLevels
         { get { return CourseLevels.ToList<EnumCourseLevel>(); } }
+
+        public EnumBannerType? Type { get; set; }
+
+        public bool? Status { get; set; }
     }
 }
