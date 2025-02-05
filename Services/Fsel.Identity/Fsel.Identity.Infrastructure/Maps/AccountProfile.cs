@@ -21,16 +21,24 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<CreateUserCommandModel, User>().IgnoreAllNonExisting();
             CreateMap<UpdateUserCommandModel, User>().IgnoreAllNonExisting();
             CreateMap<UpdateStudentByAdminCommandModel, User>()
-                .ForMember(p => p.UserName, n => n.MapFrom((m, p) => p.UserName.ToLower().Trim() == p.Email.ToLower().Trim() ? m.Email : m.PhoneNumber))
-                .ForMember(p => p.Email, n => n.MapFrom(m => m.Email))
-                .ForMember(p => p.PhoneNumber, n => n.MapFrom(m => m.PhoneNumber))
-                .ForMember(p => p.NormalizedUserName, n => n.MapFrom((m, p) => p.UserName.ToLower().Trim() == p.Email.ToLower().Trim() ? m.Email.ToLower() : m.PhoneNumber.ToLower()))
-                .ForMember(p => p.NormalizedEmail, n => n.MapFrom(m => m.Email.ToLower()))
+                .BeforeMap((m, c) =>
+                {
+                    c.UserName = (c.Email.ToLower().Trim() == c.UserName.ToLower().Trim()) ? m.Email : m.PhoneNumber;
+                    c.NormalizedUserName = (c.Email.ToLower().Trim() == c.UserName.ToLower().Trim()) ? m.Email.ToUpper() : m.PhoneNumber;
+                })
+                .ForMember(p => p.NormalizedEmail, n => n.MapFrom(m => m.Email))
                 .ForMember(m => m.Id, opt => opt.Ignore());
 
             CreateMap<User, StudentModel>().ForMember(m => m.Id, opt => opt.Ignore()).IgnoreAllNonExisting();
             CreateMap<SignUpCommandModel, User>().IgnoreAllNonExisting();
-            CreateMap<UpdateUserProfileCommandModel, User>().IgnoreAllNonExisting();
+            CreateMap<UpdateUserProfileCommandModel, User>()
+                .BeforeMap((m, c) =>
+                {
+                    c.UserName = (c.Email.ToLower().Trim() == c.UserName.ToLower().Trim()) ? c.UserName.ToLower().Trim() : m.PhoneNumber;
+                    c.NormalizedUserName = (c.Email.ToLower().Trim() == c.UserName.ToLower().Trim()) ? c.UserName.ToLower().Trim() : m.PhoneNumber;
+                })
+                .ForMember(m => m.Id, opt => opt.Ignore());
+
             CreateMap<UpdateStudentProfileCommandModel, User>().IgnoreAllNonExisting();
             CreateMap<UpdateProfileStudentCommandModel, User>().IgnoreAllNonExisting();
         }
