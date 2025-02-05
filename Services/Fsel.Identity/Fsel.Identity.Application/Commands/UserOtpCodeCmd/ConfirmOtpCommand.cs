@@ -4,19 +4,18 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.UserOtpCodes;
     using Fsel.Identity.Domain.Models.EntityModels;
-    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using Kros.Extensions;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Logging;
-    using Fsel.Core.Base.Managers;
-    using Fsel.Identity.Domain.Entities;
     using Microsoft.EntityFrameworkCore;
 
     public class ConfirmOtpCommand : ConfirmOtpCommandModel, IRequest<MethodResult<UserOtpCodeModel>>
@@ -27,14 +26,12 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     {
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IMapper _mapper;
-        private readonly ILogger<ConfirmOtpCommandHandler> _logger;
         private readonly UserManager<User> _userManager;
 
-        public ConfirmOtpCommandHandler(IUserOtpCodeRepository userOtpCodeRepository, IMapper mapper, ILogger<ConfirmOtpCommandHandler> logger, UserManager<User> userManager)
+        public ConfirmOtpCommandHandler(IUserOtpCodeRepository userOtpCodeRepository, IMapper mapper, UserManager<User> userManager)
         {
             _userOtpCodeRepository = userOtpCodeRepository;
             _mapper = mapper;
-            _logger = logger;
             _userManager = userManager;
         }
 
@@ -46,13 +43,31 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             UserOtpCode? userOtpCode = new UserOtpCode();
             User? user = null;
 
+            if (request.UserId.HasValue)
+            {
+                user = await _userManager.Users.FirstOrDefaultAsync(p => p.Id == request.UserId, cancellationToken);
+                if (user == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.UserDoesNotExist), nameof(request.UserId), request.UserId);
+                    return methodResult;
+                }
+
+                request.Email = user.Email;
+            }
+
             if (!request.Email.IsNullOrEmpty())
             {
                 user = await _userManager.Users
                                             .Include(p => p.UserOtpCodes)
                                             .FirstOrDefaultAsync(p => p.Email.Trim().ToLower() == request.Email.Trim().ToLower(), cancellationToken);
 
-                userOtpCode = await _userOtpCodeRepository.GetUserOtpCodeAsync(request.Otp, request.Email);
+                if (user == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.UserDoesNotExist), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
+                }
+
+                userOtpCode = user.UserOtpCodes.FirstOrDefault(p => p.Type == EnumUserOtpCodeType.Email && p.Status == EnumOtpCodeStatus.New && p.OTPCode == request.Otp);
                 if (userOtpCode == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.InvalidOTP), nameof(request.Otp), request.Otp);
@@ -93,7 +108,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.UserDoesNotExist), nameof(request.PhoneNumber), request.PhoneNumber);
+                methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.UserDoesNotExist), nameof(request), request);
                 return methodResult;
             }
 
