@@ -3,6 +3,7 @@
 using System.Globalization;
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Core.Entities;
@@ -71,6 +72,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<UserModel> methodResult = new MethodResult<UserModel>();
+
             User? user = null;
             if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
@@ -79,11 +81,19 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
                     return methodResult;
                 }
-                user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
-                if (user != null && user.EmailConfirmed)
+                user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber.Trim(), cancellationToken: cancellationToken);
+                if (user != null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
-                    return methodResult;
+                    if (user.EmailConfirmed)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
+                        return methodResult;
+                    }
+                    if (user.Human != null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.PhoneNumber), request.PhoneNumber);
+                        return methodResult;
+                    }
                 }
             }
             if (!string.IsNullOrEmpty(request.Email))
@@ -93,11 +103,19 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
                     return methodResult;
                 }
-                user = await _userManager.FindByEmailAsync(request.Email);
-                if (user != null && user.EmailConfirmed)
+                user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Email == request.Email.Trim(), cancellationToken: cancellationToken);
+                if (user != null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
-                    return methodResult;
+                    if (user.EmailConfirmed)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
+                        return methodResult;
+                    }
+                    if (user.Human != null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Email), request.Email);
+                        return methodResult;
+                    }
                 }
                 else
                 {
