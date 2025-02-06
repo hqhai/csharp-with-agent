@@ -87,7 +87,7 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                     commentModel.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.Comment.UserId)?.AvatarPath;
                     commentModel.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.Comment.UserId)?.FullName;
                     commentModel.Comments = await GetCommentsByObjectIdAsync(item.Comment.Id, filter);
-                    commentModel.CommentNumber = commentModel.Comments?.Count ?? default;
+                    commentModel.CommentNumber = commentModel.Comments?.Count(x => x.Status == EnumCommentStatus.Approver) ?? default;
                     commentModel.LikeNumber = actionLikes.Count;
                     commentModel.IsLiked = actionLikes.Any(x => x.UserId == _authContext.CurrentUserId);
                     commentModel.ObjectId = item.Comment.ObjectId;
