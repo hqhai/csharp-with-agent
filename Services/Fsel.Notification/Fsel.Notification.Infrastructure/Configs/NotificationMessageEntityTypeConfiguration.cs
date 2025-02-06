@@ -21,6 +21,7 @@ namespace Fsel.Notification.Infrastructure.Configs
 
             builder.HasIndex(c => new { c.IsDeleted, c.UserId });
             builder.HasIndex(c => new { c.IsDeleted, c.UserId, c.Status });
+            builder.HasIndex(c => new { c.IsDeleted, c.UserId, c.SenderId });
         }
     }
 }
