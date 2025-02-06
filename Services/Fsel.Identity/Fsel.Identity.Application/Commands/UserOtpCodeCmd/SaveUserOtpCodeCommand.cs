@@ -41,7 +41,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             try
             {
                 var userOtpCode = await _userOtpCodeRepository.Queryable
-                                     .FirstOrDefaultAsync(x => x.UserId == request.Id && x.Status == EnumOtpCodeStatus.New, cancellationToken);
+                                     .FirstOrDefaultAsync(x => x.UserId == request.Id && x.Type == EnumUserOtpCodeType.Email && x.Status == EnumOtpCodeStatus.New, cancellationToken);
                 var otp = NumberHelper.GetRandomCode();
 
                 var expiredTime = request.ExpiredTime ?? DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime);

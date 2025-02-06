@@ -17,6 +17,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
 
     public class SearchStudentsQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<StudentSearchAdminModel>>>
     {
+        public string? SchoolName { get; set; }
     }
 
     public class SearchStudentsQueryHandler : IRequestHandler<SearchStudentsQuery, MethodResult<PagingItemsModel<StudentSearchAdminModel>>>
@@ -43,28 +44,37 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var query = _studentRepository.Queryable.Include(x => x.Human).Select(x => new StudentSearchAdminModel
+            var query = _studentRepository.Queryable.Select(x => new StudentSearchAdminModel
             {
                 Id = x.Id,
                 CreatedDate = x.CreatedDate,
                 Birthday = x.Human!.Birthday,
                 CourseLevel = x.CourseLevel,
+                PhoneNumber = x.Human.PhoneNumber,
                 Email = x.Human.Email,
                 FullName = x.Human.FullName,
                 Type = x.CourseLevel.GetEnumCourseType(),
-                SchoolId = x.SchoolId
+                SchoolId = x.SchoolId,
+                SchoolName = x.School,
             });
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
+                request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
                 if (request.Keyword.IsValidEmail())
                 {
-                    query = query.Where(m => (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
+                    query = query.Where(m => (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword));
                 }
                 else
                 {
-                    query = query.Where(m => m.Id.ToString() == request.Keyword || (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
+                    query = query.Where(m => m.Id.ToString() == request.Keyword || (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword)
+                                                                                || (m.PhoneNumber ?? string.Empty).Trim().ToLower().Contains(request.Keyword));
                 }
+            }
+            if (!string.IsNullOrEmpty(request.SchoolName))
+            {
+                request.SchoolName = request.SchoolName.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+                query = query.Where(m => (m.SchoolName ?? string.Empty).Trim().ToLower().Contains(request.SchoolName));
             }
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
             {
