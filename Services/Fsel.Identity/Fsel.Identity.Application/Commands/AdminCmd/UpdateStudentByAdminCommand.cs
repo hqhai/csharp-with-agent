@@ -76,7 +76,18 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 await CheckDuplicateAsync(user, request.Email);
             }
+            #region Validate PhoneNumber
+            if (request.PhoneNumber != null && user.UserName == user.PhoneNumber)
+            {
+                var checkUserName = await _userManager.Users.AnyAsync(x => x.Id != user.Id && x.UserName == request.PhoneNumber, cancellationToken);
 
+                if (checkUserName)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.PhoneNumber));
+                    return methodResult;
+                }
+            }
+            #endregion
             #region Validate User
 
             var student = user.Human?.Student;
