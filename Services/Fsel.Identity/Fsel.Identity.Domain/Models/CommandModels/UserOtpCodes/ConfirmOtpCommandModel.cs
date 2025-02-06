@@ -16,5 +16,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.UserOtpCodes
 
         [JsonIgnore]
         public bool IsCheckExpiredTime { get; set; } = true;
+
+        public Guid? UserId { get; set; }
     }
 }
