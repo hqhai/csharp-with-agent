@@ -11,6 +11,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.UserOtpCodes;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Kros.Extensions;
@@ -27,12 +28,17 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
+        private readonly AppSetting _appSetting;
 
-        public ConfirmOtpCommandHandler(IUserOtpCodeRepository userOtpCodeRepository, IMapper mapper, UserManager<User> userManager)
+        public ConfirmOtpCommandHandler(IUserOtpCodeRepository userOtpCodeRepository,
+                                        IMapper mapper,
+                                        UserManager<User> userManager,
+                                        AppSetting appSetting)
         {
             _userOtpCodeRepository = userOtpCodeRepository;
             _mapper = mapper;
             _userManager = userManager;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<UserOtpCodeModel>> Handle(ConfirmOtpCommand request, CancellationToken cancellationToken)
@@ -67,16 +73,28 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     return methodResult;
                 }
 
-                userOtpCode = user.UserOtpCodes.FirstOrDefault(p => p.Type == EnumUserOtpCodeType.Email && p.Status == EnumOtpCodeStatus.New && p.OTPCode == request.Otp);
-                if (userOtpCode == null)
+                if (_appSetting.Otp != null && request.Otp != _appSetting.Otp.ByPassOtpValue && !_appSetting.Otp.IsByPassOtp)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.InvalidOTP), nameof(request.Otp), request.Otp);
-                    return methodResult;
+                    userOtpCode = user.UserOtpCodes.FirstOrDefault(p => p.Type == EnumUserOtpCodeType.Email && p.Status == EnumOtpCodeStatus.New && p.OTPCode == request.Otp);
+                    if (userOtpCode == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.InvalidOTP), nameof(request.Otp), request.Otp);
+                        return methodResult;
+                    }
+                    if (request.IsCheckExpiredTime && DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OTPExpired), nameof(request.Otp), request.Otp);
+                        return methodResult;
+                    }
                 }
-                if (request.IsCheckExpiredTime && DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
+                else
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OTPExpired), nameof(request.Otp), request.Otp);
-                    return methodResult;
+                    userOtpCode = user.UserOtpCodes.FirstOrDefault(p => p.Type == EnumUserOtpCodeType.Email && p.Status == EnumOtpCodeStatus.New);
+                    if (userOtpCode == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.InvalidOTP), nameof(request.Otp), request.Otp);
+                        return methodResult;
+                    }
                 }
             }
 
@@ -99,7 +117,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     return methodResult;
                 }
 
-                if (userOtpCode.OTPCode != request.Otp)
+                if (_appSetting.Otp != null && request.Otp != _appSetting.Otp.ByPassOtpValue && !_appSetting.Otp.IsByPassOtp && userOtpCode.OTPCode != request.Otp)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.WrongOTP), nameof(request.Otp), request.Otp);
                     return methodResult;
