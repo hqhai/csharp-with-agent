@@ -1063,6 +1063,10 @@ namespace Fsel.System.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("IsDeleted");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted"), new[] { "CreatedUserId", "AccessTime" });
+
                     b.HasIndex("IsDeleted", "CreatedUserId");
 
                     SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted", "CreatedUserId"), new[] { "AccessTime", "LastVisited" });

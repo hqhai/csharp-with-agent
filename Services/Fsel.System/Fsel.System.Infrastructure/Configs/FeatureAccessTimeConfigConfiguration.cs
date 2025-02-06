@@ -22,6 +22,7 @@ namespace Fsel.System.Infrastructure.Configs
 
             builder.HasIndex(c => new { c.CreatedUserId, c.IsDeleted, c.EnumFeature });
             builder.HasIndex(c => new { c.CreatedUserId, c.IsDeleted, c.CourseId, c.UnitId, c.ObjectId });
+            builder.HasIndex(c => new { c.IsDeleted }).IncludeValueProperties(x => new { x.CreatedUserId, x.AccessTime });
             builder.HasIndex(c => new { c.IsDeleted, c.CreatedUserId }).IncludeValueProperties(x => new { x.AccessTime, x.LastVisited });
         }
     }
