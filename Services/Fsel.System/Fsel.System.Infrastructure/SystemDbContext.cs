@@ -56,13 +56,13 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new TechieActionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentTechieEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LuckyTicketEntityTypeConfigConfiguration());
-            
             modelBuilder.ApplyConfiguration(new FselRatingEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseTargetConfigEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new CourseSuggestConfigEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new BannerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new BannerStudentEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TokenHistoryTranslationEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UserConfigEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 

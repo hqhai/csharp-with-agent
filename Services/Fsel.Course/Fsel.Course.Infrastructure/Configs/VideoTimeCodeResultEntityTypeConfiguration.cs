@@ -30,6 +30,7 @@ namespace Fsel.Course.Infrastructure.Configs
                    .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasIndex(c => new { c.VideoResultId, c.VideoTimeCodeId, c.StudentId }).IsUnique();
+            builder.HasIndex(c => new { c.VideoResultId, c.Status });
         }
     }
 }

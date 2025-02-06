@@ -6,13 +6,13 @@ namespace Fsel.System.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class FselRatingEntityTypeConfiguration : IEntityTypeConfiguration<FselRating>
+    public class UserConfigEntityTypeConfiguration : IEntityTypeConfiguration<UserConfig>
     {
-        public void Configure(EntityTypeBuilder<FselRating> builder)
+        public void Configure(EntityTypeBuilder<UserConfig> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            builder.HasIndex(c => new { c.CreatedUserId, c.IsDeleted });
+            builder.HasIndex(c => new { c.IsDeleted, c.UserId, c.IsViewNewFeature });
         }
     }
 }

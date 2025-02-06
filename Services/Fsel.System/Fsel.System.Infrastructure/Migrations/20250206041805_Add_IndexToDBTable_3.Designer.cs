@@ -4,6 +4,7 @@ using Fsel.System.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    partial class SystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250206041805_Add_IndexToDBTable_3")]
+    partial class Add_IndexToDBTable_3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -20,6 +20,8 @@ namespace Fsel.Interaction.Infrastructure.Configs
                    .WithMany(b => b.CustomerSurveys)
                    .HasForeignKey(b => b.CustomerSurveyGroupId)
                    .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasIndex(c => new { c.IsDeleted, c.UserId });
         }
     }
 }

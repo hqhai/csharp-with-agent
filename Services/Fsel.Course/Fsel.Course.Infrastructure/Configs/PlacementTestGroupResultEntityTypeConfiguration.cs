@@ -49,7 +49,10 @@ namespace Fsel.Course.Infrastructure.Configs
                    .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumCourseLevel>());
+
             builder.HasIndex(c => c.StudentId).IsUnique();
+
+            builder.HasIndex(x => new { x.CreatedDate }).IncludeValueProperties(x => new { x.StudentId });
         }
     }
 }
