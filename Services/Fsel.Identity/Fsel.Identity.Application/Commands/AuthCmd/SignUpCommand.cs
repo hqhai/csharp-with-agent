@@ -82,18 +82,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     return methodResult;
                 }
                 user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber.Trim(), cancellationToken: cancellationToken);
-                if (user != null)
+                if (user != null && user.EmailConfirmed)
                 {
-                    if (user.EmailConfirmed)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
-                        return methodResult;
-                    }
-                    if (user.Human != null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.PhoneNumber), request.PhoneNumber);
-                        return methodResult;
-                    }
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
+                }
+                else if (user != null && user.Human != null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
                 }
             }
             if (!string.IsNullOrEmpty(request.Email))
@@ -104,18 +101,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     return methodResult;
                 }
                 user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Email == request.Email.Trim(), cancellationToken: cancellationToken);
-                if (user != null)
+                if (user != null && user.EmailConfirmed)
                 {
-                    if (user.EmailConfirmed)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
-                        return methodResult;
-                    }
-                    if (user.Human != null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Email), request.Email);
-                        return methodResult;
-                    }
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
+                    return methodResult;
+                }
+                else if (user != null && user.Human != null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Email), request.Email);
+                    return methodResult;
                 }
                 else
                 {
@@ -247,7 +241,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
                             var sendResult = new MethodResult<bool>();
 
-                            ArgumentNullException.ThrowIfNull(request);
                             if (!string.IsNullOrEmpty(request.Email))
                             {
                                 sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, IsCCEmailDefault = true, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
@@ -274,15 +267,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             //scope.Dispose();
                         }
                     }
-                }
-            }
-            else if (!string.IsNullOrEmpty(request.PhoneNumber))
-            {
-                user = await _userManager.Users.FirstOrDefaultAsync(e => e.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
-                if (user != null && user.EmailConfirmed)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
-                    return methodResult;
                 }
             }
 
