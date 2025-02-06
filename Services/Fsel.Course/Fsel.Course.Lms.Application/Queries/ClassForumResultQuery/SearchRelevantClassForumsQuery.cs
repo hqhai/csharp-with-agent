@@ -39,8 +39,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly INotificationService _notificationService;
         private readonly IInteractionService _interactionService;
         private readonly AuthContext _authContext;
+        private readonly ICourseResultRepository _courseResultRepository;
 
-        public SearchRelevantClassForumsQueryHandler(IMapper mapper, IClassForumResultRepository classForumResultRepository, IUserService userService, ITrainingService trainingService, INotificationService notificationService, IInteractionService interactionService, AuthContext authContext)
+        public SearchRelevantClassForumsQueryHandler(IMapper mapper, IClassForumResultRepository classForumResultRepository, IUserService userService, ITrainingService trainingService, INotificationService notificationService, IInteractionService interactionService, AuthContext authContext, ICourseResultRepository courseResultRepository)
         {
             _mapper = mapper;
             _classForumResultRepository = classForumResultRepository;
@@ -49,6 +50,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             _notificationService = notificationService;
             _interactionService = interactionService;
             _authContext = authContext;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<ClassForumResultModel>>> Handle(SearchRelevantClassForumsQuery request, CancellationToken cancellationToken)
@@ -69,13 +71,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 return methodResult;
             }
 
-            var currentClass = await _trainingService.GetClassByStudentId(student.Id);
-            var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
-            if (classStudentIds == null || classStudentIds.Count == 0)
-            {
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
+            var courseStudentIds = await _courseResultRepository.Queryable.Where(p => p.CourseId == student.CourseId && p.WorkingStatus == EnumWorkingStatus.Active).Select(p => p.StudentId).ToListAsync(cancellationToken);
+
             var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumDetailResults).FirstOrDefaultAsync(x => x.Id == request.ClassForumResultId, cancellationToken);
             if (classForumResult == null)
             {
@@ -94,7 +91,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 .Where(x => x.ClassForumId == classForumResult.ClassForumId
                 && x.Status == EnumClassForumResultStatus.Graded
                 && x.Id != request.ClassForumResultId
-                && classStudentIds.Contains(x.StudentId));
+                && courseStudentIds.Contains(x.StudentId));
 
             int totalItem = await classForumResults.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await classForumResults
