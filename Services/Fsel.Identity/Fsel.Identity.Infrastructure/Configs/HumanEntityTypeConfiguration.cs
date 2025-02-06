@@ -28,6 +28,8 @@ namespace Fsel.Identity.Infrastructure.Configs
                     v => v.EnumParse<EnumGender>());
 
             builder.HasIndex(x => new { x.IsDeleted, x.Code });
+            builder.HasIndex(x => new { x.IsDeleted, x.Email });
+            builder.HasIndex(x => new { x.IsDeleted, x.PhoneNumber });
         }
     }
 }

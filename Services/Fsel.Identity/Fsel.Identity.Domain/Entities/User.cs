@@ -2,9 +2,11 @@
 
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Attributes;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Shared.Enums;
+using Microsoft.AspNetCore.Identity;
 
 namespace Fsel.Identity.Domain.Entities
 {
@@ -13,6 +15,16 @@ namespace Fsel.Identity.Domain.Entities
         [Required]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FullName { get; set; }
+
+        [EmailValid(ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [MaxLength(70, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [ProtectedPersonalData]
+        public override string? Email { get; set; }
+
+        [PhoneValid(ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [MaxLength(20, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [ProtectedPersonalData]
+        public override string? PhoneNumber { get; set; }
 
         public EnumUserStatus? Status { get; set; } = EnumUserStatus.Active;
 
