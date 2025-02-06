@@ -125,9 +125,9 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 
             await _userOtpCodeRepository.ExecuteTransactionAsync(async () =>
             {
-                var otp = NumberHelper.GetRandomCode();
                 if (lastOTP == null)
                 {
+                    var otp = NumberHelper.GetRandomCode();
                     lastOTP = new UserOtpCode
                     {
                         UserId = user.Id,
@@ -141,7 +141,6 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 }
                 else
                 {
-                    lastOTP.OTPCode = otp;
                     lastOTP.RetryCount += 1;
                     lastOTP = _userOtpCodeRepository.Update(lastOTP);
                 }
@@ -154,8 +153,9 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     Template = EnumSendSMSTemplate.SendOTP,
                     Params = new
                     {
-                        OTP = otp
-                    }
+                        OTP = lastOTP.OTPCode,
+                    },
+                    IsCheckDuplicate = false,
                 });
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
