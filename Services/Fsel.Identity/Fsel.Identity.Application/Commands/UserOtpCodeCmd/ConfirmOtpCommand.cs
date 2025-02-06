@@ -11,6 +11,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.UserOtpCodes;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Identity.Infrastructure.Common;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -28,17 +29,17 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
-        private readonly AppSetting _appSetting;
+        private readonly SaveOtpCodeConverter _saveOtpCodeConverter;
 
         public ConfirmOtpCommandHandler(IUserOtpCodeRepository userOtpCodeRepository,
                                         IMapper mapper,
                                         UserManager<User> userManager,
-                                        AppSetting appSetting)
+                                        SaveOtpCodeConverter saveOtpCodeConverter)
         {
             _userOtpCodeRepository = userOtpCodeRepository;
             _mapper = mapper;
             _userManager = userManager;
-            _appSetting = appSetting;
+            _saveOtpCodeConverter = saveOtpCodeConverter;
         }
 
         public async Task<MethodResult<UserOtpCodeModel>> Handle(ConfirmOtpCommand request, CancellationToken cancellationToken)
@@ -73,19 +74,11 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     return methodResult;
                 }
 
-                if (_appSetting.Otp != null && request.Otp != _appSetting.Otp.ByPassOtpValue && !_appSetting.Otp.IsByPassOtp)
+                var checkOtp = await _saveOtpCodeConverter.CheckOtp(request, user, EnumUserOtpCodeType.Email);
+                if (!checkOtp.Result)
                 {
-                    userOtpCode = user.UserOtpCodes.FirstOrDefault(p => p.Type == EnumUserOtpCodeType.Email && p.Status == EnumOtpCodeStatus.New && p.OTPCode == request.Otp);
-                    if (userOtpCode == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.InvalidOTP), nameof(request.Otp), request.Otp);
-                        return methodResult;
-                    }
-                    if (request.IsCheckExpiredTime && DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OTPExpired), nameof(request.Otp), request.Otp);
-                        return methodResult;
-                    }
+                    methodResult.AddError(checkOtp.ErrorMessages.ToList());
+                    return methodResult;
                 }
                 else
                 {
@@ -102,7 +95,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             {
                 user = await _userManager.Users
                                          .Include(p => p.UserOtpCodes)
-                                         .FirstOrDefaultAsync(p => p.PhoneNumber.Trim().ToLower() == request.PhoneNumber.Trim().ToLower(), cancellationToken);
+                                         .FirstOrDefaultAsync(p => p.UserName.Trim().ToLower() == request.PhoneNumber.Trim().ToLower(), cancellationToken);
 
                 if (user == null)
                 {
@@ -110,17 +103,20 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     return methodResult;
                 }
 
-                userOtpCode = user.UserOtpCodes.FirstOrDefault(p => p.Type == EnumUserOtpCodeType.SMS && p.Status == EnumOtpCodeStatus.New);
-                if (userOtpCode == null)
+                var checkOtp = await _saveOtpCodeConverter.CheckOtp(request, user, EnumUserOtpCodeType.SMS);
+                if (!checkOtp.Result)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.OTPNotSentYet), nameof(request.Otp), request.Otp);
+                    methodResult.AddError(checkOtp.ErrorMessages.ToList());
                     return methodResult;
                 }
-
-                if (_appSetting.Otp != null && request.Otp != _appSetting.Otp.ByPassOtpValue && !_appSetting.Otp.IsByPassOtp && userOtpCode.OTPCode != request.Otp)
+                else
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.WrongOTP), nameof(request.Otp), request.Otp);
-                    return methodResult;
+                    userOtpCode = user.UserOtpCodes.FirstOrDefault(p => p.Type == EnumUserOtpCodeType.SMS && p.Status == EnumOtpCodeStatus.New);
+                    if (userOtpCode == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.OTPNotSentYet), nameof(request.Otp), request.Otp);
+                        return methodResult;
+                    }
                 }
             }
 
