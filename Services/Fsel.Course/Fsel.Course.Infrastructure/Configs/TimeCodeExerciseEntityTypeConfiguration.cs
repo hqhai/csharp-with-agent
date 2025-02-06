@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -21,6 +22,8 @@ namespace Fsel.Course.Infrastructure.Configs
                 .WithMany(b => b.TimeCodeExercises)
                 .HasForeignKey(b => b.ExerciseId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasIndex(c => new { c.IsDeleted }).IncludeValueProperties(x => new { x.ExerciseId, x.VideoTimeCodeId });
         }
     }
 }
