@@ -8,6 +8,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Infrastructure.ValueSettings;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
 
     public class UserOtpCodeRepository : BaseRepository<UserOtpCode>, IUserOtpCodeRepository
@@ -19,13 +20,29 @@ namespace Fsel.Identity.Infrastructure.Repositories
             _appSetting = appSetting;
         }
 
-        public async Task<UserOtpCode?> GetUserOtpCodeAsync(string? otpCode, string? email)
+        public async Task<UserOtpCode?> GetUserOtpCodeAsync(string? otpCode, string? email, string? phoneNumber, EnumUserOtpCodeType otpCodeType)
         {
-            if (!string.IsNullOrEmpty(email) && _appSetting.Otp != null && otpCode == _appSetting.Otp.ByPassOtpValue && _appSetting.Otp.IsByPassOtp)
+            if (_appSetting.Otp != null && otpCode == _appSetting.Otp.ByPassOtpValue && _appSetting.Otp.IsByPassOtp)
             {
-                return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.Email == email);
+                if (!string.IsNullOrEmpty(email))
+                {
+                    return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.Email.ToLower().Trim() == email.ToLower().Trim() && x.Type == otpCodeType);
+                }
+
+                if (!string.IsNullOrEmpty(phoneNumber))
+                {
+                    return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.UserName.ToLower().Trim() == phoneNumber.ToLower().Trim() && x.Type == otpCodeType);
+                }
             }
-            return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.OTPCode == otpCode);
+            if (!string.IsNullOrEmpty(email))
+            {
+                return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.Email.ToLower().Trim() == email.ToLower().Trim() && x.OTPCode == otpCode && x.Type == EnumUserOtpCodeType.Email);
+            }
+            if (!string.IsNullOrEmpty(phoneNumber))
+            {
+                return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.UserName.ToLower().Trim() == phoneNumber.ToLower().Trim() && x.OTPCode == otpCode && x.Type == EnumUserOtpCodeType.SMS);
+            }
+            return null;
         }
     }
 }
