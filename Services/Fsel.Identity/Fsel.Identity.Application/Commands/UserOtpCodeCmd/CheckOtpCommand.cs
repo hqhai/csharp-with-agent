@@ -5,17 +5,13 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     using System;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base.Managers;
-    using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.UserOtpCodes;
-    using Fsel.Identity.Infrastructure.Common;
-    using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Enums.ErrorCodes;
     using Kros.Extensions;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class CheckOtpCommand : ConfirmOtpCommandModel, IRequest<MethodResult<bool>>
     {
@@ -23,14 +19,11 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 
     public class CheckOtpCommandHandler : IRequestHandler<CheckOtpCommand, MethodResult<bool>>
     {
-        private readonly UserManager<User> _userManager;
-        private readonly SaveOtpCodeConverter _saveOtpCodeConverter;
+        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
 
-        public CheckOtpCommandHandler(UserManager<User> userManager,
-                                      SaveOtpCodeConverter saveOtpCodeConverter)
+        public CheckOtpCommandHandler(IUserOtpCodeRepository userOtpCodeRepository)
         {
-            _userManager = userManager;
-            _saveOtpCodeConverter = saveOtpCodeConverter;
+            _userOtpCodeRepository = userOtpCodeRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(CheckOtpCommand request, CancellationToken cancellationToken)
@@ -38,43 +31,17 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            if (!request.Email.IsNullOrEmpty())
+            var userOtpCode = await _userOtpCodeRepository.GetUserOtpCodeAsync(request.Otp, request.Email, request.PhoneNumber, (!request.Email.IsNullOrEmpty() ? EnumUserOtpCodeType.Email : EnumUserOtpCodeType.SMS));
+            if (userOtpCode == null)
             {
-                var user = await _userManager.Users
-                                             .Include(p => p.UserOtpCodes)
-                                             .FirstOrDefaultAsync(p => p.Email.Trim().ToLower() == request.Email.Trim().ToLower(), cancellationToken);
-                if (user == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.UserDoesNotExist), nameof(request.Email), request.Email);
-                    return methodResult;
-                }
-
-                var checkOtp = await _saveOtpCodeConverter.CheckOtp(request, user, EnumUserOtpCodeType.Email);
-                if (!checkOtp.Result)
-                {
-                    methodResult.AddError(checkOtp.ErrorMessages.ToList());
-                    return methodResult;
-                }
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.InvalidOTP), nameof(request.Otp), request.Otp);
+                return methodResult;
             }
 
-            else if (!request.PhoneNumber.IsNullOrEmpty())
+            if (request.IsCheckExpiredTime && DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
             {
-                var user = await _userManager.Users
-                                             .Include(p => p.UserOtpCodes)
-                                             .FirstOrDefaultAsync(p => p.UserName.Trim().ToLower() == request.PhoneNumber.Trim().ToLower(), cancellationToken);
-
-                if (user == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.UserDoesNotExist), nameof(request.PhoneNumber), request.PhoneNumber);
-                    return methodResult;
-                }
-
-                var checkOtp = await _saveOtpCodeConverter.CheckOtp(request, user, EnumUserOtpCodeType.SMS);
-                if (!checkOtp.Result)
-                {
-                    methodResult.AddError(checkOtp.ErrorMessages.ToList());
-                    return methodResult;
-                }
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OTPExpired), nameof(request.Otp), request.Otp);
+                return methodResult;
             }
 
             methodResult.Result = true;
