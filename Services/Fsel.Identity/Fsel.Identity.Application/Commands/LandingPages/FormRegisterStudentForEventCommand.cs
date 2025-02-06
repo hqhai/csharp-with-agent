@@ -98,7 +98,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             if (competitionEvent.EventContent != null && competitionEvent.EventContent.IsParentEvent.HasValue && competitionEvent.EventContent.IsParentEvent.Value && request.DistrictId.HasValue)
             {
                 var childEvents = await _mediator.Send(new GetChildEventsByParentIdQuery() { Id = competitionEvent.Id }, cancellationToken);
-                var childEvent = childEvents.Result?.FirstOrDefault(p => p.Id == request.DistrictId);
+                var childEvent = childEvents.Result?.FirstOrDefault(p => p.LocationId == request.DistrictId);
                 if (childEvent != null)
                 {
                     @event = childEvent;
