@@ -40,8 +40,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly IInteractionService _interactionService;
         private readonly AuthContext _authContext;
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
 
-        public SearchRelevantClassForumsQueryHandler(IMapper mapper, IClassForumResultRepository classForumResultRepository, IUserService userService, ITrainingService trainingService, INotificationService notificationService, IInteractionService interactionService, AuthContext authContext, ICourseResultRepository courseResultRepository)
+        public SearchRelevantClassForumsQueryHandler(IMapper mapper, IClassForumResultRepository classForumResultRepository, IUserService userService, ITrainingService trainingService, INotificationService notificationService, IInteractionService interactionService, AuthContext authContext, ICourseResultRepository courseResultRepository, ILessonResultRepository lessonResultRepository)
         {
             _mapper = mapper;
             _classForumResultRepository = classForumResultRepository;
@@ -51,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             _interactionService = interactionService;
             _authContext = authContext;
             _courseResultRepository = courseResultRepository;
+            _lessonResultRepository = lessonResultRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<ClassForumResultModel>>> Handle(SearchRelevantClassForumsQuery request, CancellationToken cancellationToken)
@@ -71,48 +73,51 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 return methodResult;
             }
 
-            var courseStudentIds = await _courseResultRepository.Queryable.Where(p => p.CourseId == student.CourseId && p.WorkingStatus == EnumWorkingStatus.Active).Select(p => p.StudentId).ToListAsync(cancellationToken);
-
             var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumDetailResults).FirstOrDefaultAsync(x => x.Id == request.ClassForumResultId, cancellationToken);
             if (classForumResult == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
+
             if (classForumResult.ClassForumDetailResults.Any() && classForumResult.ClassForumDetailResults.Any(x => x.SubmissionCount == EnumSubmissionCount.FirstSubmit && x.Status == EnumClassForumResultStatus.Draft))
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
+            var query = from cfr in _classForumResultRepository.Queryable
+                        join lr in _lessonResultRepository.Queryable on cfr.LessonResultId equals lr.Id
+                        join cr in _courseResultRepository.Queryable on new { lr.CourseId, lr.StudentId } equals new { cr.CourseId, cr.StudentId }
+                        where cfr.Status == EnumClassForumResultStatus.Graded && cfr.ClassForumId == classForumResult.ClassForumId && cfr.Id != request.ClassForumResultId && cr.CourseId == student.CourseId
+                        select cfr;
 
-            var classForumResults = _classForumResultRepository.Queryable
-                .Include(x => x.ClassForumResultFiles)
-                .Include(x => x.ClassForumScores)
-                .Where(x => x.ClassForumId == classForumResult.ClassForumId
-                && x.Status == EnumClassForumResultStatus.Graded
-                && x.Id != request.ClassForumResultId
-                && courseStudentIds.Contains(x.StudentId));
+            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await query.ApplySortAndPaging(request)
+                                               .AsNoTracking()
+                                               .ToListAsync(cancellationToken: cancellationToken)
+                                               .ConfigureAwait(false);
 
-            int totalItem = await classForumResults.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await classForumResults
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+            var classForumResults = await _classForumResultRepository.Queryable
+                                                .Include(x => x.ClassForumResultFiles)
+                                                .Include(x => x.ClassForumScores)
+                                                .Where(x => x.ClassForumId == classForumResult.ClassForumId
+                                                && x.Status == EnumClassForumResultStatus.Graded
+                                                && x.Id != request.ClassForumResultId
+                                                && lists.Select(x => x.Id).Contains(x.Id)).ToListAsync(cancellationToken);
 
             var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = lists.Select(x => x.Id).ToList(), UserId = _authContext.CurrentUserId });
             var actions = actionsResult.Content?.Result;
 
-            GetListNotificationRemindQuery query = new GetListNotificationRemindQuery
+            GetListNotificationRemindQuery queryNotify = new GetListNotificationRemindQuery
             {
                 ObjectIds = lists.Select(x => x.Id).ToList(),
                 Status = EnumNotificationRemindStatus.Off
             };
 
-            var notificationRemind = await _notificationService.GetListNotificationRemind(query);
+            var notificationRemind = await _notificationService.GetListNotificationRemind(queryNotify);
             var notificationTurnOff = notificationRemind.Content?.Result;
-            var classForumResultModels = _mapper.Map<List<ClassForumResultModel>>(lists);
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).ToList());
+            var classForumResultModels = _mapper.Map<List<ClassForumResultModel>>(classForumResults);
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(classForumResults.Select(x => x.StudentId).ToList());
             var students = studentResults?.Content?.Result;
             if (actions != null)
             {
