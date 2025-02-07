@@ -35,39 +35,22 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly IMapper _mapper;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IUserService _userService;
-        private readonly ITrainingService _trainingService;
         private readonly INotificationService _notificationService;
         private readonly IInteractionService _interactionService;
         private readonly AuthContext _authContext;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly IClassForumResultFileRepository _classForumResultFileRepository;
-        private readonly IClassForumScoreRepository _classForumScoreRepository;
 
-        public SearchRelevantClassForumsQueryHandler(
-            IMapper mapper,
-            IClassForumResultRepository classForumResultRepository,
-            IUserService userService,
-            ITrainingService trainingService,
-            INotificationService notificationService,
-            IInteractionService interactionService,
-            AuthContext authContext,
-            ICourseResultRepository courseResultRepository,
-            ILessonResultRepository lessonResultRepository,
-            IClassForumResultFileRepository classForumResultFileRepository,
-            IClassForumScoreRepository classForumScoreRepository)
+        public SearchRelevantClassForumsQueryHandler(IMapper mapper, IClassForumResultRepository classForumResultRepository, IUserService userService, INotificationService notificationService, IInteractionService interactionService, AuthContext authContext, ICourseResultRepository courseResultRepository, ILessonResultRepository lessonResultRepository)
         {
             _mapper = mapper;
             _classForumResultRepository = classForumResultRepository;
             _userService = userService;
-            _trainingService = trainingService;
             _notificationService = notificationService;
             _interactionService = interactionService;
             _authContext = authContext;
             _courseResultRepository = courseResultRepository;
             _lessonResultRepository = lessonResultRepository;
-            _classForumResultFileRepository = classForumResultFileRepository;
-            _classForumScoreRepository = classForumScoreRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<ClassForumResultModel>>> Handle(SearchRelevantClassForumsQuery request, CancellationToken cancellationToken)
