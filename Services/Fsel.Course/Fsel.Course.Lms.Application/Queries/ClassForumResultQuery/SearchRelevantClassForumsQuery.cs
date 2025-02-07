@@ -19,7 +19,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Lms.Application.Services.InteractionService.Models;
     using Fsel.Course.Lms.Application.Services.NotificationServices;
     using Fsel.Course.Lms.Application.Services.NotificationServices.Models;
-    using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -38,10 +37,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly INotificationService _notificationService;
         private readonly IInteractionService _interactionService;
         private readonly AuthContext _authContext;
-        private readonly ICourseResultRepository _courseResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
 
-        public SearchRelevantClassForumsQueryHandler(IMapper mapper, IClassForumResultRepository classForumResultRepository, IUserService userService, INotificationService notificationService, IInteractionService interactionService, AuthContext authContext, ICourseResultRepository courseResultRepository, ILessonResultRepository lessonResultRepository)
+        public SearchRelevantClassForumsQueryHandler(IMapper mapper, IClassForumResultRepository classForumResultRepository, IUserService userService, INotificationService notificationService, IInteractionService interactionService, AuthContext authContext, ILessonResultRepository lessonResultRepository)
         {
             _mapper = mapper;
             _classForumResultRepository = classForumResultRepository;
@@ -49,7 +47,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             _notificationService = notificationService;
             _interactionService = interactionService;
             _authContext = authContext;
-            _courseResultRepository = courseResultRepository;
             _lessonResultRepository = lessonResultRepository;
         }
 
@@ -91,11 +88,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var query = from cfr in _classForumResultRepository.Queryable.Include(x => x.ClassForumResultFiles)
                                                                          .Include(x => x.ClassForumScores)
                         join lr in _lessonResultRepository.Queryable on cfr.LessonResultId equals lr.Id
-                        join cr in _courseResultRepository.Queryable on new { lr.CourseId, lr.StudentId } equals new { cr.CourseId, cr.StudentId }
                         where cfr.Status == EnumClassForumResultStatus.Graded
                             && cfr.ClassForumId == classForumResult.ClassForumId
                             && cfr.Id != request.ClassForumResultId
-                            && cr.CourseId == student.CourseId
+                            && lr.CourseId == student.CourseId
                         select cfr;
 
             int totalItem = await query.CountAsync(cancellationToken).ConfigureAwait(false);
