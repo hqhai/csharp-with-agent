@@ -125,6 +125,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                         var placementTestResultSchools = placementTestResultReports?.Where(x => eventSchool.StudentIds != null && eventSchool.StudentIds.Contains(x.StudentId)).ToList();
                         return new ReportPlacementTestEventSchoolModel
                         {
+                            SchoolId = eventSchool.SchoolId,
                             SchoolName = eventSchool.SchoolName,
                             NumberStudentsCompletedPT = placementTestResultSchools?.Where(x => x.IsDonePT).Count() ?? default,
                             NumberValidStudentAccount = eventSchool.NumberValidStudentAccount,

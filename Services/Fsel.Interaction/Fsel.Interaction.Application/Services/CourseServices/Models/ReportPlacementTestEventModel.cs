@@ -57,6 +57,7 @@ namespace Fsel.Interaction.Application.Services.CourseServices.Models
 
     public class ReportPlacementTestEventSchoolModel
     {
+        public Guid SchoolId { get; set; }
         public string? SchoolName { get; set; }
 
         /// <summary>

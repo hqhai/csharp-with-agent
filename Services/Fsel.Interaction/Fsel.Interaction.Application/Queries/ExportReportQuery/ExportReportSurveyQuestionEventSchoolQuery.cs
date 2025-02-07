@@ -27,6 +27,7 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
 
     public class ExportReportSurveyQuestionEventSchoolQuery : IRequest<MethodResult<Stream>>
     {
+        public string? HighEventCode { get; set; }
         public string? EventCodeStr { get; set; }
         public string? DistrictName { get; set; }
         public EnumEducationLevel EducationLevel { get; set; }
@@ -57,7 +58,7 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
 
             var competitionEventResults = await _userService.GetEventToEventCodeStrAsync(new GetReportCompetitionEventQueryModel
             {
-                EventCodeStr = request.EventCodeStr
+                EventCodeStr = request.HighEventCode
             });
             var competitionEvents = competitionEventResults.Content?.Result;
             if (competitionEvents == null)
@@ -65,158 +66,219 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.EventCodeStr));
                 return methodResult;
             }
-            //var reportCompetitionEventResults = await _userService.GetReportCompetitionEventSchoolAsync(new GetReportCompetitionEventQueryModel
-            //{
-            //    EducationLevel = request.EducationLevel,
-            //    EventCodeStr = request.EventCodeStr,
-            //    DistrictName = request.DistrictName,
-            //});
+            var reportCompetitionEventResults = await _userService.GetReportCompetitionEventSchoolAsync(new GetReportCompetitionEventQueryModel
+            {
+                EducationLevel = request.EducationLevel,
+                EventCodeStr = request.EventCodeStr,
+                DistrictName = request.DistrictName,
+            });
 
-            //var reportCompetitionEvents = reportCompetitionEventResults?.Content?.Result;
-            //if (reportCompetitionEvents == null)
-            //{
-            //    return methodResult;
-            //}
-            //var userIds = reportCompetitionEvents.SelectMany(x => x.UserIds ?? new List<Guid>()).ToList();
-            //var listCustomerSurveyGroup = new ConcurrentStack<CustomerSurveyGroup>();
-            //var listCustomerSurveyReport = new ConcurrentStack<CustomerSurveyUserReportModel>();
+            var reportCompetitionEvents = reportCompetitionEventResults?.Content?.Result;
+            if (reportCompetitionEvents == null)
+            {
+                return methodResult;
+            }
+            var userIds = reportCompetitionEvents.SelectMany(x => x.UserIds ?? new List<Guid>()).ToList();
+            var listCustomerSurveyGroup = new ConcurrentStack<CustomerSurveyGroup>();
+            var listQuestionReport = new ConcurrentStack<CustomerSurveyQuestionReportModel>();
+            var listSubQuestionReport = new ConcurrentStack<CustomerSurveyQuestionReportModel>();
 
-            //// Chia danh sách thành từng nhóm
-            //var batches = userIds
-            //    .Select((id, index) => new { id, index })
-            //    .GroupBy(x => x.index / ValueSettings.BatchSize)
-            //    .Select(g => g.Select(x => x.id).ToList())
-            //    .ToList();
+            // Chia danh sách thành từng nhóm
+            var batches = userIds
+                .Select((id, index) => new { id, index })
+                .GroupBy(x => x.index / ValueSettings.BatchSize)
+                .Select(g => g.Select(x => x.id).ToList())
+                .ToList();
 
-            //await Parallel.ForEachAsync(batches, async (batche, cancellationToken) =>
-            //{
-            //    using (var scope = _serviceProvider.CreateScope())
-            //    {
-            //        var customerSurveyGroupRepository = scope.ServiceProvider.GetRequiredService<ICustomerSurveyGroupRepository>();
-            //        var customerSurveyGroups = await customerSurveyGroupRepository.Queryable.Where(x => batche.Contains(x.UserId) && x.Status == EnumSurveyGroupStatus.Done)
-            //                                           .Where(x => x.CompetitionEventId.HasValue && competitionEvents.Select(x => x.Id).Contains(x.CompetitionEventId.Value))
-            //                                           .ToArrayAsync(cancellationToken);
-            //        listCustomerSurveyGroup.PushRange(customerSurveyGroups);
-            //    }
-            //});
-            //// Chia danh sách thành từng nhóm
-            //var batchetCustomerSurveys = listCustomerSurveyGroup
-            //    .Select((id, index) => new { id, index })
-            //    .GroupBy(x => x.index / ValueSettings.BatchSize)
-            //    .Select(g => g.Select(x => x.id).ToList())
-            //    .ToList();
-            //await Parallel.ForEachAsync(batchetCustomerSurveys, async (batchetCustomerSurvey, cancellationToken) =>
-            //{
-            //    using (var scope = _serviceProvider.CreateScope())
-            //    {
-            //        var customerSurveyRepository = scope.ServiceProvider.GetRequiredService<ICustomerSurveyRepository>();
-            //        var surveyQuestionRepository = scope.ServiceProvider.GetRequiredService<ISurveyQuestionRepository>();
-            //        var surveyQuestions = await surveyQuestionRepository.Queryable.Where(x => x.CompetitionEventId.HasValue && competitionEvents.Select(x => x.Id).Contains(x.CompetitionEventId.Value))
-            //                                                                      .OrderBy(x => x.DisplayLevel)
-            //                                                                      .ThenBy(x => x.DisplayOrder)
-            //                                                                      .ToListAsync(cancellationToken);
-
-            //        var customerSurveyGroups = await customerSurveyRepository.Queryable.Where(x => x.CustomerSurveyGroupId.HasValue && batchetCustomerSurvey.Select(x => x.Id).Contains(x.CustomerSurveyGroupId.Value))
-            //                                                                           .ToListAsync(cancellationToken);
-            //        foreach (var surveyQuestion in surveyQuestions)
-            //        {
-            //            var answers = ConvertHelper.Deserialize<IList<ChooseDirectionQuestionAnswers>>(surveyQuestion.Answers);
-            //            var customerSurveyQuestions = customerSurveyGroups.Where(x => x.SurveyQuestionId == surveyQuestion.Id).ToList();
-            //            var customerSurveyQuestionAnswers = customerSurveyQuestions.Select(x => new
-            //            {
-            //                UserId = x.UserId,
-            //                Answers = ConvertHelper.Deserialize<IList<ChooseDirectionQuestionAnswers>>(x.Answer) ?? new List<ChooseDirectionQuestionAnswers>()
-            //            }).ToList();
-            //            if (answers == null)
-            //            {
-            //                continue;
-            //            }
-            //            listCustomerSurveyReport.PushRange(answers.Select(item =>
-            //            {
-            //                return new CustomerSurveyUserReportModel
-            //                {
-            //                    Id = item.Id,
-            //                    DisplayLevel = surveyQuestion.DisplayLevel,
-            //                    DisplayOrder = surveyQuestion.DisplayOrder,
-            //                    NumberSubQuestion = customerSurveyQuestionAnswers.Select(x =>
-            //                    {
-            //                        return x.Answers.Any(x => x.Id == item.Id);
-            //                    }).Count(x => x),
-            //                    UserIds = customerSurveyQuestionAnswers.Select(x => x.UserId).ToList() ?? new List<Guid>()
-            //                };
-            //            }).ToArray());
-            //        }
-            //    }
-            //});
-
-            //var listGroupSurveyReport = listCustomerSurveyReport.GroupBy(x => new { x.Id, x.DisplayLevel, x.DisplayOrder }).Select(x => new CustomerSurveyUserReportModel
-            //{
-            //    Id = x.Key.Id,
-            //    DisplayLevel = x.Key.DisplayLevel,
-            //    DisplayOrder = x.Key.DisplayOrder,
-            //    NumberSubQuestion = x.Sum(x => x.NumberSubQuestion),
-            //    UserIds = x.SelectMany(x => x.UserIds).ToList()
-            //}).ToList();
-
-            //var reportPlacementTestEventResults = await _courseService.GetReportPlacementTestEventSchoolAsync(new GetReportPlacementTestEventQueryModel
-            //{
-            //    EducationLevel = request.EducationLevel,
-            //    EventCodeStr = request.EventCodeStr,
-            //});
-            //var reportPlacementTestEvents = reportPlacementTestEventResults.Content?.Result;
-            //var surveyQuestionReportDistricts = new ConcurrentBag<SurveyQuestionReportDistrictModel>();
-
-            //Parallel.ForEach(reportCompetitionEvents, reportCompetitionEvent =>
-            //{
-            //    var reportPlacementTestEvent = reportPlacementTestEvents?.FirstOrDefault(x => x.LocationName == reportCompetitionEvent.DistrictName);
-
-            //    var surveyQuestionReportDistrict = new SurveyQuestionReportDistrictModel
-            //    {
-            //        LocationName = reportCompetitionEvent.DistrictName,
-            //        NumberActualParticipatingSchool = reportPlacementTestEvent?.NumberActualParticipatingSchool ?? default,
-            //        NumberRegisteredSchool = reportPlacementTestEvent?.NumberRegisteredSchool ?? default,
-            //        NumberStudentsCompletedPT = reportPlacementTestEvent?.NumberStudentsCompletedPT ?? default,
-            //        NumberStudentVerified = reportCompetitionEvent.NumberStudentVerifiedDistrict,
-            //        NumberValidStudentAccount = reportPlacementTestEvent?.NumberValidStudentAccount ?? default,
-            //        NumberStudentsCompletedSurvey = listCustomerSurveyGroup.Where(x => reportCompetitionEvent.UserIds != null && reportCompetitionEvent.UserIds.Contains(x.UserId)).Count(),
-            //        SurveyQuestionReportSchools = reportPlacementTestEvent?.ReportPlacementTestEventSchools.Select(report =>
-            //        {
-            //            var reportCompetitionEventSchool = reportCompetitionEvent.ReportCompetitionEventSchools.FirstOrDefault(x => x.SchoolName == report.SchoolName);
-            //            if (reportCompetitionEventSchool == null)
-            //            {
-            //                return new SurveyQuestionReportSchoolModel
-            //                {
-            //                    LocatonName = report.SchoolName,
-            //                    NumberStudentsCompletedPT = report.NumberStudentsCompletedPT,
-            //                    NumberValidStudentAccount = report.NumberValidStudentAccount,
-            //                    NumberStudentVerified = report.NumberStudentVerifiedSchool,
-            //                };
-            //            }
-
-            //            var groupSurveyReport = listGroupSurveyReport.Where(x => reportCompetitionEventSchool.UserIds != null && reportCompetitionEventSchool.UserIds.Any(id => x.UserIds.Contains(id)))
-            //                                                 .OrderBy(x => x.DisplayLevel)
-            //                                                 .ThenBy(x => x.DisplayOrder)
-            //                                                 .ThenBy(x => x.Id)
-            //                                                 .ToList();
-            //            return new SurveyQuestionReportSchoolModel
-            //            {
-            //                LocatonName = report.SchoolName,
-            //                NumberStudentsCompletedPT = report.NumberStudentsCompletedPT,
-            //                NumberValidStudentAccount = report.NumberValidStudentAccount,
-            //                NumberStudentVerified = report.NumberStudentVerifiedSchool,
-            //                NumberStudentsCompletedSurvey = groupSurveyReport.SelectMany(x => x.UserIds).Distinct().Count(),
-            //                CustomerSurveyUserReports = groupSurveyReport,
-            //            };
-            //        }).ToList() ?? new List<SurveyQuestionReportSchoolModel>(),
-            //    };
-            //    surveyQuestionReportDistricts.Add(surveyQuestionReportDistrict);
-            //});
-            var surveyQuestionReportDistricts = new ConcurrentBag<SurveyQuestionReportDistrictModel>();
+            await Parallel.ForEachAsync(batches, async (batche, cancellationToken) =>
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var customerSurveyGroupRepository = scope.ServiceProvider.GetRequiredService<ICustomerSurveyGroupRepository>();
+                    var customerSurveyGroups = await customerSurveyGroupRepository.Queryable.Where(x => batche.Contains(x.UserId) && x.Status != EnumSurveyGroupStatus.Process)
+                                                       .Where(x => x.CompetitionEventId.HasValue && competitionEvents.Select(x => x.Id).Contains(x.CompetitionEventId.Value))
+                                                       .ToArrayAsync(cancellationToken);
+                    listCustomerSurveyGroup.PushRange(customerSurveyGroups);
+                }
+            });
+            // Chia danh sách thành từng nhóm
+            var batchetCustomerSurveys = listCustomerSurveyGroup
+                .Select((id, index) => new { id, index })
+                .GroupBy(x => x.index / ValueSettings.BatchSize)
+                .Select(g => g.Select(x => x.id).ToList())
+                .ToList();
 
             var surveyQuestions = await _surveyQuestionRepository.Queryable.Where(x => x.CompetitionEventId.HasValue && competitionEvents.Select(x => x.Id).Contains(x.CompetitionEventId.Value))
-                                                               .OrderBy(x => x.DisplayLevel)
-                                                               .ThenBy(x => x.DisplayOrder)
-                                                               .ToListAsync(cancellationToken);
+                                                              .OrderBy(x => x.DisplayLevel)
+                                                              .ThenBy(x => x.DisplayOrder)
+                                                              .ToListAsync(cancellationToken);
+            await Parallel.ForEachAsync(batchetCustomerSurveys, async (batchetCustomerSurvey, cancellationToken) =>
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var customerSurveyRepository = scope.ServiceProvider.GetRequiredService<ICustomerSurveyRepository>();
+                    var customerSurveyGroups = await customerSurveyRepository.Queryable.Where(x => x.CustomerSurveyGroupId.HasValue && batchetCustomerSurvey.Select(x => x.Id).Contains(x.CustomerSurveyGroupId.Value))
+                                                                                       .ToListAsync(cancellationToken);
+                    foreach (var surveyQuestion in surveyQuestions)
+                    {
+                        var answers = ConvertHelper.Deserialize<IList<ChooseDirectionQuestionAnswers>>(surveyQuestion.Answers);
+                        var answerIds = answers?.Select(a => a.Id).ToList();
+                        var customerSurveyQuestions = customerSurveyGroups.Where(x => x.SurveyQuestionId == surveyQuestion.Id).ToList();
+                        var customerSurveyQuestionAnswers = customerSurveyQuestions.Select(x => new
+                        {
+                            UserId = x.UserId,
+                            SurveyQuestionId = surveyQuestion.Id,
+                            Answers = ConvertHelper.Deserialize<IList<ChooseDirectionQuestionAnswers>>(x.Answer) ?? new List<ChooseDirectionQuestionAnswers>()
+                        }).ToList();
+
+                        if (answers == null || !answers.Any())
+                        {
+                            continue;
+                        }
+                        listQuestionReport.PushRange(reportCompetitionEvents.SelectMany(report =>
+                        {
+                            return report.ReportCompetitionEventSchools.Select(reportSchool =>
+                            {
+                                var totalStudent = reportSchool.UserIds.Join(customerSurveyQuestionAnswers.ToList(), userId => userId, record => record.UserId, (userId, record) => record)
+                                                                       .Count(x => x.Answers.Any());
+                                return new CustomerSurveyQuestionReportModel
+                                {
+                                    LocationId = report.LocationId,
+                                    SchoolId = reportSchool.SchoolId,
+                                    DisplayLevel = surveyQuestion.DisplayLevel,
+                                    DisplayOrder = surveyQuestion.DisplayOrder,
+                                    SurveyQuestionId = surveyQuestion.Id,
+                                    TotalStudent = totalStudent
+                                };
+                            });
+                        }).ToArray());
+
+                        listSubQuestionReport.PushRange(reportCompetitionEvents.SelectMany(um =>
+                        {
+                            return um.ReportCompetitionEventSchools.Select(reportSchool =>
+                            {
+                                return new CustomerSurveyQuestionReportModel
+                                {
+                                    LocationId = um.LocationId,
+                                    SchoolId = reportSchool.SchoolId,
+                                    DisplayLevel = surveyQuestion.DisplayLevel,
+                                    DisplayOrder = surveyQuestion.DisplayOrder,
+                                    SurveyQuestionId = surveyQuestion.Id,
+                                    SurveyQuestionUserReports = answers.Select(a => a.Id)
+                                                        .GroupJoin(
+                                                            reportSchool.UserIds
+                                                                .Join(customerSurveyQuestionAnswers, userId => userId, record => record.UserId, (userId, record) => record)
+                                                                .SelectMany(x => x.Answers),
+                                                            answerId => answerId,
+                                                            studentAnswer => studentAnswer.Id,
+                                                            (answerId, matchingAnswers) => new SurveyQuestionUserReportModel
+                                                            {
+                                                                Id = answerId,
+                                                                TotalCount = matchingAnswers.Count()
+                                                            }
+                                                        ).ToList()
+                                };
+                            }).ToList();
+                        }).ToArray());
+                    }
+                }
+            });
+
+            var customerSurveyQuestionReports = reportCompetitionEvents.SelectMany(reportEvent =>
+            {
+                var listQuestionReportLocation = listQuestionReport.Where(x => x.LocationId == reportEvent.LocationId);
+                return reportEvent.ReportCompetitionEventSchools.Select(reportSchool =>
+                {
+                    var listQuestionReportSchool = listQuestionReportLocation.Where(x => x.SchoolId == reportSchool.SchoolId);
+                    return new CustomerSurveyQuestionReportModel
+                    {
+                        LocationId = reportEvent.LocationId,
+                        SchoolId = reportSchool.SchoolId,
+                        SurveyQuestionUserReports = listQuestionReportSchool.GroupBy(x => new { x.SurveyQuestionId, x.DisplayOrder, x.DisplayLevel }).Select(report =>
+                        {
+                            return new SurveyQuestionUserReportModel
+                            {
+                                SurveyQuestionId = report.Key.SurveyQuestionId,
+                                DisplayLevel = report.Key.DisplayLevel,
+                                DisplayOrder = report.Key.DisplayOrder,
+                                TotalCount = report.Sum(x => x.TotalStudent)
+                            };
+                        }).OrderBy(x => x.DisplayLevel).ThenBy(x => x.DisplayOrder).ToList()
+                    };
+                });
+            }).ToList();
+
+            var customerSubSurveyQuestionReports = reportCompetitionEvents.SelectMany(um =>
+            {
+                var subQuestionReports = listSubQuestionReport.Where(x => x.LocationId == um.LocationId);
+                return um.ReportCompetitionEventSchools.Select(reportSchool =>
+                {
+                    return new CustomerSurveyQuestionReportModel
+                    {
+                        LocationId = um.LocationId,
+                        SchoolId = reportSchool.SchoolId,
+                        SurveyQuestionUserReports = subQuestionReports.Where(x => x.SchoolId == reportSchool.SchoolId)
+                                                                      .SelectMany(report => report.SurveyQuestionUserReports
+                                                                      .Select(userReport => new SurveyQuestionUserReportModel
+                                                                      {
+                                                                          Id = userReport.Id,
+                                                                          TotalCount = userReport.TotalCount,
+                                                                          DisplayLevel = report.DisplayLevel,
+                                                                          DisplayOrder = report.DisplayOrder,
+                                                                          SurveyQuestionId = report.SurveyQuestionId
+                                                                      })).GroupBy(x => new { x.SurveyQuestionId, x.DisplayLevel, x.DisplayOrder, x.Id })
+                                                                      .Select(userReport => new SurveyQuestionUserReportModel
+                                                                      {
+                                                                          Id = userReport.Key.Id,
+                                                                          TotalCount = userReport.Sum(x => x.TotalCount),
+                                                                          DisplayLevel = userReport.Key.DisplayLevel,
+                                                                          DisplayOrder = userReport.Key.DisplayOrder,
+                                                                          SurveyQuestionId = userReport.Key.SurveyQuestionId
+                                                                      }).OrderBy(x => x.DisplayLevel).ThenBy(x => x.DisplayOrder).ThenBy(x => x.Id).ToList()
+                    };
+                });
+            }).ToList();
+
+            var reportPlacementTestEventResults = await _courseService.GetReportPlacementTestEventSchoolAsync(new GetReportPlacementTestEventQueryModel
+            {
+                EducationLevel = request.EducationLevel,
+                EventCodeStr = request.EventCodeStr,
+            });
+            var reportPlacementTestEvents = reportPlacementTestEventResults.Content?.Result;
+            var surveyQuestionReportDistricts = new ConcurrentBag<SurveyQuestionReportDistrictModel>();
+
+            Parallel.ForEach(reportCompetitionEvents, reportCompetitionEvent =>
+            {
+                var reportPlacementTestEvent = reportPlacementTestEvents?.FirstOrDefault(x => x.LocationName == reportCompetitionEvent.DistrictName);
+                var reportSurveyQuestionEvents = customerSubSurveyQuestionReports?.Where(x => x.LocationId == reportCompetitionEvent.LocationId);
+                var reportSurveyQuestionReports = customerSurveyQuestionReports?.Where(x => x.LocationId == reportCompetitionEvent.LocationId);
+                var surveyQuestionReportDistrict = new SurveyQuestionReportDistrictModel
+                {
+                    LocationName = reportCompetitionEvent.DistrictName,
+                    NumberActualParticipatingSchool = reportPlacementTestEvent?.NumberActualParticipatingSchool ?? default,
+                    NumberRegisteredSchool = reportPlacementTestEvent?.NumberRegisteredSchool ?? default,
+                    NumberStudentsCompletedPT = reportPlacementTestEvent?.NumberStudentsCompletedPT ?? default,
+                    NumberStudentVerified = reportCompetitionEvent.NumberStudentCompleteVerify,
+                    NumberValidStudentAccount = reportPlacementTestEvent?.NumberValidStudentAccount ?? default,
+                    SurveyQuestionReportSchools = reportPlacementTestEvent?.ReportPlacementTestEventSchools.Select(report =>
+                    {
+                        var reportSubSurveyQuestionSchool = reportSurveyQuestionEvents?.FirstOrDefault(x => x.SchoolId == report.SchoolId);
+                        var reportSurveyQuestionSchool = reportSurveyQuestionReports?.FirstOrDefault(x => x.SchoolId == report.SchoolId);
+
+                        return new SurveyQuestionReportSchoolModel
+                        {
+                            LocatonName = report.SchoolName,
+                            NumberStudentsCompletedPT = report.NumberStudentsCompletedPT,
+                            NumberValidStudentAccount = report.NumberValidStudentAccount,
+                            NumberStudentVerified = report.NumberStudentVerifiedSchool,
+                            SurveyQuestionUserReports = reportSurveyQuestionSchool?.SurveyQuestionUserReports ?? new List<SurveyQuestionUserReportModel>(),
+                            SubSurveyQuestionUserReports = reportSubSurveyQuestionSchool?.SurveyQuestionUserReports ?? new List<SurveyQuestionUserReportModel>(),
+                        };
+                    }).ToList() ?? new List<SurveyQuestionReportSchoolModel>(),
+                };
+                surveyQuestionReportDistricts.Add(surveyQuestionReportDistrict);
+            });
+
             methodResult.Result = ExportExcelTemplate(surveyQuestionReportDistricts.ToList(), surveyQuestions, request);
             return methodResult;
         }
@@ -235,42 +297,48 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
                 {
                     throw new InvalidOperationException("The Excel file does not contain any worksheets.");
                 }
-                UpdateTemplateExcel(originalWorksheet, surveyQuestions, request);
-                //if (surveyQuestionReportDistricts != null && surveyQuestionReportDistricts.Any())
-                //{
-                //    foreach (var item in surveyQuestionReportDistricts)
-                //    {
-                //        var excelWorksheet = excelPackage.Workbook.Worksheets.Copy(originalWorksheet.Name, item.LocationName);
-                //        UpdateTemplateExcel(excelWorksheet, surveyQuestions, request);
-                //        int startRow = 5;
-                //        if (item.SurveyQuestionReportSchools != null && item.SurveyQuestionReportSchools.Any())
-                //        {
-                //            foreach (var surveyQuestionReport in item.SurveyQuestionReportSchools)
-                //            {
-                //                excelWorksheet.Cells[startRow, 1].Value = item.SurveyQuestionReportSchools.IndexOf(surveyQuestionReport) + 1;
-                //                excelWorksheet.Cells[startRow, 2].Value = surveyQuestionReport.LocatonName;
-                //                excelWorksheet.Cells[startRow, 3].Value = surveyQuestionReport.NumberValidStudentAccount;
-                //                excelWorksheet.Cells[startRow, 4].Value = surveyQuestionReport.NumberStudentVerified;
-                //                excelWorksheet.Cells[startRow, 5].Value = surveyQuestionReport.PercentStudentsVerified + "%";
-                //                excelWorksheet.Cells[startRow, 6].Value = surveyQuestionReport.NumberStudentsCompletedPT;
-                //                excelWorksheet.Cells[startRow, 7].Value = surveyQuestionReport.CompletionRate + "%";
-                //                excelWorksheet.Cells[startRow, 8].Value = surveyQuestionReport.NumberStudentsCompletedSurvey;
-                //                excelWorksheet.Cells[startRow, 9].Value = surveyQuestionReport.PercentageCompletionSurvey + "%";
-                //                if (surveyQuestionReport.CustomerSurveyUserReports != null && surveyQuestionReport.CustomerSurveyUserReports.Any())
-                //                {
-                //                    var rowReportLevel = 10;
-                //                    foreach (var reportLevel in surveyQuestionReport.CustomerSurveyUserReports)
-                //                    {
-                //                        excelWorksheet.Cells[startRow, rowReportLevel].Value = reportLevel.NumberSubQuestion;
-                //                        excelWorksheet.Cells[startRow, rowReportLevel + 1].Value = NumberHelper.GetPercent(reportLevel.NumberSubQuestion, item.NumberStudentsCompletedSurvey) + "%";
-                //                        rowReportLevel += 2;
-                //                    }
-                //                }
-                //                startRow++;
-                //            }
-                //        }
-                //    }
-                //}
+                if (surveyQuestionReportDistricts != null && surveyQuestionReportDistricts.Any())
+                {
+                    foreach (var item in surveyQuestionReportDistricts)
+                    {
+                        var excelWorksheet = excelPackage.Workbook.Worksheets.Copy(originalWorksheet.Name, item.LocationName);
+                        UpdateTemplateExcel(excelWorksheet, surveyQuestions, request);
+                        int startRow = 5;
+                        if (item.SurveyQuestionReportSchools != null && item.SurveyQuestionReportSchools.Any())
+                        {
+                            foreach (var surveyQuestionReport in item.SurveyQuestionReportSchools)
+                            {
+                                excelWorksheet.Cells[startRow, 1].Value = item.SurveyQuestionReportSchools.IndexOf(surveyQuestionReport) + 1;
+                                excelWorksheet.Cells[startRow, 2].Value = surveyQuestionReport.LocatonName;
+                                excelWorksheet.Cells[startRow, 3].Value = surveyQuestionReport.NumberValidStudentAccount;
+                                excelWorksheet.Cells[startRow, 4].Value = surveyQuestionReport.NumberStudentVerified;
+                                excelWorksheet.Cells[startRow, 5].Value = surveyQuestionReport.PercentStudentsVerified + "%";
+                                excelWorksheet.Cells[startRow, 6].Value = surveyQuestionReport.NumberStudentsCompletedPT;
+                                excelWorksheet.Cells[startRow, 7].Value = surveyQuestionReport.CompletionRate + "%";
+                                var rowReportLevel = 8;
+                                if (surveyQuestionReport.SurveyQuestionUserReports != null)
+                                {
+                                    foreach (var reportLevel in surveyQuestionReport.SurveyQuestionUserReports)
+                                    {
+                                        excelWorksheet.Cells[startRow, rowReportLevel].Value = reportLevel.TotalCount;
+                                        rowReportLevel++;
+                                    }
+                                }
+                                if (surveyQuestionReport.SubSurveyQuestionUserReports != null)
+                                {
+                                    foreach (var reportLevel in surveyQuestionReport.SubSurveyQuestionUserReports)
+                                    {
+                                        var numberQuestion = surveyQuestionReport.SurveyQuestionUserReports?.FirstOrDefault(x => x.SurveyQuestionId == reportLevel.SurveyQuestionId)?.TotalCount ?? default;
+                                        excelWorksheet.Cells[startRow, rowReportLevel].Value = reportLevel.TotalCount;
+                                        excelWorksheet.Cells[startRow, rowReportLevel + 1].Value = NumberHelper.GetPercent(reportLevel.TotalCount, numberQuestion) + "%";
+                                        rowReportLevel += 2;
+                                    }
+                                }
+                                startRow++;
+                            }
+                        }
+                    }
+                }
 
                 excelPackage.SaveAs(memoryStream);
             }

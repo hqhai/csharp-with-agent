@@ -54,7 +54,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         {
             get
             {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount);
+                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberStudentVerified);
             }
         }
 
@@ -104,41 +104,8 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
             }
         }
 
-        /// Số học sinh đã hoàn thành Survey
-        /// </summary>
-        public int NumberStudentsCompletedSurvey { get; set; }
-
-        /// <summary>
-        /// Tỷ lệ học sinh đã hoàn thành Survey
-        /// </summary>
-        public double PercentageCompletionSurvey
-        {
-            get
-            {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedSurvey, NumberValidStudentAccount);
-            }
-        }
-
         public IList<SurveyQuestionUserReportModel> SurveyQuestionUserReports { get; set; } = new List<SurveyQuestionUserReportModel>();
-    }
-
-    public class CustomerSurveyReportModel
-    {
-        public int Id { get; set; }
-        public int DisplayLevel { get; set; }
-        public float DisplayOrder { get; set; }
-        public int NumberSubQuestion { get; set; }
-        public double PercentSubQuestion { get; set; }
-    }
-
-    public class CustomerSurveyUserReportModel
-    {
-        public int Id { get; set; }
-        public Guid SurveyQuestionId { get; set; }
-        public int DisplayLevel { get; set; }
-        public float DisplayOrder { get; set; }
-        public Guid UserId { get; set; }
-        public int NumberSubQuestion { get; set; }
+        public IList<SurveyQuestionUserReportModel> SubSurveyQuestionUserReports { get; set; } = new List<SurveyQuestionUserReportModel>();
     }
 
     public class SurveyQuestionUserReportModel
@@ -148,19 +115,17 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public int DisplayLevel { get; set; }
         public float DisplayOrder { get; set; }
         public int TotalCount { get; set; }
-    }
-
-    public class QuestionUserReportModel
-    {
-        public Guid SurveyQuestionId { get; set; }
-        public int DisplayLevel { get; set; }
-        public float DisplayOrder { get; set; }
-        public int TotalStudent { get; set; }
+        public IList<SurveyQuestionUserReportModel> SurveyQuestionUserReports { get; set; } = new List<SurveyQuestionUserReportModel>();
     }
 
     public class CustomerSurveyQuestionReportModel
     {
         public Guid LocationId { get; set; }
+        public Guid? SchoolId { get; set; }
+        public Guid SurveyQuestionId { get; set; }
+        public int DisplayLevel { get; set; }
+        public float DisplayOrder { get; set; }
+        public int TotalStudent { get; set; }
         public IList<SurveyQuestionUserReportModel> SurveyQuestionUserReports { get; set; } = new List<SurveyQuestionUserReportModel>();
     }
 }

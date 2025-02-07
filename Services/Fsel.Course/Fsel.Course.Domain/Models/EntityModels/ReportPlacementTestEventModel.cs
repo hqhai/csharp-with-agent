@@ -84,6 +84,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class ReportPlacementTestEventSchoolModel
     {
+        public Guid SchoolId { get; set; }
         public string? SchoolName { get; set; }
 
         /// <summary>

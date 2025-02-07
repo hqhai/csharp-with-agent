@@ -100,7 +100,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                                               SchoolId = g.Key.GetValueOrDefault(),
                                               StudentIds = g.Select(x => x.baseQ.Id).Distinct().ToList(),
                                               UserIds = g.Where(x => x.human.UserId.HasValue).Select(x => x.human.UserId.GetValueOrDefault()).Distinct().ToList(),
-                                              CountCompleteVerify = g.Count(x => x.user.EmailConfirmed || x.user.PhoneNumberConfirmed)
+                                              CountCompleteVerify = g.Where(x => x.user.EmailConfirmed || x.user.PhoneNumberConfirmed).Select(x => x.user.Id).Distinct().Count()
                                           }).ToListAsync(cancellationToken);
 
             var reportCompetitionEvents = new List<ReportCompetitionEventModel>();
@@ -112,6 +112,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 
                 var reportCompetition = new ReportCompetitionEventModel
                 {
+                    LocationId = item.Id,
                     DistrictName = locationDistricts?.FirstOrDefault(x => x.Id == item.LocationId)?.Name,
                     NumberRegisteredSchool = schoolDistricts?.Count() ?? default,
                     NumberActualParticipatingSchool = studentDistricts.Select(x => x.SchoolId).Distinct().Count(),
@@ -124,6 +125,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                         var schoolDistrict = studentDistricts.FirstOrDefault(x => x.SchoolId == school.Id);
                         return new ReportCompetitionEventSchoolModel
                         {
+                            SchoolId = school.Id,
                             SchoolName = schools?.FirstOrDefault(x => x.Id == school.Id)?.Name,
                             NumberValidStudentAccount = schoolDistrict?.StudentIds.Count ?? default,
                             NumberStudentCompleteVerify = schoolDistrict?.CountCompleteVerify ?? default,
