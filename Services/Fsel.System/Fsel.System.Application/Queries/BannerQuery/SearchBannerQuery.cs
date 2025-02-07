@@ -9,6 +9,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
     using Fsel.System.Domain.Models.QueryModels.Banners;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class SearchBannerQuery : SearchBannerQueryModel, IRequest<MethodResult<PagingItemsModel<BannerModel>>>
     {
@@ -34,7 +35,10 @@ namespace Fsel.System.Application.Queries.BannerQuery
                 return methodResult;
             }
 
-            var query = _bannerRepository.Queryable.AsQueryable();
+            var query = _bannerRepository.Queryable
+                                         .Include(x => x.BannerScopes)
+                                         .Include(x => x.BannerImages)
+                                         .AsQueryable();
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
