@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Queries.IntegrationQuery;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -23,10 +24,16 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     public class GetPlacementTestResultByStudentIdQueryHandler : IRequestHandler<GetPlacementTestResultByStudentIdQuery, MethodResult<GetPlacementTestResultByStudentModel>>
     {
         private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
+        private readonly IUserService _userService;
+        private readonly ICourseRepository _courseRepository;
 
-        public GetPlacementTestResultByStudentIdQueryHandler(IPlacementTestGroupResultRepository _placementTestGroupResultRepository)
+        public GetPlacementTestResultByStudentIdQueryHandler(IPlacementTestGroupResultRepository placementTestGroupResultRepository,
+                                                             IUserService userService,
+                                                             ICourseRepository courseRepository)
         {
-            this._placementTestGroupResultRepository = _placementTestGroupResultRepository;
+            _placementTestGroupResultRepository = placementTestGroupResultRepository;
+            _userService = userService;
+            _courseRepository = courseRepository;
         }
 
         public async Task<MethodResult<GetPlacementTestResultByStudentModel>> Handle(GetPlacementTestResultByStudentIdQuery request, CancellationToken cancellationToken)
@@ -43,8 +50,19 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 return methodResult;
             }
 
+            var studentResult = await _userService.GetUserByStudentId(request.StudentId);
+            var student = studentResult.Content?.Result;
+            string? courseName = null;
+
+            if (student != null && student.CourseId.HasValue)
+            {
+                var course = await _courseRepository.Queryable.FirstOrDefaultAsync(x => x.Id == student.CourseId, cancellationToken);
+                courseName = course?.Name;
+            }
+
             methodResult.Result = new GetPlacementTestResultByStudentModel
             {
+                CourseName = courseName,
                 CurrentLevel = placementTestGroupResult.CurrentLevel == EnumCourseLevel.A1 && placementTestGroupResult.Percent < MinCompletePercent ? ValueCourseLevel.PreA1 : EnumCourseLevelHelper.GetCodeByEnumCourseLevel(placementTestGroupResult.CurrentLevel),
                 RecommendedLevel = placementTestGroupResult.SuggetLevel,
                 PlacementTestResults = placementTestGroupResult.PlacementTestResults.OrderBy(x => x.CreatedDate).Select(c => new IntegrationPlacementTestResultModels
@@ -62,6 +80,8 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
 
     public class GetPlacementTestResultByStudentModel
     {
+        public string? CourseName { get; set; }
+
         public string? CurrentLevel { get; set; }
 
         public EnumCourseLevel? RecommendedLevel { get; set; }
