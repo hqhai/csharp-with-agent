@@ -63,18 +63,18 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
                 if (request.Keyword.IsValidEmail())
                 {
-                    query = query.Where(m => (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword));
+                    query = query.Where(m => (m.Email ?? string.Empty).Trim().Contains(request.Keyword));
                 }
                 else
                 {
-                    query = query.Where(m => m.Id.ToString() == request.Keyword || (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword)
-                                                                                || (m.PhoneNumber ?? string.Empty).Trim().ToLower().Contains(request.Keyword));
+                    query = query.Where(m => m.Id.ToString() == request.Keyword || (m.FullName ?? string.Empty).Trim().Contains(request.Keyword)
+                                                                                || (m.PhoneNumber ?? string.Empty).Trim().Contains(request.Keyword));
                 }
             }
             if (!string.IsNullOrEmpty(request.SchoolName))
             {
                 request.SchoolName = request.SchoolName.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.Where(m => (m.SchoolName ?? string.Empty).Trim().ToLower().Contains(request.SchoolName));
+                query = query.Where(m => (m.SchoolName ?? string.Empty).Trim().Contains(request.SchoolName));
             }
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
             {
