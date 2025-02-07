@@ -86,7 +86,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             }
 
             var query = from cfr in _classForumResultRepository.Queryable.Include(x => x.ClassForumResultFiles)
-                                                                         .Include(x => x.ClassForumScores)
                         join lr in _lessonResultRepository.Queryable on cfr.LessonResultId equals lr.Id
                         where cfr.Status == EnumClassForumResultStatus.Graded
                             && cfr.ClassForumId == classForumResult.ClassForumId
