@@ -24,7 +24,7 @@ namespace Fsel.Identity.Infrastructure.Maps
                 .BeforeMap((m, c) =>
                 {
                     c.UserName = (c.Email.ToLower().Trim() == c.UserName.ToLower().Trim()) ? m.Email : m.PhoneNumber;
-                    c.NormalizedUserName = (c.Email.ToLower().Trim() == c.UserName.ToLower().Trim()) ? m.Email.ToUpper() : m.PhoneNumber;
+                    c.NormalizedUserName = (c.Email.ToLower().Trim() == c.UserName.ToLower().Trim()) ? m.Email?.ToUpper() : m.PhoneNumber;
                 })
                 .ForMember(p => p.NormalizedEmail, n => n.MapFrom(m => m.Email))
                 .ForMember(m => m.Id, opt => opt.Ignore());
