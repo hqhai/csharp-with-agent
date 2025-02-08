@@ -20,14 +20,12 @@ namespace Fsel.Identity.Infrastructure.Common
 
         public async Task<string> SaveOTpCodeBySmsCommand(UserOtpCode? lastOTP, Guid userId, CancellationToken cancellationToken)
         {
-            var otp = NumberHelper.GetRandomCode();
-
             if (lastOTP == null)
             {
                 lastOTP = new UserOtpCode
                 {
                     UserId = userId,
-                    OTPCode = otp,
+                    OTPCode = NumberHelper.GetRandomCode(),
                     Status = EnumOtpCodeStatus.New,
                     Type = EnumUserOtpCodeType.SMS,
                     RetryCount = AddOneCountRetry,
@@ -37,13 +35,12 @@ namespace Fsel.Identity.Infrastructure.Common
             }
             else
             {
-                lastOTP.OTPCode = otp;
                 lastOTP.RetryCount += AddOneCountRetry;
                 _userOtpCodeRepository.Update(lastOTP);
             }
 
             await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            return otp;
+            return lastOTP.OTPCode ?? string.Empty;
         }
     }
 }
