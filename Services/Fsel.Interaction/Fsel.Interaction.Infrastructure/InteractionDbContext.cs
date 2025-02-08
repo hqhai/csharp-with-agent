@@ -35,6 +35,7 @@ namespace Fsel.Interaction.Infrastructure
             modelBuilder.ApplyConfiguration(new SupportTicketEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new FlagEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SurveyQuestionTranslationEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CustomerSurveyGroupEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -52,6 +53,7 @@ namespace Fsel.Interaction.Infrastructure
         public DbSet<SupportTicket> SupportTickets { get; set; }
         public DbSet<SupportCategory> SupportCategorys { get; set; }
         public DbSet<Flag> Flags { get; set; }
+        public DbSet<CustomerSurveyGroup> CustomerSurveyGroups { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

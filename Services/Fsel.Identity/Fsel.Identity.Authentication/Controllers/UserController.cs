@@ -56,11 +56,11 @@ namespace Fsel.Identity.Authentication.Controllers
         /// Forgot Password
         /// </summary>
         [HttpPost("forgot-password")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<ForgotPasswordResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<ForgotPasswordResultModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

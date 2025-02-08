@@ -248,13 +248,13 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// <summary>
         /// Export template Admin School
         /// </summary>
-        [HttpPost("export-template-admin-school")]
+        [HttpGet("export-template-admin-school")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(role: nameof(EnumRole.Admin))]
-        public async Task<IActionResult> Export([FromForm] ExportTemplateCreateAdminSchoolCommand command)
+        public async Task<IActionResult> Export()
         {
-            MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<Stream> commandResult = await _mediator.Send(new ExportTemplateCreateAdminSchoolCommand()).ConfigureAwait(false);
             if (!commandResult.IsOK || commandResult.Result == null)
             {
                 return commandResult.GetActionResult();
@@ -278,6 +278,20 @@ namespace Fsel.Identity.Api.Controllers.Admin
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "import_file_admin-school.xlsx");
         }
+
+        /// <summary>
+        /// Change Password
+        /// </summary>
+        [HttpPost("reset-password")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordUserCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
         /// <summary>
         /// Tool get otp of student
         /// </summary>
