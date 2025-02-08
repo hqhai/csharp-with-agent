@@ -53,10 +53,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
                 SchoolGrade = request.SchoolGrade,
-                EndDate = request.EndDate,
+                SchoolClass = request.SchoolClass,
                 Keyword = request.Keyword,
                 Status = request.Status,
                 StartDate = request.StartDate,
+                EndDate = request.EndDate,
                 CourseLevel = request.CourseLevel,
                 CurrentLevel = request.CurrentLevel,
             }, cancellationToken);
