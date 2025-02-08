@@ -34,8 +34,8 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<UpdateUserProfileCommandModel, User>()
                 .BeforeMap((m, c) =>
                 {
-                    c.UserName = (c.Email.ToLower().Trim() == c.UserName.ToLower().Trim()) ? c.UserName.ToLower().Trim() : m.PhoneNumber;
-                    c.NormalizedUserName = (c.Email.ToLower().Trim() == c.UserName.ToLower().Trim()) ? c.UserName.ToLower().Trim() : m.PhoneNumber;
+                    c.UserName = (c.Email.ToLower().Trim() == c.UserName.ToLower().Trim()) ? c.UserName : m.PhoneNumber;
+                    c.NormalizedUserName = (c.Email.ToLower().Trim() == c.UserName.ToLower().Trim()) ? c.NormalizedUserName : m.PhoneNumber;
                 })
                 .ForMember(m => m.Id, opt => opt.Ignore());
 
