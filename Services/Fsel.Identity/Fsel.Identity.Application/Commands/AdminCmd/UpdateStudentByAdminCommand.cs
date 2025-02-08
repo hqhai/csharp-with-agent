@@ -165,7 +165,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private async Task UpdateUserToEmailAsync(User user, string? email)
         {
             int dem = 1;
-            var emailCheck = email;
+            var emailCheck = email ?? "";
             while (await _userManager.Users.AnyAsync(x => x.Email.ToLower().Trim() == emailCheck.ToLower().Trim()))
             {
                 emailCheck = dem + email;
