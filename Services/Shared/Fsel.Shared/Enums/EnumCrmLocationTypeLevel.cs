@@ -9,6 +9,9 @@ namespace Fsel.Shared.Enums
         [Description("Không xác định")]
         Unknown,
 
+        [Description("Mầm non")]
+        Preschool,
+
         [Description("Tiểu học")]
         Primary,
 

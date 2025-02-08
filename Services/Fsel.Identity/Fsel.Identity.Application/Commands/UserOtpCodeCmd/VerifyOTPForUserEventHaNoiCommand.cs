@@ -52,8 +52,18 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.UserDoesNotExist), nameof(request.PhoneNumber), request.PhoneNumber);
-                return methodResult;
+                var isPhoneNumberAlreadyExist = await _userManager.Users.AnyAsync(p => p.PhoneNumber == request.PhoneNumber, cancellationToken);
+
+                if (isPhoneNumberAlreadyExist)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.PhoneNumberAlreadyExist), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
+                }
+                else
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.UserDoesNotExist), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
+                }
             }
 
             var lastOTP = await _userOtpCodeRepository.Queryable.Where(p => p.UserId == user.Id && p.Type == EnumUserOtpCodeType.SMS).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
