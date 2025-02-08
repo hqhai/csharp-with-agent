@@ -222,7 +222,7 @@ namespace Fsel.Identity.Api.Controllers
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        [HttpGet("tool-get-otp-for-user ")]
+        [HttpGet("tool-get-otp-for-user")]
         [ProducesResponseType(typeof(MethodResult<UserOtpCodeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ToolGetOtp([FromQuery] ToolGetOtpQuery query)
