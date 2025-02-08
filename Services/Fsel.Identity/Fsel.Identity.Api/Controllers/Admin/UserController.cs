@@ -291,6 +291,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
         /// <summary>
         /// Tool get otp of student
         /// </summary>
