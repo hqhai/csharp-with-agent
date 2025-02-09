@@ -61,7 +61,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             }
 
             var eventRegistrations = await _eventRegistrationRepository.Queryable
-                                                                       .Where(x => x.CompetitionEventId == competitionEvent.Id && x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date && x.District.ToLower().Trim() == request.District.ToLower().Trim())
+                                                                       .Where(x => x.CompetitionEventId == competitionEvent.Id && x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date && x.District.Trim() == request.District.Trim())
                                                                        .ToListAsync(cancellationToken);
             if (eventRegistrations == null)
             {
