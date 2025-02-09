@@ -63,18 +63,21 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
                 if (request.Keyword.IsValidEmail())
                 {
-                    query = query.Where(m => (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword));
+                    query = query.Where(m => m.Email != null && m.Email.Contains(request.Keyword));
                 }
                 else
                 {
-                    query = query.Where(m => m.Id.ToString() == request.Keyword || (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword)
-                                                                                || (m.PhoneNumber ?? string.Empty).Trim().ToLower().Contains(request.Keyword));
+                    var queryById = query.Where(m => m.Id.ToString() == request.Keyword);
+                    var queryByFullName = query.Where(m => m.FullName != null && m.FullName.Contains(request.Keyword));
+                    var queryByPhoneNumber = query.Where(m => m.PhoneNumber != null && m.PhoneNumber.Contains(request.Keyword));
+
+                    query = queryById.Union(queryByFullName).Union(queryByPhoneNumber);
                 }
             }
             if (!string.IsNullOrEmpty(request.SchoolName))
             {
                 request.SchoolName = request.SchoolName.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.Where(m => (m.SchoolName ?? string.Empty).Trim().ToLower().Contains(request.SchoolName));
+                query = query.Where(m => m.SchoolName != null && m.SchoolName.Contains(request.SchoolName));
             }
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
             {
