@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return;
             }
             var courseResults = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
-            var countProgress = await _managerProgressHelper.GetOverallCompleteAsync(courseResults, request.EndDate);
+            var countProgress = _managerProgressHelper.GetOverallCompleteAsync(courseResults, request.EndDate);
             var totalProgress = await _managerProgressHelper.GetTotalCompleteCourseAsync(courseResults);
             overallReport.ContentAverageProgress = $"{countProgress} / {totalProgress}";
         }
