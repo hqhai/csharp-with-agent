@@ -5,7 +5,6 @@ namespace Fsel.Course.Infrastructure.Common
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -103,7 +102,7 @@ namespace Fsel.Course.Infrastructure.Common
             });
             var courseProgress = new CourseStudentProgressModel
             {
-                ContentCompleted = string.Format("{0} / {1}", currentProgress, progress),
+                ContentCompleted = $"{currentProgress} / {progress}",
                 StartDate = courseResult.ProcessDate,
                 CreatedDate = courseResult.CreatedDate,
                 UpdatedDate = courseResult.UpdatedDate,
@@ -185,7 +184,7 @@ namespace Fsel.Course.Infrastructure.Common
             return (counts.Sum(), totalModules.Sum());
         }
 
-        public async Task<double> GetOverallCompleteAsync(IList<CourseResultModel>? courseResults, DateTime? arrivalDate = default)
+        public double GetOverallCompleteAsync(IList<CourseResultModel>? courseResults, DateTime? arrivalDate = default)
         {
             if (courseResults == null || !courseResults.Any())
             {
@@ -195,11 +194,11 @@ namespace Fsel.Course.Infrastructure.Common
 
             var batches = courseResults
                .Select((id, index) => new { id, index })
-               .GroupBy(x => x.index / BatchSize)
+               .GroupBy(x => x.index / BatchSize200)
                .Select(g => g.Select(x => x.id).ToList())
                .ToList();
 
-            await Parallel.ForEachAsync(batches, async (batche, cancellationToken) =>
+            batches.ForEach(async batche =>
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
@@ -273,7 +272,7 @@ namespace Fsel.Course.Infrastructure.Common
                                          .Where(x => !arrivalDate.HasValue || (x.skmt.UpdatedDate ?? x.skmt.CreatedDate).Date <= arrivalDate.Value.Date)
                                          .Select(x => x.skmt.Id).Distinct().Count();
 
-                    learnStudentProcesses.Add(await query.SumAsync(cancellationToken));
+                    learnStudentProcesses.Add(await query.SumAsync());
                 }
             });
             return NumberHelper.ConvertRound(learnStudentProcesses.Sum() / courseResults.Count);
@@ -334,7 +333,7 @@ namespace Fsel.Course.Infrastructure.Common
             var learnCourseCompletes = new ConcurrentBag<CourseCompleteModel>();
             var courseCompleteModules = await GetCourseCompletesAsync(courseResults, arrivalDate: arrivalDate);
             var courseCompleteTotalModules = await GetCompleteCourseTotalsAsync(courseResults);
-            Parallel.ForEach(courseResults, courseResult =>
+            courseResults.ForEach(courseResult =>
             {
                 var courseCompleteModule = courseCompleteModules.FirstOrDefault(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId) ?? new CourseCompleteModel
                 {
@@ -358,12 +357,9 @@ namespace Fsel.Course.Infrastructure.Common
                 return new List<CourseCompleteModel>();
             }
             var courseCompletes = new ConcurrentStack<CourseCompleteModel>();
-            var smallerBatches = courseResults.Select(b => b).Chunk(100);
+            var smallerBatches = courseResults.Select(b => b).Chunk(BatchSize200);
 
-            await Parallel.ForEachAsync(smallerBatches, new ParallelOptions
-            {
-                MaxDegreeOfParallelism = Environment.ProcessorCount
-            }, async (smallBatch, cancellationToken) =>
+            smallerBatches.ForEach(async smallBatch =>
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
@@ -459,7 +455,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                         .Select(x => x.Lesson!.UnitLessons.Where(n => n.UnitId == x.UnitId).Select(n => n.DisplayOrder).FirstOrDefault()).FirstOrDefault()
                                 };
 
-                    var courseCompleteModels = await query.ToArrayAsync(cancellationToken);
+                    var courseCompleteModels = await query.ToArrayAsync();
                     courseCompletes.PushRange(courseCompleteModels);
                 }
             });
@@ -476,10 +472,7 @@ namespace Fsel.Course.Infrastructure.Common
             var courseCompletes = new ConcurrentStack<CourseCompleteModel>();
             var smallerBatches = courseResults.Select(b => b).Chunk(200);
 
-            await Parallel.ForEachAsync(smallerBatches, new ParallelOptions
-            {
-                MaxDegreeOfParallelism = Environment.ProcessorCount
-            }, async (smallBatch, cancellationToken) =>
+            smallerBatches.ForEach(async smallBatch =>
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
@@ -493,7 +486,7 @@ namespace Fsel.Course.Infrastructure.Common
                                     StudentId = baseQ.StudentId,
                                     CourseId = baseQ.CourseId,
                                 };
-                    var courseCompleteModels = await query.ToArrayAsync(cancellationToken);
+                    var courseCompleteModels = await query.ToArrayAsync();
                     courseCompletes.PushRange(courseCompleteModels);
                 }
             });
@@ -537,11 +530,11 @@ namespace Fsel.Course.Infrastructure.Common
 
             var batches = courseResults
                .Select((id, index) => new { id, index })
-               .GroupBy(x => x.index / BatchSize)
+               .GroupBy(x => x.index / BatchSize200)
                .Select(g => g.Select(x => x.id).ToList())
                .ToList();
 
-            await Parallel.ForEachAsync(batches, async (batche, cancellationToken) =>
+            batches.ForEach(async batche =>
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
@@ -635,8 +628,8 @@ namespace Fsel.Course.Infrastructure.Common
                                                         .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate).Select(x => _mapper.Map<LessonResultModel>(x)).FirstOrDefault(),
                                 };
 
-                    var courseCompletes = await query.ToListAsync(cancellationToken);
-                    Parallel.ForEach(courseCompletes, courseComplete =>
+                    var courseCompletes = await query.ToListAsync();
+                    courseCompletes.ForEach(courseComplete =>
                     {
                         learnCourseCompletes.Add(courseComplete);
                     });
@@ -655,7 +648,7 @@ namespace Fsel.Course.Infrastructure.Common
             var learnCourseCompletes = new ConcurrentBag<CourseCompleteModel>();
             var courseCompleteModules = await GetCourseCompleteToExportsAsync(courseResults);
             var courseCompleteTotalModules = await GetCompleteCourseTotalsAsync(courseResults);
-            Parallel.ForEach(courseResults, courseResult =>
+            courseResults.ForEach(courseResult =>
             {
                 var courseCompleteModule = courseCompleteModules.FirstOrDefault(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId) ?? new CourseCompleteModel
                 {
