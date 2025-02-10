@@ -14,6 +14,8 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Students
         public string? Occupation { get; set; }
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
+        public string? SchoolGrade { get; set; }
+        public string? SchoolClass { get; set; }
         public UpdateParentCommandModel? Parent { get; set; }
     }
 }
