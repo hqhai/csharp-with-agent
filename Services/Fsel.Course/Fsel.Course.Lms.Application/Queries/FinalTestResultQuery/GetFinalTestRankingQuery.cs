@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -19,12 +20,12 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetFinalTestRankingQuery : IRequest<MethodResult<IList<TestResultRankingModel>>>
+    public class GetFinalTestRankingQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<TestResultRankingModel>>>
     {
         public Guid FinalTestResultId { get; set; }
     }
 
-    public class GetFinalTestRankingQueryHandler : IRequestHandler<GetFinalTestRankingQuery, MethodResult<IList<TestResultRankingModel>>>
+    public class GetFinalTestRankingQueryHandler : IRequestHandler<GetFinalTestRankingQuery, MethodResult<PagingItemsModel<TestResultRankingModel>>>
     {
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IMapper _mapper;
@@ -39,10 +40,10 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             _trainingService = trainingService;
         }
 
-        public async Task<MethodResult<IList<TestResultRankingModel>>> Handle(GetFinalTestRankingQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<TestResultRankingModel>>> Handle(GetFinalTestRankingQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<TestResultRankingModel>> methodResult = new MethodResult<IList<TestResultRankingModel>>();
+            MethodResult<PagingItemsModel<TestResultRankingModel>> methodResult = new MethodResult<PagingItemsModel<TestResultRankingModel>>();
             List<TestResultRankingModel> testResultRankings = new List<TestResultRankingModel>();
 
             var finalTestResult = await _finalTestResultRepository.GetByIdAsync(request.FinalTestResultId);
@@ -54,11 +55,18 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             }
             var currentClass = await _trainingService.GetClassByStudentId(finalTestResult.StudentId);
             var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(classStudentIds);
+            if (classStudentIds == null || !classStudentIds.Any())
+            {
+                return methodResult;
+            }
+
+            var paging = classStudentIds.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(paging);
             var students = studentResults?.Content?.Result;
 
             var finalTestResults = await _finalTestResultRepository.Queryable
-                            .Where(x => classStudentIds != null && classStudentIds.Contains(x.StudentId))
+                            .Where(x => paging != null && paging.Contains(x.StudentId))
                             .Where(x => x.FinalTestId == finalTestResult.FinalTestId && x.CourseId == finalTestResult.CourseId && x.Status == EnumResultStatus.Done)
                             .ToListAsync(cancellationToken);
 
@@ -79,7 +87,9 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                 }
             }
 
-            methodResult.Result = testResultRankings.OrderByDescending(x => x.Status).ThenByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
+            int totalItem = classStudentIds.Count;
+            testResultRankings = testResultRankings.OrderByDescending(x => x.Status).ThenByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
+            methodResult.Result = new PagingItemsModel<TestResultRankingModel>(testResultRankings, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
