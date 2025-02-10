@@ -31,9 +31,34 @@ namespace Fsel.Course.Domain.Models.EntityModels
         }
 
         /// <summary>
-        /// Số học sinh đăng ký tài khoản hợp lệ
+        /// Số học sinh đăng ký tài khoản hợp lệ (Import)
         /// </summary>
         public int NumberValidStudentAccount { get; set; }
+
+        /// <summary>
+        /// Số học sinh đăng ký tài khoản hợp lệ (LandingPage)
+        /// </summary>
+        public int NumberStudentAccountRegister { get; set; }
+
+        /// <summary>
+        /// Số học sinh xác thực thành công
+        /// </summary>
+        public int NumberStudentCompleteVerify { get; set; }
+
+        /// Tỷ lệ HS xác thực thành công/Đăng ký TK
+        /// </summary>
+        public double CompleteVerifyRate
+        {
+            get
+            {
+                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentCompleteVerify, NumberValidStudentAccount);
+            }
+        }
+
+        /// <summary>
+        /// Số học sinh đang làm bài PT
+        /// </summary>
+        public int NumberStudentsProcessPT { get; set; }
 
         /// <summary>
         /// Số học sinh đã hoàn thành PT
@@ -47,7 +72,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         {
             get
             {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount);
+                return NumberStudentCompleteVerify == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberStudentCompleteVerify);
             }
         }
 
@@ -66,14 +91,50 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? SchoolName { get; set; }
 
         /// <summary>
-        /// Số học sinh đăng ký tài khoản hợp lệ
+        /// Số học sinh đăng ký tài khoản hợp lệ (Import)
         /// </summary>
         public int NumberValidStudentAccount { get; set; }
+
+        /// <summary>
+        /// Số học sinh đăng ký tài khoản hợp lệ (LandingPage)
+        /// </summary>
+        public int NumberStudentAccountRegister { get; set; }
+
+        /// <summary>
+        /// Số học sinh đăng ký tài khoản hợp lệ
+        /// </summary>
+        public int TotalStudentAccount
+        {
+            get
+            {
+                return NumberValidStudentAccount + NumberStudentAccountRegister;
+            }
+        }
+
+        /// <summary>
+        /// Số học sinh đang làm bài PT
+        /// </summary>
+        public int NumberStudentsProcessPT { get; set; }
 
         /// <summary>
         /// Số học sinh đã hoàn thành PT
         /// </summary>
         public int NumberStudentsCompletedPT { get; set; }
+
+        /// <summary>
+        /// Số học sinh xác thực thành công
+        /// </summary>
+        public int NumberStudentCompleteVerify { get; set; }
+
+        /// Tỷ lệ HS xác thực thành công/Đăng ký TK
+        /// </summary>
+        public double CompleteVerifyRate
+        {
+            get
+            {
+                return TotalStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentCompleteVerify, TotalStudentAccount);
+            }
+        }
 
         /// <summary>
         /// Số học sinh đã Học trong hệ thống
@@ -87,7 +148,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         {
             get
             {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount);
+                return NumberStudentCompleteVerify == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberStudentCompleteVerify);
             }
         }
 

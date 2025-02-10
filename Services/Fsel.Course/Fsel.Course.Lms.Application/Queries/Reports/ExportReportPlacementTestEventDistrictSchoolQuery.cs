@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Lms.Application.Queries.Reports
 {
-    using System.Collections.Concurrent;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
@@ -18,21 +17,21 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using OfficeOpenXml;
+    using System.Collections.Concurrent;
 
-    public class ExportReportPlacementTestEventSchoolQuery : IRequest<MethodResult<Stream>>
+    public class ExportReportPlacementTestEventDistrictSchoolQuery : IRequest<MethodResult<Stream>>
     {
-        public string? EventCodeStr { get; set; }
+        public string? EventCode { get; set; }
         public string? DistrictName { get; set; }
-        public EnumEducationLevel EducationLevel { get; set; }
     }
 
-    public class ExportReportPlacementTestEventSchoolQueryHandler : IRequestHandler<ExportReportPlacementTestEventSchoolQuery, MethodResult<Stream>>
+    public class ExportReportPlacementTestEventDistrictSchoolQueryHandler : IRequestHandler<ExportReportPlacementTestEventDistrictSchoolQuery, MethodResult<Stream>>
     {
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
         private readonly IServiceProvider _serviceProvider;
 
-        public ExportReportPlacementTestEventSchoolQueryHandler(
+        public ExportReportPlacementTestEventDistrictSchoolQueryHandler(
             IMapper mapper,
             IUserService userService,
             IServiceProvider serviceProvider)
@@ -42,15 +41,14 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             _serviceProvider = serviceProvider;
         }
 
-        public async Task<MethodResult<Stream>> Handle(ExportReportPlacementTestEventSchoolQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<Stream>> Handle(ExportReportPlacementTestEventDistrictSchoolQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<Stream>();
-            var reportCompetitionEventResults = await _userService.GetReportCompetitionEventSchoolAsync(new GetReportCompetitionEventQueryModel
+            var reportCompetitionEventResults = await _userService.GetReportCompetitionEventDistrictSchoolAsync(new GetCompetitionEventToEventParentQueryModel
             {
-                EducationLevel = request.EducationLevel,
                 DistrictName = request.DistrictName,
-                EventCodeStr = request.EventCodeStr,
+                EventCode = request.EventCode,
             });
 
             var reportCompetitionEvents = reportCompetitionEventResults?.Content?.Result;
@@ -117,8 +115,9 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                             SchoolName = eventSchool.SchoolName,
                             NumberStudentsCompletedPT = numberStudentsCompletedPT,
                             NumberValidStudentAccount = eventSchool.NumberValidStudentAccount,
-                            NumberStudentsProcessPT = placementTestResultSchools?.Select(x => x.StudentId).Distinct().Count() ?? default,
+                            NumberStudentsProcessPT = placementTestResultSchools?.Where(x => !x.IsDonePT).Select(x => x.StudentId).Distinct().Count() ?? default,
                             NumberStudentCompleteVerify = eventSchool.NumberStudentCompleteVerify,
+                            NumberStudentAccountRegister = eventSchool.NumberStudentAccountRegister,
                             ReportCourseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic).Select(courseLevel =>
                             {
                                 var numberStudentOfLevel = placementTestResultSchools?.Where(x => x.CourseLevel == courseLevel && x.IsDonePT).Select(x => x.StudentId).Distinct().Count() ?? default;
@@ -138,40 +137,37 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             return methodResult;
         }
 
-        public static Stream ExportExcelTemplate(IList<ReportPlacementTestEventModel>? reportPlacementTestEvents, ExportReportPlacementTestEventSchoolQuery request)
+        public static Stream ExportExcelTemplate(IList<ReportPlacementTestEventModel>? reportPlacementTestEvents, ExportReportPlacementTestEventDistrictSchoolQuery request)
         {
             MemoryStream memoryStream = new MemoryStream();
 
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.ReportPTEventSchool)))
+            using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.ReportPTEventDistrictSchool)))
             {
-                var originalWorksheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
-                if (originalWorksheet == null)
-                {
-                    throw new InvalidOperationException("The Excel file does not contain any worksheets.");
-                }
+                var excelWorksheet = excelPackage.Workbook.Worksheets[0];
                 if (reportPlacementTestEvents != null && reportPlacementTestEvents.Any())
                 {
+                    int startRow = 9;
+                    int index = 1;
+
                     foreach (var item in reportPlacementTestEvents)
                     {
-                        var index = reportPlacementTestEvents.Where(x => x.LocationName == item.LocationName).Count();
-                        var excelWorksheet = excelPackage.Workbook.Worksheets.Copy(originalWorksheet.Name, index == 1 ? item.LocationName : $"{item.LocationName} {reportPlacementTestEvents.IndexOf(item)}");
-                        excelWorksheet.Cells["A5"].Value = Shared.Helpers.StringHelper.FormatStringWithParam(excelWorksheet.Cells["A5"].Value, new[] { request.EducationLevel.GetDescription(), item.LocationName });
-                        int startRow = 9;
-
                         foreach (var reportPt in item.ReportPlacementTestEventSchools)
                         {
-                            excelWorksheet.Cells[startRow, 1].Value = item.ReportPlacementTestEventSchools.IndexOf(reportPt) + 1;
-                            excelWorksheet.Cells[startRow, 2].Value = reportPt.SchoolName;
-                            excelWorksheet.Cells[startRow, 3].Value = reportPt.NumberValidStudentAccount;
-                            excelWorksheet.Cells[startRow, 4].Value = reportPt.NumberStudentCompleteVerify;
-                            excelWorksheet.Cells[startRow, 5].Value = reportPt.CompleteVerifyRate + "%";
-                            excelWorksheet.Cells[startRow, 6].Value = reportPt.NumberStudentsProcessPT;
-                            excelWorksheet.Cells[startRow, 7].Value = reportPt.NumberStudentsCompletedPT;
-                            excelWorksheet.Cells[startRow, 8].Value = reportPt.CompletionRate + "%";
+                            excelWorksheet.Cells[startRow, 1].Value = index;
+                            excelWorksheet.Cells[startRow, 2].Value = item.LocationName;
+                            excelWorksheet.Cells[startRow, 3].Value = reportPt.SchoolName;
+                            excelWorksheet.Cells[startRow, 4].Value = reportPt.NumberValidStudentAccount;
+                            excelWorksheet.Cells[startRow, 5].Value = reportPt.NumberStudentAccountRegister;
+                            excelWorksheet.Cells[startRow, 6].Value = reportPt.TotalStudentAccount;
+                            excelWorksheet.Cells[startRow, 7].Value = reportPt.NumberStudentCompleteVerify;
+                            excelWorksheet.Cells[startRow, 8].Value = reportPt.CompleteVerifyRate + "%";
+                            excelWorksheet.Cells[startRow, 9].Value = reportPt.NumberStudentsProcessPT;
+                            excelWorksheet.Cells[startRow, 10].Value = reportPt.NumberStudentsCompletedPT;
+                            excelWorksheet.Cells[startRow, 11].Value = reportPt.CompletionRate + "%";
                             if (reportPt.ReportCourseLevels != null)
                             {
-                                var rowReportLevel = 9;
+                                var rowReportLevel = 12;
                                 foreach (var reportLevel in reportPt.ReportCourseLevels)
                                 {
                                     excelWorksheet.Cells[startRow, rowReportLevel].Value = reportLevel.TotalStudent;
@@ -180,6 +176,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                                 }
                             }
                             startRow++;
+                            index++;
                         }
                     }
                 }
