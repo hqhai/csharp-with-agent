@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 {
     using System;
     using System.Collections.Concurrent;
+    using System.IO;
     using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -11,24 +12,24 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.StorageServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
+    using Newtonsoft.Json;
     using OfficeOpenXml;
     using OfficeOpenXml.Style;
+    using Refit;
     using static Fsel.Shared.Constants.ValueSettings;
 
-    public class ExportReportLearningProcessStudentQuery : IRequest<MethodResult<Stream>>
+    public class ExportReportLearningProcessStudentQuery : ExportReportStudentLearningProcessQueueModel, IRequest<MethodResult<Stream>>
     {
-        public string? EventCodeStr { get; set; }
-        public string? DistrictName { get; set; }
-        public Guid? StudentId { get; set; }
-        public EnumCourseType CourseType { get; set; }
     }
 
     public class ExportReportLearningProcessStudentQueryHandler : IRequestHandler<ExportReportLearningProcessStudentQuery, MethodResult<Stream>>
@@ -38,6 +39,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         private readonly IServiceProvider _serviceProvider;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
+        private readonly IStorageService _storageService;
         private const int RowExportReport = 1;
         private const int NumberModuleLesson = 3;
 
@@ -46,13 +48,15 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             IUserService userService,
             IServiceProvider serviceProvider,
             ICourseResultRepository courseResultRepository,
-            ICourseUnitMockTestRepository courseUnitMockTestRepository)
+            ICourseUnitMockTestRepository courseUnitMockTestRepository,
+            IStorageService storageService)
         {
             _mapper = mapper;
             _userService = userService;
             _serviceProvider = serviceProvider;
             _courseResultRepository = courseResultRepository;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
+            _storageService = storageService;
         }
 
         public async Task<MethodResult<Stream>> Handle(ExportReportLearningProcessStudentQuery request, CancellationToken cancellationToken)
@@ -73,9 +77,10 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 return methodResult;
             }
             var reportPlacementTestEvents = new ConcurrentBag<ReportPlacementTestEventModel>();
-            var placementTestResultGroups = new ConcurrentBag<PlacementTestResultReportGroupModel>();
+            var placementTestResultGroups = new ConcurrentStack<PlacementTestResultReportGroupModel>();
             var listCourseComplete = new ConcurrentBag<CourseCompleteModel>();
             var courseStudentResults = new ConcurrentBag<CourseResultModel>();
+            var studentEventLearnProcesses = new ConcurrentBag<StudentEventLearnProcessModel>();
             var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType);
 
             // Chia danh sách thành từng nhóm
@@ -126,34 +131,20 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                    var placementTestResultRepository = scope.ServiceProvider.GetRequiredService<IPlacementTestResultRepository>();
-                    var placementTestGroups = await placementTestResultRepository.Queryable
-                        .Where(x => batche.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
-                        .GroupBy(x => x.StudentId)
-                        .Select(x => new PlacementTestGroupStudentResultModel
-                        {
-                            StudentId = x.Key,
-                            PlacementTestStart = _mapper.Map<PlacementTestResultModel>(x.Select(x => x).OrderBy(x => x.CreatedDate).FirstOrDefault()),
-                            PlacementTestEnd = _mapper.Map<PlacementTestResultModel>(x.Select(x => x).OrderByDescending(x => x.CreatedDate).FirstOrDefault()),
-                        })
-                        .ToListAsync(cancellationToken);
-                    var placementTestResultReports = placementTestGroups?.Select(item =>
-                    {
-                        var placementTestResultEnd = item.PlacementTestEnd;
-                        var placementTestResultStart = item.PlacementTestStart;
-                        if (placementTestResultEnd != null)
-                        {
-                            var (levelCompleted, isLock) = placementTestResultEnd.Level.GetLevelInScore(placementTestResultEnd.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultStart?.Level, default));
-                            return new PlacementTestResultReportGroupModel { StudentId = item.StudentId, IsDonePT = isLock, CourseLevel = levelCompleted };
-                        }
-                        return new PlacementTestResultReportGroupModel { StudentId = item.StudentId };
-                    }).ToList() ?? new List<PlacementTestResultReportGroupModel>();
-                    foreach (var item in placementTestResultReports)
-                    {
-                        placementTestResultGroups.Add(item);
-                    }
+                    var placementTestGroupResultRepository = scope.ServiceProvider.GetRequiredService<IPlacementTestGroupResultRepository>();
+                    var placementTestGroups = await placementTestGroupResultRepository.Queryable
+                                                    .Where(x => batche.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
+                                                    .Select(x => new PlacementTestResultReportGroupModel
+                                                    {
+                                                        CourseLevel = x.SuggetLevel,
+                                                        StudentId = x.StudentId,
+                                                        IsDonePT = true
+                                                    })
+                                                    .ToListAsync(cancellationToken);
+                    placementTestResultGroups.PushRange(placementTestGroups.ToArray());
                 }
             });
+
             var courseResultGroups = studentEventRegistrations
                                     .Select((id, index) => new { id, index })
                                     .GroupBy(x => x.index / BatchSize)
@@ -250,7 +241,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             }).ToList());
             var learningProgressLearns = await GetStudyPositionAsync(request.CourseType, studentIds);
 
-            var studentEventLearnProcesses = studentEventRegistrations.Select(item =>
+            Parallel.ForEach(studentEventRegistrations, item =>
             {
                 var courseCompleteModule = listCourseComplete.FirstOrDefault(x => x.StudentId == item.StudentId && x.CourseId == item.CourseId) ?? new CourseCompleteModel
                 {
@@ -280,11 +271,22 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     TotalLessonCompleted = courseCompleteModule.TotalLessonDone,
                     LearningProgressLearns = learningProgressLearns.Where(x => x.StudentId == item.StudentId).ToList(),
                 };
-                return studentEventLearnProcess;
-            }).ToList();
+                studentEventLearnProcesses.Add(studentEventLearnProcess);
+            });
 
-            methodResult.Result = ExportExcelTemplate(studentEventLearnProcesses, request);
+            methodResult.Result = ExportExcelTemplate(studentEventLearnProcesses.ToList(), request);
+            await UploadFileExcel(methodResult.Result, request.FileName);
             return methodResult;
+        }
+
+        private async Task UploadFileExcel(Stream stream, string? fileName)
+        {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return;
+            }
+            var filePart = new StreamPart(stream, fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            await _storageService.UpLoadFile(EnumFolderType.Files, EnumBucketType.FselPublic, filePart, isAddSuffix: false);
         }
 
         public static Stream ExportExcelTemplate(IList<StudentEventLearnProcessModel>? studentEventLearnProcesses, ExportReportLearningProcessStudentQuery request)

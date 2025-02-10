@@ -45,20 +45,42 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var students = await _studentRepository.Queryable
-                                        .Include(i => i.Human)
-                                        .Where(i => i.Human != null && i.Human.UserId.HasValue && request.UserIds.Contains(i.Human.UserId.Value))
-                                        .Select(x => new StudentModel
-                                        {
-                                            Id = x.Id,
-                                            ClassId = x.ClassId,
-                                            Occupation = x.Occupation,
-                                            CourseLevel = x.CourseLevel,
-                                            CreatedDate = x.CreatedDate,
-                                            School = x.School,
-                                            SchoolId = x.SchoolId,
-                                            Human = _mapper.Map<HumanProfileModel>(x.Human)
-                                        }).ToListAsync(cancellationToken);
+
+
+            #region #Batch
+            var students = new List<StudentModel>();
+            int batchSize = 100;
+
+            // Chia danh sách UserIds thành nhiều batch
+            var userIdBatches = request.UserIds
+                .Distinct() // Loại bỏ trùng lặp nếu có
+                .Select((id, index) => new { id, index })
+                .GroupBy(x => x.index / batchSize)
+                .Select(g => g.Select(x => x.id).ToList())
+                .ToList();
+
+            foreach (var batch in userIdBatches)
+            {
+                var batchStudents = await _studentRepository.Queryable
+                    .Include(i => i.Human)
+                    .Where(i => i.Human != null && i.Human.UserId.HasValue && batch.Contains(i.Human.UserId.Value))
+                    .Select(x => new StudentModel
+                    {
+                        Id = x.Id,
+                        ClassId = x.ClassId,
+                        Occupation = x.Occupation,
+                        CourseLevel = x.CourseLevel,
+                        CreatedDate = x.CreatedDate,
+                        School = x.School,
+                        SchoolId = x.SchoolId,
+                        Human = _mapper.Map<HumanProfileModel>(x.Human)
+                    })
+                    .ToListAsync(cancellationToken);
+
+                students.AddRange(batchStudents); // Gộp kết quả vào danh sách chính
+            }
+            #endregion
+
             //var schoolResults = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
             //{
             //    Filters = new List<GenericFilterModel>() { new GenericFilterModel { Property = "Id", Operator = Common.Enums.EnumFilterOperator.Equal, Value = students.Select(x => x.SchoolId).ToList() } },

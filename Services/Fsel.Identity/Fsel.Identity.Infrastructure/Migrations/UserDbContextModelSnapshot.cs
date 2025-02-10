@@ -471,7 +471,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnOrder(103);
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(70)
+                        .HasColumnType("nvarchar(70)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -487,7 +488,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -510,6 +512,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.HasIndex("IsDeleted", "Code");
+
+                    b.HasIndex("IsDeleted", "Email");
+
+                    b.HasIndex("IsDeleted", "PhoneNumber");
 
                     b.ToTable("Humans");
                 });
@@ -1888,7 +1894,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
@@ -1928,9 +1935,15 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                        .HasFilter("[NormalizedUserName] IS NOT NULL AND [IsDeleted] = 0");
 
                     b.HasIndex("IsDeleted", "Email");
+
+                    b.HasIndex("IsDeleted", "PhoneNumber");
+
+                    b.HasIndex("IsDeleted", "UserName");
+
+                    b.HasIndex("IsDeleted", "Id", "UserName", "Email");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });

@@ -64,12 +64,11 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     return methodResult;
                 }
             }
-
             else if (!request.PhoneNumber.IsNullOrEmpty())
             {
                 user = await _userManager.Users
                                          .Include(p => p.UserOtpCodes)
-                                         .FirstOrDefaultAsync(p => p.PhoneNumber.Trim().ToLower() == request.PhoneNumber.Trim().ToLower(), cancellationToken);
+                                         .FirstOrDefaultAsync(p => p.UserName.Trim().ToLower() == request.PhoneNumber.Trim().ToLower(), cancellationToken);
 
                 if (user == null)
                 {

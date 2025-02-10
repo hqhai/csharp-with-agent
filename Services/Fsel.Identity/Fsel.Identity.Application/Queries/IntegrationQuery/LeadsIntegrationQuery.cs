@@ -123,7 +123,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             }
             else
             {
-                var user = await _humanRepository.Queryable.FirstOrDefaultAsync(x => x.Email != null && x.Email.ToLower().Trim() == request.Email.ToLower().Trim(), cancellationToken);
+                var user = await _humanRepository.Queryable.FirstOrDefaultAsync(x => x.Email != null && x.Email.Trim() == request.Email.Trim(), cancellationToken);
 
                 if (user == null)
                 {
@@ -156,17 +156,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             // lấy order
             var orders = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { UserIds = paging, Status = false });
-            if (!orders.IsSuccessStatusCode)
-            {
-                methodResult.AddError(orders.Error);
-                return methodResult;
-            }
             var orderResults = orders.Content?.Result;
-            if (orderResults == null)
-            {
-                methodResult.AddError(orders.Error);
-                return methodResult;
-            }
 
             var courseIntegrationQueryModel = new CourseIntegrationQueryModel
             {
@@ -175,31 +165,11 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             // lấy Pt
             var ptTests = await _lmsCourseService.GetPalcementTestResults(courseIntegrationQueryModel);
-            if (!ptTests.IsSuccessStatusCode)
-            {
-                methodResult.AddError(ptTests.Error);
-                return methodResult;
-            }
             var ptTestResults = ptTests.Content?.Result;
-            if (ptTestResults == null)
-            {
-                methodResult.AddError(ptTests.Error);
-                return methodResult;
-            }
 
             // lấy unit lesson
             var units = await _lmsCourseService.GetUnitResults(courseIntegrationQueryModel);
-            if (!units.IsSuccessStatusCode)
-            {
-                methodResult.AddError(units.Error);
-                return methodResult;
-            }
             var unitResults = units.Content?.Result;
-            if (unitResults == null)
-            {
-                methodResult.AddError(units.Error);
-                return methodResult;
-            }
 
             // lấy all user từ list hợp nhất
             var userCombines = await _humanRepository.Queryable
@@ -226,14 +196,14 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             foreach (var item in leadsIntegrations)
             {
-                var orderItem = orderResults.Where(x => x.UserId == item.UserId).OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault();
+                var orderItem = orderResults?.Where(x => x.UserId == item.UserId).OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault();
                 if (orderItem != null && !orderItem.IsTrial)
                 {
                     continue;
                 }
 
-                var ptTestResult = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId);
-                var unitResult = unitResults.FirstOrDefault(x => x.UserId == item.UserId);
+                var ptTestResult = ptTestResults?.FirstOrDefault(x => x.UserId == item.UserId);
+                var unitResult = unitResults?.FirstOrDefault(x => x.UserId == item.UserId);
                 item.LastDate = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item.UserId)?.LastVisited;
                 item.AccessTime = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item.UserId)?.AccessTime;
                 item.Status = EnumIntegrationStatus.Register;
