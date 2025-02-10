@@ -53,7 +53,11 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                users = users?.Where(m => (!string.IsNullOrEmpty(m.Email) && m.Email.Contains(request.Keyword)) || (!string.IsNullOrEmpty(m.Code) && m.Code.Contains(request.Keyword)) || (!string.IsNullOrEmpty(m.FullName) && m.FullName.Contains(request.Keyword)));
+                var emailQuery = users.Where(m => m.Email != null && m.Email.Trim().Contains(request.Keyword));
+                var codeQuery = users.Where(m => m.Code != null && m.Code.Trim().Contains(request.Keyword));
+                var fullNameQuery = users.Where(m => m.FullName != null && m.FullName.Trim().Contains(request.Keyword));
+                users = emailQuery.Union(codeQuery).Union(fullNameQuery);
+
             }
 
             users = users?.OrderByDescending(p => p.NumberUser);
