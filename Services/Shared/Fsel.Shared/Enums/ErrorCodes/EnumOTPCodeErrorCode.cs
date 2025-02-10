@@ -12,6 +12,7 @@ namespace Fsel.Shared.Enums.ErrorCodes
         WrongOTP,
         SentWithin30Seconds,
         OTPNotVerified,
-        EmailDoesNotExist
+        EmailDoesNotExist,
+        PhoneNumberAlreadyExist
     }
 }
