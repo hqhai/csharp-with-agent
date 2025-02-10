@@ -46,7 +46,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                                                                                     .FirstOrDefaultAsync(x => x.StudentId == request.StudentId, cancellationToken);
             if (placementTestGroupResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(placementTestGroupResult), placementTestGroupResult);
                 return methodResult;
             }
 
