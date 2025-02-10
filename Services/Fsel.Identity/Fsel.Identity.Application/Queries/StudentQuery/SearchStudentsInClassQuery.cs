@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Application.Queries.StudentQuery
 {
+    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -57,9 +58,12 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower())
-                                            || (m.Code ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower())
-                                            || (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
+                request.Keyword = request.Keyword.Trim().ToLower(CultureInfo.InvariantCulture);
+                var queryFullName = query.Where(m => m.FullName != null && m.FullName.Trim().Contains(request.Keyword));
+                var queryCode = query.Where(m => m.Code != null && m.Code.Trim().Contains(request.Keyword));
+                var queryEmail = query.Where(m => m.Email != null && m.Email.Trim().Contains(request.Keyword));
+                query = queryFullName.Union(queryCode).Union(queryEmail);
+
             }
             if (request.ClassId.HasValue)
             {

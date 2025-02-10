@@ -46,11 +46,11 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             UserOtpCode? userOtpCode = new UserOtpCode();
             User? user = null;
 
-            if (!request.Email.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(request.Email))
             {
                 user = await _userManager.Users
                                             .Include(p => p.UserOtpCodes)
-                                            .FirstOrDefaultAsync(p => p.Email.Trim().ToLower() == request.Email.Trim().ToLower(), cancellationToken);
+                                            .FirstOrDefaultAsync(p => p.Email != null && p.Email.Trim() == request.Email.Trim(), cancellationToken);
 
                 userOtpCode = await _userOtpCodeRepository.GetUserOtpCodeAsync(request.Otp, request.Email);
                 if (userOtpCode == null)
@@ -64,11 +64,11 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     return methodResult;
                 }
             }
-            else if (!request.PhoneNumber.IsNullOrEmpty())
+            else if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
                 user = await _userManager.Users
                                          .Include(p => p.UserOtpCodes)
-                                         .FirstOrDefaultAsync(p => p.UserName.Trim().ToLower() == request.PhoneNumber.Trim().ToLower(), cancellationToken);
+                                         .FirstOrDefaultAsync(p => p.UserName != null && p.UserName.Trim() == request.PhoneNumber.Trim(), cancellationToken);
 
                 if (user == null)
                 {

@@ -195,11 +195,11 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
                 if (!string.IsNullOrEmpty(request.Keyword))
                 {
-                    resultSearch = resultSearch.Where(x => (x.FullName != null && x.FullName.ToLower().Contains(request.Keyword.ToLower().Trim())) || (x.Email != null && x.Email.ToLower() == request.Keyword.ToLower().Trim())).ToList();
+                    resultSearch = resultSearch.Where(x => (x.FullName != null && x.FullName.ToLower(CultureInfo.InvariantCulture).Contains(request.Keyword.ToLower(CultureInfo.InvariantCulture).Trim(), StringComparison.InvariantCulture)) || (x.Email != null && x.Email.ToLower(CultureInfo.InvariantCulture) == request.Keyword.ToLower(CultureInfo.InvariantCulture).Trim())).ToList();
                     resultSearch.AddRange(resultTemp
                                          .Where(x =>
-                                             (x.FullName != null && x.FullName.ToLower().Contains(request.Keyword.ToLower().Trim())) ||
-                                             (x.Email != null && x.Email.ToLower() == request.Keyword.ToLower().Trim()))
+                                             (x.FullName != null && x.FullName.ToLower(CultureInfo.InvariantCulture).Contains(request.Keyword.ToLower(CultureInfo.InvariantCulture).Trim(), StringComparison.InvariantCulture)) ||
+                                             (x.Email != null && x.Email.ToLower(CultureInfo.InvariantCulture) == request.Keyword.ToLower(CultureInfo.InvariantCulture).Trim()))
                                          .ToList()
                                          .Where(newItem => !resultSearch.Any(existingItem => existingItem.StudentId == newItem.StudentId))
                                          .Select(newItem => new StudentRankingModel
