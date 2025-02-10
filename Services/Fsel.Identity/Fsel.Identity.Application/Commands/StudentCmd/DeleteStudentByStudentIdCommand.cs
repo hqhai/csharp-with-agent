@@ -37,6 +37,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly IOrderService _orderService;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly ITrainingService _trainingService;
+        private readonly IStudentRepository _studentRepository;
         private readonly UserManager<User> _userManager;
 
         public DeleteStudentByUserIdCommandHandler(IUserOtpCodeRepository userOtpCodeRepository
@@ -51,6 +52,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                                  , IOrderService orderService
                                                  , ILmsCourseService lmsCourseService
                                                  , ITrainingService trainingService
+                                                 , IStudentRepository studentRepository
                                                  , UserManager<User> userManager)
         {
             _userOtpCodeRepository = userOtpCodeRepository;
@@ -66,6 +68,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             _lmsCourseService = lmsCourseService;
             _trainingService = trainingService;
             _userManager = userManager;
+            _studentRepository = studentRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteStudentByUserIdCommand request, CancellationToken cancellationToken)
@@ -73,50 +76,50 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            //delete Training
-            await _trainingService.DeleteListDataUser(request.UserId);
+            ////delete Training
+            //await _trainingService.DeleteListDataUser(request.UserId);
 
-            //delete System
-            await _systemService.DeleteListDataUser(request.UserId);
+            ////delete System
+            //await _systemService.DeleteListDataUser(request.UserId);
 
-            //delete Interaction
-            await _interactionService.DeleteListDataUser(request.UserId);
+            ////delete Interaction
+            //await _interactionService.DeleteListDataUser(request.UserId);
 
-            //delete Ordering
-            await _orderService.DeleteListDataUser(request.UserId);
+            ////delete Ordering
+            //await _orderService.DeleteListDataUser(request.UserId);
 
-            //delete Course
-            await _lmsCourseService.DeleteListDataUser(request.UserId);
+            ////delete Course
+            //await _lmsCourseService.DeleteListDataUser(request.UserId);
 
-            // delete User Otp Code
-            var userOtpCode = await _userOtpCodeRepository.Queryable
-                                                          .Where(x => x.UserId == request.UserId && x.IsDeleted != true)
-                                                          .ToListAsync(cancellationToken);
-            if (userOtpCode.Count != 0)
-            {
-                await _userOtpCodeRepository.DeleteListAsync(userOtpCode);
-                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-            }
+            //// delete User Otp Code
+            //var userOtpCode = await _userOtpCodeRepository.Queryable
+            //                                              .Where(x => x.UserId == request.UserId && x.IsDeleted != true)
+            //                                              .ToListAsync(cancellationToken);
+            //if (userOtpCode.Count != 0)
+            //{
+            //    await _userOtpCodeRepository.DeleteListAsync(userOtpCode);
+            //    await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+            //}
 
-            // delete User Setting
-            var userSetting = await _userSettingRepository.Queryable
-                                                          .Where(x => x.UserId == request.UserId && x.IsDeleted != true)
-                                                          .ToListAsync(cancellationToken);
-            if (userSetting.Count != 0)
-            {
-                await _userSettingRepository.DeleteListAsync(userSetting);
-                await _userSettingRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-            }
+            //// delete User Setting
+            //var userSetting = await _userSettingRepository.Queryable
+            //                                              .Where(x => x.UserId == request.UserId && x.IsDeleted != true)
+            //                                              .ToListAsync(cancellationToken);
+            //if (userSetting.Count != 0)
+            //{
+            //    await _userSettingRepository.DeleteListAsync(userSetting);
+            //    await _userSettingRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+            //}
 
-            // delete user platform
-            var userPlatform = await _userPlatformRepository.Queryable
-                                                            .Where(x => x.UserId == request.UserId && x.IsDeleted != true)
-                                                            .ToListAsync(cancellationToken);
-            if (userPlatform.Count != 0)
-            {
-                await _userPlatformRepository.DeleteListAsync(userPlatform);
-                await _userPlatformRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-            }
+            //// delete user platform
+            //var userPlatform = await _userPlatformRepository.Queryable
+            //                                                .Where(x => x.UserId == request.UserId && x.IsDeleted != true)
+            //                                                .ToListAsync(cancellationToken);
+            //if (userPlatform.Count != 0)
+            //{
+            //    await _userPlatformRepository.DeleteListAsync(userPlatform);
+            //    await _userPlatformRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+            //}
 
             var human = await _humanRepository.Queryable
                                               .Include(x => x.Student)
@@ -128,36 +131,36 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             {
                 if (human.Student != null)
                 {
-                    //delete student ranking
-                    var studentRankings = await _studentRankingRepository.Queryable
-                                                                      .Where(x => x.StudentId == human.Student!.Id)
-                                                                      .ToListAsync(cancellationToken);
-                    if (studentRankings.Count != 0)
-                    {
-                        await _studentRankingRepository.DeleteListAsync(studentRankings);
-                        await _studentRankingRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-                    }
+                    ////delete student ranking
+                    //var studentRankings = await _studentRankingRepository.Queryable
+                    //                                                  .Where(x => x.StudentId == human.Student!.Id)
+                    //                                                  .ToListAsync(cancellationToken);
+                    //if (studentRankings.Count != 0)
+                    //{
+                    //    await _studentRankingRepository.DeleteListAsync(studentRankings);
+                    //    await _studentRankingRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                    //}
 
-                    // delete student daily streak
-                    var studentDailyStreak = await _studentDailyStreakRepository.Queryable
-                                                                                .Where(x => x.StudentId == human.Student!.Id)
-                                                                                .ToListAsync(cancellationToken);
-                    if (studentDailyStreak.Count != 0)
-                    {
-                        await _studentDailyStreakRepository.DeleteListAsync(studentDailyStreak);
-                        await _studentDailyStreakRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-                    }
+                    //// delete student daily streak
+                    //var studentDailyStreak = await _studentDailyStreakRepository.Queryable
+                    //                                                            .Where(x => x.StudentId == human.Student!.Id)
+                    //                                                            .ToListAsync(cancellationToken);
+                    //if (studentDailyStreak.Count != 0)
+                    //{
+                    //    await _studentDailyStreakRepository.DeleteListAsync(studentDailyStreak);
+                    //    await _studentDailyStreakRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                    //}
 
-                    // delete student focus time
+                    //// delete student focus time
 
-                    var studentFocusTime = await _studentFocusTimeRepository.Queryable
-                                                                            .Where(x => x.StudentId == human.Student!.Id)
-                                                                            .ToListAsync(cancellationToken);
-                    if (studentFocusTime.Count != 0)
-                    {
-                        await _studentFocusTimeRepository.DeleteListAsync(studentFocusTime);
-                        await _studentFocusTimeRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-                    }
+                    //var studentFocusTime = await _studentFocusTimeRepository.Queryable
+                    //                                                        .Where(x => x.StudentId == human.Student!.Id)
+                    //                                                        .ToListAsync(cancellationToken);
+                    //if (studentFocusTime.Count != 0)
+                    //{
+                    //    await _studentFocusTimeRepository.DeleteListAsync(studentFocusTime);
+                    //    await _studentFocusTimeRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                    //}
                 }
 
                 // delete human va student va parent student
