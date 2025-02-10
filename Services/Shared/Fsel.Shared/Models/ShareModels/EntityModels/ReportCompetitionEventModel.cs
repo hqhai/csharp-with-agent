@@ -17,9 +17,14 @@ namespace Fsel.Shared.Models.ShareModels.EntityModels
         public int NumberActualParticipatingSchool { get; set; }
 
         /// <summary>
-        /// Số học sinh đăng ký tài khoản hợp lệ
+        /// Số học sinh đăng ký tài khoản hợp lệ (Import)
         /// </summary>
         public int NumberValidStudentAccount { get; set; }
+
+        /// <summary>
+        /// Số học sinh đăng ký tài khoản hợp lệ (LandingPage)
+        /// </summary>
+        public int NumberStudentAccountRegister { get; set; }
 
         /// <summary>
         /// Số học sinh xác minh thành công
