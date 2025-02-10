@@ -39,9 +39,9 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             var methodResult = new MethodResult<UserOtpCodeModel>();
 
             request.EmailOrNumberphone = request.EmailOrNumberphone?.Trim() ?? string.Empty;
-            var emailQuery = _userManager.Users.Where(x => x.Email != null && x.Email == request.EmailOrNumberphone).Select(x => x.Id);
-            var phoneQuery = _userManager.Users.Where(x => x.PhoneNumber != null && x.PhoneNumber == request.EmailOrNumberphone).Select(x => x.Id);
-            Guid? userId = emailQuery.Union(phoneQuery).FirstOrDefault();
+            var emailQuery = _userManager.Users.Where(x => x.Email != null && x.UserName == request.EmailOrNumberphone).Select(x => x.Id);
+            var phoneQuery = _userManager.Users.Where(x => x.PhoneNumber != null && x.PhoneNumber == request.EmailOrNumberphone && x.UserName == request.EmailOrNumberphone).Select(x => x.Id);
+            Guid? userId = emailQuery.Union(emailQuery).FirstOrDefault();
 
             var userOTP = _userOtpCodeRepository.Queryable.Where(x => x.UserId == userId)
                                                           .OrderByDescending(x => x.CreatedDate)
