@@ -123,7 +123,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             }
             else
             {
-                var user = await _humanRepository.Queryable.FirstOrDefaultAsync(x => x.Email != null && x.Email.ToLower().Trim() == request.Email.ToLower().Trim(), cancellationToken);
+                var user = await _humanRepository.Queryable.FirstOrDefaultAsync(x => x.Email != null && x.Email.Trim() == request.Email.Trim(), cancellationToken);
 
                 if (user == null)
                 {
