@@ -53,7 +53,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                 return methodResult;
             }
 
-            var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.EventCode.ToLower().Trim() == request.EventCode.ToLower().Trim(), cancellationToken);
+            var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.EventCode != null && x.EventCode.Trim() == request.EventCode.Trim(), cancellationToken);
             if (competitionEvent == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent));
@@ -71,7 +71,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 
             if (!string.IsNullOrEmpty(request.School))
             {
-                eventRegistrations = eventRegistrations.Where(x => x.School.ToLower().Trim() == request.School.ToLower().Trim()).ToList();
+                eventRegistrations = eventRegistrations.Where(x => x.School != null && x.School.Trim() == request.School.Trim()).ToList();
             }
 
             var template = _mapper.Map<IList<ExportLandingPageByEventCodeModel>>(eventRegistrations);

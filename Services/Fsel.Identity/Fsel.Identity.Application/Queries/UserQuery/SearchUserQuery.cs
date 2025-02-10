@@ -123,9 +123,12 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                             };
             }
 
-            if (!string.IsNullOrEmpty(request.Keyword))
+            if (userQuery != null && !string.IsNullOrEmpty(request.Keyword))
             {
-                userQuery = userQuery?.Where(m => m.PhoneNumber == request.Keyword || (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                request.Keyword = request.Keyword.Trim().ToLower(CultureInfo.InvariantCulture);
+                var queryByPhone = userQuery.Where(m => m.PhoneNumber == request.Keyword);
+                var queryByFullName = userQuery.Where(m => m.FullName != null && m.FullName.Trim().Contains(request.Keyword));
+                userQuery = queryByPhone.Union(queryByFullName);
             }
 
             int totalItem = userQuery != null ? await userQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false) : default;

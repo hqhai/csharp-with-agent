@@ -73,7 +73,11 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                teacherQuery = teacherQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Human != null && (m.Human.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim())));
+                request.Keyword = request.Keyword.Trim().ToLower(CultureInfo.InvariantCulture);
+                var queryById = teacherQuery.Where(m => m.Id.ToString() == request.Keyword);
+                var queryByFullName = teacherQuery.Where(m => m.Human != null && m.Human.FullName != null && m.Human.FullName.Trim().Contains(request.Keyword));
+                teacherQuery = queryById.Union(queryByFullName);
+
             }
 
             int totalItem = await teacherQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

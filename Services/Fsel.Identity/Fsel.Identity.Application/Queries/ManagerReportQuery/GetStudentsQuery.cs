@@ -67,9 +67,10 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.Where(m => (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword) ||
-                                         (m.PhoneNumber ?? string.Empty).Trim().ToLower().Contains(request.Keyword) ||
-                                         (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword));
+                var queryFullName = query.Where(m => m.FullName != null && m.FullName.Trim().Contains(request.Keyword));
+                var queryPhone = query.Where(m => m.PhoneNumber != null && m.PhoneNumber.Trim().Contains(request.Keyword));
+                var queryEmail = query.Where(m => m.Email != null && m.Email.Trim().Contains(request.Keyword));
+                query = queryFullName.Union(queryPhone).Union(queryEmail);
             }
 
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
@@ -102,12 +103,12 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             if (!string.IsNullOrEmpty(request.SchoolGrade))
             {
                 request.SchoolGrade = request.SchoolGrade.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolGrade) && x.SchoolGrade.Trim().ToLower() == request.SchoolGrade);
+                query = query.Where(x => x.SchoolGrade != null && x.SchoolGrade.Trim() == request.SchoolGrade);
             }
             if (!string.IsNullOrEmpty(request.SchoolClass))
             {
                 request.SchoolClass = request.SchoolClass.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolClass) && x.SchoolClass.Trim().ToLower() == request.SchoolClass);
+                query = query.Where(x => x.SchoolClass != null && x.SchoolClass.Trim() == request.SchoolClass);
             }
             if (request.LearningStatus.HasValue)
             {
