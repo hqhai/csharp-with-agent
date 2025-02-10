@@ -80,7 +80,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             {
                 request.DistrictName = request.DistrictName.ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim();
                 var district = locationDistricts?.FirstOrDefault(x => x.Name.ToLower().Trim() == request.DistrictName);
-                competitionEvents = competitionEvents.Where(x => district != null && x.Id == district.Id).ToList();
+                competitionEvents = competitionEvents.Where(x => district != null && x.LocationId == district.Id).ToList();
             }
 
             var schoolIds = competitionEvents.SelectMany(x => x.SchoolIds ?? new List<Guid>()).ToList();
@@ -93,13 +93,13 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                                           join user in _userManager.Users on human.UserId equals user.Id
                                           where baseQ.SchoolId.HasValue && schools != null && schools.Select(x => x.Id).Contains(baseQ.SchoolId.Value)
                                           && competitions.Select(x => x.Id).Contains(sce.CompetitionEventId)
-                                          group new { baseQ, human, user }
+                                          group new { baseQ, user }
                                           by baseQ.SchoolId into g
                                           select new
                                           {
                                               SchoolId = g.Key.GetValueOrDefault(),
                                               StudentIds = g.Select(x => x.baseQ.Id).Distinct().ToList(),
-                                              UserIds = g.Where(x => x.human.UserId.HasValue).Select(x => x.human.UserId.GetValueOrDefault()).Distinct().ToList(),
+                                              UserIds = g.Select(x => x.user.Id).Distinct().ToList(),
                                               CountCompleteVerify = g.Where(x => x.user.EmailConfirmed || x.user.PhoneNumberConfirmed).Select(x => x.user.Id).Distinct().Count()
                                           }).ToListAsync(cancellationToken);
 

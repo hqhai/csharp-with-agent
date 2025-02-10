@@ -150,6 +150,8 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
                             {
                                 LocationId = um.LocationId,
                                 SurveyQuestionId = surveyQuestion.Id,
+                                DisplayLevel = surveyQuestion.DisplayLevel,
+                                DisplayOrder = surveyQuestion.DisplayOrder,
                                 TotalStudent = totalStudent
                             };
                         }).ToArray());
@@ -183,14 +185,17 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
                 return new CustomerSurveyQuestionReportModel
                 {
                     LocationId = reportEvent.LocationId,
-                    SurveyQuestionUserReports = listQuestionReportLocation.GroupBy(x => x.SurveyQuestionId).Select(group =>
+                    SurveyQuestionUserReports = listQuestionReportLocation.GroupBy(x => new { x.SurveyQuestionId, x.DisplayOrder, x.DisplayLevel })
+                    .Select(group =>
                     {
                         return new SurveyQuestionUserReportModel
                         {
-                            SurveyQuestionId = group.Key,
+                            SurveyQuestionId = group.Key.SurveyQuestionId,
+                            DisplayLevel = group.Key.DisplayLevel,
+                            DisplayOrder = group.Key.DisplayOrder,
                             TotalCount = group.Sum(x => x.TotalStudent)
                         };
-                    }).ToList()
+                    }).OrderBy(x => x.DisplayLevel).ThenBy(x => x.DisplayOrder).ToList()
                 };
             }).ToList();
 
@@ -276,9 +281,11 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
                         excelWorksheet.Cells[startRow, 4].Value = item.NumberActualParticipatingSchool;
                         excelWorksheet.Cells[startRow, 5].Value = item.ActualSchoolParticipationRate + "%";
                         excelWorksheet.Cells[startRow, 6].Value = item.NumberValidStudentAccount;
-                        excelWorksheet.Cells[startRow, 7].Value = item.NumberStudentsCompletedPT;
-                        excelWorksheet.Cells[startRow, 8].Value = item.CompletionRate + "%";
-                        var rowReportLevel = 9;
+                        excelWorksheet.Cells[startRow, 7].Value = item.NumberStudentVerified;
+                        excelWorksheet.Cells[startRow, 8].Value = item.PercentStudentsVerified + "%";
+                        excelWorksheet.Cells[startRow, 9].Value = item.NumberStudentsCompletedPT;
+                        excelWorksheet.Cells[startRow, 10].Value = item.CompletionRate + "%";
+                        var rowReportLevel = 11;
                         if (item.SurveyQuestionUserReports != null)
                         {
                             foreach (var reportLevel in item.SurveyQuestionUserReports)
@@ -310,7 +317,7 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
 
         private static void UpdateTemplateExcel(ExcelWorksheet excelWorksheet, IList<SurveyQuestion> surveyQuestions, ExportReportSurveyQuestionEventQuery request)
         {
-            int currentColumn = 9;
+            int currentColumn = 11;
             excelWorksheet.Cells["A1"].Value = Shared.Helpers.StringHelper.FormatStringWithParam(excelWorksheet.Cells["A1"].Value, $"{request.EducationLevel.GetDescription()}");
             var valueHearder = excelWorksheet.Cells[3, currentColumn].Value.ToString() ?? string.Empty;
             excelWorksheet.Cells[3, currentColumn].Value = Shared.Helpers.StringHelper.FormatStringWithParam(valueHearder, 1);
@@ -348,7 +355,7 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
                     else
                     {
                         excelWorksheet.InsertColumn(currentColumn + 1, 1); // Chèn 1 cột sau cột B
-                        excelWorksheet.Cells[4, currentColumn + 1].Value = "Option" + (answers.IndexOf(answers[i / 2]) + 1);
+                        excelWorksheet.Cells[4, currentColumn + 1].Value = answers[answers.IndexOf(answers[i / 2])].Content;
                     }
 
                     excelWorksheet.Cells[4, currentColumn + 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;

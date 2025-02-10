@@ -54,7 +54,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         {
             get
             {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberStudentVerified);
+                return NumberStudentVerified == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberStudentVerified);
             }
         }
 
@@ -100,7 +100,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         {
             get
             {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberValidStudentAccount);
+                return NumberStudentVerified == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberStudentVerified);
             }
         }
 

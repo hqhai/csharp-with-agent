@@ -92,21 +92,23 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             Parallel.ForEach(reportCompetitionEvents, reportCompetitionEvent =>
             {
                 var placementTestResultReports = placementTestResultGroups.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).ToList();
+                var numberStudentsCompletedPT = placementTestResultReports?.Where(x => x.IsDonePT).Select(x => x.StudentId).Distinct().Count() ?? default;
+
                 var reportPlacementTestEvent = new ReportPlacementTestEventModel
                 {
                     LocationName = reportCompetitionEvent.DistrictName,
                     NumberRegisteredSchool = reportCompetitionEvent.NumberRegisteredSchool,
                     NumberActualParticipatingSchool = reportCompetitionEvent.NumberActualParticipatingSchool,
                     NumberValidStudentAccount = reportCompetitionEvent.NumberValidStudentAccount,
-                    NumberStudentsCompletedPT = placementTestResultReports?.Where(x => x.IsDonePT).Count() ?? default,
+                    NumberStudentsCompletedPT = numberStudentsCompletedPT,
                     ReportCourseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic).Select(courseLevel =>
                     {
-                        var numberStudentOfLevel = placementTestResultReports?.Where(x => x.IsDonePT && x.CourseLevel == courseLevel).Count() ?? default;
+                        var numberStudentOfLevel = placementTestResultReports?.Where(x => x.IsDonePT && x.CourseLevel == courseLevel).Select(x => x.StudentId).Distinct().Count() ?? default;
                         return new ReportCourseLevelModel
                         {
                             CourseLevel = courseLevel,
                             TotalStudent = numberStudentOfLevel,
-                            Percent = NumberHelper.GetPercent(numberStudentOfLevel, placementTestResultReports?.Where(x => x.IsDonePT).Count() ?? default)
+                            Percent = NumberHelper.GetPercent(numberStudentOfLevel, numberStudentsCompletedPT)
                         };
                     }).ToList()
                 };

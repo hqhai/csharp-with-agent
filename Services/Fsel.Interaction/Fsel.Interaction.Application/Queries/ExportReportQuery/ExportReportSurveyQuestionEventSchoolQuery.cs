@@ -243,6 +243,7 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
             {
                 EducationLevel = request.EducationLevel,
                 EventCodeStr = request.EventCodeStr,
+                DistrictName = request.DistrictName,
             });
             var reportPlacementTestEvents = reportPlacementTestEventResults.Content?.Result;
             var surveyQuestionReportDistricts = new ConcurrentBag<SurveyQuestionReportDistrictModel>();
@@ -387,7 +388,7 @@ namespace Fsel.Interaction.Application.Queries.ExportReportQuery
                     else
                     {
                         excelWorksheet.InsertColumn(currentColumn + 1, 1); // Chèn 1 cột sau cột B
-                        excelWorksheet.Cells[4, currentColumn + 1].Value = "Option" + (answers.IndexOf(answers[i / 2]) + 1);
+                        excelWorksheet.Cells[4, currentColumn + 1].Value = answers[answers.IndexOf(answers[i / 2])].Content;
                     }
 
                     excelWorksheet.Cells[4, currentColumn + 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
