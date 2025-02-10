@@ -82,7 +82,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                                           join human in _humanRepository.Queryable on baseQ.HumanId equals human.Id
                                           join user in _userManager.Users on human.UserId equals user.Id
                                           where baseQ.SchoolId.HasValue && schools.Select(x => x.Id).Contains(baseQ.SchoolId.Value)
-                                          && competitions.Select(x => x.Id).Contains(sce.CompetitionEventId)
+                                          && competitions.Select(x => x.Id).Contains(sce.CompetitionEventId) && !baseQ.IsDeleted && !user.IsDeleted
                                           select new
                                           {
                                               SchoolId = baseQ.SchoolId.GetValueOrDefault(),
@@ -98,7 +98,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                 var reportCompetition = new ReportCompetitionEventModel
                 {
                     DistrictName = locationDistricts?.FirstOrDefault(x => x.Id == item.LocationId)?.Name,
-                    NumberRegisteredSchool = schools?.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.Id)).Count() ?? default,
+                    NumberRegisteredSchool = schools.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.Id)).Count(),
                     NumberActualParticipatingSchool = studentDistricts.Select(x => x.SchoolId).Distinct().Count(),
                     NumberValidStudentAccount = studentIds.Count,
                     NumberStudentCompleteVerify = studentDistricts.Count(x => x.IsConfirmed),
