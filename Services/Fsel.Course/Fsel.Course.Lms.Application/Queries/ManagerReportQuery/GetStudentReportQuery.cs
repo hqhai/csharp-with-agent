@@ -2,14 +2,14 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 {
+    using System.Collections.Generic;
+    using System.Diagnostics;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
-    using Fsel.Course.Lms.Application.Services.SystemService;
-    using Fsel.Course.Lms.Application.Services.SystemService.QueryModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
@@ -57,7 +57,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<StudentDtoModel>>();
-
             var searchQuery = new SearchStudentSchoolQueryModel
             {
                 SchoolGrade = request.SchoolGrade,
@@ -98,8 +97,16 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
                 case EnumManagerReportType.ReportLearningProgress:
                     var courseResults = students?.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
-                    var courseCompletes = await _managerProgressHelper.GetCourseCompletesAsync(courseResults, request, request.EndDate, isPagination: request.IsSearchReport);
-                    students = students?.Where(x => courseCompletes.Select(y => y.StudentId).Contains(x.Id)).OrderBy(x => courseCompletes.Select(y => y.StudentId).ToList().IndexOf(x.Id)).ToList();
+                    if (!request.IsSearchReport && !request.SortBy.Any())
+                    {
+                        var courseCompletes = await _managerProgressHelper.GetCourseLearnsAsync(courseResults);
+                        students = students?.Where(x => courseCompletes.Select(y => y.StudentId).Contains(x.Id)).ToList();
+                    }
+                    else if (request.SortBy.Any())
+                    {
+                        var courseCompletes = await _managerProgressHelper.GetCourseCompletesAsync(courseResults, request, request.EndDate, isPagination: request.IsSearchReport);
+                        students = students?.Where(x => courseCompletes.Select(y => y.StudentId).Contains(x.Id)).OrderBy(x => courseCompletes.Select(y => y.StudentId).ToList().IndexOf(x.Id)).ToList();
+                    }
                     break;
 
                 case EnumManagerReportType.ReportLearningResults:
@@ -127,16 +134,13 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     students = students?.Where(x => unitResultGroups.Select(x => x.StudentId).Contains(x.Id)).OrderBy(x => unitResultGroups.Select(y => y.StudentId).ToList().IndexOf(x.Id)).ToList();
                     break;
             }
-
-            if (request.IsSearchReport && !request.SortBy.Any())
-            {
-                students = students?.OrderBy(x => int.TryParse(x.SchoolGrade, out int graded) ? graded : 0).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName)
-                                    .ApplyPaging(request)
-                                    .ToList();
-            }
-            else if (!request.IsSearchReport && !request.SortBy.Any())
+            if (!request.SortBy.Any())
             {
                 students = students?.OrderBy(x => int.TryParse(x.SchoolGrade, out int graded) ? graded : 0).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName).ToList();
+                if (request.IsSearchReport)
+                {
+                    students = students?.ApplyPaging(request).ToList();
+                }
             }
 
             methodResult.Result = students;
