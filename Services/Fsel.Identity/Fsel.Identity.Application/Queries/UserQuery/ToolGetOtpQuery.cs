@@ -41,7 +41,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             request.EmailOrNumberphone = request.EmailOrNumberphone?.Trim() ?? string.Empty;
             var emailQuery = _userManager.Users.Where(x => x.Email != null && x.UserName == request.EmailOrNumberphone).Select(x => x.Id);
             var phoneQuery = _userManager.Users.Where(x => x.PhoneNumber != null && x.PhoneNumber == request.EmailOrNumberphone && x.UserName == request.EmailOrNumberphone).Select(x => x.Id);
-            Guid? userId = emailQuery.Union(emailQuery).FirstOrDefault();
+            Guid? userId = emailQuery.Union(phoneQuery).FirstOrDefault();
 
             var userOTP = _userOtpCodeRepository.Queryable.Where(x => x.UserId == userId)
                                                           .OrderByDescending(x => x.CreatedDate)
