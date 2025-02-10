@@ -54,6 +54,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         }
 
         /// <summary>
+        /// RetakeCourse School
+        /// </summary>
+        [HttpGet("report-competition-event-district-school")]
+        [ProducesResponseType(typeof(MethodResult<IList<ReportCompetitionEventModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ReportCompetitionEvent([FromQuery] GetCompetitionEventToEventParentQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get Student Event Registration
         /// </summary>
         [HttpGet("get-student-event-registrations")]
