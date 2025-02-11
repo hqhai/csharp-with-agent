@@ -99,12 +99,12 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     var courseResults = students?.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
                     if (!request.IsSearchReport && !request.SortBy.Any())
                     {
-                        var courseCompletes = await _managerProgressHelper.GetCourseLearnsAsync(courseResults);
+                        var courseCompletes = _managerProgressHelper.GetCourseLearnsAsync(courseResults);
                         students = students?.Where(x => courseCompletes.Select(y => y.StudentId).Contains(x.Id)).ToList();
                     }
                     else if (request.SortBy.Any())
                     {
-                        var courseCompletes = await _managerProgressHelper.GetCourseCompletesAsync(courseResults, request, request.EndDate, isPagination: request.IsSearchReport);
+                        var courseCompletes = _managerProgressHelper.GetCourseCompletesAsync(courseResults, request, request.EndDate, isPagination: request.IsSearchReport);
                         students = students?.Where(x => courseCompletes.Select(y => y.StudentId).Contains(x.Id)).OrderBy(x => courseCompletes.Select(y => y.StudentId).ToList().IndexOf(x.Id)).ToList();
                     }
                     break;
