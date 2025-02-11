@@ -7,6 +7,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
     using System.Linq;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
@@ -50,10 +51,22 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                var queryFullName = query.Where(m => m.Human != null && m.Human.FullName != null && m.Human.FullName.Trim().Contains(request.Keyword));
-                var queryPhone = query.Where(m => m.Human != null && m.Human.PhoneNumber != null && m.Human.PhoneNumber.Trim().Contains(request.Keyword));
-                var queryEmail = query.Where(m => m.Human != null && m.Human.Email != null && m.Human.Email.Trim().Contains(request.Keyword));
-                query = queryFullName.Union(queryPhone).Union(queryEmail);
+                if (request.Keyword.IsValidEmail())
+                {
+                    query = query.Where(m => m.Human != null && m.Human.Email != null && m.Human.Email.Contains(request.Keyword));
+                }
+                else if (request.Keyword.IsValidPhoneNumber())
+                {
+                    query = query.Where(m => m.Human != null && m.Human.PhoneNumber != null && m.Human.PhoneNumber == request.Keyword);
+                }
+                else if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    query = query.Where(m => m.Id == guid);
+                }
+                else
+                {
+                    query = query.Where(m => m.Human != null && m.Human.FullName != null && m.Human.FullName.Contains(request.Keyword));
+                }
             }
 
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
@@ -86,12 +99,12 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             if (!string.IsNullOrEmpty(request.SchoolGrade))
             {
                 request.SchoolGrade = request.SchoolGrade.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.Where(x => x.SchoolGrade != null && x.SchoolGrade.Trim() == request.SchoolGrade);
+                query = query.Where(x => x.SchoolGrade == request.SchoolGrade);
             }
             if (!string.IsNullOrEmpty(request.SchoolClass))
             {
                 request.SchoolClass = request.SchoolClass.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.Where(x => x.SchoolClass != null && x.SchoolClass.Trim() == request.SchoolClass);
+                query = query.Where(x => x.SchoolClass == request.SchoolClass);
             }
             if (request.LearningStatus.HasValue)
             {

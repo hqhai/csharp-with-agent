@@ -6,6 +6,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Identity.Application.Services.LmsCourseService;
@@ -49,11 +50,16 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 request.Keyword = request.Keyword.Trim().ToLower(CultureInfo.InvariantCulture);
-                var queryFullName = query.Where(m => m.Human != null && m.Human.FullName != null && m.Human.FullName.Trim().Contains(request.Keyword));
-                var queryCode = query.Where(m => m.Human != null && m.Human.Code != null && m.Human.Code.Trim().Contains(request.Keyword));
-                var queryEmail = query.Where(m => m.Human != null && m.Human.Email != null && m.Human.Email.Trim().Contains(request.Keyword));
-                query = queryFullName.Union(queryCode).Union(queryEmail);
-
+                if (request.Keyword.IsValidEmail())
+                {
+                    query = query.Where(m => m.Human != null && m.Human.Email != null && m.Human.Email.Contains(request.Keyword));
+                }
+                else
+                {
+                    var queryFullName = query.Where(m => m.Human != null && m.Human.FullName != null && m.Human.FullName.Contains(request.Keyword));
+                    var queryCode = query.Where(m => m.Human != null && m.Human.Code != null && m.Human.Code.Contains(request.Keyword));
+                    query = queryFullName.Union(queryCode);
+                }
             }
             if (request.ClassId.HasValue)
             {
