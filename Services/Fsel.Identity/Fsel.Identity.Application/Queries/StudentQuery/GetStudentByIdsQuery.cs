@@ -12,6 +12,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using MassTransit;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -44,32 +45,13 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 return methodResult;
             }
 
-
-            #region Batch
-            var students = new List<Student>();
-            int batchSize = 100;
-
-            // Chia danh sách StudentIds thành nhiều batch
-            var studentIdBatches = request.StudentIds
-                .Distinct() // Loại bỏ trùng lặp nếu có
-                .Select((id, index) => new { id, index })
-                .GroupBy(x => x.index / batchSize)
-                .Select(g => g.Select(x => x.id).ToList())
-                .ToList();
-
-            foreach (var batch in studentIdBatches)
-            {
-                var batchStudents = await _studentRepository.Queryable
+            var students = await _studentRepository.Queryable
                     .Include(x => x.Human)
                     .Include(pr => pr.ParentStudents)
                         .ThenInclude(p => p.Parent)
                         .ThenInclude(hm => hm.Human)
-                    .Where(x => batch.Contains(x.Id)) // Lọc theo batch hiện tại
+                    .WhereBulkContains(request.StudentIds, i => i.Id)
                     .ToListAsync(cancellationToken);
-
-                students.AddRange(batchStudents); // Gộp kết quả vào danh sách chính
-            }
-            #endregion
 
             methodResult.Result = _mapper.Map<IList<StudentModel>>(students);
             methodResult.StatusCode = StatusCodes.Status200OK;
