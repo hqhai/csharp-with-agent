@@ -26,21 +26,21 @@ namespace Fsel.Identity.Infrastructure.Repositories
             {
                 if (!string.IsNullOrEmpty(email))
                 {
-                    return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.Email.ToLower().Trim() == email.ToLower().Trim() && x.Type == otpCodeType);
+                    return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.Email == email && x.Type == otpCodeType);
                 }
 
                 if (!string.IsNullOrEmpty(phoneNumber))
                 {
-                    return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.UserName.ToLower().Trim() == phoneNumber.ToLower().Trim() && x.Type == otpCodeType);
+                    return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.UserName == phoneNumber && x.Type == otpCodeType);
                 }
             }
             if (!string.IsNullOrEmpty(email))
             {
-                return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.Email.ToLower().Trim() == email.ToLower().Trim() && x.OTPCode == otpCode && x.Type == EnumUserOtpCodeType.Email);
+                return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.Email == email && x.OTPCode == otpCode && x.Type == EnumUserOtpCodeType.Email);
             }
             if (!string.IsNullOrEmpty(phoneNumber))
             {
-                return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.UserName.ToLower().Trim() == phoneNumber.ToLower().Trim() && x.OTPCode == otpCode && x.Type == EnumUserOtpCodeType.SMS);
+                return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.UserName == phoneNumber && x.OTPCode == otpCode && x.Type == EnumUserOtpCodeType.SMS);
             }
             return null;
         }
