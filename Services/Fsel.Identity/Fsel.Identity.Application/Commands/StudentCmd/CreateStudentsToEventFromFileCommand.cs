@@ -185,6 +185,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 var stream = new MemoryStream(request.File);
                 IFormFile formFile = new FormFile(stream, 0, request.File.Length, "name", "fileName");
 
+                var cultureInfo = CultureInfo.InvariantCulture;
+
                 var result = formFile.ImportAndValidateExcel(async (CreateStudentToEventFromFileModel x, IList<CreateStudentToEventFromFileModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
                 {
                     if (!string.IsNullOrEmpty(x.FullName?.Trim()) || !string.IsNullOrEmpty(x.PhoneNumber?.Trim()) || x.DateOfBirth != null || !string.IsNullOrEmpty(x.SchoolGrade?.Trim()) || !string.IsNullOrEmpty(x.SchoolClass?.Trim()))
@@ -215,13 +217,13 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         {
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
                         }
-                        else if (!string.IsNullOrEmpty(x.Email?.Trim()) && emails.Contains(x.Email.Trim()))
+                        else if (!string.IsNullOrEmpty(x.Email?.Trim()) && emails.Contains(x.Email.ToLower(cultureInfo).Trim()))
                         {
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.EmailAlreadyExistInListVN });
                         }
                         else if (!string.IsNullOrEmpty(x.Email?.Trim()))
                         {
-                            emails.Add(x.Email.Trim());
+                            emails.Add(x.Email.ToLower(cultureInfo).Trim());
                         }
                         if (x.DateOfBirth == null)
                         {
@@ -248,7 +250,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     var emails = datas.Values.Where(p => p.Email != null && !string.IsNullOrEmpty(p.Email.Trim())).Select(n => n.Email!.Trim());
                     var phoneNumbers = datas.Values.Where(p => p.PhoneNumber != null && !string.IsNullOrEmpty(p.PhoneNumber.Trim())).Select(n => n.PhoneNumber!.Trim());
 
-                    var usersExist = await _userManager.Users.Where(x => emails.Contains(x.Email) || phoneNumbers.Contains(x.PhoneNumber) || emails.Contains(x.UserName) || phoneNumbers.Contains(x.UserName)).ToArrayAsync(cancellationToken);
+                    var emailQuery = _userManager.Users.Where(x => emails.Contains(x.Email));
+                    var phoneQuery = _userManager.Users.Where(x => phoneNumbers.Contains(x.PhoneNumber));
+
+                    var usersExist = await emailQuery
+                        .Union(phoneQuery)
+                        .ToArrayAsync(cancellationToken);
 
                     usersExist.ForEach(user =>
                     {
@@ -339,7 +346,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 var user = new User()
                                 {
                                     UserName = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
-                                    Email = !string.IsNullOrEmpty(student.Email) ? student.Email.Trim() : null,
+                                    Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
                                     FullName = student.FullName!.Trim(),
                                     PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
                                     EmailConfirmed = false,
@@ -350,7 +357,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                         FullName = student.FullName.Trim(),
                                         PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
                                         Birthday = student.DateOfBirth,
-                                        Email = !string.IsNullOrEmpty(student.Email) ? student.Email.Trim() : null,
+                                        Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
                                         Code = GeneratorCodeAsync(studentRepository, student.DateOfBirth ?? DateTime.MinValue, null),
                                         Student = new Student()
                                         {
