@@ -50,7 +50,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             {
                 user = await _userManager.Users
                                             .Include(p => p.UserOtpCodes)
-                                            .FirstOrDefaultAsync(p => p.Email != null && p.Email.Trim() == request.Email.Trim(), cancellationToken);
+                                            .FirstOrDefaultAsync(p => p.Email != null && p.Email == request.Email.Trim(), cancellationToken);
 
                 userOtpCode = await _userOtpCodeRepository.GetUserOtpCodeAsync(request.Otp, request.Email);
                 if (userOtpCode == null)
@@ -68,7 +68,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             {
                 user = await _userManager.Users
                                          .Include(p => p.UserOtpCodes)
-                                         .FirstOrDefaultAsync(p => p.UserName != null && p.UserName.Trim() == request.PhoneNumber.Trim(), cancellationToken);
+                                         .FirstOrDefaultAsync(p => p.UserName != null && p.UserName == request.PhoneNumber.Trim(), cancellationToken);
 
                 if (user == null)
                 {

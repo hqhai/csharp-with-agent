@@ -53,13 +53,17 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 {
                     query = query.Where(m => m.Human != null && m.Human.Email != null && m.Human.Email.Contains(request.Keyword));
                 }
+                else if (request.Keyword.IsValidPhoneNumber())
+                {
+                    query = query.Where(m => m.Human != null && m.Human.PhoneNumber != null && m.Human.PhoneNumber == request.Keyword);
+                }
+                else if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    query = query.Where(m => m.Id == guid);
+                }
                 else
                 {
-                    var queryById = query.Where(m => m.Id.ToString() == request.Keyword);
-                    var queryByFullName = query.Where(m => m.Human != null && m.Human.FullName != null && m.Human.FullName.Contains(request.Keyword));
-                    var queryByPhoneNumber = query.Where(m => m.Human != null && m.Human.PhoneNumber != null && m.Human.PhoneNumber.Contains(request.Keyword));
-
-                    query = queryById.Union(queryByFullName).Union(queryByPhoneNumber);
+                    query = query.Where(m => m.Human != null && m.Human.FullName != null && m.Human.FullName.Contains(request.Keyword));
                 }
             }
             if (!string.IsNullOrEmpty(request.SchoolName))

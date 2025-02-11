@@ -250,7 +250,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     var emails = datas.Values.Where(p => p.Email != null && !string.IsNullOrEmpty(p.Email.Trim())).Select(n => n.Email!.Trim());
                     var phoneNumbers = datas.Values.Where(p => p.PhoneNumber != null && !string.IsNullOrEmpty(p.PhoneNumber.Trim())).Select(n => n.PhoneNumber!.Trim());
 
-                    var usersExist = await _userManager.Users.Where(x => emails.Contains(x.Email) || phoneNumbers.Contains(x.PhoneNumber) || emails.Contains(x.UserName) || phoneNumbers.Contains(x.UserName)).ToArrayAsync(cancellationToken);
+                    var emailQuery = _userManager.Users.Where(x => emails.Contains(x.Email));
+                    var phoneQuery = _userManager.Users.Where(x => phoneNumbers.Contains(x.PhoneNumber));
+
+                    var usersExist = await emailQuery
+                        .Union(phoneQuery)
+                        .ToArrayAsync(cancellationToken);
 
                     usersExist.ForEach(user =>
                     {
