@@ -184,21 +184,21 @@ namespace Fsel.Course.Infrastructure.Common
             return (counts.Sum(), totalModules.Sum());
         }
 
-        public double GetOverallCompleteAsync(IList<CourseResultModel>? courseResults, DateTime? arrivalDate = default)
+        public async Task<double> GetOverallCompleteAsync(IList<CourseResultModel>? courseResults, DateTime? arrivalDate = default)
         {
             if (courseResults == null || !courseResults.Any())
             {
                 return default;
             }
-            var learnStudentProcesses = new ConcurrentBag<long>();
+            var learnStudentProcesses = new List<long>();
 
             var batches = courseResults
                .Select((id, index) => new { id, index })
-               .GroupBy(x => x.index / BatchSize200)
+               .GroupBy(x => x.index / BatchSize)
                .Select(g => g.Select(x => x.id).ToList())
                .ToList();
 
-            batches.ForEach(async batche =>
+            foreach (var batche in batches)
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
@@ -274,7 +274,7 @@ namespace Fsel.Course.Infrastructure.Common
 
                     learnStudentProcesses.Add(await query.SumAsync());
                 }
-            });
+            };
             return NumberHelper.ConvertRound(learnStudentProcesses.Sum() / courseResults.Count);
         }
 
@@ -330,8 +330,8 @@ namespace Fsel.Course.Infrastructure.Common
                 return new List<CourseCompleteModel>();
             }
 
-            var learnCourseCompletes = new ConcurrentBag<CourseCompleteModel>();
-            var courseCompleteModules = GetCourseCompletesAsync(courseResults, arrivalDate: arrivalDate);
+            var learnCourseCompletes = new List<CourseCompleteModel>();
+            var courseCompleteModules = await GetCourseCompletesAsync(courseResults, arrivalDate: arrivalDate);
             var courseCompleteTotalModules = await GetCompleteCourseTotalsAsync(courseResults);
             courseResults.ForEach(courseResult =>
             {
@@ -350,28 +350,27 @@ namespace Fsel.Course.Infrastructure.Common
             return learnCourseCompletes.ToList();
         }
 
-        public IList<CourseCompleteModel> GetCourseCompletesAsync(IList<CourseResultModel>? courseResults, BaseQueryModel? baseQuery = default, DateTime? arrivalDate = default, bool isPagination = false)
+        public async Task<IList<CourseCompleteModel>> GetCourseCompletesAsync(IList<CourseResultModel>? courseResults, BaseQueryModel? baseQuery = default, DateTime? arrivalDate = default)
         {
             if (courseResults == null || !courseResults.Any())
             {
                 return new List<CourseCompleteModel>();
             }
-            var courseCompletes = new ConcurrentStack<CourseCompleteModel>();
-            var smallerBatches = courseResults.Select(b => b).Chunk(BatchSize200);
-
-            smallerBatches.ForEach(async smallBatch =>
+            var courseCompletes = new List<CourseCompleteModel>();
+            var smallerBatches = courseResults.Select(b => b).Chunk(BatchSize);
+            using (var scope = _serviceProvider.CreateScope())
             {
-                using (var scope = _serviceProvider.CreateScope())
-                {
-                    var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
-                    var courseUnitMockTestRepository = scope.ServiceProvider.GetRequiredService<ICourseUnitMockTestRepository>();
-                    var unitResultRepository = scope.ServiceProvider.GetRequiredService<IUnitResultRepository>();
-                    var mockTestResultRepository = scope.ServiceProvider.GetRequiredService<IMockTestResultRepository>();
-                    var finalTestResultRepository = scope.ServiceProvider.GetRequiredService<IFinalTestResultRepository>();
-                    var lessonResultRepository = scope.ServiceProvider.GetRequiredService<ILessonResultRepository>();
-                    var videoResultRepository = scope.ServiceProvider.GetRequiredService<IVideoResultRepository>();
-                    var classForumResultRepository = scope.ServiceProvider.GetRequiredService<IClassForumResultRepository>();
+                var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
+                var courseUnitMockTestRepository = scope.ServiceProvider.GetRequiredService<ICourseUnitMockTestRepository>();
+                var unitResultRepository = scope.ServiceProvider.GetRequiredService<IUnitResultRepository>();
+                var mockTestResultRepository = scope.ServiceProvider.GetRequiredService<IMockTestResultRepository>();
+                var finalTestResultRepository = scope.ServiceProvider.GetRequiredService<IFinalTestResultRepository>();
+                var lessonResultRepository = scope.ServiceProvider.GetRequiredService<ILessonResultRepository>();
+                var videoResultRepository = scope.ServiceProvider.GetRequiredService<IVideoResultRepository>();
+                var classForumResultRepository = scope.ServiceProvider.GetRequiredService<IClassForumResultRepository>();
 
+                foreach (var smallBatch in smallerBatches)
+                {
                     var query = from baseQ in courseResultRepository.Queryable.AsNoTracking()
 
                                 join cum in courseUnitMockTestRepository.Queryable.AsNoTracking()
@@ -455,24 +454,23 @@ namespace Fsel.Course.Infrastructure.Common
                                                         .Select(x => x.Lesson!.UnitLessons.Where(n => n.UnitId == x.UnitId).Select(n => n.DisplayOrder).FirstOrDefault()).FirstOrDefault()
                                 };
 
-                    var courseCompleteModels = await query.ToArrayAsync();
-                    courseCompletes.PushRange(courseCompleteModels);
+                    courseCompletes.AddRange(await query.ToListAsync());
                 }
-            });
-            return isPagination ? baseQuery != null && baseQuery.SortBy.Any() ? courseCompletes.ApplySortAndPaging(baseQuery).ToList() : courseCompletes.ApplySort(baseQuery).ToList() : courseCompletes.ToList();
+            };
+            return baseQuery != null && baseQuery.SortBy.Any() ? courseCompletes.ApplySortAndPaging(baseQuery).ToList() : courseCompletes.ApplySort(baseQuery).ToList();
         }
 
-        public IList<CourseCompleteModel> GetCourseLearnsAsync(IList<CourseResultModel>? courseResults)
+        public async Task<IList<CourseCompleteModel>> GetCourseLearnsAsync(IList<CourseResultModel>? courseResults)
         {
             if (courseResults == null || !courseResults.Any())
             {
                 return new List<CourseCompleteModel>();
             }
 
-            var courseCompletes = new ConcurrentStack<CourseCompleteModel>();
-            var smallerBatches = courseResults.Select(b => b).Chunk(BatchSize200);
+            var courseCompletes = new List<CourseCompleteModel>();
+            var smallerBatches = courseResults.Select(b => b).Chunk(BatchSize);
 
-            smallerBatches.ForEach(async smallBatch =>
+            foreach (var smallBatch in smallerBatches)
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
@@ -486,10 +484,9 @@ namespace Fsel.Course.Infrastructure.Common
                                     StudentId = baseQ.StudentId,
                                     CourseId = baseQ.CourseId,
                                 };
-                    var courseCompleteModels = await query.ToArrayAsync();
-                    courseCompletes.PushRange(courseCompleteModels);
+                    courseCompletes.AddRange(await query.ToListAsync());
                 }
-            });
+            };
             return courseCompletes.ToList();
         }
 
@@ -520,21 +517,21 @@ namespace Fsel.Course.Infrastructure.Common
                                       }).ToList();
         }
 
-        public IList<CourseCompleteModel> GetCourseCompleteToExportsAsync(IList<CourseResultModel>? courseResults)
+        public async Task<IList<CourseCompleteModel>> GetCourseCompleteToExportsAsync(IList<CourseResultModel>? courseResults)
         {
             if (courseResults == null || !courseResults.Any())
             {
                 return new List<CourseCompleteModel>();
             }
-            var learnCourseCompletes = new ConcurrentBag<CourseCompleteModel>();
+            var learnCourseCompletes = new List<CourseCompleteModel>();
 
             var batches = courseResults
                .Select((id, index) => new { id, index })
-               .GroupBy(x => x.index / BatchSize200)
+               .GroupBy(x => x.index / BatchSize)
                .Select(g => g.Select(x => x.id).ToList())
                .ToList();
 
-            batches.ForEach(async batche =>
+            foreach (var batche in batches)
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
@@ -628,13 +625,9 @@ namespace Fsel.Course.Infrastructure.Common
                                                         .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate).Select(x => _mapper.Map<LessonResultModel>(x)).FirstOrDefault(),
                                 };
 
-                    var courseCompletes = await query.ToListAsync();
-                    courseCompletes.ForEach(courseComplete =>
-                    {
-                        learnCourseCompletes.Add(courseComplete);
-                    });
+                    learnCourseCompletes.AddRange(await query.ToListAsync());
                 }
-            });
+            };
 
             return learnCourseCompletes.ToList();
         }
@@ -645,8 +638,8 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return new List<CourseCompleteModel>();
             }
-            var learnCourseCompletes = new ConcurrentBag<CourseCompleteModel>();
-            var courseCompleteModules = GetCourseCompleteToExportsAsync(courseResults);
+            var learnCourseCompletes = new List<CourseCompleteModel>();
+            var courseCompleteModules = await GetCourseCompleteToExportsAsync(courseResults);
             var courseCompleteTotalModules = await GetCompleteCourseTotalsAsync(courseResults);
             courseResults.ForEach(courseResult =>
             {

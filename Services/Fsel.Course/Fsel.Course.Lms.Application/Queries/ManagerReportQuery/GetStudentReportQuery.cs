@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 {
     using System.Collections.Generic;
-    using System.Diagnostics;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Enums;
@@ -97,14 +96,14 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
                 case EnumManagerReportType.ReportLearningProgress:
                     var courseResults = students?.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
-                    if (!request.IsSearchReport && !request.SortBy.Any())
+                    if (!request.SortBy.Any())
                     {
-                        var courseCompletes = _managerProgressHelper.GetCourseLearnsAsync(courseResults);
-                        students = students?.Where(x => courseCompletes.Select(y => y.StudentId).Contains(x.Id)).ToList();
+                        var courseLearns = await _managerProgressHelper.GetCourseLearnsAsync(courseResults);
+                        students = students?.Where(x => courseLearns.Select(y => y.StudentId).Contains(x.Id)).ToList();
                     }
-                    else if (request.SortBy.Any())
+                    else if (request.IsSearchReport && request.SortBy.Any())
                     {
-                        var courseCompletes = _managerProgressHelper.GetCourseCompletesAsync(courseResults, request, request.EndDate, isPagination: request.IsSearchReport);
+                        var courseCompletes = await _managerProgressHelper.GetCourseCompletesAsync(courseResults, request, request.EndDate);
                         students = students?.Where(x => courseCompletes.Select(y => y.StudentId).Contains(x.Id)).OrderBy(x => courseCompletes.Select(y => y.StudentId).ToList().IndexOf(x.Id)).ToList();
                     }
                     break;
