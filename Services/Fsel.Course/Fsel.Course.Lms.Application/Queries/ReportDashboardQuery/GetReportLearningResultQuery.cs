@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     using Fsel.Course.Domain.Models.EntityModels.BaseChartModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -46,6 +47,20 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             _authContext = authContext;
         }
 
+        private class StudentCourseLevelModel
+        {
+            public Guid StudentId { get; set; }
+            public EnumCourseLevel CourseLevel { get; set; }
+            public double Percent { get; set; }
+        }
+
+        private class LevelPercentModel
+        {
+            public int DisplayOrder { get; set; }
+            public EnumCourseLevel CourseLevel { get; set; }
+            public IList<double> Percents { get; set; } = new List<double>();
+        }
+
         public async Task<MethodResult<DashBoardLearningResultModel>> Handle(GetReportLearningResultQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -58,35 +73,51 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             }
             var studentIds = userResults.Content?.Result?.Select(x => x.Id).ToList() ?? new List<Guid>();
 
-            var courseOveralls = await (from baseQ in _courseResultRepository.Queryable
-                                        join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
-                                        join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
-                                        join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
-                                        where baseQ.WorkingStatus == EnumWorkingStatus.Active && ur.Status == EnumResultStatus.Done && studentIds.Contains(baseQ.StudentId) &&
-                                        (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
-                                        group new { baseQ, ur, c } by new { baseQ.CourseId, baseQ.StudentId } into g
-                                        select new
-                                        {
-                                            StudentId = g.Key.StudentId,
-                                            CourseLevel = g.Select(x => x.c).Select(x => x.CourseLevel).FirstOrDefault(),
-                                            Percent = g.Select(x => x.ur).Any() ? Math.Round(g.Select(x => x.ur).Average(x => x.Percent)) : default(double),
-                                        }).ToListAsync(cancellationToken);
+            // Chia danh sách thành từng nhóm
+            var batches = studentIds
+                .Select((id, index) => new { id, index })
+                .GroupBy(x => x.index / BatchSize)
+                .Select(g => g.Select(x => x.id).ToList())
+                .ToList();
+            var courseOveralls = new List<StudentCourseLevelModel>();
 
-            var query = from baseQ in _courseResultRepository.Queryable
-                        join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
-                        join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
-                        join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
-                        where baseQ.WorkingStatus == EnumWorkingStatus.Active && studentIds.Contains(baseQ.StudentId) &&
-                        (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
-                        group new { cum, ur, c } by new { cum.Number, c.CourseLevel } into g
-                        select new
-                        {
-                            DisplayOrder = g.Key.Number,
-                            CourseLevel = g.Key.CourseLevel,
-                            Percents = g.Select(x => x.ur).Where(x => x.Status == EnumResultStatus.Done).Any() ? g.Select(x => x.ur).Where(x => x.Status == EnumResultStatus.Done).Select(x => x.Percent).ToList() : default,
-                        };
+            foreach (var batch in batches)
+            {
+                var datas = await (from baseQ in _courseResultRepository.Queryable
+                                   join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
+                                   join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
+                                   join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
+                                   where baseQ.WorkingStatus == EnumWorkingStatus.Active && ur.Status == EnumResultStatus.Done && batch.Contains(baseQ.StudentId) &&
+                                   (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
+                                   group new { baseQ, ur, c } by new { baseQ.CourseId, baseQ.StudentId } into g
+                                   select new StudentCourseLevelModel
+                                   {
+                                       StudentId = g.Key.StudentId,
+                                       CourseLevel = g.Select(x => x.c).Select(x => x.CourseLevel).FirstOrDefault(),
+                                       Percent = g.Select(x => x.ur).Any() ? Math.Round(g.Select(x => x.ur).Average(x => x.Percent)) : default(double),
+                                   }).ToListAsync(cancellationToken);
+                courseOveralls.AddRange(datas);
+            }
 
-            var unitOveralls = await (query).ToListAsync(cancellationToken);
+            var unitOveralls = new List<LevelPercentModel>();
+            foreach (var batch in batches)
+            {
+                var datas = await (from baseQ in _courseResultRepository.Queryable
+                                   join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
+                                   join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
+                                   join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
+                                   where baseQ.WorkingStatus == EnumWorkingStatus.Active && batch.Contains(baseQ.StudentId) &&
+                                   (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
+                                   group new { cum, ur, c } by new { cum.Number, c.CourseLevel } into g
+                                   select new LevelPercentModel
+                                   {
+                                       DisplayOrder = g.Key.Number,
+                                       CourseLevel = g.Key.CourseLevel,
+                                       Percents = g.Select(x => x.ur).Where(x => x.Status == EnumResultStatus.Done).Select(x => x.Percent).ToList(),
+                                   }).ToListAsync(cancellationToken);
+
+                unitOveralls.AddRange(datas);
+            }
 
             DashBoardLearningResultModel reportLearningResult = new DashBoardLearningResultModel
             {

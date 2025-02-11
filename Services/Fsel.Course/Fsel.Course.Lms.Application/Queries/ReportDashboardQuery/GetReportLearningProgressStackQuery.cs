@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     using Fsel.Course.Domain.Models.EntityModels.BaseChartModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -69,6 +70,12 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             _lessonResultRepository = lessonResultRepository;
         }
 
+        public class StudentOnScheduleModel
+        {
+            public Guid StudentId { get; set; }
+            public bool IsOnSchedule { get; set; }
+        }
+
         public async Task<MethodResult<StackBarChartsModel>> Handle(GetReportLearningProgressStackQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -106,21 +113,30 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                  }).Take(8)
                  .ToList();
             var studentIds = studentGroups?.SelectMany(x => x.Select(y => y.Id)).ToList() ?? new List<Guid>();
-            var query = from baseQ in _courseResultRepository.Queryable
-                        join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
-                        join lr in _lessonResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId } equals new { lr.StudentId, lr.CourseId }
-                        where baseQ.WorkingStatus == EnumWorkingStatus.Active && studentIds.Contains(baseQ.StudentId) &&
-                        (!request.EndDate.HasValue || (lr.UpdatedDate ?? lr.CreatedDate).Date <= request.EndDate.Value.Date) &&
-                        ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
-                        lr.Status == EnumResultStatus.Done
-                        group new { lr } by new { baseQ.StudentId } into g
-                        select new
-                        {
-                            StudentId = g.Key.StudentId,
-                            IsOnSchedule = isMaxHoursCompleted
-                            //g.OrderByDescending(x => x.lr.CompletionDate).ThenByDescending(x => x.lr.UpdatedDate).Select(x => !x.lr.MaxHoursCompleted.HasValue || ((x.lr.CompletionDate ?? x.lr.UpdatedDate) - x.lr.NewDate).GetValueOrDefault().TotalSeconds <= x.lr.MaxHoursCompleted).FirstOrDefault()
-                        };
-            var queryChart = await query.ToListAsync(cancellationToken);
+            var batches = studentIds
+               .Select((id, index) => new { id, index })
+               .GroupBy(x => x.index / ValueSettings.BatchSize)
+               .Select(g => g.Select(x => x.id).ToList())
+               .ToList();
+            var queryChart = new List<StudentOnScheduleModel>();
+            foreach (var batch in batches)
+            {
+                var query = from baseQ in _courseResultRepository.Queryable
+                            join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
+                            join lr in _lessonResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId } equals new { lr.StudentId, lr.CourseId }
+                            where baseQ.WorkingStatus == EnumWorkingStatus.Active && batch.Contains(baseQ.StudentId) &&
+                            (!request.EndDate.HasValue || (lr.UpdatedDate ?? lr.CreatedDate).Date <= request.EndDate.Value.Date) &&
+                            ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
+                            lr.Status == EnumResultStatus.Done
+                            group new { lr } by new { baseQ.StudentId } into g
+                            select new StudentOnScheduleModel
+                            {
+                                StudentId = g.Key.StudentId,
+                                IsOnSchedule = isMaxHoursCompleted
+                                //g.OrderByDescending(x => x.lr.CompletionDate).ThenByDescending(x => x.lr.UpdatedDate).Select(x => !x.lr.MaxHoursCompleted.HasValue || ((x.lr.CompletionDate ?? x.lr.UpdatedDate) - x.lr.NewDate).GetValueOrDefault().TotalSeconds <= x.lr.MaxHoursCompleted).FirstOrDefault()
+                            };
+                queryChart.AddRange(await query.ToListAsync(cancellationToken));
+            }
 
             StackBarChartsModel reportLearningResult = new StackBarChartsModel
             {
