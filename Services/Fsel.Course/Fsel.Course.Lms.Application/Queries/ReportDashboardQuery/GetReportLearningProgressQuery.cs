@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     using Fsel.Course.Domain.Models.EntityModels.BaseChartModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -102,20 +103,30 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             {
                 courseLevels = request.CourseLevels.Intersect(courseLevels).ToList();
             }
-            var query = from baseQ in _courseResultRepository.Queryable
-                        join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
-                        join lr in _lessonResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId } equals new { lr.StudentId, lr.CourseId }
-                        where baseQ.WorkingStatus == EnumWorkingStatus.Active && studentIds.Contains(baseQ.StudentId) &&
-                        (!request.EndDate.HasValue || (lr.UpdatedDate ?? lr.CreatedDate).Date <= request.EndDate.Value.Date) &&
-                        ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
-                        lr.Status == EnumResultStatus.Done
-                        group new { lr } by new { baseQ.CourseId, baseQ.StudentId } into g
-                        select g.OrderByDescending(x => x.lr.UpdatedDate).ThenByDescending(x => x.lr.CreatedDate)
-                        .Select(x => isMaxHoursCompleted).FirstOrDefault();
+            var batches = studentIds
+               .Select((id, index) => new { id, index })
+               .GroupBy(x => x.index / BatchSize)
+               .Select(g => g.Select(x => x.id).ToList())
+               .ToList();
+
+            var queryPieChart = new List<bool>();
+            foreach (var batche in batches)
+            {
+                var query = from baseQ in _courseResultRepository.Queryable
+                            join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
+                            join lr in _lessonResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId } equals new { lr.StudentId, lr.CourseId }
+                            where baseQ.WorkingStatus == EnumWorkingStatus.Active && batche.Contains(baseQ.StudentId) &&
+                            (!request.EndDate.HasValue || (lr.UpdatedDate ?? lr.CreatedDate).Date <= request.EndDate.Value.Date) &&
+                            ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
+                            lr.Status == EnumResultStatus.Done
+                            group new { lr } by new { baseQ.CourseId, baseQ.StudentId } into g
+                            select g.OrderByDescending(x => x.lr.UpdatedDate).ThenByDescending(x => x.lr.CreatedDate)
+                            .Select(x => isMaxHoursCompleted).FirstOrDefault();
+                queryPieChart.AddRange(await query.ToListAsync(cancellationToken));
+            }
 
             //.Select(x => !x.lr.MaxHoursCompleted.HasValue || ((x.lr.CompletionDate ?? x.lr.UpdatedDate) - x.lr.NewDate).GetValueOrDefault().TotalSeconds <= x.lr.MaxHoursCompleted).FirstOrDefault();
 
-            var queryPieChart = await query.ToListAsync(cancellationToken);
             var reportLearningProgress = new DashBoardLearningProgressModel
             {
                 TotalStudentBehindSchedule = queryPieChart.Count(x => !x),
@@ -134,19 +145,24 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             };
             if (request.Type == nameof(Unit))
             {
-                var unitOveralls = await (from baseQ in _courseResultRepository.Queryable
-                                          join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
-                                          join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
-                                          join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
-                                          where baseQ.WorkingStatus == EnumWorkingStatus.Active && studentIds.Contains(baseQ.StudentId) &&
-                                          ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
-                                          (!request.EndDate.HasValue || (ur.CompletionDate ?? ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
-                                          group new { cum, ur } by new { cum.Number } into g
-                                          select new
-                                          {
-                                              DisplayOrder = g.Key.Number,
-                                              TotalUnitDone = g.Select(x => x.ur).Where(x => x.Status == EnumResultStatus.Done).Count(),
-                                          }).ToListAsync(cancellationToken);
+                var unitOveralls = new List<DisplayModuleResultModel>();
+                foreach (var batche in batches)
+                {
+                    var datas = await (from baseQ in _courseResultRepository.Queryable
+                                       join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
+                                       join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
+                                       join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
+                                       where baseQ.WorkingStatus == EnumWorkingStatus.Active && batche.Contains(baseQ.StudentId) &&
+                                       ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
+                                       (!request.EndDate.HasValue || (ur.CompletionDate ?? ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
+                                       group new { cum, ur } by new { cum.Number } into g
+                                       select new DisplayModuleResultModel
+                                       {
+                                           DisplayOrder = g.Key.Number,
+                                           TotalUnitDone = g.Select(x => x.ur).Where(x => x.Status == EnumResultStatus.Done).Select(x => x.Id).Distinct().Count(),
+                                       }).ToListAsync(cancellationToken);
+                    unitOveralls.AddRange(datas);
+                }
                 reportLearningProgress.OverallLearningProgress = new BaseChartResultModel
                 {
                     Type = EnumChartType.LineChart,
@@ -163,25 +179,29 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             }
             if (request.Type == nameof(Lesson))
             {
-                var lessonOveralls = await (from baseQ in _courseResultRepository.Queryable
-                                            join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
-                                            join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
-                                            join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
-                                            join lr in _lessonResultRepository.Queryable on new { ur.StudentId, ur.CourseId, ur.UnitId } equals new { lr.StudentId, lr.CourseId, lr.UnitId }
-                                            join ul in _unitLessonRepository.Queryable on new { lr.UnitId, lr.LessonId } equals new { ul.UnitId, ul.LessonId }
+                var lessonOveralls = new List<DisplayModuleResultModel>();
+                foreach (var batche in batches)
+                {
+                    var datas = await (from baseQ in _courseResultRepository.Queryable
+                                       join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
+                                       join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
+                                       join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
+                                       join lr in _lessonResultRepository.Queryable on new { ur.StudentId, ur.CourseId, ur.UnitId } equals new { lr.StudentId, lr.CourseId, lr.UnitId }
+                                       join ul in _unitLessonRepository.Queryable on new { lr.UnitId, lr.LessonId } equals new { ul.UnitId, ul.LessonId }
 
-                                            where baseQ.WorkingStatus == EnumWorkingStatus.Active && studentIds.Contains(baseQ.StudentId) &&
-                                            ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
-                                            (!request.EndDate.HasValue || (ur.CompletionDate ?? ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date) &&
-                                            cum.DisplayOrder == request.DisplayOrderUnit
+                                       where baseQ.WorkingStatus == EnumWorkingStatus.Active && batche.Contains(baseQ.StudentId) &&
+                                       ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
+                                       (!request.EndDate.HasValue || (ur.CompletionDate ?? ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date) &&
+                                       cum.DisplayOrder == request.DisplayOrderUnit
 
-                                            group lr by ul.DisplayOrder into g
-                                            select new
-                                            {
-                                                DisplayOrder = g.Key,
-                                                TotalLessonDone = g.Select(x => x).Where(x => x.Status == EnumResultStatus.Done).Count(),
-                                            }).ToListAsync(cancellationToken);
-
+                                       group lr by ul.DisplayOrder into g
+                                       select new DisplayModuleResultModel
+                                       {
+                                           DisplayOrder = g.Key,
+                                           TotalLessonDone = g.Select(x => x).Where(x => x.Status == EnumResultStatus.Done).Select(x => x.Id).Distinct().Count(),
+                                       }).ToListAsync(cancellationToken);
+                    lessonOveralls.AddRange(datas);
+                }
                 reportLearningProgress.OverallLearningProgress = new BaseChartResultModel
                 {
                     Type = EnumChartType.LineChart,
@@ -198,6 +218,13 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             }
             methodResult.Result = reportLearningProgress;
             return methodResult;
+        }
+
+        public class DisplayModuleResultModel
+        {
+            public int DisplayOrder { get; set; }
+            public int TotalLessonDone { get; set; }
+            public int TotalUnitDone { get; set; }
         }
     }
 }
