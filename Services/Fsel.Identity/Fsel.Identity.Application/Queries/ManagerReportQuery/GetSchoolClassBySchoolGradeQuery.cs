@@ -36,8 +36,12 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             MethodResult<IList<string>> methodResult = new MethodResult<IList<string>>();
 
             request.SchoolGrade = request.SchoolGrade?.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-            var query = _studentRepository.Queryable.Where(x => string.IsNullOrEmpty(request.SchoolGrade) || (x.SchoolGrade ?? string.Empty).Trim().ToLower() == request.SchoolGrade)
-                                                    .Where(x => !string.IsNullOrEmpty(x.SchoolClass));
+            var query = _studentRepository.Queryable.Where(x => !string.IsNullOrEmpty(x.SchoolClass));
+
+            if (!string.IsNullOrEmpty(request.SchoolGrade))
+            {
+                query = query.Where(x => x.SchoolGrade == request.SchoolGrade);
+            }
 
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
             {

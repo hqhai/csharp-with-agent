@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using System.Globalization;
     using System.Linq;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Identity.Application.Services.TrainingService;
@@ -57,10 +58,25 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                 return methodResult;
             }
             var usersByRole = await _userManager.GetUsersInRoleAsync(request.Role.ToString() ?? string.Empty);
+            var query = _userManager.Users;
             IQueryable<UserSearchModel>? userQuery = default;
+
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                request.Keyword = request.Keyword.Trim().ToLower(CultureInfo.InvariantCulture);
+                if (request.Keyword.IsValidPhoneNumber())
+                {
+                    query = query.Where(m => m.PhoneNumber == request.Keyword);
+                }
+                else
+                {
+                    query = query.Where(m => m.FullName != null && m.FullName.Contains(request.Keyword));
+                }
+            }
+
             if (request.Role == EnumRoleRegisterWithAdmin.Teacher)
             {
-                userQuery = from u in _userManager.Users
+                userQuery = from u in query
                             join i in _humanRepository.Queryable on u.Id equals i.UserId
                             join t in _teacherRepository.Queryable on i.Id equals t.HumanId
                             where usersByRole.Select(x => x.Id).Contains(u.Id)
@@ -89,7 +105,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.CSO)
             {
-                userQuery = from u in _userManager.Users
+                userQuery = from u in query
                             join i in _humanRepository.Queryable on u.Id equals i.UserId
                             join cso in _cSORepository.Queryable on i.Id equals cso.HumanId
                             where usersByRole.Select(x => x.Id).Contains(u.Id)
@@ -107,7 +123,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.Moderator)
             {
-                userQuery = from u in _userManager.Users
+                userQuery = from u in query
                             join i in _humanRepository.Queryable on u.Id equals i.UserId
                             where usersByRole.Select(x => x.Id).Contains(u.Id)
                             select new UserSearchModel
@@ -121,11 +137,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 CreatedDate = i.CreatedDate,
                                 Status = !u.Status.HasValue || u.Status == EnumUserStatus.Active,
                             };
-            }
-
-            if (!string.IsNullOrEmpty(request.Keyword))
-            {
-                userQuery = userQuery?.Where(m => m.PhoneNumber == request.Keyword || (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             int totalItem = userQuery != null ? await userQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false) : default;
