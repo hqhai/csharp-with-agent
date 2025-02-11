@@ -173,7 +173,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             }
             if (updateHomeWorkAnswers.Any())
             {
-                _homeWorkAnswerRepository.UpdateList(updateHomeWorkAnswers);
+                _homeWorkAnswerRepository.UpdateList(updateHomeWorkAnswers, false, x => x.HomeWorkQuestionId, x => x.HomeWorkResultId);
             }
             try
             {
@@ -183,7 +183,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             {
                 _logger.LogWarning($"Log Duplicate HomeWorkAnswer : {ex.Message}");
             }
-
             methodResult.Result = true;
             return methodResult;
         }
@@ -411,7 +410,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     x.Status = (x.CorrectCount == correctTotal || isDone) ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
                     x.IsCorrect = x.IsCorrect.HasValue ? x.CorrectCount == correctTotal : null;
                 });
-                _homeWorkAnswerRepository.UpdateList(homeWorkAnswers);
+                _homeWorkAnswerRepository.UpdateList(homeWorkAnswers, false, x => x.HomeWorkQuestionId, x => x.HomeWorkResultId);
                 await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 return homeWorkAnswers.Where(x => x.Status == EnumAnswerStatus.Done).Sum(x => x.CorrectCount);
             }

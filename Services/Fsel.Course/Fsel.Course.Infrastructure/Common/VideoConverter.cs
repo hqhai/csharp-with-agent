@@ -708,7 +708,7 @@ namespace Fsel.Course.Infrastructure.Common
                     x.Status = isDone ? EnumAnswerStatus.Done : status;
                     x.IsCorrect = x.IsCorrect.HasValue ? x.CorrectCount == x.Question!.CorrectTotal : null;
                 });
-                _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
+                _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers, false, x => x.VideoResultId, x => x.VideoTimeCodeResultId, x => x.QuestionId);
                 await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
             return updateVideoTimeCodeAnswers?.Where(x => x.Question != null && !x.Question.Ungraded && x.Question.QuestionType != EnumQuestionType.ExercisePreparation)?.Where(x => x.Status == EnumAnswerStatus.Done).Sum(x => x.CorrectCount) ?? default;

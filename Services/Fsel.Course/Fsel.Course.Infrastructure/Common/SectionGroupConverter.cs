@@ -430,7 +430,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     x.Status = EnumAnswerStatus.Done;
                     return x;
-                }).ToList());
+                }).ToList(), false, x => x.FinalTestResultId, x => x.SectionQuestionId, x => x.SectionGroupResultId);
                 await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
             else if (sectionGroupResult.PlacementTestResultId.HasValue)
@@ -440,7 +440,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     x.Status = EnumAnswerStatus.Done;
                     return x;
-                }).ToList());
+                }).ToList(), false, x => x.PlacementTestResultId, x => x.SectionQuestionId, x => x.SectionGroupResultId);
                 await _placementTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
             else
@@ -450,7 +450,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     x.Status = EnumAnswerStatus.Done;
                     return x;
-                }).ToList());
+                }).ToList(), false, x => x.MockTestResultId, x => x.SectionQuestionId, x => x.SectionGroupResultId, x => x.SectionId, x => x.SectionTimeCodeId);
                 await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
         }

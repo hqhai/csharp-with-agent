@@ -388,7 +388,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             }
             if (updatePlacementTestAnswers != null && updatePlacementTestAnswers.Any())
             {
-                _placementTestAnswerRepository.UpdateList(updatePlacementTestAnswers);
+                _placementTestAnswerRepository.UpdateList(updatePlacementTestAnswers, false, x => x.PlacementTestResultId, x => x.SectionGroupResultId, x => x.SectionQuestionId);
             }
             try
             {

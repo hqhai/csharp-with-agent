@@ -352,7 +352,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             }
             if (updateMockTestAnswers != null && updateMockTestAnswers.Any())
             {
-                _mockTestAnswerRepository.UpdateList(updateMockTestAnswers);
+                _mockTestAnswerRepository.UpdateList(updateMockTestAnswers, false, x => x.MockTestResultId, x => x.SectionGroupResultId, x => x.SectionQuestionId, x => x.SectionId, x => x.SectionTimeCodeId);
             }
 
             try

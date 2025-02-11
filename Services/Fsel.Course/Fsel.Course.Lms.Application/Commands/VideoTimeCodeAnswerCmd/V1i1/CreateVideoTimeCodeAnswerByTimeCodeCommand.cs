@@ -305,7 +305,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             }
             else if (updateVideoTimeCodeAnswers.Any())
             {
-                _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
+                _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers, false, x => x.VideoTimeCodeResultId, x => x.VideoResultId, x => x.QuestionId);
             }
             try
             {

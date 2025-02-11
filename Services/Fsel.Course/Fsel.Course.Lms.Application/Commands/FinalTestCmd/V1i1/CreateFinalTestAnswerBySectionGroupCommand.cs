@@ -285,7 +285,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             }
             if (updateFinalTestAnswers != null && updateFinalTestAnswers.Any())
             {
-                _finalTestAnswerRepository.UpdateList(updateFinalTestAnswers);
+                _finalTestAnswerRepository.UpdateList(updateFinalTestAnswers, false, x => x.FinalTestResultId, x => x.SectionGroupResultId, x => x.SectionQuestionId);
             }
 
             try
