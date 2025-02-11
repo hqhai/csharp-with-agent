@@ -46,30 +46,13 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<StudentDtoModel>> methodResult = new MethodResult<IList<StudentDtoModel>>();
 
-            var query = _studentRepository.Queryable.Select(i => new StudentDtoModel
-            {
-                Id = i.Id,
-                FullName = i.Human!.FullName,
-                BirthDay = i.Human.Birthday,
-                Email = i.Human.Email,
-                PhoneNumber = i.Human.PhoneNumber,
-                CourseLevel = i.CourseLevel,
-                ExpiredDate = i.ExpiredDate,
-                School = i.School,
-                SchoolClass = i.SchoolClass,
-                SchoolGrade = i.SchoolGrade,
-                BaseCourseLevel = i.BaseCourseLevel,
-                SchoolId = i.SchoolId,
-                CourseId = i.CourseId,
-                UserId = i.Human.UserId,
-                CreatedDate = i.CreatedDate,
-            });
+            var query = _studentRepository.Queryable;
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                var queryFullName = query.Where(m => m.FullName != null && m.FullName.Trim().Contains(request.Keyword));
-                var queryPhone = query.Where(m => m.PhoneNumber != null && m.PhoneNumber.Trim().Contains(request.Keyword));
-                var queryEmail = query.Where(m => m.Email != null && m.Email.Trim().Contains(request.Keyword));
+                var queryFullName = query.Where(m => m.Human != null && m.Human.FullName != null && m.Human.FullName.Trim().Contains(request.Keyword));
+                var queryPhone = query.Where(m => m.Human != null && m.Human.PhoneNumber != null && m.Human.PhoneNumber.Trim().Contains(request.Keyword));
+                var queryEmail = query.Where(m => m.Human != null && m.Human.Email != null && m.Human.Email.Trim().Contains(request.Keyword));
                 query = queryFullName.Union(queryPhone).Union(queryEmail);
             }
 
@@ -125,7 +108,26 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             {
                 query = query.Where(x => request.IsLearning.Value ? x.CourseId.HasValue : !x.CourseId.HasValue);
             }
-            var list = await query.AsNoTracking().ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            var dataQuery = query.Select(i => new StudentDtoModel
+            {
+                Id = i.Id,
+                FullName = i.Human!.FullName,
+                BirthDay = i.Human.Birthday,
+                Email = i.Human.Email,
+                PhoneNumber = i.Human.PhoneNumber,
+                CourseLevel = i.CourseLevel,
+                ExpiredDate = i.ExpiredDate,
+                School = i.School,
+                SchoolClass = i.SchoolClass,
+                SchoolGrade = i.SchoolGrade,
+                BaseCourseLevel = i.BaseCourseLevel,
+                SchoolId = i.SchoolId,
+                CourseId = i.CourseId,
+                UserId = i.Human.UserId,
+                CreatedDate = i.CreatedDate,
+            });
+            var list = await dataQuery.AsNoTracking().ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             methodResult.Result = list.OrderBy(x => int.TryParse(x.SchoolGrade, out int graded) ? graded : 0).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
