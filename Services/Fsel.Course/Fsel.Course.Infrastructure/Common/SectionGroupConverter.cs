@@ -31,10 +31,24 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly IFinalTestAnswerRepository _finalTestAnswerRepository;
         private readonly IPlacementTestAnswerRepository _placementTestAnswerRepository;
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
+        private readonly CourseDbContext _courseDbContext;
 
         #region Clean Code
 
-        public SectionGroupConverter(ISectionGroupResultRepository sectionGroupResultRepository, ILogger<SectionGroupConverter> logger, IStudentFeedbackRepository studentFeedbackRepository, AnswerTypeConverter answerTypeConverter, ISectionQuestionRepository sectionQuestionRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper, IQuestionRepository questionRepository, LinQHelper linQHelper, ISectionRepository sectionRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, IMockTestAnswerRepository mockTestAnswerRepository)
+        public SectionGroupConverter(ISectionGroupResultRepository sectionGroupResultRepository,
+            ILogger<SectionGroupConverter> logger,
+            IStudentFeedbackRepository studentFeedbackRepository,
+            AnswerTypeConverter answerTypeConverter,
+            ISectionQuestionRepository sectionQuestionRepository,
+            QuestionTypeConverter questionTypeConverter,
+            IMapper mapper,
+            IQuestionRepository questionRepository,
+            LinQHelper linQHelper,
+            ISectionRepository sectionRepository,
+            IFinalTestAnswerRepository finalTestAnswerRepository,
+            IPlacementTestAnswerRepository placementTestAnswerRepository,
+            IMockTestAnswerRepository mockTestAnswerRepository,
+            CourseDbContext courseDbContext)
         {
             _sectionGroupResultRepository = sectionGroupResultRepository;
             _logger = logger;
@@ -49,6 +63,7 @@ namespace Fsel.Course.Infrastructure.Common
             _finalTestAnswerRepository = finalTestAnswerRepository;
             _placementTestAnswerRepository = placementTestAnswerRepository;
             _mockTestAnswerRepository = mockTestAnswerRepository;
+            _courseDbContext = courseDbContext;
         }
 
         public async Task<int> GetHighestStreak(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, double version = (int)EnumVersion.V1)
@@ -426,32 +441,29 @@ namespace Fsel.Course.Infrastructure.Common
             if (sectionGroupResult.FinalTestResultId.HasValue)
             {
                 var finalTestAnswers = await _finalTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
-                _finalTestAnswerRepository.UpdateList(finalTestAnswers.Select(x =>
+                await _courseDbContext.BulkMergeAsync(finalTestAnswers.Select(x =>
                 {
                     x.Status = EnumAnswerStatus.Done;
                     return x;
-                }).ToList(), false, x => x.FinalTestResultId, x => x.SectionQuestionId, x => x.SectionGroupResultId);
-                await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                }).ToList());
             }
             else if (sectionGroupResult.PlacementTestResultId.HasValue)
             {
                 var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
-                _placementTestAnswerRepository.UpdateList(placementTestAnswers.Select(x =>
+                await _courseDbContext.BulkMergeAsync(placementTestAnswers.Select(x =>
                 {
                     x.Status = EnumAnswerStatus.Done;
                     return x;
-                }).ToList(), false, x => x.PlacementTestResultId, x => x.SectionQuestionId, x => x.SectionGroupResultId);
-                await _placementTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                }).ToList());
             }
             else
             {
                 var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
-                _mockTestAnswerRepository.UpdateList(mockTestAnswers.Select(x =>
+                await _courseDbContext.BulkMergeAsync(mockTestAnswers.Select(x =>
                 {
                     x.Status = EnumAnswerStatus.Done;
                     return x;
-                }).ToList(), false, x => x.MockTestResultId, x => x.SectionQuestionId, x => x.SectionGroupResultId, x => x.SectionId, x => x.SectionTimeCodeId);
-                await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                }).ToList());
             }
         }
 

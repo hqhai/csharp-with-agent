@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodeAnswers;
+    using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -38,6 +39,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly IQuestionRepository _questionRepository;
         private readonly IUserService _userService;
+        private readonly CourseDbContext _courseDbContext;
         private readonly AuthContext _authContext;
 
         public CreateVideoTimeCodeAnswerCommandHandler(
@@ -49,7 +51,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             , IQuestionRepository questionRepository,
               QuestBoardPublisher questBoardPublisher,
               AuthContext authContext,
-              IUserService userService)
+              IUserService userService,
+              CourseDbContext courseDbContext)
         {
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _videoResultRepository = videoResultRepository;
@@ -60,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             _questBoardPublisher = questBoardPublisher;
             _authContext = authContext;
             _userService = userService;
+            _courseDbContext = courseDbContext;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateVideoTimeCodeAnswerCommand request, CancellationToken cancellationToken)
@@ -186,14 +190,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         videoTimeCodeResult.Status = EnumResultStatus.Done;
                     }
 
-                    await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswers);
-                    await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _courseDbContext.BulkMergeAsync(videoTimeCodeAnswers);
                 }
                 else if (updateVideoTimeCodeAnswers.Any())
                 {
                     videoTimeCodeResult.Status = EnumResultStatus.Done;
-                    _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
-                    await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _courseDbContext.BulkMergeAsync(updateVideoTimeCodeAnswers);
                 }
                 if (videoTimeCode != null && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
                 {

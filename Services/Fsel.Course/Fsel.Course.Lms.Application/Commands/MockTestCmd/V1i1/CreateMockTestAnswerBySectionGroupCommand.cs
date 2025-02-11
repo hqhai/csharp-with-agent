@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Fsel.Course.Domain.Models.CommandModels.MockTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
+    using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
@@ -57,6 +58,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private readonly SubmitSpeakingAIPublisher _submitSpeakingAIPublisher;
         private readonly ILogger<CreateMockTestAnswerBySectionGroupCommand> _logger;
         private readonly DisconnectSocketCalculateTimePublisher _disconnectSocketCalculateTimePublisher;
+        private readonly CourseDbContext _courseDbContext;
 
         public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository,
             AuthContext authContext,
@@ -76,7 +78,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             ISpeakingAIService speakingAIService,
             ISpeakingEvaluationAIService evaluationAIService,
             SubmitSpeakingAIPublisher submitSpeakingAIPublisher,
-            DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher)
+            DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher,
+            CourseDbContext courseDbContext)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -97,6 +100,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             _evaluationAIService = evaluationAIService;
             _submitSpeakingAIPublisher = submitSpeakingAIPublisher;
             _disconnectSocketCalculateTimePublisher = disconnectSocketCalculateTimePublisher;
+            _courseDbContext = courseDbContext;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateMockTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -346,18 +350,17 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 return methodResult;
             }
             var (createMockTestAnswers, updateMockTestAnswers) = anserResult.Result;
-            if (createMockTestAnswers != null && createMockTestAnswers.Any())
-            {
-                await _mockTestAnswerRepository.AddList(createMockTestAnswers);
-            }
-            if (updateMockTestAnswers != null && updateMockTestAnswers.Any())
-            {
-                _mockTestAnswerRepository.UpdateList(updateMockTestAnswers, false, x => x.MockTestResultId, x => x.SectionGroupResultId, x => x.SectionQuestionId, x => x.SectionId, x => x.SectionTimeCodeId);
-            }
 
             try
             {
-                await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                if (createMockTestAnswers != null && createMockTestAnswers.Any())
+                {
+                    await _courseDbContext.BulkMergeAsync(createMockTestAnswers);
+                }
+                if (updateMockTestAnswers != null && updateMockTestAnswers.Any())
+                {
+                    await _courseDbContext.BulkMergeAsync(createMockTestAnswers);
+                }
             }
             catch (Exception ex)
             {

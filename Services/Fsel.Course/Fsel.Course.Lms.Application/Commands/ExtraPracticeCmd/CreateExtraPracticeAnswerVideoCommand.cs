@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ExtraPracticeAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
@@ -36,6 +37,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
         private readonly IExtraPracticeAnswerRepository _extraPracticeAnswerRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
+        private readonly CourseDbContext _courseDbContext;
 
         public CreateExtraPracticeAnswerVideoCommandHandler(AuthContext authContext
             , IUserService userService
@@ -43,7 +45,8 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             , QuestionConverter questionConverter
             , IExtraPracticeAnswerRepository extraPracticeAnswerRepository
             , IQuestionRepository questionRepository
-            , IExtraPracticeResultRepository extraPracticeResultRepository)
+            , IExtraPracticeResultRepository extraPracticeResultRepository
+            , CourseDbContext courseDbContext)
         {
             _authContext = authContext;
             _userService = userService;
@@ -52,6 +55,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _extraPracticeAnswerRepository = extraPracticeAnswerRepository;
             _questionRepository = questionRepository;
             _extraPracticeResultRepository = extraPracticeResultRepository;
+            _courseDbContext = courseDbContext;
         }
 
         public async Task<MethodResult<ExtraPracticeResultModel>> Handle(CreateExtraPracticeAnswerVideoCommand request, CancellationToken cancellationToken)
@@ -156,13 +160,11 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             {
                 if (extraPracticeAnswers.Count > 0)
                 {
-                    await _extraPracticeAnswerRepository.AddList(extraPracticeAnswers);
-                    await _extraPracticeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _courseDbContext.BulkMergeAsync(extraPracticeAnswers);
                 }
                 else if (updateExtraPracticeAnswers.Count > 0)
                 {
-                    _extraPracticeAnswerRepository.UpdateList(updateExtraPracticeAnswers);
-                    await _extraPracticeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _courseDbContext.BulkMergeAsync(updateExtraPracticeAnswers);
                 }
 
                 _extraPracticeResultRepository.Update(extraPracticeResult);

@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
@@ -53,6 +54,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
         private readonly ILogger<CreateFinalTestAnswerBySectionGroupCommand> _logger;
         private readonly RankedStudentPublisher _rankedStudentPublisher;
         private readonly DisconnectSocketCalculateTimePublisher _disconnectSocketCalculateTimePublisher;
+        private readonly CourseDbContext _courseDbContext;
 
         public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository,
             ICourseResultRepository courseResultRepository,
@@ -69,7 +71,8 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             IMapper mapper,
             RankedStudentPublisher rankedStudentPublisher,
             ILogger<CreateFinalTestAnswerBySectionGroupCommand> logger,
-            DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher)
+            DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher,
+            CourseDbContext courseDbContext)
         {
             _questionRepository = questionRepository;
             _courseResultRepository = courseResultRepository;
@@ -87,6 +90,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             _logger = logger;
             _rankedStudentPublisher = rankedStudentPublisher;
             _disconnectSocketCalculateTimePublisher = disconnectSocketCalculateTimePublisher;
+            _courseDbContext = courseDbContext;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateFinalTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -279,18 +283,17 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 return methodResult;
             }
             var (createFinalTestAnswers, updateFinalTestAnswers) = anwserResult.Result;
-            if (createFinalTestAnswers != null && createFinalTestAnswers.Any())
-            {
-                await _finalTestAnswerRepository.AddList(createFinalTestAnswers);
-            }
-            if (updateFinalTestAnswers != null && updateFinalTestAnswers.Any())
-            {
-                _finalTestAnswerRepository.UpdateList(updateFinalTestAnswers, false, x => x.FinalTestResultId, x => x.SectionGroupResultId, x => x.SectionQuestionId);
-            }
 
             try
             {
-                await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                if (createFinalTestAnswers != null && createFinalTestAnswers.Any())
+                {
+                    await _courseDbContext.BulkMergeAsync(createFinalTestAnswers);
+                }
+                if (updateFinalTestAnswers != null && updateFinalTestAnswers.Any())
+                {
+                    await _courseDbContext.BulkMergeAsync(updateFinalTestAnswers);
+                }
             }
             catch (Exception ex)
             {

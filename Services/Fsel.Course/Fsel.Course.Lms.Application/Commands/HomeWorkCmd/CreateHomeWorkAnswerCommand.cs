@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.HomeWorkAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -37,6 +38,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
         private const int FIFTY_PERCENT_DONE = 50;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly IUserService _userService;
+        private readonly CourseDbContext _courseDbContext;
 
         public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
             IHomeWorkAnswerRepository homeWorkAnswerRepository,
@@ -45,7 +47,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             IQuestionRepository questionRepository,
             AuthContext authContext,
             QuestBoardPublisher questBoardPublisher,
-            IUserService userService)
+            IUserService userService,
+            CourseDbContext courseDbContext)
         {
             _homeWorkResultRepository = homeWorkResultRepository;
             _homeWorkAnswerRepository = homeWorkAnswerRepository;
@@ -55,6 +58,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             _authContext = authContext;
             _questBoardPublisher = questBoardPublisher;
             _userService = userService;
+            _courseDbContext = courseDbContext;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
@@ -180,8 +184,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
                 if (homeWorkAnswers.Any())
                 {
-                    _homeWorkAnswerRepository.UpdateList(homeWorkAnswers);
-                    await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    await _courseDbContext.BulkMergeAsync(homeWorkAnswers);
                 }
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
