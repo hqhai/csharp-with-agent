@@ -331,7 +331,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
 
             var learnCourseCompletes = new ConcurrentBag<CourseCompleteModel>();
-            var courseCompleteModules = await GetCourseCompletesAsync(courseResults, arrivalDate: arrivalDate);
+            var courseCompleteModules = GetCourseCompletesAsync(courseResults, arrivalDate: arrivalDate);
             var courseCompleteTotalModules = await GetCompleteCourseTotalsAsync(courseResults);
             courseResults.ForEach(courseResult =>
             {
@@ -350,7 +350,7 @@ namespace Fsel.Course.Infrastructure.Common
             return learnCourseCompletes.ToList();
         }
 
-        public async Task<IList<CourseCompleteModel>> GetCourseCompletesAsync(IList<CourseResultModel>? courseResults, BaseQueryModel? baseQuery = default, DateTime? arrivalDate = default, bool isPagination = false)
+        public IList<CourseCompleteModel> GetCourseCompletesAsync(IList<CourseResultModel>? courseResults, BaseQueryModel? baseQuery = default, DateTime? arrivalDate = default, bool isPagination = false)
         {
             if (courseResults == null || !courseResults.Any())
             {
@@ -462,7 +462,7 @@ namespace Fsel.Course.Infrastructure.Common
             return isPagination ? baseQuery != null && baseQuery.SortBy.Any() ? courseCompletes.ApplySortAndPaging(baseQuery).ToList() : courseCompletes.ApplySort(baseQuery).ToList() : courseCompletes.ToList();
         }
 
-        public async Task<IList<CourseCompleteModel>> GetCourseLearnsAsync(IList<CourseResultModel>? courseResults)
+        public IList<CourseCompleteModel> GetCourseLearnsAsync(IList<CourseResultModel>? courseResults)
         {
             if (courseResults == null || !courseResults.Any())
             {
@@ -470,7 +470,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
 
             var courseCompletes = new ConcurrentStack<CourseCompleteModel>();
-            var smallerBatches = courseResults.Select(b => b).Chunk(200);
+            var smallerBatches = courseResults.Select(b => b).Chunk(BatchSize200);
 
             smallerBatches.ForEach(async smallBatch =>
             {
@@ -520,7 +520,7 @@ namespace Fsel.Course.Infrastructure.Common
                                       }).ToList();
         }
 
-        public async Task<IList<CourseCompleteModel>> GetCourseCompleteToExportsAsync(IList<CourseResultModel>? courseResults)
+        public IList<CourseCompleteModel> GetCourseCompleteToExportsAsync(IList<CourseResultModel>? courseResults)
         {
             if (courseResults == null || !courseResults.Any())
             {
@@ -646,7 +646,7 @@ namespace Fsel.Course.Infrastructure.Common
                 return new List<CourseCompleteModel>();
             }
             var learnCourseCompletes = new ConcurrentBag<CourseCompleteModel>();
-            var courseCompleteModules = await GetCourseCompleteToExportsAsync(courseResults);
+            var courseCompleteModules = GetCourseCompleteToExportsAsync(courseResults);
             var courseCompleteTotalModules = await GetCompleteCourseTotalsAsync(courseResults);
             courseResults.ForEach(courseResult =>
             {
