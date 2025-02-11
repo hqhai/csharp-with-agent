@@ -45,23 +45,13 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 return methodResult;
             }
 
-            var query = _studentRepository.Queryable.Where(p => p.ClassId.HasValue).Include(x => x.Human).Select(i => new SearchStudentsInClassModel
-            {
-                Id = i.Id,
-                FullName = i.Human!.FullName,
-                BirthDay = i.Human.Birthday,
-                Code = i.Human.Code,
-                CreatedDate = i.CreatedDate,
-                Email = i.Human.Email,
-                ClassId = i.ClassId
-            });
-
+            var query = _studentRepository.Queryable.Where(p => p.ClassId.HasValue);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 request.Keyword = request.Keyword.Trim().ToLower(CultureInfo.InvariantCulture);
-                var queryFullName = query.Where(m => m.FullName != null && m.FullName.Trim().Contains(request.Keyword));
-                var queryCode = query.Where(m => m.Code != null && m.Code.Trim().Contains(request.Keyword));
-                var queryEmail = query.Where(m => m.Email != null && m.Email.Trim().Contains(request.Keyword));
+                var queryFullName = query.Where(m => m.Human != null && m.Human.FullName != null && m.Human.FullName.Trim().Contains(request.Keyword));
+                var queryCode = query.Where(m => m.Human != null && m.Human.Code != null && m.Human.Code.Trim().Contains(request.Keyword));
+                var queryEmail = query.Where(m => m.Human != null && m.Human.Email != null && m.Human.Email.Trim().Contains(request.Keyword));
                 query = queryFullName.Union(queryCode).Union(queryEmail);
 
             }
@@ -77,8 +67,18 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 query = query.Where(p => studentIds != null && studentIds.Contains(p.Id));
             }
 
-            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await query
+            var dataQuery = query.Select(i => new SearchStudentsInClassModel
+            {
+                Id = i.Id,
+                FullName = i.Human!.FullName,
+                BirthDay = i.Human.Birthday,
+                Code = i.Human.Code,
+                CreatedDate = i.CreatedDate,
+                Email = i.Human.Email,
+                ClassId = i.ClassId
+            });
+            int totalItem = await dataQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await dataQuery
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
