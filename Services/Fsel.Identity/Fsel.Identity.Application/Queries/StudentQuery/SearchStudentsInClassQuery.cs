@@ -2,9 +2,11 @@
 
 namespace Fsel.Identity.Application.Queries.StudentQuery
 {
+    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Identity.Application.Services.LmsCourseService;
@@ -44,22 +46,20 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 return methodResult;
             }
 
-            var query = _studentRepository.Queryable.Where(p => p.ClassId.HasValue).Include(x => x.Human).Select(i => new SearchStudentsInClassModel
-            {
-                Id = i.Id,
-                FullName = i.Human!.FullName,
-                BirthDay = i.Human.Birthday,
-                Code = i.Human.Code,
-                CreatedDate = i.CreatedDate,
-                Email = i.Human.Email,
-                ClassId = i.ClassId
-            });
-
+            var query = _studentRepository.Queryable.Where(p => p.ClassId.HasValue);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower())
-                                            || (m.Code ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower())
-                                            || (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword.Trim().ToLower()));
+                request.Keyword = request.Keyword.Trim().ToLower(CultureInfo.InvariantCulture);
+                if (request.Keyword.IsValidEmail())
+                {
+                    query = query.Where(m => m.Human != null && m.Human.Email != null && m.Human.Email.Contains(request.Keyword));
+                }
+                else
+                {
+                    var queryFullName = query.Where(m => m.Human != null && m.Human.FullName != null && m.Human.FullName.Contains(request.Keyword));
+                    var queryCode = query.Where(m => m.Human != null && m.Human.Code != null && m.Human.Code.Contains(request.Keyword));
+                    query = queryFullName.Union(queryCode);
+                }
             }
             if (request.ClassId.HasValue)
             {
@@ -73,8 +73,18 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 query = query.Where(p => studentIds != null && studentIds.Contains(p.Id));
             }
 
-            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await query
+            var dataQuery = query.Select(i => new SearchStudentsInClassModel
+            {
+                Id = i.Id,
+                FullName = i.Human!.FullName,
+                BirthDay = i.Human.Birthday,
+                Code = i.Human.Code,
+                CreatedDate = i.CreatedDate,
+                Email = i.Human.Email,
+                ClassId = i.ClassId
+            });
+            int totalItem = await dataQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await dataQuery
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)

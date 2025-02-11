@@ -76,12 +76,11 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 
                 if (!request.Email.IsNullOrEmpty())
                 {
-                    var userTypeSMS = await _userOtpCodeRepository.Queryable
-                                                                  .FirstOrDefaultAsync(p => p.Type == EnumUserOtpCodeType.SMS && p.Status == EnumOtpCodeStatus.New && p.User.Email.ToLower().Trim() == request.Email.ToLower().Trim(), cancellationToken);
-
+                    var userTypeSMS = await _userOtpCodeRepository.Queryable.FirstOrDefaultAsync(p => p.Type == EnumUserOtpCodeType.SMS && p.Status == EnumOtpCodeStatus.New && p.User != null && p.User.Email == request.Email, cancellationToken);
                     if (userTypeSMS != null)
                     {
                         userTypeSMS.Status = EnumOtpCodeStatus.Verified;
+                        _userOtpCodeRepository.Update(userTypeSMS);
                     }
                 }
 
