@@ -2,6 +2,8 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 {
+    using System.Collections.Generic;
+    using System.Diagnostics;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
@@ -44,7 +46,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
                 LearningStatus = request.LearningStatus,
-                SortBy = request.SortBy,
                 CourseType = request.CourseType,
                 CourseLevel = request.CourseLevel,
                 ManagerReportType = EnumManagerReportType.ReportLearningProgress,
@@ -81,7 +82,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return;
             }
             var courseResults = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
-            var countProgress = _managerProgressHelper.GetOverallCompleteAsync(courseResults, request.EndDate);
+            var countProgress = await _managerProgressHelper.GetOverallCompleteAsync(courseResults, request.EndDate);
             var totalProgress = await _managerProgressHelper.GetTotalCompleteCourseAsync(courseResults);
             overallReport.ContentAverageProgress = $"{countProgress} / {totalProgress}";
         }
