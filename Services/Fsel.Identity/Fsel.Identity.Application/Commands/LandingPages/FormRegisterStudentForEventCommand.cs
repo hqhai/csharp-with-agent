@@ -59,7 +59,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.EventCode.ToLower() == request.EventCode.ToLower(), cancellationToken);
+            var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.EventCode == request.EventCode, cancellationToken);
 
             if (competitionEvent == null)
             {
