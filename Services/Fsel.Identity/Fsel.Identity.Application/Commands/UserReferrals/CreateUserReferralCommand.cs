@@ -40,7 +40,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
             var receiverId = request.ReceiverId ?? _authContext.CurrentUserId;
 
             request.ReferralCode = request.ReferralCode?.Trim() ?? string.Empty;
-            var sender = await _userManager.Users.FirstOrDefaultAsync(p => p.Human != null && !string.IsNullOrEmpty(p.Human.Code) && p.Human.Code == request.ReferralCode, cancellationToken);
+            var sender = await _userManager.Users.FirstOrDefaultAsync(p => p.Human != null && p.Human.Code != null && p.Human.Code == request.ReferralCode, cancellationToken);
             if (sender == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ReferralCode));
