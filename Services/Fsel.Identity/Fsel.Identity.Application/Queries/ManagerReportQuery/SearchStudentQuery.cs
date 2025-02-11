@@ -46,32 +46,14 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
 
-            var query = _studentRepository.Queryable.Include(x => x.Human)
-                .Select(i => new StudentDtoModel
-                {
-                    Id = i.Id,
-                    FullName = i.Human!.FullName,
-                    BirthDay = i.Human.Birthday,
-                    Email = i.Human.Email,
-                    PhoneNumber = i.Human.PhoneNumber,
-                    CourseLevel = i.CourseLevel,
-                    ExpiredDate = i.ExpiredDate,
-                    School = i.School,
-                    SchoolClass = i.SchoolClass,
-                    SchoolGrade = i.SchoolGrade,
-                    SchoolId = i.SchoolId,
-                    CourseId = i.CourseId,
-                    UserId = i.Human.UserId,
-                    CreatedDate = i.CreatedDate,
-                    BaseCourseLevel = i.BaseCourseLevel,
-                });
+            var query = _studentRepository.Queryable;
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                var queryFullName = query.Where(m => m.FullName != null && m.FullName.Contains(request.Keyword));
-                var queryPhone = query.Where(m => m.PhoneNumber != null && m.PhoneNumber.Contains(request.Keyword));
-                var queryEmail = query.Where(m => m.Email != null && m.Email.Contains(request.Keyword));
+                var queryFullName = query.Where(m => m.Human != null && m.Human.FullName != null && m.Human.FullName.Contains(request.Keyword));
+                var queryPhone = query.Where(m => m.Human != null && m.Human.PhoneNumber != null && m.Human.PhoneNumber.Contains(request.Keyword));
+                var queryEmail = query.Where(m => m.Human != null && m.Human.Email != null && m.Human.Email.Contains(request.Keyword));
                 query = queryFullName.Union(queryPhone).Union(queryEmail);
             }
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
@@ -128,8 +110,26 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 query = query.Where(x => x.CourseLevel.HasValue && x.CourseLevel == request.CourseLevel.Value);
             }
 
-            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = query.AsEnumerable()
+            var dataQuery = query.Select(i => new StudentDtoModel
+            {
+                Id = i.Id,
+                FullName = i.Human!.FullName,
+                BirthDay = i.Human.Birthday,
+                Email = i.Human.Email,
+                PhoneNumber = i.Human.PhoneNumber,
+                CourseLevel = i.CourseLevel,
+                ExpiredDate = i.ExpiredDate,
+                School = i.School,
+                SchoolClass = i.SchoolClass,
+                SchoolGrade = i.SchoolGrade,
+                SchoolId = i.SchoolId,
+                CourseId = i.CourseId,
+                UserId = i.Human.UserId,
+                CreatedDate = i.CreatedDate,
+                BaseCourseLevel = i.BaseCourseLevel,
+            });
+            int totalItem = await dataQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = dataQuery.AsEnumerable()
                     .OrderBy(x => int.TryParse(x.SchoolGrade, out int graded) ? graded : 0).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName)
                     .ApplyPaging(request)
                     .ToList();
