@@ -75,7 +75,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
 
-            if (await _userManager.Users.AnyAsync(p => p.Id != user.Id && (p.UserName == request.Email.ToLower() || p.Email == request.Email.ToLower()), cancellationToken))
+            if (await _userManager.Users.AnyAsync(p => p.Id != user.Id && p.Email == request.Email, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.EmailDoesNotExist), nameof(request.Email), request.Email);
                 return methodResult;

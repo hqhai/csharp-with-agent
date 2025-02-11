@@ -185,6 +185,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 var stream = new MemoryStream(request.File);
                 IFormFile formFile = new FormFile(stream, 0, request.File.Length, "name", "fileName");
 
+                var cultureInfo = CultureInfo.InvariantCulture;
+
                 var result = formFile.ImportAndValidateExcel(async (CreateStudentToEventFromFileModel x, IList<CreateStudentToEventFromFileModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
                 {
                     if (!string.IsNullOrEmpty(x.FullName?.Trim()) || !string.IsNullOrEmpty(x.PhoneNumber?.Trim()) || x.DateOfBirth != null || !string.IsNullOrEmpty(x.SchoolGrade?.Trim()) || !string.IsNullOrEmpty(x.SchoolClass?.Trim()))
@@ -215,13 +217,13 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         {
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
                         }
-                        else if (!string.IsNullOrEmpty(x.Email?.Trim()) && emails.Contains(x.Email.Trim()))
+                        else if (!string.IsNullOrEmpty(x.Email?.Trim()) && emails.Contains(x.Email.ToLower(cultureInfo).Trim()))
                         {
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.EmailAlreadyExistInListVN });
                         }
                         else if (!string.IsNullOrEmpty(x.Email?.Trim()))
                         {
-                            emails.Add(x.Email.Trim());
+                            emails.Add(x.Email.ToLower(cultureInfo).Trim());
                         }
                         if (x.DateOfBirth == null)
                         {
@@ -339,7 +341,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 var user = new User()
                                 {
                                     UserName = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
-                                    Email = !string.IsNullOrEmpty(student.Email) ? student.Email.Trim() : null,
+                                    Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
                                     FullName = student.FullName!.Trim(),
                                     PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
                                     EmailConfirmed = false,
@@ -350,7 +352,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                         FullName = student.FullName.Trim(),
                                         PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
                                         Birthday = student.DateOfBirth,
-                                        Email = !string.IsNullOrEmpty(student.Email) ? student.Email.Trim() : null,
+                                        Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
                                         Code = GeneratorCodeAsync(studentRepository, student.DateOfBirth ?? DateTime.MinValue, null),
                                         Student = new Student()
                                         {

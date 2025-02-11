@@ -6,8 +6,11 @@ namespace Fsel.Shared.Enums
 
     public enum EnumEducationLevel
     {
+        [Description("Mầm non")]
+        Preschool = 1,
+
         [Description("Tiểu học")]
-        Primary = 1,
+        Primary,
 
         [Description("THCS")]
         Secondary,
