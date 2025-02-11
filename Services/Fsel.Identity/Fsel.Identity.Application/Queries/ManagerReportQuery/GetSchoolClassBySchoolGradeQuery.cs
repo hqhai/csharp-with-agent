@@ -40,7 +40,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
 
             if (!string.IsNullOrEmpty(request.SchoolGrade))
             {
-                query = query.Where(x => x.SchoolGrade != null && x.SchoolGrade.Trim() == request.SchoolGrade);
+                query = query.Where(x => x.SchoolGrade == request.SchoolGrade);
             }
 
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
