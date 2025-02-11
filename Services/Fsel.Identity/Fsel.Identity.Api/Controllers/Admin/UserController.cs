@@ -285,12 +285,13 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("reset-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Admin))]
+        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordUserCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
         /// <summary>
         /// Tool get otp of student
         /// </summary>

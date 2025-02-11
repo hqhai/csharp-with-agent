@@ -61,7 +61,14 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 Email = request.Email,
             };
 
-            var user = await _userManager.Users.FirstOrDefaultAsync(p => p.UserName.ToLower() == request.Email.ToLower() || p.Email.ToLower() == request.Email.ToLower() || p.PhoneNumber.ToLower() == request.PhoneNumber.ToLower(), cancellationToken);
+            var queryByUserName = _userManager.Users.Where(p => p.UserName == request.Email);
+            var queryByEmail = _userManager.Users.Where(p => p.Email == request.Email);
+            var queryByPhoneNumber = _userManager.Users.Where(p => p.PhoneNumber == request.PhoneNumber);
+
+            var user = await queryByUserName
+                .Union(queryByEmail)
+                .Union(queryByPhoneNumber)
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (user != null)
             {

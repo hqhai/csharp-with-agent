@@ -9,8 +9,10 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using MassTransit;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -44,9 +46,12 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             }
 
             var students = await _studentRepository.Queryable
-                                    .Include(x => x.Human)
-                                    .Include(pr => pr.ParentStudents).ThenInclude(p => p.Parent).ThenInclude(hm => hm.Human)
-                                    .Where(x => request.StudentIds.Contains(x.Id)).ToListAsync(cancellationToken: cancellationToken);
+                    .Include(x => x.Human)
+                    .Include(pr => pr.ParentStudents)
+                        .ThenInclude(p => p.Parent)
+                        .ThenInclude(hm => hm.Human)
+                    .WhereBulkContains(request.StudentIds, i => i.Id)
+                    .ToListAsync(cancellationToken);
 
             methodResult.Result = _mapper.Map<IList<StudentModel>>(students);
             methodResult.StatusCode = StatusCodes.Status200OK;

@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using System.Globalization;
 using AutoMapper;
 using Fsel.Core.Extensions;
 using Fsel.Identity.Domain.Entities;
@@ -23,8 +24,8 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<UpdateStudentByAdminCommandModel, User>()
                 .BeforeMap((m, c) =>
                 {
-                    c.UserName = (c.Email.ToLower().Trim() == c.UserName.ToLower().Trim()) ? m.Email : m.PhoneNumber;
-                    c.NormalizedUserName = (c.Email.ToLower().Trim() == c.UserName.ToLower().Trim()) ? m.Email.ToUpper() : m.PhoneNumber;
+                    c.UserName = (c.Email?.ToLower(CultureInfo.CurrentCulture).Trim() == c.UserName?.ToLower(CultureInfo.CurrentCulture).Trim()) ? m.Email : m.PhoneNumber;
+                    c.NormalizedUserName = (c.Email?.ToLower(CultureInfo.CurrentCulture).Trim() == c.UserName?.ToLower(CultureInfo.CurrentCulture).Trim()) ? m.Email?.ToUpper(CultureInfo.CurrentCulture) : m.PhoneNumber;
                 })
                 .ForMember(p => p.NormalizedEmail, n => n.MapFrom(m => m.Email))
                 .ForMember(m => m.Id, opt => opt.Ignore());
@@ -34,8 +35,8 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<UpdateUserProfileCommandModel, User>()
                 .BeforeMap((m, c) =>
                 {
-                    c.UserName = (c.Email.ToLower().Trim() == c.UserName.ToLower().Trim()) ? c.UserName.ToLower().Trim() : m.PhoneNumber;
-                    c.NormalizedUserName = (c.Email.ToLower().Trim() == c.UserName.ToLower().Trim()) ? c.UserName.ToLower().Trim() : m.PhoneNumber;
+                    c.UserName = (c.Email?.ToLower(CultureInfo.CurrentCulture).Trim() == c.UserName?.ToLower(CultureInfo.CurrentCulture).Trim()) ? c.UserName : m.PhoneNumber;
+                    c.NormalizedUserName = (c.Email?.ToLower(CultureInfo.CurrentCulture).Trim() == c.UserName?.ToLower(CultureInfo.CurrentCulture).Trim()) ? c.NormalizedUserName : m.PhoneNumber;
                 })
                 .ForMember(m => m.Id, opt => opt.Ignore());
 

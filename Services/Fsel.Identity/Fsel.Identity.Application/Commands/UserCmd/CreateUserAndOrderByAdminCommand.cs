@@ -36,7 +36,13 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var user = await _userManager.Users.FirstOrDefaultAsync(p => p.Email.Trim().ToLower() == request.Email.Trim().ToLower() || p.UserName.Trim().ToLower() == request.Email.Trim().ToLower(), cancellationToken);
+            request.Email ??= string.Empty;
+            var queryByEmail = _userManager.Users.Where(p => p.Email == request.Email.Trim());
+            var queryByUserName = _userManager.Users.Where(p => p.UserName == request.Email.Trim());
+
+            var user = await queryByEmail
+                .Union(queryByUserName)
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (user == null)
             {
