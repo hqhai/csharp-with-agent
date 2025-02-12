@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
@@ -279,18 +280,20 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 return methodResult;
             }
             var (createFinalTestAnswers, updateFinalTestAnswers) = anwserResult.Result;
-            if (createFinalTestAnswers != null && createFinalTestAnswers.Any())
-            {
-                await _finalTestAnswerRepository.AddList(createFinalTestAnswers);
-            }
-            if (updateFinalTestAnswers != null && updateFinalTestAnswers.Any())
-            {
-                _finalTestAnswerRepository.UpdateList(updateFinalTestAnswers);
-            }
 
             try
             {
-                await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                if (createFinalTestAnswers != null && createFinalTestAnswers.Any())
+                {
+                    await _finalTestAnswerRepository.BulkMergeAsync(createFinalTestAnswers);
+                }
+                if (updateFinalTestAnswers != null && updateFinalTestAnswers.Any())
+                {
+                    await _finalTestAnswerRepository.BulkMergeAsync(updateFinalTestAnswers, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = entity => new { entity.FinalTestResultId, entity.SectionGroupResultId, entity.SectionQuestionId };
+                    });
+                }
             }
             catch (Exception ex)
             {
