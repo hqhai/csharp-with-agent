@@ -16,7 +16,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ExtraPracticeAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
@@ -157,11 +156,13 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             {
                 if (extraPracticeAnswers.Count > 0)
                 {
-                    await _extraPracticeAnswerRepository.BulkMergeAsync(extraPracticeAnswers);
+                    await _extraPracticeAnswerRepository.AddList(extraPracticeAnswers);
+                    await _extraPracticeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else if (updateExtraPracticeAnswers.Count > 0)
                 {
-                    await _extraPracticeAnswerRepository.BulkMergeAsync(updateExtraPracticeAnswers);
+                    _extraPracticeAnswerRepository.UpdateList(updateExtraPracticeAnswers);
+                    await _extraPracticeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
 
                 _extraPracticeResultRepository.Update(extraPracticeResult);
