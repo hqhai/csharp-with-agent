@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -57,10 +58,15 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(classStudentIds);
             var students = studentResults?.Content?.Result;
 
-            var finalTestResults = await _finalTestResultRepository.Queryable
-                                                                   .WhereBulkContains(classStudentIds, x => x.StudentId)
-                                                                   .Where(x => x.FinalTestId == finalTestResult.FinalTestId && x.CourseId == finalTestResult.CourseId && x.Status == EnumResultStatus.Done)
-                                                                   .ToListAsync(cancellationToken);
+            List<FinalTestResult> finalTestResults = new List<FinalTestResult>();
+
+            if (classStudentIds != null)
+            {
+                finalTestResults = await _finalTestResultRepository.Queryable
+                                                           .WhereBulkContains(classStudentIds, x => x.StudentId)
+                                                           .Where(x => x.FinalTestId == finalTestResult.FinalTestId && x.CourseId == finalTestResult.CourseId && x.Status == EnumResultStatus.Done)
+                                                           .ToListAsync(cancellationToken);
+            }
 
             if (students != null)
             {

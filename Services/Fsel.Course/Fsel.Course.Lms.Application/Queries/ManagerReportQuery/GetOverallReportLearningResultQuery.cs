@@ -86,11 +86,19 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType);
 
             var overallModules = new List<OverallModuleReportModel>();
-            var courseIds = students.Select(x => x.CourseId).Distinct().ToList();
-            var unitGroups = await _courseUnitMockTestRepository.Queryable
-                                     .WhereBulkContains(courseIds, x => x.CourseId)
-                                     .Where(x => x.UnitId.HasValue)
-                                     .GroupBy(x => x.Number)
+            var courseIds = students.Where(x => x.CourseId.HasValue).Select(x => x.CourseId!.Value).Distinct().ToList();
+
+            var unitGroupQuerys = new List<CourseUnitMockTest>();
+
+            if (courseIds != null)
+            {
+                unitGroupQuerys = await _courseUnitMockTestRepository.Queryable
+                                             .WhereBulkContains(courseIds, x => x.CourseId)
+                                             .Where(x => x.UnitId.HasValue)
+                                             .ToListAsync();
+            }
+
+            var unitGroups = unitGroupQuerys.GroupBy(x => x.Number)
                                      .Select(x => new
                                      {
                                          Number = x.Key,
@@ -100,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                              UnitId = u.UnitId.GetValueOrDefault()
                                          }).Distinct().ToList()
                                      })
-                                     .ToListAsync();
+                                     .ToList();
 
             var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(students.Select(x => x.Id), x => x.StudentId)
                                           join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
@@ -184,11 +192,15 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                                  MockTestResult = mtr
                                              }).ToListAsync();
 
-                var mockTestGroupQuerys = await _courseUnitMockTestRepository.Queryable
+                var mockTestGroupQuerys = new List<CourseUnitMockTest>();
+
+                if (courseIds != null)
+                {
+                    mockTestGroupQuerys = await _courseUnitMockTestRepository.Queryable
                                                                              .WhereBulkContains(courseIds, x => x.CourseId)
                                                                              .Where(x => x.MockTestId.HasValue)
                                                                              .ToListAsync();
-
+                }
 
                 var mockTestGroups = mockTestGroupQuerys.GroupBy(x => new { x.Number, x.Course!.CourseLevel })
                                                         .Select(x => new

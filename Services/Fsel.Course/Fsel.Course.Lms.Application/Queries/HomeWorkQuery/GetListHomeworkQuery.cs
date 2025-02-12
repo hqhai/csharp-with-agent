@@ -72,10 +72,16 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             }
             var homeWorks = await _homeWorkRepository.GetListAsync(lessonResult);
             var homeWorkResultIds = homeWorks.SelectMany(x => x.HomeWorkResults).Select(x => x.Id).ToList();
-            var homeWorkResultAnswerQuerys = await _homeWorkAnswerRepository.Queryable
-                                                                       .WhereBulkContains(homeWorkResultIds, x => x.HomeWorkResultId)
-                                                                       .Where(x => x.IsCorrect.HasValue)
-                                                                       .ToListAsync(cancellationToken);
+
+            List<HomeWorkAnswer> homeWorkResultAnswerQuerys = new List<HomeWorkAnswer>();
+
+            if (homeWorkResultIds != null)
+            {
+                homeWorkResultAnswerQuerys = await _homeWorkAnswerRepository.Queryable
+                                                                            .WhereBulkContains(homeWorkResultIds, x => x.HomeWorkResultId)
+                                                                            .Where(x => x.IsCorrect.HasValue)
+                                                                            .ToListAsync(cancellationToken);
+            }
 
             var homeWorkResultAnswers = homeWorkResultAnswerQuerys.GroupBy(x => x.HomeWorkResultId)
                                                                   .Select(x => new

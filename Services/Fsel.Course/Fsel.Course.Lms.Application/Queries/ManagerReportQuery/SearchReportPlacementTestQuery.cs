@@ -97,6 +97,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             }
 
             var studentIds = students.Select(x => x.Id).ToList();
+            if (studentIds == null)
+            {
+                return methodResult;
+            }
+
             var lists = await _placementTestGroupResultRepository.Queryable.Where(x => studentIds.Any(y => y == x.StudentId))
                 .Select(x => new
                 {

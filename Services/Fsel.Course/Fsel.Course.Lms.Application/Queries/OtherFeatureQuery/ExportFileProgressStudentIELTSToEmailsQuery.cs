@@ -170,7 +170,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                                                    }).ToListAsync(cancellationToken);
 
             var courseCompletes = await _managerProgressHelper.GetProgressCompleteModuleExportAsync(courseResults.Select(x => new CourseResultModel { CourseId = x.CourseId, StudentId = x.StudentId }).ToList());
-            var lessonResultIds = courseCompletes.Where(x => x.LessonResult != null).Select(x => x.LessonResult).Select(x => x.Id).ToList();
+            var lessonResultIds = courseCompletes.Where(x => x.LessonResult != null).Select(x => x.LessonResult).Select(x => x.Id).ToList() ?? new List<Guid>();
 
             var lessonResults = await _lessonResultRepository.Queryable
                .WhereBulkContains(lessonResultIds, x => x.Id)
