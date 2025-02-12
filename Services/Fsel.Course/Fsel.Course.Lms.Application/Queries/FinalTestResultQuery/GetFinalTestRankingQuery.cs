@@ -58,9 +58,9 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             var students = studentResults?.Content?.Result;
 
             var finalTestResults = await _finalTestResultRepository.Queryable
-                            .Where(x => classStudentIds != null && classStudentIds.Contains(x.StudentId))
-                            .Where(x => x.FinalTestId == finalTestResult.FinalTestId && x.CourseId == finalTestResult.CourseId && x.Status == EnumResultStatus.Done)
-                            .ToListAsync(cancellationToken);
+                                                                   .WhereBulkContains(classStudentIds, x => x.StudentId)
+                                                                   .Where(x => x.FinalTestId == finalTestResult.FinalTestId && x.CourseId == finalTestResult.CourseId && x.Status == EnumResultStatus.Done)
+                                                                   .ToListAsync(cancellationToken);
 
             if (students != null)
             {

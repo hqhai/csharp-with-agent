@@ -69,16 +69,20 @@ namespace Fsel.Course.Lms.Application.Queries.LeaderBoardCollectiveAwardQuery
             List<Guid> studentIds = students.Select(x => x.Id).ToList();
 
             var courseResults = await _courseResultRepository.Queryable
-                                                              .Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active)
-                                                              .ToListAsync(cancellationToken);
+                                                             .WhereBulkContains(studentIds, x => x.StudentId)
+                                                             .Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
+                                                             .ToListAsync(cancellationToken);
 
             var placementTestGroupResults = await _placementTestGroupResultRepository.Queryable
-                                                                                     .Where(x => studentIds.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
+                                                                                     .WhereBulkContains(studentIds, x => x.StudentId)
+                                                                                     .Where(x => x.Status == EnumResultStatus.Done)
                                                                                      .ToListAsync(cancellationToken);
 
             List<Guid> courseIds = courseResults.Select(x => x.CourseId).Distinct().ToList();
             var unitResults = await _unitResultRepository.Queryable
-                                                         .Where(x => studentIds.Contains(x.StudentId) && courseIds.Contains(x.CourseId) && x.Status == EnumResultStatus.Done)
+                                                         .WhereBulkContains(studentIds, x => x.StudentId)
+                                                         .WhereBulkContains(courseIds, x => x.CourseId)
+                                                         .Where(x => x.Status == EnumResultStatus.Done)
                                                          .ToListAsync(cancellationToken);
 
             List<Guid> unitIds = unitResults.Select(x => x.UnitId).Distinct().ToList();

@@ -32,7 +32,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
             var query = await _courseResultRepository.Queryable
                                                      .Include(x => x.Course)
-                                                     .Where(x => request.UserIds.Contains(x.CreatedUserId))
+                                                     .WhereBulkContains(request.UserIds, x => x.CreatedUserId)
                                                      .Select(x => new
                                                      {
                                                          UserId = x.CreatedUserId,

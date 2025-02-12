@@ -110,12 +110,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
                 case EnumManagerReportType.ReportLearningResults:
                     studentIds = students?.Select(x => x.Id).ToList() ?? new List<Guid>();
-                    var query = (from baseQ in _courseResultRepository.Queryable
+                    var query = (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                                  join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                  join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
                                  from ur in unitGroup.DefaultIfEmpty()
-                                 where studentIds.Contains(baseQ.StudentId) &&
-                                 baseQ.WorkingStatus == EnumWorkingStatus.Active &&
+                                 where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
                                  (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
                                  group new { baseQ, ur }
                                  by new { baseQ.CourseId, baseQ.StudentId } into g
