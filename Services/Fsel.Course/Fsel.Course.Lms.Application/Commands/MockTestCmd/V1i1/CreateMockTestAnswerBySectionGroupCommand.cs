@@ -58,7 +58,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private readonly SubmitSpeakingAIPublisher _submitSpeakingAIPublisher;
         private readonly ILogger<CreateMockTestAnswerBySectionGroupCommand> _logger;
         private readonly DisconnectSocketCalculateTimePublisher _disconnectSocketCalculateTimePublisher;
-        private readonly CourseDbContext _courseDbContext;
 
         public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository,
             AuthContext authContext,
@@ -78,8 +77,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             ISpeakingAIService speakingAIService,
             ISpeakingEvaluationAIService evaluationAIService,
             SubmitSpeakingAIPublisher submitSpeakingAIPublisher,
-            DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher,
-            CourseDbContext courseDbContext)
+            DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -100,7 +98,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             _evaluationAIService = evaluationAIService;
             _submitSpeakingAIPublisher = submitSpeakingAIPublisher;
             _disconnectSocketCalculateTimePublisher = disconnectSocketCalculateTimePublisher;
-            _courseDbContext = courseDbContext;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateMockTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -355,11 +352,14 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             {
                 if (createMockTestAnswers != null && createMockTestAnswers.Any())
                 {
-                    await _courseDbContext.BulkMergeAsync(createMockTestAnswers);
+                    await _mockTestAnswerRepository.BulkMergeAsync(createMockTestAnswers);
                 }
                 if (updateMockTestAnswers != null && updateMockTestAnswers.Any())
                 {
-                    await _courseDbContext.BulkMergeAsync(createMockTestAnswers);
+                    await _mockTestAnswerRepository.BulkMergeAsync(updateMockTestAnswers, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = entity => new { entity.MockTestResultId, entity.SectionGroupResultId, entity.SectionQuestionId, entity.SectionId, entity.SectionTimeCodeId };
+                    });
                 }
             }
             catch (Exception ex)

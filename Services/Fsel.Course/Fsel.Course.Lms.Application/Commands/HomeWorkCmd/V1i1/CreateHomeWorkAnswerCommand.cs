@@ -7,14 +7,12 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.HomeWorkAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queries.HomeWorkQuery;
     using Fsel.Course.Lms.Application.Queues.Publishers;
@@ -54,7 +52,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         private readonly ILogger<CreateHomeWorkAnswerCommand> _logger;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly RankedStudentPublisher _rankedStudentPublisher;
-        private readonly CourseDbContext _courseDbContext;
 
         public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
             ICourseResultRepository courseResultRepository,
@@ -72,8 +69,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             CreateTokenHistoryPublisher createTokenHistoryPublisher,
             ILogger<CreateHomeWorkAnswerCommand> logger,
             QuestBoardPublisher questionBoardPublisher,
-            RankedStudentPublisher rankedStudentPublisher,
-            CourseDbContext courseDbContext)
+            RankedStudentPublisher rankedStudentPublisher)
         {
             _homeWorkResultRepository = homeWorkResultRepository;
             _courseResultRepository = courseResultRepository;
@@ -92,7 +88,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             _logger = logger;
             _questBoardPublisher = questionBoardPublisher;
             _rankedStudentPublisher = rankedStudentPublisher;
-            _courseDbContext = courseDbContext;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
@@ -192,11 +187,14 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             {
                 if (createHomeWorkAnswers.Any())
                 {
-                    await _courseDbContext.BulkMergeAsync(createHomeWorkAnswers);
+                    await _homeWorkAnswerRepository.BulkMergeAsync(createHomeWorkAnswers);
                 }
                 if (updateHomeWorkAnswers.Any())
                 {
-                    await _courseDbContext.BulkMergeAsync(updateHomeWorkAnswers);
+                    await _homeWorkAnswerRepository.BulkMergeAsync(updateHomeWorkAnswers, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = entity => new { entity.HomeWorkResultId, entity.HomeWorkQuestionId };
+                    });
                 }
             }
             catch (Exception ex)
@@ -430,7 +428,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     x.Status = (x.CorrectCount == correctTotal || isDone) ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
                     x.IsCorrect = x.IsCorrect.HasValue ? x.CorrectCount == correctTotal : null;
                 });
-                await _courseDbContext.BulkMergeAsync(homeWorkAnswers);
+                await _homeWorkAnswerRepository.BulkMergeAsync(homeWorkAnswers, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = entity => new { entity.HomeWorkResultId, entity.HomeWorkQuestionId };
+                });
                 return homeWorkAnswers.Where(x => x.Status == EnumAnswerStatus.Done).Sum(x => x.CorrectCount);
             }
             return homeWorkAnswers?.Sum(x => x.CorrectCount) ?? default;

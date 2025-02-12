@@ -54,7 +54,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
         private readonly ILogger<CreateFinalTestAnswerBySectionGroupCommand> _logger;
         private readonly RankedStudentPublisher _rankedStudentPublisher;
         private readonly DisconnectSocketCalculateTimePublisher _disconnectSocketCalculateTimePublisher;
-        private readonly CourseDbContext _courseDbContext;
 
         public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository,
             ICourseResultRepository courseResultRepository,
@@ -71,8 +70,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             IMapper mapper,
             RankedStudentPublisher rankedStudentPublisher,
             ILogger<CreateFinalTestAnswerBySectionGroupCommand> logger,
-            DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher,
-            CourseDbContext courseDbContext)
+            DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher)
         {
             _questionRepository = questionRepository;
             _courseResultRepository = courseResultRepository;
@@ -90,7 +88,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             _logger = logger;
             _rankedStudentPublisher = rankedStudentPublisher;
             _disconnectSocketCalculateTimePublisher = disconnectSocketCalculateTimePublisher;
-            _courseDbContext = courseDbContext;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateFinalTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -288,11 +285,14 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             {
                 if (createFinalTestAnswers != null && createFinalTestAnswers.Any())
                 {
-                    await _courseDbContext.BulkMergeAsync(createFinalTestAnswers);
+                    await _finalTestAnswerRepository.BulkMergeAsync(createFinalTestAnswers);
                 }
                 if (updateFinalTestAnswers != null && updateFinalTestAnswers.Any())
                 {
-                    await _courseDbContext.BulkMergeAsync(updateFinalTestAnswers);
+                    await _finalTestAnswerRepository.BulkMergeAsync(updateFinalTestAnswers, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = entity => new { entity.FinalTestResultId, entity.SectionGroupResultId, entity.SectionQuestionId };
+                    });
                 }
             }
             catch (Exception ex)

@@ -328,11 +328,14 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             {
                 if (videoTimeCodeAnswers.Any())
                 {
-                    await _courseDbContext.BulkMergeAsync(videoTimeCodeAnswers);
+                    await _videoTimeCodeAnswerRepository.BulkMergeAsync(videoTimeCodeAnswers);
                 }
                 else if (updateVideoTimeCodeAnswers.Any())
                 {
-                    await _courseDbContext.BulkMergeAsync(updateVideoTimeCodeAnswers);
+                    await _videoTimeCodeAnswerRepository.BulkMergeAsync(updateVideoTimeCodeAnswers, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = entity => new { entity.VideoResultId, entity.VideoTimeCodeResultId, entity.QuestionId };
+                    });
                 }
             }
             catch (Exception ex)

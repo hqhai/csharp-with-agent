@@ -37,7 +37,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
         private readonly IExtraPracticeAnswerRepository _extraPracticeAnswerRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
-        private readonly CourseDbContext _courseDbContext;
 
         public CreateExtraPracticeAnswerVideoCommandHandler(AuthContext authContext
             , IUserService userService
@@ -45,8 +44,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             , QuestionConverter questionConverter
             , IExtraPracticeAnswerRepository extraPracticeAnswerRepository
             , IQuestionRepository questionRepository
-            , IExtraPracticeResultRepository extraPracticeResultRepository
-            , CourseDbContext courseDbContext)
+            , IExtraPracticeResultRepository extraPracticeResultRepository)
         {
             _authContext = authContext;
             _userService = userService;
@@ -55,7 +53,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _extraPracticeAnswerRepository = extraPracticeAnswerRepository;
             _questionRepository = questionRepository;
             _extraPracticeResultRepository = extraPracticeResultRepository;
-            _courseDbContext = courseDbContext;
         }
 
         public async Task<MethodResult<ExtraPracticeResultModel>> Handle(CreateExtraPracticeAnswerVideoCommand request, CancellationToken cancellationToken)
@@ -160,11 +157,11 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             {
                 if (extraPracticeAnswers.Count > 0)
                 {
-                    await _courseDbContext.BulkMergeAsync(extraPracticeAnswers);
+                    await _extraPracticeAnswerRepository.BulkMergeAsync(extraPracticeAnswers);
                 }
                 else if (updateExtraPracticeAnswers.Count > 0)
                 {
-                    await _courseDbContext.BulkMergeAsync(updateExtraPracticeAnswers);
+                    await _extraPracticeAnswerRepository.BulkMergeAsync(updateExtraPracticeAnswers);
                 }
 
                 _extraPracticeResultRepository.Update(extraPracticeResult);

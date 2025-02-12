@@ -391,11 +391,14 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             {
                 if (createPlacementTestAnswers != null && createPlacementTestAnswers.Any())
                 {
-                    await _courseDbContext.BulkMergeAsync(createPlacementTestAnswers);
+                    await _placementTestAnswerRepository.BulkMergeAsync(createPlacementTestAnswers);
                 }
                 if (updatePlacementTestAnswers != null && updatePlacementTestAnswers.Any())
                 {
-                    await _courseDbContext.BulkMergeAsync(updatePlacementTestAnswers);
+                    await _placementTestAnswerRepository.BulkMergeAsync(updatePlacementTestAnswers, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = entity => new { entity.PlacementTestResultId, entity.SectionQuestionId, entity.SectionGroupResultId };
+                    });
                 }
             }
             catch (Exception ex)

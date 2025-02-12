@@ -38,7 +38,6 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly IMapper _mapper;
         private readonly IQuestionShuffleRepository _questionShuffleRepository;
-        private readonly CourseDbContext _courseDbContext;
         private const int NumberOfQuestion = 1;
 
         public VideoConverter(IVideoRepository videoRepository
@@ -56,8 +55,7 @@ namespace Fsel.Course.Infrastructure.Common
             , LinQHelper linQHelper
             , DateTimeConverter dateTimeConverter
             , IMapper mapper
-            , IQuestionShuffleRepository questionShuffleRepository
-            , CourseDbContext courseDbContext)
+            , IQuestionShuffleRepository questionShuffleRepository)
         {
             _videoRepository = videoRepository;
             _questionRepository = questionRepository;
@@ -75,7 +73,6 @@ namespace Fsel.Course.Infrastructure.Common
             _dateTimeConverter = dateTimeConverter;
             _mapper = mapper;
             _questionShuffleRepository = questionShuffleRepository;
-            _courseDbContext = courseDbContext;
         }
 
         public VoidMethodResult AddQuestionToExercise(dynamic newExercise, CreateExerciseCommandModel? exercise)
@@ -699,8 +696,7 @@ namespace Fsel.Course.Infrastructure.Common
                     IsCorrect = null
                 }).ToList();
 
-                await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswers);
-                await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                await _videoTimeCodeAnswerRepository.BulkMergeAsync(videoTimeCodeAnswers);
             }
             if (updateVideoTimeCodeAnswers != null && updateVideoTimeCodeAnswers.Any())
             {
@@ -711,7 +707,10 @@ namespace Fsel.Course.Infrastructure.Common
                     x.Status = isDone ? EnumAnswerStatus.Done : status;
                     x.IsCorrect = x.IsCorrect.HasValue ? x.CorrectCount == x.Question!.CorrectTotal : null;
                 });
-                await _courseDbContext.BulkMergeAsync(updateVideoTimeCodeAnswers);
+                await _videoTimeCodeAnswerRepository.BulkMergeAsync(updateVideoTimeCodeAnswers, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = entity => new { entity.VideoResultId, entity.VideoTimeCodeResultId, entity.QuestionId };
+                });
             }
             return updateVideoTimeCodeAnswers?.Where(x => x.Question != null && !x.Question.Ungraded && x.Question.QuestionType != EnumQuestionType.ExercisePreparation)?.Where(x => x.Status == EnumAnswerStatus.Done).Sum(x => x.CorrectCount) ?? default;
         }
