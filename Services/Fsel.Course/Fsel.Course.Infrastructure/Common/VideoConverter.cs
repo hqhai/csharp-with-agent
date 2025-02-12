@@ -696,7 +696,8 @@ namespace Fsel.Course.Infrastructure.Common
                     IsCorrect = null
                 }).ToList();
 
-                await _videoTimeCodeAnswerRepository.BulkMergeAsync(videoTimeCodeAnswers);
+                await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswers);
+                await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
             if (updateVideoTimeCodeAnswers != null && updateVideoTimeCodeAnswers.Any())
             {
@@ -707,10 +708,8 @@ namespace Fsel.Course.Infrastructure.Common
                     x.Status = isDone ? EnumAnswerStatus.Done : status;
                     x.IsCorrect = x.IsCorrect.HasValue ? x.CorrectCount == x.Question!.CorrectTotal : null;
                 });
-                await _videoTimeCodeAnswerRepository.BulkMergeAsync(updateVideoTimeCodeAnswers, bulk =>
-                {
-                    bulk.IgnoreOnUpdateExpression = entity => new { entity.VideoResultId, entity.VideoTimeCodeResultId, entity.QuestionId };
-                });
+                _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
+                await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
             return updateVideoTimeCodeAnswers?.Where(x => x.Question != null && !x.Question.Ungraded && x.Question.QuestionType != EnumQuestionType.ExercisePreparation)?.Where(x => x.Status == EnumAnswerStatus.Done).Sum(x => x.CorrectCount) ?? default;
         }

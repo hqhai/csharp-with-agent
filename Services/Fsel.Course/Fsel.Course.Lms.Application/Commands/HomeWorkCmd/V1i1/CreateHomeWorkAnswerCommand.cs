@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -53,23 +54,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly RankedStudentPublisher _rankedStudentPublisher;
 
-        public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
-            ICourseResultRepository courseResultRepository,
-            QuestionConverter questionConverter,
-            IHomeWorkAnswerRepository homeWorkAnswerRepository,
-            IHomeWorkRepository homeWorkRepository,
-            IMediator mediator,
-            IUserService userService,
-            AuthContext authContext,
-            ICourseRepository courseRepository,
-            ILessonResultRepository lessonResultRepository,
-            ISystemService systemService,
-            FinishOneHomeWorkPublisher finishOneHomeWorkPublisher,
-            IQuestionRepository questionRepository,
-            CreateTokenHistoryPublisher createTokenHistoryPublisher,
-            ILogger<CreateHomeWorkAnswerCommand> logger,
-            QuestBoardPublisher questionBoardPublisher,
-            RankedStudentPublisher rankedStudentPublisher)
+        public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository, ICourseResultRepository courseResultRepository, QuestionConverter questionConverter, IHomeWorkAnswerRepository homeWorkAnswerRepository, IHomeWorkRepository homeWorkRepository, IMediator mediator, IUserService userService, AuthContext authContext, ICourseRepository courseRepository, ILessonResultRepository lessonResultRepository, ISystemService systemService, FinishOneHomeWorkPublisher finishOneHomeWorkPublisher, IQuestionRepository questionRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILogger<CreateHomeWorkAnswerCommand> logger, QuestBoardPublisher questionBoardPublisher, RankedStudentPublisher rankedStudentPublisher)
         {
             _homeWorkResultRepository = homeWorkResultRepository;
             _courseResultRepository = courseResultRepository;
@@ -182,25 +167,23 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     updateHomeWorkAnswers.Add(GetHomeWorkAnswer(homeWorkAnswer, answerConfig, isAnswered, correctCount, questionItem.CorrectTotal));
                 }
             }
-
+            if (createHomeWorkAnswers.Any())
+            {
+                await _homeWorkAnswerRepository.AddList(createHomeWorkAnswers);
+            }
+            if (updateHomeWorkAnswers.Any())
+            {
+                _homeWorkAnswerRepository.UpdateList(updateHomeWorkAnswers);
+            }
             try
             {
-                if (createHomeWorkAnswers.Any())
-                {
-                    await _homeWorkAnswerRepository.BulkMergeAsync(createHomeWorkAnswers);
-                }
-                if (updateHomeWorkAnswers.Any())
-                {
-                    await _homeWorkAnswerRepository.BulkMergeAsync(updateHomeWorkAnswers, bulk =>
-                    {
-                        bulk.IgnoreOnUpdateExpression = entity => new { entity.HomeWorkResultId, entity.HomeWorkQuestionId };
-                    });
-                }
+                await _homeWorkAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 _logger.LogWarning($"Log Duplicate HomeWorkAnswer : {ex.Message}");
             }
+
             methodResult.Result = true;
             return methodResult;
         }
@@ -428,10 +411,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     x.Status = (x.CorrectCount == correctTotal || isDone) ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
                     x.IsCorrect = x.IsCorrect.HasValue ? x.CorrectCount == correctTotal : null;
                 });
-                await _homeWorkAnswerRepository.BulkMergeAsync(homeWorkAnswers, bulk =>
-                {
-                    bulk.IgnoreOnUpdateExpression = entity => new { entity.HomeWorkResultId, entity.HomeWorkQuestionId };
-                });
+                _homeWorkAnswerRepository.UpdateList(homeWorkAnswers);
+                await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 return homeWorkAnswers.Where(x => x.Status == EnumAnswerStatus.Done).Sum(x => x.CorrectCount);
             }
             return homeWorkAnswers?.Sum(x => x.CorrectCount) ?? default;
