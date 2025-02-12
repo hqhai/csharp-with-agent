@@ -97,6 +97,14 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 request.SchoolClass = request.SchoolClass.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
                 query = query.Where(x => x.SchoolClass == request.SchoolClass);
             }
+            if (request.SchoolGrades != null && request.SchoolGrades.Any())
+            {
+                query = query.Where(x => x.SchoolGrade != null && request.SchoolGrades.Any(y => y == x.SchoolGrade));
+            }
+            if (request.SchoolClasses != null && request.SchoolClasses.Any())
+            {
+                query = query.Where(x => x.SchoolClass != null && request.SchoolClasses.Any(y => y == x.SchoolClass));
+            }
             if (request.LearningStatus.HasValue)
             {
                 if (request.LearningStatus.Value == EnumLearningStatus.InProgress)
