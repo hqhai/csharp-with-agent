@@ -98,7 +98,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var @event = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.EventCode.ToLower() == request.EventCode.ToLower(), cancellationToken);
+            var @event = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.EventCode == request.EventCode, cancellationToken);
             if (@event == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
@@ -119,7 +119,19 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 LinkLuckyStar = @event.EventContent?.LinkLuckyStar,
             };
 
-            var user = await _userManager.Users.Include(p => p.Human).ThenInclude(p => p.Student).FirstOrDefaultAsync(p => p.UserName.ToLower() == request.Email.ToLower() || p.Email.ToLower() == request.Email.ToLower(), cancellationToken);
+            var queryByUserName = _userManager.Users
+                .Include(p => p.Human)
+                .ThenInclude(p => p.Student)
+                .Where(p => p.UserName == request.Email);
+
+            var queryByEmail = _userManager.Users
+                .Include(p => p.Human)
+                .ThenInclude(p => p.Student)
+                .Where(p => p.Email == request.Email);
+
+            var user = await queryByUserName
+                .Union(queryByEmail)
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (user == null)
             {

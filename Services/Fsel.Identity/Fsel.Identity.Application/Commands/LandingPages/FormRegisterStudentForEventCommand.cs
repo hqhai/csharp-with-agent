@@ -59,7 +59,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.EventCode.ToLower() == request.EventCode.ToLower(), cancellationToken);
+            var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.EventCode == request.EventCode, cancellationToken);
 
             if (competitionEvent == null)
             {
@@ -98,7 +98,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             if (competitionEvent.EventContent != null && competitionEvent.EventContent.IsParentEvent.HasValue && competitionEvent.EventContent.IsParentEvent.Value && request.DistrictId.HasValue)
             {
                 var childEvents = await _mediator.Send(new GetChildEventsByParentIdQuery() { Id = competitionEvent.Id }, cancellationToken);
-                var childEvent = childEvents.Result?.FirstOrDefault(p => p.Id == request.DistrictId);
+                var childEvent = childEvents.Result?.FirstOrDefault(p => p.LocationId == request.DistrictId);
                 if (childEvent != null)
                 {
                     @event = childEvent;
@@ -127,7 +127,11 @@ namespace Fsel.Identity.Application.Commands.LandingPages
 
         private async Task<MethodResult<bool>> RegisterAndCreateUser(RegisterStudentForEventCommandModel request, CompetitionEvent? parentEvent, CompetitionEvent competitionEvent, MethodResult<bool> methodResult, CancellationToken cancellationToken)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email.ToLower() == request.Email.ToLower() || x.UserName.ToLower() == request.Email.ToLower(), cancellationToken: cancellationToken);
+            var queryByEmail = _userManager.Users.Where(x => x.Email == request.Email);
+            var queryByUserName = _userManager.Users.Where(x => x.UserName == request.Email);
+
+            var user = await queryByEmail.Union(queryByUserName).FirstOrDefaultAsync(cancellationToken);
+
             if (user != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Email), request.Email);
@@ -245,7 +249,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
 
         private async Task<MethodResult<bool>> Register(RegisterStudentForEventCommandModel request, CompetitionEvent competitionEvent, Guid? studentId, bool isSendMail, MethodResult<bool> methodResult, CancellationToken cancellationToken)
         {
-            var eventRegistration = await _eventRegistrationRepository.Queryable.FirstOrDefaultAsync(p => p.Email.ToLower() == request.Email.ToLower() && p.CompetitionEventId == competitionEvent.Id, cancellationToken);
+            var eventRegistration = await _eventRegistrationRepository.Queryable.FirstOrDefaultAsync(p => p.Email == request.Email && p.CompetitionEventId == competitionEvent.Id, cancellationToken);
 
             if (eventRegistration == null)
             {

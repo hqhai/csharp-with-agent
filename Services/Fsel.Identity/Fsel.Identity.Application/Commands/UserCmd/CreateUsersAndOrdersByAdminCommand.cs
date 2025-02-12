@@ -52,7 +52,13 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
             foreach (var item in request.Users)
             {
-                var user = await _userManager.Users.FirstOrDefaultAsync(p => p.Email.Trim().ToLower() == item.Email.Trim().ToLower() || p.UserName.Trim().ToLower() == item.Email.Trim().ToLower(), cancellationToken);
+                item.Email ??= string.Empty;
+                var queryByEmail = _userManager.Users.Where(p => p.Email == item.Email.Trim());
+                var queryByUserName = _userManager.Users.Where(p => p.UserName == item.Email.Trim());
+
+                var user = await queryByEmail
+                    .Union(queryByUserName)
+                    .FirstOrDefaultAsync(cancellationToken);
 
                 if (user == null)
                 {
