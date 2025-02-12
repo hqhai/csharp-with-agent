@@ -304,7 +304,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
-        private async Task<IList<Guid>?> GetUnansweredQuestionIds(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, double version = (int)EnumVersion.V1)
+        public async Task<IList<Guid>?> GetUnansweredQuestionIds(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, double version = (int)EnumVersion.V1)
         {
             ArgumentNullException.ThrowIfNull(sectionGroup);
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
@@ -405,25 +405,6 @@ namespace Fsel.Course.Infrastructure.Common
                         _logger.LogWarning($"Log Duplicate FinalTestAnswer : {ex.Message}");
                     }
                 }
-                else if (sectionGroupResult.PlacementTestResultId.HasValue)
-                {
-                    try
-                    {
-                        await _placementTestAnswerRepository.BulkMergeAsync(questions.Select(x => new PlacementTestAnswer
-                        {
-                            Answer = _answerTypeConverter.GetConfigEmpty(x.QuestionType),
-                            SectionQuestionId = x.SectionQuestionId,
-                            SectionGroupResultId = sectionGroupResult.Id,
-                            PlacementTestResultId = sectionGroupResult.PlacementTestResultId ?? default,
-                            IsCorrect = null,
-                            Status = EnumAnswerStatus.Done
-                        }).ToList());
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning($"Log Duplicate PlacementTestAnswer : {ex.Message}");
-                    }
-                }
             }
         }
 
@@ -440,18 +421,6 @@ namespace Fsel.Course.Infrastructure.Common
                 }).ToList(), bulk =>
                 {
                     bulk.IgnoreOnUpdateExpression = entity => new { entity.FinalTestResultId, entity.SectionQuestionId, entity.SectionGroupResultId };
-                });
-            }
-            else if (sectionGroupResult.PlacementTestResultId.HasValue)
-            {
-                var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
-                await _placementTestAnswerRepository.BulkMergeAsync(placementTestAnswers.Select(x =>
-                {
-                    x.Status = EnumAnswerStatus.Done;
-                    return x;
-                }).ToList(), bulk =>
-                {
-                    bulk.IgnoreOnUpdateExpression = entity => new { entity.PlacementTestResultId, entity.SectionQuestionId, entity.SectionGroupResultId };
                 });
             }
             else
