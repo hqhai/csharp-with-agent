@@ -77,12 +77,11 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             var schoolResults = await _systemService.GetSchoolsAsync(new GetListSchoolQueryModel { Ids = schoolIds, EducationLevel = request.EducationLevel });
             var schools = schoolResults.Content?.Result ?? new List<SchoolModel>();
 
-            var studentSchoolIds = await (from baseQ in _studentRepository.Queryable
+            var studentSchoolIds = await (from baseQ in _studentRepository.Queryable.Where(x => x.SchoolId != null).WhereBulkContains(schools.Select(x => x.Id), x => x.SchoolId)
                                           join sce in _studentCompetitionEventsRepository.Queryable on baseQ.Id equals sce.StudentId
                                           join human in _humanRepository.Queryable on baseQ.HumanId equals human.Id
                                           join user in _userManager.Users on human.UserId equals user.Id
-                                          where baseQ.SchoolId.HasValue && schools.Select(x => x.Id).Contains(baseQ.SchoolId.Value)
-                                          && competitions.Select(x => x.Id).Contains(sce.CompetitionEventId) && !baseQ.IsDeleted && !user.IsDeleted
+                                          where competitions.Select(x => x.Id).Contains(sce.CompetitionEventId) && !baseQ.IsDeleted && !user.IsDeleted
                                           select new
                                           {
                                               SchoolId = baseQ.SchoolId.GetValueOrDefault(),

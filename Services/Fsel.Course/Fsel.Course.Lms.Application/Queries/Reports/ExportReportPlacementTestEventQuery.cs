@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Lms.Application.Queries.Reports
 {
-    using System.Collections.Concurrent;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
@@ -56,26 +55,25 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 return methodResult;
             }
-            var reportPlacementTestEvents = new ConcurrentBag<ReportPlacementTestEventModel>();
-            var placementTestResultGroups = new ConcurrentStack<PlacementTestResultReportGroupModel>();
+            var reportPlacementTestEvents = new List<ReportPlacementTestEventModel>();
+            var placementTestResultGroups = new List<PlacementTestResultReportGroupModel>();
 
-            var studentIds = reportCompetitionEvents.Where(x => x.StudentIds != null && x.StudentIds.Any()).SelectMany(x => x.StudentIds ?? new List<Guid>()).ToList();
+            var studentIds = reportCompetitionEvents.Where(x => x.StudentIds != null && x.StudentIds.Any()).SelectMany(x => x.StudentIds ?? new List<Guid>()).ToList() ?? new List<Guid>();
 
             // Chia danh sách thành từng nhóm
             var batches = studentIds
                 .Select((id, index) => new { id, index })
-                .GroupBy(x => x.index / ValueSettings.BatchSize)
+                .GroupBy(x => x.index / ValueSettings.BatchSize1000)
                 .Select(g => g.Select(x => x.id).ToList())
                 .ToList();
 
             // Thực hiện truy vấn từng nhóm
-            await Parallel.ForEachAsync(batches, async (batche, cancellationToken) =>
+            foreach (var batche in batches)
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var placementTestGroupResultRepository = scope.ServiceProvider.GetRequiredService<IPlacementTestGroupResultRepository>();
-                    var placementTestGroups = await placementTestGroupResultRepository.Queryable
-                                                    .Where(x => batche.Contains(x.StudentId))
+                    var placementTestGroups = await placementTestGroupResultRepository.Queryable.WhereBulkContains(batche, x => x.StudentId)
                                                     .Select(x => new PlacementTestResultReportGroupModel
                                                     {
                                                         CourseLevel = x.SuggetLevel,
@@ -83,9 +81,9 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                                                         IsDonePT = x.Status == EnumResultStatus.Done
                                                     })
                                                     .ToListAsync(cancellationToken);
-                    placementTestResultGroups.PushRange(placementTestGroups.ToArray());
+                    placementTestResultGroups.AddRange(placementTestGroups);
                 }
-            });
+            };
 
             foreach (var reportCompetitionEvent in reportCompetitionEvents)
             {

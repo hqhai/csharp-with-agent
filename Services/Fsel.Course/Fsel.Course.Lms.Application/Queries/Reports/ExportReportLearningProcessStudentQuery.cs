@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queries.Reports
 {
     using System;
-    using System.Collections.Concurrent;
     using System.IO;
     using System.Threading;
     using AutoMapper;
@@ -22,7 +21,6 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
-    using Newtonsoft.Json;
     using OfficeOpenXml;
     using OfficeOpenXml.Style;
     using Refit;
@@ -76,11 +74,11 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 return methodResult;
             }
-            var reportPlacementTestEvents = new ConcurrentBag<ReportPlacementTestEventModel>();
-            var placementTestResultGroups = new ConcurrentStack<PlacementTestResultReportGroupModel>();
-            var listCourseComplete = new ConcurrentBag<CourseCompleteModel>();
-            var courseStudentResults = new ConcurrentBag<CourseResultModel>();
-            var studentEventLearnProcesses = new ConcurrentBag<StudentEventLearnProcessModel>();
+            var reportPlacementTestEvents = new List<ReportPlacementTestEventModel>();
+            var placementTestResultGroups = new List<PlacementTestResultReportGroupModel>();
+            var listCourseComplete = new List<CourseCompleteModel>();
+            var courseStudentResults = new List<CourseResultModel>();
+            var studentEventLearnProcesses = new List<StudentEventLearnProcessModel>();
             var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType);
 
             // Chia danh sách thành từng nhóm
@@ -89,51 +87,14 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 .GroupBy(x => x.index / BatchSize)
                 .Select(g => g.Select(x => x.id).ToList())
                 .ToList();
-            await Parallel.ForEachAsync(batches, async (batche, cancellationToken) =>
-            {
-                using (var scope = _serviceProvider.CreateScope())
-                {
-                    var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
-                    var courseResults = await courseResultRepository.Queryable.Where(x => batche.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active)
-                                                                              .Where(x => x.Course != null && courseLevels.Contains(x.Course.CourseLevel))
-                                                                              .ToListAsync(cancellationToken);
 
-                    foreach (var courseResult in _mapper.Map<IList<CourseResultModel>>(courseResults))
-                    {
-                        courseStudentResults.Add(courseResult);
-                    }
-                }
-            });
-            studentEventRegistrations = studentEventRegistrations.Where(x => courseStudentResults.Select(x => x.StudentId).Contains(x.StudentId)).ToList();
-            var studentIds = studentEventRegistrations.Select(x => x.StudentId).ToList();
-            var batcheStudents = studentIds
-                .Select((id, index) => new { id, index })
-                .GroupBy(x => x.index / BatchSize)
-                .Select(g => g.Select(x => x.id).ToList())
-                .ToList();
-            await Parallel.ForEachAsync(batches, async (batche, cancellationToken) =>
-            {
-                using (var scope = _serviceProvider.CreateScope())
-                {
-                    var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
-                    var courseResults = await courseResultRepository.Queryable.Where(x => batche.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active)
-                                                                              .Where(x => x.Course != null && courseLevels.Contains(x.Course.CourseLevel))
-                                                                              .ToListAsync(cancellationToken);
-
-                    foreach (var courseResult in _mapper.Map<IList<CourseResultModel>>(courseResults))
-                    {
-                        courseStudentResults.Add(courseResult);
-                    }
-                }
-            });
-
-            await Parallel.ForEachAsync(batches, async (batche, cancellationToken) =>
+            foreach (var batche in batches)
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var placementTestGroupResultRepository = scope.ServiceProvider.GetRequiredService<IPlacementTestGroupResultRepository>();
-                    var placementTestGroups = await placementTestGroupResultRepository.Queryable
-                                                    .Where(x => batche.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
+                    var placementTestGroups = await placementTestGroupResultRepository.Queryable.WhereBulkContains(batche, x => x.StudentId)
+                                                    .Where(x => x.Status == EnumResultStatus.Done)
                                                     .Select(x => new PlacementTestResultReportGroupModel
                                                     {
                                                         CourseLevel = x.SuggetLevel,
@@ -141,17 +102,32 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                                                         IsDonePT = true
                                                     })
                                                     .ToListAsync(cancellationToken);
-                    placementTestResultGroups.PushRange(placementTestGroups.ToArray());
+                    placementTestResultGroups.AddRange(placementTestGroups);
                 }
-            });
+            };
 
+            foreach (var batche in batches)
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
+                    var courseResults = await courseResultRepository.Queryable.WhereBulkContains(batche, x => x.StudentId).Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
+                                                                              .Where(x => x.Course != null && courseLevels.Contains(x.Course.CourseLevel))
+                                                                              .Select(x => _mapper.Map<CourseResultModel>(x))
+                                                                              .ToListAsync(cancellationToken);
+
+                    courseStudentResults.AddRange(courseResults);
+                }
+            };
+            studentEventRegistrations = studentEventRegistrations.Where(x => courseStudentResults.Select(x => x.StudentId).Contains(x.StudentId)).ToList();
+            var studentIds = studentEventRegistrations.Select(x => x.StudentId).ToList();
             var courseResultGroups = studentEventRegistrations
                                     .Select((id, index) => new { id, index })
                                     .GroupBy(x => x.index / BatchSize)
                                     .Select(g => g.Select(x => x.id).ToList())
                                     .ToList();
 
-            await Parallel.ForEachAsync(courseResultGroups, async (courseResults, cancellationToken) =>
+            foreach (var courseResults in courseResultGroups)
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
@@ -226,13 +202,9 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                                                      g.Where(x => x.skmt.Status == EnumResultStatus.Done)
                                                       .Select(x => x.skmt.Id).Distinct().Count(),
                                 };
-                    var courseCompletes = await query.ToListAsync(cancellationToken);
-                    foreach (var item in courseCompletes)
-                    {
-                        listCourseComplete.Add(item);
-                    }
+                    listCourseComplete.AddRange(await query.ToListAsync(cancellationToken));
                 }
-            });
+            };
 
             var courseCompleteTotalModules = await GetCompleteCourseTotalsAsync(studentEventRegistrations.Select(x => new CourseResultModel
             {
@@ -241,7 +213,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             }).ToList());
             var learningProgressLearns = await GetStudyPositionAsync(request.CourseType, studentIds);
 
-            Parallel.ForEach(studentEventRegistrations, item =>
+            foreach (var item in studentEventRegistrations)
             {
                 var courseCompleteModule = listCourseComplete.FirstOrDefault(x => x.StudentId == item.StudentId && x.CourseId == item.CourseId) ?? new CourseCompleteModel
                 {
@@ -272,8 +244,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     LearningProgressLearns = learningProgressLearns.Where(x => x.StudentId == item.StudentId).ToList(),
                 };
                 studentEventLearnProcesses.Add(studentEventLearnProcess);
-            });
-
+            };
             methodResult.Result = ExportExcelTemplate(studentEventLearnProcesses.ToList(), request);
             await UploadFileExcel(methodResult.Result, request.FileName);
             return methodResult;
@@ -470,17 +441,15 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         {
             var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(courseType);
 
-            int batchSize = 500; // Số lượng bản ghi mỗi lần truy vấn
-
             // Chia danh sách thành từng nhóm
             var batches = studentIds
                 .Select((id, index) => new { id, index })
-                .GroupBy(x => x.index / batchSize)
+                .GroupBy(x => x.index / BatchSize1000)
                 .Select(g => g.Select(x => x.id).ToList())
                 .ToList();
 
-            var listLearningProcess = new ConcurrentBag<LearningProgressLearnModel>();
-            await Parallel.ForEachAsync(batches, async (batche, cancellationToken) =>
+            var listLearningProcess = new List<LearningProgressLearnModel>();
+            foreach (var batche in batches)
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
@@ -519,10 +488,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                                                               (g.ftr != null && g.ftr.Status == EnumResultStatus.Done) ||
                                                               (g.lr != null && g.lr.Status == EnumResultStatus.Done))
                                                       }).OrderBy(x => x.UnitDisplayOrder).ThenBy(x => x.DisplayOrder).ToListAsync(CancellationToken.None);
-                        foreach (var item in learningProgress)
-                        {
-                            listLearningProcess.Add(item);
-                        }
+                        listLearningProcess.AddRange(learningProgress);
                     }
                     else if (courseType == EnumCourseType.Ielts)
                     {
@@ -578,14 +544,10 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                                                                   .OrderBy(r => r.DisplayOrder)
                                                                   .ThenByDescending(r => r.StudentCount)
                                                                   .ToListAsync(CancellationToken.None);
-
-                        foreach (var item in learningProgress)
-                        {
-                            listLearningProcess.Add(item);
-                        }
+                        listLearningProcess.AddRange(learningProgress);
                     }
                 }
-            });
+            };
             return listLearningProcess.GroupBy(x => new { x.DisplayOrder, x.UnitDisplayOrder, x.StudentId }).Select(x => new LearningProgressLearnModel
             {
                 StudentId = x.Key.StudentId,

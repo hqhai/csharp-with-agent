@@ -12,7 +12,6 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
     using Fsel.Shared.Constants;
@@ -71,15 +70,15 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 return methodResult;
             }
-            var reportPlacementTestEvents = new ConcurrentBag<ReportPlacementTestEventModel>();
-            var courseStudentResults = new ConcurrentBag<CourseResultModel>();
+            var reportPlacementTestEvents = new List<ReportPlacementTestEventModel>();
+            var courseStudentResults = new List<CourseResultModel>();
 
-            var studentIds = reportCompetitionEvents.Where(x => x.StudentIds != null && x.StudentIds.Any()).SelectMany(x => x.StudentIds ?? new List<Guid>()).ToList();
-            var placementTestResultGroups = new ConcurrentStack<PlacementTestResultReportGroupModel>();
+            var studentIds = reportCompetitionEvents.Where(x => x.StudentIds != null && x.StudentIds.Any()).SelectMany(x => x.StudentIds ?? new List<Guid>()).ToList() ?? new List<Guid>();
+            var placementTestResultGroups = new List<PlacementTestResultReportGroupModel>();
 
             var batches = studentIds
                 .Select((id, index) => new { id, index })
-                .GroupBy(x => x.index / ValueSettings.BatchSize)
+                .GroupBy(x => x.index / BatchSize1000)
                 .Select(g => g.Select(x => x.id).ToList())
                 .ToList();
 
@@ -88,29 +87,28 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 courseLevels = courseLevels.Where(x => x == request.CourseLevel.Value).ToList();
             }
-            await Parallel.ForEachAsync(batches, async (batche, cancellationToken) =>
+            foreach (var batche in batches)
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
-                    var courseResults = await courseResultRepository.Queryable.Where(x => batche.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active)
+                    var courseResults = await courseResultRepository.Queryable.WhereBulkContains(batche, x => x.StudentId)
+                                                                              .Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
                                                                               .Where(x => x.Course != null && courseLevels.Contains(x.Course.CourseLevel))
+                                                                              .Select(x => _mapper.Map<CourseResultModel>(x))
                                                                               .ToListAsync(cancellationToken);
 
-                    foreach (var courseResult in _mapper.Map<IList<CourseResultModel>>(courseResults))
-                    {
-                        courseStudentResults.Add(courseResult);
-                    }
+                    courseStudentResults.AddRange(courseResults);
                 }
-            });
+            };
 
-            await Parallel.ForEachAsync(batches, async (batche, cancellationToken) =>
+            foreach (var batche in batches)
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var placementTestGroupResultRepository = scope.ServiceProvider.GetRequiredService<IPlacementTestGroupResultRepository>();
-                    var placementTestGroups = await placementTestGroupResultRepository.Queryable
-                                                    .Where(x => batche.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
+                    var placementTestGroups = await placementTestGroupResultRepository.Queryable.WhereBulkContains(batche, x => x.StudentId)
+                                                    .Where(x => x.Status == EnumResultStatus.Done)
                                                     .Select(x => new PlacementTestResultReportGroupModel
                                                     {
                                                         CourseLevel = x.SuggetLevel,
@@ -118,14 +116,14 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                                                         IsDonePT = true
                                                     })
                                                     .ToListAsync(cancellationToken);
-                    placementTestResultGroups.PushRange(placementTestGroups.ToArray());
+                    placementTestResultGroups.AddRange(placementTestGroups);
                 }
-            });
+            };
 
-            await Parallel.ForEachAsync(reportCompetitionEvents, async (reportCompetitionEvent, cancellationToken) =>
+            foreach (var reportCompetitionEvent in reportCompetitionEvents)
             {
                 var placementTestResultReports = placementTestResultGroups.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).Select(x => x.StudentId).Distinct().ToList();
-                var studentIds = courseStudentResults.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).Select(x => x.StudentId).Distinct().ToList();
+                var studentDistrictIds = courseStudentResults.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).Select(x => x.StudentId).Distinct().ToList();
                 var reportPlacementTestEvent = new ReportPlacementTestEventModel
                 {
                     LocationName = reportCompetitionEvent.DistrictName,
@@ -133,13 +131,13 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     NumberActualParticipatingSchool = reportCompetitionEvent.NumberActualParticipatingSchool,
                     NumberValidStudentAccount = reportCompetitionEvent.NumberValidStudentAccount,
                     NumberStudentsCompletedPT = placementTestResultReports?.Count ?? default,
-                    NumberStudentToLearn = studentIds.Count,
+                    NumberStudentToLearn = studentDistrictIds.Count,
                     LearningProgressLearns = await GetStudyPositionAsync(request.CourseType, studentIds),
                 };
                 reportPlacementTestEvents.Add(reportPlacementTestEvent);
-            });
+            };
 
-            methodResult.Result = ExportExcelTemplate(reportPlacementTestEvents.ToList(), request);
+            methodResult.Result = ExportExcelTemplate(reportPlacementTestEvents, request);
             return methodResult;
         }
 
