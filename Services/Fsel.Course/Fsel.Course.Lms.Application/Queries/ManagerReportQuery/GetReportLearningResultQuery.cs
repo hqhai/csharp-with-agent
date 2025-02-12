@@ -94,11 +94,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             var courseIds = students.Select(x => x.CourseId).Distinct().ToList();
             var dataStudent = students.Select(x => new { StudentId = x.Id, CourseId = x.CourseId.GetValueOrDefault() }).ToList();
 
-            var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable
+            var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(students.Select(x => x.Id), x => x.StudentId)
                                           join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                           join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
                                           from ur in unitGroup.DefaultIfEmpty()
-                                          where students.Select(x => x.Id).Contains(baseQ.StudentId) && baseQ.WorkingStatus == EnumWorkingStatus.Active &&
+                                          where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
                                           (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date) && ur.Status == EnumResultStatus.Done
                                           group new { baseQ, ur }
                                           by new { baseQ.CourseId, baseQ.StudentId } into g
@@ -110,8 +110,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                           }).ToListAsync(cancellationToken);
 
             var mockTestResults = await _mockTestResultRepository.Queryable
-                                          .Where(x => studentIds.Contains(x.StudentId) && courseIds.Contains(x.CourseId) && x.Status == EnumResultStatus.Done)
-                                          .ToListAsync(cancellationToken);
+                                                                 .WhereBulkContains(studentIds, x => x.StudentId)
+                                                                 .WhereBulkContains(courseIds, x => x.CourseId)
+                                                                 .Where(x => x.Status == EnumResultStatus.Done)
+                                                                 .ToListAsync(cancellationToken);
 
             var mockTestGroupResults = mockTestResults.Join(dataStudent,
                                             mockTestResult => new { mockTestResult.CourseId, mockTestResult.StudentId },
@@ -129,11 +131,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                               SkillMockTestResults = x.Where(x => x.UnitId.HasValue).OrderBy(x => x.CreatedDate).ToList(),
                                           }).ToList();
 
-            var finalTestResults = await (from baseQ in _courseResultRepository.Queryable
+            var finalTestResults = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(students.Select(x => x.Id), x => x.StudentId)
                                           join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                           join ftr in _finalTestResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, FinalTestId = cum.FinalTestId } equals new { ftr.StudentId, ftr.CourseId, FinalTestId = (Guid?)ftr.FinalTestId } into finalTestGroup
                                           from ftr in finalTestGroup.DefaultIfEmpty()
-                                          where students.Select(x => x.Id).Contains(baseQ.StudentId) && baseQ.WorkingStatus == EnumWorkingStatus.Active &&
+                                          where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
                                           (!request.EndDate.HasValue || (ftr.UpdatedDate ?? ftr.CreatedDate).Date <= request.EndDate.Value.Date) && ftr.Status == EnumResultStatus.Done
                                           select new
                                           {

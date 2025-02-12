@@ -122,10 +122,13 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             var schools = schoolResults.Content?.Result;
 
             var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course)
-                .Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active)
+                .WhereBulkContains(studentIds, x => x.StudentId)
+                .Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
                 .ToListAsync(cancellationToken);
 
-            var placemenTestResultGroups = await _placementTestResultRepository.Queryable.Where(x => studentIds.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
+            var placemenTestResultGroups = await _placementTestResultRepository.Queryable
+                .WhereBulkContains(studentIds, x => x.StudentId)
+                .Where(x => x.Status == EnumResultStatus.Done)
                 .GroupBy(x => x.StudentId)
                 .Select(x => new
                 {
@@ -133,20 +136,20 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                     PlacementTestCurrent = x.Select(x => x).OrderBy(x => x.CreatedDate).FirstOrDefault(),
                     PlacementTestEnd = x.Select(x => x).OrderByDescending(x => x.CreatedDate).FirstOrDefault(),
                 }).ToListAsync(cancellationToken);
-            var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable
+            var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                                           join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                           join ur in _unitResultRepository.Queryable on new { cum.CourseId, baseQ.StudentId, UnitId = cum.UnitId } equals new { ur.CourseId, ur.StudentId, UnitId = (Guid?)ur.UnitId }
-                                          where baseQ.WorkingStatus == EnumWorkingStatus.Active && studentIds.Contains(baseQ.StudentId) && ur.Status == EnumResultStatus.Done
+                                          where baseQ.WorkingStatus == EnumWorkingStatus.Active && ur.Status == EnumResultStatus.Done
                                           group ur by ur.StudentId into g
                                           select new
                                           {
                                               StudentId = g.Key,
                                               UnitResults = g.Select(x => x).OrderBy(x => x.CreatedDate).ToList()
                                           }).ToListAsync(cancellationToken);
-            var mockTestResultGroups = await (from baseQ in _courseResultRepository.Queryable
+            var mockTestResultGroups = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                                               join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                               join mtr in _mockTestResultRepository.Queryable on new { cum.CourseId, baseQ.StudentId, MockTestId = cum.MockTestId } equals new { mtr.CourseId, mtr.StudentId, MockTestId = (Guid?)mtr.MockTestId }
-                                              where baseQ.WorkingStatus == EnumWorkingStatus.Active && studentIds.Contains(baseQ.StudentId) && mtr.Status == EnumResultStatus.Done
+                                              where baseQ.WorkingStatus == EnumWorkingStatus.Active && mtr.Status == EnumResultStatus.Done
                                               group mtr by mtr.StudentId into g
                                               select new
                                               {
@@ -158,7 +161,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                                                    join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                                    join ur in _unitResultRepository.Queryable on new { cum.CourseId, baseQ.StudentId, UnitId = cum.UnitId } equals new { ur.CourseId, ur.StudentId, UnitId = (Guid?)ur.UnitId }
                                                    join mtr in _mockTestResultRepository.Queryable on new { ur.CourseId, ur.StudentId, UnitId = (Guid?)ur.UnitId } equals new { mtr.CourseId, mtr.StudentId, UnitId = mtr.UnitId }
-                                                   where baseQ.WorkingStatus == EnumWorkingStatus.Active && studentIds.Contains(baseQ.StudentId) && mtr.Status == EnumResultStatus.Done
+                                                   where baseQ.WorkingStatus == EnumWorkingStatus.Active && mtr.Status == EnumResultStatus.Done
                                                    group mtr by mtr.StudentId into g
                                                    select new
                                                    {
@@ -169,7 +172,8 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             var courseCompletes = await _managerProgressHelper.GetProgressCompleteModuleExportAsync(courseResults.Select(x => new CourseResultModel { CourseId = x.CourseId, StudentId = x.StudentId }).ToList());
             var lessonResultIds = courseCompletes.Where(x => x.LessonResult != null).Select(x => x.LessonResult).Select(x => x.Id).ToList();
 
-            var lessonResults = await _lessonResultRepository.Queryable.Where(x => lessonResultIds.Contains(x.Id))
+            var lessonResults = await _lessonResultRepository.Queryable
+               .WhereBulkContains(lessonResultIds, x => x.Id)
                .Select(x => new
                {
                    StudentId = x.StudentId,

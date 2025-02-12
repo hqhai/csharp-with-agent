@@ -108,10 +108,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 })
                 .ToListAsync(cancellationToken);
 
-            var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => studentIds.Contains(x.StudentId))
-                .GroupBy(x => x.StudentId)
-                .Select(x => x.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
-                .ToListAsync(cancellationToken);
+            var placementTestResultQuerys = await _placementTestResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId).ToListAsync(cancellationToken);
+            var placementTestResults = placementTestResultQuerys.GroupBy(x => x.StudentId)
+                                                                .Select(x => x.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
+                                                                .ToList();
 
             var datas = students.Select(item =>
             {

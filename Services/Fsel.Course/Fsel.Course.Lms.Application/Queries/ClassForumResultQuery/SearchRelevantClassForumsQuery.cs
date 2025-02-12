@@ -91,10 +91,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var classForumResults = _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
+                .WhereBulkContains(classStudentIds, x => x.StudentId)
                 .Where(x => x.ClassForumId == classForumResult.ClassForumId
                 && x.Status == EnumClassForumResultStatus.Graded
-                && x.Id != request.ClassForumResultId
-                && classStudentIds.Contains(x.StudentId));
+                && x.Id != request.ClassForumResultId);
 
             int totalItem = await classForumResults.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await classForumResults
