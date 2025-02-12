@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using System.Globalization;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
@@ -38,9 +39,17 @@ namespace Fsel.Course.Application.Queries.VideoQuery
 
             var videoQuery = _videoRepository.SearchAsync(request.TimeCodeType, request.TeacherId, request.CourseLevel);
 
+            request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                videoQuery = videoQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    videoQuery = videoQuery.Where(m => m.Id == guid);
+                }
+                else
+                {
+                    videoQuery = videoQuery.Where(m => m.Name!.Contains(request.Keyword));
+                }
             }
 
             int totalItem = await videoQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

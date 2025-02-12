@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
+    using System.Globalization;
     using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
@@ -80,9 +81,17 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 FullName = x.Human.FullName,
             }).ToList();
 
+            request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.InvariantCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query?.Where(m => m.Id.ToString() == request.Keyword || (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim())).ToList();
+                if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    query = query?.Where(m => m.Id == guid).ToList();
+                }
+                else
+                {
+                    query = query?.Where(m => m.FullName != null && m.FullName!.Contains(request.Keyword, StringComparison.InvariantCulture)).ToList();
+                }
             }
             if (query != null && query.Any())
             {
