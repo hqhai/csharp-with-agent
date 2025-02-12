@@ -120,6 +120,7 @@ namespace Fsel.Shared.Constants
                 public const string StudentRankingEvent = $"{KeyQueue}_StudentRankingEvent";
                 public const string RankedStudent = $"{KeyQueue}_RankedStudent";
                 public const string ExportExcelStudentLearningProcess = $"{KeyQueue}_ExportExcelStudentLearningProcess";
+                public const string SavePlacementTestAnswers = $"{KeyQueue}_SavePlacementTestAnswers";
             }
         }
 

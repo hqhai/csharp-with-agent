@@ -213,8 +213,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             {
                 if (mockTestAnswers.Count > 0)
                 {
-                    await _mockTestAnswerRepository.AddList(mockTestAnswers);
-                    await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _mockTestAnswerRepository.BulkMergeAsync(mockTestAnswers);
                 }
 
                 _mockTestResultRepository.Update(mockTestResult);
