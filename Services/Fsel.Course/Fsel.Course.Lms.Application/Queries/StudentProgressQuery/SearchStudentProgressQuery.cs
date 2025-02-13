@@ -75,8 +75,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     methodResult.AddError(studentSchoolResult.Error);
                     return methodResult;
                 }
-                var studentIds = studentSchoolResult.Content?.Result?.Select(x => x.Id).ToList();
-                query = query.Where(x => studentIds != null && studentIds.Contains(x.StudentId));
+                var studentIds = studentSchoolResult.Content?.Result?.Select(x => x.Id).ToList() ?? new List<Guid>();
+                query = query.WhereBulkContains(studentIds, x => x.StudentId);
             }
 
             if (request.CourseType.HasValue)
@@ -92,8 +92,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 var studentKeyResult = await _userService.SearchStudentAsync(new BaseQueryModel { Keyword = request.Keyword });
                 if (studentKeyResult.IsSuccessStatusCode)
                 {
-                    var studentIds = studentKeyResult.Content?.Result?.Items?.Select(x => x.Id).ToList();
-                    query = query.Where(x => studentIds != null && studentIds.Contains(x.StudentId));
+                    var studentIds = studentKeyResult.Content?.Result?.Items?.Select(x => x.Id).ToList() ?? new List<Guid>();
+                    query = query.WhereBulkContains(studentIds, x => x.StudentId);
                 }
             }
 
