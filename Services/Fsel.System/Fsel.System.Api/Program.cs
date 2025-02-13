@@ -63,13 +63,14 @@ builder.Services.AddScoped<ITechieRepository, TechieRepository>();
 builder.Services.AddScoped<ITechieActionRepository, TechieActionRepository>();
 builder.Services.AddScoped<IStudentTechieRepository, StudentTechieRepository>();
 builder.Services.AddScoped<ILuckyTicketRepository, LuckyTicketRepository>();
-
 builder.Services.AddScoped<IFselRatingRepository, FselRatingRepository>();
-
 builder.Services.AddScoped<ICourseTargetConfigRepository, CourseTargetConfigRepository>();
 builder.Services.AddScoped<ICourseSuggestConfigRepository, CourseSuggestConfigRepository>();
 builder.Services.AddScoped<IBannerRepository, BannerRepository>();
+builder.Services.AddScoped<IBannerSettingRepository, BannerSettingRepository>();
 builder.Services.AddScoped<IBannerStudentRepository, BannerStudentRepository>();
+builder.Services.AddScoped<IBannerScopeRepository, BannerScopeRepository>();
+builder.Services.AddScoped<IBannerImageRepository, BannerImageRepository>();
 builder.Services.AddScoped<ISharePointService, SharePointService>();
 
 builder.Services.AddScoped<IFselRatingRepository, FselRatingRepository>();
@@ -79,6 +80,8 @@ builder.Services.AddScoped<TokenConfigsConverter>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<ChatBotPublisher>();
 builder.Services.AddScoped<TechieSendMessagePublisher>();
+builder.Services.AddScoped<BannerConverter>();
+builder.Services.AddScoped<BannerPublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
@@ -108,7 +111,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.Techie, typeof(TechieConsumer) },
     { QueueSettings.SystemQueue.NameQueue.CreateLuckyTicket, typeof(CreateLuckyTicketConsumer) },
     { QueueSettings.SystemQueue.NameQueue.NoticeAccessTime, typeof(NoticeAccessFeatureConsumer) },
-    { QueueSettings.InteractionQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) }
+    { QueueSettings.InteractionQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.Banner, typeof(BannerConsumer) }
 });
 
 var app = builder.Build();

@@ -24,6 +24,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
 
     public class GetStudentSettingQuery : IRequest<MethodResult<StudentSettingModel>>
     {
+        public Guid? UserId { get; set; }
     }
 
     public class SettingStudentCheckQueryHandler : IRequestHandler<GetStudentSettingQuery, MethodResult<StudentSettingModel>>
@@ -57,7 +58,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StudentSettingModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId ?? _authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
