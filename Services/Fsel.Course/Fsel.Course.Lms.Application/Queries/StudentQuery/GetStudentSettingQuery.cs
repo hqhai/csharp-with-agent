@@ -58,7 +58,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StudentSettingModel>();
-            var settingStudentModel = new StudentSettingModel();
             var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId ?? _authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
