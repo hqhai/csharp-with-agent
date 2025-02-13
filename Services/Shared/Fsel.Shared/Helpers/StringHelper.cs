@@ -244,5 +244,98 @@ namespace Fsel.Shared.Helpers
         {
             return Regex.IsMatch(input, "^[a-zA-Z0-9]+$");
         }
+
+        public static string GeneratePassword(int length)
+        {
+            if (length < 3)
+            {
+                throw new ArgumentException("Độ dài mật khẩu phải lớn hơn hoặc bằng 3 để đảm bảo các yêu cầu.");
+            }
+
+            // Danh sách các ký tự
+            const string upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const string lowerCase = "abcdefghijklmnopqrstuvwxyz";
+            const string digits = "0123456789";
+            const string specialChars = "!@#$%^&*()_-+=<>?";
+            const string allChars = upperCase + lowerCase + digits;
+
+            Random random = new Random();
+
+            // Đảm bảo có ít nhất 1 ký tự viết hoa, 1 ký tự đặc biệt
+            string upper = upperCase[random.Next(upperCase.Length)].ToString();
+            string special = specialChars[random.Next(specialChars.Length)].ToString();
+            string number = digits[random.Next(digits.Length)].ToString();
+
+            // Các ký tự còn lại được chọn ngẫu nhiên
+            string remainingChars = new string(Enumerable.Repeat(allChars, length - 3)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+
+            // Ghép lại tất cả và xáo trộn vị trí
+            string password = upper + special + number + remainingChars;
+            return new string(password.OrderBy(_ => random.Next()).ToArray());
+        }
+
+        public static string JoinWithComma(ICollection<string> items)
+        {
+            // Kiểm tra nếu danh sách rỗng hoặc null
+            if (items == null || items.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            // Sử dụng string.Join để nối các phần tử với dấu phẩy
+            return string.Join(", ", items);
+        }
+
+        public static bool IsValidPhoneNumber(string? phoneNumber)
+        {
+            if (string.IsNullOrEmpty(phoneNumber))
+            {
+                return false;
+            }
+
+            phoneNumber = phoneNumber.Replace(" ", "", StringComparison.InvariantCultureIgnoreCase);
+
+            string pattern = @"^(0\d{9})$|^(84\d{9})$|^\+84\d{9}$|^\d{9}$";
+            Regex regex = new Regex(pattern);
+
+            return regex.IsMatch(phoneNumber);
+        }
+
+        public static string NormalizeToDomesticFormat(string? phoneNumber)
+        {
+            if (string.IsNullOrEmpty(phoneNumber))
+            {
+                return string.Empty;
+            }
+
+            var stringComparison = StringComparison.InvariantCultureIgnoreCase;
+            phoneNumber = phoneNumber.Replace(" ", "", stringComparison);
+
+            if (phoneNumber.StartsWith("+84", stringComparison) && phoneNumber.Length == 12)
+            {
+                return string.Concat("0", phoneNumber.AsSpan(3));
+            }
+            else if (phoneNumber.StartsWith("84", stringComparison) && phoneNumber.Length == 11)
+            {
+                return string.Concat("0", phoneNumber.AsSpan(2));
+            }
+            else if (phoneNumber.StartsWith("0", stringComparison) && phoneNumber.Length == 10)
+            {
+                return phoneNumber;
+            }
+            else if (!phoneNumber.StartsWith("0", stringComparison) && phoneNumber.Length == 9)
+            {
+                return "0" + phoneNumber;
+            }
+
+            return phoneNumber;
+        }
+
+        public static string FormatStringWithParam(object data, params object[]? param)
+        {
+            string objStr = data?.ToString() ?? string.Empty;
+            return string.Format(objStr, param ?? Array.Empty<object>());
+        }
     }
 }

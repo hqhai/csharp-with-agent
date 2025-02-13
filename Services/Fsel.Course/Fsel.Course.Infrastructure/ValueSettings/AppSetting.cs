@@ -46,6 +46,8 @@ namespace Fsel.Course.Infrastructure.ValueSettings
     {
         public string? Uri { get; set; }
         public string? ApiKey { get; set; }
+
+        public string? ApprovalAIModel { get; set; }
     }
 
     public class AzureAiConfig
@@ -62,6 +64,7 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public string? SystemApiUrl { get; set; }
         public string? OrderApiUrl { get; set; }
         public string? NotificationApiUrl { get; set; }
+        public string? StorageApiUrl { get; set; }
     }
 
     public class Otp

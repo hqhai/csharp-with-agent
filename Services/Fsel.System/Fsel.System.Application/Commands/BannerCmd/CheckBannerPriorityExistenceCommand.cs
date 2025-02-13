@@ -72,13 +72,13 @@ namespace Fsel.System.Application.Commands.BannerCmd
             {
                 if (applicableUserDefaults != null && applicableUserDefaults.Any())
                 {
-                    var bannerScopeDefaults = bannerScopeQuerys.Where(x => !x.CompetitionEventId.HasValue && x.Banner!.Status && applicableUserDefaults.Any(p => p.IsPriority && p.CourseLevel == x.CourseLevel)).ToList();
+                    var bannerScopeDefaults = bannerScopeQuerys.Where(x => !x.CompetitionEventId.HasValue && x.Banner!.Status && applicableUserDefaults.Any(p => p.CourseLevel == x.CourseLevel)).ToList();
                     bannerScopes.AddRange(bannerScopeDefaults);
                 }
 
                 if (applicableUserEvents != null && applicableUserEvents.Any())
                 {
-                    var bannerScopeEvents = bannerScopeQuerys.Where(x => x.Banner!.Status && applicableUserEvents.Any(p => p.IsPriority && p.CourseLevel == x.CourseLevel && p.CompetitionEventId == x.CompetitionEventId)).ToList();
+                    var bannerScopeEvents = bannerScopeQuerys.Where(x => x.Banner!.Status && applicableUserEvents.Any(p => p.CourseLevel == x.CourseLevel && p.CompetitionEventId == x.CompetitionEventId)).ToList();
                     bannerScopes.AddRange(bannerScopeEvents);
                 }
             }

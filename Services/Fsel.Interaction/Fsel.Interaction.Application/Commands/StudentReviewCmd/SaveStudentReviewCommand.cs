@@ -15,10 +15,8 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.StudentReviews;
     using Fsel.Interaction.Domain.Models.EntityModels;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -71,7 +69,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
             Guid? courseId = null;
             if (request.ReviewType == EnumReviewType.Course)
             {
-                var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
+                var classResult = await _trainingService.GetClassToStudentId(studentId ?? default);
                 if (!classResult.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));
@@ -96,7 +94,6 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
             await _studentReviewRepository.ExecuteTransactionAsync(async () =>
             {
                 var studentReview = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails).FirstOrDefaultAsync(x => x.StudentId == studentId && x.ReviewType == request.ReviewType, cancellationToken);
-
                 var studentReviewDetails = _mapper.Map<List<StudentReviewDetail>>(request.StudentReviewDetails);
 
                 //var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel

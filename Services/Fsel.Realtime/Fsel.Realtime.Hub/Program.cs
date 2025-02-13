@@ -38,6 +38,7 @@ multicastQueues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
     { QueueSettings.SystemQueue.NameQueue.Techie, typeof(StudentTechieConsumer) },
     { QueueSettings.OrderingQueue.NameQueue.ChangeStatusOrder, typeof(ChangeStatusOrderConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.SendStudentsFromFile, typeof(SendStudentsFromFileConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.BannerRealTime, typeof(BannerConsumer) },
 });
 
@@ -54,6 +55,7 @@ app.UseHubs<SetTimeModuleHub>(RealtimeSettings.SetTimeModuleHub.Pattern);
 app.UseHubs<ChatBotHub>(RealtimeSettings.ChatBotHub.Pattern);
 app.UseHubs<TechieHub>(RealtimeSettings.TechieHub.Pattern);
 app.UseHubs<PaymentHub>(RealtimeSettings.PaymentHub.Pattern);
+app.UseHubs<SendStudentsFromFileHub>(RealtimeSettings.SendStudentsFromFileHub.Pattern);
 app.UseHubs<BannerHub>(RealtimeSettings.BannerHub.Pattern);
 
 app.Run();

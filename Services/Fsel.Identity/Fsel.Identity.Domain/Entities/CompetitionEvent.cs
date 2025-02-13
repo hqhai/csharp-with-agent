@@ -10,7 +10,21 @@ namespace Fsel.Identity.Domain.Entities
     {
         public string? EventCode { get; set; }
 
+        public string? Name { get; set; }
+
         public string? EventContentStr { get; set; }
+
+        public string? LBConfigStr { get; set; }
+
+        [NotMapped]
+        public SchoolEventRule? LBConfig
+        {
+            get
+            {
+                return Common.Helpers.ConvertHelper.Deserialize<SchoolEventRule>(LBConfigStr);
+            }
+            set { LBConfigStr = Common.Helpers.ConvertHelper.Serialize(value); }
+        }
 
         [NotMapped]
         public SchoolEventRule? EventContent

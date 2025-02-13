@@ -8,6 +8,7 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Course.Lms.Application.Commands.TestCmd;
 using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
+using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
 using Fsel.Shared.Attributes;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;

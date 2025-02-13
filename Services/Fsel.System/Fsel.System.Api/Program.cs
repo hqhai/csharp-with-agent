@@ -111,6 +111,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.Techie, typeof(TechieConsumer) },
     { QueueSettings.SystemQueue.NameQueue.CreateLuckyTicket, typeof(CreateLuckyTicketConsumer) },
     { QueueSettings.SystemQueue.NameQueue.NoticeAccessTime, typeof(NoticeAccessFeatureConsumer) },
+    { QueueSettings.InteractionQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) }
     { QueueSettings.RealtimeQueue.NameQueue.Banner, typeof(BannerConsumer) },
 });
 

@@ -27,5 +27,8 @@ namespace Fsel.Identity.Application.Services.TrainingService
 
         [Delete("/admin/student/delete-student/{id}")]
         Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
+
+        [Get("/v1/class/get-class-to-student/{studentId}")]
+        Task<IApiResponse<MethodResult<ClassModel>>> GetClassToStudentId([FromRoute] Guid studentId);
     }
 }

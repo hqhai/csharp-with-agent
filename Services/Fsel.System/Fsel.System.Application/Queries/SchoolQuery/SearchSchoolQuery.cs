@@ -41,7 +41,7 @@ namespace Fsel.System.Application.Queries.SchoolQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                query = query.Where(m => m.GlobalId.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             if (request.LocationId != null)

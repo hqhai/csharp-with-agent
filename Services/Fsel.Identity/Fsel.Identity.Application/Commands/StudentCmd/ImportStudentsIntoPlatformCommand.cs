@@ -69,11 +69,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null or malformed" });
                 }
-                else if (_userManager.Users.Any(p => (p.Email == x.Email || p.UserName == x.Email) && !p.EmailConfirmed))
+                else if (_userManager.Users.Any(p => (p.Email == x.Email) && !p.EmailConfirmed))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email not confirmed email" });
                 }
-                else if (_userManager.Users.Any(p => p.Email == x.Email || p.UserName == x.Email))
+                else if (_userManager.Users.Any(p => p.Email == x.Email))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email Already exist" });
                 }
@@ -166,7 +166,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
                     if (!string.IsNullOrEmpty(student.ParentEmail))
                     {
-                        var parent = await _userManager.Users.Include(p => p.Human).ThenInclude(p => p.Parent).FirstOrDefaultAsync(p => p.UserName == student.ParentEmail || p.Email == student.ParentEmail, cancellationToken);
+                        var parent = await _userManager.Users.Include(p => p.Human).ThenInclude(p => p.Parent).FirstOrDefaultAsync(p => p.Email == student.ParentEmail, cancellationToken);
                         if (parent == null)
                         {
                             parent = new User()

@@ -42,6 +42,9 @@ namespace Fsel.Ordering.Infrastructure.Configs
                .HasConversion(
                    v => v == null ? null : v.ToString(),
                    v => string.IsNullOrEmpty(v) ? null : v.EnumParse<EnumPaymentRevenueType>());
+
+            builder.HasIndex(c => new { c.IsDeleted, c.Status, c.UserId, c.IsTrial });
+            builder.HasIndex(c => new { c.IsDeleted, c.UserId });
         }
     }
 }
