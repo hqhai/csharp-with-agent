@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     else if (request.IsSearchReport && request.SortBy.Any())
                     {
                         IList<CourseCompleteModel> courseCompletes = new List<CourseCompleteModel>();
-                        if (request.SortBy.Any(x => x.Property == "UnitDisplayOrder"))
+                        if (request.SortBy.Any(x => x.Property == nameof(CourseCompleteModel.UnitDisplayOrder)))
                         {
                             courseCompletes = await _managerProgressHelper.GetCourseCompletesFilterAsync(courseResults, request, request.EndDate);
                         }
