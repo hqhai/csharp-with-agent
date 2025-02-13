@@ -6,27 +6,39 @@ namespace Fsel.System.Application.Commands.BannerCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
-    using Fsel.Shared.Enums;
     using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.Banners;
     using Fsel.System.Domain.Models.EntityModels;
+    using Fsel.System.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
-    public class UpdateBannerCommand : UpdateBannerCommandModel, IRequest<MethodResult<BannerModel>>
+    public class UpdateBannerCommand : CreateBannerCommandModel, IRequest<MethodResult<BannerModel>>
     {
+        public Guid Id { get; set; }
     }
 
     public class UpdateBannerCommandHandler : IRequestHandler<UpdateBannerCommand, MethodResult<BannerModel>>
     {
         private readonly IBannerRepository _bannerRepository;
         private readonly IMapper _mapper;
+        private readonly BannerConverter _bannerConverter;
+        private readonly IBannerScopeRepository _bannerScopeRepository;
+        private readonly IBannerImageRepository _bannerImageRepository;
 
-        public UpdateBannerCommandHandler(IBannerRepository bannerRepository, IMapper mapper)
+        public UpdateBannerCommandHandler(IBannerRepository bannerRepository,
+                                          IMapper mapper,
+                                          BannerConverter bannerConverter,
+                                          IBannerScopeRepository bannerScopeRepository,
+                                          IBannerImageRepository bannerImageRepository)
         {
             _bannerRepository = bannerRepository;
             _mapper = mapper;
+            _bannerConverter = bannerConverter;
+            _bannerScopeRepository = bannerScopeRepository;
+            _bannerImageRepository = bannerImageRepository;
         }
 
         public async Task<MethodResult<BannerModel>> Handle(UpdateBannerCommand request, CancellationToken cancellationToken)
@@ -34,40 +46,48 @@ namespace Fsel.System.Application.Commands.BannerCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<BannerModel>();
 
-            if (request.StartDate >= request.EndDate)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.StartDateGreaterThanEndDate));
-                return methodResult;
-            }
-            if (request.Type == EnumBannerType.Popup && string.IsNullOrEmpty(request.FilePath))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(EnumBannerType.Popup), request.FilePath);
-                return methodResult;
-            }
-            else if (request.Type == EnumBannerType.Warning && string.IsNullOrEmpty(request.Description))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(EnumBannerType.Warning), request.Description);
-                return methodResult;
-            }
-
-            var banner = await _bannerRepository.GetByIdAsync(request.Id);
+            var banner = await _bannerRepository.Queryable
+                                                .Include(x => x.BannerScopes)
+                                                .Include(x => x.BannerImages)
+                                                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (banner == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(banner));
                 return methodResult;
             }
-            _mapper.Map(request, banner);
-            if (!banner.IsValid())
+
+            if (await _bannerRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Code.ToLower().Trim() == request.Code.ToLower().Trim(), cancellationToken))
             {
-                methodResult.AddErrorBadRequest(banner.ErrorMessages);
+                methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.CodeAlreadyExist), nameof(request.Code), request.Code);
                 return methodResult;
             }
 
-            banner.StartDate = banner.StartDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
-            banner.EndDate = banner.EndDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
+            (bool isValid, string errorCode, string field, object? value) = _bannerConverter.ValidateBanner(request);
+            if (!isValid)
+            {
+                methodResult.AddErrorBadRequest(nameof(errorCode), nameof(field), value);
+                return methodResult;
+            }
 
             await _bannerRepository.ExecuteTransactionAsync(async () =>
             {
+                var bannerScopes = banner.BannerScopes.ToList();
+                var bannerImages = banner.BannerImages.ToList();
+
+                await _bannerImageRepository.DeleteListAsync(bannerImages);
+                await _bannerScopeRepository.DeleteListAsync(bannerScopes);
+
+                _mapper.Map(request, banner);
+                if (!banner.IsValid())
+                {
+                    methodResult.AddErrorBadRequest(banner.ErrorMessages);
+                    return methodResult;
+                }
+
+                banner.StartDate = banner.StartDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
+                banner.EndDate = banner.EndDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
+                await _bannerConverter.BannerScopeHandler(request, request.Id, cancellationToken);
+
                 _bannerRepository.Update(banner);
                 await _bannerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

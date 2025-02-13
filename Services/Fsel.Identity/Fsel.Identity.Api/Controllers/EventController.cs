@@ -83,6 +83,18 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
+        /// Lấy liệu sự kiện trong khoảng ngày
+        /// </summary>
+        [HttpGet("event-by-date")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCompetitionEventsByDate([FromQuery] GetCompetitionEventsByDateQuery query)
+        {
+            MethodResult<IList<CompetitionEventsModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Execute-list-query
         /// </summary>
         [HttpGet("execute-list-query")]
@@ -141,6 +153,18 @@ namespace Fsel.Identity.Api.Controllers
             ArgumentException.ThrowIfNullOrEmpty(nameof(id));
             var commandResult = await _mediator.Send(new GetChildEventsByParentIdQuery { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get event by ids
+        /// </summary>
+        [HttpPost("event-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetEventByIds([FromBody] GetCompetitionEventByIdsQuery query)
+        {
+            MethodResult<IList<CompetitionEventsModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }
