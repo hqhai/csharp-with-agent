@@ -45,5 +45,10 @@ namespace Fsel.Interaction.Application.Services.CourseServices
         [Get("/v1/other/feature-module")]
         Task<IApiResponse<MethodResult<FeatureModuleModel>>> GetModuleModel([FromQuery] FeatureModuleQuery query);
 
+        [Get("/v1/admin/other/get-placement-test-event")]
+        Task<IApiResponse<MethodResult<IList<ReportPlacementTestEventModel>>>> GetReportPlacementTestEventAsync([FromQuery] GetReportPlacementTestEventQueryModel query);
+
+        [Get("/v1/admin/other/get-placement-test-school-event")]
+        Task<IApiResponse<MethodResult<IList<ReportPlacementTestEventModel>>>> GetReportPlacementTestEventSchoolAsync([FromQuery] GetReportPlacementTestEventQueryModel query);
     }
 }
