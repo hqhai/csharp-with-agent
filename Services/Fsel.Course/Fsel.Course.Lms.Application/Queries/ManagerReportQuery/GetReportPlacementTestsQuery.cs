@@ -64,8 +64,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             }
             var studentIds = students.Select(x => x.Id).ToList();
             var placementTestGroupResults = await _placementTestGroupResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId).ToListAsync(cancellationToken: cancellationToken);
-            var placementTestResultQuerys = await _placementTestResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId).ToListAsync(cancellationToken);
-            var placementTestResults = placementTestResultQuerys.GroupBy(x => x.StudentId).Select(x => x.Select(x => x).OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault()).ToList();
+            var placementTestResults = (await _placementTestResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId).ToListAsync(cancellationToken))
+                                        .GroupBy(x => x.StudentId)
+                                        .Select(x => x.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
+                                        .ToList();
 
             var data = new List<PlacementTestReportModel>();
             foreach (var item in students)
