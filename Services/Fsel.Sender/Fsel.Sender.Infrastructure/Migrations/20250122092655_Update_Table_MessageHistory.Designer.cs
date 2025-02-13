@@ -4,6 +4,7 @@ using Fsel.Sender.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Sender.Infrastructure.Migrations
 {
     [DbContext(typeof(SenderDBContext))]
-    partial class SenderDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250122092655_Update_Table_MessageHistory")]
+    partial class Update_Table_MessageHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
