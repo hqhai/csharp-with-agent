@@ -2,6 +2,8 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 {
+    using System.Collections.Generic;
+    using System.Diagnostics;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
