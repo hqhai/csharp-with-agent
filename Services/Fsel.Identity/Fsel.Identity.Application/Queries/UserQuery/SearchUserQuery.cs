@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using System.Globalization;
     using System.Linq;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Identity.Application.Services.TrainingService;
@@ -63,9 +64,14 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 request.Keyword = request.Keyword.Trim().ToLower(CultureInfo.InvariantCulture);
-                var queryByPhone = query.Where(m => m.PhoneNumber == request.Keyword);
-                var queryByFullName = query.Where(m => m.FullName != null && m.FullName.Trim().Contains(request.Keyword));
-                query = queryByPhone.Union(queryByFullName);
+                if (request.Keyword.IsValidPhoneNumber())
+                {
+                    query = query.Where(m => m.PhoneNumber == request.Keyword);
+                }
+                else
+                {
+                    query = query.Where(m => m.FullName != null && m.FullName.Contains(request.Keyword));
+                }
             }
 
             if (request.Role == EnumRoleRegisterWithAdmin.Teacher)

@@ -61,8 +61,8 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             query = query.Where(p => p.a.Status == request.Status);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                var userNameQuery = query.Where(p => p.b.UserName != null && p.b.UserName.Trim().Contains(request.Keyword));
-                var codeQuery = query.Where(p => p.c.Code != null && p.c.Code.Trim().Contains(request.Keyword));
+                var userNameQuery = query.Where(p => p.b.UserName != null && p.b.UserName.Contains(request.Keyword));
+                var codeQuery = query.Where(p => p.c.Code != null && p.c.Code.Contains(request.Keyword));
                 query = userNameQuery.Union(codeQuery);
             }
             if (request.Role.HasValue)

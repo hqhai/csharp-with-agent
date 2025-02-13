@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
     using Fsel.Core.Extensions;
@@ -45,10 +46,16 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                var emailQuery = users.Where(m => m.Email != null && m.Email.Trim().Contains(request.Keyword));
-                var codeQuery = users.Where(m => m.Human != null && m.Human.Code != null && m.Human.Code.Trim().Contains(request.Keyword));
-                var fullNameQuery = users.Where(m => m.FullName != null && m.FullName.Trim().Contains(request.Keyword));
-                users = emailQuery.Union(codeQuery).Union(fullNameQuery);
+                if (request.Keyword.IsValidEmail())
+                {
+                    users = users.Where(m => m.Email != null && m.Email.Contains(request.Keyword));
+                }
+                else
+                {
+                    var codeQuery = users.Where(m => m.Human != null && m.Human.Code != null && m.Human.Code.Contains(request.Keyword));
+                    var fullNameQuery = users.Where(m => m.FullName != null && m.FullName.Contains(request.Keyword));
+                    users = codeQuery.Union(fullNameQuery);
+                }
             }
 
             var queryData = users.Select(x => new SearchReferralCodeModel

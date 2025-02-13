@@ -47,9 +47,14 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 request.Keyword = request.Keyword.Trim().ToLower(CultureInfo.InvariantCulture);
-                var queryById = teacherQuery.Where(m => m.Id.ToString() == request.Keyword);
-                var queryByFullName = teacherQuery.Where(m => m.Human != null && m.Human.FullName != null && m.Human.FullName.Trim().Contains(request.Keyword));
-                teacherQuery = queryById.Union(queryByFullName);
+                if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    teacherQuery = teacherQuery.Where(m => m.Id == guid);
+                }
+                else
+                {
+                    teacherQuery = teacherQuery.Where(m => m.Human != null && m.Human.FullName != null && m.Human.FullName.Contains(request.Keyword));
+                }
             }
 
             var dataQuery = teacherQuery.Select(x => new TeacherModel
