@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -76,46 +77,50 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 methodResult.AddError(userResults.Error);
                 return methodResult;
             }
-            var students = userResults.Content?.Result;
-            List<Guid> studentIds = new List<Guid>();
+            var students = userResults.Content?.Result ?? new List<StudentDtoModel>();
+            List<Guid> studentIds = students.Select(x => x.Id).ToList();
             switch (request.ManagerReportType)
             {
                 case EnumManagerReportType.ReportManagerPT:
                     bool isCheckDate = request.StartDate.HasValue || request.EndDate.HasValue;
                     if (isCheckDate)
                     {
-                        studentIds = await _placementTestResultRepository.GetStudentPtIdsAsync(request.StartDate, request.EndDate);
+                        studentIds = await _placementTestResultRepository.GetStudentPtIdsAsync(request.StartDate, request.EndDate, studentIds);
                     }
                     var studentPtGroups = await _placementTestGroupResultRepository.GetStudentIdsAsync(request.Status, studentIds, isCheckDate, request.CurrentLevel, request.CourseLevel);
-
-                    if (isCheckDate || (request.Status.HasValue && request.Status == EnumCompletionStatus.InProgress) || (request.CurrentLevel.HasValue || request.CourseLevel.HasValue))
-                    {
-                        students = students?.Where(x => studentPtGroups.Contains(x.Id)).ToList();
-                    }
+                    var studentPTIds = studentPtGroups.ToHashSet();
+                    students = students.Where(x => studentPTIds.Contains(x.Id)).ToList();
                     break;
 
                 case EnumManagerReportType.ReportLearningProgress:
-                    var courseResults = students?.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
+                    var courseResults = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
                     if (!request.SortBy.Any())
                     {
-                        var courseLearns = await _managerProgressHelper.GetCourseLearnsAsync(courseResults);
-                        students = students?.Where(x => courseLearns.Select(y => y.StudentId).Contains(x.Id)).ToList();
+                        var courseLearnIds = (await _managerProgressHelper.GetCourseLearnsAsync(courseResults)).Select(x => x.StudentId).ToHashSet();
+                        students = students.Where(x => courseLearnIds.Contains(x.Id)).ToList();
                     }
                     else if (request.IsSearchReport && request.SortBy.Any())
                     {
-                        var courseCompletes = await _managerProgressHelper.GetCourseCompletesAsync(courseResults, request, request.EndDate);
-                        students = students?.Where(x => courseCompletes.Select(y => y.StudentId).Contains(x.Id)).OrderBy(x => courseCompletes.Select(y => y.StudentId).ToList().IndexOf(x.Id)).ToList();
+                        IList<CourseCompleteModel> courseCompletes = new List<CourseCompleteModel>();
+                        if (request.SortBy.Any(x => x.Property == "UnitDisplayOrder"))
+                        {
+                            courseCompletes = await _managerProgressHelper.GetCourseCompletesFilterAsync(courseResults, request, request.EndDate);
+                        }
+                        else
+                        {
+                            courseCompletes = await _managerProgressHelper.GetCourseCompletesFilterCountCompleteAsync(courseResults, request, request.EndDate);
+                        }
+                        var studentLearnIds = courseCompletes.Select(x => x.StudentId).ToHashSet();
+                        students = students.Where(x => studentLearnIds.Contains(x.Id)).OrderBy(x => studentLearnIds.ToList().IndexOf(x.Id)).ToList();
                     }
                     break;
 
                 case EnumManagerReportType.ReportLearningResults:
-                    studentIds = students?.Select(x => x.Id).ToList() ?? new List<Guid>();
-                    var query = (from baseQ in _courseResultRepository.Queryable
+                    var query = (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                                  join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                  join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
                                  from ur in unitGroup.DefaultIfEmpty()
-                                 where studentIds.Contains(baseQ.StudentId) &&
-                                 baseQ.WorkingStatus == EnumWorkingStatus.Active &&
+                                 where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
                                  (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
                                  group new { baseQ, ur }
                                  by new { baseQ.CourseId, baseQ.StudentId } into g
@@ -130,15 +135,16 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                         query = query.ApplySortAndPaging(request);
                     }
                     var unitResultGroups = await query.ToListAsync(cancellationToken);
-                    students = students?.Where(x => unitResultGroups.Select(x => x.StudentId).Contains(x.Id)).OrderBy(x => unitResultGroups.Select(y => y.StudentId).ToList().IndexOf(x.Id)).ToList();
+                    var studentResultIds = unitResultGroups.Select(x => x.StudentId).ToHashSet();
+                    students = students.Where(x => studentResultIds.Contains(x.Id)).OrderBy(x => studentResultIds.ToList().IndexOf(x.Id)).ToList();
                     break;
             }
             if (!request.SortBy.Any())
             {
-                students = students?.OrderBy(x => int.TryParse(x.SchoolGrade, out int graded) ? graded : 0).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName).ToList();
+                students = students.OrderBy(x => int.TryParse(x.SchoolGrade, out int graded) ? graded : 0).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName).ToList();
                 if (request.IsSearchReport)
                 {
-                    students = students?.ApplyPaging(request).ToList();
+                    students = students.ApplyPaging(request).ToList();
                 }
             }
 
