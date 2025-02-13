@@ -38,7 +38,6 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly ISystemService _systemService;
-        private readonly IEventRegistrationRepository _eventRegistrationRepository;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IHumanRepository _humanRepository;
         private readonly UserManager<User> _userManager;
@@ -46,7 +45,6 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
         public GetReportCompetitionEventSchoolsQueryHandler(ICompetitionEventsRepository competitionEventsRepository,
             IStudentRepository studentRepository,
             ISystemService systemService,
-            IEventRegistrationRepository eventRegistrationRepository,
             IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
             IHumanRepository humanRepository,
             UserManager<User> userManager)
@@ -54,7 +52,6 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             _competitionEventsRepository = competitionEventsRepository;
             _studentRepository = studentRepository;
             _systemService = systemService;
-            _eventRegistrationRepository = eventRegistrationRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _humanRepository = humanRepository;
             _userManager = userManager;
@@ -69,11 +66,8 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             {
                 return methodResult;
             }
-            var competitionEvents = competitions.Where(x => !x.ParentEventId.HasValue).SelectMany(x => x.CompetitionEvents).GroupBy(x => x.LocationId).Select(g => g.First()).ToList();
-            if (competitions.Any(x => x.ParentEventId.HasValue))
-            {
-                competitionEvents.AddRange(competitions.Where(x => x.ParentEventId.HasValue).ToList());
-            }
+            var competitionEvents = await GetCompetitionEventsAsync(competitions);
+            competitionEvents = competitionEvents.GroupBy(x => x.Id).Select(x => x.First()).ToList();
 
             var districtIds = competitionEvents.Where(x => x.LocationId.HasValue).Select(x => x.LocationId.GetValueOrDefault()).ToList();
             var locationResults = await _systemService.GetLocationByIdsAsync(new GetLocationsByIdsQueryModel { IdsStr = string.Join(",", districtIds) });
@@ -85,24 +79,25 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                 var district = locationDistricts?.FirstOrDefault(x => x.Name != null && x.Name.ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim() == request.DistrictName);
                 competitionEvents = competitionEvents.Where(x => district != null && x.Id == district.Id).ToList();
             }
+            var competitionEventIds = competitionEvents.Select(x => x.Id).ToList();
+            competitionEventIds.AddRange(competitions.Select(x => x.Id));
 
             var schoolIds = competitionEvents.SelectMany(x => x.SchoolIds ?? new List<Guid>()).ToList();
             var schoolResults = await _systemService.GetSchoolsAsync(new GetListSchoolQueryModel { Ids = schoolIds, EducationLevel = request.EducationLevel });
             var schools = schoolResults.Content?.Result ?? new List<SchoolModel>();
 
-            var studentSchoolIds = await (from baseQ in _studentRepository.Queryable
+            var studentSchoolIds = await (from baseQ in _studentRepository.Queryable.Where(x => x.SchoolId != null).WhereBulkContains(schools.Select(x => x.Id), x => x.SchoolId)
                                           join sce in _studentCompetitionEventsRepository.Queryable on baseQ.Id equals sce.StudentId
                                           join human in _humanRepository.Queryable on baseQ.HumanId equals human.Id
                                           join user in _userManager.Users on human.UserId equals user.Id
-                                          where baseQ.SchoolId.HasValue && schools.Select(x => x.Id).Contains(baseQ.SchoolId.Value)
-                                          && competitions.Select(x => x.Id).Contains(sce.CompetitionEventId)
+                                          where competitionEventIds.Contains(sce.CompetitionEventId) && !baseQ.IsDeleted && !user.IsDeleted
                                           group new { baseQ, user }
                                           by baseQ.SchoolId into g
                                           select new
                                           {
                                               SchoolId = g.Key.GetValueOrDefault(),
                                               StudentIds = g.Select(x => x.baseQ.Id).Distinct().ToList(),
-                                              CountCompleteVerify = g.Count(x => x.user.EmailConfirmed || x.user.PhoneNumberConfirmed)
+                                              CountCompleteVerify = g.Where(x => x.user.EmailConfirmed || x.user.PhoneNumberConfirmed).Select(x => x.user.Id).Distinct().Count(),
                                           }).ToListAsync(cancellationToken);
 
             var reportCompetitionEvents = new List<ReportCompetitionEventModel>();
@@ -110,7 +105,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             {
                 var studentDistricts = studentSchoolIds.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.SchoolId)).ToList();
                 var studentIds = studentDistricts.SelectMany(x => x.StudentIds).Distinct().ToList();
-                var schoolDistricts = schools?.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.Id));
+                var schoolDistricts = schools.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.Id));
 
                 var reportCompetition = new ReportCompetitionEventModel
                 {
@@ -138,6 +133,28 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             methodResult.Result = reportCompetitionEvents;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task<List<CompetitionEvent>> GetCompetitionEventsAsync(List<CompetitionEvent> competitionEvents)
+        {
+            // Lấy tất cả các sự kiện con của competitionEvents
+            var subEvents = await _competitionEventsRepository.Queryable
+                .Where(x => x.ParentEventId.HasValue && competitionEvents.Select(e => e.Id).Contains(x.ParentEventId.Value))
+                .ToListAsync();
+
+            // Lọc ra các sự kiện từ competitionEvents mà không có con (nút lá)
+            var leafNodes = competitionEvents.Where(e => !subEvents.Any(se => se.ParentEventId == e.Id)).ToList();
+
+            // Nếu không có con thì trả về các nút lá (điểm cuối)
+            if (!subEvents.Any())
+            {
+                return leafNodes;
+            }
+
+            // Gọi đệ quy để lấy tiếp các điểm cuối từ danh sách con
+            var childLeafNodes = await GetCompetitionEventsAsync(subEvents);
+
+            return leafNodes.Concat(childLeafNodes).ToList();
         }
     }
 }
