@@ -64,7 +64,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddError(method.ErrorMessages);
                 return methodResult;
             }
-            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == method.Result.UserId, cancellationToken);
+            var user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == method.Result.UserId, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
@@ -73,20 +73,24 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             await _userManager.ConfirmEmailAsync(user, token);
-            var roles = await _userManager.GetRolesAsync(user);
+            if (user.Human == null)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
 
-            var human = await CreateHuman(roles, user);
-            if (!human.IsValid())
-            {
-                methodResult.AddError(human.ErrorMessages);
-                return methodResult;
+                var human = await CreateHuman(roles, user);
+                if (!human.IsValid())
+                {
+                    methodResult.AddError(human.ErrorMessages);
+                    return methodResult;
+                }
+                await _humanRepository.ExecuteTransactionAsync(async () =>
+                {
+                    human = _humanRepository.Add(human);
+                    await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    return methodResult;
+                });
             }
-            await _humanRepository.ExecuteTransactionAsync(async () =>
-            {
-                human = _humanRepository.Add(human);
-                await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                return methodResult;
-            });
+
             var generateToken = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
             var confirmOtp = new ConfirmOtpModel
             {

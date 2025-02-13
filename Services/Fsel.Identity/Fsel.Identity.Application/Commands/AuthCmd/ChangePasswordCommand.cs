@@ -31,12 +31,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            if (request.OldPassword == null)
+            if (string.IsNullOrEmpty(request.OldPassword))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.OldPassword));
                 return methodResult;
             }
-            if (request.Password == null)
+            if (string.IsNullOrEmpty(request.Password))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Password));
                 return methodResult;

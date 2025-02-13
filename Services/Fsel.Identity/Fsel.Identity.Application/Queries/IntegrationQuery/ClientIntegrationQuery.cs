@@ -124,7 +124,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             }
             else
             {
-                var user = await _humanRepository.Queryable.FirstOrDefaultAsync(x => x.Email != null && x.Email.ToLower().Trim() == request.Email.ToLower().Trim(), cancellationToken);
+                var user = await _humanRepository.Queryable.FirstOrDefaultAsync(x => x.Email == request.Email.Trim(), cancellationToken);
 
                 if (user == null)
                 {
@@ -161,31 +161,11 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             };
 
             var ptTests = await _lmsCourseService.GetPalcementTestResults(courseIntegrationQueryModel);
-            if (!ptTests.IsSuccessStatusCode)
-            {
-                methodResult.AddError(ptTests.Error);
-                return methodResult;
-            }
             var ptTestResults = ptTests.Content?.Result;
-            if (ptTestResults == null)
-            {
-                methodResult.AddError(ptTests.Error);
-                return methodResult;
-            }
 
             // lấy unit lesson
             var units = await _lmsCourseService.GetUnitResults(courseIntegrationQueryModel);
-            if (!units.IsSuccessStatusCode)
-            {
-                methodResult.AddError(units.Error);
-                return methodResult;
-            }
             var unitResults = units.Content?.Result;
-            if (unitResults == null)
-            {
-                methodResult.AddError(units.Error);
-                return methodResult;
-            }
 
             // lấy user
             var userCombines = await _humanRepository.Queryable
@@ -212,13 +192,13 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             clientsIntegrations.ForEach(item =>
             {
-                var ptTestResult = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId);
-                var unitResult = unitResults.FirstOrDefault(x => x.UserId == item.UserId);
+                var ptTestResult = ptTestResults?.FirstOrDefault(x => x.UserId == item.UserId);
+                var unitResult = unitResults?.FirstOrDefault(x => x.UserId == item.UserId);
                 item.LongPathSchool = schoolResult?.FirstOrDefault(x => x.Id == item.SchoolId)?.LongPath;
                 item.LongPathLocation = schoolResult?.FirstOrDefault(x => x.Id == item.SchoolId)?.Location?.LongPath;
                 item.LastDate = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item.UserId)?.LastVisited;
-                item.PTLevel = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId)?.Level;
-                item.PTLevel = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId)?.Level;
+                item.PTLevel = ptTestResults?.FirstOrDefault(x => x.UserId == item.UserId)?.Level;
+                item.PTLevel = ptTestResults?.FirstOrDefault(x => x.UserId == item.UserId)?.Level;
                 item.CourseLevel = unitResult?.CourseLevel;
                 item.StartCourse = unitResult?.StartCourse;
                 item.EndCourse = unitResult?.EndCourse;

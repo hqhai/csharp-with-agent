@@ -69,7 +69,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
             Guid? courseId = null;
             if (request.ReviewType == EnumReviewType.Course)
             {
-                var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
+                var classResult = await _trainingService.GetClassToStudentId(studentId ?? default);
                 if (!classResult.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));

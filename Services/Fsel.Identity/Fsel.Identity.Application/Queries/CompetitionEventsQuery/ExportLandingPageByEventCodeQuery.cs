@@ -53,7 +53,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                 return methodResult;
             }
 
-            var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.EventCode.ToLower().Trim() == request.EventCode.ToLower().Trim(), cancellationToken);
+            var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.EventCode != null && x.EventCode == request.EventCode.Trim(), cancellationToken);
             if (competitionEvent == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent));
@@ -61,7 +61,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             }
 
             var eventRegistrations = await _eventRegistrationRepository.Queryable
-                                                                       .Where(x => x.CompetitionEventId == competitionEvent.Id && x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date && x.District.ToLower().Trim() == request.District.ToLower().Trim())
+                                                                       .Where(x => x.CompetitionEventId == competitionEvent.Id && x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date && x.District == request.District.Trim())
                                                                        .ToListAsync(cancellationToken);
             if (eventRegistrations == null)
             {
@@ -71,7 +71,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 
             if (!string.IsNullOrEmpty(request.School))
             {
-                eventRegistrations = eventRegistrations.Where(x => x.School.ToLower().Trim() == request.School.ToLower().Trim()).ToList();
+                eventRegistrations = eventRegistrations.Where(x => x.School == request.School.Trim()).ToList();
             }
 
             var template = _mapper.Map<IList<ExportLandingPageByEventCodeModel>>(eventRegistrations);

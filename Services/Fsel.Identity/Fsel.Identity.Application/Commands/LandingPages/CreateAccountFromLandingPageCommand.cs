@@ -52,7 +52,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
                 return methodResult;
             }
-            user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber.ToLower() == request.PhoneNumber.ToLower(), cancellationToken: cancellationToken);
+            user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
             if (user != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
@@ -63,7 +63,11 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
                 return methodResult;
             }
-            user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email.ToLower() == request.Email.ToLower() || x.UserName.ToLower() == request.Email.ToLower(), cancellationToken: cancellationToken);
+
+            var queryByEmail = _userManager.Users.Where(x => x.Email == request.Email);
+            var queryByUserName = _userManager.Users.Where(x => x.UserName == request.Email);
+            user = await queryByEmail.Union(queryByUserName).FirstOrDefaultAsync(cancellationToken);
+
             if (user != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);

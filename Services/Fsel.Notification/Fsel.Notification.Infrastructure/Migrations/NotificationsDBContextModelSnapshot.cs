@@ -102,6 +102,8 @@ namespace Fsel.Notification.Infrastructure.Migrations
 
                     b.HasIndex("IsDeleted", "UserId");
 
+                    b.HasIndex("IsDeleted", "UserId", "SenderId");
+
                     b.HasIndex("IsDeleted", "UserId", "Status");
 
                     b.ToTable("NotificationMessages");
@@ -903,7 +905,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/invite-friends",
+                            TemplateLink = "",
                             TemplateMessage = "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được {1} xu, nhấn để xem chi tiết",
                             Type = "LinkPage"
                         },
@@ -917,7 +919,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/invite-friends",
+                            TemplateLink = "",
                             TemplateMessage = "{0} đã hoàn thành unit 1,bạn vừa nhận được {1} xu, nhấn để xem chi tiết ",
                             Type = "LinkPage"
                         },
@@ -932,7 +934,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Priority = 1,
                             TemplateLink = "",
-                            TemplateMessage = "{0} đã đăng kí thành công gói học FSEL,bạn vừa nhận được {1}🟡, nhấn để xem chi tiết ",
+                            TemplateMessage = "{0} đã đăng kí thành công gói học FSEL,bạn vừa nhận được {1} xu, nhấn để xem chi tiết ",
                             Type = "LinkPage"
                         });
                 });

@@ -14,6 +14,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Identity.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -26,14 +27,12 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     public class GetStudentByUserIdsQueryHandler : IRequestHandler<GetStudentByUserIdsQuery, MethodResult<IList<StudentModel>>>
     {
         private readonly IMapper _mapper;
-        private readonly IStudentRepository _studentRepository;
-        private readonly ISystemService _systemService;
+        private readonly IHumanRepository _humanRepository;
 
-        public GetStudentByUserIdsQueryHandler(IMapper mapper, IStudentRepository studentRepository, ISystemService systemService)
+        public GetStudentByUserIdsQueryHandler(IMapper mapper, IHumanRepository humanRepository)
         {
             _mapper = mapper;
-            _studentRepository = studentRepository;
-            _systemService = systemService;
+            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<IList<StudentModel>>> Handle(GetStudentByUserIdsQuery request, CancellationToken cancellationToken)
@@ -45,38 +44,23 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var students = await _studentRepository.Queryable
-                                        .Include(i => i.Human)
-                                        .Where(i => i.Human != null && i.Human.UserId.HasValue && request.UserIds.Contains(i.Human.UserId.Value))
-                                        .Select(x => new StudentModel
-                                        {
-                                            Id = x.Id,
-                                            ClassId = x.ClassId,
-                                            Occupation = x.Occupation,
-                                            CourseLevel = x.CourseLevel,
-                                            CreatedDate = x.CreatedDate,
-                                            School = x.School,
-                                            SchoolId = x.SchoolId,
-                                            Human = _mapper.Map<HumanProfileModel>(x.Human)
-                                        }).ToListAsync(cancellationToken);
-            //var schoolResults = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
-            //{
-            //    Filters = new List<GenericFilterModel>() { new GenericFilterModel { Property = "Id", Operator = Common.Enums.EnumFilterOperator.Equal, Value = students.Select(x => x.SchoolId).ToList() } },
-            //    IncludePaths = new List<string>() { "School" }
-            //});
-            //if (!schoolResults.IsSuccessStatusCode || schoolResults.Content?.Result == null)
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-            //    return methodResult;
-            //}
 
-            //foreach (var student in students)
-            //{
-            //    if (student.SchoolId != null)
-            //    {
-            //        student.School = schoolResults.Content?.Result?.Where(x => x.Id == student.SchoolId).FirstOrDefault()?.Name;
-            //    }
-            //}
+            var students = await _humanRepository.Queryable
+                .Where(i => i.UserId != null)
+                .WhereBulkContains(request.UserIds, i => i.UserId)
+                .Select(x => new StudentModel
+                {
+                    Id = x.Id,
+                    ClassId = x.Student!.ClassId,
+                    Occupation = x.Student.Occupation,
+                    CourseLevel = x.Student.CourseLevel,
+                    CreatedDate = x.Student.CreatedDate,
+                    School = x.Student.School,
+                    SchoolId = x.Student.SchoolId,
+                    Human = _mapper.Map<HumanProfileModel>(x)
+                })
+                .ToListAsync(cancellationToken);
+
             methodResult.Result = _mapper.Map<IList<StudentModel>>(students);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
