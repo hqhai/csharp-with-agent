@@ -58,11 +58,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             }
             var studentIds = userResults.Content?.Result?.Select(x => x.Id).ToList() ?? new List<Guid>();
 
-            var courseOveralls = await (from baseQ in _courseResultRepository.Queryable
+            var courseOveralls = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                                         join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
                                         join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
                                         join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
-                                        where baseQ.WorkingStatus == EnumWorkingStatus.Active && ur.Status == EnumResultStatus.Done && studentIds.Contains(baseQ.StudentId) &&
+                                        where baseQ.WorkingStatus == EnumWorkingStatus.Active && ur.Status == EnumResultStatus.Done &&
                                         (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
                                         group new { baseQ, ur, c } by new { baseQ.CourseId, baseQ.StudentId } into g
                                         select new
@@ -72,11 +72,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                                             Percent = g.Select(x => x.ur).Any() ? Math.Round(g.Select(x => x.ur).Average(x => x.Percent)) : default(double),
                                         }).ToListAsync(cancellationToken);
 
-            var query = from baseQ in _courseResultRepository.Queryable
+            var query = from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                         join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
                         join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
                         join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
-                        where baseQ.WorkingStatus == EnumWorkingStatus.Active && studentIds.Contains(baseQ.StudentId) &&
+                        where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
                         (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
                         group new { cum, ur, c } by new { cum.Number, c.CourseLevel } into g
                         select new

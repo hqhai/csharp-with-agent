@@ -98,13 +98,12 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                     return letterPart;
                 }).Take(8)
                 .ToList();
-            var studentIds = studentGroups?.SelectMany(x => x.Select(y => y.Id)).ToList();
+            var studentIds = studentGroups?.SelectMany(x => x.Select(y => y.Id)).ToList() ?? new List<Guid>();
 
-            var courseOveralls = await (from baseQ in _courseResultRepository.Queryable
+            var courseOveralls = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                                         join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                         join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
                                         where baseQ.WorkingStatus == EnumWorkingStatus.Active && ur.Status == EnumResultStatus.Done &&
-                                        studentIds != null && studentIds.Contains(baseQ.StudentId) &&
                                         (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
                                         group new { baseQ, ur } by new { baseQ.CourseId, baseQ.StudentId } into g
                                         select new
