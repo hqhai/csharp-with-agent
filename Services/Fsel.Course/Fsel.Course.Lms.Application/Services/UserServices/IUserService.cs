@@ -137,14 +137,14 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         Task<IApiResponse<MethodResult<IList<StudentDtoModel>>>> GetStudentsSchoolAsync([FromQuery] SearchStudentSchoolQueryModel query);
 
         [Get("/v1/admin/student/get-dashboards")]
-        [RefitCache(CacheSettings.TimeCache.TenMinutes)]
+        [RefitCache(CacheSettings.TimeCache.ThirtyMinutes)]
         Task<IApiResponse<MethodResult<IList<StudentDtoModel>>>> GetStudentsDashboardAsync([FromQuery] GetStudentsDashboardQueryModel query);
 
         [Get("/v1/admin-school/student")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsToAdminSchoolAsync();
 
         [Get("/v1/student/get-by-school-id")]
-        //[RefitCache(CacheSettings.TimeCache.ThirtyMinutes)]
+        [RefitCache(CacheSettings.TimeCache.ThirtyMinutes)]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsBySchoolId();
 
         [Get("/v1/user/get-user-profile")]
