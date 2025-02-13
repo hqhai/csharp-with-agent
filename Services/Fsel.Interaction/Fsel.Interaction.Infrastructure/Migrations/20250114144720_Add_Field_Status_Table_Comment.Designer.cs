@@ -4,6 +4,7 @@ using Fsel.Interaction.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Interaction.Infrastructure.Migrations
 {
     [DbContext(typeof(InteractionDbContext))]
-    partial class InteractionDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250114144720_Add_Field_Status_Table_Comment")]
+    partial class Add_Field_Status_Table_Comment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -123,9 +126,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
 
-                    b.Property<Guid?>("CustomerSurveyGroupId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(109);
@@ -162,91 +162,14 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid?>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CustomerSurveyGroupId");
 
                     b.HasIndex("SurveyQuestionId");
 
                     b.ToTable("CustomerSurveys");
-                });
-
-            modelBuilder.Entity("Fsel.Interaction.Domain.Entities.CustomerSurveyGroup", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(0);
-
-                    b.Property<double?>("Coin")
-                        .HasColumnType("float");
-
-                    b.Property<Guid?>("CompetitionEventId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
-
-                    b.Property<string>("CreatedFullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
-
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("SurveyFormType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CustomerSurveyGroups");
                 });
 
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.Flag", b =>
@@ -957,9 +880,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("CompetitionEventId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
@@ -1013,11 +933,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<string>("SurveyFormType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -1055,7 +970,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = false,
                             Question = "Bạn là?",
-                            SurveyFormType = "QuestBoard",
                             Type = "ChooseMultipleColumn"
                         },
                         new
@@ -1071,7 +985,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Icon = "addd",
                             IsDeleted = false,
                             Question = "Bạn biết đến Fsel từ đâu?",
-                            SurveyFormType = "Default",
                             Type = "ChooseMultipleColumn"
                         },
                         new
@@ -1088,7 +1001,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = false,
                             Question = "Bạn biết đến Fsel từ đâu?",
-                            SurveyFormType = "QuestBoard",
                             Type = "CheckList"
                         },
                         new
@@ -1105,7 +1017,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = false,
                             Question = "Mục tiêu học tập của bạn là gì?",
-                            SurveyFormType = "QuestBoard",
                             Type = "CheckList"
                         },
                         new
@@ -1121,7 +1032,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Icon = "addd",
                             IsDeleted = false,
                             Question = "Chọn hướng đi của bạn",
-                            SurveyFormType = "Default",
                             Type = "YourDirection"
                         },
                         new
@@ -1137,7 +1047,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Icon = "fluent_target-arrow-16-filled.png",
                             IsDeleted = false,
                             Question = "Tại sao bạn học ngoại ngữ",
-                            SurveyFormType = "Default",
                             Type = "ChooseMultipleColumn"
                         },
                         new
@@ -1153,7 +1062,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Icon = "wideword.png",
                             IsDeleted = false,
                             Question = "Thông tin cá nhân",
-                            SurveyFormType = "Default",
                             Type = "YourPlace"
                         },
                         new
@@ -1170,7 +1078,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = false,
                             Question = "Thông tin cá nhân và Trường học",
-                            SurveyFormType = "QuestBoard",
                             Type = "Location"
                         },
                         new
@@ -1187,7 +1094,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = false,
                             Question = "Vị trí của bạn?",
-                            SurveyFormType = "QuestBoard",
                             Type = "Location"
                         },
                         new
@@ -1203,7 +1109,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Icon = "time.png",
                             IsDeleted = false,
                             Question = "Giới tính của bạn",
-                            SurveyFormType = "Default",
                             Type = "AgeGender"
                         },
                         new
@@ -1219,7 +1124,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Họ tên",
-                            SurveyFormType = "Default",
                             Type = "ShortAnswer"
                         },
                         new
@@ -1235,7 +1139,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Bạn sống ở đâu",
-                            SurveyFormType = "Default",
                             Type = "DropDown"
                         },
                         new
@@ -1251,7 +1154,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Số điện thoại của bạn là gì",
-                            SurveyFormType = "Default",
                             Type = "ShortAnswer"
                         },
                         new
@@ -1267,7 +1169,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Họ tên đầy đủ của trẻ là gì",
-                            SurveyFormType = "Default",
                             Type = "ShortAnswer"
                         },
                         new
@@ -1283,7 +1184,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Năm sinh của trẻ",
-                            SurveyFormType = "Default",
                             Type = "YearInput"
                         },
                         new
@@ -1299,7 +1199,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Giới Tính của trẻ",
-                            SurveyFormType = "Default",
                             Type = "MultipleChoiceVertical"
                         },
                         new
@@ -1315,7 +1214,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Bạn nhà có thể cam kết hoàn thành khóa học 6 tháng với tốc độ 3 buổi học mỗi tuần (7,5 giờ mỗi tuần) từ tháng 11 năm 2023 đến tháng 4 năm 2024 không?",
-                            SurveyFormType = "Default",
                             Type = "MultipleChoiceVertical"
                         },
                         new
@@ -1331,7 +1229,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Bạn nhà có thể cam kết hoàn thành khóa học 4 tháng với tốc độ 2 buổi học mỗi tuần (5 giờ mỗi tuần) từ tháng 11 năm 2023 đến tháng 2 năm 2024 không?",
-                            SurveyFormType = "Default",
                             Type = "MultipleChoiceVertical"
                         },
                         new
@@ -1347,7 +1244,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Bạn có máy tính để bàn hoặc máy tính xách tay ở nhà để con bạn có thể sử dụng để truy cập khóa học không?",
-                            SurveyFormType = "Default",
                             Type = "MultipleChoiceVertical"
                         },
                         new
@@ -1363,7 +1259,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Con bạn có thể mang máy tính xách tay đến các buổi học tại trung tâm chúng tôi để tham gia khóa học không?",
-                            SurveyFormType = "Default",
                             Type = "MultipleChoiceVertical"
                         },
                         new
@@ -1379,7 +1274,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Chúng tôi sẽ tổ chức 2 buổi gặp mặt trực tiếp (2 tiếng/buổi) tại trung tâm (33 Lạc Trung hoặc 125 Hoàng Ngân) để lấy ý kiến phản hồi của các bạn trong giai đoạn thử nghiệm. Bạn sẵn sàng đưa con mình tham dự những buổi học này ở mức độ nào?",
-                            SurveyFormType = "Default",
                             Type = "MultipleChoiceHorizontal"
                         },
                         new
@@ -1395,7 +1289,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Bạn mong muốn các buổi họp được tổ chức tại trung tâm nào hơn?",
-                            SurveyFormType = "Default",
                             Type = "MultipleChoiceVertical"
                         },
                         new
@@ -1411,7 +1304,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Ngày nào sau đây thuận tiện cho con bạn tham dự các buổi học trong giai đoạn thử nghiệm? Lưu ý rằng các buổi học sẽ chỉ được tổ chức khoảng một lần mỗi 2 tháng. (Chọn nhiều phương án)",
-                            SurveyFormType = "Default",
                             Type = "CheckList"
                         },
                         new
@@ -1427,7 +1319,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Ngày nào sau đây thuận tiện cho con bạn tham dự các buổi học trong giai đoạn thử nghiệm? Lưu ý rằng các buổi học sẽ chỉ được tổ chức khoảng một lần mỗi 3 tháng. (Chọn nhiều phương án)",
-                            SurveyFormType = "Default",
                             Type = "CheckList"
                         },
                         new
@@ -1443,7 +1334,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Bạn có sẵn sàng tham dự các buổi họp tại trung tâm để tham gia các cuộc phỏng vấn và các buổi họp nhóm tập trung cho phụ huynh không?",
-                            SurveyFormType = "Default",
                             Type = "MultipleChoiceHorizontal"
                         },
                         new
@@ -1459,7 +1349,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Ngày nào sau đây thuận tiện cho bạn tham dự các buổi họp tại trung tâm trong giai đoạn thử nghiệm? (Chọn nhiều phương án)",
-                            SurveyFormType = "Default",
                             Type = "CheckList"
                         },
                         new
@@ -1475,7 +1364,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Bạn biết đến chương trình học trải nghiệm của FSEL bằng cách nào?",
-                            SurveyFormType = "Default",
                             Type = "ShortAnswer"
                         },
                         new
@@ -1491,72 +1379,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Tại sao bạn muốn đăng ký chương trình học trải nghiệm của FSEL?",
-                            SurveyFormType = "Default",
                             Type = "ShortAnswer"
-                        },
-                        new
-                        {
-                            Id = new Guid("238cae89-e1d8-408a-bb3c-1a0b27cd0edb"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"C\\u1EA3i thi\\u1EC7n \\u0111i\\u1EC3m s\\u1ED1 \\u1EDF tr\\u01B0\\u1EDDng\",\"image\":null},{\"id\":2,\"content\":\"Thi ch\\u1EE9ng ch\\u1EC9\",\"image\":null},{\"id\":3,\"content\":\"S\\u1EDF th\\u00EDch\",\"image\":null},{\"id\":4,\"content\":\"L\\u00FD do kh\\u00E1c\",\"image\":null}]",
-                            CompetitionEventId = new Guid("ae2aa832-8436-4ca8-87c4-a3b563b7b5f3"),
-                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayLevel = 1,
-                            DisplayOrder = 1f,
-                            IsDeleted = false,
-                            IsPilot = false,
-                            Question = "Mục tiêu của bạn khi học Tiếng Anh là gì?",
-                            SurveyFormType = "Event",
-                            Type = "MultipleChoiceVertical"
-                        },
-                        new
-                        {
-                            Id = new Guid("68c17fa9-1d90-4eb2-8412-ea5062ad26f0"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"1\",\"image\":null},{\"id\":2,\"content\":\"2\",\"image\":null},{\"id\":3,\"content\":\"3\",\"image\":null},{\"id\":4,\"content\":\"4\",\"image\":null},{\"id\":5,\"content\":\"5\",\"image\":null}]",
-                            CompetitionEventId = new Guid("ae2aa832-8436-4ca8-87c4-a3b563b7b5f3"),
-                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayLevel = 1,
-                            DisplayOrder = 2f,
-                            IsDeleted = false,
-                            IsPilot = false,
-                            Question = "Bạn đánh giá mức độ quan trọng của việc học tiếng Anh như thế nào (thang điểm 5 từ thấp đến cao)?",
-                            SurveyFormType = "Event",
-                            Type = "MultipleChoiceVertical"
-                        },
-                        new
-                        {
-                            Id = new Guid("73a7a0c8-1e07-4351-b3f4-3e843623bbaf"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Trung t\\u00E2m ti\\u1EBFng Anh\",\"image\":null},{\"id\":2,\"content\":\"H\\u1ECDc online\",\"image\":null},{\"id\":3,\"content\":\"H\\u1ECDc gia s\\u01B0\",\"image\":null},{\"id\":4,\"content\":\"H\\u1ECDc th\\u00EAm v\\u1EDBi gi\\u00E1o vi\\u00EAn\",\"image\":null},{\"id\":5,\"content\":\"Kh\\u00F4ng h\\u1ECDc th\\u00EAm ti\\u1EBFng Anh\",\"image\":null}]",
-                            CompetitionEventId = new Guid("ae2aa832-8436-4ca8-87c4-a3b563b7b5f3"),
-                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayLevel = 2,
-                            DisplayOrder = 1f,
-                            IsDeleted = false,
-                            IsPilot = false,
-                            Question = "Bạn học thêm Tiếng Anh ở đâu?",
-                            SurveyFormType = "Event",
-                            Type = "MultipleChoiceVertical"
-                        },
-                        new
-                        {
-                            Id = new Guid("c6bda257-0757-4290-86c1-794d0ba6ae3b"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Giao ti\\u1EBFp ti\\u1EBFng Anh r\\u1EA5t pro trong m\\u1EAFt b\\u1EA1n b\\u00E8\",\"image\":null},{\"id\":2,\"content\":\"\\u0110i\\u1EC3m cao \\u0111\\u01B0\\u1EE3c c\\u00F4 gi\\u00E1o khen ng\\u1EE3i tr\\u01B0\\u1EDBc l\\u1EDBp\",\"image\":null},{\"id\":3,\"content\":\"Th\\u00EDch v\\u00EC ti\\u1EBFng Anh hay ho\",\"image\":null},{\"id\":4,\"content\":\"Kh\\u00F4ng th\\u00EDch g\\u00EC c\\u1EA3\",\"image\":null},{\"id\":5,\"content\":\"Gh\\u00E9t ti\\u1EBFng Anh\",\"image\":null}]",
-                            CompetitionEventId = new Guid("ae2aa832-8436-4ca8-87c4-a3b563b7b5f3"),
-                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayLevel = 2,
-                            DisplayOrder = 2f,
-                            IsDeleted = false,
-                            IsPilot = false,
-                            Question = "Điều bạn thích nhất ở việc học tiếng Anh là gì?",
-                            SurveyFormType = "Event",
-                            Type = "MultipleChoiceVertical"
                         });
                 });
 
@@ -1844,150 +1667,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Language = "en-US",
                             Question = "Your Gender",
                             SurveyQuestionId = new Guid("2be9a620-143d-41f6-815b-2038c21a7b23")
-                        },
-                        new
-                        {
-                            Id = new Guid("b3e92765-8b8d-4bec-a5d4-f9a9e213b53f"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"C\\u1EA3i thi\\u1EC7n \\u0111i\\u1EC3m s\\u1ED1 \\u1EDF tr\\u01B0\\u1EDDng\",\"image\":null},{\"id\":2,\"content\":\"Thi ch\\u1EE9ng ch\\u1EC9\",\"image\":null},{\"id\":3,\"content\":\"S\\u1EDF th\\u00EDch\",\"image\":null},{\"id\":4,\"content\":\"L\\u00FD do kh\\u00E1c\",\"image\":null}]",
-                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "vi-VN",
-                            Question = "Mục tiêu của bạn khi học Tiếng Anh là gì?",
-                            SurveyQuestionId = new Guid("238cae89-e1d8-408a-bb3c-1a0b27cd0edb")
-                        },
-                        new
-                        {
-                            Id = new Guid("41058318-f3c0-4285-81c9-ac847a1d5364"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Improving school grades\",\"image\":null},{\"id\":2,\"content\":\"Taking certification exams\",\"image\":null},{\"id\":3,\"content\":\"Personal interest\",\"image\":null},{\"id\":4,\"content\":\"Other reasons\",\"image\":null}]",
-                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "en-US",
-                            Question = "What is your goal in learning English?",
-                            SurveyQuestionId = new Guid("238cae89-e1d8-408a-bb3c-1a0b27cd0edb")
-                        },
-                        new
-                        {
-                            Id = new Guid("8bb2b7f3-8254-4e83-b13f-f43cdb8d3c18"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Am\\u00E9liorer vos notes \\u00E0 l\\u0027\\u00E9cole\",\"image\":null},{\"id\":2,\"content\":\"Passer une certification\",\"image\":null},{\"id\":3,\"content\":\"Int\\u00E9r\\u00EAt personnel\",\"image\":null},{\"id\":4,\"content\":\"Autres raisons\",\"image\":null}]",
-                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "fr-FR",
-                            Question = "Quels sont vos objectifs pour apprendre l'anglais ?",
-                            SurveyQuestionId = new Guid("238cae89-e1d8-408a-bb3c-1a0b27cd0edb")
-                        },
-                        new
-                        {
-                            Id = new Guid("54d7630b-e27a-4e89-a77b-23384e15dc9b"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"1\",\"image\":null},{\"id\":2,\"content\":\"2\",\"image\":null},{\"id\":3,\"content\":\"3\",\"image\":null},{\"id\":4,\"content\":\"4\",\"image\":null},{\"id\":5,\"content\":\"5\",\"image\":null}]",
-                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "vi-VN",
-                            Question = "Bạn đánh giá mức độ quan trọng của việc học tiếng Anh như thế nào (thang điểm 5 từ thấp đến cao)?",
-                            SurveyQuestionId = new Guid("68c17fa9-1d90-4eb2-8412-ea5062ad26f0")
-                        },
-                        new
-                        {
-                            Id = new Guid("819f8198-3b77-4243-9dfc-4f5b2ae052a7"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"1\",\"image\":null},{\"id\":2,\"content\":\"2\",\"image\":null},{\"id\":3,\"content\":\"3\",\"image\":null},{\"id\":4,\"content\":\"4\",\"image\":null},{\"id\":5,\"content\":\"5\",\"image\":null}]",
-                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "en-US",
-                            Question = "How would you rate the importance of learning English (on a scale of 1 to 5, from least to most important)?",
-                            SurveyQuestionId = new Guid("68c17fa9-1d90-4eb2-8412-ea5062ad26f0")
-                        },
-                        new
-                        {
-                            Id = new Guid("90267a54-b716-43be-a54d-bae0cec65729"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"1\",\"image\":null},{\"id\":2,\"content\":\"2\",\"image\":null},{\"id\":3,\"content\":\"3\",\"image\":null},{\"id\":4,\"content\":\"4\",\"image\":null},{\"id\":5,\"content\":\"5\",\"image\":null}]",
-                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "fr-FR",
-                            Question = "Comment évaluez-vous l'importance de l'apprentissage de l'anglais ? (échelle de 1 à 5, de faible à élevé)?",
-                            SurveyQuestionId = new Guid("68c17fa9-1d90-4eb2-8412-ea5062ad26f0")
-                        },
-                        new
-                        {
-                            Id = new Guid("d4d2fae7-ae44-4652-883c-68c98a2972de"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Trung t\\u00E2m ti\\u1EBFng Anh\",\"image\":null},{\"id\":2,\"content\":\"H\\u1ECDc online\",\"image\":null},{\"id\":3,\"content\":\"H\\u1ECDc gia s\\u01B0\",\"image\":null},{\"id\":4,\"content\":\"H\\u1ECDc th\\u00EAm v\\u1EDBi gi\\u00E1o vi\\u00EAn\",\"image\":null},{\"id\":5,\"content\":\"Kh\\u00F4ng h\\u1ECDc th\\u00EAm ti\\u1EBFng Anh\",\"image\":null}]",
-                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "vi-VN",
-                            Question = "Bạn học thêm Tiếng Anh ở đâu?",
-                            SurveyQuestionId = new Guid("73a7a0c8-1e07-4351-b3f4-3e843623bbaf")
-                        },
-                        new
-                        {
-                            Id = new Guid("3353fb66-5d41-4334-9542-510e327359c7"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"English language centers\",\"image\":null},{\"id\":2,\"content\":\"Online learning\",\"image\":null},{\"id\":3,\"content\":\"Private tutoring\",\"image\":null},{\"id\":4,\"content\":\"Extra classes with teachers\",\"image\":null},{\"id\":5,\"content\":\"Do not take additional English lessons\",\"image\":null}]",
-                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "en-US",
-                            Question = "Where do you take additional English lessons?",
-                            SurveyQuestionId = new Guid("73a7a0c8-1e07-4351-b3f4-3e843623bbaf")
-                        },
-                        new
-                        {
-                            Id = new Guid("0bced45a-cc34-47d4-a1e5-97735f52791b"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Centres de langue anglaise\",\"image\":null},{\"id\":2,\"content\":\"Apprentissage en ligne\",\"image\":null},{\"id\":3,\"content\":\"Cours particuliers\",\"image\":null},{\"id\":4,\"content\":\"Cours suppl\\u00E9mentaires avec des enseignants\",\"image\":null},{\"id\":5,\"content\":\"Je ne prends pas de cours suppl\\u00E9mentaires d\\u0027anglais\",\"image\":null}]",
-                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "fr-FR",
-                            Question = "Où prenez-vous des cours supplémentaires d'anglais ?",
-                            SurveyQuestionId = new Guid("73a7a0c8-1e07-4351-b3f4-3e843623bbaf")
-                        },
-                        new
-                        {
-                            Id = new Guid("70c9d600-a6a2-4d56-a740-3d0151efab1a"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Giao ti\\u1EBFp ti\\u1EBFng Anh r\\u1EA5t pro trong m\\u1EAFt b\\u1EA1n b\\u00E8\",\"image\":null},{\"id\":2,\"content\":\"\\u0110i\\u1EC3m cao \\u0111\\u01B0\\u1EE3c c\\u00F4 gi\\u00E1o khen ng\\u1EE3i tr\\u01B0\\u1EDBc l\\u1EDBp\",\"image\":null},{\"id\":3,\"content\":\"Th\\u00EDch v\\u00EC ti\\u1EBFng Anh hay ho\",\"image\":null},{\"id\":4,\"content\":\"Kh\\u00F4ng th\\u00EDch g\\u00EC c\\u1EA3\",\"image\":null},{\"id\":5,\"content\":\"Gh\\u00E9t ti\\u1EBFng Anh\",\"image\":null}]",
-                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "vi-VN",
-                            Question = "Điều bạn thích nhất ở việc học tiếng Anh là gì?",
-                            SurveyQuestionId = new Guid("c6bda257-0757-4290-86c1-794d0ba6ae3b")
-                        },
-                        new
-                        {
-                            Id = new Guid("1e81a3d3-edcb-4401-8a59-870fdbf037e5"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Being seen as a pro at English by friends\",\"image\":null},{\"id\":2,\"content\":\"High grades and being praised by the teacher in class\",\"image\":null},{\"id\":3,\"content\":\"Enjoying English because it is interesting\",\"image\":null},{\"id\":4,\"content\":\"Do not like anything about it\",\"image\":null},{\"id\":5,\"content\":\"Dislike English entirely\",\"image\":null}]",
-                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "en-US",
-                            Question = "What do you like most about learning English?",
-                            SurveyQuestionId = new Guid("c6bda257-0757-4290-86c1-794d0ba6ae3b")
-                        },
-                        new
-                        {
-                            Id = new Guid("97064707-b3d8-4fb5-bf4a-12bb6eb3776e"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"\\u00CAtre consid\\u00E9r\\u00E9 comme un expert en anglais par vos amis\",\"image\":null},{\"id\":2,\"content\":\"Obtenir de bonnes notes et \\u00EAtre f\\u00E9licit\\u00E9 par le professeur en classe\",\"image\":null},{\"id\":3,\"content\":\"Aimer l\\u0027anglais parce que c\\u0027est int\\u00E9ressant\",\"image\":null},{\"id\":4,\"content\":\"Ne rien aimer du tout\",\"image\":null},{\"id\":5,\"content\":\"D\\u00E9tester l\\u0027anglais compl\\u00E8tement\",\"image\":null}]",
-                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "fr-FR",
-                            Question = "Qu'aimez-vous le plus dans l'apprentissage de l'anglais ?",
-                            SurveyQuestionId = new Guid("c6bda257-0757-4290-86c1-794d0ba6ae3b")
                         });
                 });
 
@@ -2058,18 +1737,11 @@ namespace Fsel.Interaction.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.CustomerSurvey", b =>
                 {
-                    b.HasOne("Fsel.Interaction.Domain.Entities.CustomerSurveyGroup", "CustomerSurveyGroup")
-                        .WithMany("CustomerSurveys")
-                        .HasForeignKey("CustomerSurveyGroupId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("Fsel.Interaction.Domain.Entities.SurveyQuestion", "SurveyQuestion")
                         .WithMany("CustomerSurveys")
                         .HasForeignKey("SurveyQuestionId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.Navigation("CustomerSurveyGroup");
 
                     b.Navigation("SurveyQuestion");
                 });
@@ -2139,11 +1811,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("SurveyQuestion");
-                });
-
-            modelBuilder.Entity("Fsel.Interaction.Domain.Entities.CustomerSurveyGroup", b =>
-                {
-                    b.Navigation("CustomerSurveys");
                 });
 
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.Post", b =>
