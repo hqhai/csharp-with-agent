@@ -67,7 +67,7 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
             var student = studentResult?.Content?.Result;
             if (student != null)
             {
-                var classResult = await _trainingService.GetClassByStudentId(student.Id);
+                var classResult = await _trainingService.GetClassToStudentId(student.Id);
                 var courseId = classResult.Content?.Result?.CourseId;
             }
 

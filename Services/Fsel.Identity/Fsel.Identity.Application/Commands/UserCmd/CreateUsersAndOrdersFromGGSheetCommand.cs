@@ -6,6 +6,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Identity.Application.Services.GoogleSheetServices;
     using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Infrastructure.ValueSettings;
@@ -55,14 +56,22 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 var email = dataItem[1].ToString();
                 var dob = dataItem[3].ToString();
                 var month = dataItem[5].ToString();
+                var expireDateStr = dataItem.Count == 7 ? dataItem[6].ToString() : null;
 
-                if (string.IsNullOrEmpty(fullName) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(month))
+                if (string.IsNullOrEmpty(fullName) || string.IsNullOrEmpty(email) || (string.IsNullOrEmpty(month) && string.IsNullOrEmpty(expireDateStr)))
                 {
                     methodResult.AddErrorBadRequest("Thiếu dữ liệu");
                     return methodResult;
                 }
 
+                if (!string.IsNullOrEmpty(month) && !string.IsNullOrEmpty(expireDateStr))
+                {
+                    methodResult.AddErrorBadRequest("Chỉ nhập Package hoặc ExpiredDate");
+                    return methodResult;
+                }
+
                 DateTime dateOfBirth = DateTime.UtcNow;
+                DateTime expireDate = DateTime.UtcNow;
 
                 if (!string.IsNullOrEmpty(dob))
                 {
@@ -73,20 +82,24 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     }
                 }
 
-                var isMonthNumber = int.TryParse(month, out int monthNumber);
-
-                if (!isMonthNumber)
+                if (!string.IsNullOrEmpty(expireDateStr))
                 {
-                    methodResult.AddErrorBadRequest("Package rỗng hoặc không đúng định dạng");
-                    return methodResult;
+                    if (!DateTime.TryParse(expireDateStr, out expireDate))
+                    {
+                        methodResult.AddErrorBadRequest("ExpireDate không đúng định dạng");
+                        return methodResult;
+                    }
                 }
+
+                var isMonthNumber = int.TryParse(month, out int monthNumber);
 
                 model.FullName = fullName;
                 model.Email = email;
                 model.PhoneNumber = dataItem[2].ToString();
                 model.DateOfBirth = dateOfBirth;
                 model.School = dataItem[4].ToString();
-                model.MonthNumber = monthNumber;
+                model.MonthNumber = isMonthNumber ? monthNumber : null;
+                model.ExpireDate = expireDate;
                 model.IsRevenue = true;
                 model.IsSendMail = true;
 

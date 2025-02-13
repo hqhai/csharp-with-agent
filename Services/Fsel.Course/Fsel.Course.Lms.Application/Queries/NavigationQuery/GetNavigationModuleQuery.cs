@@ -52,7 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.NavigationCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ModuleNavigationModel> methodResult = new MethodResult<ModuleNavigationModel>();
             ModuleNavigationModel? moduleNavigation = default;
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));

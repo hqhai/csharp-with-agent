@@ -28,7 +28,7 @@ namespace Fsel.Notification.Infrastructure
             ArgumentNullException.ThrowIfNull(modelBuilder);
             base.OnModelCreating(modelBuilder);
             SeedNotificationType(modelBuilder);
-            modelBuilder.ApplyConfiguration(new NotificationEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new NotificationMessageEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new NotificationTypeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new NotificationRemindEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new NotificationTypeTranslationEntityTypeConfiguration());

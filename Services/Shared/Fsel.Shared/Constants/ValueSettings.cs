@@ -19,8 +19,11 @@ namespace Fsel.Shared.Constants
         public const int DelayTwoHours = 2;
         public const int DelayWorkerSecond = 60;
         public const int AmountTrialDays = 14;
+        public const int AmountStudentSending = 1000;
         public const int MaxSendingRateApp = 3;
         public const int MinCompletePercent = 75;
+        public const int BatchSize = 500; // Số lượng bản ghi mỗi lần truy vấn
+        public const string FSEL_PUBLIC_FILES_URL = "https://s3-sgn10.fptcloud.com/fsel-public/Files/";
 
         public static class AgeMilestone
         {
@@ -127,6 +130,20 @@ namespace Fsel.Shared.Constants
         {
             public const int DelayDateSendingRate = 5;
             public const int MoreThanOneDevice = 1;
+        }
+
+        public static class CourseProgressValue
+        {
+            public const int ProgressAcademic = 217;
+            public const int ProgressIELTS = 106;
+            public const int CountUnitAca = 12;
+            public const int CountUnitIELTS = 8;
+            public const int CountFullMockTest = 2;
+            public const int CountFinalTest = 1;
+            public const int MockTestPosition = 5;
+            public const int SkillFullMocKTest = 4;
+            public const int CountLessonAca = 6;
+            public const int CountLessonIELTS = 4;
         }
 
         public static class ValueOrderIndex

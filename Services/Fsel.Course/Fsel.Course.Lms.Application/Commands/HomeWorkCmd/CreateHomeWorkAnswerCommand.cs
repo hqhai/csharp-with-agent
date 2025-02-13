@@ -173,22 +173,16 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             _homeWorkResultRepository.Update(homeWorkResult);
             await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-            await _homeWorkAnswerRepository.ExecuteTransactionAsync(async () =>
+            var homeworkresulttoday = _homeWorkResultRepository.Queryable.Where(x => x.CreatedUserId == _authContext.CurrentUserId);
+            var homeworkTest = homeworkresulttoday.ToList();
+
+            if (homeWorkAnswers.Any())
             {
-                var homeworkresulttoday = _homeWorkResultRepository.Queryable.Where(x => x.CreatedUserId == _authContext.CurrentUserId);
-                var homeworkTest = homeworkresulttoday.ToList();
+                await _homeWorkAnswerRepository.BulkMergeAsync(homeWorkAnswers);
+            }
 
-                if (homeWorkAnswers.Any())
-                {
-                    _homeWorkAnswerRepository.UpdateList(homeWorkAnswers);
-                    await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
-
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = true;
-                return methodResult;
-            });
-
+            methodResult.StatusCode = StatusCodes.Status201Created;
+            methodResult.Result = true;
             return methodResult;
         }
     }
