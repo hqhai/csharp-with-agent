@@ -142,5 +142,18 @@ namespace Fsel.Identity.Api.Controllers
             var commandResult = await _mediator.Send(new GetChildEventsByParentIdQuery { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Lấy danh sách Events theo EventCodeStr
+        /// </summary>
+        [HttpGet("get-events-by-event-code-str")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetEventsByEventCodeStr([FromQuery] GetCompetitionEventsToEventCodeStrQuery query)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(nameof(query));
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

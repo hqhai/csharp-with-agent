@@ -97,12 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             }
 
             var studentIds = students.Select(x => x.Id).ToList();
-            if (studentIds == null)
-            {
-                return methodResult;
-            }
-
-            var lists = await _placementTestGroupResultRepository.Queryable.Where(x => studentIds.Any(y => y == x.StudentId))
+            var lists = await _placementTestGroupResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                 .Select(x => new
                 {
                     StudentId = x.StudentId,
@@ -113,10 +108,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 })
                 .ToListAsync(cancellationToken);
 
-            var placementTestResultQuerys = await _placementTestResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId).ToListAsync(cancellationToken);
-            var placementTestResults = placementTestResultQuerys.GroupBy(x => x.StudentId)
-                                                                .Select(x => x.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
-                                                                .ToList();
+            var placementTestResults = (await _placementTestResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId).ToListAsync(cancellationToken))
+                                        .GroupBy(x => x.StudentId)
+                                        .Select(x => x.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
+                                        .ToList();
 
             var datas = students.Select(item =>
             {

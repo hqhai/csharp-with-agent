@@ -3,8 +3,11 @@
 namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.SystemService;
+    using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -34,19 +37,22 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
         private readonly IStudentRepository _studentRepository;
         private readonly ISystemService _systemService;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
-        private readonly IEventRegistrationRepository _eventRegistrationRepository;
+        private readonly IHumanRepository _humanRepository;
+        private readonly UserManager<User> _userManager;
 
         public GetReportCompetitionEventsQueryHandler(ICompetitionEventsRepository competitionEventsRepository,
             IStudentRepository studentRepository,
             ISystemService systemService,
             IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
-            IEventRegistrationRepository eventRegistrationRepository)
+            IHumanRepository humanRepository,
+            UserManager<User> userManager)
         {
             _competitionEventsRepository = competitionEventsRepository;
             _studentRepository = studentRepository;
             _systemService = systemService;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
-            _eventRegistrationRepository = eventRegistrationRepository;
+            _humanRepository = humanRepository;
+            _userManager = userManager;
         }
 
         public async Task<MethodResult<IList<ReportCompetitionEventModel>>> Handle(GetReportCompetitionEventsQuery request, CancellationToken cancellationToken)
@@ -58,38 +64,49 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             {
                 return methodResult;
             }
-            var districtIds = competitions.SelectMany(x => x.CompetitionEvents).Where(x => x.LocationId.HasValue).Select(x => x.LocationId.GetValueOrDefault()).ToList();
+            var competitionEvents = competitions.Where(x => !x.ParentEventId.HasValue).SelectMany(x => x.CompetitionEvents).GroupBy(x => x.LocationId).Select(g => g.First()).ToList();
+            if (competitions.Any(x => x.ParentEventId.HasValue))
+            {
+                competitionEvents.AddRange(competitions.Where(x => x.ParentEventId.HasValue).ToList());
+            }
+            var districtIds = competitionEvents.Where(x => x.LocationId.HasValue).Select(x => x.LocationId.GetValueOrDefault()).ToList();
             var locationResults = await _systemService.GetLocationByIdsAsync(new GetLocationsByIdsQueryModel { IdsStr = string.Join(",", districtIds) });
             var locationDistricts = locationResults.Content?.Result;
 
-            var schoolIds = competitions.SelectMany(x => x.CompetitionEvents).SelectMany(x => x.SchoolIds ?? new List<Guid>()).ToList();
+            var schoolIds = competitionEvents.SelectMany(x => x.SchoolIds ?? new List<Guid>()).ToList();
             var schoolResults = await _systemService.GetSchoolsAsync(new GetListSchoolQueryModel { Ids = schoolIds, EducationLevel = request.EducationLevel });
-            var schools = schoolResults.Content?.Result;
+            var schools = schoolResults.Content?.Result ?? new List<SchoolModel>();
 
             var studentSchoolIds = await (from baseQ in _studentRepository.Queryable
                                           join sce in _studentCompetitionEventsRepository.Queryable on baseQ.Id equals sce.StudentId
-                                          where baseQ.SchoolId.HasValue && schools != null && schools.Select(x => x.Id).Contains(baseQ.SchoolId.Value)
-                                          && competitions.Select(x => x.Id).Contains(sce.CompetitionEventId)
+                                          join human in _humanRepository.Queryable on baseQ.HumanId equals human.Id
+                                          join user in _userManager.Users on human.UserId equals user.Id
+                                          where baseQ.SchoolId.HasValue && schools.Select(x => x.Id).Contains(baseQ.SchoolId.Value)
+                                          && competitions.Select(x => x.Id).Contains(sce.CompetitionEventId) && !baseQ.IsDeleted && !user.IsDeleted
                                           select new
                                           {
                                               SchoolId = baseQ.SchoolId.GetValueOrDefault(),
-                                              StudentId = baseQ.Id
+                                              StudentId = baseQ.Id,
+                                              IsConfirmed = user.EmailConfirmed || user.PhoneNumberConfirmed,
+                                              UserId = human.UserId.GetValueOrDefault(),
                                           }).ToListAsync(cancellationToken);
 
             var reportCompetitionEvents = new List<ReportCompetitionEventModel>();
-            foreach (var item in competitions.SelectMany(x => x.CompetitionEvents))
+            foreach (var item in competitionEvents)
             {
                 var studentDistricts = studentSchoolIds.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.SchoolId)).ToList();
                 var studentIds = studentDistricts.Select(x => x.StudentId).Distinct().ToList();
                 var reportCompetition = new ReportCompetitionEventModel
                 {
+                    LocationId = item.LocationId.GetValueOrDefault(),
                     DistrictName = locationDistricts?.FirstOrDefault(x => x.Id == item.LocationId)?.Name,
-                    NumberRegisteredSchool = schools?.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.Id)).Count() ?? default,
+                    NumberRegisteredSchool = schools.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.Id)).Count(),
                     NumberActualParticipatingSchool = studentDistricts.Select(x => x.SchoolId).Distinct().Count(),
                     NumberValidStudentAccount = studentIds.Count,
+                    NumberStudentCompleteVerify = studentDistricts.Where(x => x.IsConfirmed).Select(x => x.UserId).Distinct().Count(),
                     StudentIds = studentIds,
+                    UserIds = studentDistricts.Select(x => x.UserId).Distinct().ToList(),
                 };
-
                 reportCompetitionEvents.Add(reportCompetition);
             }
 

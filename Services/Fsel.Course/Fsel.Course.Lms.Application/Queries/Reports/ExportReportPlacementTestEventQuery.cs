@@ -75,12 +75,12 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 {
                     var placementTestGroupResultRepository = scope.ServiceProvider.GetRequiredService<IPlacementTestGroupResultRepository>();
                     var placementTestGroups = await placementTestGroupResultRepository.Queryable
-                                                    .Where(x => batche.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
+                                                    .Where(x => batche.Contains(x.StudentId))
                                                     .Select(x => new PlacementTestResultReportGroupModel
                                                     {
                                                         CourseLevel = x.SuggetLevel,
                                                         StudentId = x.StudentId,
-                                                        IsDonePT = true
+                                                        IsDonePT = x.Status == EnumResultStatus.Done
                                                     })
                                                     .ToListAsync(cancellationToken);
                     placementTestResultGroups.PushRange(placementTestGroups.ToArray());
@@ -90,21 +90,25 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             foreach (var reportCompetitionEvent in reportCompetitionEvents)
             {
                 var placementTestResultReports = placementTestResultGroups.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).Distinct().ToList();
+                int numberStudentsCompletedPT = placementTestResultReports?.Where(x => x.IsDonePT).Select(x => x.StudentId).Distinct().Count() ?? default;
+                int numberStudentsProcessPT = placementTestResultReports?.Where(x => !x.IsDonePT).Select(x => x.StudentId).Distinct().Count() ?? default;
                 var reportPlacementTestEvent = new ReportPlacementTestEventModel
                 {
                     LocationName = reportCompetitionEvent.DistrictName,
                     NumberRegisteredSchool = reportCompetitionEvent.NumberRegisteredSchool,
                     NumberActualParticipatingSchool = reportCompetitionEvent.NumberActualParticipatingSchool,
                     NumberValidStudentAccount = reportCompetitionEvent.NumberValidStudentAccount,
-                    NumberStudentsCompletedPT = placementTestResultReports?.Select(x => x.StudentId).Distinct().Count() ?? default,
+                    NumberStudentsProcessPT = numberStudentsProcessPT,
+                    NumberStudentCompleteVerify = reportCompetitionEvent.NumberStudentCompleteVerify,
+                    NumberStudentsCompletedPT = numberStudentsCompletedPT,
                     ReportCourseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic).Select(courseLevel =>
                     {
-                        var numberStudentOfLevel = placementTestResultReports?.Where(x => x.CourseLevel == courseLevel).Select(x => x.StudentId).Distinct().Count() ?? default;
+                        var numberStudentOfLevel = placementTestResultReports?.Where(x => x.CourseLevel == courseLevel && x.IsDonePT).Select(x => x.StudentId).Distinct().Count() ?? default;
                         return new ReportCourseLevelModel
                         {
                             CourseLevel = courseLevel,
                             TotalStudent = numberStudentOfLevel,
-                            Percent = NumberHelper.GetPercent(numberStudentOfLevel, placementTestResultReports?.Select(x => x.StudentId).Distinct().Count() ?? default)
+                            Percent = NumberHelper.GetPercent(numberStudentOfLevel, numberStudentsCompletedPT)
                         };
                     }).ToList()
                 };
@@ -136,11 +140,14 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                         excelWorksheet.Cells[startRow, 4].Value = item.NumberActualParticipatingSchool;
                         excelWorksheet.Cells[startRow, 5].Value = item.ActualSchoolParticipationRate + "%";
                         excelWorksheet.Cells[startRow, 6].Value = item.NumberValidStudentAccount;
-                        excelWorksheet.Cells[startRow, 7].Value = item.NumberStudentsCompletedPT;
-                        excelWorksheet.Cells[startRow, 8].Value = item.CompletionRate + "%";
+                        excelWorksheet.Cells[startRow, 7].Value = item.NumberStudentCompleteVerify;
+                        excelWorksheet.Cells[startRow, 8].Value = item.CompleteVerifyRate + "%";
+                        excelWorksheet.Cells[startRow, 9].Value = item.NumberStudentsProcessPT;
+                        excelWorksheet.Cells[startRow, 10].Value = item.NumberStudentsCompletedPT;
+                        excelWorksheet.Cells[startRow, 11].Value = item.CompletionRate + "%";
                         if (item.ReportCourseLevels != null)
                         {
-                            var rowReportLevel = 9;
+                            var rowReportLevel = 12;
                             foreach (var reportLevel in item.ReportCourseLevels)
                             {
                                 excelWorksheet.Cells[startRow, rowReportLevel].Value = reportLevel.TotalStudent;

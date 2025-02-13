@@ -74,7 +74,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var students = userResults?.Result?.ToList() ?? new List<StudentDtoModel>();
-            var studentIds = students.Select(x => x.Id).ToList();
 
             methodResult.Result = await GetOverallReportAsync(request, students);
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -155,7 +154,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
             if (request.CourseType == EnumCourseType.Academic)
             {
-                var finalTestResults = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(students.Select(x => x.Id), x => x.StudentId)
+                var finalTestResults = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                                               join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                               join ftr in _finalTestResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, FinalTestId = cum.FinalTestId } equals new { ftr.StudentId, ftr.CourseId, FinalTestId = (Guid?)ftr.FinalTestId } into finalTestGroup
                                               from ftr in finalTestGroup.DefaultIfEmpty()
