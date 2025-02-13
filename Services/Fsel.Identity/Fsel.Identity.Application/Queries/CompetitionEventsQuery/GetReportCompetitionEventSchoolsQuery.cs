@@ -82,7 +82,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             if (!string.IsNullOrEmpty(request.DistrictName))
             {
                 request.DistrictName = request.DistrictName.ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim();
-                var district = locationDistricts?.FirstOrDefault(x => x.Name.ToLower().Trim() == request.DistrictName);
+                var district = locationDistricts?.FirstOrDefault(x => x.Name != null && x.Name.ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim() == request.DistrictName);
                 competitionEvents = competitionEvents.Where(x => district != null && x.Id == district.Id).ToList();
             }
 

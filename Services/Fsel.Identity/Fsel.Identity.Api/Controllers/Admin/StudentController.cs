@@ -12,7 +12,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Fsel.Identity.Application.Queries.AdminQuery;
     using Fsel.Identity.Application.Queries.ManagerReportQuery;
     using Fsel.Identity.Application.Queries.StudentQuery;
-    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -23,7 +22,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/student")]
-    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool) })]
+    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
     [ApiController]
     public class StudentController : ControllerBase
     {
@@ -201,6 +200,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> Gets([FromQuery] GetStudentsDashboardQuery query)
         {
             MethodResult<IList<StudentDtoModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// delete student by userid
+        /// </summary>
+        [HttpDelete("delete-user-by-userid/{userId}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> DeleteStudentByStudentId([FromRoute] Guid userId)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteStudentByUserIdCommand { UserId = userId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
