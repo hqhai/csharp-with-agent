@@ -75,9 +75,9 @@ namespace Fsel.Shared.Helpers
             return convertedValue;
         }
 
-        public static double ConvertPercentDouble(double value)
+        public static double ConvertPercentDouble(double value, int digits = 0)
         {
-            double convertedValue = Math.Round(value * 100, 0, MidpointRounding.AwayFromZero);
+            double convertedValue = Math.Round(value * 100, digits, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
 

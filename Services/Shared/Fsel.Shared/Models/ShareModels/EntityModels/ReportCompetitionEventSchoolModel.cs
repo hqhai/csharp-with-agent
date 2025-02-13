@@ -7,6 +7,7 @@ namespace Fsel.Shared.Models.ShareModels.EntityModels
 
     public class ReportCompetitionEventSchoolModel
     {
+        public Guid SchoolId { get; set; }
         public string? SchoolName { get; set; }
 
         /// <summary>
@@ -24,6 +25,7 @@ namespace Fsel.Shared.Models.ShareModels.EntityModels
         /// </summary>
         public int NumberStudentCompleteVerify { get; set; }
 
-        public IList<Guid>? StudentIds { get; set; }
+        public IList<Guid> StudentIds { get; set; } = new List<Guid>();
+        public IList<Guid> UserIds { get; set; } = new List<Guid>();
     }
 }
