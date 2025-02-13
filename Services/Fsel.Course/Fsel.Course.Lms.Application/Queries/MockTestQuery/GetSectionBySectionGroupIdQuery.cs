@@ -56,18 +56,18 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<SectionGroupDtoModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
-                return methodResult;
-            }
-            var student = studentResult?.Content?.Result;
-            if (student == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
-                return methodResult;
-            }
+            //var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
+            //if (!studentResult.IsSuccessStatusCode)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+            //    return methodResult;
+            //}
+            //var student = studentResult?.Content?.Result;
+            //if (student == null)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+            //    return methodResult;
+            //}
 
             var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTest).FirstOrDefaultAsync(x => x.Id == request.MockTestResultId, cancellationToken);
             if (mockTestResult == null)

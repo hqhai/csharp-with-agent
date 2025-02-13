@@ -32,6 +32,7 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.EnumParse<EnumResultStatus>());
 
             builder.HasIndex(c => new { c.CourseId, c.FinalTestId, c.StudentId }).IsUnique();
+            builder.HasIndex(c => new { c.StudentId, c.CourseId });
         }
     }
 }

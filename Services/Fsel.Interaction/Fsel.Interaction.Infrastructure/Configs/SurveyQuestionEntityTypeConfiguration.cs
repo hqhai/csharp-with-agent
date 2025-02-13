@@ -18,6 +18,12 @@ namespace Fsel.Interaction.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumSurveyQuestion>());
+
+            builder.Property(e => e.SurveyFormType)
+                   .HasMaxLength(100)
+                   .HasConversion(
+                       v => v.ToString(),
+                       v => v.EnumParse<EnumSurveyFormType>());
         }
     }
 }

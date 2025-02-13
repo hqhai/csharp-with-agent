@@ -70,6 +70,7 @@ namespace Fsel.Shared.Enums
         PhaseIV,
         PhaseV,
         PhaseVI,
+        SurveyEvent,
 
         #region QuestBoard
 
@@ -85,7 +86,7 @@ namespace Fsel.Shared.Enums
         [Description("Hoàn thành Bài tập về nhà đầu tiên")]
         CompleteHomeworkFirst,
 
-        [Description("Hoàn thành Focus Mode đầu tiên")]
+        [Description("Hoàn thành Mục tiêu học tập ngày đầu tiên")]
         CompleteFocusModeFirst,
 
         [Description("Hoàn thành Unit đầu tiên")]
@@ -139,7 +140,7 @@ namespace Fsel.Shared.Enums
         [Description("Xem phản hồi của AI cho bài đăng Class Forum của bạn")]
         MessagesFromAI,
 
-        [Description("Hoàn thành 7 lần Focus Mode")]
+        [Description("Hoàn thành 7 lần Mục tiêu học tập ngày")]
         InfinityFocusMode,
 
         [Description("Hoàn thành 10 bài tập về nhà")]

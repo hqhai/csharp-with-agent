@@ -124,7 +124,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             }
             else
             {
-                var user = await _humanRepository.Queryable.FirstOrDefaultAsync(x => x.Email != null && x.Email.ToLower().Trim() == request.Email.ToLower().Trim(), cancellationToken);
+                var user = await _humanRepository.Queryable.FirstOrDefaultAsync(x => x.Email == request.Email.Trim(), cancellationToken);
 
                 if (user == null)
                 {
@@ -151,6 +151,9 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 return methodResult;
             }
 
+            // xoá những user không phải là client trong list user id
+            paging = paging.Where(x => orderResults.Select(x => x.UserId).Contains(x)).ToList();
+
             // lấy Pt
             var courseIntegrationQueryModel = new CourseIntegrationQueryModel
             {
@@ -158,31 +161,11 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             };
 
             var ptTests = await _lmsCourseService.GetPalcementTestResults(courseIntegrationQueryModel);
-            if (!ptTests.IsSuccessStatusCode)
-            {
-                methodResult.AddError(ptTests.Error);
-                return methodResult;
-            }
             var ptTestResults = ptTests.Content?.Result;
-            if (ptTestResults == null)
-            {
-                methodResult.AddError(ptTests.Error);
-                return methodResult;
-            }
 
             // lấy unit lesson
             var units = await _lmsCourseService.GetUnitResults(courseIntegrationQueryModel);
-            if (!units.IsSuccessStatusCode)
-            {
-                methodResult.AddError(units.Error);
-                return methodResult;
-            }
             var unitResults = units.Content?.Result;
-            if (unitResults == null)
-            {
-                methodResult.AddError(units.Error);
-                return methodResult;
-            }
 
             // lấy user
             var userCombines = await _humanRepository.Queryable
@@ -209,13 +192,13 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             clientsIntegrations.ForEach(item =>
             {
-                var ptTestResult = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId);
-                var unitResult = unitResults.FirstOrDefault(x => x.UserId == item.UserId);
+                var ptTestResult = ptTestResults?.FirstOrDefault(x => x.UserId == item.UserId);
+                var unitResult = unitResults?.FirstOrDefault(x => x.UserId == item.UserId);
                 item.LongPathSchool = schoolResult?.FirstOrDefault(x => x.Id == item.SchoolId)?.LongPath;
                 item.LongPathLocation = schoolResult?.FirstOrDefault(x => x.Id == item.SchoolId)?.Location?.LongPath;
                 item.LastDate = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item.UserId)?.LastVisited;
-                item.PTLevel = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId)?.Level;
-                item.PTLevel = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId)?.Level;
+                item.PTLevel = ptTestResults?.FirstOrDefault(x => x.UserId == item.UserId)?.Level;
+                item.PTLevel = ptTestResults?.FirstOrDefault(x => x.UserId == item.UserId)?.Level;
                 item.CourseLevel = unitResult?.CourseLevel;
                 item.StartCourse = unitResult?.StartCourse;
                 item.EndCourse = unitResult?.EndCourse;
@@ -224,7 +207,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 var dateUser = userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.UpdatedDate != null ? userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.UpdatedDate : userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.CreatedDate;
 
                 var dateEdits = new[] { dateOrder, ptTestResult?.DateEdit, unitResult?.DateEdit, dateUser };
-                if (dateEdits != null && dateEdits.Any())
+                if (dateEdits != null && dateEdits.Any() && dateEdits.Any(x => x.HasValue))
                 {
                     item.DateEdit = dateEdits.Where(d => d.HasValue).Max(d => d.Value);
                 }
@@ -268,10 +251,8 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             });
             #endregion
 
-            int totalItem = clientsIntegrations.Count;
-            var lists = clientsIntegrations.ApplySortAndPaging(request).ToList();
-
-            methodResult.Result = new PagingItemsModel<ClientsIntegrationModel>(lists, request, totalItem);
+            int totalItem = distinctUserIds.Count;
+            methodResult.Result = new PagingItemsModel<ClientsIntegrationModel>(clientsIntegrations, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

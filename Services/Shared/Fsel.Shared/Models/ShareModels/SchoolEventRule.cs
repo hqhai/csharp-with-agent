@@ -22,6 +22,7 @@ namespace Fsel.Shared.Models.ShareModels
         public string? EventLogo { get; set; }
 
         public string? EventTitle { get; set; }
+        public string? EventName { get; set; }
 
         public string? EventDescription { get; set; }
 
@@ -53,6 +54,7 @@ namespace Fsel.Shared.Models.ShareModels
         public string? LuckySpinGiftImage { get; set; }
         public IList<WeekEvent>? WeekEvents { get; set; }
         public IList<WeekEvent>? LuckyStarRules { get; set; }
+        public IList<CollectiveAward>? CollectiveAwards { get; set; }
         public FormConfig? FormConfig { get; set; }
         public Guid? LocationId { get; set; }
 
@@ -61,6 +63,9 @@ namespace Fsel.Shared.Models.ShareModels
         public IList<string>? TabNames { get; set; }
         public ButtonNavSettings? ButtonNavSettings { get; set; }
         public bool? AutoGenAge { get; set; }
+        public string? NoticeDescription { get; set; }
+        public bool? IsDisplayGift { get; set; }
+        public bool? IsParentEvent { get; set; }
     }
 
     public enum EnumSchoolEventRuleAction
@@ -138,12 +143,14 @@ namespace Fsel.Shared.Models.ShareModels
     {
         public string? Title { get; set; }
         public IList<WeekRule>? Rules { get; set; }
-        public IList<WeekRule>? ChildrenRules { get; set; }
         public int PrizeCount { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int WeekNumber { get; set; }
+        public EnumLeaderBoardType LeaderBoardType { get; set; }
+        public string? FormOfAward { get; set; }
         public string? Rule { get; set; }
+        public IList<CollectiveAward>? CollectiveAwards { get; set; }
     }
 
     public class WeekRule
@@ -153,6 +160,12 @@ namespace Fsel.Shared.Models.ShareModels
         public string? Detail { get; set; }
         public string? RewardImagine { get; set; }
         public int Rank { get; set; }
+    }
+
+    public class CollectiveAward
+    {
+        public string? Title { get; set; }
+        public string? Description { get; set; }
     }
 
     public class LearningNotice

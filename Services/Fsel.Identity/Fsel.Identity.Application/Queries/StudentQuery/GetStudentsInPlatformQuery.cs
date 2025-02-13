@@ -57,26 +57,30 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                         join d in _studentRepository.Queryable on c.Id equals d.HumanId
                         join ur in userRoleQuery on b.Id equals ur.UserId
                         join r in _roleManager.Roles on ur.RoleId equals r.Id
-                        select new StudentInPlatformModel
-                        {
-                            Id = b.Id,
-                            Code = c.Code,
-                            UserName = b.UserName,
-                            Role = r.Name,
-                            StudentId = d.Id,
-                            UserPlatformStatus = a.Status,
-                            CreatedDate = a.CreatedDate,
-                        };
-            query = query.Where(p => p.UserPlatformStatus == request.Status);
+                        select new { b, c, r, d, a };
+            query = query.Where(p => p.a.Status == request.Status);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(p => (!string.IsNullOrEmpty(p.UserName) && p.UserName.Contains(request.Keyword)) || (!string.IsNullOrEmpty(p.Code) && p.Code.Contains(request.Keyword)));
+                var userNameQuery = query.Where(p => p.b.UserName != null && p.b.UserName.Contains(request.Keyword));
+                var codeQuery = query.Where(p => p.c.Code != null && p.c.Code.Contains(request.Keyword));
+                query = userNameQuery.Union(codeQuery);
             }
             if (request.Role.HasValue)
             {
-                query = query.Where(p => p.Role == request.Role.ToString());
+                query = query.Where(p => p.r.Name == request.Role.ToString());
             }
-            methodResult.Result = query.ToList();
+
+            var dataQuery = query.Select(i => new StudentInPlatformModel
+            {
+                Id = i.b.Id,
+                Code = i.c.Code,
+                UserName = i.b.UserName,
+                Role = i.r.Name,
+                StudentId = i.d.Id,
+                UserPlatformStatus = i.a.Status,
+                CreatedDate = i.a.CreatedDate,
+            });
+            methodResult.Result = await dataQuery.ToListAsync(cancellationToken);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

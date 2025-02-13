@@ -17,6 +17,8 @@ namespace Fsel.Identity.Infrastructure.Configs
                  .WithMany(b => b.StudentDailyStreaks)
                  .HasForeignKey(p => p.StudentId)
                  .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasIndex(c => new { c.IsDeleted, c.StudentId });
         }
     }
 }

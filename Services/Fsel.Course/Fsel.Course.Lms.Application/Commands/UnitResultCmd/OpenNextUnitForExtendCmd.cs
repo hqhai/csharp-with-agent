@@ -21,7 +21,7 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IUserService _userService;
 
-        public OpenNextUnitForExtendCmdHandler(IUnitResultRepository unitResultRepository,IUserService userService)
+        public OpenNextUnitForExtendCmdHandler(IUnitResultRepository unitResultRepository, IUserService userService)
         {
             _unitResultRepository = unitResultRepository;
             _userService = userService;
@@ -50,7 +50,7 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd
                 return methodResult;
             }
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(request.UserId);
             var studentId = studentResult.Content?.Result?.Id;
 
             var unitResult = _unitResultRepository.Queryable.Where(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done);
