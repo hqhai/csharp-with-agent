@@ -94,5 +94,9 @@ namespace Fsel.Shared.Constants
 
         public const string ConfigPlacementTest = "Resources//PlacementTestConfigAgeLevel.json";
         public const string ConfigViewReportLevel = "Resources//PlacementTestReportViewConfig.json";
+
+        public const string ContentAICheckComment = "Resources//ContentAICheckComment.txt";
+        public const string ReportSurveyQuestionEvent = "Resources//ExportExcelTemplates//SurveyQuestionReport.xlsx";
+        public const string ReportSurveyQuestionEventSchool = "Resources//ExportExcelTemplates//SurveyQuestionReportSchool.xlsx";
     }
 }
