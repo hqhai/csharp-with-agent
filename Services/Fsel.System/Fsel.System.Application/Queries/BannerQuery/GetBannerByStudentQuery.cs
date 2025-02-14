@@ -140,6 +140,22 @@ namespace Fsel.System.Application.Queries.BannerQuery
             // lấy banner được ưu tiên
             var bannerPriority = banners.FirstOrDefault(x => x.Type == EnumBannerType.Popup && x.BannerScopes.Any(c => c.IsPriority && c.CourseLevel == studentSetting.Level && c.TargetUsers != null && c.TargetUsers.Any(p => p == targetUser)));
 
+            // lấy setting banner
+            var bannerSetting = await _bannerSettingRepository.Queryable.FirstOrDefaultAsync(cancellationToken);
+
+            // check số banner đã hiện trong ngày
+            if (bannerSetting != null && bannerIds?.Count >= bannerSetting.MaximumPerDay)
+            {
+                banners = banners.Where(x => x.Type != EnumBannerType.Popup).ToList();
+            }
+
+            // check khoảng cách xuất hiện giữa các banner
+            var lastBannerToday = bannerUsedTodays.OrderByDescending(x => x.CreatedDate).FirstOrDefault();
+            if (bannerSetting != null && lastBannerToday?.CreatedDate.AddMinutes(bannerSetting.DisplayIntervalTime) > DateTime.UtcNow)
+            {
+                banners = banners.Where(x => x.Type != EnumBannerType.Popup).ToList();
+            }
+
             // lấy dữ liệu
             var banner = bannerPriority != null ? bannerPriority : banners.FirstOrDefault(x => x.Type == EnumBannerType.Popup);
             var heading = banners.FirstOrDefault(x => x.Type == EnumBannerType.Warning);
@@ -168,9 +184,6 @@ namespace Fsel.System.Application.Queries.BannerQuery
             {
                 bannerStudents.Add(_mapper.Map<BannerStudentQueueModel>(left));
             }
-
-            // lấy time slide show
-            var bannerSetting = await _bannerSettingRepository.Queryable.FirstOrDefaultAsync(cancellationToken);
 
             // bắn web socket
             await _bannerPublisher.Publish(new BannerStudentsQueueModel { UserId = request.UserId, TimeSlideShow = bannerSetting?.TimeSlideShow ?? default, BannerStudents = bannerStudents }, cancellationToken);
