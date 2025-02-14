@@ -9,6 +9,7 @@ using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.CompetitionEventsCmd;
 using Fsel.Identity.Application.Queries.CompetitionEventsQuery;
 using Fsel.Identity.Application.Services.SystemService.Model;
+using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
@@ -62,9 +63,9 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("{eventCode}")]
         [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetCompetitionEvents([FromRoute] string? eventCode)
+        public async Task<IActionResult> GetCompetitionEvents([FromRoute] string? eventCode, [FromQuery] bool isLeaderBoard)
         {
-            MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(new GetCompetitionEventsQuery { EventCode = eventCode }).ConfigureAwait(false);
+            MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(new GetCompetitionEventsQuery { EventCode = eventCode, IsLeaderBoard = isLeaderBoard }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -91,6 +92,55 @@ namespace Fsel.Identity.Api.Controllers
         {
             var result = await _competitionEventsRepository.GetListResultAsync<CompetitionEventsModel>(query);
             return result.GetActionResult();
+        }
+
+        /// <summary>
+        /// Export-LandingPage-By-EventCode
+        /// </summary>
+        [HttpGet("export-landing-page")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportLandingPageByEventCode([FromQuery] ExportLandingPageByEventCodeQuery query)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, $"LandingPageEventCode.xlsx");
+        }
+
+        /// <summary>
+        /// Lấy danh sách Events theo ParentIds
+        /// </summary>
+        [HttpGet("get-events-by-parent-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetEventsByParentIds([FromQuery] GetCompetitionEventsByParentIdsQuery query)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(nameof(query));
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpGet("get-event-parent/{id}")]
+        [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetParentEvent([FromRoute] Guid id)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(nameof(id));
+            var commandResult = await _mediator.Send(new GetParentEventByIdQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpGet("get-child-events/{id}")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEvent>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetChildPEvents([FromRoute] Guid id)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(nameof(id));
+            var commandResult = await _mediator.Send(new GetChildEventsByParentIdQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

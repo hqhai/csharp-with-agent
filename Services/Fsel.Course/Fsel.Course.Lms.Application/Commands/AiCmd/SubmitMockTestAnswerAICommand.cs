@@ -299,8 +299,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             }
 
             double average = totalScore / bandScoreDescriptions.Length;
-
-            return (NumberHelper.RoundNumberDouble(average), totalScore);
+            return (NumberHelper.RoundReduceNumber(average), totalScore);
         }
 
         private static double CaculateAverageScoreWritingSection(double firstScore, double average, int displayOrder)

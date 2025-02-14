@@ -14,11 +14,11 @@ using Fsel.Course.Lms.Application.Services.AiService;
 using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
-using Fsel.Course.Lms.Application.Services.GoogleSheetServices;
 using Fsel.Course.Lms.Application.Services.InteractionService;
 using Fsel.Course.Lms.Application.Services.NotificationServices;
 using Fsel.Course.Lms.Application.Services.OrderServices;
 using Fsel.Course.Lms.Application.Services.SenderService;
+using Fsel.Course.Lms.Application.Services.StorageServices;
 using Fsel.Course.Lms.Application.Services.SystemService;
 using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
@@ -112,6 +112,8 @@ builder.Services.AddScoped<ISpeakingAIService, SpeakingAIService>();
 builder.Services.AddScoped<ISpeakingEvaluationAIService, SpeakingEvaluationAIService>();
 builder.Services.AddScoped<IQuestionExplanationErrorRepository, QuestionExplanationErrorRepository>();
 builder.Services.AddScoped<IQuestionExplanationLogRepository, QuestionExplanationLogRepository>();
+builder.Services.AddScoped<IPlacementTestGroupResultRepository, PlacementTestGroupResultRepository>();
+builder.Services.AddScoped<IQuestionShuffleRepository, QuestionShuffleRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
@@ -165,6 +167,8 @@ builder.Services.AddScoped<GetTimeModulePublisher>();
 builder.Services.AddScoped<SubmitSpeakingAIPublisher>();
 builder.Services.AddScoped<StudentRankingEventsPublisher>();
 builder.Services.AddScoped<RankedStudentPublisher>();
+builder.Services.AddScoped<ExportFileExcelStudentLearningProcessPublisher>();
+builder.Services.AddScoped<SavePlacementTestAnswersPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -174,6 +178,7 @@ builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiU
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(INotificationService), appSetting?.Services?.NotificationApiUrl);
+builder.AddRefitClients(typeof(IStorageService), appSetting?.Services?.StorageApiUrl);
 builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
 {
     httpClient.BaseAddress = new Uri(appSetting?.OpenAiConfig?.Uri ?? string.Empty);
@@ -200,6 +205,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.RetryClassForumAction, typeof(RetryClassForumConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SpeakingAI, typeof(SpeakingAIEvaluationConsumer) },
     { QueueSettings.LmsQueue.NameQueue.RankedStudent, typeof(RankedStudentConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.ExportExcelStudentLearningProcess, typeof(ExportFileExcelStudentLearningProcessConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.SavePlacementTestAnswers, typeof(SavePlacementTestAnswersConsumer) },
 });
 
 var app = builder.Build();

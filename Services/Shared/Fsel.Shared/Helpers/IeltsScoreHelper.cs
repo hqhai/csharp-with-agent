@@ -123,7 +123,7 @@ namespace Fsel.Shared.Helpers
             return default;
         }
 
-        public static int GetInitialAge(EnumPlacementTestLevel? level, int age)
+        public static int GetInitialAge(EnumPlacementTestLevel? level, int age = default)
         {
             if (level.HasValue)
             {

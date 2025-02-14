@@ -45,7 +45,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 Id = x.Id,
                 Code = x.Code,
                 UserId = x.UserId,
-                CreatedDate = x.CreatedDate,
+                CreatedDate = x.UpdatedDate ?? x.CreatedDate,
                 UpdatedDate = x.UpdatedDate,
                 CreatedFullName = x.CreatedFullName,
                 Status = x.Status,
@@ -56,18 +56,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 TotalPrice = x.TotalPrice,
             }).ToList();
 
-            var userIds = query.Select(l => l.UserId).Distinct().ToList();
-            if (userIds.Any())
-            {
-                var studentResults = await _userService.GetStudentsByIdsAsync(userIds);
-                var students = studentResults.Content?.Result;
-                query.ForEach(p =>
-                {
-                    var student = students?.FirstOrDefault(x => x.Human != null && x.Human.UserId == p.UserId);
-                    p.Email = student?.Human?.Email;
-                    p.FullName = student?.Human?.FullName;
-                });
-            }
+
 
             if (request.IsNew.HasValue && request.IsNew == true)
             {
@@ -122,6 +111,27 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
             var lists = query
                     .ApplySortAndPaging(request)
                     .ToList();
+
+
+            var userIds = lists.Select(l => l.UserId).Distinct().ToList();
+            if (userIds.Any())
+            {
+                var studentResults = await _userService.GetStudentsByIdsAsync(userIds);
+                var students = studentResults.Content?.Result;
+
+                // Code sau khi Optimize
+                var studentLookup = students?
+                                    .Where(x => x.Human != null && x.Human.UserId.HasValue)
+                                    .ToDictionary(x => x.Human!.UserId!.Value, x => x.Human);
+                lists.ForEach(p =>
+                {
+                    if (studentLookup != null && studentLookup.TryGetValue(p.UserId, out var human))
+                    {
+                        p.Email = human?.Email;
+                        p.FullName = human?.FullName;
+                    }
+                });
+            }
 
             methodResult.Result = new PagingItemsModel<SearchOrderModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

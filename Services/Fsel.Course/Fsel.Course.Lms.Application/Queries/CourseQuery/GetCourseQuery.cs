@@ -165,7 +165,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
                 return methodResult;
             }
-            var classResult = await _trainingService.GetClassByStudentId(student.Id);
+            var classResult = await _trainingService.GetClassToStudentIdAsync(student.Id);
             if (!classResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));
@@ -358,7 +358,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
                 if (!courseUnitMockTest.UnitId.HasValue && !courseUnitMockTest.FinalTestId.HasValue && !courseUnitMockTest.MockTestId.HasValue)
                 {
-                    break;
+                    continue;
                 }
 
                 if (!checkUnitResult && courseUnitMockTest.UnitId.HasValue)

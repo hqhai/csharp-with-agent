@@ -90,7 +90,6 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
                     businessContent = EnumNotificationContent.FlagComment;
                 }
 
-
                 InterationActionQueueModel model = new InterationActionQueueModel()
                 {
                     ObjectId = request.ObjectId,
@@ -129,10 +128,8 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
 
             var response = await courseService.GetClassForumResultByIdAsync(id) ?? default;
 
-
             return response?.Content?.Result ?? new ClassForumResultModel();
         }
-
 
         /// <summary>
         /// Kiểm tra xem ObjectId truyền vào có phải là ClassForum hay không
@@ -157,7 +154,6 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
             return isClassForum;
         }
 
-
         /// <summary>
         /// Lấy tham số để truyền vào link, message
         /// </summary>
@@ -178,14 +174,13 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
             var studentInfoResult = studentInfo?.Content?.Result;
 
             //class info
-            var classInfo = studentInfoResult?.Id != null ? await trainingService.GetClassByStudentId(studentInfoResult.Id) : default;
+            var classInfo = studentInfoResult?.Id != null ? await trainingService.GetClassToStudentId(studentInfoResult.Id) : default;
             var classInfoResult = classInfo?.Content?.Result;
 
             // param
             var paramsMessage = new List<object> { templateResult?.CreatedFullName! ?? string.Empty, classInfoResult?.Name ?? "" };
             var paramsLink = new List<object> { unitId?.ToString() ?? string.Empty, courseId?.ToString() ?? string.Empty, templateResult?.Id.ToString() ?? string.Empty, objectId };
             var ownerObjectId = templateResult?.CreatedUserId ?? default;
-
 
             return (paramsMessage, paramsLink, ownerObjectId);
         }

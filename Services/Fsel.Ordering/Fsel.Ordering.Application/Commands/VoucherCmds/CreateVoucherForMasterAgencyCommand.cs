@@ -77,11 +77,11 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             {
                 Name = Name,
                 Code = p,
-                Percent = request.Percent,
+                Value = request.Percent,
                 Quantity = request.Quantity,
                 StartDate = currentDate,
                 EndDate = request.ExpiredDate,
-                VoucherType = EnumVoucherType.NewSale,
+                ApplicableSubjects = new List<EnumApplicableSubjectsVoucher>() { EnumApplicableSubjectsVoucher.NewSale },
                 Source = EnumVoucherSource.MasterAgency,
                 SourceName = request.MasterAgency,
                 VoucherPackages = new List<VoucherPackage>()

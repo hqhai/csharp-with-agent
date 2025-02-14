@@ -22,6 +22,7 @@ namespace Fsel.Shared.Models.ShareModels
         public string? EventLogo { get; set; }
 
         public string? EventTitle { get; set; }
+        public string? EventName { get; set; }
 
         public string? EventDescription { get; set; }
 
@@ -36,7 +37,7 @@ namespace Fsel.Shared.Models.ShareModels
 
         public string? FormDescription { get; set; }
         public string? AwardPromotional { get; set; }
-        public string? AwardPromotionalImage { get; set; }
+        public IList<string>? AwardPromotionalImage { get; set; }
 
         public IList<ActionConfig>? ActionConfigs { get; set; }
         public EnumByPassPaymentType ByPassPaymentType { get; set; }
@@ -53,12 +54,18 @@ namespace Fsel.Shared.Models.ShareModels
         public string? LuckySpinGiftImage { get; set; }
         public IList<WeekEvent>? WeekEvents { get; set; }
         public IList<WeekEvent>? LuckyStarRules { get; set; }
+        public IList<CollectiveAward>? CollectiveAwards { get; set; }
         public FormConfig? FormConfig { get; set; }
         public Guid? LocationId { get; set; }
 
         public string? BackGroundImage { get; set; }
 
         public IList<string>? TabNames { get; set; }
+        public ButtonNavSettings? ButtonNavSettings { get; set; }
+        public bool? AutoGenAge { get; set; }
+        public string? NoticeDescription { get; set; }
+        public bool? IsDisplayGift { get; set; }
+        public bool? IsParentEvent { get; set; }
     }
 
     public enum EnumSchoolEventRuleAction
@@ -76,6 +83,7 @@ namespace Fsel.Shared.Models.ShareModels
     }
 
     #region FormConfig
+
     public class FormConfig
     {
         public IList<FormSection>? Sections { get; set; }
@@ -102,7 +110,7 @@ namespace Fsel.Shared.Models.ShareModels
         public string? ErrorMessage { get; set; }
     }
 
-    #endregion
+    #endregion FormConfig
 
     public class ProcessStep
     {
@@ -118,6 +126,7 @@ namespace Fsel.Shared.Models.ShareModels
         public DateTime? EndDate { get; set; }
         public StopAtLevelSelectionConfig? StopAtLevelSelectionConfig { get; set; }
         public EnumSenderTemplate? MailRegister { get; set; }
+        public string? SubjectMailRegister { get; set; }
     }
 
     public class StopAtLevelSelectionConfig
@@ -129,16 +138,19 @@ namespace Fsel.Shared.Models.ShareModels
     }
 
     #region Prize
+
     public class WeekEvent
     {
         public string? Title { get; set; }
         public IList<WeekRule>? Rules { get; set; }
-        public IList<WeekRule>? ChildrenRules { get; set; }
         public int PrizeCount { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int WeekNumber { get; set; }
+        public EnumLeaderBoardType LeaderBoardType { get; set; }
+        public string? FormOfAward { get; set; }
         public string? Rule { get; set; }
+        public IList<CollectiveAward>? CollectiveAwards { get; set; }
     }
 
     public class WeekRule
@@ -150,6 +162,12 @@ namespace Fsel.Shared.Models.ShareModels
         public int Rank { get; set; }
     }
 
+    public class CollectiveAward
+    {
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+    }
+
     public class LearningNotice
     {
         public string? Title { get; set; }
@@ -158,9 +176,14 @@ namespace Fsel.Shared.Models.ShareModels
 
     public class BannerPromotional
     {
-        public string? BannerWeb { get; set; }
-        public string? BannerMobile { get; set; }
+        public IList<string>? BannerWeb { get; set; }
+        public IList<string>? BannerMobile { get; set; }
     }
 
-    #endregion
+    public class ButtonNavSettings
+    {
+        public string? TextDisplay { get; set; }
+        public string? Link { get; set; }
+    }
+    #endregion Prize
 }

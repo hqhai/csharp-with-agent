@@ -46,7 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var methodResult = new MethodResult<LessonScoreModel>();
             var lessonScore = new LessonScoreModel();
 
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var student = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));

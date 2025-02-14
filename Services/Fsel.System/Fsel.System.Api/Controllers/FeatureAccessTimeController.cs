@@ -2,21 +2,20 @@
 
 namespace Fsel.System.Api.Controllers
 {
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.System.Application.Commands.FeatureAccessTimeCmd;
     using Fsel.System.Application.Queries.FeatureAccessTimeQuery;
+    using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
-    using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.System.Domain.IRepositories;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -43,6 +42,15 @@ namespace Fsel.System.Api.Controllers
         {
             SetQuery(query);
             var commandResult = await _featureAccessTimeRepository.GetListResultAsync<FeatureAccessTimeModel>(query);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpPost("get-feature-accesstime")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetFeatureAccessTime([FromBody] GetAccessTimeByUserAndFeatureCommand cmd)
+        {
+            var commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -131,6 +139,18 @@ namespace Fsel.System.Api.Controllers
         public async Task<IActionResult> GetFeatureAccessTimeByUserId([FromBody] IList<Guid> userIds)
         {
             var queryResult = await _mediator.Send(new GetFeatureAccessTimeByUserIdQuery { UserIds = userIds }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get feature access business
+        /// </summary>
+        [HttpPost("get-feature-access-time-to-modules")]
+        [ProducesResponseType(typeof(MethodResult<IList<FeatureAccessTimeBusinessModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromBody] GetFeatureAccessTimeStudentToExportQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

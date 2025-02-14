@@ -22,5 +22,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public StudentBeginnerGuideModel? BeginnerGuide { get; set; }
         public double NumberOfToken { get; set; }
         public CourseModel? Course { get; set; }
+        public bool IsSurveyEvent { get; set; }
     }
 }

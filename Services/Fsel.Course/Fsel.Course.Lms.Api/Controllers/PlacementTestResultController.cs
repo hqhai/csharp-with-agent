@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/placement-test-result")]
     [ApiController]
+    [Common.Attributes.Permission]
     public class PlacementTestResultController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -87,7 +88,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("export-file-pts")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
-        public async Task<IActionResult> Export([FromForm] ExportPlacementTestByStudentsQuery query)
+        public async Task<IActionResult> Export([FromQuery] ExportPlacementTestByStudentsQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             if (!commandResult.IsOK || commandResult.Result == null)
@@ -122,6 +123,30 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> SendMailPT([FromQuery] SendPTCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Save choose Level PT
+        /// </summary>
+        [HttpPost("choose-level-pt")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SavePlacementTestGroupResult([FromBody] SavePlacementTestGroupResultCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Config Placement Test
+        /// </summary>
+        [HttpGet("get-config-placement-test")]
+        [ProducesResponseType(typeof(MethodResult<PlacementTestReportOveallModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetConfigPlacementTest()
+        {
+            var queryResult = await _mediator.Send(new GetConfigPlacementTestQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

@@ -25,7 +25,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
 
-
         public GetUnitSkillDiagramQueryHandler(ICourseResultRepository courseResultRepository, AuthContext authContext, IUserService userService)
         {
             _courseResultRepository = courseResultRepository;
@@ -39,16 +38,18 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             MethodResult<IList<SkillScores>> methodResult = new MethodResult<IList<SkillScores>>();
 
             #region Validate
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));
                 return methodResult;
             }
 
-            #endregion
+            #endregion Validate
 
             #region Handler
+
             var studentId = studentsResult.Content!.Result!.Id;
 
             var courseResult = await _courseResultRepository.Queryable
@@ -66,7 +67,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             methodResult.Result = courseResult.CourseResult.SkillScores;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-            #endregion
+
+            #endregion Handler
         }
     }
 }
