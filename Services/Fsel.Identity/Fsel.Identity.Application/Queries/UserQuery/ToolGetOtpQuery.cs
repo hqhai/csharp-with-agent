@@ -18,7 +18,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     public class ToolGetOtpQuery : IRequest<MethodResult<UserOtpCodeModel>>
     {
         public string? EmailOrNumberphone { get; set; }
-        public EnumUserOtpCodeType Type { get; set; }
     }
 
     public class ToolGetOtpQueryHandler : IRequestHandler<ToolGetOtpQuery, MethodResult<UserOtpCodeModel>>
@@ -45,7 +44,9 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             var phoneQuery = _userManager.Users.Where(x => x.PhoneNumber != null && x.PhoneNumber == request.EmailOrNumberphone && x.UserName == request.EmailOrNumberphone).Select(x => x.Id);
             Guid? userId = emailQuery.Union(phoneQuery).FirstOrDefault();
 
-            var userOTP = _userOtpCodeRepository.Queryable.Where(x => x.UserId == userId && x.Type == request.Type)
+            EnumUserOtpCodeType type = phoneQuery?.Count() != 0 ? EnumUserOtpCodeType.SMS : EnumUserOtpCodeType.Email;
+
+            var userOTP = _userOtpCodeRepository.Queryable.Where(x => x.UserId == userId && x.Type == type)
                                                           .OrderByDescending(x => x.CreatedDate)
                                                           .FirstOrDefault();
 
