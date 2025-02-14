@@ -11,12 +11,14 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
     public class ToolGetOtpQuery : IRequest<MethodResult<UserOtpCodeModel>>
     {
         public string? EmailOrNumberphone { get; set; }
+        public EnumUserOtpCodeType Type { get; set; }
     }
 
     public class ToolGetOtpQueryHandler : IRequestHandler<ToolGetOtpQuery, MethodResult<UserOtpCodeModel>>
@@ -43,7 +45,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             var phoneQuery = _userManager.Users.Where(x => x.PhoneNumber != null && x.PhoneNumber == request.EmailOrNumberphone && x.UserName == request.EmailOrNumberphone).Select(x => x.Id);
             Guid? userId = emailQuery.Union(phoneQuery).FirstOrDefault();
 
-            var userOTP = _userOtpCodeRepository.Queryable.Where(x => x.UserId == userId)
+            var userOTP = _userOtpCodeRepository.Queryable.Where(x => x.UserId == userId && x.Type == request.Type)
                                                           .OrderByDescending(x => x.CreatedDate)
                                                           .FirstOrDefault();
 
