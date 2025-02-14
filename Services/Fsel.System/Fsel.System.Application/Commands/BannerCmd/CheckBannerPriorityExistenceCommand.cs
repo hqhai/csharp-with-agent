@@ -46,7 +46,7 @@ namespace Fsel.System.Application.Commands.BannerCmd
 
             var bannerScopeQuerys = await _bannerScopeRepository.Queryable
                                                                 .Include(x => x.Banner)
-                                                                .Where(x => x.Banner != null && request.StartDate <= x.Banner.EndDate && request.EndDate >= x.Banner.StartDate && x.Banner!.Type == request.Type)
+                                                                .Where(x => x.Banner != null && request.StartDate <= x.Banner.EndDate && request.EndDate >= x.Banner.StartDate && x.Banner!.Type == request.Type && x.Banner.Status)
                                                                 .ToListAsync(cancellationToken);
 
             var applicableUserDefaults = request.BannerScopes?.Where(x => x.ApplicableUser == EnumApplicableUserGroup.Default).ToList();
