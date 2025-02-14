@@ -71,6 +71,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             }
             var settingStudentModel = new StudentSettingModel
             {
+                StudentId = student.Id,
                 ExpiredDate = student.ExpiredDate,
                 NumberOfToken = student.NumberOfToken,
                 BeginnerGuide = student.BeginnerGuide,
