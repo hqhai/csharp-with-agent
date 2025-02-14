@@ -9,41 +9,27 @@ namespace Fsel.System.Domain.Enums.ErrorCodes
         ThisStudentViewedThisBanner,
 
         BannerNotExist,
-
         DisplayDatesNotNull,
-
         DisplayDateOutOfRange,
-
         DisplayStartTimeGreaterThanDisplayEndTime,
-
         DisplayStartTimeMustGreaterThanZero,
-
         EachBannerOnlyOneCourseLevel,
-
         TargetUsersRequired,
-
         ApplicableUserGroupsRequired,
-
         CompetitionEventIdNotNull,
-
         MaximumPerDayMustGreaterThanZero,
-
         DisplayIntervalTimeMustGreaterThanZero,
-
         CodeAlreadyExist,
-
         BannerImageNotNull,
-
         ContentNotNull,
-
         BannerScopeNotNull,
-
         CourseLevelNotNull,
-
         TargetUserNotNull,
-
         FilePathNotNull,
-
-        UrlNotNull
+        UrlNotNull,
+        CustomFrequencyRequiresDisplayDate,
+        DisplayStartDateGreaterThanDisplayEndDate,
+        CompetitionEventIdsRequired,
+        StartDateLowerThanDateTimeNow
     }
 }
