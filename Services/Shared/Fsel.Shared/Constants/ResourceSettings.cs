@@ -78,6 +78,7 @@ namespace Fsel.Shared.Constants
         public const string IeltsStudentResult = "Resources//IeltsStudentsResult.json";
         public const string AcademicStudentsResult = "Resources//AcademicStudentsResult.json";
         public const string SchoolEventRules = "Resources//SchoolEventRules.json";
+        public const string DisplayOrderConfig = "Resources//DisplayOrderConfig.json";
 
         public const string ManagerReportPlacementTestExcel = "Resources//ManagerReports//BaoCaoPlacmentTest.xlsx";
         public const string ManagerReportLearningProgressAcaExcel = "Resources//ManagerReports//BaoCaoTienDoHocTapAca.xlsx";
