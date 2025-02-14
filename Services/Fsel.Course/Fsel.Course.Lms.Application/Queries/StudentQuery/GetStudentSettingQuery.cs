@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             };
 
             await GetPlacementTestAsync(settingStudentModel, student, cancellationToken);
-            var @eventResults = await _userService.GetEventByUserId(_authContext.CurrentUserId);
+            var @eventResults = await _userService.GetEventByUserId(request.UserId ?? _authContext.CurrentUserId);
             if (@eventResults.IsSuccessStatusCode && @eventResults.Content?.Result != null)
             {
                 var @events = @eventResults.Content?.Result;
@@ -96,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 }
             }
 
-            var status = await _orderService.GetCurrentStatusAsync(_authContext.CurrentUserId);
+            var status = await _orderService.GetCurrentStatusAsync(request.UserId ?? _authContext.CurrentUserId);
             if (!status.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(status));
