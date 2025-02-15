@@ -19,13 +19,9 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
         }
 
-        public async Task<IList<Guid>> GetStudentIdsAsync(EnumCompletionStatus? status, IList<Guid> studentIds, bool isCheckDate, EnumCourseLevel? currentLevel, EnumCourseLevel? courseLevel)
+        public async Task<IList<Guid>> GetStudentIdsAsync(EnumCompletionStatus? status, IList<Guid> studentIds, EnumCourseLevel? currentLevel, EnumCourseLevel? courseLevel)
         {
-            if (!(currentLevel.HasValue || status.HasValue || courseLevel.HasValue || (isCheckDate || studentIds.Any())))
-            {
-                return new List<Guid>();
-            }
-            var query = Queryable;
+            var query = Queryable.WhereBulkContains(studentIds, x => x.StudentId);
             if (status.HasValue)
             {
                 switch (status.Value)
@@ -46,10 +42,6 @@ namespace Fsel.Course.Infrastructure.Repositories
             if (courseLevel.HasValue)
             {
                 query = query.Where(x => x.ChooseLevel == courseLevel.Value);
-            }
-            if (isCheckDate)
-            {
-                query = query.Where(x => studentIds.Contains(x.StudentId));
             }
             return await query.Select(x => x.StudentId).ToListAsync();
         }
