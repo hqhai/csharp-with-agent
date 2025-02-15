@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 {
+    using System.Diagnostics;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
@@ -111,8 +112,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             }
 
             var lists = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
-            var datas = new List<LearningProgressModel>();
             var courseCompletes = await _managerProgressHelper.GetProgressCompleteModuleAsync(lists, request.EndDate);
+            var datas = new List<LearningProgressModel>();
             foreach (var item in students)
             {
                 var courseComplete = courseCompletes.FirstOrDefault(x => x.StudentId == item.Id);
@@ -130,7 +131,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     UnitName = $"{nameof(Domain.Entities.Unit)} {courseComplete?.UnitDisplayOrder}",
                     LessonName = $"{nameof(Lesson)} {courseComplete?.LessonDisplayOrder}",
                 };
-
                 datas.Add(learningProgress);
             }
 
