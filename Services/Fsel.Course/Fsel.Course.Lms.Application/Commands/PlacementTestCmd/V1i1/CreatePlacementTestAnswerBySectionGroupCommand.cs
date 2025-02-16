@@ -184,7 +184,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                     Type = nameof(PlacementTest),
                     ObjectId = sectionGroupResult.Id
                 }, cancellationToken);
-                Thread.Sleep(4000);
+                Thread.Sleep(3000);
             }
             await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
