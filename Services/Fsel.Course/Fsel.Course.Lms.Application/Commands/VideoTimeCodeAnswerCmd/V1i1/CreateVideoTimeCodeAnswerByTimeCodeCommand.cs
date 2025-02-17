@@ -377,7 +377,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             {
                 return;
             }
-            var videoTimeCodeResult = _videoTimeCodeResultRepository.Queryable.First(x => x.VideoResultId == videoResult.Id && x.VideoTimeCodeId == videoTimeCode.Id);
+            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.FirstOrDefaultAsync(x => x.VideoResultId == videoResult.Id && x.VideoTimeCodeId == videoTimeCode.Id, cancellationToken);
             if (videoTimeCodeResult == null)
             {
                 return;
@@ -390,7 +390,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             }.Serialize();
 
             _logger.LogInformation($"Log_CreateVideoTimeCodeAnswerByTimeCodeCommand_Handle_UpdateVideoTimeCodeResultAsync : {requestInfo}");
-            var courseResultId = _courseResultRepository.Queryable.FirstOrDefault(x => x.CourseId == videoResult.LessonResult.CourseId && x.StudentId == student.Id)?.Id;
+            var courseResultId = await _courseResultRepository.Queryable.Where(x => x.CourseId == videoResult.LessonResult.CourseId && x.StudentId == student.Id).Select(x => x.Id).FirstOrDefaultAsync(cancellationToken
+                );
 
             var isDoneTimeCode = videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone || videoTimeCodeResult.Status == EnumResultStatus.Process;
             if (isSubmit)
@@ -480,7 +481,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         /// <returns></returns>
         private async Task StreakTimeCodeCheer(CreateVideoTimeCodeAnswerByTimeCodeCommand request, CancellationToken cancellation)
         {
-            var videoTimeCodeResults = _videoTimeCodeResultRepository.Queryable.OrderBy(x => x.CreatedDate).Where(x => x.VideoResultId == request.VideoResultId).ToList();
+            var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.OrderBy(x => x.CreatedDate).Where(x => x.VideoResultId == request.VideoResultId).ToListAsync(cancellation);
 
             var currentVideoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoTimeCodeId == request.VideoTimeCodeId && x.VideoResultId == request.VideoResultId).FirstOrDefaultAsync(cancellation);
 

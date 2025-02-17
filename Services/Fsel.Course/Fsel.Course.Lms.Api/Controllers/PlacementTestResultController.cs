@@ -149,5 +149,17 @@ namespace Fsel.Course.Lms.Api.Controllers
             var queryResult = await _mediator.Send(new GetConfigPlacementTestQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Placement Test By Student Id
+        /// </summary>
+        [HttpGet("placement-test/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<GetPlacementTestResultByStudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetPlacementTestResultByStudentId([FromRoute] Guid studentId)
+        {
+            var queryResult = await _mediator.Send(new GetPlacementTestResultByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

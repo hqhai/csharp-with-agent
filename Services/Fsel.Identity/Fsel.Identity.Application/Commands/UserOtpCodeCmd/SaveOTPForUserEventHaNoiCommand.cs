@@ -66,16 +66,10 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 return methodResult;
             }
 
-            var user = await _userManager.Users.Include(p => p.UserOtpCodes).Include(p => p.Human).ThenInclude(p => p.Student).FirstOrDefaultAsync(p => p.UserName == request.PhoneNumber, cancellationToken);
+            var user = await _userManager.Users.FirstOrDefaultAsync(p => p.UserName == request.PhoneNumber, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.UserDoesNotExist), nameof(request.PhoneNumber), request.PhoneNumber);
-                return methodResult;
-            }
-
-            if (user.Status == EnumUserStatus.Inactive)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.PendingVerification), nameof(request.PhoneNumber), request.PhoneNumber);
                 return methodResult;
             }
 
@@ -87,30 +81,11 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 return methodResult;
             }
 
-            if (lastOTP != null && IsValidTime(lastOTP.UpdatedDate ?? lastOTP.CreatedDate, DateTime.UtcNow))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.SentWithin30Seconds));
-                return methodResult;
-            }
-
-            var studentId = user.Human?.Student?.Id;
-
-            var studentCompetitionEvent = await _studentCompetitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.StudentId == studentId, cancellationToken);
-            if (studentCompetitionEvent == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.NotInEventHN), nameof(request.PhoneNumber), request.PhoneNumber);
-                return methodResult;
-            }
-
-            var competitionEvent = await _competitionEventsRepository.Queryable.Include(p => p.CompetitionEventParent).ThenInclude(p => p.CompetitionEventParent).FirstOrDefaultAsync(p => p.Id == studentCompetitionEvent.CompetitionEventId, cancellationToken);
-
-            var parentCompetitionEvent = competitionEvent?.CompetitionEventParent?.CompetitionEventParent;
-
-            if (parentCompetitionEvent == null || parentCompetitionEvent.EventCode != request.EventCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.NotInEventHN), nameof(request.PhoneNumber), request.PhoneNumber);
-                return methodResult;
-            }
+            //if (lastOTP != null && IsValidTime(lastOTP.UpdatedDate ?? lastOTP.CreatedDate, DateTime.UtcNow))
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.SentWithin30Seconds));
+            //    return methodResult;
+            //}
 
             if (lastOTP != null && lastOTP.Type == EnumUserOtpCodeType.SMS && lastOTP.Status == EnumOtpCodeStatus.Verified && !user.PhoneNumberConfirmed && !user.EmailConfirmed)
             {
@@ -165,11 +140,11 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             return methodResult;
         }
 
-        public bool IsValidTime(DateTime dateTime1, DateTime dateTime2)
-        {
-            TimeSpan difference = dateTime2 - dateTime1;
+        //public bool IsValidTime(DateTime dateTime1, DateTime dateTime2)
+        //{
+        //    TimeSpan difference = dateTime2 - dateTime1;
 
-            return difference.TotalSeconds < 30;
-        }
+        //    return difference.TotalSeconds < 30;
+        //}
     }
 }
