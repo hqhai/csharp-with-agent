@@ -54,7 +54,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
             var studentIds = _studentCompetitionEventsRepository.Queryable.Where(p => p.CompetitionEventId == competitionEvent.Id).Select(p => p.StudentId).Distinct().ToList();
 
-            var students = _studentRepository.Queryable.Include(p => p.Human).Where(p => studentIds.Contains(p.Id)).ToList();
+            var students = _studentRepository.Queryable.Include(p => p.Human).ThenInclude(x => x.User).Where(p => studentIds.Contains(p.Id)).ToList();
 
             methodResult.Result = _mapper.Map<IList<StudentModel>>(students);
             return methodResult;
