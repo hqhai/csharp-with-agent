@@ -3,6 +3,7 @@
 namespace Fsel.Course.Infrastructure.Common
 {
     using System;
+    using System.Globalization;
     using System.Linq;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
@@ -805,7 +806,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var question = dataQuestion?.Answers.FirstOrDefault(x => x.Id == item.Id);
                 if (!string.IsNullOrEmpty(item.Key) && question != null)
                 {
-                    var answerQuestion = question.Answers.FirstOrDefault(x => x.Key?.Trim().ToLower() == item.Key?.Trim().ToLower());
+                    var answerQuestion = question.Answers.FirstOrDefault(x => x.Key?.Trim().ToLower(CultureInfo.InvariantCulture) == item.Key?.Trim().ToLower(CultureInfo.InvariantCulture));
                     if (answerQuestion != null && answerQuestion.IsCorrect.HasValue && answerQuestion.IsCorrect.Value)
                     {
                         number++;

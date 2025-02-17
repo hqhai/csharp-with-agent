@@ -9,7 +9,9 @@ namespace Fsel.System.Api.Controllers.Admins
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.System.Application.Commands.BannerCmd;
+    using Fsel.System.Application.Commands.BannerSettingCmd;
     using Fsel.System.Application.Queries.BannerQuery;
+    using Fsel.System.Application.Queries.BannerSettingQuery;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
@@ -68,13 +70,11 @@ namespace Fsel.System.Api.Controllers.Admins
         /// <summary>
         /// Update
         /// </summary>
-        [HttpPut("{id}")]
+        [HttpPut]
         [ProducesResponseType(typeof(MethodResult<BannerModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateBannerCommand command)
+        public async Task<IActionResult> Update([FromBody] UpdateBannerCommand command)
         {
-            ArgumentNullException.ThrowIfNull(command);
-            command.Id = id;
             MethodResult<BannerModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
@@ -88,6 +88,66 @@ namespace Fsel.System.Api.Controllers.Admins
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteBannerCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create Banner Setting
+        /// </summary>
+        [HttpPost("banner-setting")]
+        [ProducesResponseType(typeof(MethodResult<BannerSettingModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Create([FromBody] CreateBannerSettingCommand command)
+        {
+            MethodResult<BannerSettingModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Setting
+        /// </summary>
+        [HttpGet("banner-setting")]
+        [ProducesResponseType(typeof(MethodResult<BannerSettingModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetBannerSetting()
+        {
+            MethodResult<BannerSettingModel> commandResult = await _mediator.Send(new GetBannerSettingQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Check Banner Priority Existence
+        /// </summary>
+        [HttpPost("check-priority")]
+        [ProducesResponseType(typeof(MethodResult<BannerPriorityExistenceModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckBannerPriorityExistence([FromBody] CheckBannerPriorityExistenceCommand command)
+        {
+            MethodResult<BannerPriorityExistenceModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search
+        /// </summary>
+        [HttpGet("preview")]
+        [ProducesResponseType(typeof(MethodResult<IList<BannerModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> PreviewBannerByDate([FromQuery] PreviewBannerByDateQuery query)
+        {
+            MethodResult<IList<BannerModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// banner trong ngày
+        /// </summary>
+        [HttpGet("banner-in-day")]
+        [ProducesResponseType(typeof(MethodResult<IList<BannerModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetBannerInDateQuery([FromQuery] GetBannerInDateQuery query)
+        {
+            MethodResult<IList<BannerInDayModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
