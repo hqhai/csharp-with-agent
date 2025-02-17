@@ -89,7 +89,13 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var studentIds = students.Select(x => x.Id).ToList();
-            var courseIds = students.Select(x => x.CourseId).Distinct().ToList();
+            var courseIds = students.Where(x => x.CourseId.HasValue).Select(x => x.CourseId!.Value).Distinct().ToList();
+
+            if (studentIds == null || courseIds == null)
+            {
+                return methodResult;
+            }
+
             var dataStudent = students.Select(x => new { StudentId = x.Id, CourseId = x.CourseId.GetValueOrDefault() }).ToList();
 
             var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
@@ -107,9 +113,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                               UnitResults = g.Select(x => x.ur).ToList(),
                                           }).ToListAsync(cancellationToken);
 
-            var mockTestResults = await _mockTestResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
-                                          .Where(x => courseIds.Contains(x.CourseId) && x.Status == EnumResultStatus.Done)
-                                          .ToListAsync(cancellationToken);
+            var mockTestResults = await _mockTestResultRepository.Queryable
+                                                                 .WhereBulkContains(studentIds, x => x.StudentId)
+                                                                 .WhereBulkContains(courseIds, x => x.CourseId)
+                                                                 .Where(x => x.Status == EnumResultStatus.Done)
+                                                                 .ToListAsync(cancellationToken);
 
             var mockTestGroupResults = mockTestResults.Join(dataStudent,
                                             mockTestResult => new { mockTestResult.CourseId, mockTestResult.StudentId },

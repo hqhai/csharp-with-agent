@@ -97,7 +97,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable
                             .Include(x => x.VideoResult)
                             .ThenInclude(x => x.LessonResult)
-                            .Where(x => x.VideoTimeCodeId == videoTimeCodeResult.VideoTimeCodeId && x.Status == EnumResultStatus.Done && students.Select(x => x.Id).Contains(x.StudentId))
+                            .WhereBulkContains(students.Select(x => x.Id), x => x.StudentId)
+                            .Where(x => x.VideoTimeCodeId == videoTimeCodeResult.VideoTimeCodeId && x.Status == EnumResultStatus.Done)
                             .Where(x => x.VideoResult != null && x.VideoResult.LessonResult != null && x.VideoResult.LessonResult.UnitId == lessonResult.UnitId && x.VideoResult.LessonResult.CourseId == lessonResult.CourseId)
                             .ToListAsync(cancellationToken);
 

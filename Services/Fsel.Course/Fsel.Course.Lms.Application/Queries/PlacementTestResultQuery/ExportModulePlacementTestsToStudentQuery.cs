@@ -73,7 +73,8 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             var studentIds = students?.Select(x => x.Id).ToList() ?? new List<Guid>();
 
             var placementTestResults = await _placementTestResultRepository.Queryable
-                                            .Where(x => x != null && studentIds.Contains(x.StudentId))
+                                            .Where(x => x != null)
+                                            .WhereBulkContains(studentIds, x => x.StudentId)
                                             .ToListAsync(cancellationToken);
 
             foreach (var groupPlacementTest in placementTestResults.GroupBy(x => x.StudentId))

@@ -92,7 +92,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                                           join human in _humanRepository.Queryable on baseQ.HumanId equals human.Id
                                           join user in _userManager.Users on human.UserId equals user.Id
                                           where baseQ.SchoolId.HasValue && schools.Select(x => x.Id).Contains(baseQ.SchoolId.Value)
-                                          && competitions.Select(x => x.Id).Contains(sce.CompetitionEventId)
+                                          && competitions.Select(x => x.Id).Contains(sce.CompetitionEventId) && !baseQ.IsDeleted && !user.IsDeleted
                                           group new { baseQ, user }
                                           by baseQ.SchoolId into g
                                           select new
@@ -108,7 +108,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             {
                 var studentDistricts = studentSchoolIds.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.SchoolId)).ToList();
                 var studentIds = studentDistricts.SelectMany(x => x.StudentIds).Distinct().ToList();
-                var schoolDistricts = schools?.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.Id));
+                var schoolDistricts = schools.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.Id));
 
                 var reportCompetition = new ReportCompetitionEventModel
                 {

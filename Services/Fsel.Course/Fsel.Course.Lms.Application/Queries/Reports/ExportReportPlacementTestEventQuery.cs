@@ -91,14 +91,14 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 var placementTestResultReports = placementTestResultGroups.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).Distinct().ToList();
                 int numberStudentsCompletedPT = placementTestResultReports?.Where(x => x.IsDonePT).Select(x => x.StudentId).Distinct().Count() ?? default;
-
+                int numberStudentsProcessPT = placementTestResultReports?.Where(x => !x.IsDonePT).Select(x => x.StudentId).Distinct().Count() ?? default;
                 var reportPlacementTestEvent = new ReportPlacementTestEventModel
                 {
                     LocationName = reportCompetitionEvent.DistrictName,
                     NumberRegisteredSchool = reportCompetitionEvent.NumberRegisteredSchool,
                     NumberActualParticipatingSchool = reportCompetitionEvent.NumberActualParticipatingSchool,
                     NumberValidStudentAccount = reportCompetitionEvent.NumberValidStudentAccount,
-                    NumberStudentsProcessPT = placementTestResultReports?.Count ?? default,
+                    NumberStudentsProcessPT = numberStudentsProcessPT,
                     NumberStudentCompleteVerify = reportCompetitionEvent.NumberStudentCompleteVerify,
                     NumberStudentsCompletedPT = numberStudentsCompletedPT,
                     ReportCourseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic).Select(courseLevel =>
