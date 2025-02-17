@@ -202,5 +202,17 @@ namespace Fsel.Identity.Api.Controllers.Admin
             MethodResult<IList<StudentDtoModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// delete student by userid
+        /// </summary>
+        [HttpDelete("delete-user-by-userid/{userId}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> DeleteStudentByStudentId([FromRoute] Guid userId)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteStudentByUserIdCommand { UserId = userId }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
