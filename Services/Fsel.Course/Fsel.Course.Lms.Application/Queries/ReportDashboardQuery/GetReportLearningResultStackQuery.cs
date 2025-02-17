@@ -11,8 +11,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     using Fsel.Course.Domain.Models.EntityModels.BaseChartModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using MassTransit;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -99,8 +101,13 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 }).Take(8)
                 .ToList();
             var studentIds = studentGroups?.SelectMany(x => x.Select(y => y.Id)).ToList() ?? new List<Guid>();
-
-            var courseOveralls = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
+            // Chia danh sách thành từng nhóm
+            var batches = studentIds
+                .Select((id, index) => new { id, index })
+                .GroupBy(x => x.index / ValueSettings.BatchSize)
+                .Select(g => g.Select(x => x.id).ToList())
+                .ToList();
+            var courseOveralls = await (from baseQ in _courseResultRepository.Queryable
                                         join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                         join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
                                         where baseQ.WorkingStatus == EnumWorkingStatus.Active && ur.Status == EnumResultStatus.Done &&
@@ -111,7 +118,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                                             StudentId = g.Key.StudentId,
                                             Percent = g.Select(x => x.ur).Any() ? Math.Round(g.Select(x => x.ur).Average(x => x.Percent)) : default(double),
                                         }).ToListAsync(cancellationToken);
-
             StackBarChartsModel reportLearningResult = new StackBarChartsModel
             {
                 Type = EnumChartType.StackbarChart,

@@ -11,8 +11,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     using Fsel.Course.Domain.Models.EntityModels.BaseChartModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using MassTransit;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using static Fsel.Shared.Constants.ValueSettings;
@@ -72,21 +74,19 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                                             Percent = g.Select(x => x.ur).Any() ? Math.Round(g.Select(x => x.ur).Average(x => x.Percent)) : default(double),
                                         }).ToListAsync(cancellationToken);
 
-            var query = from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
-                        join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
-                        join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
-                        join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
-                        where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
-                        (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
-                        group new { cum, ur, c } by new { cum.Number, c.CourseLevel } into g
-                        select new
-                        {
-                            DisplayOrder = g.Key.Number,
-                            CourseLevel = g.Key.CourseLevel,
-                            Percents = g.Select(x => x.ur).Where(x => x.Status == EnumResultStatus.Done).Any() ? g.Select(x => x.ur).Where(x => x.Status == EnumResultStatus.Done).Select(x => x.Percent).ToList() : default,
-                        };
-
-            var unitOveralls = await (query).ToListAsync(cancellationToken);
+            var unitOveralls = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
+                                      join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
+                                      join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
+                                      join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
+                                      where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
+                                      (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
+                                      group new { cum, ur, c } by new { cum.Number, c.CourseLevel } into g
+                                      select new
+                                      {
+                                          DisplayOrder = g.Key.Number,
+                                          CourseLevel = g.Key.CourseLevel,
+                                          Percents = g.Select(x => x.ur).Where(x => x.Status == EnumResultStatus.Done).Select(x => x.Percent).ToList(),
+                                      }).ToListAsync(cancellationToken);
 
             DashBoardLearningResultModel reportLearningResult = new DashBoardLearningResultModel
             {

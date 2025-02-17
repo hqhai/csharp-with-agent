@@ -66,11 +66,9 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
                 EndDate = request.EndDate,
-                PageSize = request.PageSize,
                 Filters = request.Filters,
                 IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
-                Page = request.Page,
                 CourseLevel = request.CourseLevel,
                 CourseType = request.CourseType,
                 OverallScore = request.OverallScore,
@@ -91,16 +89,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var studentIds = students.Select(x => x.Id).ToList();
-            var courseIds = students.Where(x => x.CourseId.HasValue).Select(x => x.CourseId!.Value).Distinct().ToList();
-
-            if (studentIds == null || courseIds == null)
-            {
-                return methodResult;
-            }
-
+            var courseIds = students.Select(x => x.CourseId).Distinct().ToList();
             var dataStudent = students.Select(x => new { StudentId = x.Id, CourseId = x.CourseId.GetValueOrDefault() }).ToList();
 
-            var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(students.Select(x => x.Id), x => x.StudentId)
+            var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                                           join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                           join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
                                           from ur in unitGroup.DefaultIfEmpty()
@@ -115,11 +107,9 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                               UnitResults = g.Select(x => x.ur).ToList(),
                                           }).ToListAsync(cancellationToken);
 
-            var mockTestResults = await _mockTestResultRepository.Queryable
-                                                                 .WhereBulkContains(studentIds, x => x.StudentId)
-                                                                 .WhereBulkContains(courseIds, x => x.CourseId)
-                                                                 .Where(x => x.Status == EnumResultStatus.Done)
-                                                                 .ToListAsync(cancellationToken);
+            var mockTestResults = await _mockTestResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
+                                          .Where(x => courseIds.Contains(x.CourseId) && x.Status == EnumResultStatus.Done)
+                                          .ToListAsync(cancellationToken);
 
             var mockTestGroupResults = mockTestResults.Join(dataStudent,
                                             mockTestResult => new { mockTestResult.CourseId, mockTestResult.StudentId },
@@ -137,7 +127,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                               SkillMockTestResults = x.Where(x => x.UnitId.HasValue).OrderBy(x => x.CreatedDate).ToList(),
                                           }).ToList();
 
-            var finalTestResults = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(students.Select(x => x.Id), x => x.StudentId)
+            var finalTestResults = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                                           join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                           join ftr in _finalTestResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, FinalTestId = cum.FinalTestId } equals new { ftr.StudentId, ftr.CourseId, FinalTestId = (Guid?)ftr.FinalTestId } into finalTestGroup
                                           from ftr in finalTestGroup.DefaultIfEmpty()
