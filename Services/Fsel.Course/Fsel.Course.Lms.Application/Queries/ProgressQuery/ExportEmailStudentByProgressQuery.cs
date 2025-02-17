@@ -131,8 +131,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var courseProgressCompletes = await _managerProgressHelper.GetProgressCompleteModuleExportAsync(students.Select(x => new CourseResultModel { StudentId = x.Id, CourseId = x.CourseId.GetValueOrDefault() }).ToList());
             var lessonResultIds = courseProgressCompletes.Where(x => x.LessonResult != null).Select(x => x.LessonResult).Select(x => x.Id).ToList();
 
-            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).ToListAsync(cancellationToken);
-            var lessonResults = await _lessonResultRepository.Queryable.Where(x => lessonResultIds.Contains(x.Id))
+            var courseResults = await _courseResultRepository.Queryable
+                                                             .Include(x => x.Course)
+                                                             .WhereBulkContains(studentIds, x => x.StudentId)
+                                                             .Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
+                                                             .ToListAsync(cancellationToken);
+
+            var lessonResults = await _lessonResultRepository.Queryable.WhereBulkContains(lessonResultIds, x => x.Id)
                 .Select(x => new OverallLessonResultModel
                 {
                     StudentId = x.StudentId,
