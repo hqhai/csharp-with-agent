@@ -176,6 +176,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 
             #endregion Validate
 
+            await _savePlacementTestAnswersPublisher.Publish(request, cancellationToken);
             if (request.IsSubmit)
             {
                 await _disconnectSocketCalculateTimePublisher.Publish(new SetTimeModuleModel
@@ -183,9 +184,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                     Type = nameof(PlacementTest),
                     ObjectId = sectionGroupResult.Id
                 }, cancellationToken);
+                Thread.Sleep(3000);
             }
-            await _savePlacementTestAnswersPublisher.Publish(request, cancellationToken);
-
             await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
                 sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit);

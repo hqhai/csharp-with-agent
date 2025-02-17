@@ -81,11 +81,11 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 return methodResult;
             }
 
-            if (lastOTP != null && IsValidTime(lastOTP.UpdatedDate ?? lastOTP.CreatedDate, DateTime.UtcNow))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.SentWithin30Seconds));
-                return methodResult;
-            }
+            //if (lastOTP != null && IsValidTime(lastOTP.UpdatedDate ?? lastOTP.CreatedDate, DateTime.UtcNow))
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.SentWithin30Seconds));
+            //    return methodResult;
+            //}
 
             if (lastOTP != null && lastOTP.Type == EnumUserOtpCodeType.SMS && lastOTP.Status == EnumOtpCodeStatus.Verified && !user.PhoneNumberConfirmed && !user.EmailConfirmed)
             {
@@ -140,11 +140,11 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             return methodResult;
         }
 
-        public bool IsValidTime(DateTime dateTime1, DateTime dateTime2)
-        {
-            TimeSpan difference = dateTime2 - dateTime1;
+        //public bool IsValidTime(DateTime dateTime1, DateTime dateTime2)
+        //{
+        //    TimeSpan difference = dateTime2 - dateTime1;
 
-            return difference.TotalSeconds < 30;
-        }
+        //    return difference.TotalSeconds < 30;
+        //}
     }
 }
