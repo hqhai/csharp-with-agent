@@ -116,6 +116,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             #region validate and Send OTP
 
+            //var isCheckEmail = !string.IsNullOrEmpty(request.Email) && user.Email != request.Email;
             //if (isCheckEmail)
             //{
             //    user.EmailConfirmed = false;

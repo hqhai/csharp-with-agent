@@ -67,6 +67,11 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                     b.Property<Guid>("ObjectId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(100)

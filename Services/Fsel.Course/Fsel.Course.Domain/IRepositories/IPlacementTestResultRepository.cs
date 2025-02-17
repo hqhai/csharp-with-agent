@@ -10,6 +10,6 @@ namespace Fsel.Course.Domain.IRepositories
     {
         Task<(EnumCourseLevel?, bool)> CheckByPassPlacementTestAsync(Guid studentId, int age);
 
-        Task<List<Guid>> GetStudentPtIdsAsync(DateTime? startDate, DateTime? endDate);
+        Task<List<Guid>> GetStudentPtIdsAsync(DateTime? startDate, DateTime? endDate, IList<Guid> studentIds);
     }
 }

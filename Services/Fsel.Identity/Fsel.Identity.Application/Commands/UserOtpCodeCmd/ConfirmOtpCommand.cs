@@ -82,6 +82,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     if (userTypeSMS != null)
                     {
                         userTypeSMS.Status = EnumOtpCodeStatus.Verified;
+                        _userOtpCodeRepository.Update(userTypeSMS);
                     }
                 }
 
