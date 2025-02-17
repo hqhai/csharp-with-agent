@@ -8,6 +8,7 @@ using Fsel.Sender.Application.Services.SystemServices;
 using Fsel.Sender.Domain.Models.Commands;
 using Fsel.Sender.Domain.Models.Entities;
 using Fsel.Sender.Domain.ValueSettings;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -22,12 +23,14 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
         private readonly AppSetting _appSetting;
         private readonly SESWrapper _wrapper;
         private readonly ISystemService _systemService;
+        private readonly IMediator _mediator;
 
-        public SendEmailCommandHandler(AppSetting appSetting, SESWrapper wrapper, ISystemService systemService)
+        public SendEmailCommandHandler(AppSetting appSetting, SESWrapper wrapper, ISystemService systemService, IMediator mediator)
         {
             _appSetting = appSetting;
             _wrapper = wrapper;
             _systemService = systemService;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<bool>> Handle(SendEmailCommand request, CancellationToken cancellationToken)
@@ -81,6 +84,18 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             {
                 var emailMessage = CreateEmailMessage(sendEmail);
                 await SendEmail(emailMessage);
+
+                // lưu lại lịch sử gửi mail
+                await _mediator.Send(new SaveMessageHistoryByTypeEmailCommand
+                {
+                    ToEmails = request.ToEmails,
+                    CcEmails = request.CcEmails,
+                    BccEmails = request.BccEmails,
+                    Content = request.Content,
+                    Status = EnumMessageHistoryStatus.Success,
+                    Template = request.Template
+                }, cancellationToken);
+
             }
             catch (Exception)
             {

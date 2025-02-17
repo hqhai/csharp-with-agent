@@ -1,20 +1,22 @@
+
 // Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.System.Application.Commands.BannerCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
-    using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.Banners;
     using Fsel.System.Domain.Models.EntityModels;
+    using Fsel.System.Infrastructure.Common;
     using global::System;
+    using global::System.Threading;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class CreateBannerCommand : CreateBannerCommandModel, IRequest<MethodResult<BannerModel>>
     {
@@ -24,11 +26,15 @@ namespace Fsel.System.Application.Commands.BannerCmd
     {
         private readonly IBannerRepository _bannerRepository;
         private readonly IMapper _mapper;
+        private readonly BannerConverter _bannerConverter;
 
-        public CreateBannerCommandHandler(IBannerRepository bannerRepository, IMapper mapper)
+        public CreateBannerCommandHandler(IBannerRepository bannerRepository,
+                                          IMapper mapper,
+                                          BannerConverter bannerConverter)
         {
             _bannerRepository = bannerRepository;
             _mapper = mapper;
+            _bannerConverter = bannerConverter;
         }
 
         public async Task<MethodResult<BannerModel>> Handle(CreateBannerCommand request, CancellationToken cancellationToken)
@@ -37,20 +43,16 @@ namespace Fsel.System.Application.Commands.BannerCmd
             var methodResult = new MethodResult<BannerModel>();
 
             #region Validation
-            if (request.StartDate >= request.EndDate)
+            if (await _bannerRepository.Queryable.AnyAsync(x => x.Code.ToLower().Trim() == request.Code.ToLower().Trim(), cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.StartDateGreaterThanEndDate));
+                methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.CodeAlreadyExist), nameof(request.Code), request.Code);
                 return methodResult;
             }
 
-            if (request.Type == EnumBannerType.Popup && string.IsNullOrEmpty(request.FilePath))
+            (bool isValid, string errorCode, string field, object? value) = _bannerConverter.ValidateBanner(request);
+            if (!isValid)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(EnumBannerType.Popup), request.FilePath);
-                return methodResult;
-            }
-            else if (request.Type == EnumBannerType.Warning && string.IsNullOrEmpty(request.Description))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(EnumBannerType.Warning), request.Description);
+                methodResult.AddErrorBadRequest(errorCode, field, value);
                 return methodResult;
             }
 
@@ -60,13 +62,15 @@ namespace Fsel.System.Application.Commands.BannerCmd
                 methodResult.AddErrorBadRequest(banner.ErrorMessages);
                 return methodResult;
             }
-
-            banner.StartDate = banner.StartDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
-            banner.EndDate = banner.EndDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
             #endregion Validation
 
             await _bannerRepository.ExecuteTransactionAsync(async () =>
             {
+                await _bannerConverter.BannerScopeHandler(request, null, cancellationToken);
+                banner.StartDate = banner.StartDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
+                banner.EndDate = banner.EndDate.ConvertTimeToUtc(EnumCountryKey.Vietnam);
+                banner.Status = true;
+
                 _bannerRepository.Add(banner);
                 await _bannerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -77,5 +81,7 @@ namespace Fsel.System.Application.Commands.BannerCmd
 
             return methodResult;
         }
+
+
     }
 }

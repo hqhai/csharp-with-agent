@@ -11,5 +11,6 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
         public Guid? UserId { get; set; }
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
+        public UserInformationModel? User { get; set; }
     }
 }

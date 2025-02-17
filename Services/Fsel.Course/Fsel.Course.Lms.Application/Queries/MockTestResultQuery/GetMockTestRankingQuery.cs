@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -20,12 +21,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetMockTestRankingQuery : IRequest<MethodResult<IList<TestResultRankingModel>>>
+    public class GetMockTestRankingQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<TestResultRankingModel>>>
     {
         public Guid MockTestResultId { get; set; }
     }
 
-    public class GetMockTestRankingQueryHandler : IRequestHandler<GetMockTestRankingQuery, MethodResult<IList<TestResultRankingModel>>>
+    public class GetMockTestRankingQueryHandler : IRequestHandler<GetMockTestRankingQuery, MethodResult<PagingItemsModel<TestResultRankingModel>>>
     {
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
@@ -40,10 +41,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             _mockTestResultRepository = mockTestResultRepository;
         }
 
-        public async Task<MethodResult<IList<TestResultRankingModel>>> Handle(GetMockTestRankingQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<TestResultRankingModel>>> Handle(GetMockTestRankingQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<TestResultRankingModel>> methodResult = new MethodResult<IList<TestResultRankingModel>>();
+            MethodResult<PagingItemsModel<TestResultRankingModel>> methodResult = new MethodResult<PagingItemsModel<TestResultRankingModel>>();
 
             List<TestResultRankingModel> testResultRankings = new List<TestResultRankingModel>();
 
@@ -59,14 +60,17 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             {
                 return methodResult;
             }
+
+            var paging = classStudentIds.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList() ?? new List<Guid>();
+
             var mockTestResults = await _mockTestResultRepository.Queryable
                                 .Where(x => x.CourseId == mockTestResult.CourseId && x.MockTestId == mockTestResult.MockTestId)
                                 .Where(x => !mockTestResult.UnitId.HasValue || x.UnitId == mockTestResult.UnitId)
-                                .WhereBulkContains(classStudentIds, x => x.StudentId)
+                                .WhereBulkContains(paging, x => x.StudentId)
                                 .Where(x => x.Status == EnumResultStatus.Done)
                                 .ToListAsync(cancellationToken);
 
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(classStudentIds);
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(paging);
             var students = studentResults?.Content?.Result;
 
             if (students != null)
@@ -86,7 +90,9 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 }
             }
 
-            methodResult.Result = testResultRankings.OrderByDescending(x => x.Status).ThenByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
+            int totalItem = classStudentIds.Count;
+            testResultRankings = testResultRankings.OrderByDescending(x => x.Status).ThenByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
+            methodResult.Result = new PagingItemsModel<TestResultRankingModel>(testResultRankings, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

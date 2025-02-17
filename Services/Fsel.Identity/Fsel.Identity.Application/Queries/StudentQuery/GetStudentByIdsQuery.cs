@@ -47,6 +47,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
             var students = await _studentRepository.Queryable
                     .Include(x => x.Human)
+                    .ThenInclude(u => u.User)
                     .Include(pr => pr.ParentStudents)
                         .ThenInclude(p => p.Parent)
                         .ThenInclude(hm => hm.Human)

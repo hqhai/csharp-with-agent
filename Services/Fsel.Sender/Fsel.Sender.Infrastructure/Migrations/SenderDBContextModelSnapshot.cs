@@ -87,6 +87,9 @@ namespace Fsel.Sender.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int?>("Template")
+                        .HasColumnType("int");
+
                     b.Property<string>("To")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
