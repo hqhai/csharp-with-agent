@@ -13,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -83,18 +82,25 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
 
             var students = studentResultToEmail.Content?.Result?.ToList();
             var studentIds = students?.Select(x => x.Id).ToList() ?? new List<Guid>();
-            var placementTestResultGroups = await _placementTestResultRepository.Queryable
-                                            .Where(x => studentIds.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
-                                            .GroupBy(x => x.StudentId)
+            var placementTestResults = await _placementTestResultRepository.Queryable
+                                            .Where(x => x.Status == EnumResultStatus.Done)
+                                            .WhereBulkContains(studentIds, x => (x.StudentId))
+                                            .ToListAsync(cancellationToken);
+
+            var placementTestResultGroups = placementTestResults.GroupBy(x => x.StudentId)
                                             .Select(x => new
                                             {
                                                 StudentId = x.Key,
                                                 PlacementTestStart = x.Select(x => x).OrderBy(x => x.CreatedDate).FirstOrDefault(),
                                                 PlacementTestEnd = x.Select(x => x).OrderByDescending(x => x.CreatedDate).FirstOrDefault(),
                                             })
-                                            .ToListAsync(cancellationToken);
+                                            .ToList();
 
-            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).ToListAsync(cancellationToken);
+            var courseResults = await _courseResultRepository.Queryable
+                                                             .Include(x => x.Course)
+                                                             .WhereBulkContains(studentIds, x => x.StudentId)
+                                                             .Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
+                                                             .ToListAsync(cancellationToken);
             foreach (var item in placementTestResultGroups)
             {
                 var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
