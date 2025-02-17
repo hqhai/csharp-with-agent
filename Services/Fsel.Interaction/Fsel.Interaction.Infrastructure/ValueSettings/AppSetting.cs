@@ -11,11 +11,19 @@ namespace Fsel.Interaction.Infrastructure.ValueSettings
         public HarmfulContentConfigs? HarmfulContentConfigs { get; set; }
         public new Services? Services { get; set; }
         public CoinConfig? CoinConfig { get; set; }
+        public OpenAiConfig? OpenAiConfig { get; set; }
     }
 
     public class ConstantUrl
     {
         public string? ConfirmOtpUrl { get; set; }
+    }
+
+    public class OpenAiConfig
+    {
+        public string? Uri { get; set; }
+        public string? ApiKey { get; set; }
+        public string? ModelCommentAI { get; set; }
     }
 
     public class HarmfulContentConfigs

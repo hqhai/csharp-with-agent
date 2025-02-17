@@ -76,16 +76,15 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             var student = user.Human?.Student;
             var studentId = student?.Id;
 
-            var studentCompetitionEvent = await _studentCompetitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.StudentId == studentId, cancellationToken);
+            var studentCompetitionEvent = await _studentCompetitionEventsRepository.Queryable.Include(p => p.CompetitionEvents).ThenInclude(p => p.CompetitionEventParent).ThenInclude(p => p.CompetitionEventParent).FirstOrDefaultAsync(p => p.StudentId == studentId, cancellationToken);
+
             if (studentCompetitionEvent == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.NotInEventHN), nameof(request.PhoneNumber), request.PhoneNumber);
                 return methodResult;
             }
 
-            var competitionEvent = await _competitionEventsRepository.Queryable.Include(p => p.CompetitionEventParent).ThenInclude(p => p.CompetitionEventParent).FirstOrDefaultAsync(p => p.Id == studentCompetitionEvent.CompetitionEventId, cancellationToken);
-
-            var parentCompetitionEvent = competitionEvent?.CompetitionEventParent?.CompetitionEventParent;
+            var parentCompetitionEvent = studentCompetitionEvent.CompetitionEvents?.CompetitionEventParent?.CompetitionEventParent;
 
             if (parentCompetitionEvent == null || parentCompetitionEvent.EventCode != request.EventCode)
             {
