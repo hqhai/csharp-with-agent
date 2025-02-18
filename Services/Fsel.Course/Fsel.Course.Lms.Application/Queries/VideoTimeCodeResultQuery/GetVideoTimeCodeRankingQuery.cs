@@ -13,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Helpers;
@@ -35,16 +34,16 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        private readonly ITrainingService _trainingService;
+        private readonly ICourseResultRepository _courseResultRepository;
 
-        public GetVideoTimeCodeRankingQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, ILessonResultRepository lessonResultRepository, IVideoResultRepository videoResultRepository, IMapper mapper, IUserService userService, ITrainingService trainingService)
+        public GetVideoTimeCodeRankingQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, ILessonResultRepository lessonResultRepository, IVideoResultRepository videoResultRepository, IMapper mapper, IUserService userService, ICourseResultRepository courseResultRepository)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _videoResultRepository = videoResultRepository;
             _mapper = mapper;
             _userService = userService;
-            _trainingService = trainingService;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<TestResultRankingModel>>> Handle(GetVideoTimeCodeRankingQuery request, CancellationToken cancellationToken)
@@ -88,7 +87,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                 return methodResult;
             }
 
-            var (students, count) = await GetStudents(videoTimeCodeResult.StudentId, request);
+            var (students, count) = await GetStudents(lessonResult.CourseId, request);
             if (students == null)
             {
                 return methodResult;
@@ -121,10 +120,10 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             return methodResult;
         }
 
-        private async Task<(IList<StudentModel>?, int count)> GetStudents(Guid studentId, GetVideoTimeCodeRankingQuery request)
+        private async Task<(IList<StudentModel>?, int count)> GetStudents(Guid courseId, GetVideoTimeCodeRankingQuery request)
         {
-            var currentClass = await _trainingService.GetClassByStudentId(studentId);
-            var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
+            var currentClass = await _courseResultRepository.Queryable.Where(x => x.CourseId == courseId).Select(x => x.StudentId).ToListAsync();
+            var classStudentIds = currentClass.Distinct().ToList();
             if (classStudentIds == null)
             {
                 return default;
@@ -158,7 +157,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
                 return methodResult;
             }
-            var (students, count) = await GetStudents(lessonResult.StudentId, request);
+            var (students, count) = await GetStudents(lessonResult.CourseId, request);
             if (students == null)
             {
                 return methodResult;
