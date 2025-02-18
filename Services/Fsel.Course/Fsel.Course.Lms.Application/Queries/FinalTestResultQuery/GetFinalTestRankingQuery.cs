@@ -13,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -30,14 +29,14 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        private readonly ITrainingService _trainingService;
+        private readonly ICourseResultRepository _courseResultRepository;
 
-        public GetFinalTestRankingQueryHandler(IFinalTestResultRepository finalTestResultRepository, IMapper mapper, IUserService userService, ITrainingService trainingService)
+        public GetFinalTestRankingQueryHandler(IFinalTestResultRepository finalTestResultRepository, IMapper mapper, IUserService userService, ICourseResultRepository courseResultRepository)
         {
             _finalTestResultRepository = finalTestResultRepository;
             _mapper = mapper;
             _userService = userService;
-            _trainingService = trainingService;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<TestResultRankingModel>>> Handle(GetFinalTestRankingQuery request, CancellationToken cancellationToken)
@@ -53,8 +52,13 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestResult));
                 return methodResult;
             }
-            var currentClass = await _trainingService.GetClassByStudentId(finalTestResult.StudentId);
-            var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
+
+            var classStudentIds = await _courseResultRepository.Queryable
+                                                               .Where(x => x.CourseId == finalTestResult.CourseId)
+                                                               .Select(x => x.StudentId)
+                                                               .Distinct()
+                                                               .ToListAsync(cancellationToken);
+
             if (classStudentIds == null || !classStudentIds.Any())
             {
                 return methodResult;
