@@ -49,7 +49,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
 
             if (request.ListSchoolGrade != null && request.ListSchoolGrade.Any())
             {
-                query = query.WhereBulkContains(request.ListSchoolGrade, x => x.SchoolClass);
+                query = query.WhereBulkContains(request.ListSchoolGrade, x => x.SchoolGrade);
             }
 
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
