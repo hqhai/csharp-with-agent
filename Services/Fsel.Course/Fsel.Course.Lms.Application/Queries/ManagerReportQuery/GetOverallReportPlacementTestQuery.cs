@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 {
     using System;
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Enums;
