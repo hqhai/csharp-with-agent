@@ -32,9 +32,12 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             var methodResult = new MethodResult<List<AveragePTPointModel>>();
             List<AveragePTPointModel> average = new List<AveragePTPointModel>();
 
-            List<Guid>? studentIds = request.PointByIdQueryModels.SelectMany(x => x.StudentIds!).ToList();
+            List<Guid> studentIds = request.PointByIdQueryModels.SelectMany(x => x.StudentIds!).ToList();
 
-            var ptResult = await _placementTestResultRepository.Queryable.Where(x => studentIds.Contains(x.StudentId)).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
+            var ptResult = await _placementTestResultRepository.Queryable
+                                                               .WhereBulkContains(studentIds, x => x.StudentId)
+                                                               .OrderByDescending(p => p.CreatedDate)
+                                                               .ToListAsync(cancellationToken);
 
             foreach (var item in request.PointByIdQueryModels)
             {
