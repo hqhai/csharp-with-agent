@@ -6,7 +6,6 @@ using Fsel.Common.Helpers;
 using Fsel.Sender.Domain.Models.Commands;
 using Fsel.Sender.Domain.ValueSettings;
 using Fsel.Shared.Constants;
-using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -59,6 +58,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
                 Content = body,
                 IsCCEmail = request.IsCCEmail,
                 IsCCEmailDefault = request.IsCCEmailDefault,
+                Template = request.Template
             }, cancellationToken);
 
             #endregion Validation

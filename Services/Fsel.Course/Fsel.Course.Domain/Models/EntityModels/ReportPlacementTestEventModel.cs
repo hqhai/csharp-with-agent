@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class ReportPlacementTestEventModel
     {
+        public Guid LocationId { get; set; }
         public string? LocationName { get; set; }
 
         /// <summary>
@@ -88,6 +89,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class ReportPlacementTestEventSchoolModel
     {
+        public Guid SchoolId { get; set; }
         public string? SchoolName { get; set; }
 
         /// <summary>
@@ -152,6 +154,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
             }
         }
 
+        public int NumberStudentVerifiedSchool { get; set; }
         public IList<LearningProgressLearnModel> LearningProgressLearns { get; set; } = new List<LearningProgressLearnModel>();
         public IList<ReportCourseLevelModel>? ReportCourseLevels { get; set; }
     }

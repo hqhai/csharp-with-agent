@@ -88,6 +88,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                                               SchoolId = baseQ.SchoolId.GetValueOrDefault(),
                                               StudentId = baseQ.Id,
                                               IsConfirmed = user.EmailConfirmed || user.PhoneNumberConfirmed,
+                                              UserId = human.UserId.GetValueOrDefault(),
                                           }).ToListAsync(cancellationToken);
 
             var reportCompetitionEvents = new List<ReportCompetitionEventModel>();
@@ -97,12 +98,14 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                 var studentIds = studentDistricts.Select(x => x.StudentId).Distinct().ToList();
                 var reportCompetition = new ReportCompetitionEventModel
                 {
+                    LocationId = item.LocationId.GetValueOrDefault(),
                     DistrictName = locationDistricts?.FirstOrDefault(x => x.Id == item.LocationId)?.Name,
                     NumberRegisteredSchool = schools.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.Id)).Count(),
                     NumberActualParticipatingSchool = studentDistricts.Select(x => x.SchoolId).Distinct().Count(),
                     NumberValidStudentAccount = studentIds.Count,
-                    NumberStudentCompleteVerify = studentDistricts.Count(x => x.IsConfirmed),
+                    NumberStudentCompleteVerify = studentDistricts.Where(x => x.IsConfirmed).Select(x => x.UserId).Distinct().Count(),
                     StudentIds = studentIds,
+                    UserIds = studentDistricts.Select(x => x.UserId).Distinct().ToList(),
                 };
                 reportCompetitionEvents.Add(reportCompetition);
             }

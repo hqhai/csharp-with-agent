@@ -69,9 +69,17 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                          IsActive = x.UnitLessons.Any()
                      });
 
+            request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                lessonQuery = lessonQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    lessonQuery = lessonQuery.Where(m => m.Id == guid);
+                }
+                else
+                {
+                    lessonQuery = lessonQuery.Where(m => m.Name != null && m.Name.Contains(request.Keyword));
+                }
             }
 
             if (request.TeacherId != null)

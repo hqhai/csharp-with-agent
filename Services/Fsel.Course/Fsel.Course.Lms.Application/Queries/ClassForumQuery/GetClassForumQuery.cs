@@ -119,14 +119,16 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             var query = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
-                .Where(x => x.ClassForumId == classForum.Id && classStudentIds.Contains(x.StudentId) && x.Status.HasValue && x.Status == EnumClassForumResultStatus.Graded)
+                .WhereBulkContains(classStudentIds, x => x.StudentId)
+                .Where(x => x.ClassForumId == classForum.Id && x.Status.HasValue && x.Status == EnumClassForumResultStatus.Graded)
                 .OrderBy(x => x.CreatedDate)
                 .ToListAsync(cancellationToken);
 
             //Lấy ngẫu nhiên 2 học sinh khác lớp nhưng cùng lesson và course
             var totalRecords = await _classForumResultRepository.Queryable
-                            .Where(x => x.ClassForumId == classForum.Id && !classStudentIds.Contains(x.StudentId))
-                            .CountAsync(cancellationToken);
+                                                                .WhereBulkNotContains(classStudentIds, x => x.StudentId)
+                                                                .Where(x => x.ClassForumId == classForum.Id)
+                                                                .CountAsync(cancellationToken);
             var skip = totalRecords < STUDENT_RANDOM_TAKE ? 0 : new Random().Next(0, totalRecords - STUDENT_RANDOM_TAKE);
             var classForumResults = _mapper.Map<IList<ClassForumResultModel>>(query);
 
@@ -187,7 +189,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             var result = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
-                .Where(x => x.ClassForumId == classForum.Id && !classStudentIds!.Contains(x.StudentId) && x.Status != EnumClassForumResultStatus.Draft && x.Status != EnumClassForumResultStatus.Pending)
+                .WhereBulkNotContains(classStudentIds, x => x.StudentId)
+                .Where(x => x.ClassForumId == classForum.Id && x.Status != EnumClassForumResultStatus.Draft && x.Status != EnumClassForumResultStatus.Pending)
                 .Skip(skip)
                 .Take(quantityRecord)
                 .ToListAsync(cancellationToken);

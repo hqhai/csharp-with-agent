@@ -37,7 +37,10 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
                 return methodResult;
             }
             List<StudentPTPointModel> studentPTPoints = new List<StudentPTPointModel>();
-            var ptRs = await _placementTestResultRepository.Queryable.Where(p => request.StudentIds.Contains(p.StudentId)).OrderByDescending(x => x.CreatedDate).ToListAsync(cancellationToken);
+            var ptRs = await _placementTestResultRepository.Queryable
+                                                           .WhereBulkContains(request.StudentIds, p => p.StudentId)
+                                                           .OrderByDescending(x => x.CreatedDate)
+                                                           .ToListAsync(cancellationToken);
             foreach (var item in request.StudentIds)
             {
                 studentPTPoints.Add(
