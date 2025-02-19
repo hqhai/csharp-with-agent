@@ -63,11 +63,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var studentIds = students.Select(x => x.Id).ToList();
-            if (studentIds == null)
-            {
-                return methodResult;
-            }
-
             var placementTestGroupResults = await _placementTestGroupResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId).ToListAsync(cancellationToken: cancellationToken);
             var placementTestResults = (await _placementTestResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId).ToListAsync(cancellationToken))
                                         .GroupBy(x => x.StudentId)
