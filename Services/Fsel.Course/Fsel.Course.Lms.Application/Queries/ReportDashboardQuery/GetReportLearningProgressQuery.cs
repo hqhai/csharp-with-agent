@@ -102,98 +102,109 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             {
                 courseLevels = request.CourseLevels.Intersect(courseLevels).ToList();
             }
-            var query = from baseQ in _courseResultRepository.Queryable
-                        join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
-                        join lr in _lessonResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId } equals new { lr.StudentId, lr.CourseId }
-                        where baseQ.WorkingStatus == EnumWorkingStatus.Active && studentIds.Contains(baseQ.StudentId) &&
-                        (!request.EndDate.HasValue || (lr.UpdatedDate ?? lr.CreatedDate).Date <= request.EndDate.Value.Date) &&
-                        ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
-                        lr.Status == EnumResultStatus.Done
-                        group new { lr } by new { baseQ.CourseId, baseQ.StudentId } into g
-                        select g.OrderByDescending(x => x.lr.UpdatedDate).ThenByDescending(x => x.lr.CreatedDate)
-                        .Select(x => isMaxHoursCompleted).FirstOrDefault();
 
+            var queryPieChart = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
+                                       join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
+                                       join lr in _lessonResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId } equals new { lr.StudentId, lr.CourseId }
+                                       where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
+                                       (!request.EndDate.HasValue || (lr.UpdatedDate ?? lr.CreatedDate).Date <= request.EndDate.Value.Date) &&
+                                       ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
+                                       lr.Status == EnumResultStatus.Done
+                                       group new { lr } by new { baseQ.CourseId, baseQ.StudentId } into g
+                                       select g.OrderByDescending(x => x.lr.UpdatedDate).ThenByDescending(x => x.lr.CreatedDate)
+                                       .Select(x => isMaxHoursCompleted).FirstOrDefault()).ToListAsync(cancellationToken);
             //.Select(x => !x.lr.MaxHoursCompleted.HasValue || ((x.lr.CompletionDate ?? x.lr.UpdatedDate) - x.lr.NewDate).GetValueOrDefault().TotalSeconds <= x.lr.MaxHoursCompleted).FirstOrDefault();
 
-            var queryPieChart = await query.ToListAsync(cancellationToken);
+            var totalStudents = queryPieChart.Count(x => x);
+            var totalBehindSchedule = queryPieChart.Count(x => !x);
+            var totalOnSchedule = totalStudents - totalBehindSchedule;
+
             var reportLearningProgress = new DashBoardLearningProgressModel
             {
-                TotalStudentBehindSchedule = queryPieChart.Count(x => !x),
-                TotalStudentOnSchedule = queryPieChart.Count(x => x),
+                TotalStudentBehindSchedule = totalBehindSchedule,
+                TotalStudentOnSchedule = totalOnSchedule,
                 LearningProgressChart = new LearningProgressChartModel
                 {
                     Type = EnumChartType.PieChart,
-                    LearningProgressDatas = queryPieChart.Any() ? queryPieChart.GroupBy(x => x).Select(x => new DataPieChartModel
-                    {
-                        Label = x.Key ? nameof(EnumLearningProgress.OnSchedule) : nameof(EnumLearningProgress.BehindSchedule),
-                        Percent = (int)NumberHelper.GetPercent(queryPieChart.Count(y => y == x.Key), queryPieChart.Count),
-                        Value = queryPieChart.Count(y => y == x.Key)
-                    }).ToList()
-                    : ConvertHelper.EnumToList<EnumLearningProgress>().Select(x => new DataPieChartModel { Label = x.ToString() }).ToList()
+                    LearningProgressDatas = totalStudents > 0
+                        ? new List<DataPieChartModel>
+                        {
+                            new DataPieChartModel
+                            {
+                                Label = nameof(EnumLearningProgress.OnSchedule),
+                                Percent = (int)NumberHelper.GetPercent(totalOnSchedule, totalStudents),
+                                Value = totalOnSchedule
+                            },
+                            new DataPieChartModel
+                            {
+                                Label = nameof(EnumLearningProgress.BehindSchedule),
+                                Percent = (int)NumberHelper.GetPercent(totalBehindSchedule, totalStudents),
+                                Value = totalBehindSchedule
+                            }
+                        } : ConvertHelper.EnumToList<EnumLearningProgress>()
+                                      .Select(x => new DataPieChartModel { Label = x.ToString() })
+                                      .ToList()
                 }
             };
             if (request.Type == nameof(Unit))
             {
-                var unitOveralls = await (from baseQ in _courseResultRepository.Queryable
-                                          join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
-                                          join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
-                                          join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
-                                          where baseQ.WorkingStatus == EnumWorkingStatus.Active && studentIds.Contains(baseQ.StudentId) &&
-                                          ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
-                                          (!request.EndDate.HasValue || (ur.CompletionDate ?? ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
-                                          group new { cum, ur } by new { cum.Number } into g
-                                          select new
-                                          {
-                                              DisplayOrder = g.Key.Number,
-                                              TotalUnitDone = g.Select(x => x.ur).Where(x => x.Status == EnumResultStatus.Done).Count(),
-                                          }).ToListAsync(cancellationToken);
+                var unitOverallsDict = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
+                                              join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
+                                              join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
+                                              join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId }
+                                                 equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
+                                              where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
+                                                    ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
+                                                    (!request.EndDate.HasValue || (ur.CompletionDate ?? ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
+                                              group ur by cum.Number into g
+                                              select new
+                                              {
+                                                  DisplayOrder = g.Key,
+                                                  TotalUnitDone = g.Where(x => x.Status == EnumResultStatus.Done).Select(x => x.Id).Distinct().Count()
+                                              }).ToDictionaryAsync(x => x.DisplayOrder, x => x.TotalUnitDone, cancellationToken);
+
                 reportLearningProgress.OverallLearningProgress = new BaseChartResultModel
                 {
                     Type = EnumChartType.LineChart,
                     DataCharts = Enumerable.Range(1, CourseProgressValue.CountUnitAca).Select(item =>
-                    {
-                        var unitOverall = unitOveralls.FirstOrDefault(x => x.DisplayOrder == item);
-                        return new DataChartModel
+                        new DataChartModel
                         {
                             Label = $"{item}",
-                            Value = unitOverall?.TotalUnitDone ?? default,
-                        };
-                    }).ToList()
+                            Value = unitOverallsDict.TryGetValue(item, out var totalDone) ? totalDone : 0
+                        }).ToList()
                 };
             }
             if (request.Type == nameof(Lesson))
             {
-                var lessonOveralls = await (from baseQ in _courseResultRepository.Queryable
-                                            join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
-                                            join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
-                                            join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
-                                            join lr in _lessonResultRepository.Queryable on new { ur.StudentId, ur.CourseId, ur.UnitId } equals new { lr.StudentId, lr.CourseId, lr.UnitId }
-                                            join ul in _unitLessonRepository.Queryable on new { lr.UnitId, lr.LessonId } equals new { ul.UnitId, ul.LessonId }
+                var lessonOverallsDict = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
+                                                join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
+                                                join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
+                                                join lr in _lessonResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId }
+                                                    equals new { lr.StudentId, lr.CourseId, UnitId = (Guid?)lr.UnitId }
+                                                join ul in _unitLessonRepository.Queryable on new { lr.UnitId, lr.LessonId }
+                                                    equals new { ul.UnitId, ul.LessonId }
 
-                                            where baseQ.WorkingStatus == EnumWorkingStatus.Active && studentIds.Contains(baseQ.StudentId) &&
-                                            ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
-                                            (!request.EndDate.HasValue || (ur.CompletionDate ?? ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date) &&
-                                            cum.DisplayOrder == request.DisplayOrderUnit
+                                                where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
+                                                      ((courseLevels == null || !courseLevels.Any()) || courseLevels.Contains(c.CourseLevel)) &&
+                                                      (!request.EndDate.HasValue || (lr.UpdatedDate ?? lr.CreatedDate).Date <= request.EndDate.Value.Date) &&
+                                                      cum.DisplayOrder == request.DisplayOrderUnit
 
-                                            group lr by ul.DisplayOrder into g
-                                            select new
-                                            {
-                                                DisplayOrder = g.Key,
-                                                TotalLessonDone = g.Select(x => x).Where(x => x.Status == EnumResultStatus.Done).Count(),
-                                            }).ToListAsync(cancellationToken);
+                                                group lr by ul.DisplayOrder into g
+                                                select new
+                                                {
+                                                    DisplayOrder = g.Key,
+                                                    TotalLessonDone = g.Count(x => x.Status == EnumResultStatus.Done)
+                                                }).ToDictionaryAsync(x => x.DisplayOrder, x => x.TotalLessonDone, cancellationToken);
 
                 reportLearningProgress.OverallLearningProgress = new BaseChartResultModel
                 {
                     Type = EnumChartType.LineChart,
                     DataCharts = Enumerable.Range(1, CourseProgressValue.CountLessonAca).Select(item =>
-                    {
-                        var lessonOverall = lessonOveralls.FirstOrDefault(x => x.DisplayOrder == item);
-                        return new DataChartModel
+                        new DataChartModel
                         {
                             Label = $"{item}",
-                            Value = lessonOverall?.TotalLessonDone ?? default,
-                        };
-                    }).ToList()
+                            Value = lessonOverallsDict.TryGetValue(item, out var totalDone) ? totalDone : 0
+                        }).ToList()
                 };
             }
             methodResult.Result = reportLearningProgress;

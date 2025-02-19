@@ -78,6 +78,7 @@ namespace Fsel.Shared.Constants
         public const string IeltsStudentResult = "Resources//IeltsStudentsResult.json";
         public const string AcademicStudentsResult = "Resources//AcademicStudentsResult.json";
         public const string SchoolEventRules = "Resources//SchoolEventRules.json";
+        public const string DisplayOrderConfig = "Resources//DisplayOrderConfig.json";
 
         public const string ManagerReportPlacementTestExcel = "Resources//ManagerReports//BaoCaoPlacmentTest.xlsx";
         public const string ManagerReportLearningProgressAcaExcel = "Resources//ManagerReports//BaoCaoTienDoHocTapAca.xlsx";
@@ -87,11 +88,16 @@ namespace Fsel.Shared.Constants
         public const string ManagerReportLearningResultIELTSExcel = "Resources//ManagerReports//BaoCaoKetQuaHocTapIELTS.xlsx";
         public const string ReportPTEvent = "Resources//ExportExcelTemplates//ReportPTEvent.xlsx";
         public const string ReportPTEventSchool = "Resources//ExportExcelTemplates//ReportPTEventSchool.xlsx";
+        public const string ReportPTEventDistrictSchool = "Resources//ExportExcelTemplates//ReportPTEventDistrictSchool.xlsx";
         public const string ReportLearningDistrictEvent = "Resources//ExportExcelTemplates//ReportLearningDistrictEvent.xlsx";
         public const string ReportLearningSchoolEvent = "Resources//ExportExcelTemplates//ReportLearningSchoolEvent.xlsx";
         public const string BaoCaoReportStudentEvent = "Resources//ExportExcelTemplates//BaoCaoReportStudentEvent.xlsx";
 
         public const string ConfigPlacementTest = "Resources//PlacementTestConfigAgeLevel.json";
         public const string ConfigViewReportLevel = "Resources//PlacementTestReportViewConfig.json";
+
+        public const string ContentAICheckComment = "Resources//ContentAICheckComment.txt";
+        public const string ReportSurveyQuestionEvent = "Resources//ExportExcelTemplates//SurveyQuestionReport.xlsx";
+        public const string ReportSurveyQuestionEventSchool = "Resources//ExportExcelTemplates//SurveyQuestionReportSchool.xlsx";
     }
 }

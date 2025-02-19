@@ -2,24 +2,17 @@
 
 namespace Fsel.Identity.Application.Commands.AdminCmd
 {
-    using System.Globalization;
     using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.Managers;
-    using Fsel.Identity.Application.Commands.AuthCmd;
-    using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Identity.Domain.Models.EntityModels;
-    using Fsel.Identity.Infrastructure.ValueSettings;
-    using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
-    using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -34,24 +27,18 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly IMapper _mapper;
         private readonly ITrainingService _trainingService;
         private readonly IOrderService _orderService;
-        private readonly AppSetting _appSetting;
-        private readonly IMediator _mediator;
         private readonly IHumanRepository _humanRepository;
 
         public UpdateStudentByAdminCommandHandler(UserManager<User> userManager,
             IMapper mapper,
             ITrainingService trainingService,
             IOrderService orderService,
-            AppSetting appSetting,
-            IMediator mediator,
             IHumanRepository humanRepository)
         {
             _userManager = userManager;
             _mapper = mapper;
             _trainingService = trainingService;
             _orderService = orderService;
-            _appSetting = appSetting;
-            _mediator = mediator;
             _humanRepository = humanRepository;
         }
 
@@ -71,23 +58,30 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
-            var isCheckEmail = !string.IsNullOrEmpty(request.Email) && user.Email != request.Email;
-            if (isCheckEmail)
-            {
-                await CheckDuplicateAsync(user, request.Email);
-            }
+
             #region Validate PhoneNumber
+
             if (request.PhoneNumber != null && user.UserName == user.PhoneNumber)
             {
                 var checkUserName = await _userManager.Users.AnyAsync(x => x.Id != user.Id && x.UserName == request.PhoneNumber, cancellationToken);
-
                 if (checkUserName)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.PhoneNumber));
                     return methodResult;
                 }
             }
-            #endregion
+            if (!string.IsNullOrEmpty(request.Email))
+            {
+                var checkEmail = await _userManager.Users.AnyAsync(x => x.Id != user.Id && x.Email == request.Email, cancellationToken);
+                if (checkEmail)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Email), request.Email);
+                    return methodResult;
+                }
+            }
+
+            #endregion Validate PhoneNumber
+
             #region Validate User
 
             var student = user.Human?.Student;
@@ -122,6 +116,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             #region validate and Send OTP
 
+            //var isCheckEmail = !string.IsNullOrEmpty(request.Email) && user.Email != request.Email;
             //if (isCheckEmail)
             //{
             //    user.EmailConfirmed = false;
@@ -129,7 +124,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             //    var param = new SendOtpTemplateModel
             //    {
             //        OtpCode = userOtpCode.Result,
-            //        AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting!.ConstantUrl!.ConfirmOtpUrl!, userOtpCode.Result),
+            //        AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting!.ConstantUrl!.ConfirmOtpUrl!, userOtpCode.Result, user.Id),
             //        OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidDay, _appSetting!.Otp!.StepDayWithAdmin)
             //    };
             //    var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
@@ -150,39 +145,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = await GetUser(user, student);
             return methodResult;
-        }
-
-        private async Task CheckDuplicateAsync(User user, string? otherEmail)
-        {
-            var userOther = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Email == otherEmail && x.Id != user.Id);
-            if (userOther == null)
-            {
-                return;
-            }
-            await UpdateUserToEmailAsync(userOther, user.Email);
-        }
-
-        private async Task UpdateUserToEmailAsync(User user, string? email)
-        {
-            int dem = 1;
-            var emailCheck = email;
-            while (await _userManager.Users.AnyAsync(x => x.Email.ToLower().Trim() == emailCheck.ToLower().Trim()))
-            {
-                emailCheck = dem + email;
-                dem++;
-            }
-            email = emailCheck;
-
-            //email cần thay đổi
-            user.Email = email;
-            user.NormalizedEmail = email;
-            user.UserName = email;
-            user.NormalizedUserName = email;
-            if (user.Human != null)
-            {
-                user.Human.Email = email;
-            }
-            await _userManager.UpdateAsync(user).ConfigureAwait(false);
         }
 
         private async Task<StudentModel> GetUser(User user, Student? student)

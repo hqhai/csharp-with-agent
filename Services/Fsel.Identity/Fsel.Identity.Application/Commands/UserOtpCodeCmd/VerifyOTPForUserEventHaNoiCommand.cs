@@ -26,15 +26,11 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     {
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly UserManager<User> _userManager;
-        private readonly ICompetitionEventsRepository _competitionEventsRepository;
-        private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
 
-        public VerifyOTPForUserEventHaNoiCommandHandler(IUserOtpCodeRepository userOtpCodeRepository, UserManager<User> userManager, ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository)
+        public VerifyOTPForUserEventHaNoiCommandHandler(IUserOtpCodeRepository userOtpCodeRepository, UserManager<User> userManager)
         {
             _userOtpCodeRepository = userOtpCodeRepository;
             _userManager = userManager;
-            _competitionEventsRepository = competitionEventsRepository;
-            _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(VerifyOTPForUserEventHaNoiCommand request, CancellationToken cancellationToken)
@@ -48,12 +44,22 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 return methodResult;
             }
 
-            var user = await _userManager.Users.Include(p => p.UserOtpCodes).Include(p => p.Human).ThenInclude(p => p.Student).FirstOrDefaultAsync(p => p.UserName == request.PhoneNumber, cancellationToken);
+            var user = await _userManager.Users.FirstOrDefaultAsync(p => p.UserName == request.PhoneNumber, cancellationToken);
 
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.UserDoesNotExist), nameof(request.PhoneNumber), request.PhoneNumber);
-                return methodResult;
+                var isPhoneNumberAlreadyExist = await _userManager.Users.AnyAsync(p => p.PhoneNumber == request.PhoneNumber, cancellationToken);
+
+                if (isPhoneNumberAlreadyExist)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.PhoneNumberAlreadyExist), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
+                }
+                else
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.UserDoesNotExist), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
+                }
             }
 
             var lastOTP = await _userOtpCodeRepository.Queryable.Where(p => p.UserId == user.Id && p.Type == EnumUserOtpCodeType.SMS).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);

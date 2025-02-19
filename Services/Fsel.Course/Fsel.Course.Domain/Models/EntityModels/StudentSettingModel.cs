@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class StudentSettingModel
     {
+        public Guid StudentId { get; set; }
         public bool IsPlacementTest { get; set; }
         public Guid? ClassId { get; set; }
         public EnumCourseLevel? Level { get; set; }
