@@ -99,12 +99,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            if ((!user.PhoneNumberConfirmed || !user.EmailConfirmed) && user.Human == null)
+            if (!user.PhoneNumberConfirmed && !user.EmailConfirmed)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
-
 
             if (!string.IsNullOrEmpty(request.Email))
             {
