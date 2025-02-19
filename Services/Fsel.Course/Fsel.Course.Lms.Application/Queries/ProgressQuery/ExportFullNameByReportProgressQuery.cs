@@ -12,7 +12,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
@@ -98,7 +97,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
             if (students != null && students.Any())
             {
-                var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
+                var courseResults = await _courseResultRepository.Queryable
+                                                                 .Include(x => x.Course)
+                                                                 .WhereBulkContains(studentIds, x => x.StudentId)
+                                                                 .Where(x => x.WorkingStatus == EnumWorkingStatus.Active).OrderBy(x => x.CreatedDate)
+                                                                 .ToListAsync(cancellationToken);
                 foreach (var student in students)
                 {
                     var userId = student.Human?.UserId ?? default;

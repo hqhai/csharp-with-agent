@@ -107,9 +107,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                               UnitResults = g.Select(x => x.ur).ToList(),
                                           }).ToListAsync(cancellationToken);
 
-            var mockTestResults = await _mockTestResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
-                                          .Where(x => courseIds.Contains(x.CourseId) && x.Status == EnumResultStatus.Done)
-                                          .ToListAsync(cancellationToken);
+            var mockTestResults = await _mockTestResultRepository.Queryable
+                                                                 .WhereBulkContains(studentIds, x => x.StudentId)
+                                                                 .WhereBulkContains(courseIds, x => x.CourseId)
+                                                                 .Where(x => x.Status == EnumResultStatus.Done)
+                                                                 .ToListAsync(cancellationToken);
 
             var mockTestGroupResults = mockTestResults.Join(dataStudent,
                                             mockTestResult => new { mockTestResult.CourseId, mockTestResult.StudentId },

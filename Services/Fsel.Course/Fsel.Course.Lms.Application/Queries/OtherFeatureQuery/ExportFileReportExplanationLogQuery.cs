@@ -57,10 +57,12 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var listQuestionIds = result.Datas.Where(x => !string.IsNullOrEmpty(x.QuestionId)).Select(x => new Guid(x.QuestionId ?? string.Empty)).Distinct().ToList();
-            var questionExplanationLogs = await _questionExplanationLogRepository.Queryable.Include(x => x.Question).Where(x => listQuestionIds.Contains(x.QuestionId))
-                                                                                           .OrderBy(x => x.CreatedDate)
-                                                                                           .ToListAsync(cancellationToken);
+            var listQuestionIds = result.Datas.Where(x => !string.IsNullOrEmpty(x.QuestionId)).Select(x => new Guid(x.QuestionId ?? string.Empty)).Distinct().ToList() ?? new List<Guid>();
+            var questionExplanationLogs = await _questionExplanationLogRepository.Queryable
+                                                                                 .Include(x => x.Question)
+                                                                                 .WhereBulkContains(listQuestionIds, x => x.QuestionId)
+                                                                                 .OrderBy(x => x.CreatedDate)
+                                                                                 .ToListAsync(cancellationToken);
             var data = new List<QuestionExplanationLogExportModel>();
             foreach (var questionExplanation in questionExplanationLogs)
             {

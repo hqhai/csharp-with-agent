@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -64,13 +65,13 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                 return methodResult;
             }
 
-            var paging = classStudentIds.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+            var paging = classStudentIds.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList() ?? new List<Guid>();
 
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(paging);
             var students = studentResults?.Content?.Result;
 
             var finalTestResults = await _finalTestResultRepository.Queryable
-                            .Where(x => paging != null && paging.Contains(x.StudentId))
+                            .WhereBulkContains(paging, x => x.StudentId)
                             .Where(x => x.FinalTestId == finalTestResult.FinalTestId && x.CourseId == finalTestResult.CourseId && x.Status == EnumResultStatus.Done)
                             .ToListAsync(cancellationToken);
 
