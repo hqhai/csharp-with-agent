@@ -14,7 +14,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -151,7 +150,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                         join vtc in _videoTimeCodeRepository.Queryable on bastQ.VideoTimeCodeId equals vtc.Id
                         join vr in _videoResultRepository.Queryable on bastQ.VideoResultId equals vr.Id
                         join lr in _lessonResultRepository.Queryable on vr.LessonResultId equals lr.Id
-                        where vtc.VideoId == videoResult.VideoId && vtc.TimeCodeType == type && bastQ.Status == EnumResultStatus.Done &&
+                        where vtc.VideoId == videoResult.VideoId && vtc.TimeCodeType == type && vr.Status == EnumResultStatus.Done &&
                         lr.CourseId == lessonResult.CourseId && lr.UnitId == lessonResult.UnitId
                         group bastQ by new { bastQ.StudentId, bastQ.VideoResultId } into g
                         select new TestResultRankingModel
