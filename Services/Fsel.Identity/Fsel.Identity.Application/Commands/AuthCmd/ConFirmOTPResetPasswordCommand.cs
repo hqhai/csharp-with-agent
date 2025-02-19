@@ -44,7 +44,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            var method = await _mediator.Send(new ConfirmOtpCommand { Otp = request.Otp, Email = request.Email, PhoneNumber = request.PhoneNumber, IsCheckExpiredTime = false }, cancellationToken);
+            var method = await _mediator.Send(new ConfirmOtpCommand { Otp = request.Otp, Email = request.Email, PhoneNumber = request.PhoneNumber, UserId = request.UserId, IsCheckExpiredTime = false }, cancellationToken);
             if (!method.IsOK || method.Result == null)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);

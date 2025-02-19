@@ -19,6 +19,12 @@ namespace Fsel.System.Infrastructure.Configs
                    .HasConversion(
                    v => v.ToString(),
                    v => v.EnumParse<EnumBannerType>());
+
+            builder.Property(e => e.BannerFrequency)
+                   .HasMaxLength(100)
+                   .HasConversion(
+                   v => v.ToString(),
+                   v => v.EnumParse<EnumBannerFrequency>());
         }
     }
 }

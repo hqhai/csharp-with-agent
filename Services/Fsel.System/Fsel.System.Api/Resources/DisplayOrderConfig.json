@@ -1,0 +1,58 @@
+[
+  {
+    "id": "F619CD35-CD55-4931-A7B4-2B1C992D1306",
+    "displayOrder": 1,
+    "name": "Disconnected",
+    "status": true,
+    "createdDate": "2025-01-03"
+  },
+  {
+    "id": "AC124367-9B60-46DD-964F-AA85EFC91ADA",
+    "displayOrder": 2,
+    "name": "Popup",
+    "status": true,
+    "createdDate": "2025-01-03"
+  },
+  {
+    "id": "F9EE8B6B-D3B5-4183-9B4F-62C373C80020",
+    "displayOrder": 3,
+    "name": "Heading",
+    "status": true,
+    "createdDate": "2025-01-03"
+  },
+  {
+    "id": "5F787B73-36CF-4DB9-8378-74FFACEF6DF1",
+    "displayOrder": 4,
+    "name": "GoodMorning",
+    "status": true,
+    "createdDate": "2025-01-03"
+  },
+  {
+    "id": "DAC69796-079E-4090-9B8F-E786856D4A20",
+    "displayOrder": 5,
+    "name": "FselCoin",
+    "status": true,
+    "createdDate": "2025-01-03"
+  },
+  {
+    "id": "858C0AC1-41A2-461B-9252-32F56914CAF0",
+    "displayOrder": 6,
+    "name": "StreakTimeCode",
+    "status": true,
+    "createdDate": "2025-01-03"
+  },
+  {
+    "id": "08DB065D-689F-42BC-95BD-5181FB4D7024",
+    "displayOrder": 7,
+    "name": "TwentyFiveMinutesBreak",
+    "status": true,
+    "createdDate": "2025-01-03"
+  },
+  {
+    "id": "29F6B274-6EDD-427B-B1BE-51A8BA5B23CD",
+    "displayOrder": 8,
+    "name": "Beginner",
+    "status": true,
+    "createdDate": "2025-01-03"
+  }
+]

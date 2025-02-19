@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using System;
+    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -78,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                result = result.Where(m => (m.CreatedFullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim())).ToList();
+                result = result.Where(m => m.CreatedFullName != null && m.CreatedFullName.Contains(request.Keyword.ToLower(CultureInfo.InvariantCulture).Trim(), StringComparison.InvariantCulture)).ToList();
             }
             int totalItem = result.Count;
             var lists = result.ApplySortAndPaging(request).ToList();

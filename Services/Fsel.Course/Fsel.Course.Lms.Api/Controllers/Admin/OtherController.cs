@@ -4,8 +4,11 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
+    using Fsel.Course.Lms.Application.Queries.Reports;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -16,7 +19,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/admin/other")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+    [Permission(role: nameof(EnumRole.Admin))]
     public class OtherController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -35,6 +38,30 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         public async Task<IActionResult> GetParamBeginnerGuide([FromBody] IList<Guid> studentIds)
         {
             MethodResult<IList<ParamBeginnerGuideModel>> queryResult = await _mediator.Send(new GetParamBeginnerGuideQuery { ListStudentIds = studentIds }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get PlacementTest Event
+        /// </summary>
+        [HttpGet("get-placement-test-event")]
+        [ProducesResponseType(typeof(MethodResult<IList<ReportPlacementTestEventModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromQuery] GetReportPlacementTestEventQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Placement Test school Event
+        /// </summary>
+        [HttpGet("get-placement-test-school-event")]
+        [ProducesResponseType(typeof(MethodResult<IList<ReportPlacementTestEventModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromQuery] GetReportPlacementTestEventSchoolQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

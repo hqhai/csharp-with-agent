@@ -55,6 +55,8 @@ namespace Fsel.Shared.Constants
                 public const string MockTestSpeaking = $"{KeyQueue}_MockTestSpeaking";
                 public const string TechieAction = $"{KeyQueue}_TechieAction";
                 public const string SendStudentsFromFile = $"{KeyQueue}_SendStudentsFromFile";
+                public const string Banner = $"{KeyQueue}_Banner";
+                public const string BannerRealTime = $"{KeyQueue}_BannerRealTime";
             }
         }
 

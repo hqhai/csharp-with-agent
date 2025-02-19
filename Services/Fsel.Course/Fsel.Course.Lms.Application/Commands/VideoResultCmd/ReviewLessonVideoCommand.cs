@@ -93,15 +93,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             }
 
             videoResult = await GetVideoResult(videoResult, cancellationToken);
-            await _videoResultRepository.ExecuteTransactionAsync(async () =>
+            await _videoResultRepository.BulkMergeAsync(new List<VideoResult> { videoResult }, bulk =>
             {
-                videoResult = _videoResultRepository.Update(videoResult);
-                await _videoResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<VideoResultModel>(videoResult);
-                return methodResult;
+                bulk.IgnoreOnUpdateExpression = entity => new { entity.LessonResultId, entity.StudentId, entity.VideoId };
             });
+
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = _mapper.Map<VideoResultModel>(videoResult);
             return methodResult;
         }
 

@@ -155,6 +155,23 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// Expot File PlacementTest Event
+        /// </summary>
+        [HttpPost("export-file-placement-test-district-school-event")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> ExportFile([FromQuery] ExportReportPlacementTestEventDistrictSchoolQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!queryResult.IsOK || queryResult.Result == null)
+            {
+                return queryResult.GetActionResult();
+            }
+            return File(queryResult.Result, Settings.Excels.ContentType, "export_report_placement_test_district_school_event.xlsx");
+        }
+
+        /// <summary>
         /// Expot File Learning Process District
         /// </summary>
         [HttpPost("export-file-learning-process-district")]
