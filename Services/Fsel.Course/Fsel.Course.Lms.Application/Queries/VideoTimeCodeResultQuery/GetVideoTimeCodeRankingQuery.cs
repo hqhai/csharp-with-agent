@@ -95,7 +95,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                         join vr in _videoResultRepository.Queryable on bastQ.VideoResultId equals vr.Id
                         join lr in _lessonResultRepository.Queryable on vr.LessonResultId equals lr.Id
                         where bastQ.VideoTimeCodeId == videoTimeCodeResult.VideoTimeCodeId && bastQ.Status == EnumResultStatus.Done &&
-                        lr.CourseId == lessonResult.CourseId && lr.UnitId == lessonResult.UnitId
+                        lr.CourseId == lessonResult.CourseId && lr.UnitId == lessonResult.UnitId && lr.LessonId == lessonResult.LessonId
                         select new TestResultRankingModel
                         {
                             WorkingTime = bastQ.WorkingTime,
@@ -157,7 +157,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                         join vr in _videoResultRepository.Queryable on bastQ.VideoResultId equals vr.Id
                         join lr in _lessonResultRepository.Queryable on vr.LessonResultId equals lr.Id
                         where vtc.VideoId == videoResult.VideoId && vtc.TimeCodeType == type && vr.Status == EnumResultStatus.Done &&
-                        lr.CourseId == lessonResult.CourseId && lr.UnitId == lessonResult.UnitId
+                        lr.CourseId == lessonResult.CourseId && lr.UnitId == lessonResult.UnitId && lr.LessonId == lessonResult.LessonId
                         group bastQ by new { bastQ.StudentId, bastQ.VideoResultId } into g
                         select new TestResultRankingModel
                         {
