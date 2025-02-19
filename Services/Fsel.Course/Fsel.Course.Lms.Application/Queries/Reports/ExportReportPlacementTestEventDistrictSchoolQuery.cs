@@ -2,9 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.Reports
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -15,9 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.DependencyInjection;
     using OfficeOpenXml;
-    using System.Collections.Concurrent;
 
     public class ExportReportPlacementTestEventDistrictSchoolQuery : IRequest<MethodResult<Stream>>
     {
@@ -27,18 +23,15 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
     public class ExportReportPlacementTestEventDistrictSchoolQueryHandler : IRequestHandler<ExportReportPlacementTestEventDistrictSchoolQuery, MethodResult<Stream>>
     {
-        private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
 
         public ExportReportPlacementTestEventDistrictSchoolQueryHandler(
-            IMapper mapper,
             IUserService userService,
-            IServiceProvider serviceProvider)
+            IPlacementTestGroupResultRepository placementTestGroupResultRepository)
         {
-            _mapper = mapper;
             _userService = userService;
-            _serviceProvider = serviceProvider;
+            _placementTestGroupResultRepository = placementTestGroupResultRepository;
         }
 
         public async Task<MethodResult<Stream>> Handle(ExportReportPlacementTestEventDistrictSchoolQuery request, CancellationToken cancellationToken)
@@ -56,83 +49,60 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 return methodResult;
             }
-            var reportPlacementTestEvents = new ConcurrentBag<ReportPlacementTestEventModel>();
-            var placementTestResultGroups = new ConcurrentStack<PlacementTestResultReportGroupModel>();
-            var studentIds = reportCompetitionEvents.Where(x => x.StudentIds != null && x.StudentIds.Any()).SelectMany(x => x.StudentIds ?? new List<Guid>()).ToList();
+            var reportPlacementTestEvents = new List<ReportPlacementTestEventModel>();
+            var studentIds = reportCompetitionEvents.Where(x => x.StudentIds != null && x.StudentIds.Any()).SelectMany(x => x.StudentIds ?? new List<Guid>()).ToList() ?? new List<Guid>();
 
-            var batches = studentIds
-                .Select((id, index) => new { id, index })
-                .GroupBy(x => x.index / ValueSettings.BatchSize)
-                .Select(g => g.Select(x => x.id).ToList())
-                .ToList();
+            var placementTestResultGroups = await _placementTestGroupResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
+                                                      .Select(x => new PlacementTestResultReportGroupModel
+                                                      {
+                                                          CourseLevel = x.SuggetLevel,
+                                                          StudentId = x.StudentId,
+                                                          IsDonePT = x.Status == EnumResultStatus.Done
+                                                      })
+                                                      .ToListAsync(cancellationToken);
 
-            // Thực hiện truy vấn từng nhóm
-            await Parallel.ForEachAsync(batches, async (batche, cancellationToken) =>
+            foreach (var reportCompetitionEvent in reportCompetitionEvents)
             {
-                using (var scope = _serviceProvider.CreateScope())
-                {
-                    var placementTestGroupResultRepository = scope.ServiceProvider.GetRequiredService<IPlacementTestGroupResultRepository>();
-                    var placementTestGroups = await placementTestGroupResultRepository.Queryable
-                                                    .Where(x => batche.Contains(x.StudentId))
-                                                    .Select(x => new PlacementTestResultReportGroupModel
-                                                    {
-                                                        CourseLevel = x.SuggetLevel,
-                                                        StudentId = x.StudentId,
-                                                        IsDonePT = x.Status == EnumResultStatus.Done
-                                                    })
-                                                    .ToListAsync(cancellationToken);
-                    placementTestResultGroups.PushRange(placementTestGroups.ToArray());
-                }
-            });
+                var studentIdsSet = reportCompetitionEvent.StudentIds?.ToHashSet() ?? new HashSet<Guid>();
+                var placementTestResultReports = placementTestResultGroups.Where(x => studentIdsSet.Contains(x.StudentId)).ToList();
 
-            Parallel.ForEach(reportCompetitionEvents, reportCompetitionEvent =>
-            {
-                var placementTestResultReports = placementTestResultGroups.Where(x => reportCompetitionEvent.StudentIds != null && reportCompetitionEvent.StudentIds.Contains(x.StudentId)).Distinct().ToList();
                 var reportPlacementTestEvent = new ReportPlacementTestEventModel
                 {
                     LocationName = reportCompetitionEvent.DistrictName,
-                    NumberRegisteredSchool = reportCompetitionEvent.NumberRegisteredSchool,
-                    NumberActualParticipatingSchool = reportCompetitionEvent.NumberActualParticipatingSchool,
-                    NumberValidStudentAccount = reportCompetitionEvent.NumberValidStudentAccount,
-                    NumberStudentsCompletedPT = placementTestResultReports?.Where(x => x.IsDonePT).Select(x => x.StudentId).Distinct().Count() ?? default,
-                    ReportCourseLevels = placementTestResultReports != null && placementTestResultReports.Any() ? EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic).Select(courseLevel =>
-                    {
-                        var numberStudentOfLevel = placementTestResultReports?.Where(x => x.CourseLevel == courseLevel).Select(x => x.StudentId).Distinct().Count() ?? default;
-                        return new ReportCourseLevelModel
-                        {
-                            CourseLevel = courseLevel,
-                            TotalStudent = numberStudentOfLevel,
-                            Percent = NumberHelper.GetPercent(numberStudentOfLevel, placementTestResultReports?.Select(x => x.StudentId).Distinct().Count() ?? default)
-                        };
-                    }).ToList() : new List<ReportCourseLevelModel>(),
                     ReportPlacementTestEventSchools = reportCompetitionEvent.ReportCompetitionEventSchools.Select(eventSchool =>
                     {
-                        var placementTestResultSchools = placementTestResultReports?.Where(x => eventSchool.StudentIds != null && eventSchool.StudentIds.Contains(x.StudentId)).ToList();
-                        int numberStudentsCompletedPT = placementTestResultSchools?.Where(x => x.IsDonePT).Select(x => x.StudentId).Distinct().Count() ?? default;
+                        var eventStudentIdsSet = eventSchool.StudentIds?.ToHashSet() ?? new HashSet<Guid>();
+
+                        var placementTestResultSchools = placementTestResultReports.Where(x => eventStudentIdsSet.Contains(x.StudentId));
+                        var numberStudentsCompletedPT = placementTestResultSchools.Where(x => x.IsDonePT).Select(x => x.StudentId).Distinct().Count();
+                        int numberStudentsProcessPT = placementTestResultSchools.Where(x => !x.IsDonePT).Select(x => x.StudentId).Distinct().Count();
 
                         return new ReportPlacementTestEventSchoolModel
                         {
                             SchoolName = eventSchool.SchoolName,
                             NumberStudentsCompletedPT = numberStudentsCompletedPT,
                             NumberValidStudentAccount = eventSchool.NumberValidStudentAccount,
-                            NumberStudentsProcessPT = placementTestResultSchools?.Where(x => !x.IsDonePT).Select(x => x.StudentId).Distinct().Count() ?? default,
+                            NumberStudentsProcessPT = numberStudentsProcessPT,
                             NumberStudentCompleteVerify = eventSchool.NumberStudentCompleteVerify,
                             NumberStudentAccountRegister = eventSchool.NumberStudentAccountRegister,
-                            ReportCourseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic).Select(courseLevel =>
-                            {
-                                var numberStudentOfLevel = placementTestResultSchools?.Where(x => x.CourseLevel == courseLevel && x.IsDonePT).Select(x => x.StudentId).Distinct().Count() ?? default;
-                                return new ReportCourseLevelModel
+                            ReportCourseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic)
+                                .Select(courseLevel =>
                                 {
-                                    CourseLevel = courseLevel,
-                                    TotalStudent = numberStudentOfLevel,
-                                    Percent = NumberHelper.GetPercent(numberStudentOfLevel, numberStudentsCompletedPT)
-                                };
-                            }).ToList(),
+                                    var numberStudentOfLevel = placementTestResultSchools.Where(x => x.CourseLevel == courseLevel && x.IsDonePT).Select(x => x.StudentId).Distinct().Count();
+                                    return new ReportCourseLevelModel
+                                    {
+                                        CourseLevel = courseLevel,
+                                        TotalStudent = numberStudentOfLevel,
+                                        Percent = NumberHelper.GetPercent(numberStudentOfLevel, numberStudentsCompletedPT)
+                                    };
+                                })
+                                .ToList()
                         };
                     }).ToList(),
                 };
                 reportPlacementTestEvents.Add(reportPlacementTestEvent);
-            });
+            }
+
             methodResult.Result = ExportExcelTemplate(reportPlacementTestEvents.ToList(), request);
             return methodResult;
         }
@@ -140,9 +110,9 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         public static Stream ExportExcelTemplate(IList<ReportPlacementTestEventModel>? reportPlacementTestEvents, ExportReportPlacementTestEventDistrictSchoolQuery request)
         {
             MemoryStream memoryStream = new MemoryStream();
-
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.ReportPTEventDistrictSchool)))
+
+            using (var excelPackage = new ExcelPackage(ResourceSettings.ReportPTEventDistrictSchool))
             {
                 var excelWorksheet = excelPackage.Workbook.Worksheets[0];
                 if (reportPlacementTestEvents != null && reportPlacementTestEvents.Any())
@@ -150,38 +120,46 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     int startRow = 9;
                     int index = 1;
 
+                    var dataRows = new List<object[]>();
+
                     foreach (var item in reportPlacementTestEvents)
                     {
                         foreach (var reportPt in item.ReportPlacementTestEventSchools)
                         {
-                            excelWorksheet.Cells[startRow, 1].Value = index;
-                            excelWorksheet.Cells[startRow, 2].Value = item.LocationName;
-                            excelWorksheet.Cells[startRow, 3].Value = reportPt.SchoolName;
-                            excelWorksheet.Cells[startRow, 4].Value = reportPt.NumberValidStudentAccount;
-                            excelWorksheet.Cells[startRow, 5].Value = reportPt.NumberStudentAccountRegister;
-                            excelWorksheet.Cells[startRow, 6].Value = reportPt.TotalStudentAccount;
-                            excelWorksheet.Cells[startRow, 7].Value = reportPt.NumberStudentCompleteVerify;
-                            excelWorksheet.Cells[startRow, 8].Value = reportPt.CompleteVerifyRate + "%";
-                            excelWorksheet.Cells[startRow, 9].Value = reportPt.NumberStudentsProcessPT;
-                            excelWorksheet.Cells[startRow, 10].Value = reportPt.NumberStudentsCompletedPT;
-                            excelWorksheet.Cells[startRow, 11].Value = reportPt.CompletionRate + "%";
+                            var row = new List<object>
+                            {
+                                index++,
+                                item.LocationName ?? string.Empty,
+                                reportPt.SchoolName?? string.Empty,
+                                reportPt.NumberValidStudentAccount,
+                                reportPt.NumberStudentAccountRegister,
+                                reportPt.TotalStudentAccount,
+                                reportPt.NumberStudentCompleteVerify,
+                                reportPt.CompleteVerifyRate + "%",
+                                reportPt.NumberStudentsProcessPT,
+                                reportPt.NumberStudentsCompletedPT,
+                                reportPt.CompletionRate + "%"
+                            };
+
                             if (reportPt.ReportCourseLevels != null)
                             {
-                                var rowReportLevel = 12;
                                 foreach (var reportLevel in reportPt.ReportCourseLevels)
                                 {
-                                    excelWorksheet.Cells[startRow, rowReportLevel].Value = reportLevel.TotalStudent;
-                                    excelWorksheet.Cells[startRow, rowReportLevel + 1].Value = reportLevel.Percent + "%";
-                                    rowReportLevel += 2;
+                                    row.Add(reportLevel.TotalStudent);
+                                    row.Add(reportLevel.Percent + "%");
                                 }
                             }
-                            startRow++;
-                            index++;
+                            dataRows.Add(row.ToArray());
                         }
+                    }
+                    if (dataRows.Count > 0)
+                    {
+                        excelWorksheet.Cells[startRow, 1].LoadFromArrays(dataRows);
                     }
                 }
 
-                excelPackage.SaveAs(memoryStream);
+                excelPackage.Save();
+                memoryStream = new MemoryStream(excelPackage.GetAsByteArray());
             }
 
             memoryStream.Position = 0L;
