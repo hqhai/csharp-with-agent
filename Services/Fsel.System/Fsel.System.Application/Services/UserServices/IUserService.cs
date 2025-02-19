@@ -78,6 +78,10 @@ namespace Fsel.System.Application.Services.UserServices
         [Post("/v1/student-daily-streak")]
         Task<IApiResponse<MethodResult<bool>>> SaveDailyStreak([Body] StudentDailyStreakCommandModel cmd);
 
+
+        [Get("/v1/student-ranking/get-events-by-user-id")]
+        Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>?>>> GetEventsByUserId([Query] Guid? userId);
+
         [Post("/v1/user/get-users-by-userids")]
         Task<IApiResponse<MethodResult<IList<UserModel>>>> GetUsersByUserIdsAsync([FromBody] IList<Guid>? userIds);
 
@@ -91,5 +95,8 @@ namespace Fsel.System.Application.Services.UserServices
         [RefitCache(CacheSettings.TimeCache.TenMinutes)]
         [Get("/v1/admin/student/gets")]
         Task<IApiResponse<MethodResult<IList<StudentDtoModel>>>> GetStudentsSchoolAsync([FromQuery] SearchStudentSchoolQueryModel query);
+
+        [Post("/v1/event/event-ids")]
+        Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>>>> GetEventByIds([FromBody] GetEventByIdsModel query);
     }
 }

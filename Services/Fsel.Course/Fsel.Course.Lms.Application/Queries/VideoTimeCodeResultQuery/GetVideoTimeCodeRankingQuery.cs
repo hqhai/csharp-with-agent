@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
     using MediatR;

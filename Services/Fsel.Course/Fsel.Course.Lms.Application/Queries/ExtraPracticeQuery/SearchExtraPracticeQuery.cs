@@ -92,9 +92,17 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                 AccessCount = x.ExtraPracticeResults.Count
             });
 
+            request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                extraPracticeQuery = extraPracticeQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    extraPracticeQuery = extraPracticeQuery.Where(m => m.Id == guid);
+                }
+                else
+                {
+                    extraPracticeQuery = extraPracticeQuery.Where(m => m.Name!.Contains(request.Keyword));
+                }
             }
 
             if (request.Types != null && request.Types.Count > 0)

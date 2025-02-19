@@ -28,5 +28,6 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public EnumCourseLevel CourseLevel { get; set; }
         public EnumInteractionActionType? InteractionActionType { get; set; }
         public IList<CommentModel>? Comments { get; set; }
+        public EnumCommentStatus Status { get; set; }
     }
 }
