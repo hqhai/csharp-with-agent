@@ -176,7 +176,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 
             #endregion Validate
 
-            await _savePlacementTestAnswersPublisher.Publish(request, cancellationToken);
             if (request.IsSubmit)
             {
                 await _disconnectSocketCalculateTimePublisher.Publish(new SetTimeModuleModel
@@ -184,18 +183,114 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                     Type = nameof(PlacementTest),
                     ObjectId = sectionGroupResult.Id
                 }, cancellationToken);
-                Thread.Sleep(3000);
             }
-            await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
+            if (request.Answers != null && request.Answers.Any())
             {
-                sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit);
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            });
+                var answerResult = await CreateAnswerAsync(request, sectionGroupResult);
+                if (!answerResult.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(answerResult.ErrorMessages);
+                    return methodResult;
+                }
+            }
+            await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit);
 
             var isLockPT = await UpdatePlacementTestResultAsync(placementTestResult, placementTest, student, cancellationToken);
             methodResult.Result = await GetPlacementTestResult(placementTestResult, isLockPT);
             return methodResult;
+        }
+
+        private async Task<MethodResult<IList<PlacementTestAnswer>>> CreateAnswerAsync(CreatePlacementTestAnswerBySectionGroupCommand request, SectionGroupResult sectionGroupResult)
+        {
+            ArgumentNullException.ThrowIfNull(request.Answers);
+            var methodResult = new MethodResult<IList<PlacementTestAnswer>>();
+            var questionIds = request.Answers.Select(x => x.QuestionId).ToList();
+            var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
+            if (questions == null || !questions.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
+                return methodResult;
+            }
+            var anwserResult = await CreateAnswer(request, questions, sectionGroupResult);
+            if (!anwserResult.IsOK)
+            {
+                methodResult.AddErrorBadRequest(anwserResult.ErrorMessages);
+                return methodResult;
+            }
+            var (createPlacementTestAnswers, updatePlacementTestAnswers) = anwserResult.Result;
+
+            try
+            {
+                if (createPlacementTestAnswers != null && createPlacementTestAnswers.Any())
+                {
+                    await _placementTestAnswerRepository.BulkMergeAsync(createPlacementTestAnswers);
+                }
+                if (updatePlacementTestAnswers != null && updatePlacementTestAnswers.Any())
+                {
+                    await _placementTestAnswerRepository.BulkMergeAsync(updatePlacementTestAnswers, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = entity => new { entity.PlacementTestResultId, entity.SectionQuestionId, entity.SectionGroupResultId };
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Duplicate PlacementTestAnswer : {ex.Message}");
+            }
+            return methodResult;
+        }
+
+        private async Task<MethodResult<(IList<PlacementTestAnswer>, IList<PlacementTestAnswer>)>> CreateAnswer(CreatePlacementTestAnswerBySectionGroupCommand request, IList<Question>? questions, SectionGroupResult sectionGroupResult)
+        {
+            ArgumentNullException.ThrowIfNull(request.Answers);
+            ArgumentNullException.ThrowIfNull(questions);
+            var methodResult = new MethodResult<(IList<PlacementTestAnswer>, IList<PlacementTestAnswer>)>();
+            var createPlacementTestAnswers = new List<PlacementTestAnswer>();
+            var updatePlacementTestAnswers = new List<PlacementTestAnswer>();
+            if (questions != null && questions.Any())
+            {
+                var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Where(x => x.PlacementTestResultId == request.PlacementTestResultId).ToListAsync();
+                foreach (var item in request.Answers)
+                {
+                    var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
+                    var questionResult = _questionConverter.HandleAnswerTest(question, item.Answer, request.IsSubmit);
+                    if (!questionResult.IsOK)
+                    {
+                        methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
+                        return methodResult;
+                    }
+                    var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
+
+                    var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default;
+                    var placementTestAnswer = placementTestAnswers.FirstOrDefault(x => x.SectionQuestionId == sectionQuestionId);
+                    if (placementTestAnswer == null)
+                    {
+                        placementTestAnswer = new PlacementTestAnswer
+                        {
+                            PlacementTestResultId = request.PlacementTestResultId,
+                            SectionGroupResultId = sectionGroupResult.Id,
+                            SectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default,
+                        };
+                        createPlacementTestAnswers.Add(GetPlacementTestAnswer(placementTestAnswer, answerConfig, correctCount, isAnswered, questionItem));
+                    }
+                    else
+                    {
+                        updatePlacementTestAnswers.Add(GetPlacementTestAnswer(placementTestAnswer, answerConfig, correctCount, isAnswered, questionItem));
+                    }
+                }
+            }
+
+            methodResult.Result = (createPlacementTestAnswers, updatePlacementTestAnswers);
+            return methodResult;
+        }
+
+        private static PlacementTestAnswer GetPlacementTestAnswer(PlacementTestAnswer placementTestAnswer, object? answer, int correctCount, bool isAnswered, Question questionItem)
+        {
+            placementTestAnswer.Answer = answer;
+            placementTestAnswer.CorrectCount = correctCount;
+            placementTestAnswer.IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null;
+            placementTestAnswer.Status = questionItem.CorrectTotal == correctCount ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
+            return placementTestAnswer;
         }
 
         private async Task UpdatePlacementGroupResultDoneAsync(PlacementTestResult placementTestResult, EnumCourseLevel? level)
