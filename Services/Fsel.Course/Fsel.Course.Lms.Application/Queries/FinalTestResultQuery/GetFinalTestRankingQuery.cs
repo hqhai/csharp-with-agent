@@ -52,10 +52,22 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                 return methodResult;
             }
 
-            var query = _finalTestResultRepository.Queryable
-                                   .Where(x => x.FinalTestId == finalTestResult.FinalTestId && x.CourseId == finalTestResult.CourseId && x.Status == EnumResultStatus.Done);
+            var query = _finalTestResultRepository.Queryable.Where(x => x.FinalTestId == finalTestResult.FinalTestId && x.CourseId == finalTestResult.CourseId && x.Status == EnumResultStatus.Done)
+                                                            .Select(x => new TestResultRankingModel
+                                                            {
+                                                                WorkingTime = x.WorkingTime,
+                                                                CorrectCount = x.CorrectCount,
+                                                                CorrectTotal = x.CorrectTotal,
+                                                                Id = x.Id,
+                                                                Percent = x.CorrectTotal != 0 ? Math.Round((double)x.CorrectCount * 100 / x.CorrectTotal, 0) : default,
+                                                                CreatedDate = x.CreatedDate,
+                                                                Status = x.Status,
+                                                                StudentId = x.StudentId,
+                                                                Score = x.CorrectCount,
+                                                                UpdatedDate = x.UpdatedDate,
+                                                            });
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await query.OrderByDescending(x => x.Status).ThenByDescending(x => x.Percent)
+            var lists = await query.OrderByDescending(x => x.Percent).ThenBy(x => x.WorkingTime)
                                    .ApplySort(request)
                                    .AsNoTracking()
                                    .ToListAsync(cancellationToken: cancellationToken)
@@ -63,18 +75,15 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
 
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).ToList());
             var students = studentResults?.Content?.Result;
-            foreach (var finalTestResultStudent in lists)
+            foreach (var item in lists)
             {
-                var student = students?.FirstOrDefault(x => x.Id == finalTestResultStudent.StudentId);
-                var finalTestResultDto = _mapper.Map<TestResultRankingModel>(finalTestResultStudent);
-
-                finalTestResultDto.IsCurrentStudent = student?.Id == finalTestResult.StudentId;
-                finalTestResultDto.FullName = student?.Human?.FullName;
-                finalTestResultDto.AvatarPath = student?.Human?.AvatarPath;
-                testResultRankings.Add(finalTestResultDto);
+                var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
+                item.IsCurrentStudent = student?.Id == finalTestResult.StudentId;
+                item.FullName = student?.Human?.FullName;
+                item.AvatarPath = student?.Human?.AvatarPath;
+                testResultRankings.Add(item);
             }
 
-            testResultRankings = testResultRankings.OrderByDescending(x => x.Status).ThenByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
             methodResult.Result = new PagingItemsModel<TestResultRankingModel>(testResultRankings, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
