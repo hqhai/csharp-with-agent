@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetReportPTResultQuery : IRequest<MethodResult<ReportPTResultModel>>
     {
@@ -48,16 +49,20 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 return methodResult;
             }
             var student = studentResult.Content?.Result;
-            if (student?.Count <= 0)
+            if (student == null || student.Count <= 0)
             {
                 methodResult.Result = reportPTResult;
                 return methodResult;
             }
+
+            var placementTestGroupResults = await _placementTestGroupResultRepository.Queryable
+                                                    .Where(p => p.Status == Domain.Enums.EnumResultStatus.Done && (!request.ToDate.HasValue || p.CompletionDate <= request.ToDate.Value))
+                                                    .WhereBulkContains(student.Select(x => x.Id), x => x.StudentId)
+                                                    .ToListAsync(cancellationToken);
+
             var filteredStudents = (from s in student
-                                    join p in _placementTestGroupResultRepository.Queryable
+                                    join p in placementTestGroupResults
                                     on s.Id equals p.StudentId
-                                    where p.Status == Domain.Enums.EnumResultStatus.Done &&
-                                          (!request.ToDate.HasValue || p.CompletionDate <= request.ToDate.Value)
                                     select new
                                     {
                                         Student = s,

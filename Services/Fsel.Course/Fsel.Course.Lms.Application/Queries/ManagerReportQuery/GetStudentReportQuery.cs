@@ -83,13 +83,16 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             {
                 case EnumManagerReportType.ReportManagerPT:
                     bool isCheckDate = request.StartDate.HasValue || request.EndDate.HasValue;
-                    if (isCheckDate)
+                    if (request.Status.HasValue || isCheckDate || request.CurrentLevel.HasValue || request.CourseLevel.HasValue)
                     {
-                        studentIds = await _placementTestResultRepository.GetStudentPtIdsAsync(request.StartDate, request.EndDate, studentIds);
+                        if (isCheckDate)
+                        {
+                            studentIds = await _placementTestResultRepository.GetStudentPtIdsAsync(request.StartDate, request.EndDate, studentIds);
+                        }
+                        var studentPtGroups = await _placementTestGroupResultRepository.GetStudentIdsAsync(request.Status, studentIds, request.CurrentLevel, request.CourseLevel);
+                        var studentPTIds = studentPtGroups.ToHashSet();
+                        students = students.Where(x => studentPTIds.Contains(x.Id)).ToList();
                     }
-                    var studentPtGroups = await _placementTestGroupResultRepository.GetStudentIdsAsync(request.Status, studentIds, isCheckDate, request.CurrentLevel, request.CourseLevel);
-                    var studentPTIds = studentPtGroups.ToHashSet();
-                    students = students.Where(x => studentPTIds.Contains(x.Id)).ToList();
                     break;
 
                 case EnumManagerReportType.ReportLearningProgress:
@@ -102,7 +105,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     else if (request.IsSearchReport && request.SortBy.Any())
                     {
                         IList<CourseCompleteModel> courseCompletes = new List<CourseCompleteModel>();
-                        if (request.SortBy.Any(x => x.Property == "UnitDisplayOrder"))
+                        if (request.SortBy.Any(x => x.Property == nameof(CourseCompleteModel.UnitDisplayOrder)))
                         {
                             courseCompletes = await _managerProgressHelper.GetCourseCompletesFilterAsync(courseResults, request, request.EndDate);
                         }

@@ -13,6 +13,13 @@ namespace Fsel.Interaction.Domain.Entities.SurveyQuestionConfigs
         public string? Content { get; set; }
     }
 
+    public class ChooseDirectionQuestionToAnswers
+    {
+        public int Id { get; set; }
+        public string? Content { get; set; }
+        public bool IsChecked { get; set; }
+    }
+
     public class ChooseDirectionAnswer
     {
         public ChooseDirectionQuestionAnswers? ChooseDirectionAnswers { get; set; }
