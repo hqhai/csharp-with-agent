@@ -72,14 +72,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.NewPassword);
             user.PasswordHash = hashPassword;
-            if (!string.IsNullOrEmpty(request.PhoneNumber))
-            {
-                user.PhoneNumberConfirmed = true;
-            }
-            else
-            {
-                user.EmailConfirmed = true;
-            }
+            user.EmailConfirmed = true;
             await _userManager.UpdateAsync(user);
 
             methodResult.StatusCode = StatusCodes.Status200OK;
