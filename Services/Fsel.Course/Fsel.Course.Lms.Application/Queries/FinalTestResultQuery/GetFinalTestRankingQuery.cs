@@ -10,7 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Entities;
+    using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -30,14 +30,12 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        private readonly ICourseResultRepository _courseResultRepository;
 
-        public GetFinalTestRankingQueryHandler(IFinalTestResultRepository finalTestResultRepository, IMapper mapper, IUserService userService, ICourseResultRepository courseResultRepository)
+        public GetFinalTestRankingQueryHandler(IFinalTestResultRepository finalTestResultRepository, IMapper mapper, IUserService userService)
         {
             _finalTestResultRepository = finalTestResultRepository;
             _mapper = mapper;
             _userService = userService;
-            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<TestResultRankingModel>>> Handle(GetFinalTestRankingQuery request, CancellationToken cancellationToken)
@@ -54,46 +52,38 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                 return methodResult;
             }
 
-            var classStudentIds = await _courseResultRepository.Queryable
-                                                               .Where(x => x.CourseId == finalTestResult.CourseId)
-                                                               .Select(x => x.StudentId)
-                                                               .Distinct()
-                                                               .ToListAsync(cancellationToken);
+            var query = _finalTestResultRepository.Queryable.Where(x => x.FinalTestId == finalTestResult.FinalTestId && x.CourseId == finalTestResult.CourseId && x.Status == EnumResultStatus.Done)
+                                                            .Select(x => new TestResultRankingModel
+                                                            {
+                                                                WorkingTime = x.WorkingTime,
+                                                                CorrectCount = x.CorrectCount,
+                                                                CorrectTotal = x.CorrectTotal,
+                                                                Id = x.Id,
+                                                                Percent = x.CorrectTotal != 0 ? Math.Round((double)x.CorrectCount * 100 / x.CorrectTotal, 0) : default,
+                                                                CreatedDate = x.CreatedDate,
+                                                                Status = x.Status,
+                                                                StudentId = x.StudentId,
+                                                                Score = x.CorrectCount,
+                                                                UpdatedDate = x.UpdatedDate,
+                                                            });
+            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await query.OrderByDescending(x => x.Percent).ThenBy(x => x.WorkingTime)
+                                   .ApplyPaging(request)
+                                   .AsNoTracking()
+                                   .ToListAsync(cancellationToken: cancellationToken)
+                                   .ConfigureAwait(false);
 
-            if (classStudentIds == null || !classStudentIds.Any())
-            {
-                return methodResult;
-            }
-
-            var paging = classStudentIds.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList() ?? new List<Guid>();
-
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(paging);
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).ToList());
             var students = studentResults?.Content?.Result;
-
-            var finalTestResults = await _finalTestResultRepository.Queryable
-                            .WhereBulkContains(paging, x => x.StudentId)
-                            .Where(x => x.FinalTestId == finalTestResult.FinalTestId && x.CourseId == finalTestResult.CourseId && x.Status == EnumResultStatus.Done)
-                            .ToListAsync(cancellationToken);
-
-            if (students != null)
+            foreach (var item in lists)
             {
-                foreach (var item in students)
-                {
-                    var finalTestResultStudent = finalTestResults.FirstOrDefault(x => x.StudentId == item.Id);
-                    var finalTestResultDto = _mapper.Map<TestResultRankingModel>(finalTestResultStudent);
-                    if (finalTestResultStudent == null)
-                    {
-                        finalTestResultDto = new TestResultRankingModel();
-                    }
-                    finalTestResultDto.IsCurrentStudent = item.Id == finalTestResult.StudentId;
-                    finalTestResultDto.FullName = item.Human?.FullName;
-                    finalTestResultDto.AvatarPath = item.Human?.AvatarPath;
-                    testResultRankings.Add(finalTestResultDto);
-                }
+                var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
+                item.IsCurrentStudent = student?.Id == finalTestResult.StudentId;
+                item.FullName = student?.Human?.FullName;
+                item.AvatarPath = student?.Human?.AvatarPath;
+                testResultRankings.Add(item);
             }
 
-            int totalItem = classStudentIds.Count;
-            testResultRankings = testResultRankings.OrderByDescending(x => x.Status).ThenByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
             methodResult.Result = new PagingItemsModel<TestResultRankingModel>(testResultRankings, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
