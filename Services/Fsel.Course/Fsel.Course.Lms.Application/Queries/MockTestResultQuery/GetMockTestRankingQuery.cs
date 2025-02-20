@@ -74,7 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query.OrderByDescending(x => x.Percent).ThenBy(x => x.WorkingTime)
-                                   .ApplySort(request)
+                                   .ApplyPaging(request)
                                    .AsNoTracking()
                                    .ToListAsync(cancellationToken: cancellationToken)
                                    .ConfigureAwait(false);
