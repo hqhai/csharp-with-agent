@@ -95,31 +95,38 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                         join vr in _videoResultRepository.Queryable on bastQ.VideoResultId equals vr.Id
                         join lr in _lessonResultRepository.Queryable on vr.LessonResultId equals lr.Id
                         where bastQ.VideoTimeCodeId == videoTimeCodeResult.VideoTimeCodeId && bastQ.Status == EnumResultStatus.Done &&
-                        lr.CourseId == lessonResult.CourseId && lr.UnitId == lessonResult.UnitId
-                        select bastQ;
+                        lr.CourseId == lessonResult.CourseId && lr.UnitId == lessonResult.UnitId && lr.LessonId == lessonResult.LessonId
+                        select new TestResultRankingModel
+                        {
+                            WorkingTime = bastQ.WorkingTime,
+                            CorrectCount = bastQ.CorrectCount,
+                            CorrectTotal = bastQ.CorrectTotal,
+                            Id = bastQ.Id,
+                            Percent = bastQ.CorrectTotal != 0 ? Math.Round((double)bastQ.CorrectCount * 100 / bastQ.CorrectTotal, 0) : default,
+                            CreatedDate = bastQ.CreatedDate,
+                            Status = bastQ.Status,
+                            StudentId = bastQ.StudentId,
+                            Score = bastQ.CorrectCount,
+                            UpdatedDate = bastQ.UpdatedDate,
+                        };
 
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await query.OrderByDescending(x => x.Status).ThenByDescending(x => x.Percent)
-                                   .ApplySort(request)
+            var lists = await query.OrderByDescending(x => x.Percent).ThenBy(x => x.WorkingTime)
+                                   .ApplyPaging(request)
                                    .AsNoTracking()
                                    .ToListAsync(cancellationToken: cancellationToken)
                                    .ConfigureAwait(false);
-            var studentIds = lists.Select(x => x.StudentId).ToList();
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).ToList());
             var students = studentResults?.Content?.Result;
 
-            List<TestResultRankingModel> testResultRankings = new List<TestResultRankingModel>();
             foreach (var item in lists)
             {
                 var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
-                var videoTimeCodeResultDto = _mapper.Map<TestResultRankingModel>(item);
-
-                videoTimeCodeResultDto.IsCurrentStudent = item.Id == videoTimeCodeResult.StudentId;
-                videoTimeCodeResultDto.FullName = student?.Human?.FullName;
-                videoTimeCodeResultDto.AvatarPath = student?.Human?.AvatarPath;
-                testResultRankings.Add(videoTimeCodeResultDto);
+                item.IsCurrentStudent = item.Id == videoTimeCodeResult.StudentId;
+                item.FullName = student?.Human?.FullName;
+                item.AvatarPath = student?.Human?.AvatarPath;
             }
-            methodResult.Result = new PagingItemsModel<TestResultRankingModel>(testResultRankings.OrderByDescending(x => x.Status).ThenByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList(), request, totalItem);
+            methodResult.Result = new PagingItemsModel<TestResultRankingModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
@@ -127,7 +134,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
         private async Task<MethodResult<PagingItemsModel<TestResultRankingModel>>> GetRankingToTimeCode(MethodResult<PagingItemsModel<TestResultRankingModel>> methodResult, GetVideoTimeCodeRankingQuery request, EnumTimeCodeType type, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request.LessonResultId);
-            List<TestResultRankingModel> testResultRankings = new List<TestResultRankingModel>();
             if (type == EnumTimeCodeType.Standalone)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(EnumTimeCodeType.Standalone));
@@ -150,8 +156,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                         join vtc in _videoTimeCodeRepository.Queryable on bastQ.VideoTimeCodeId equals vtc.Id
                         join vr in _videoResultRepository.Queryable on bastQ.VideoResultId equals vr.Id
                         join lr in _lessonResultRepository.Queryable on vr.LessonResultId equals lr.Id
-                        where vtc.VideoId == videoResult.VideoId && vtc.TimeCodeType == type && bastQ.Status == EnumResultStatus.Done &&
-                        lr.CourseId == lessonResult.CourseId && lr.UnitId == lessonResult.UnitId
+                        where vtc.VideoId == videoResult.VideoId && vtc.TimeCodeType == type && vr.Status == EnumResultStatus.Done &&
+                        lr.CourseId == lessonResult.CourseId && lr.UnitId == lessonResult.UnitId && lr.LessonId == lessonResult.LessonId
                         group bastQ by new { bastQ.StudentId, bastQ.VideoResultId } into g
                         select new TestResultRankingModel
                         {
@@ -161,32 +167,29 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                             StudentId = g.Key.StudentId,
                             Id = g.Key.VideoResultId,
                             WorkingTime = g.Sum(x => x.WorkingTime),
-                            Percent = g.Sum(x => x.CorrectTotal) != 0 ? (g.Sum(x => x.CorrectCount) / g.Sum(x => x.CorrectTotal)) : default,
+                            Percent = g.Sum(x => x.CorrectTotal) != 0 ? Math.Round((double)g.Sum(x => x.CorrectCount) * 100 / g.Sum(x => x.CorrectTotal), 0) : default,
                             Status = g.Select(x => x.VideoResult).Select(x => x!.Status).FirstOrDefault(),
                         };
 
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await query.OrderByDescending(x => x.Status).ThenByDescending(x => x.Percent)
-                                   .ApplySort(request)
+            var lists = await query.OrderByDescending(x => x.Percent).ThenBy(x => x.WorkingTime)
+                                   .ApplyPaging(request)
                                    .AsNoTracking()
                                    .ToListAsync(cancellationToken: cancellationToken)
                                    .ConfigureAwait(false);
 
-            var studentIds = lists.Select(x => x.StudentId).ToList();
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).ToList());
             var students = studentResults?.Content?.Result;
 
-            foreach (var videoTimeCodeResultStudent in lists)
+            foreach (var item in lists)
             {
-                var student = students?.FirstOrDefault(x => x.Id == videoTimeCodeResultStudent.StudentId);
-                videoTimeCodeResultStudent.IsCurrentStudent = student?.Id == videoResult.StudentId;
-                videoTimeCodeResultStudent.FullName = student?.Human?.FullName;
-                videoTimeCodeResultStudent.Percent = NumberHelper.ConvertRound(videoTimeCodeResultStudent.Percent);
-                videoTimeCodeResultStudent.AvatarPath = student?.Human?.AvatarPath;
-                testResultRankings.Add(videoTimeCodeResultStudent);
+                var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
+                item.IsCurrentStudent = student?.Id == videoResult.StudentId;
+                item.FullName = student?.Human?.FullName;
+                item.Percent = NumberHelper.ConvertRound(item.Percent);
+                item.AvatarPath = student?.Human?.AvatarPath;
             }
-            testResultRankings = testResultRankings.OrderByDescending(x => x.Status).ThenByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
-            methodResult.Result = new PagingItemsModel<TestResultRankingModel>(testResultRankings, request, totalItem);
+            methodResult.Result = new PagingItemsModel<TestResultRankingModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
