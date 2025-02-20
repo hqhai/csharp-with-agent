@@ -32,13 +32,13 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<Guid?>();
 
-            var competitionEvents = await _competitionEventRepository.Queryable.ToListAsync(cancellationToken);
-            var competitionChildEvent = competitionEvents.FirstOrDefault(x => x.Id == request.Id);
+            var competitionEvents = _competitionEventRepository.Queryable;
+            var competitionChildEvent = await competitionEvents.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (competitionChildEvent != null)
             {
-                var parentId = GetRootIdRecursive(competitionEvents, competitionChildEvent.Id);
-                var competitionParentEvent = competitionEvents.FirstOrDefault(x => x.Id == parentId);
+                var parentId = await GetRootIdRecursive(competitionEvents, competitionChildEvent.Id);
+                var competitionParentEvent = await competitionEvents.FirstOrDefaultAsync(x => x.Id == parentId, cancellationToken);
 
                 methodResult.Result = competitionParentEvent?.Id ?? Guid.Empty;
                 return methodResult;
@@ -47,14 +47,14 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             return methodResult;
         }
 
-        public Guid GetRootIdRecursive(IEnumerable<CompetitionEvent> records, Guid currentId)
+        public async Task<Guid> GetRootIdRecursive(IQueryable<CompetitionEvent> records, Guid currentId)
         {
-            var currentRecord = records.FirstOrDefault(r => r.Id == currentId);
+            var currentRecord = await records.FirstOrDefaultAsync(r => r.Id == currentId);
             if (currentRecord == null || currentRecord.ParentEventId == null)
             {
                 return currentId; // Đây là bảng gốc
             }
-            return GetRootIdRecursive(records, currentRecord.ParentEventId.Value);
+            return await GetRootIdRecursive(records, currentRecord.ParentEventId.Value);
         }
 
     }
