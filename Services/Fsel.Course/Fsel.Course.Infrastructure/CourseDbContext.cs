@@ -93,6 +93,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<TotalDetailEvaluateInputResultModel> TotalDetailEvaluateInputResults { get; set; }
         public DbSet<PercentEvaluateInputResultModel> PercentEvaluateInputResults { get; set; }
         public DbSet<LevelEvaluateInputResultModel> LevelEvaluateInputResults { get; set; }
+        public DbSet<SchoolSummaryModel> SchoolSummarys { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

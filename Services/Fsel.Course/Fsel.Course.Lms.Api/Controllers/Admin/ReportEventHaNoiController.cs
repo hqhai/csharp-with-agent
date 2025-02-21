@@ -30,9 +30,21 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("evaluat-input-result")]
         [ProducesResponseType(typeof(MethodResult<EvaluateInputResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetListUnitByCourse()
+        public async Task<IActionResult> GetListUnitByCourse([FromQuery] EvaluateInputResultCityQuery query)
         {
-            var queryResult = await _mediator.Send(new EvaluateInputResultCityQuery()).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [HttpGet("school-summary")]
+        [ProducesResponseType(typeof(MethodResult<EvaluateInputResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SchoolSummary([FromQuery] SchoolSummaryQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
