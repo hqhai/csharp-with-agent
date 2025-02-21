@@ -52,12 +52,12 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 request.Keyword = request.Keyword.Trim().ToLower(CultureInfo.InvariantCulture);
                 if (request.Keyword.IsValidEmail())
                 {
-                    query = query.Where(m => m.Human != null && m.Human.Email != null && m.Human.Email.Contains(request.Keyword));
+                    query = query.Where(m => m.Human != null && m.Human.Email!.Contains(request.Keyword));
                 }
                 else
                 {
-                    var queryFullName = query.Where(m => m.Human != null && m.Human.FullName != null && m.Human.FullName.Contains(request.Keyword));
-                    var queryCode = query.Where(m => m.Human != null && m.Human.Code != null && m.Human.Code.Contains(request.Keyword));
+                    var queryFullName = query.Where(m => m.Human != null && m.Human.FullName!.Contains(request.Keyword));
+                    var queryCode = query.Where(m => m.Human != null && m.Human.Code!.Contains(request.Keyword));
                     query = queryFullName.Union(queryCode);
                 }
             }

@@ -51,11 +51,11 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
                 if (request.Keyword.IsValidEmail())
                 {
-                    query = query.Where(m => m.Human != null && m.Human.Email != null && m.Human.Email.Contains(request.Keyword));
+                    query = query.Where(m => m.Human != null && m.Human.Email!.Contains(request.Keyword));
                 }
                 else if (request.Keyword.IsValidPhoneNumber())
                 {
-                    query = query.Where(m => m.Human != null && m.Human.PhoneNumber != null && m.Human.PhoneNumber == request.Keyword);
+                    query = query.Where(m => m.Human != null && m.Human.PhoneNumber == request.Keyword);
                 }
                 else if (Guid.TryParse(request.Keyword, out var guid))
                 {
@@ -63,7 +63,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 }
                 else
                 {
-                    query = query.Where(m => m.Human != null && m.Human.FullName != null && m.Human.FullName.Contains(request.Keyword));
+                    query = query.Where(m => m.Human != null && m.Human.FullName!.Contains(request.Keyword));
                 }
             }
             if (!string.IsNullOrEmpty(request.SchoolName))
