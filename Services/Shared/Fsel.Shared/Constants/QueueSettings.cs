@@ -57,7 +57,7 @@ namespace Fsel.Shared.Constants
                 public const string SendStudentsFromFile = $"{KeyQueue}_SendStudentsFromFile";
                 public const string Banner = $"{KeyQueue}_Banner";
                 public const string BannerRealTime = $"{KeyQueue}_BannerRealTime";
-                public const string SpeechToText = $"{KeyQueue}_SpeechToText";
+                public const string SpeechToTextRealTime = $"{KeyQueue}_SpeechToTextRealTime";
             }
         }
 

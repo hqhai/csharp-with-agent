@@ -41,7 +41,7 @@ multicastQueues: new Dictionary<string, Type>
     { QueueSettings.OrderingQueue.NameQueue.ChangeStatusOrder, typeof(ChangeStatusOrderConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.SendStudentsFromFile, typeof(SendStudentsFromFileConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.BannerRealTime, typeof(BannerConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.SpeechToText, typeof(SpeechToTextConsumer) }
+    { QueueSettings.RealtimeQueue.NameQueue.SpeechToTextRealTime, typeof(SpeechToTextConsumer) }
 });
 
 var app = builder.Build();

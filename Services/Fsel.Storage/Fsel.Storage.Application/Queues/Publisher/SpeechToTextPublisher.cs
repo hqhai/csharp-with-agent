@@ -21,7 +21,7 @@ namespace Fsel.Storage.Application.Queues.Publisher
             {
                 return;
             }
-            await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.SpeechToText, request, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.SpeechToTextRealTime, request, cancellationToken);
         }
     }
 }
