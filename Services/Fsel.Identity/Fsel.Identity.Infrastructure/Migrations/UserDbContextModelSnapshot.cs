@@ -1139,6 +1139,16 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasIndex("HumanId");
 
+                    b.HasIndex("IsDeleted");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted"), new[] { "CreatedDate", "School", "CourseLevel", "HumanId", "SchoolId" });
+
+                    b.HasIndex("IsDeleted", "SchoolId");
+
+                    b.HasIndex("IsDeleted", "SchoolId", "SchoolClass");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted", "SchoolId", "SchoolClass"), new[] { "BaseCourseLevel", "BeginnerGuideStr", "ClassId", "CourseId", "CourseLevel", "CreatedByParent", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "DistrictId", "ExpiredDate", "HumanId", "NumberOfShield", "Occupation", "PackageId", "ParentEmail", "ParentPhoneNumber", "ProvinceId", "School", "SchoolFaculty", "SchoolGrade", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
+
                     b.ToTable("Students");
                 });
 
@@ -1202,6 +1212,12 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CompetitionEventId");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CompetitionEventId"), new[] { "StudentId" });
+
+                    b.HasIndex("StudentId");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("StudentId"), new[] { "CompetitionEventId" });
 
                     b.HasIndex("IsDeleted", "StudentId");
 
@@ -1831,7 +1847,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -1936,6 +1952,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL AND [IsDeleted] = 0");
+
+                    b.HasIndex("Id", "ConcurrencyStamp");
 
                     b.HasIndex("IsDeleted", "Email");
 
@@ -2193,6 +2211,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasIndex("UserId", "OTPCode");
 
                     b.HasIndex("UserId", "Status");
+
+                    b.HasIndex("IsDeleted", "OTPCode", "Status");
 
                     b.ToTable("UserOtpCodes");
                 });
@@ -2541,8 +2561,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<string>("RefreshToken")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime?>("RefreshTokenExpiryTime")
                         .HasColumnType("datetime2");
@@ -2564,6 +2584,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.HasIndex("IsDeleted", "RefreshToken");
 
                     b.ToTable("AspNetUserTokens", (string)null);
                 });

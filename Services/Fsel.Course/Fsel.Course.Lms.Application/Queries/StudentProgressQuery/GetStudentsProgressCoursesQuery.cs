@@ -199,19 +199,19 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             #region ClassForum
 
             var courseOfClassForumIds = courseProgress.Select(x => x.CourseId).Distinct().ToList();
+            studentIds ??= new List<Guid>();
 
-            var classForumResultQuery = _classForumResultRepository.Queryable.Include(x => x.ClassForum).ThenInclude(x => x.Lesson).ThenInclude(x => x.LessonResults).
-               Where(x => studentIds.Contains(x.StudentId) && x.ClassForum != null
-            ).Select(x =>
-            new
-            {
-                ClassForumScores = x.ClassForumScores,
-                CorrectCount = x.CorrectCount,
-                CorrectTotal = x.CorrectTotal,
-                StudentId = x.StudentId,
-                CourseId = x.LessonResult.CourseId
-            }
-           ).ToList();
+            var classForumResultQuery = await _classForumResultRepository.Queryable.Include(x => x.ClassForum).ThenInclude(x => x.Lesson).ThenInclude(x => x.LessonResults)
+                .Where(x => x.ClassForum != null)
+                .WhereBulkContains(studentIds, x => x.StudentId)
+                .Select(x => new
+                {
+                    ClassForumScores = x.ClassForumScores,
+                    CorrectCount = x.CorrectCount,
+                    CorrectTotal = x.CorrectTotal,
+                    StudentId = x.StudentId,
+                    CourseId = x.LessonResult!.CourseId
+                }).ToListAsync(cancellationToken);
 
             var joinedClassForumResults = (from courseId in courseOfClassForumIds
                                            join forumResult in classForumResultQuery

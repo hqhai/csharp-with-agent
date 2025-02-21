@@ -57,6 +57,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new UserDeletionEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentDailyStreakEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserSchoolEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserTokenEntityTypeConfiguration());
         }
 
         #region Db Set

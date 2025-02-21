@@ -32,6 +32,7 @@ namespace Fsel.Identity.Infrastructure.Configs
             builder.HasIndex(x => new { x.IsDeleted, x.Email });
             builder.HasIndex(x => new { x.IsDeleted, x.PhoneNumber });
             builder.HasIndex(x => new { x.IsDeleted, x.Id, x.UserName, x.Email });
+            builder.HasIndex(x => new { x.Id, x.ConcurrencyStamp });
         }
     }
 }
