@@ -116,8 +116,10 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
 
-            _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
-            await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _sectionGroupResultRepository.BulkMergeAsync(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = entity => new { entity.WorkingTime };
+            });
             return sectionGroupResult;
         }
 
