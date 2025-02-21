@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -17,20 +17,6 @@ namespace Fsel.System.Infrastructure.Migrations
             migrationBuilder.DropIndex(
                 name: "IX_TokenHistories_IsDeleted_UserId_Type",
                 table: "TokenHistories");
-
-            migrationBuilder.DropColumn(
-                name: "CourseLevel",
-                table: "CourseSuggestConfigs");
-
-            migrationBuilder.DropColumn(
-                name: "CourseType",
-                table: "CourseSuggestConfigs");
-
-            migrationBuilder.AddColumn<string>(
-                name: "CourseLevelStr",
-                table: "CourseSuggestConfigs",
-                type: "nvarchar(max)",
-                nullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_TokenHistories_IsDeleted_UserId",
@@ -74,26 +60,6 @@ namespace Fsel.System.Infrastructure.Migrations
             migrationBuilder.DropIndex(
                 name: "IX_BannerStudents_IsDeleted_StudentId_CreatedDate",
                 table: "BannerStudents");
-
-            migrationBuilder.DropColumn(
-                name: "CourseLevelStr",
-                table: "CourseSuggestConfigs");
-
-            migrationBuilder.AddColumn<string>(
-                name: "CourseLevel",
-                table: "CourseSuggestConfigs",
-                type: "nvarchar(100)",
-                maxLength: 100,
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<string>(
-                name: "CourseType",
-                table: "CourseSuggestConfigs",
-                type: "nvarchar(100)",
-                maxLength: 100,
-                nullable: false,
-                defaultValue: "");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TokenHistories_IsDeleted_UserId_CreatedDate",
