@@ -66,6 +66,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new BannerSettingEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new BannerStudentEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TokenHistoryTranslationEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UserConfigEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new DisplayOrderConfigEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }

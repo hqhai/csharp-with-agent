@@ -39,6 +39,7 @@ namespace Fsel.Course.Infrastructure.Configs
 
             builder.HasIndex(c => new { c.LessonResultId, c.HomeWorkId, c.StudentId }).IsUnique();
             builder.HasIndex(c => new { c.StudentId });
+            builder.HasIndexIncludeAllProperties(c => new { c.StudentId });
         }
     }
 }

@@ -32,30 +32,31 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<CompetitionEvent>?>();
 
-            var competitionEvents = await _competitionEventRepository.Queryable.ToListAsync(cancellationToken);
-
-            var parentEvent = competitionEvents.FirstOrDefault(p => p.Id == request.Id);
+            var competitionEvents = _competitionEventRepository.Queryable;
+            var parentEvent = await competitionEvents.FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
             if (parentEvent != null && parentEvent.EventContent != null && parentEvent.EventContent.IsParentEvent.HasValue && parentEvent.EventContent.IsParentEvent.Value)
             {
-                var leafEvents = GetLeafEventsRecursive(competitionEvents, parentEvent.Id);
+                var leafEvents = await GetLeafEventsRecursive(competitionEvents, parentEvent.Id);
                 methodResult.Result = leafEvents.ToList();
                 return methodResult;
             }
             return methodResult;
         }
 
-        public ICollection<CompetitionEvent> GetLeafEventsRecursive(ICollection<CompetitionEvent> events, Guid? parentId = null)
+        public async Task<ICollection<CompetitionEvent>> GetLeafEventsRecursive(IQueryable<CompetitionEvent> events, Guid? parentId = null)
         {
-            var children = events.Where(e => e.ParentEventId == parentId).ToList();
+            var children = await events.Where(e => e.ParentEventId == parentId).ToListAsync();
 
             if (!children.Any())
+            {
                 return new List<CompetitionEvent>();
+            }
 
             var leafEvents = new List<CompetitionEvent>();
             foreach (var child in children)
             {
-                var subChildren = GetLeafEventsRecursive(events, child.Id);
+                var subChildren = await GetLeafEventsRecursive(events, child.Id);
                 if (subChildren.Count == 0)
                 {
                     leafEvents.Add(child);

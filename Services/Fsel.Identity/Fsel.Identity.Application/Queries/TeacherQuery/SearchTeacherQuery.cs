@@ -53,7 +53,7 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
                 }
                 else
                 {
-                    teacherQuery = teacherQuery.Where(m => m.Human != null && m.Human.FullName != null && m.Human.FullName.Contains(request.Keyword));
+                    teacherQuery = teacherQuery.Where(m => m.Human != null && m.Human.FullName!.Contains(request.Keyword));
                 }
             }
 

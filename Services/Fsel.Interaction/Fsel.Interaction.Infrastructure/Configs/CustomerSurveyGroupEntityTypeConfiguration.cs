@@ -24,6 +24,8 @@ namespace Fsel.Interaction.Infrastructure.Configs
                    .HasConversion(
                        v => v.ToString(),
                        v => v.EnumParse<EnumSurveyFormType>());
+
+            builder.HasIndex(c => new { c.IsDeleted, c.UserId, c.SurveyFormType });
         }
     }
 }
