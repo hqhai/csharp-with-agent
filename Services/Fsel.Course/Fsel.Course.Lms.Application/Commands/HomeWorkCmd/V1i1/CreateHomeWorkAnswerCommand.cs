@@ -304,9 +304,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 homeWorkResult = await GetHomeWorkResult(homeWorkResult, homeWorkQuestionCount, isHomeWorkDone, (int)tokensAchieved);
             }
             //_homeWorkResultRepository.Update(homeWorkResult);
-            //await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
             await _homeWorkResultRepository.BulkMergeAsync(new List<HomeWorkResult> { homeWorkResult });
+            await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
             await PublishRankedStudent(homeWorkResult.CreatedUserId, cancellationToken);
             methodResult.Result = true;
             return methodResult;
