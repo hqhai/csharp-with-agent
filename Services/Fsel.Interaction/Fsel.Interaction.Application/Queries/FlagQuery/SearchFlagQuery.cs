@@ -79,19 +79,24 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var classForumResultResult = await _courseService.ExecuteListClassForumResultQueryAsync(new BaseQueryModel
+            var classForumResults = new List<ClassForumResultModel>();
+
+            if (lists.Count > 0)
             {
-                Filters = new List<GenericFilterModel>
-                 {
-                     new GenericFilterModel
-                     {
-                         Property = nameof(ClassForumResultModel.Id),
-                         Value = lists.Select(x => x.ObjectId).ToList(),
-                         Operator = Common.Enums.EnumFilterOperator.In
-                     }
-                 }
-            });
-            var classForumResults = classForumResultResult.Content?.Result;
+                var classForumResultResult = await _courseService.ExecuteListClassForumResultQueryAsync(new BaseQueryModel
+                {
+                    Filters = new List<GenericFilterModel>
+                    {
+                        new GenericFilterModel
+                        {
+                            Property = nameof(ClassForumResultModel.Id),
+                            Value = lists.Select(x => x.ObjectId).ToList(),
+                            Operator = Common.Enums.EnumFilterOperator.In
+                        }
+                    }
+                });
+                classForumResults = classForumResultResult.Content?.Result?.ToList() ?? new List<ClassForumResultModel>();
+            }
 
             var studentResult = await _userService.ExecuteListStudentQueryAsync(new BaseQueryModel
             {
