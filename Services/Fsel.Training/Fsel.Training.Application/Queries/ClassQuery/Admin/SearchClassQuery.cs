@@ -48,7 +48,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                 return methodResult;
             }
 
-            var classes = await _classRepository.Queryable.Where(x => !request.ClassId.HasValue || request.ClassId != x.Id).Include(i => i.ClassStudents).Select(p => new ClassSearchModel
+            var classes = await _classRepository.Queryable.Where(x => !request.ClassId.HasValue || request.ClassId != x.Id).Select(p => new ClassSearchModel
             {
                 Id = p.Id,
                 ClassName = p.Name,
