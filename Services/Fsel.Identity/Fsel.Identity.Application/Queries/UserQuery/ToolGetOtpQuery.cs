@@ -11,6 +11,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -38,11 +39,14 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserOtpCodeModel>();
 
-            Guid? userId = _userManager.Users.Where(x => x.Email.ToLower().Trim() == request.EmailOrNumberphone.ToLower().Trim() || x.PhoneNumber == request.EmailOrNumberphone)
-                                             .Select(x => x.Id)
-                                             .FirstOrDefault();
+            request.EmailOrNumberphone = request.EmailOrNumberphone?.Trim() ?? string.Empty;
+            var emailQuery = _userManager.Users.Where(x => x.Email != null && x.UserName == request.EmailOrNumberphone).Select(x => x.Id);
+            var phoneQuery = _userManager.Users.Where(x => x.PhoneNumber != null && x.PhoneNumber == request.EmailOrNumberphone && x.UserName == request.EmailOrNumberphone).Select(x => x.Id);
+            Guid? userId = emailQuery.Union(phoneQuery).FirstOrDefault();
 
-            var userOTP = _userOtpCodeRepository.Queryable.Where(x => x.UserId == userId)
+            EnumUserOtpCodeType type = phoneQuery?.Count() != 0 ? EnumUserOtpCodeType.SMS : EnumUserOtpCodeType.Email;
+
+            var userOTP = _userOtpCodeRepository.Queryable.Where(x => x.UserId == userId && x.Type == type)
                                                           .OrderByDescending(x => x.CreatedDate)
                                                           .FirstOrDefault();
 

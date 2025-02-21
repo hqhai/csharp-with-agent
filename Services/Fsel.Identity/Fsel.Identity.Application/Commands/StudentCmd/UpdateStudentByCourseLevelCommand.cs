@@ -47,14 +47,14 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 student.BaseCourseLevel = request.BaseCourseLevel.Value;
             }
 
-            await _studentRepository.ExecuteTransactionAsync(async () =>
-            {
-                student = _studentRepository.Update(student);
-                await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = true;
-                return methodResult;
-            });
+            _studentRepository.Update(student, false, x => x.CreatedDate, x => x.CreatedByParent, x => x.CreatedFullName, x => x.CreatedUserId
+            , x => x.DeletedDate, x => x.DeletedFullName, x => x.DeletedUserId, x => x.IsDeleted, x => x.PackageId, x => x.Occupation, x => x.School,
+            x => x.NumberOfShield, x => x.NumberOfToken, x => x.NumberOfTokenExchanged, x => x.NumberOfTokenReceived, x => x.ParentPhoneNumber,
+            x => x.ClassId, x => x.HumanId, x => x.BeginnerGuideStr, x => x.DistrictId, x => x.ProvinceId, x => x.SchoolClass, x => x.SchoolFaculty,
+            x => x.SchoolGrade, x => x.SchoolId, x => x.ExpiredDate, x => x.ParentEmail);
+            await _studentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = true;
             return methodResult;
         }
     }

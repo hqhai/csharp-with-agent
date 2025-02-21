@@ -8,5 +8,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
         public string? Email { get; set; }
         public string? NewPassword { get; set; }
         public string? PhoneNumber { get; set; }
+        public Guid? UserId { get; set; }
     }
 }

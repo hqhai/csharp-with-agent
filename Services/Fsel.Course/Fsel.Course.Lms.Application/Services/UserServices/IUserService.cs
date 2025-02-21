@@ -137,13 +137,14 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         Task<IApiResponse<MethodResult<IList<StudentDtoModel>>>> GetStudentsSchoolAsync([FromQuery] SearchStudentSchoolQueryModel query);
 
         [Get("/v1/admin/student/get-dashboards")]
-        [RefitCache(CacheSettings.TimeCache.TenMinutes)]
+        [RefitCache(CacheSettings.TimeCache.ThirtyMinutes)]
         Task<IApiResponse<MethodResult<IList<StudentDtoModel>>>> GetStudentsDashboardAsync([FromQuery] GetStudentsDashboardQueryModel query);
 
         [Get("/v1/admin-school/student")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsToAdminSchoolAsync();
 
         [Get("/v1/student/get-by-school-id")]
+        [RefitCache(CacheSettings.TimeCache.ThirtyMinutes)]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsBySchoolId();
 
         [Get("/v1/user/get-user-profile")]
@@ -157,6 +158,9 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Get("/v1/admin/other/report-competition-event-school")]
         Task<IApiResponse<MethodResult<IList<ReportCompetitionEventModel>>>> GetReportCompetitionEventSchoolAsync([Query] GetReportCompetitionEventQueryModel query);
+
+        [Get("/v1/admin/other/report-competition-event-district-school")]
+        Task<IApiResponse<MethodResult<IList<ReportCompetitionEventModel>>>> GetReportCompetitionEventDistrictSchoolAsync([Query] GetCompetitionEventToEventParentQueryModel query);
 
         [Get("/v1/student/get-student/{eventCode}")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByEventCode([FromRoute] string eventCode);

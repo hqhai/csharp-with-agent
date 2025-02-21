@@ -25,8 +25,13 @@ namespace Fsel.Sender.Domain.Entities
         public string? SMSId { get; set; }
 
         public EnumMessageHistoryType Type { get; set; }
+
         public EnumMessageHistoryStatus Status { get; set; }
+
         public string? RequestBody { get; set; }
+
         public string? ResponseBody { get; set; }
+
+        public EnumSenderTemplate? Template { get; set; }
     }
 }

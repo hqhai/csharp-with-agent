@@ -74,7 +74,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var students = userResults?.Result?.ToList() ?? new List<StudentDtoModel>();
-            var studentIds = students.Select(x => x.Id).ToList();
 
             methodResult.Result = await GetOverallReportAsync(request, students);
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -101,11 +100,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                      })
                                      .ToListAsync();
 
-            var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable
+            var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(students.Select(x => x.Id), x => x.StudentId)
                                           join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                           join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
                                           from ur in unitGroup.DefaultIfEmpty()
-                                          where students.Select(x => x.Id).Contains(baseQ.StudentId) && baseQ.WorkingStatus == EnumWorkingStatus.Active &&
+                                          where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
                                           (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date) && ur.Status == EnumResultStatus.Done
                                           group new { baseQ, ur }
                                           by new { baseQ.CourseId, baseQ.StudentId } into g
@@ -146,11 +145,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
             if (request.CourseType == EnumCourseType.Academic)
             {
-                var finalTestResults = await (from baseQ in _courseResultRepository.Queryable
+                var finalTestResults = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                                               join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                               join ftr in _finalTestResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, FinalTestId = cum.FinalTestId } equals new { ftr.StudentId, ftr.CourseId, FinalTestId = (Guid?)ftr.FinalTestId } into finalTestGroup
                                               from ftr in finalTestGroup.DefaultIfEmpty()
-                                              where students.Select(x => x.Id).Contains(baseQ.StudentId) && baseQ.WorkingStatus == EnumWorkingStatus.Active &&
+                                              where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
                                               (!request.EndDate.HasValue || (ftr.UpdatedDate ?? ftr.CreatedDate).Date <= request.EndDate.Value.Date) && ftr.Status == EnumResultStatus.Done
                                               select new FinalTestResult
                                               {
@@ -170,12 +169,12 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             }
             else
             {
-                var mockTestResults = await (from baseQ in _courseResultRepository.Queryable
+                var mockTestResults = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                                              join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                              join c in _courseRepository.Queryable on cum.CourseId equals c.Id
                                              join mtr in _mockTestResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, MockTestId = cum.MockTestId } equals new { mtr.StudentId, mtr.CourseId, MockTestId = (Guid?)mtr.MockTestId } into mockTestGroup
                                              from mtr in mockTestGroup.DefaultIfEmpty()
-                                             where studentIds.Contains(baseQ.StudentId) && baseQ.WorkingStatus == EnumWorkingStatus.Active &&
+                                             where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
                                              (!request.EndDate.HasValue || (mtr.UpdatedDate ?? mtr.CreatedDate).Date <= request.EndDate.Value.Date) && mtr.Status == EnumResultStatus.Done && !mtr.UnitId.HasValue
                                              select new
                                              {

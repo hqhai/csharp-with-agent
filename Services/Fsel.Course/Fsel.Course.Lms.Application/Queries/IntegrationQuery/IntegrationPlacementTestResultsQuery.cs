@@ -55,7 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
             }
 
             var placementTestResults = await _placementTestResultRepository.Queryable
-                                                                           .Where(x => request.UserIds.Contains(x.CreatedUserId))
+                                                                           .WhereBulkContains(request.UserIds, x => x.CreatedUserId)
                                                                            .ToListAsync(cancellationToken);
 
             var userIds = placementTestResults.Select(x => x.CreatedUserId).Distinct().ToList();

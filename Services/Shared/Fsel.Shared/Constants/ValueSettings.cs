@@ -22,7 +22,10 @@ namespace Fsel.Shared.Constants
         public const int AmountStudentSending = 1000;
         public const int MaxSendingRateApp = 3;
         public const int MinCompletePercent = 75;
+
+        public const int BatchSize1000 = 1000; // Số lượng bản ghi mỗi lần truy vấn
         public const int BatchSize = 500; // Số lượng bản ghi mỗi lần truy vấn
+        public const int BatchSize200 = 200; // Số lượng bản ghi mỗi lần truy vấn
         public const string FSEL_PUBLIC_FILES_URL = "https://s3-sgn10.fptcloud.com/fsel-public/Files/";
 
         public static class AgeMilestone

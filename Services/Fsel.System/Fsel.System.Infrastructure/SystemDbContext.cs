@@ -30,6 +30,7 @@ namespace Fsel.System.Infrastructure
             SeedTokenConfig(modelBuilder);
             SeedTechieConfig(modelBuilder);
             SeedTechieActionsConfig(modelBuilder);
+            SeedDisplayOrderConfig(modelBuilder);
             modelBuilder.ApplyConfiguration(new TeachingCostEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ReferralDiscountConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardConfigConfiguration());
@@ -60,9 +61,13 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new CourseTargetConfigEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new CourseSuggestConfigEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new BannerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BannerScopeEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BannerImageEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BannerSettingEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new BannerStudentEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TokenHistoryTranslationEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UserConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new DisplayOrderConfigEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -99,6 +104,9 @@ namespace Fsel.System.Infrastructure
         public DbSet<CourseTargetConfig> CourseTargetConfigs { get; set; }
         public DbSet<CourseSuggestConfig> CourseSuggestConfigs { get; set; }
         public DbSet<Banner> Banners { get; set; }
+        public DbSet<BannerSetting> BannerSettings { get; set; }
+        public DbSet<BannerScope> BannerScopes { get; set; }
+        public DbSet<BannerImage> BannerImages { get; set; }
         public DbSet<BannerStudent> BannerStudents { get; set; }
         public DbSet<TokenHistory> TokenHistories { get; set; }
         public DbSet<TokenHistoryTranslation> TokenHistoryTranslations { get; set; }
@@ -180,6 +188,14 @@ namespace Fsel.System.Infrastructure
 
             builder.Entity<TechieAction>().HasData(techieActions);
             builder.Entity<TechieActionTranslation>().HasData(packageTranslations);
+        }
+
+        private static void SeedDisplayOrderConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.DisplayOrderConfig);
+            var displayOrderConfigs = ConvertHelper.DeserializeFromFilePath<IList<DisplayOrderConfig>>(path);
+            ArgumentNullException.ThrowIfNull(displayOrderConfigs);
+            builder.Entity<DisplayOrderConfig>().HasData(displayOrderConfigs);
         }
 
         //private static void SeedTechieActionsConfig(ModelBuilder builder)

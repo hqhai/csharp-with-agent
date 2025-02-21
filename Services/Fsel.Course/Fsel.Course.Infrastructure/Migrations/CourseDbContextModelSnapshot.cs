@@ -5708,7 +5708,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("QuestionId", "VideoResultId"), new[] { "CorrectCount" });
 
-                    b.HasIndex("VideoResultId", "VideoTimeCodeId", "ExerciseId", "QuestionId", "VideoTimeCodeResultId")
+                    b.HasIndex("VideoResultId", "QuestionId", "VideoTimeCodeResultId")
                         .IsUnique()
                         .HasFilter("[VideoResultId] IS NOT NULL AND [VideoTimeCodeResultId] IS NOT NULL");
 

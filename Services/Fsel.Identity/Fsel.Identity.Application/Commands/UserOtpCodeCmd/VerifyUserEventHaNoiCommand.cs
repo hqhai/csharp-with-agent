@@ -50,10 +50,21 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             }
 
             var user = await _userManager.Users.Include(p => p.Human).ThenInclude(p => p.Student).FirstOrDefaultAsync(p => p.UserName == request.PhoneNumber, cancellationToken);
+
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.UserDoesNotExist), nameof(request.PhoneNumber), request.PhoneNumber);
-                return methodResult;
+                var isPhoneNumberAlreadyExist = await _userManager.Users.AnyAsync(p => p.PhoneNumber == request.PhoneNumber, cancellationToken);
+
+                if (isPhoneNumberAlreadyExist)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.PhoneNumberAlreadyExist), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
+                }
+                else
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.UserDoesNotExist), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
+                }
             }
 
             if (user.Status == EnumUserStatus.Inactive)
@@ -65,16 +76,15 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             var student = user.Human?.Student;
             var studentId = student?.Id;
 
-            var studentCompetitionEvent = await _studentCompetitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.StudentId == studentId, cancellationToken);
+            var studentCompetitionEvent = await _studentCompetitionEventsRepository.Queryable.Include(p => p.CompetitionEvents).ThenInclude(p => p.CompetitionEventParent).ThenInclude(p => p.CompetitionEventParent).FirstOrDefaultAsync(p => p.StudentId == studentId, cancellationToken);
+
             if (studentCompetitionEvent == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.NotInEventHN), nameof(request.PhoneNumber), request.PhoneNumber);
                 return methodResult;
             }
 
-            var competitionEvent = await _competitionEventsRepository.Queryable.Include(p => p.CompetitionEventParent).ThenInclude(p => p.CompetitionEventParent).FirstOrDefaultAsync(p => p.Id == studentCompetitionEvent.CompetitionEventId, cancellationToken);
-
-            var parentCompetitionEvent = competitionEvent?.CompetitionEventParent?.CompetitionEventParent;
+            var parentCompetitionEvent = studentCompetitionEvent.CompetitionEvents?.CompetitionEventParent?.CompetitionEventParent;
 
             if (parentCompetitionEvent == null || parentCompetitionEvent.EventCode != request.EventCode)
             {

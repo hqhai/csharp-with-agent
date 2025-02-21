@@ -83,7 +83,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
             else if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
-                user = await _userManager.Users.Include(p => p.UserOtpCodes).Include(x => x.Human).FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber, cancellationToken);
+                user = await _userManager.Users.Include(p => p.UserOtpCodes).Include(x => x.Human).FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber.Trim() && x.UserName == request.PhoneNumber.Trim(), cancellationToken);
             }
 
             if (user == null)
@@ -99,12 +99,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            if ((!user.PhoneNumberConfirmed || !user.EmailConfirmed) && user.Human == null)
+            if (!user.PhoneNumberConfirmed && !user.EmailConfirmed)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
-
 
             if (!string.IsNullOrEmpty(request.Email))
             {

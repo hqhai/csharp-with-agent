@@ -6,6 +6,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
     using Fsel.Common.ActionResults;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -60,24 +61,26 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             {
                 return methodResult;
             }
-            var competitionEvents = competitions.SelectMany(x => x.CompetitionEvents).ToList();
+            var competitionEvents = await GetCompetitionEventsAsync(competitions);
+            competitionEvents = competitionEvents.GroupBy(x => x.Id).Select(x => x.First()).ToList();
 
             var districtIds = competitionEvents.Where(x => x.LocationId.HasValue).Select(x => x.LocationId.GetValueOrDefault()).ToList();
             var locationResults = await _systemService.GetLocationByIdsAsync(new GetLocationsByIdsQueryModel { IdsStr = string.Join(",", districtIds) });
             var locationDistricts = locationResults.Content?.Result;
 
+            var competitionEventIds = competitionEvents.Select(x => x.Id).ToList();
+            competitionEventIds.AddRange(competitions.Select(x => x.Id));
             if (!string.IsNullOrEmpty(request.DistrictName))
             {
                 request.DistrictName = request.DistrictName.ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim();
-                var district = locationDistricts?.FirstOrDefault(x => x.Name.ToLower().Trim() == request.DistrictName);
+                var district = locationDistricts?.FirstOrDefault(x => x.Name != null && x.Name.ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim() == request.DistrictName);
                 competitionEvents = competitionEvents.Where(x => district != null && x.Id == district.Id).ToList();
             }
             var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType);
             var eventRegistrations = await (from baseQ in _studentRepository.Queryable
                                             join er in _eventRegistrationRepository.Queryable on baseQ.Id equals er.StudentId
                                             join sce in _studentCompetitionEventsRepository.Queryable on baseQ.Id equals sce.StudentId
-                                            where er.DistrictId.HasValue && competitionEvents.Select(x => x.LocationId).Contains(er.DistrictId.Value)
-                                            && competitions.Select(x => x.Id).Contains(er.CompetitionEventId)
+                                            where competitionEventIds.Contains(er.CompetitionEventId)
                                             && (!request.StudentId.HasValue || baseQ.Id == request.StudentId.Value)
                                             && baseQ.CourseLevel.HasValue && courseLevels.Contains(baseQ.CourseLevel.Value)
                                             && baseQ.CourseId.HasValue
@@ -112,6 +115,28 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             methodResult.Result = eventRegistrations;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task<List<CompetitionEvent>> GetCompetitionEventsAsync(List<CompetitionEvent> competitionEvents)
+        {
+            // Lấy tất cả các sự kiện con của competitionEvents
+            var subEvents = await _competitionEventsRepository.Queryable
+                .Where(x => x.ParentEventId.HasValue && competitionEvents.Select(e => e.Id).Contains(x.ParentEventId.Value))
+                .ToListAsync();
+
+            // Lọc ra các sự kiện từ competitionEvents mà không có con (nút lá)
+            var leafNodes = competitionEvents.Where(e => !subEvents.Any(se => se.ParentEventId == e.Id)).ToList();
+
+            // Nếu không có con thì trả về các nút lá (điểm cuối)
+            if (!subEvents.Any())
+            {
+                return leafNodes;
+            }
+
+            // Gọi đệ quy để lấy tiếp các điểm cuối từ danh sách con
+            var childLeafNodes = await GetCompetitionEventsAsync(subEvents);
+
+            return leafNodes.Concat(childLeafNodes).ToList();
         }
     }
 }
