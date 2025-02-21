@@ -35,6 +35,7 @@ namespace Fsel.Identity.Infrastructure.Configs
 
             builder.HasIndex(x => new { x.IsDeleted, x.SchoolId });
             builder.HasIndex(x => new { x.IsDeleted }).IncludeValueProperties(x => new { x.CreatedDate, x.School, x.CourseLevel, x.HumanId, x.SchoolId });
+            builder.HasIndexIncludeAllProperties(c => new { c.IsDeleted, c.SchoolId, c.SchoolClass });
         }
     }
 }

@@ -22,6 +22,7 @@ namespace Fsel.Interaction.Infrastructure.Configs
                    .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasIndex(c => new { c.IsDeleted, c.UserId });
+            builder.HasIndex(c => new { c.IsDeleted, c.UserId, c.SurveyQuestionId });
         }
     }
 }

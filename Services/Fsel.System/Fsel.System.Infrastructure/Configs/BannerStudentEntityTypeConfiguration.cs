@@ -18,6 +18,7 @@ namespace Fsel.System.Infrastructure.Configs
                    .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasIndex(c => new { c.IsDeleted, c.StudentId, c.BannerId });
+            builder.HasIndex(c => new { c.IsDeleted, c.StudentId, c.CreatedDate });
         }
     }
 }
