@@ -88,11 +88,14 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
             #endregion Check Duplicate HomeWorkId
 
-            var homeWorkIds = homeWorkDuplicates.Select(x => x.ObjectId).ToList();
-            var groupHomeWork = await _homeWorkRepository.Queryable.Where(x => homeWorkIds.Contains(x.Id))
-                .GroupBy(x => x.CourseSkill)
-                .Select(x => new { x.Key, HomeWorkIds = x.Select(x => x.Id).ToList() })
-                .ToListAsync(cancellationToken);
+            var homeWorkIds = homeWorkDuplicates.Select(x => x.ObjectId).ToList() ?? new List<Guid>();
+
+            var groupHomeWorkResult = await _homeWorkRepository.Queryable.WhereBulkContains(homeWorkIds, x => x.Id).ToListAsync(cancellationToken);
+
+            var groupHomeWork = groupHomeWorkResult.GroupBy(x => x.CourseSkill)
+                                                   .Select(x => new { x.Key, HomeWorkIds = x.Select(x => x.Id).ToList() })
+                                                   .ToList();
+
             if (groupHomeWork == null || groupHomeWork.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(groupHomeWork));
@@ -162,7 +165,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
         private async Task<SkillScores> GetSkillScoreHomeWorkAnswerAsync(IList<Guid> homeWorkResultIds, CancellationToken cancellationToken)
         {
-            var listScore = await _homeWorkAnswerRepository.Queryable.Where(x => homeWorkResultIds.Contains(x.HomeWorkResultId))
+            var listScore = await _homeWorkAnswerRepository.Queryable.WhereBulkContains(homeWorkResultIds, x => x.HomeWorkResultId)
                                     .Select(x => x.CorrectCount)
                                     .ToListAsync(cancellationToken);
             return new SkillScores
@@ -174,14 +177,18 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
         private async Task<IList<ModuleDuplicateModel>> GetHomeWorksDupliateAsync(GetOverallScoreByHomeWorkQuery request, CancellationToken cancellationToken)
         {
-            var lessonIds = await GetLessonIdsAsync(request);
+            var lessonIds = await GetLessonIdsAsync(request) ?? new List<Guid>();
             var lessonDuplicateIds = lessonIds.GroupBy(x => x).Select(x => new ModuleDuplicateModel
             {
                 ObjectId = x.Key,
                 NumberOfDuplicate = x.Count(),
             }).ToList();
 
-            var homeWorkDuplicates = await _lessonHomeWorkRepository.Queryable.Where(x => lessonIds.Contains(x.LessonId)).Select(x => new { x.HomeWorkId, x.LessonId }).ToListAsync(cancellationToken);
+            var homeWorkDuplicates = await _lessonHomeWorkRepository.Queryable
+                                                                    .WhereBulkContains(lessonIds, x => x.LessonId)
+                                                                    .Select(x => new { x.HomeWorkId, x.LessonId })
+                                                                    .ToListAsync(cancellationToken);
+
             return homeWorkDuplicates.Select(x => new ModuleDuplicateModel
             {
                 ObjectId = x.HomeWorkId,

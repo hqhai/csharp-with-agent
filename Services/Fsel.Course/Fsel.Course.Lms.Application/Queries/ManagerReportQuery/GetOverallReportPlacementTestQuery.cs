@@ -76,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                         break;
 
                     case EnumCompletionStatus.InProgress:
-                        overallReportPlacementTest.TotalPlacementTest = await query.Where(x => x.Status == EnumResultStatus.Process).Select(x => x.StudentId).CountAsync(cancellationToken);
+                        overallReportPlacementTest.TotalPlacementTest = await query.Where(x => x.Status != EnumResultStatus.Done).Select(x => x.StudentId).CountAsync(cancellationToken);
                         break;
                 }
             }

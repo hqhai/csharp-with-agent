@@ -40,10 +40,12 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<SearchOrderModel>>();
 
-            var query = _orderRepository.Queryable.Include(p => p.Package).Where(p => !p.IsTrial).Select(x => new SearchOrderModel
+            var query = _orderRepository.Queryable.Where(p => !p.IsTrial).Select(x => new SearchOrderModel
             {
                 Id = x.Id,
                 Code = x.Code,
+                Email = x.Email,
+                FullName = x.FullName,
                 UserId = x.UserId,
                 CreatedDate = x.UpdatedDate ?? x.CreatedDate,
                 UpdatedDate = x.UpdatedDate,
@@ -54,63 +56,64 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 MonthNumber = x.Package == null ? null : x.Package.MonthNumber,
                 RevenueType = x.RevenueType,
                 TotalPrice = x.TotalPrice,
-            }).ToList();
-
-
+            });
 
             if (request.IsNew.HasValue && request.IsNew == true)
             {
-                query = query.Where(p => p.Status == EnumOrderStatus.New && (p.PaymentMethod == EnumPaymentMethodStatus.BankTransfer || p.PaymentMethod == EnumPaymentMethodStatus.Card)).ToList();
+                query = query.Where(p => p.Status == EnumOrderStatus.New && (p.PaymentMethod == EnumPaymentMethodStatus.BankTransfer || p.PaymentMethod == EnumPaymentMethodStatus.Card));
             }
             else if (request.IsNew.HasValue && request.IsNew == false)
             {
-                query = query.Where(p => p.Status != EnumOrderStatus.New || (p.Status == EnumOrderStatus.New && (p.PaymentMethod == EnumPaymentMethodStatus.Payoo || p.PaymentMethod == EnumPaymentMethodStatus.AppStore || p.PaymentMethod == EnumPaymentMethodStatus.CHPlay))).ToList();
+                query = query.Where(p => p.Status != EnumOrderStatus.New || (p.Status == EnumOrderStatus.New && (p.PaymentMethod == EnumPaymentMethodStatus.Payoo || p.PaymentMethod == EnumPaymentMethodStatus.AppStore || p.PaymentMethod == EnumPaymentMethodStatus.CHPlay)));
             }
 
             if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
             {
-                query = query.Where(p => p.UserId == _authContext.CurrentUserId).ToList();
+                query = query.Where(p => p.UserId == _authContext.CurrentUserId);
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 if (request.Keyword.IsValidEmail())
                 {
-                    query = query.Where(p => !string.IsNullOrEmpty(p.Email) && p.Email.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase)).ToList();
+                    query = query.Where(p => !string.IsNullOrEmpty(p.Email) && p.Email.Contains(request.Keyword));
                 }
                 else
                 {
-                    query = query.Where(p => (!string.IsNullOrEmpty(p.Code) && p.Code.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase)) || (!string.IsNullOrEmpty(p.FullName) && p.FullName.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase))).ToList();
+                    var codeQuery = query.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
+                    var fullNameQuery = query.Where(m => m.FullName != null && m.FullName.Contains(request.Keyword));
+                    query = codeQuery.Union(fullNameQuery);
                 }
             }
 
             if (request.PackageIds != null && request.PackageIds.Count > 0)
             {
-                query = query.Where(p => p.PackageId.HasValue && request.PackageIds.Contains(p.PackageId.Value)).ToList();
+                request.PackageIds = request.PackageIds.Distinct().ToList();
+                query = query.Where(p => p.PackageId.HasValue && request.PackageIds.Contains(p.PackageId.Value));
             }
 
             if (request.StartDate.HasValue && request.EndDate.HasValue)
             {
-                query = query.Where(p => p.CreatedDate.HasValue && request.StartDate.Value.Date <= p.CreatedDate.Value.Date && request.EndDate.Value.Date >= p.CreatedDate.Value.Date).ToList();
+                query = query.Where(p => p.CreatedDate.HasValue && request.StartDate.Value.Date <= p.CreatedDate.Value.Date && request.EndDate.Value.Date >= p.CreatedDate.Value.Date);
             }
             else if (request.StartDate.HasValue)
             {
-                query = query.Where(p => p.CreatedDate.HasValue && request.StartDate.Value.Date <= p.CreatedDate.Value.Date).ToList();
+                query = query.Where(p => p.CreatedDate.HasValue && request.StartDate.Value.Date <= p.CreatedDate.Value.Date);
             }
             else if (request.EndDate.HasValue)
             {
-                query = query.Where(p => p.CreatedDate.HasValue && request.EndDate.Value.Date >= p.CreatedDate.Value.Date).ToList();
+                query = query.Where(p => p.CreatedDate.HasValue && request.EndDate.Value.Date >= p.CreatedDate.Value.Date);
             }
 
             if (request.RevenueType.HasValue)
             {
-                query = query.Where(p => p.RevenueType == request.RevenueType).ToList();
+                query = query.Where(p => p.RevenueType == request.RevenueType);
             }
 
-            int totalItem = query.Count;
-            var lists = query
+            int totalItem = await query.CountAsync(cancellationToken);
+            var lists = await query
                     .ApplySortAndPaging(request)
-                    .ToList();
+                    .ToListAsync(cancellationToken);
 
 
             var userIds = lists.Select(l => l.UserId).Distinct().ToList();
@@ -127,8 +130,8 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 {
                     if (studentLookup != null && studentLookup.TryGetValue(p.UserId, out var human))
                     {
-                        p.Email = human?.Email;
-                        p.FullName = human?.FullName;
+                        p.Email ??= human?.Email;
+                        p.FullName ??= human?.FullName;
                     }
                 });
             }

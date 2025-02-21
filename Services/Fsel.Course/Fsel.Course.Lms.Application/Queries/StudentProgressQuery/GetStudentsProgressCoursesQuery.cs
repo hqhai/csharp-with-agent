@@ -4,8 +4,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
     using System.Collections.Generic;
     using System.Linq.Dynamic.Core;
-    using System.Linq.Expressions;
-    using System.Reflection.Metadata;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -68,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             double homeWorkRatio = request.CourseType == EnumCourseType.Academic ? ValueSettings.AcademicStudentResultRatio.HomeWorkRatio : ValueSettings.IeltsStudentResultRatio.HomeWorkRatio;
             double classForumRatio = request.CourseType == EnumCourseType.Academic ? ValueSettings.AcademicStudentResultRatio.ClassForumRatio : ValueSettings.IeltsStudentResultRatio.ClassForumRatio;
 
-            var studentIds = request.StudentIds;
+            var studentIds = request.StudentIds ?? new List<Guid>();
 
             #region validate
 
@@ -80,11 +78,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
             #endregion validate
 
-            studentIds = await _courseResultRepository.Queryable.Where(x =>
-               x.Status != EnumResultStatus.Unfinished &&
-               x.Status != EnumResultStatus.New &&
-               x.WorkingStatus == EnumWorkingStatus.Active &&
-               studentIds.Contains(x.StudentId)).Select(x => x.StudentId).ToListAsync(cancellationToken);
+            studentIds = await _courseResultRepository.Queryable
+                                                      .WhereBulkContains(studentIds, x => x.StudentId)
+                                                      .Where(x => x.Status != EnumResultStatus.Unfinished &&
+                                                                  x.Status != EnumResultStatus.New &&
+                                                                  x.WorkingStatus == EnumWorkingStatus.Active)
+                                                      .Select(x => x.StudentId)
+                                                      .ToListAsync(cancellationToken);
 
             #region Progress
 
