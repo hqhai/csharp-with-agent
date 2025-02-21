@@ -11,7 +11,7 @@
     <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.195" />
     <PackageReference Include="JWT" Version="10.1.1" />
     <PackageReference Include="Z.EntityFramework.Extensions.EFCore" Version="7.103.7" />
-    <PackageReference Include="Fsel.Core" Version="1.2.32-rc.54.16" />
+    <PackageReference Include="Fsel.Core" Version="1.2.32-rc.54.17" />
   </ItemGroup>
   <!-- Tests -->
   <ItemGroup Label="Tests Packages" Condition="'$(IsTestProject)' == 'true'">
