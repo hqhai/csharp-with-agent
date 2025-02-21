@@ -3,6 +3,7 @@
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
 using Fsel.Course.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -87,6 +88,11 @@ namespace Fsel.Course.Infrastructure
         public DbSet<QuestionExplanationError> QuestionExplanationErrors { get; set; }
         public DbSet<QuestionExplanationLog> QuestionExplanationLogs { get; set; }
         public DbSet<QuestionShuffle> QuestionShuffles { get; set; }
+
+        public DbSet<TotalEvaluateInputResultModel> TotalEvaluateInputResults { get; set; }
+        public DbSet<TotalDetailEvaluateInputResultModel> TotalDetailEvaluateInputResults { get; set; }
+        public DbSet<PercentEvaluateInputResultModel> PercentEvaluateInputResults { get; set; }
+        public DbSet<LevelEvaluateInputResultModel> LevelEvaluateInputResults { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
