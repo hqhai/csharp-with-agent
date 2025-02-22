@@ -3,6 +3,7 @@
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
 using Fsel.Course.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -87,6 +88,22 @@ namespace Fsel.Course.Infrastructure
         public DbSet<QuestionExplanationError> QuestionExplanationErrors { get; set; }
         public DbSet<QuestionExplanationLog> QuestionExplanationLogs { get; set; }
         public DbSet<QuestionShuffle> QuestionShuffles { get; set; }
+
+        public DbSet<TotalEvaluateInputResultModel> TotalEvaluateInputResults { get; set; }
+        public DbSet<TotalDetailEvaluateInputResultModel> TotalDetailEvaluateInputResults { get; set; }
+        public DbSet<PercentEvaluateInputResultModel> PercentEvaluateInputResults { get; set; }
+        public DbSet<LevelEvaluateInputResultModel> LevelEvaluateInputResults { get; set; }
+        public DbSet<SchoolSummaryModel> SchoolSummarys { get; set; }
+        public DbSet<TotalLearningProgressModel> TotalLearningProgress { get; set; }
+        public DbSet<AverageLearningProgressModel> AverageLearningProgress { get; set; }
+        public DbSet<UnitDoneLearningProgressIeltsModel> UnitDoneLearningProgressIelts { get; set; }
+        public DbSet<UnitDoneLearningProgressAcademicModel> UnitDoneLearningProgressAcademics { get; set; }
+        public DbSet<LessonDoneLearningProgressIeltsModel> LessonDoneLearningProgressIelts { get; set; }
+        public DbSet<LessonDoneLearningProgressAcademicModel> LessonDoneLearningProgressAcademics { get; set; }
+        public DbSet<TotalLearningModel> TotalLearnings { get; set; }
+        public DbSet<RateLearningModel> RateLearnings { get; set; }
+        public DbSet<TotalLearningQualityModel> TotalLearningQualitys { get; set; }
+        public DbSet<TotalDetailLearningQualityModel> TotalDetailLearningQualitys { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
