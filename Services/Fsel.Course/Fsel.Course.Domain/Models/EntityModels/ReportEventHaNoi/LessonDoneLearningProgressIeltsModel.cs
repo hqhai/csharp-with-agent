@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi
     using Microsoft.EntityFrameworkCore;
 
     [Keyless]
-    public class LessonDoneLearningProgressModel
+    public class LessonDoneLearningProgressIeltsModel
     {
         public DateTime? CompletedDate { get; set; }
 

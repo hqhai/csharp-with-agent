@@ -27,10 +27,10 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Get 
         /// </summary>
-        [HttpGet("evaluat-input-result")]
+        [HttpPost("evaluat-input-result")]
         [ProducesResponseType(typeof(MethodResult<EvaluateInputResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetListUnitByCourse([FromQuery] EvaluateInputResultCityQuery query)
+        public async Task<IActionResult> GetListUnitByCourse([FromBody] EvaluateInputResultCityQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -39,10 +39,10 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Get 
         /// </summary>
-        [HttpGet("school-summary")]
+        [HttpPost("school-summary")]
         [ProducesResponseType(typeof(MethodResult<EvaluateInputResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SchoolSummary([FromQuery] SchoolSummaryQuery query)
+        public async Task<IActionResult> SchoolSummary([FromBody] SchoolSummaryQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -51,10 +51,22 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Get 
         /// </summary>
-        [HttpGet("learning-progress")]
+        [HttpPost("learning-progress")]
         [ProducesResponseType(typeof(MethodResult<LearningProgressModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> LearningProgress([FromQuery] LearningProgressQuery query)
+        public async Task<IActionResult> LearningProgress([FromBody] LearningProgressQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [HttpPost("learning-quality")]
+        [ProducesResponseType(typeof(MethodResult<LearningQualityModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> LearningQuality([FromBody] LearningQualityQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

@@ -16,14 +16,14 @@ namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
     public class SchoolSummaryQuery : IRequest<MethodResult<PagingItemsModel<SchoolSummaryModel>>>
     {
         public int FilterType { get; set; }
-        public object? FilterValue { get; set; }
+        public IList<string>? FilterValues { get; set; }
         public int GroupByType { get; set; } = 1;
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;
         public int UseParentEvent { get; set; } = 1;
-        public object? DistrictIds { get; set; }
-        public object? GroupIds { get; set; }
-        public object? SchoolIds { get; set; }
+        public IList<string>? DistrictIds { get; set; }
+        public IList<string>? GroupIds { get; set; }
+        public IList<string>? SchoolIds { get; set; }
         public int CheckByGroup { get; set; }
     }
 
@@ -41,17 +41,22 @@ namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<SchoolSummaryModel>>();
 
+            var districtIdsParam = request.DistrictIds != null ? string.Join(",", request.DistrictIds) : (object)DBNull.Value;
+            var groupIdsParam = request.GroupIds != null ? string.Join(",", request.GroupIds) : (object)DBNull.Value;
+            var schoolIdsParam = request.SchoolIds != null ? string.Join(",", request.SchoolIds) : (object)DBNull.Value;
+            var filterValuesParam = request.FilterValues != null ? string.Join(",", request.FilterValues) : (object)DBNull.Value;
+
             var result = await _courseDbContext.Set<SchoolSummaryModel>()
                                                .FromSqlRaw("EXEC SchoolSummary @FilterType, @FilterValue, @GroupByType, @PageNumber, @PageSize, @UseParentEvent, @DistrictIds, @GroupIds, @SchoolIds, @CheckByGroup",
                                                    new SqlParameter("@FilterType", request.FilterType),
-                                                   new SqlParameter("@FilterValue", request.FilterValue ?? (object)DBNull.Value),
+                                                   new SqlParameter("@FilterValue", filterValuesParam),
                                                    new SqlParameter("@GroupByType", request.GroupByType),
                                                    new SqlParameter("@PageNumber", request.PageNumber),
                                                    new SqlParameter("@PageSize", request.PageSize),
                                                    new SqlParameter("@UseParentEvent", request.UseParentEvent),
-                                                   new SqlParameter("@DistrictIds", request.DistrictIds ?? (object)DBNull.Value),
-                                                   new SqlParameter("@GroupIds", request.GroupIds ?? (object)DBNull.Value),
-                                                   new SqlParameter("@SchoolIds", request.SchoolIds ?? (object)DBNull.Value),
+                                                   new SqlParameter("@DistrictIds", districtIdsParam),
+                                                   new SqlParameter("@GroupIds", groupIdsParam),
+                                                   new SqlParameter("@SchoolIds", schoolIdsParam),
                                                    new SqlParameter("@CheckByGroup", request.CheckByGroup))
                                                .AsNoTracking()
                                                .ToListAsync(cancellationToken);

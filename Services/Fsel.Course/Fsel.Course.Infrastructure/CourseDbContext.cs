@@ -96,8 +96,14 @@ namespace Fsel.Course.Infrastructure
         public DbSet<SchoolSummaryModel> SchoolSummarys { get; set; }
         public DbSet<TotalLearningProgressModel> TotalLearningProgress { get; set; }
         public DbSet<AverageLearningProgressModel> AverageLearningProgress { get; set; }
-        public DbSet<UnitDoneLearningProgressModel> UnitDoneLearningProgress { get; set; }
-        public DbSet<LessonDoneLearningProgressModel> LessonDoneLearningProgress { get; set; }
+        public DbSet<UnitDoneLearningProgressIeltsModel> UnitDoneLearningProgressIelts { get; set; }
+        public DbSet<UnitDoneLearningProgressAcademicModel> UnitDoneLearningProgressAcademics { get; set; }
+        public DbSet<LessonDoneLearningProgressIeltsModel> LessonDoneLearningProgressIelts { get; set; }
+        public DbSet<LessonDoneLearningProgressAcademicModel> LessonDoneLearningProgressAcademics { get; set; }
+        public DbSet<TotalLearningModel> TotalLearnings { get; set; }
+        public DbSet<RateLearningModel> RateLearnings { get; set; }
+        public DbSet<TotalLearningQualityModel> TotalLearningQualitys { get; set; }
+        public DbSet<TotalDetailLearningQualityModel> TotalDetailLearningQualitys { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
