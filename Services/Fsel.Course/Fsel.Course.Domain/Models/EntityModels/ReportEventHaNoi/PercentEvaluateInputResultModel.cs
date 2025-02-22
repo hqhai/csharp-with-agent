@@ -7,10 +7,10 @@ namespace Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi
     [Keyless]
     public class PercentEvaluateInputResultModel
     {
-        public decimal PercentStudentDonePT { get; set; }
+        public decimal? PercentStudentDonePT { get; set; }
 
-        public decimal PercentStudentProcessPT { get; set; }
+        public decimal? PercentStudentProcessPT { get; set; }
 
-        public decimal PercentStudentNewPT { get; set; }
+        public decimal? PercentStudentNewPT { get; set; }
     }
 }

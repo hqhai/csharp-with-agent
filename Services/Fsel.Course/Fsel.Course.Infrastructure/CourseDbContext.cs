@@ -94,6 +94,10 @@ namespace Fsel.Course.Infrastructure
         public DbSet<PercentEvaluateInputResultModel> PercentEvaluateInputResults { get; set; }
         public DbSet<LevelEvaluateInputResultModel> LevelEvaluateInputResults { get; set; }
         public DbSet<SchoolSummaryModel> SchoolSummarys { get; set; }
+        public DbSet<TotalLearningProgressModel> TotalLearningProgress { get; set; }
+        public DbSet<AverageLearningProgressModel> AverageLearningProgress { get; set; }
+        public DbSet<UnitDoneLearningProgressModel> UnitDoneLearningProgress { get; set; }
+        public DbSet<LessonDoneLearningProgressModel> LessonDoneLearningProgress { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

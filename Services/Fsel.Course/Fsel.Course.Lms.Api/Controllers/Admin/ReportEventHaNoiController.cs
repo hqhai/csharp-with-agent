@@ -47,5 +47,17 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [HttpGet("learning-progress")]
+        [ProducesResponseType(typeof(MethodResult<LearningProgressModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> LearningProgress([FromQuery] LearningProgressQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
