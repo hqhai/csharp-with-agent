@@ -15,6 +15,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -95,7 +96,6 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 }
 
                 countSurveyQuestion = countSurveyQuestion.Where(x => x.CompetitionEventId == eventId).ToList();
-                customerSurveyGroup.Coin = _appSetting.CoinConfig?.SurveyEvent;
             }
             else
             {
@@ -126,6 +126,12 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 
             if (request.Answers == null)
             {
+                return methodResult;
+            }
+
+            if (customerSurveyGroup.Status == EnumSurveyGroupStatus.Done || customerSurveyGroup.Status == EnumSurveyGroupStatus.Skip)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusDone), nameof(customerSurveyGroup.Status), customerSurveyGroup.Status);
                 return methodResult;
             }
 
@@ -161,6 +167,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             if (customerSurveyGroup.CustomerSurveys.All(x => x.IsCompleted) && customerSurveyGroup.CustomerSurveys.Count == countSurveyQuestion.Count)
             {
                 customerSurveyGroup.Status = EnumSurveyGroupStatus.Done;
+                customerSurveyGroup.Coin = _appSetting.CoinConfig?.SurveyEvent;
             }
             else
             {
