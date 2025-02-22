@@ -511,7 +511,7 @@ namespace Fsel.Course.Infrastructure.Common
             timeCode.Ungraded = questions.Any(x => x.Ungraded);
             timeCode.CorrectCount = videoTimeCodeAnswers.Sum(x => x.CorrectCount);
             timeCode.CorrectTotal = questions.Sum(x => x.CorrectTotal);
-            timeCode.Status = GetTimeCodeStatus(videoTimeCodeAnswers);
+            timeCode.Status = videoTimeCodeResult.Status != EnumResultStatus.Done ? EnumResultStatus.Process : EnumResultStatus.Done;
             timeCode.VideoTimeCodeResult = GetVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode);
             timeCode.CourseSkills = exercises.Select(x => x.CourseSkill).Distinct().ToList();
             foreach (var exercise in exercises)
@@ -708,16 +708,6 @@ namespace Fsel.Course.Infrastructure.Common
         {
             var status = EnumResultStatus.Process;
             if (videoTimeCode != null && videoTimeCode.VideoTimeCodeAnswers.Any() && videoTimeCode.VideoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Done))
-            {
-                status = EnumResultStatus.Done;
-            }
-            return status;
-        }
-
-        private static EnumResultStatus GetTimeCodeStatus(IList<VideoTimeCodeAnswer>? videoTimeCodeAnswers)
-        {
-            var status = EnumResultStatus.Process;
-            if (videoTimeCodeAnswers != null && videoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Done))
             {
                 status = EnumResultStatus.Done;
             }
