@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery;
@@ -27,6 +28,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Get 
         /// </summary>
+        [ServerCache(CacheSettings.TimeCache.OneHour)]
         [HttpPost("evaluat-input-result")]
         [ProducesResponseType(typeof(MethodResult<EvaluateInputResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -39,6 +41,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Get 
         /// </summary>
+        [ServerCache(CacheSettings.TimeCache.OneHour)]
         [HttpPost("school-summary")]
         [ProducesResponseType(typeof(MethodResult<EvaluateInputResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -51,6 +54,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Get 
         /// </summary>
+        [ServerCache(CacheSettings.TimeCache.OneHour)]
         [HttpPost("learning-progress")]
         [ProducesResponseType(typeof(MethodResult<LearningProgressModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -63,6 +67,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Get 
         /// </summary>
+        [ServerCache(CacheSettings.TimeCache.OneHour)]
         [HttpPost("learning-quality")]
         [ProducesResponseType(typeof(MethodResult<LearningQualityModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
