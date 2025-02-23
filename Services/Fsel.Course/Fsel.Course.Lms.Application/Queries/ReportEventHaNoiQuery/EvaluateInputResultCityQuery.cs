@@ -5,8 +5,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Caching;
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Course.Infrastructure;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Data.SqlClient;
@@ -28,16 +30,26 @@ namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
     public class EvaluateInputResultCityQueryHandler : IRequestHandler<EvaluateInputResultCityQuery, MethodResult<EvaluateInputResultModel>>
     {
         private readonly CourseDbContext _courseDbContext;
+        private readonly ICacheService<EvaluateInputResultModel> _cacheService;
+        private const string KeyCache = "EvaluateInput";
 
-        public EvaluateInputResultCityQueryHandler(CourseDbContext courseDbContext)
+        public EvaluateInputResultCityQueryHandler(CourseDbContext courseDbContext, ICacheService<EvaluateInputResultModel> cacheService)
         {
             _courseDbContext = courseDbContext;
+            _cacheService = cacheService;
         }
 
         public async Task<MethodResult<EvaluateInputResultModel>> Handle(EvaluateInputResultCityQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<EvaluateInputResultModel> methodResult = new MethodResult<EvaluateInputResultModel>();
+
+            var data = await _cacheService.GetAsync(KeyCache);
+            if (data != null)
+            {
+                methodResult.Result = data;
+                return methodResult;
+            }
 
             var checkByGroup = 0;
             var districtIdsParam = request.DistrictIds != null ? string.Join(",", request.DistrictIds) : (object)DBNull.Value;
@@ -88,13 +100,16 @@ namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
                                               .AsNoTracking()
                                               .ToListAsync(cancellationToken);
 
-            methodResult.Result = new EvaluateInputResultModel
+            var setDataCache = new EvaluateInputResultModel
             {
                 TotalEvaluateInputResults = total,
                 TotalDetailEvaluateInputResults = totalDetail,
                 PercentEvaluateInputResults = percent,
                 LevelEvaluateInputResults = level
             };
+
+            methodResult.Result = setDataCache;
+            await _cacheService.SetAsync(KeyCache, setDataCache, TimeSpan.FromSeconds(CacheSettings.TimeCache.OneHour));
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

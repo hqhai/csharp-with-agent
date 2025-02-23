@@ -5,8 +5,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Caching;
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Course.Infrastructure;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Data.SqlClient;
@@ -28,16 +30,26 @@ namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
     public class LearningQualityQueryHandler : IRequestHandler<LearningQualityQuery, MethodResult<LearningQualityModel>>
     {
         private readonly CourseDbContext _courseDbContext;
+        private readonly ICacheService<LearningQualityModel> _cacheService;
+        private const string KeyCache = "LearningQuality";
 
-        public LearningQualityQueryHandler(CourseDbContext courseDbContext)
+        public LearningQualityQueryHandler(CourseDbContext courseDbContext, ICacheService<LearningQualityModel> cacheService)
         {
             _courseDbContext = courseDbContext;
+            _cacheService = cacheService;
         }
 
         public async Task<MethodResult<LearningQualityModel>> Handle(LearningQualityQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LearningQualityModel> methodResult = new MethodResult<LearningQualityModel>();
+
+            var data = await _cacheService.GetAsync(KeyCache);
+            if (data != null)
+            {
+                methodResult.Result = data;
+                return methodResult;
+            }
 
             var checkByGroup = 0;
             var districtIdsParam = request.DistrictIds != null ? string.Join(",", request.DistrictIds) : (object)DBNull.Value;
@@ -88,13 +100,16 @@ namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
                                                               .AsNoTracking()
                                                               .ToListAsync(cancellationToken);
 
-            methodResult.Result = new LearningQualityModel
+            var setDataCache = new LearningQualityModel
             {
                 TotalLearnings = total,
                 RateLearnings = rate,
                 TotalLearningQualitys = learningQuality,
                 TotalDetailLearningQualitys = detailLearningQuality
             };
+
+            methodResult.Result = setDataCache;
+            await _cacheService.SetAsync(KeyCache, setDataCache, TimeSpan.FromSeconds(CacheSettings.TimeCache.OneHour));
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
