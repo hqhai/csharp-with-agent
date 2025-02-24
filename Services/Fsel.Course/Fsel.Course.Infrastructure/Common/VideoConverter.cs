@@ -501,7 +501,12 @@ namespace Fsel.Course.Infrastructure.Common
                                                                        .Select(x => x.Exercise ?? new Exercise())
                                                                        .ToListAsync();
 
-            var questions = await _exerciseQuestionRepository.Queryable.Where(x => exercises.Select(x => x.Id).Contains(x.ExerciseId)).OrderBy(x => x.CreatedDate).Select(x => x.Question ?? new Question()).ToListAsync();
+            var exerciseQuestions = await _exerciseQuestionRepository.Queryable.Where(x => exercises.Select(x => x.Id).Contains(x.ExerciseId)).OrderBy(x => x.CreatedDate).Select(x => new
+            {
+                ExerciseId = x.ExerciseId,
+                Question = x.Question ?? new Question()
+            }).ToListAsync();
+            var questions = exerciseQuestions.Select(x => x.Question).ToList();
             var questionIds = questions.Select(x => x!.Id).ToList();
 
             var questionShuffles = await _questionShuffleRepository.Queryable.Where(x => questionIds.Contains(x.QuestionId) && x.StudentId == videoTimeCodeResult.StudentId).ToListAsync();
@@ -517,7 +522,8 @@ namespace Fsel.Course.Infrastructure.Common
             foreach (var exercise in exercises)
             {
                 var exerciseModel = _mapper.Map<ExerciseModel>(exercise);
-                foreach (var question in questions)
+                var listQuestion = exerciseQuestions.Where(x => x.ExerciseId == exercise.Id).Select(x => x.Question).ToList();
+                foreach (var question in listQuestion)
                 {
                     if (question == null)
                     {
