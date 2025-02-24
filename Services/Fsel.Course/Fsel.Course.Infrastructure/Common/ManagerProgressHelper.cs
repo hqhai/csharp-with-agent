@@ -159,7 +159,7 @@ namespace Fsel.Course.Infrastructure.Common
             if (lessonIds != null && lessonIds.Any())
             {
                 var query = await _lessonResultRepository.Queryable
-                                  .Where(x => lessonIds.Contains(x.LessonId) && x.CourseId == courseResult.CourseId && x.StudentId == courseResult.StudentId)
+                                  .Where(x => x.CourseId == courseResult.CourseId && x.StudentId == courseResult.StudentId)
                                   .AsNoTracking()
                                   .Select(x => new
                                   {
