@@ -8,6 +8,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Course.Application.Queries.ReportEventHaNoiQuery;
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
+    using Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using MediatR;
@@ -72,6 +73,19 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<LearningQualityModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> LearningQuality([FromBody] LearningQualityQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [ServerCache(CacheSettings.TimeCache.OneHour)]
+        [HttpPost("report-attendance")]
+        [ProducesResponseType(typeof(MethodResult<LearningQualityModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ReportAttendance([FromBody] ReportAttendanceForCityQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
