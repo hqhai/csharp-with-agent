@@ -46,8 +46,9 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 Code = x.Code,
                 Email = x.Email,
                 FullName = x.FullName,
+                PhoneNumber = x.PhoneNumber,
                 UserId = x.UserId,
-                CreatedDate = x.UpdatedDate ?? x.CreatedDate,
+                CreatedDate = x.CreatedDate,
                 UpdatedDate = x.UpdatedDate,
                 CreatedFullName = x.CreatedFullName,
                 Status = x.Status,
@@ -56,6 +57,10 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 MonthNumber = x.Package == null ? null : x.Package.MonthNumber,
                 RevenueType = x.RevenueType,
                 TotalPrice = x.TotalPrice,
+                Price = x.Price,
+                DiscountPrice = x.DiscountPrice,
+                DistrictId = x.DistrictId,
+                ProvinceId = x.ProvinceId
             });
 
             if (request.IsNew.HasValue && request.IsNew == true)
@@ -115,25 +120,30 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                     .ApplySortAndPaging(request)
                     .ToListAsync(cancellationToken);
 
-
             var userIds = lists.Select(l => l.UserId).Distinct().ToList();
             if (userIds.Any())
             {
                 var studentResults = await _userService.GetStudentsByIdsAsync(userIds);
                 var students = studentResults.Content?.Result;
 
-                // Code sau khi Optimize
-                var studentLookup = students?
-                                    .Where(x => x.Human != null && x.Human.UserId.HasValue)
-                                    .ToDictionary(x => x.Human!.UserId!.Value, x => x.Human);
-                lists.ForEach(p =>
+                var studentDict = students?
+                    .Where(x => x.Human != null && x.Human.UserId.HasValue)
+                    .ToDictionary(x => x.Human?.UserId ?? default, x => x);
+
+                if (studentDict != null)
                 {
-                    if (studentLookup != null && studentLookup.TryGetValue(p.UserId, out var human))
+                    lists.ForEach(p =>
                     {
-                        p.Email ??= human?.Email;
-                        p.FullName ??= human?.FullName;
-                    }
-                });
+                        if (studentDict.TryGetValue(p.UserId, out var student))
+                        {
+                            p.StudentCode = student.Human?.Code;
+                            p.StudentPhoneNumber = student.Human?.PhoneNumber;
+                            p.StudentEmail = student.Human?.Email;
+                            p.StudentFullName = student.Human?.FullName;
+                            p.ExpiredDate = student.ExpiredDate;
+                        }
+                    });
+                }
             }
 
             methodResult.Result = new PagingItemsModel<SearchOrderModel>(lists, request, totalItem);
