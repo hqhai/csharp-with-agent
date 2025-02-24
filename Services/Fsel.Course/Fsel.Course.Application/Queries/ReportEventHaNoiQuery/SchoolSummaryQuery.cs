@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
+namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
