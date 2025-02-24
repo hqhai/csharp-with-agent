@@ -54,18 +54,18 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
             return commandResult.GetActionResult();
         }
 
-        /// <summary>
-        /// Redeem product
-        /// </summary>
-        [HttpPost("redeem-product")]
-        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
-        public async Task<IActionResult> RedeemProduct([FromBody] RedeemProductCommand command)
-        {
-            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
+        ///// <summary>
+        ///// Redeem product
+        ///// </summary>
+        //[HttpPost("redeem-product")]
+        //[ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        //[ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        //[Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        //public async Task<IActionResult> RedeemProduct([FromBody] RedeemProductCommand command)
+        //{
+        //    var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+        //    return commandResult.GetActionResult();
+        //}
 
         /// <summary>
         /// History redeem Product
