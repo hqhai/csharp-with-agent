@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
+namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
         public async Task<MethodResult<LearningQualityModel>> Handle(LearningQualityQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<LearningQualityModel> methodResult = new MethodResult<LearningQualityModel>();
+            var methodResult = new MethodResult<LearningQualityModel>();
 
             var data = await _cacheService.GetAsync(KeyCache);
             if (data != null)
