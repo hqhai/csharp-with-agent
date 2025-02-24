@@ -76,5 +76,17 @@ namespace Fsel.Course.Lcms.Api.Controllers
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [HttpPost("school-info")]
+        [ProducesResponseType(typeof(MethodResult<IList<SchoolInfoModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSchoolInfo([FromBody] GetSchoolInfoQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

@@ -104,6 +104,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<RateLearningModel> RateLearnings { get; set; }
         public DbSet<TotalLearningQualityModel> TotalLearningQualitys { get; set; }
         public DbSet<TotalDetailLearningQualityModel> TotalDetailLearningQualitys { get; set; }
+        public DbSet<SchoolInfoModel> SchoolInfos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
