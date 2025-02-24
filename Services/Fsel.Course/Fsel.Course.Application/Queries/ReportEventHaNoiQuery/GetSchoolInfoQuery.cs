@@ -20,7 +20,7 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
 
         public IList<string>? DistrictIds { get; set; }
 
-        public int Level { get; set; }
+        public IList<string>? Levels { get; set; }
     }
 
     public class GetSchoolInfoQueryHandler : IRequestHandler<GetSchoolInfoQuery, MethodResult<IList<SchoolInfoModel>>>
@@ -39,13 +39,14 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
 
             var districtIdsParam = request.DistrictIds != null ? string.Join(",", request.DistrictIds) : (object)DBNull.Value;
             var groupIdsParam = request.GroupIds != null ? string.Join(",", request.GroupIds) : (object)DBNull.Value;
+            var levelsParam = request.Levels != null ? string.Join(",", request.Levels) : (object)DBNull.Value;
 
             var schoolInfos = await _courseDbContext.Set<SchoolInfoModel>()
-                                                    .FromSqlRaw("EXEC SchoolInfoQuery @Type, @DistrictIds, @GroupIds, @Level",
+                                                    .FromSqlRaw("EXEC SchoolInfoQuery @Type, @GroupIds, @DistrictIds, @Level",
                                                         new SqlParameter("@Type", request.Type),
-                                                        new SqlParameter("@DistrictIds", districtIdsParam),
                                                         new SqlParameter("@GroupIds", groupIdsParam),
-                                                        new SqlParameter("@Level", request.Level))
+                                                        new SqlParameter("@DistrictIds", districtIdsParam),
+                                                        new SqlParameter("@Level", levelsParam))
                                                     .AsNoTracking()
                                                     .ToListAsync(cancellationToken);
 
