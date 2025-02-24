@@ -14,6 +14,7 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         WrongQuantity,
         WrongExpirationDate,
         EmptyPhoneNumber,
-        PhoneNumberIsInvalid
+        PhoneNumberIsInvalid,
+        GiftExchangeOff
     }
 }

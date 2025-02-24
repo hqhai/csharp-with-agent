@@ -1,12 +1,14 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
+namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Caching;
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Course.Infrastructure;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Data.SqlClient;
@@ -28,16 +30,26 @@ namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
     public class LearningProgressQueryHandler : IRequestHandler<LearningProgressQuery, MethodResult<LearningProgressModel>>
     {
         private readonly CourseDbContext _courseDbContext;
+        private readonly ICacheService<LearningProgressModel> _cacheService;
+        private const string KeyCache = "LearningProgress";
 
-        public LearningProgressQueryHandler(CourseDbContext courseDbContext)
+        public LearningProgressQueryHandler(CourseDbContext courseDbContext, ICacheService<LearningProgressModel> cacheService)
         {
             _courseDbContext = courseDbContext;
+            _cacheService = cacheService;
         }
 
         public async Task<MethodResult<LearningProgressModel>> Handle(LearningProgressQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<LearningProgressModel> methodResult = new MethodResult<LearningProgressModel>();
+            var methodResult = new MethodResult<LearningProgressModel>();
+
+            var data = await _cacheService.GetAsync(KeyCache);
+            if (data != null)
+            {
+                methodResult.Result = data;
+                return methodResult;
+            }
 
             var checkByGroup = 0;
             var districtIdsParam = request.DistrictIds != null ? string.Join(",", request.DistrictIds) : (object)DBNull.Value;
@@ -110,7 +122,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
                                                         .AsNoTracking()
                                                         .ToListAsync(cancellationToken);
 
-            methodResult.Result = new LearningProgressModel
+            var setDataCache = new LearningProgressModel
             {
                 TotalLearningProgress = total,
                 AverageLearningProgress = average,
@@ -119,6 +131,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
                 UnitDoneLearningProgressIelts = unitDoneIelts,
                 LessonDoneLearningProgressIelts = lessonDoneIelts
             };
+
+            methodResult.Result = setDataCache;
+            await _cacheService.SetAsync(KeyCache, setDataCache, TimeSpan.FromSeconds(CacheSettings.TimeCache.OneHour));
+
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
