@@ -41,7 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 item.GradingStartDate = null;
             }
 
-            _classForumResultRepository.UpdateList(classForumResult);
+            _classForumResultRepository.UpdateList(classForumResult, false, x => x.LessonResultId, x => x.ClassForumId, x => x.StudentId);
             await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             var mockTestResult = await _mockTestResultRepository.Queryable
@@ -52,7 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 item.GradingTeacherId = null;
                 item.GradingStartDate = null;
             }
-            _mockTestResultRepository.UpdateList(mockTestResult);
+            _mockTestResultRepository.UpdateList(mockTestResult, false, x => x.MockTestId, x => x.CourseId, x => x.UnitId, x => x.StudentId);
             await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return methodResult;
         }

@@ -140,7 +140,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 _classForumDetailResultRepository.Update(classForumDetailResult, false
                 , x => x.WordContent, x => x.Content
                 , x => x.WordCount, x => x.SubmissionCount
-                , x => x.ProcessDate, x => x.CompletionDate, x => x.Status);
+                , x => x.ProcessDate, x => x.CompletionDate, x => x.Status, x => x.ClassForumResultId, x => x.SubmissionCount);
                 await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 

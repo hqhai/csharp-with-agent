@@ -129,7 +129,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             placementTestGroupResult.CurrentLevel = SendMailHelper.GetPreviousEnumValue(level ?? default);
             placementTestGroupResult.Status = EnumResultStatus.Done;
             placementTestGroupResult.Percent = placementTestResult.Percent;
-            _placementTestGroupResultRepository.Update(placementTestGroupResult);
+            _placementTestGroupResultRepository.Update(placementTestGroupResult, false, x => x.StudentId);
             await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
 
