@@ -671,30 +671,23 @@ namespace Fsel.Course.Infrastructure.Common
 
             var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoResultId == videoResult.Id).ToListAsync();
 
-            var timeCodeExercises = await _timeCodeExerciseRepository.Queryable.WhereBulkContains(videoTimeCodes.Select(x => x.Id), x => x.VideoTimeCodeId)
-                                                             .OrderBy(x => x.CreatedDate)
-                                                             .Select(x => new
-                                                             {
-                                                                 x.VideoTimeCodeId,
-                                                                 Exercise = x.Exercise ?? new Exercise()
-                                                             })
-                                                             .ToListAsync();
-            var exerciseIds = timeCodeExercises.Select(x => x.Exercise).Select(x => x.Id);
-
-            var exerciseQuestions = await _exerciseQuestionRepository.Queryable.Where(x => exerciseIds.Contains(x.ExerciseId)).OrderBy(x => x.CreatedDate).Select(x => new
-            {
-                ExerciseId = x.ExerciseId,
-                Question = x.Question ?? new Question()
-            }).ToListAsync();
+            var queryData = await (from baseQ in _videoTimeCodeRepository.Queryable
+                                   join te in _timeCodeExerciseRepository.Queryable on baseQ.Id equals te.VideoTimeCodeId
+                                   join eq in _exerciseQuestionRepository.Queryable on te.ExerciseId equals eq.ExerciseId
+                                   where baseQ.VideoId == video.Id
+                                   select new
+                                   {
+                                       baseQ.Id,
+                                       CourseSkill = te.Exercise.CourseSkill,
+                                       Question = eq.Question,
+                                   }).ToListAsync();
 
             foreach (var item in videoTimeCodes)
             {
                 var indexTimeCode = videoTimeCodes.IndexOf(item);
                 var videoTimeCodeResult = videoTimeCodeResults.FirstOrDefault(x => x.VideoTimeCodeId == item.Id);
-                var exercises = timeCodeExercises.Where(x => x.VideoTimeCodeId == item.Id).Select(x => x.Exercise);
-
-                var listExerciseId = exercises.Select(x => x.Id).ToHashSet();
-                var questions = exerciseQuestions.Where(x => listExerciseId.Contains(x.ExerciseId)).Select(x => x.Question).ToList();
+                var courseSkills = queryData.Where(x => x.Id == item.Id).Select(x => x.CourseSkill).Distinct().ToList();
+                var questions = queryData.Where(x => x.Id == item.Id).Select(x => x.Question).ToList();
 
                 var videoTimeCodeResultModel = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult);
                 if (videoTimeCodeResultModel != null)
@@ -707,7 +700,7 @@ namespace Fsel.Course.Infrastructure.Common
                 videoTimeCode.CorrectCount = videoTimeCodeResult?.CorrectCount ?? default;
                 videoTimeCode.CorrectTotal = questions.Sum(x => x.CorrectTotal);
                 videoTimeCode.VideoTimeCodeResult = GetVideoTimeCodeResult(videoTimeCodeResultModel, item);
-                videoTimeCode.CourseSkills = exercises.Select(x => x.CourseSkill).Distinct().ToList();
+                videoTimeCode.CourseSkills = courseSkills;
                 videoTimeCode.Status = GetTimeCodeStatus(indexProcess, indexTimeCode, videoTimeCodeResult);
                 videoTimeCodeModels.Add(videoTimeCode);
             }
