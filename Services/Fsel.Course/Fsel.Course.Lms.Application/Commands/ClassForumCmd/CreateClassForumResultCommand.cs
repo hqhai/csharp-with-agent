@@ -235,7 +235,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 FilePath = x,
             }).ToList() ?? new List<ClassForumResultFile>();
 
-            classForumDetailResult = _classForumDetailResultRepository.Update(classForumDetailResult);
+            classForumDetailResult = _classForumDetailResultRepository.Update(classForumDetailResult, false, x => x.ClassForumResultId, x => x.SubmissionCount);
             await _classForumDetailResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             return classForumDetailResult;
         }
@@ -255,7 +255,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 {
                     await _setTimeClassForumDonePublisher.Publish(new Core.Base.BaseModels.BaseQueueModel { QueueId = classForumResult.Id.ToString() }, cancellationToken);
                     classForumResult.TokenFirstTime = await GetTokenAsync(classForum, classForumResult, course.CourseType);
-                    classForumResult = _classForumResultRepository.Update(classForumResult);
+                    classForumResult = _classForumResultRepository.Update(classForumResult, false, x => x.LessonResultId, x => x.ClassForumId, x => x.StudentId);
                     await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
