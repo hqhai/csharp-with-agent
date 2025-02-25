@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 return methodResult;
             }
             placementTestGroupResult.ChooseLevel = request.ChooseCourseLevel;
-            _placementTestGroupResultRepository.Update(placementTestGroupResult);
+            _placementTestGroupResultRepository.Update(placementTestGroupResult, false, x => x.StudentId);
             await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             methodResult.Result = true;
             return methodResult;

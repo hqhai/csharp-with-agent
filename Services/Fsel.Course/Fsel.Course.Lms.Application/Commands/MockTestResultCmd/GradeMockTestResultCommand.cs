@@ -178,10 +178,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
 
             await _mockTestResultRepository.ExecuteTransactionAsync(async () =>
             {
-                _sectionGroupResultRepository.UpdateList(sectionGroupResults);
+                _sectionGroupResultRepository.UpdateList(sectionGroupResults, false, x => x.WorkingTime, x => x.SectionGroupId, x => x.PlacementTestResultId, x => x.MockTestResultId, x => x.FinalTestResultId, x => x.StudentId);
                 await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 await SendNotification(mockTestResult, cancellationToken);
-                _mockTestResultRepository.Update(mockTestResult);
+                _mockTestResultRepository.Update(mockTestResult, false, x => x.CourseId, x => x.UnitId, x => x.MockTestId, x => x.StudentId);
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

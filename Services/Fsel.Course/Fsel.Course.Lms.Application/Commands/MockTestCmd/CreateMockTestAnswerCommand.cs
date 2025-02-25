@@ -216,7 +216,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     await _mockTestAnswerRepository.BulkMergeAsync(mockTestAnswers);
                 }
 
-                _mockTestResultRepository.Update(mockTestResult);
+                _mockTestResultRepository.Update(mockTestResult, false, x => x.CourseId, x => x.UnitId, x => x.MockTestId, x => x.StudentId);
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
