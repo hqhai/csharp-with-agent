@@ -46,6 +46,9 @@ namespace Fsel.Ordering.Application.Commands.Products
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<string>();
 
+            methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.GiftExchangeOff));
+            return methodResult;
+
             if (string.IsNullOrEmpty(request.PhoneNumber))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.EmptyPhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);

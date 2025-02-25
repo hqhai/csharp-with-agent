@@ -428,27 +428,26 @@ namespace Fsel.Course.Infrastructure.Common
         public async Task<int> GetHighestStreak(VideoResult videoResult)
         {
             ArgumentNullException.ThrowIfNull(videoResult);
-            var answerQuery = from baseQ in _videoRepository.Queryable
-                              join vt in _videoTimeCodeRepository.Queryable on baseQ.Id equals vt.VideoId
-                              join te in _timeCodeExerciseRepository.Queryable on vt.Id equals te.VideoTimeCodeId
-                              join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
-                              join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
-                              join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
-                              join vtca in _videoTimeCodeAnswerRepository.Queryable on q.Id equals vtca.QuestionId
-                              where baseQ.Id == videoResult.VideoId && vt.TimeCodeType == EnumTimeCodeType.Standalone
-                              group q by baseQ into g
-                              select new
-                              {
-                                  HighestStreaks = g.Select(x => x).Where(x => !x.Ungraded && x.QuestionType != EnumQuestionType.ExercisePreparation).Distinct().OrderBy(x => x.CreatedDate)
-                                                  .SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
-                                                  .Select(x => x.IsCorrect == true && x.IsFirstSubmit)
-                              };
-            var highestStreak = await answerQuery.FirstOrDefaultAsync();
-            if (highestStreak == null)
+            var questionIds = await (from baseQ in _videoTimeCodeRepository.Queryable
+                                     join te in _timeCodeExerciseRepository.Queryable on baseQ.Id equals te.VideoTimeCodeId
+                                     join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
+                                     join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
+                                     join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
+                                     where baseQ.VideoId == videoResult.VideoId && baseQ.TimeCodeType == EnumTimeCodeType.Standalone
+                                      && !q.Ungraded && q.QuestionType != EnumQuestionType.ExercisePreparation
+                                     select q.Id).ToListAsync();
+
+            var answerQuery = from baseQ in _questionRepository.Queryable.WhereBulkContains(questionIds, x => x.Id)
+                              join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.QuestionId
+                              where vtca.VideoResultId == videoResult.Id
+                              orderby baseQ.CreatedDate
+                              select vtca.IsCorrect == true && vtca.IsFirstSubmit;
+            var highestStreaks = await answerQuery.ToListAsync();
+            if (highestStreaks == null)
             {
                 return default;
             }
-            return _linQHelper.GetHighestStreak(highestStreak.HighestStreaks.ToList());
+            return _linQHelper.GetHighestStreak(highestStreaks);
         }
 
         public async Task<int> GetHighestStreak(VideoTimeCodeResult videoTimeCodeResult)
@@ -486,6 +485,148 @@ namespace Fsel.Course.Infrastructure.Common
                 timeCode.Exercises.Add(exerciseModel);
             }
             return timeCode;
+        }
+
+        public async Task<VideoTimeCodeModel> GetVideoTimeCodeDetailAsync(VideoTimeCode videoTimeCode, VideoTimeCodeResultModel videoTimeCodeResult, bool isShowSubStatus = false)
+        {
+            ArgumentNullException.ThrowIfNull(videoTimeCode);
+            ArgumentNullException.ThrowIfNull(videoTimeCodeResult);
+            var listQuestionShuffle = new List<QuestionShuffle>();
+
+            var isTimeCodeProcess = videoTimeCodeResult.Status == EnumResultStatus.Process;
+            var timeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode);
+
+            var exercises = await _timeCodeExerciseRepository.Queryable.Where(x => x.VideoTimeCodeId == videoTimeCode.Id)
+                                                                       .OrderBy(x => x.CreatedDate)
+                                                                       .Select(x => x.Exercise ?? new Exercise())
+                                                                       .ToListAsync();
+
+            var questions = await _exerciseQuestionRepository.Queryable.Where(x => exercises.Select(x => x.Id).Contains(x.ExerciseId)).OrderBy(x => x.CreatedDate).Select(x => x.Question ?? new Question()).ToListAsync();
+            var questionIds = questions.Select(x => x!.Id).ToList();
+
+            var questionShuffles = await _questionShuffleRepository.Queryable.Where(x => questionIds.Contains(x.QuestionId) && x.StudentId == videoTimeCodeResult.StudentId).ToListAsync();
+            var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable.Where(x => questionIds.Contains(x.QuestionId) && x.VideoTimeCodeResultId == videoTimeCodeResult.Id).ToListAsync();
+
+            timeCode.TotalCount = questionIds.Count;
+            timeCode.Ungraded = questions.Any(x => x.Ungraded);
+            timeCode.CorrectCount = videoTimeCodeAnswers.Sum(x => x.CorrectCount);
+            timeCode.CorrectTotal = questions.Sum(x => x.CorrectTotal);
+            timeCode.Status = videoTimeCodeResult.Status != EnumResultStatus.Done ? EnumResultStatus.Process : EnumResultStatus.Done;
+            timeCode.VideoTimeCodeResult = GetVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode);
+            timeCode.CourseSkills = exercises.Select(x => x.CourseSkill).Distinct().ToList();
+            foreach (var exercise in exercises)
+            {
+                var exerciseModel = _mapper.Map<ExerciseModel>(exercise);
+                foreach (var question in questions)
+                {
+                    if (question == null)
+                    {
+                        continue;
+                    }
+
+                    var videoTimeCodeAnswer = videoTimeCodeAnswers.FirstOrDefault(x => x.QuestionId == question.Id);
+                    var isCheck = videoTimeCodeAnswer?.Status == EnumAnswerStatus.Done;
+                    var questionModel = _mapper.Map<QuestionModel>(question);
+                    if (!isCheck)
+                    {
+                        questionModel.Explanations = null;
+                        questionModel.Explanation = null;
+                    }
+                    questionModel.CorrectStatus = GetCorrectStatus(videoTimeCodeAnswer);
+                    questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
+
+                    var questionShuffle = questionShuffles.FirstOrDefault(x => x.QuestionId == question.Id);
+                    (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, questionShuffle?.ShuffleConfigs);
+                    if (!string.IsNullOrEmpty(questionShuffleStr) && (questionShuffle == null || questionShuffle.ShuffleConfigStr != questionShuffleStr))
+                    {
+                        if (questionShuffle == null)
+                        {
+                            questionShuffle = new QuestionShuffle
+                            {
+                                QuestionId = question.Id,
+                                StudentId = videoTimeCodeResult.StudentId,
+                                ShuffleConfigStr = questionShuffleStr
+                            };
+                        }
+                        else
+                        {
+                            questionShuffle.ShuffleConfigStr = questionShuffleStr;
+                        }
+                        listQuestionShuffle.Add(questionShuffle);
+                    }
+
+                    if (videoTimeCodeAnswer != null)
+                    {
+                        videoTimeCodeAnswer.CorrectCount = isCheck ? videoTimeCodeAnswer.CorrectCount : default;
+                        videoTimeCodeAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(videoTimeCodeAnswer.Answer, question.QuestionType, isShowSubStatus, videoTimeCodeResult.Status, videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone);
+                        questionModel.ResultAnswer = _mapper.Map<AnswerModel>(videoTimeCodeAnswer);
+                    }
+                    exerciseModel.Questions.Add(questionModel);
+                }
+
+                await _questionShuffleRepository.SaveQuestionShufflesAsync(listQuestionShuffle);
+                timeCode.Exercises.Add(exerciseModel);
+            }
+            return timeCode;
+        }
+
+        private async Task<ExerciseModel> GetExercise(Exercise? exercise, Guid studentId, EnumResultStatus status, bool isShowSubStatus, bool isDisableAnswer)
+        {
+            ArgumentNullException.ThrowIfNull(exercise);
+            var listQuestionShuffle = new List<QuestionShuffle>();
+            var exerciseModel = _mapper.Map<ExerciseModel>(exercise);
+            var questions = exercise.ExerciseQuestions.OrderBy(x => x!.CreatedDate).Where(x => x.Question != null).Select(x => x.Question).ToList();
+            var questionShuffles = await _questionShuffleRepository.Queryable.Where(x => questions.Select(x => x!.Id).Contains(x.QuestionId) && x.StudentId == studentId).ToListAsync();
+
+            foreach (var question in questions)
+            {
+                if (question == null)
+                {
+                    continue;
+                }
+
+                var videoTimeCodeAnswer = question.VideoTimeCodeAnswers.FirstOrDefault();
+                var isCheck = videoTimeCodeAnswer?.Status == EnumAnswerStatus.Done;
+                var questionModel = _mapper.Map<QuestionModel>(question);
+                if (!isCheck)
+                {
+                    questionModel.Explanations = null;
+                    questionModel.Explanation = null;
+                }
+                questionModel.CorrectStatus = GetCorrectStatus(videoTimeCodeAnswer);
+                questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
+
+                var questionShuffle = questionShuffles.FirstOrDefault(x => x.QuestionId == question.Id);
+                (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, questionShuffle?.ShuffleConfigs);
+                if (!string.IsNullOrEmpty(questionShuffleStr) && (questionShuffle == null || questionShuffle.ShuffleConfigStr != questionShuffleStr))
+                {
+                    if (questionShuffle == null)
+                    {
+                        questionShuffle = new QuestionShuffle
+                        {
+                            QuestionId = question.Id,
+                            StudentId = studentId,
+                            ShuffleConfigStr = questionShuffleStr
+                        };
+                    }
+                    else
+                    {
+                        questionShuffle.ShuffleConfigStr = questionShuffleStr;
+                    }
+                    listQuestionShuffle.Add(questionShuffle);
+                }
+
+                if (videoTimeCodeAnswer != null)
+                {
+                    videoTimeCodeAnswer.CorrectCount = isCheck ? videoTimeCodeAnswer.CorrectCount : default;
+                    videoTimeCodeAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(videoTimeCodeAnswer.Answer, question.QuestionType, isShowSubStatus, status, isDisableAnswer);
+                    questionModel.ResultAnswer = _mapper.Map<AnswerModel>(videoTimeCodeAnswer);
+                }
+                exerciseModel.Questions.Add(questionModel);
+            }
+
+            await _questionShuffleRepository.SaveQuestionShufflesAsync(listQuestionShuffle);
+            return exerciseModel;
         }
 
         public VideoTimeCodeModel GetVideoTimeCode(VideoTimeCode? videoTimeCode, VideoTimeCodeResultModel? videoTimeCodeResult)
@@ -546,65 +687,6 @@ namespace Fsel.Course.Infrastructure.Common
                 videoTimeCodeResult.RemainingTime = _dateTimeConverter.SetRemainingTime(videoTimeCode.ExecutionTime, remainingTime);
             }
             return videoTimeCodeResult;
-        }
-
-        private async Task<ExerciseModel> GetExercise(Exercise? exercise, Guid studentId, EnumResultStatus status, bool isShowSubStatus, bool isDisableAnswer)
-        {
-            ArgumentNullException.ThrowIfNull(exercise);
-            var listQuestionShuffle = new List<QuestionShuffle>();
-            var exerciseModel = _mapper.Map<ExerciseModel>(exercise);
-            var questions = exercise.ExerciseQuestions.OrderBy(x => x!.CreatedDate).Where(x => x.Question != null).Select(x => x.Question).ToList();
-            var questionShuffles = await _questionShuffleRepository.Queryable.Where(x => questions.Select(x => x!.Id).Contains(x.QuestionId) && x.StudentId == studentId).ToListAsync();
-
-            foreach (var question in questions)
-            {
-                if (question == null)
-                {
-                    continue;
-                }
-
-                var videoTimeCodeAnswer = question.VideoTimeCodeAnswers.FirstOrDefault();
-                var isCheck = videoTimeCodeAnswer?.Status == EnumAnswerStatus.Done;
-                var questionModel = _mapper.Map<QuestionModel>(question);
-                if (!isCheck)
-                {
-                    questionModel.Explanations = null;
-                    questionModel.Explanation = null;
-                }
-                questionModel.CorrectStatus = GetCorrectStatus(videoTimeCodeAnswer);
-                questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
-
-                var questionShuffle = questionShuffles.FirstOrDefault(x => x.QuestionId == question.Id);
-                (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, questionShuffle?.ShuffleConfigs);
-                if (!string.IsNullOrEmpty(questionShuffleStr) && (questionShuffle == null || questionShuffle.ShuffleConfigStr != questionShuffleStr))
-                {
-                    if (questionShuffle == null)
-                    {
-                        questionShuffle = new QuestionShuffle
-                        {
-                            QuestionId = question.Id,
-                            StudentId = studentId,
-                            ShuffleConfigStr = questionShuffleStr
-                        };
-                    }
-                    else
-                    {
-                        questionShuffle.ShuffleConfigStr = questionShuffleStr;
-                    }
-                    listQuestionShuffle.Add(questionShuffle);
-                }
-
-                if (videoTimeCodeAnswer != null)
-                {
-                    videoTimeCodeAnswer.CorrectCount = isCheck ? videoTimeCodeAnswer.CorrectCount : default;
-                    videoTimeCodeAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(videoTimeCodeAnswer.Answer, question.QuestionType, isShowSubStatus, status, isDisableAnswer);
-                    questionModel.ResultAnswer = _mapper.Map<AnswerModel>(videoTimeCodeAnswer);
-                }
-                exerciseModel.Questions.Add(questionModel);
-            }
-
-            await _questionShuffleRepository.SaveQuestionShufflesAsync(listQuestionShuffle);
-            return exerciseModel;
         }
 
         private static EnumCorrectStatus? GetCorrectStatus(VideoTimeCodeAnswer? videoTimeCodeAnswer)

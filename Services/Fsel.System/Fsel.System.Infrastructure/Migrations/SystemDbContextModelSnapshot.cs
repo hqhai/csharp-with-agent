@@ -562,6 +562,10 @@ namespace Fsel.System.Infrastructure.Migrations
 
                     b.HasIndex("BannerId");
 
+                    b.HasIndex("IsDeleted", "StudentId", "BannerId");
+
+                    b.HasIndex("IsDeleted", "StudentId", "CreatedDate");
+
                     b.ToTable("BannerStudents");
                 });
 
@@ -967,15 +971,8 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<string>("CourseLevel")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("CourseType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<string>("CourseLevelStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -1118,161 +1115,161 @@ namespace Fsel.System.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.DisplayOrderConfig", b =>
-            {
-                b.Property<Guid>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("uniqueidentifier")
-                    .HasColumnOrder(0);
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
 
-                b.Property<DateTime>("CreatedDate")
-                    .HasColumnType("datetime2")
-                    .HasColumnOrder(107);
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
 
-                b.Property<string>("CreatedFullName")
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .HasColumnType("nvarchar(100)")
-                    .HasColumnOrder(104);
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
 
-                b.Property<Guid>("CreatedUserId")
-                    .HasColumnType("uniqueidentifier")
-                    .HasColumnOrder(101);
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
 
-                b.Property<DateTime?>("DeletedDate")
-                    .HasColumnType("datetime2")
-                    .HasColumnOrder(109);
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
 
-                b.Property<string>("DeletedFullName")
-                    .HasMaxLength(100)
-                    .HasColumnType("nvarchar(100)")
-                    .HasColumnOrder(106);
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
 
-                b.Property<Guid?>("DeletedUserId")
-                    .HasColumnType("uniqueidentifier")
-                    .HasColumnOrder(103);
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
 
-                b.Property<int>("DisplayOrder")
-                    .HasColumnType("int");
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
 
-                b.Property<bool>("IsDeleted")
-                    .HasColumnType("bit")
-                    .HasColumnOrder(110);
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
 
-                b.Property<string>("Name")
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .HasColumnType("nvarchar(100)");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                b.Property<bool>("Status")
-                    .HasColumnType("bit");
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
 
-                b.Property<DateTime?>("UpdatedDate")
-                    .HasColumnType("datetime2")
-                    .HasColumnOrder(108);
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
 
-                b.Property<string>("UpdatedFullName")
-                    .HasMaxLength(100)
-                    .HasColumnType("nvarchar(100)")
-                    .HasColumnOrder(105);
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
 
-                b.Property<Guid?>("UpdatedUserId")
-                    .HasColumnType("uniqueidentifier")
-                    .HasColumnOrder(102);
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.ToTable("DisplayOrderConfig");
+                    b.ToTable("DisplayOrderConfig");
 
-                b.HasData(
-                    new
-                    {
-                        Id = new Guid("f619cd35-cd55-4931-a7b4-2b1c992d1306"),
-                        CreatedDate = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                        CreatedFullName = "",
-                        CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                        DisplayOrder = 1,
-                        IsDeleted = false,
-                        Name = "Disconnected",
-                        Status = true
-                    },
-                    new
-                    {
-                        Id = new Guid("ac124367-9b60-46dd-964f-aa85efc91ada"),
-                        CreatedDate = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                        CreatedFullName = "",
-                        CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                        DisplayOrder = 2,
-                        IsDeleted = false,
-                        Name = "Popup",
-                        Status = true
-                    },
-                    new
-                    {
-                        Id = new Guid("f9ee8b6b-d3b5-4183-9b4f-62c373c80020"),
-                        CreatedDate = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                        CreatedFullName = "",
-                        CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                        DisplayOrder = 3,
-                        IsDeleted = false,
-                        Name = "Heading",
-                        Status = true
-                    },
-                    new
-                    {
-                        Id = new Guid("5f787b73-36cf-4db9-8378-74ffacef6df1"),
-                        CreatedDate = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                        CreatedFullName = "",
-                        CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                        DisplayOrder = 4,
-                        IsDeleted = false,
-                        Name = "GoodMorning",
-                        Status = true
-                    },
-                    new
-                    {
-                        Id = new Guid("dac69796-079e-4090-9b8f-e786856d4a20"),
-                        CreatedDate = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                        CreatedFullName = "",
-                        CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                        DisplayOrder = 5,
-                        IsDeleted = false,
-                        Name = "FselCoin",
-                        Status = true
-                    },
-                    new
-                    {
-                        Id = new Guid("858c0ac1-41a2-461b-9252-32f56914caf0"),
-                        CreatedDate = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                        CreatedFullName = "",
-                        CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                        DisplayOrder = 6,
-                        IsDeleted = false,
-                        Name = "StreakTimeCode",
-                        Status = true
-                    },
-                    new
-                    {
-                        Id = new Guid("08db065d-689f-42bc-95bd-5181fb4d7024"),
-                        CreatedDate = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                        CreatedFullName = "",
-                        CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                        DisplayOrder = 7,
-                        IsDeleted = false,
-                        Name = "TwentyFiveMinutesBreak",
-                        Status = true
-                    },
-                    new
-                    {
-                        Id = new Guid("29f6b274-6edd-427b-b1be-51a8ba5b23cd"),
-                        CreatedDate = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                        CreatedFullName = "",
-                        CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                        DisplayOrder = 8,
-                        IsDeleted = false,
-                        Name = "Beginner",
-                        Status = true
-                    });
-            });
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("f619cd35-cd55-4931-a7b4-2b1c992d1306"),
+                            CreatedDate = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 1,
+                            IsDeleted = false,
+                            Name = "Disconnected",
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("ac124367-9b60-46dd-964f-aa85efc91ada"),
+                            CreatedDate = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 2,
+                            IsDeleted = false,
+                            Name = "Popup",
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("f9ee8b6b-d3b5-4183-9b4f-62c373c80020"),
+                            CreatedDate = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 3,
+                            IsDeleted = false,
+                            Name = "Heading",
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("5f787b73-36cf-4db9-8378-74ffacef6df1"),
+                            CreatedDate = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 4,
+                            IsDeleted = false,
+                            Name = "GoodMorning",
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("dac69796-079e-4090-9b8f-e786856d4a20"),
+                            CreatedDate = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 5,
+                            IsDeleted = false,
+                            Name = "FselCoin",
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("858c0ac1-41a2-461b-9252-32f56914caf0"),
+                            CreatedDate = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 6,
+                            IsDeleted = false,
+                            Name = "StreakTimeCode",
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("08db065d-689f-42bc-95bd-5181fb4d7024"),
+                            CreatedDate = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 7,
+                            IsDeleted = false,
+                            Name = "TwentyFiveMinutesBreak",
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("29f6b274-6edd-427b-b1be-51a8ba5b23cd"),
+                            CreatedDate = new DateTime(2025, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 8,
+                            IsDeleted = false,
+                            Name = "Beginner",
+                            Status = true
+                        });
+                });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.ErrorReport", b =>
                 {
@@ -1454,6 +1451,14 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted"), new[] { "CreatedUserId", "AccessTime" });
+
+                    b.HasIndex("IsDeleted", "CreatedUserId");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted", "CreatedUserId"), new[] { "AccessTime", "LastVisited" });
 
                     b.HasIndex("CreatedUserId", "IsDeleted", "EnumFeature");
 
@@ -1701,6 +1706,8 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedUserId", "IsDeleted");
 
                     b.ToTable("FselRatings");
                 });
@@ -2312,6 +2319,8 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted", "LessonResultId", "StudentId");
 
                     b.ToTable("LuckyTickets");
                 });
@@ -2979,6 +2988,10 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("QuestBoardOverallId");
+
+                    b.HasIndex("IsDeleted", "QuestBoardOverallId", "StudentId", "CreatedDate");
+
+                    b.HasIndex("IsDeleted", "QuestBoardOverallId", "StudentId", "Status", "CurrentValue");
 
                     b.ToTable("QuestBoardOverallStudents");
                 });
@@ -5261,6 +5274,18 @@ namespace Fsel.System.Infrastructure.Migrations
 
                     b.HasIndex("TokenConfigId");
 
+                    b.HasIndex("IsDeleted", "UserId");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted", "UserId"), new[] { "VolatileToken", "Type" });
+
+                    b.HasIndex("IsDeleted", "UserId", "CreatedDate");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted", "UserId", "CreatedDate"), new[] { "ConfigDataStr", "ConfigStr", "CourseResultId", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "Feature", "InitialToken", "Mission", "ObjectId", "RemainToken", "TokenConfigId", "Type", "UpdatedDate", "UpdatedFullName", "UpdatedUserId", "VolatileToken" });
+
+                    b.HasIndex("IsDeleted", "UserId", "Type");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted", "UserId", "Type"), new[] { "ConfigDataStr", "ConfigStr", "CourseResultId", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "Feature", "InitialToken", "Mission", "ObjectId", "RemainToken", "TokenConfigId", "UpdatedDate", "UpdatedFullName", "UpdatedUserId", "VolatileToken" });
+
                     b.ToTable("TokenHistories");
                 });
 
@@ -5389,6 +5414,8 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted", "UserId", "IsViewNewFeature");
 
                     b.ToTable("UserConfigs");
                 });

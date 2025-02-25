@@ -30,7 +30,7 @@ namespace Fsel.Interaction.Application.Commands.AiCmd
 
             var response = await _openAIService.SubmitAICompletionsAsync(new RequestAIModel
             {
-                Model = request.SettingModel,
+                Model = "gpt-4o-mini",
                 Messages = new List<object>
                 {
                     new
@@ -43,7 +43,11 @@ namespace Fsel.Interaction.Application.Commands.AiCmd
                         Role = RoleUser,
                         Content = request.UserAIConfig,
                     }
-                }
+                },
+                Temperature = 0,
+                MaxTokens = 1000,
+                PresencePenalty = 0,
+                TopP = 0
             });
 
             var result = response.Content?.Choices?.Select(x => x.Message?.Content).FirstOrDefault();

@@ -22,7 +22,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
     {
         public Guid ObjectResultId { get; set; }
 
-        public IList<string>? QuestionIds { get; set; }
+        public IList<string> QuestionIds { get; set; } = new List<string>();
 
         [JsonIgnore]
         public IList<Guid> ListQuestionIds

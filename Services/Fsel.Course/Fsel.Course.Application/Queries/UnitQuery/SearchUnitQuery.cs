@@ -84,7 +84,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                 {
                     var unitCodeQuery = unitQuery.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
                     var unitNameQuery = unitQuery.Where(m => m.Name != null && m.Name.Contains(request.Keyword));
-                    unitQuery = unitNameQuery.Union(unitNameQuery);
+                    unitQuery = unitCodeQuery.Union(unitNameQuery);
                 }
             }
 

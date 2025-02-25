@@ -48,12 +48,12 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
             {
                 if (request.Keyword.IsValidEmail())
                 {
-                    users = users.Where(m => m.Email != null && m.Email.Contains(request.Keyword));
+                    users = users.Where(m => m.Email!.Contains(request.Keyword));
                 }
                 else
                 {
-                    var codeQuery = users.Where(m => m.Human != null && m.Human.Code != null && m.Human.Code.Contains(request.Keyword));
-                    var fullNameQuery = users.Where(m => m.FullName != null && m.FullName.Contains(request.Keyword));
+                    var codeQuery = users.Where(m => m.Human != null && m.Human.Code!.Contains(request.Keyword));
+                    var fullNameQuery = users.Where(m => m.FullName!.Contains(request.Keyword));
                     users = codeQuery.Union(fullNameQuery);
                 }
             }

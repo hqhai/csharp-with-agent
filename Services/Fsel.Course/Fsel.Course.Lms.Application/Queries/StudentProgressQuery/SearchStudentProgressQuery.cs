@@ -12,7 +12,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Domain.Models.QueryModels.StudentProgress;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -54,18 +53,17 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-
-            var query = _courseResultRepository.Queryable.Include(x => x.Course).Where(x => !x.IsDeleted && x.WorkingStatus == EnumWorkingStatus.Active)
-                .GroupBy(r => new { r.StudentId, r.CourseId })
-                .Select(group => new CourseResultModel
-                {
-                    StudentId = group.Key.StudentId,
-                    CourseId = group.Key.CourseId,
-                    CourseType = group.Select(x => x.Course).FirstOrDefault(c => c!.Id == group.Key.CourseId)!.CourseType,
-                    CourseLevel = group.Select(x => x.Course).FirstOrDefault(c => c!.Id == group.Key.CourseId)!.CourseLevel,
-                    CreatedDate = group.Max(r => r.CreatedDate),
-                    UpdatedDate = group.Max(r => r.UpdatedDate),
-                });
+            var query = from baseQ in _courseResultRepository.Queryable
+                        join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
+                        where !baseQ.IsDeleted && baseQ.WorkingStatus == EnumWorkingStatus.Active
+                        select new CourseResultModel
+                        {
+                            StudentId = baseQ.StudentId,
+                            CourseId = baseQ.CourseId,
+                            CourseLevel = c.CourseLevel,
+                            CreatedDate = baseQ.CreatedDate,
+                            UpdatedDate = baseQ.UpdatedDate,
+                        };
 
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
             {
@@ -76,7 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     return methodResult;
                 }
                 var studentIds = studentSchoolResult.Content?.Result?.Select(x => x.Id).ToList() ?? new List<Guid>();
-                query = query.WhereBulkContains(studentIds, x => x.StudentId);
+                query = query.Where(x => studentIds.Contains(x.StudentId));
             }
 
             if (request.CourseType.HasValue)
@@ -92,21 +90,22 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 var studentKeyResult = await _userService.SearchStudentAsync(new BaseQueryModel { Keyword = request.Keyword });
                 if (studentKeyResult.IsSuccessStatusCode)
                 {
-                    var studentIds = studentKeyResult.Content?.Result?.Items?.Select(x => x.Id).ToList();
-                    query = query.Where(x => studentIds != null && studentIds.Contains(x.StudentId));
+                    var studentIds = studentKeyResult.Content?.Result?.Items?.Select(x => x.Id).ToList() ?? new List<Guid>();
+                    query = query.Where(x => studentIds.Contains(x.StudentId));
                 }
             }
 
             var totalItem = await query.CountAsync(cancellationToken);
-            var lists = await query.OrderByDescending(x => x.UpdatedDate)
-                               .ThenByDescending(x => x.CreatedDate)
-                               .ApplyPaging(request)
-                               .AsNoTracking()
-                               .ToListAsync(cancellationToken: cancellationToken)
-                               .ConfigureAwait(false);
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).Distinct().ToList());
+            var lists = await query.ApplySortAndPaging(request)
+                                   .AsNoTracking()
+                                   .ToListAsync(cancellationToken: cancellationToken)
+                                   .ConfigureAwait(false);
+
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).ToList());
             var students = studentResults.Content?.Result;
+
             var studentProgress = new List<StudentProgressModel>();
+
             foreach (var courseResult in lists)
             {
                 var student = students?.FirstOrDefault(x => x.Id == courseResult.StudentId);
@@ -128,6 +127,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 };
                 studentProgress.Add(studentProgressModel);
             }
+
             methodResult.Result = new PagingItemsModel<StudentProgressModel>(studentProgress, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

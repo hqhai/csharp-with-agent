@@ -421,6 +421,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("LessonResultId", "ClassForumId", "StudentId")
                         .IsUnique();
 
+                    b.HasIndex("IsDeleted", "Status", "ClassForumId", "Id");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted", "Status", "ClassForumId", "Id"), new[] { "StudentId" });
+
                     b.ToTable("ClassForumResults");
                 });
 
@@ -818,8 +822,14 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedUserId");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CreatedUserId"), new[] { "Status", "CourseId" });
+
                     b.HasIndex("CourseId", "StudentId")
                         .IsUnique();
+
+                    b.HasIndex("IsDeleted", "WorkingStatus");
 
                     b.HasIndex("StudentId", "WorkingStatus");
 
@@ -988,6 +998,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("MockTestId");
 
                     b.HasIndex("UnitId");
+
+                    b.HasIndex("IsDeleted", "CourseId");
 
                     b.ToTable("CourseUnitMockTests");
                 });
@@ -2327,6 +2339,8 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("StudentId");
 
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("StudentId"), new[] { "CorrectCount", "CorrectTotal", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "HomeWorkId", "IsDeleted", "LessonResultId", "Percent", "SkillScoresStr", "Status", "SubmissionCount", "TokenFirstTime", "TokenLastTime", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
+
                     b.HasIndex("LessonResultId", "HomeWorkId", "StudentId")
                         .IsUnique();
 
@@ -2771,11 +2785,17 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedUserId");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CreatedUserId"), new[] { "CorrectCount", "CorrectTotal", "CourseId", "CreatedDate", "CreatedFullName", "DeletedDate", "DeletedFullName", "DeletedUserId", "IsDeleted", "LessonId", "Percent", "SkillScoresStr", "Status", "StudentId", "SummaryNote", "UnitId", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
+
                     b.HasIndex("LessonId");
 
                     b.HasIndex("UnitId");
 
                     b.HasIndex("UnitLessonId");
+
+                    b.HasIndex("CourseId", "StudentId", "Status");
 
                     b.HasIndex("CreatedUserId", "Status", "UnitId");
 
@@ -3732,8 +3752,16 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedDate");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CreatedDate"), new[] { "StudentId" });
+
                     b.HasIndex("StudentId")
                         .IsUnique();
+
+                    b.HasIndex("IsDeleted", "Status");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted", "Status"), new[] { "SuggetLevel", "StudentId" });
 
                     b.ToTable("PlacementTestGroupResults");
                 });
@@ -3827,6 +3855,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnOrder(102);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedUserId");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CreatedUserId"), new[] { "CorrectCount", "CorrectTotal", "CountQuestion", "CreatedDate", "CreatedFullName", "DeletedDate", "DeletedFullName", "DeletedUserId", "IsDeleted", "Level", "Percent", "PlacementTestGroupResultId", "PlacementTestId", "SkillScoresStr", "Status", "StudentId", "TotalQuestion", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
 
                     b.HasIndex("PlacementTestGroupResultId");
 
@@ -4913,6 +4945,8 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("IsDeleted", "ObjectId");
+
                     b.HasIndex("IsDeleted", "Type", "ObjectId");
 
                     b.ToTable("StudentFeedbacks");
@@ -4978,6 +5012,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ExerciseId");
+
+                    b.HasIndex("IsDeleted");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted"), new[] { "ExerciseId", "VideoTimeCodeId" });
 
                     b.HasIndex("VideoTimeCodeId");
 
@@ -5216,6 +5254,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("CourseUnitMockTestId");
 
                     b.HasIndex("CreatedUserId");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CreatedUserId"), new[] { "CompletionDate", "CorrectCount", "CorrectTotal", "CourseId", "CreatedDate", "CreatedFullName", "DeletedDate", "DeletedFullName", "DeletedUserId", "IsDeleted", "Percent", "ProcessDate", "SkillScoresStr", "Status", "StudentId", "UnitId", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
 
                     b.HasIndex("UnitId");
 
@@ -5660,11 +5700,13 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("ExerciseId");
 
-                    b.HasIndex("QuestionId");
-
                     b.HasIndex("VideoTimeCodeId");
 
                     b.HasIndex("VideoTimeCodeResultId");
+
+                    b.HasIndex("QuestionId", "VideoResultId");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("QuestionId", "VideoResultId"), new[] { "CorrectCount" });
 
                     b.HasIndex("VideoResultId", "QuestionId", "VideoTimeCodeResultId")
                         .IsUnique()
@@ -5780,6 +5822,12 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("VideoTimeCodeId");
+
+                    b.HasIndex("Status", "StudentId");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("Status", "StudentId"), new[] { "VideoResultId", "VideoTimeCodeId", "CorrectCount", "CorrectTotal", "WorkingTime" });
+
+                    b.HasIndex("VideoResultId", "Status");
 
                     b.HasIndex("VideoResultId", "VideoTimeCodeId", "StudentId")
                         .IsUnique();

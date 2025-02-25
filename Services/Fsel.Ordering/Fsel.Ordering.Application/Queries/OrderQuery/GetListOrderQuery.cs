@@ -12,6 +12,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using Fsel.Ordering.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetListOrderQuery : IRequest<MethodResult<IList<OrderModel>>>
     {
@@ -33,7 +34,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<OrderModel>>();
-            var orders = _orderRepository.Queryable.Where(x => x.UserId == request.UserId);
+            var orders = await _orderRepository.Queryable.Where(x => x.UserId == request.UserId).ToListAsync(cancellationToken);
 
             methodResult.Result = _mapper.Map<IList<OrderModel>>(orders);
             methodResult.StatusCode = StatusCodes.Status200OK;

@@ -171,6 +171,10 @@ namespace Fsel.Interaction.Infrastructure.Migrations
 
                     b.HasIndex("SurveyQuestionId");
 
+                    b.HasIndex("IsDeleted", "UserId");
+
+                    b.HasIndex("IsDeleted", "UserId", "SurveyQuestionId");
+
                     b.ToTable("CustomerSurveys");
                 });
 
@@ -245,6 +249,8 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted", "UserId", "SurveyFormType");
 
                     b.ToTable("CustomerSurveyGroups");
                 });
