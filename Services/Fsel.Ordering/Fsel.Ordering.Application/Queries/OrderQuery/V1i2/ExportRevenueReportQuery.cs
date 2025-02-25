@@ -10,6 +10,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Ordering.Application.Services.SystemService;
+    using Fsel.Ordering.Application.Services.SystemService.Models;
     using Fsel.Ordering.Domain.Models.EntityModels.V1i2;
     using Fsel.Ordering.Domain.Models.QueryModels.Oders.V1i2;
     using Fsel.Shared.Constants;
@@ -63,14 +64,30 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
-            methodResult.Result = ExportExcelTemplate(orders);
+            var locationIds = new List<Guid>();
+            var provinceIds = orders.Where(p => p.ProvinceId.HasValue).Select(p => p.ProvinceId!.Value).Distinct().ToList();
+            var districtIds = orders.Where(p => p.DistrictId.HasValue).Select(p => p.DistrictId!.Value).Distinct().ToList();
+            locationIds.AddRange(provinceIds);
+            locationIds.AddRange(districtIds);
+
+            var locationResults = await _systemService.GetLocationByIdsAsync(new GetLocationsByIdsQueryModel()
+            {
+                IdsStr = string.Join(",", locationIds),
+            });
+
+            var locations = locationResults.Content?.Result;
+
+            methodResult.Result = ExportExcelTemplate(orders, locations);
             return methodResult;
         }
 
-        public static Stream ExportExcelTemplate(IList<SearchOrderModel> orders)
+        public static Stream ExportExcelTemplate(IList<SearchOrderModel> orders, IList<LocationModel>? locations)
         {
             ArgumentNullException.ThrowIfNull(orders);
             MemoryStream memoryStream = new MemoryStream();
+
+            var locationDict = locations?
+                    .ToDictionary(x => x.Id, x => x);
 
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
@@ -92,6 +109,22 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                     _ => "Fail"
                 };
 
+                var province = item.ProvinceId.HasValue && locationDict?.TryGetValue(item.ProvinceId.Value, out var provinceModel) == true
+                                ? provinceModel.Name
+                                : string.Empty;
+
+                var district = item.DistrictId.HasValue && locationDict?.TryGetValue(item.DistrictId.Value, out var districtModel) == true
+                                ? districtModel.Name
+                                : string.Empty;
+
+                var location = string.Empty;
+
+                if (!string.IsNullOrEmpty(province) || !string.IsNullOrEmpty(district))
+                {
+                    location = string.Join(" - ", new[] { province, district }.Where(s => !string.IsNullOrEmpty(s)));
+                    location = string.IsNullOrEmpty(location) ? string.Empty : location;
+                }
+
                 object[] rowValues = new object[]
                 {
                     item.Code ?? string.Empty,
@@ -108,7 +141,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                     item.FullName ?? string.Empty,
                     item.Email ?? string.Empty,
                     item.PhoneNumber ?? string.Empty,
-                    item.Address ?? string.Empty,
+                    location ?? string.Empty,
                     item.StudentCode ?? string.Empty,
                     item.StudentFullName ?? string.Empty,
                     item.StudentPhoneNumber ?? string.Empty,
