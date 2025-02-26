@@ -10,7 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
     using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
 
-    public class ReportAttendanceForCityQuery : IRequest<MethodResult<AttendanceReportModel>>
+    public class ReportAttendanceForCityQuery : IRequest<MethodResult<OverallStudentModel>>
     {
         public int Target { get; set; } = 1;
 
@@ -24,7 +24,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
         public DateTime? Date { get; set; }
     }
 
-    public class ReportAttendanceForCityQueryHandler : IRequestHandler<ReportAttendanceForCityQuery, MethodResult<AttendanceReportModel>>
+    public class ReportAttendanceForCityQueryHandler : IRequestHandler<ReportAttendanceForCityQuery, MethodResult<OverallStudentModel>>
     {
         private readonly CourseDbContext _courseDbContext;
 
@@ -33,10 +33,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
             _courseDbContext = courseDbContext;
         }
 
-        public async Task<MethodResult<AttendanceReportModel>> Handle(ReportAttendanceForCityQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<OverallStudentModel>> Handle(ReportAttendanceForCityQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<AttendanceReportModel> methodResult = new MethodResult<AttendanceReportModel>();
+            MethodResult<OverallStudentModel> methodResult = new MethodResult<OverallStudentModel>();
 
             var checkByGroup = 0;
             var districtIdsParam = request.DistrictIds != null ? string.Join(",", request.DistrictIds) : (object)DBNull.Value;
@@ -58,37 +58,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReportEventHaNoiQuery
 
             var overallStudent = totalList.FirstOrDefault();
 
-            var numberStudentLearnOnSystem = await _courseDbContext.Set<NumberStudentLearnOnSystemModel>()
-                                                    .FromSqlRaw("EXEC NumberStudentLearnOnSystem @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @Date, @CheckByGroup",
-                                                        new SqlParameter("@Target", request.Target),
-                                                        new SqlParameter("@GroupByType", request.GroupByType),
-                                                        new SqlParameter("@DistrictIds", districtIdsParam),
-                                                        new SqlParameter("@GroupIds", groupIdsParam),
-                                                        new SqlParameter("@SchoolIds", schoolIdsParam),
-                                                        new SqlParameter("@Date", request.Date ?? DateTime.UtcNow), // Truyền đúng tham số Date
-                                                        new SqlParameter("@CheckByGroup", checkByGroup))
-                                                    .AsNoTracking()
-                                                    .ToListAsync(cancellationToken);
 
-            var summaryDataOnCity = await _courseDbContext.Set<SummaryDataOnCityModel>()
-                                                .FromSqlRaw("EXEC SummaryDataOnCity @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @Date, @CheckByGroup",
-                                                    new SqlParameter("@Target", request.Target),
-                                                    new SqlParameter("@GroupByType", request.GroupByType),
-                                                    new SqlParameter("@DistrictIds", districtIdsParam),
-                                                    new SqlParameter("@GroupIds", groupIdsParam),
-                                                    new SqlParameter("@SchoolIds", schoolIdsParam),
-                                                    new SqlParameter("@Date", request.Date ?? DateTime.UtcNow), // Truyền đúng tham số Date
-                                                    new SqlParameter("@CheckByGroup", checkByGroup))
-                                                .AsNoTracking()
-                                                .ToListAsync(cancellationToken);
-
-
-            methodResult.Result = new AttendanceReportModel
-            {
-                OverallStudent = overallStudent,
-                NumberStudentLearnOnSystem = numberStudentLearnOnSystem,
-                SummaryDataOnCity = summaryDataOnCity,
-            };
+            methodResult.Result = overallStudent;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

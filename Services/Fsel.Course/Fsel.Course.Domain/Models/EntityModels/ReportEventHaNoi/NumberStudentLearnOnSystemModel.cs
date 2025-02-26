@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi
 
     public class NumberStudentLearnOnSystemModel
     {
-        public DateTime? ActiveDate { get; set; }
+        public string? ActiveDate { get; set; }
         public int? ActiveStudentCount { get; set; }
     }
 }

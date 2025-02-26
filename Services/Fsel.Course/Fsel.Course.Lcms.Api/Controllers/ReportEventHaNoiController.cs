@@ -82,10 +82,30 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// Get 
         /// </summary>
         [ServerCache(CacheSettings.TimeCache.OneHour)]
-        [HttpPost("report-attendance")]
-        [ProducesResponseType(typeof(MethodResult<LearningQualityModel>), (int)HttpStatusCode.OK)]
+        [HttpPost("report-attendance-overall")]
+        [ProducesResponseType(typeof(MethodResult<OverallStudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ReportAttendance([FromBody] ReportAttendanceForCityQuery query)
+        public async Task<IActionResult> ReportAttendanceOverall([FromBody] ReportAttendanceForCityQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [ServerCache(CacheSettings.TimeCache.OneHour)]
+        [HttpPost("report-attendance-graph")]
+        [ProducesResponseType(typeof(MethodResult<IList<NumberStudentLearnOnSystemModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ReportAttendanceGraph([FromBody] ReportAttendanceGraphQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [ServerCache(CacheSettings.TimeCache.OneHour)]
+        [HttpPost("report-attendance-table")]
+        [ProducesResponseType(typeof(MethodResult<IList<SummaryDataOnCityModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ReportAttendanceTable([FromBody] ReportAttendanceTableQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

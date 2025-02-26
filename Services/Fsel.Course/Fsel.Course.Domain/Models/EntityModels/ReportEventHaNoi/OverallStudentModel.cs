@@ -10,6 +10,6 @@ namespace Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi
         public int? TotalStudents { get; set; }
         public int? ActiveStudentsToday { get; set; }
         public int? ActiveStudentsYesterday { get; set; }
-        public double? PercentageChange { get; set; }
+        public int? RegisteredStudentsYesterday { get; set; }
     }
 }
