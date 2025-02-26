@@ -103,7 +103,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     };
                 }
 
-                _classForumResultRepository.Update(classForumResult);
+                _classForumResultRepository.Update(classForumResult, false, x => x.LessonResultId, x => x.ClassForumId, x => x.StudentId);
                 await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 //Thông báo cho user khi bài viết được phê duyệt

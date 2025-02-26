@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 lessonResult.CorrectTotal = videoResult.CorrectTotal;
                 lessonResult.Percent = NumberHelper.ConvertDoublePercent(videoResult.Percent * 40);
                 lessonResult.SkillScores = skillScores;
-                _lessonResultRepository.Update(lessonResult);
+                _lessonResultRepository.Update(lessonResult, false, x => x.CourseId, x => x.StudentId, x => x.UnitId, x => x.LessonId);
                 await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)

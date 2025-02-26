@@ -62,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd
 
             await _unitResultRepository.ExecuteTransactionAsync(async () =>
             {
-                _unitResultRepository.UpdateList(unitResult);
+                _unitResultRepository.UpdateList(unitResult, false, x => x.StudentId, x => x.CourseId, x => x.UnitId);
                 await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.Result = true;
                 return methodResult;

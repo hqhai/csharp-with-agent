@@ -69,12 +69,14 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 ClassForumResulId = classForumResult.Id
             }, cancellationToken);
 
-
             #region RankedStudent
+
             await PublishRankedStudent(classForumDetailResult.CreatedUserId, cancellationToken);
-            #endregion
+
+            #endregion RankedStudent
 
             #region Notification
+
             IList<EnumRole> roles = new List<EnumRole>();
             roles.Add(EnumRole.CSO);
 
@@ -88,7 +90,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 PlatformCode = EnumPlatformCode.LMSAdmin
             };
             await _notificationMessagePublisher.Publish(model, cancellationToken);
-            #endregion
+
+            #endregion Notification
 
             return true;
         }
@@ -140,7 +143,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     item.CompletionDate = DateTime.UtcNow;
                 }
             }
-            _classforumDetailResultRepository.UpdateList(classForumDetailResults);
+            _classforumDetailResultRepository.UpdateList(classForumDetailResults, false, x => x.ClassForumResultId, x => x.SubmissionCount);
             await _classforumDetailResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
 
@@ -186,7 +189,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     }
                 };
             }
-            _classForumResultRepository.Update(classForumResult);
+            _classForumResultRepository.Update(classForumResult, false, x => x.LessonResultId, x => x.ClassForumId, x => x.StudentId);
             await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
         }
 
