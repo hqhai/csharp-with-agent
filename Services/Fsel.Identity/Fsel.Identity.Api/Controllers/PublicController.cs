@@ -5,12 +5,14 @@ namespace Fsel.Identity.Api.Controllers
     using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Identity.Application.Commands.StudentCmd;
     using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Identity.Application.Queries.StudentQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -18,6 +20,7 @@ namespace Fsel.Identity.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/public")]
     [ApiController]
+    [Permission(roles: new string[] { nameof(EnumRole.Admin) })]
     public class PublicController : ControllerBase
     {
         private readonly IMediator _mediator;
