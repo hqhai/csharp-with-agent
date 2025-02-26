@@ -133,5 +133,15 @@ namespace Fsel.Shared.Constants
                 public const string Banner = $"Banner";
             }
         }
+
+        public static class TranscriptHub
+        {
+            public const string Pattern = $"/transcript";
+
+            public static class Methods
+            {
+                public const string Transcript = $"Transcript";
+            }
+        }
     }
 }
