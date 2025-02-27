@@ -306,7 +306,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             placementTestGroupResult.CurrentLevel = SendMailHelper.GetPreviousEnumValue(level ?? default);
             placementTestGroupResult.Status = EnumResultStatus.Done;
             placementTestGroupResult.Percent = placementTestResult.Percent;
-            _placementTestGroupResultRepository.Update(placementTestGroupResult);
+            _placementTestGroupResultRepository.Update(placementTestGroupResult, false, x => x.StudentId);
             await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
 
@@ -343,7 +343,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                             BaseCourseLevel = currentLevel.Value
                         }).ConfigureAwait(false);
                     }
-                    _placementTestResultRepository.Update(placementTestResult);
+                    _placementTestResultRepository.Update(placementTestResult, false, x => x.StudentId, x => x.PlacementTestId);
                     await _placementTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     if (isLockPT)
                     {

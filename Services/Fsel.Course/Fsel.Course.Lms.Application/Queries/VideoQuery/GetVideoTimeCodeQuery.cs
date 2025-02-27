@@ -75,15 +75,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 return methodResult;
             }
             var video = await _videoRepository.Queryable.Include(i => i.VideoTimeCodes)
-                                    .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
-                                    .ThenInclude(x => x.Exercise)
-                                    .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
-                                    .ThenInclude(x => x.Question)
-                                .Include(i => i.VideoTimeCodes)
-                                .ThenInclude(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id))
-                                .Where(x => x.Id == request.VideoId)
-                                .AsNoTracking()
-                                .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                                                        .Where(x => x.Id == request.VideoId)
+                                                        .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             if (video == null)
             {

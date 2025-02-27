@@ -14,7 +14,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
     using Fsel.Course.Domain.Models.CommandModels.HomeWorkAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Queries.HomeWorkQuery;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
@@ -303,10 +302,12 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 }
                 homeWorkResult = await GetHomeWorkResult(homeWorkResult, homeWorkQuestionCount, isHomeWorkDone, (int)tokensAchieved);
             }
-            _homeWorkResultRepository.Update(homeWorkResult);
+
+            _homeWorkResultRepository.Update(homeWorkResult, false, x => x.HomeWorkId, x => x.LessonResultId, x => x.StudentId);
+            homeWorkResult.HomeWorkAnswers.ForEach(answer => _homeWorkResultRepository.DbContext.Entry(answer).State = EntityState.Unchanged);
             await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-            await PublishRankedStudent(homeWorkResult.CreatedUserId, cancellationToken);
+            await PublishRankedStudent(homeWorkResult.CreatedUserId, cancellationToken).ConfigureAwait(false);
             methodResult.Result = true;
             return methodResult;
         }

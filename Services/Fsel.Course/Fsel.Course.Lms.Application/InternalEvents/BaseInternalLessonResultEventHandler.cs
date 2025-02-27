@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             IHomeWorkResultRepository homeWorkResultRepository,
             QuestBoardPublisher questBoardPublisher,
             IOrderService orderService,
-            ILessonNoteRepository lessonNoteRepository,NotificationMessagePublisher notificationMessagePublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository, notificationMessagePublisher)
+            ILessonNoteRepository lessonNoteRepository, NotificationMessagePublisher notificationMessagePublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository, notificationMessagePublisher)
         {
             _lessonResultRepository = lessonResultRepository;
             _logger = logger;
@@ -74,7 +74,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
                 else
                 {
-                    _lessonResultRepository.Update(lessonResult);
+                    _lessonResultRepository.Update(lessonResult, false, x => x.CourseId, x => x.StudentId, x => x.UnitId, x => x.LessonId);
                     await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
@@ -94,7 +94,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 lessonResult.CorrectTotal = (int)baseScoreResult.CorrectTotal;
                 lessonResult.Percent = baseScoreResult.Percent;
                 lessonResult.SkillScores = baseScoreResult.SkillScores;
-                _lessonResultRepository.Update(lessonResult);
+                _lessonResultRepository.Update(lessonResult, false, x => x.CourseId, x => x.StudentId, x => x.UnitId, x => x.LessonId);
                 await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)

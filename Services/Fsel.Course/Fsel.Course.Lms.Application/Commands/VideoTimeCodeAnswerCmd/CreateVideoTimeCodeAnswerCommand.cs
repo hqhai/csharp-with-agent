@@ -202,9 +202,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 {
                     videoTimeCodeResult.HighestStreak = await _videoConverter.GetHighestStreak(videoTimeCodeResult);
                 }
-                _videoResultRepository.Update(videoResult);
+                _videoResultRepository.Update(videoResult, false, x => x.VideoId, x => x.LessonResultId, x => x.StudentId);
                 await _videoResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
+                _videoTimeCodeResultRepository.Update(videoTimeCodeResult, false, x => x.VideoTimeCodeId, x => x.VideoResultId, x => x.StudentId);
                 await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 return methodResult;
