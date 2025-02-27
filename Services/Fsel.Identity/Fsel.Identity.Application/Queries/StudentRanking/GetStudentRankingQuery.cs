@@ -26,6 +26,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
         private readonly IMapper _mapper;
         private readonly IStudentRepository _studentRepository;
         private readonly IStudentDailyStreakRepository _studentDailyStreakRepository;
+        private const int TOP_LEADER = 30;
 
         public GetStudentRankingQueryHandler(IStudentRankingRepository studentRankingRepository, IMapper mapper, IStudentRepository studentRepository, IStudentDailyStreakRepository studentDailyStreakRepository)
         {
@@ -40,7 +41,11 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<List<StudentRankingModel>> methodResult = new MethodResult<List<StudentRankingModel>>();
 
-            var studentRankingsQuery = await _studentRankingRepository.Queryable.Where(x => x.CourseLevel == request.CourseLevel).OrderBy(x => x.CurrentPosition).ToListAsync(cancellationToken);
+            var studentRankingsQuery = await _studentRankingRepository.Queryable.Where(x => x.CourseLevel == request.CourseLevel)
+                                                                                .OrderByDescending(x => x.TotalScore)
+                                                                                .ThenBy(x => x.CurrentPosition)
+                                                                                .Take(TOP_LEADER)
+                                                                                .ToListAsync(cancellationToken);
 
             var studentIds = studentRankingsQuery.Select(s => s.StudentId);
             var studentInfo = _studentRepository.Queryable.Include(x => x.Human).Where(x => studentIds.Contains(x.Id)).ToList();
