@@ -9,6 +9,7 @@ using Fsel.Core.Base.Managers;
 using Fsel.Core.Entities;
 using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Application.Commands.UserReferrals;
+using Fsel.Identity.Application.Queries.UserReferrals;
 using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -19,6 +20,7 @@ using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Enums.ErrorCodes;
 using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -74,6 +76,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             MethodResult<UserModel> methodResult = new MethodResult<UserModel>();
 
             User? user = null;
+
+            if (!string.IsNullOrEmpty(request.ReferralCode))
+            {
+                var checkReferralCodeResult = await _mediator.Send(new CheckReferralCodeQuery() { ReferralCode = request.ReferralCode }, cancellationToken);
+                if (!checkReferralCodeResult.IsOK || checkReferralCodeResult.Result == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumUserReferralErrorCode.FriendCodeDoesNotExist));
+                    return methodResult;
+                }
+            }
+
             if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
                 if (!request.PhoneNumber.IsValidPhoneNumber())
