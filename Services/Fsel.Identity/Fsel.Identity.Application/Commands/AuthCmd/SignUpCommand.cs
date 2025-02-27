@@ -63,6 +63,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<UserModel> methodResult = new MethodResult<UserModel>();
+
             User? user = null;
             if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
@@ -71,8 +72,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
                     return methodResult;
                 }
-                user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
-                if (user != null && user.EmailConfirmed)
+                user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber.Trim(), cancellationToken: cancellationToken);
+                if (user != null && (user.EmailConfirmed || user.Human != null))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
                     return methodResult;
@@ -85,8 +86,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
                     return methodResult;
                 }
-                user = await _userManager.FindByEmailAsync(request.Email);
-                if (user != null && user.EmailConfirmed)
+                user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Email == request.Email.Trim(), cancellationToken: cancellationToken);
+                if (user != null && (user.EmailConfirmed || user.Human != null))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
                     return methodResult;
@@ -256,15 +257,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                         return methodResult;
                         //scope.Dispose();
                     }
-                }
-            }
-            else if (!string.IsNullOrEmpty(request.PhoneNumber))
-            {
-                user = await _userManager.Users.FirstOrDefaultAsync(e => e.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
-                if (user != null && user.EmailConfirmed)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
-                    return methodResult;
                 }
             }
 

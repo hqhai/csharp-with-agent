@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -89,14 +90,16 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                     UnitId = grouped.Key.UnitId,
                                     CourseName = grouped.First().CourseName,
                                     Code = grouped.First().Code,
-                                    NumberOfStars = grouped.Select(x => x.NumberOfStars).Average(),
+                                    NumberOfStars = grouped.Any() ? grouped.Average(x => x.NumberOfStars) : default,
                                     TotalRating = grouped.Select(x => x.NumberOfStars).Where(x => x <= 2).Count(),
                                     UnitDisplayOrder = grouped.Select(x => x.UnitDisplayOrder).FirstOrDefault(),
                                     LessonDisplayOrder = grouped.Select(x => x.LessonDisplayOrder).FirstOrDefault(),
                                 });
+
+            request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.InvariantCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                groupedQuery = groupedQuery.Where(m => (m.CourseName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                groupedQuery = groupedQuery.Where(m => m.CourseName!.Contains(request.Keyword));
             }
 
             if (request.NumberOfStars != null)

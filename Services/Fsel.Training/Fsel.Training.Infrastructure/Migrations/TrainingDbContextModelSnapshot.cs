@@ -422,6 +422,12 @@ namespace Fsel.Training.Infrastructure.Migrations
 
                     b.HasIndex("ClassId");
 
+                    b.HasIndex("IsDeleted", "ClassId");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted", "ClassId"), new[] { "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "IsActive", "StudentId", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
+
+                    b.HasIndex("IsDeleted", "StudentId");
+
                     b.HasIndex("IsDeleted", "ClassId", "StudentId");
 
                     b.ToTable("ClassStudents");

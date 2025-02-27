@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Fsel.Course.Infrastructure\Fsel.Course.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\SystemService\QueryModels\Schools\" />
+  </ItemGroup>
+
 </Project>

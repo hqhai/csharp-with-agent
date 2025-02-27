@@ -98,7 +98,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             MethodResult<bool> methodResult = new MethodResult<bool>();
             bool allowOpenNextUnit = false;
 
-            var order = await _orderRepository.Queryable.Include(ot => ot.OrderTransactions).FirstOrDefaultAsync(p => p.Id == request.OrderId, cancellationToken);
+            var order = await _orderRepository.Queryable.Include(ot => ot.OrderTransactions).Include(p => p.Voucher).FirstOrDefaultAsync(p => p.Id == request.OrderId, cancellationToken);
             if (order == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(order));
@@ -151,10 +151,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                     {
                         order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber + packageEvent.MonthBonus);
                         order.ExpireDate = order.ExpireDate.Value.AddDays(packageEvent.DayBonus);
+
+                        int monthBonus = order.Voucher != null && order.Voucher.Category == EnumVoucherCategory.Month ? order.Voucher.Value : 0;
+
                         await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
                         {
                             StudentId = student!.Id,
-                            Month = package.MonthNumber + packageEvent.MonthBonus,
+                            Month = package.MonthNumber + packageEvent.MonthBonus + monthBonus,
                             Day = packageEvent.DayBonus
                         }, cancellationToken);
                     }

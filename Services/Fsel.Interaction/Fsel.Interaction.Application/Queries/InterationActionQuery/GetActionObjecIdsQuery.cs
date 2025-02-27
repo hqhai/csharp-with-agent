@@ -54,7 +54,7 @@ namespace Fsel.Interaction.Application.Queries.InterationActionQuery
                 .Select(x => new
                 {
                     ObjectId = x.Key,
-                    Number = x.Count()
+                    Number = x.Count(x => x.Status == EnumCommentStatus.Approver)
                 })
                 .ToListAsync(cancellationToken);
 

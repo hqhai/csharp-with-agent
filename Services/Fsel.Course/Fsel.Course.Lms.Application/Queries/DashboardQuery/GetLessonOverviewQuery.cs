@@ -116,14 +116,14 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         public async Task<MethodResult<(Guid?, Guid)>> Validate()
         {
             MethodResult<(Guid?, Guid)> methodResult = new MethodResult<(Guid?, Guid)>();
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentsResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentsResult));
                 return methodResult;
             }
             var studentId = studentsResult.Content?.Result?.Id;
-            var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
+            var classResult = await _trainingService.GetClassToStudentIdAsync(studentId ?? default);
             if (!classResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));

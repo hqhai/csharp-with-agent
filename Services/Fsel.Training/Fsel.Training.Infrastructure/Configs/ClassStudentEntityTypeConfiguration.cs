@@ -2,6 +2,7 @@
 
 namespace Fsel.Training.Infrastructure.Configs
 {
+    using Fsel.Common.Helpers;
     using Fsel.Training.Domain.Entities;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -17,6 +18,8 @@ namespace Fsel.Training.Infrastructure.Configs
                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasIndex(c => new { c.IsDeleted, c.ClassId, c.StudentId });
+            builder.HasIndex(c => new { c.IsDeleted, c.StudentId });
+            builder.HasIndexIncludeAllProperties(c => new { c.IsDeleted, c.ClassId });
         }
     }
 }

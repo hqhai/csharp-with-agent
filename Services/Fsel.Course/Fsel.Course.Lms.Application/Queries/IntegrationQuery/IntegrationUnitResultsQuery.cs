@@ -57,24 +57,30 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
                 return methodResult;
             }
 
-            var lessonResults = await _lessonResultRepository.Queryable
+            var lessonResultQuerys = await _lessonResultRepository.Queryable
                                                              .Include(x => x.Lesson)
-                                                             .Where(x => request.UserIds.Contains(x.CreatedUserId))
-                                                             .GroupBy(x => x.CreatedUserId)
-                                                             .Select(x => x.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
+                                                             .WhereBulkContains(request.UserIds, x => x.CreatedUserId)
                                                              .ToListAsync(cancellationToken);
+
+            var lessonResults = lessonResultQuerys.GroupBy(x => x.CreatedUserId)
+                                                  .Select(x => x.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
+                                                  .ToList();
+
+
 
             IList<UnitResultIntegration> unitResults = new List<UnitResultIntegration>();
 
             var userIds = lessonResults.Select(x => x.CreatedUserId).Distinct().ToList();
 
-            var unitQuerys = await _unitResultRepository.Queryable
-                                                        .Include(x => x.Unit)
-                                                        .Include(x => x.Course)
-                                                        .Where(x => userIds.Contains(x.CreatedUserId))
-                                                        .GroupBy(x => x.CreatedUserId)
-                                                        .Select(x => x.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
-                                                        .ToListAsync(cancellationToken);
+            var units = await _unitResultRepository.Queryable
+                                                   .Include(x => x.Unit)
+                                                   .Include(x => x.Course)
+                                                   .WhereBulkContains(userIds, x => x.CreatedUserId)
+                                                   .ToListAsync(cancellationToken);
+
+            var unitQuerys = units.GroupBy(x => x.CreatedUserId)
+                                  .Select(x => x.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
+                                  .ToList();
 
             var courseIds = unitQuerys.Select(x => x.CourseId).Distinct().ToList();
 

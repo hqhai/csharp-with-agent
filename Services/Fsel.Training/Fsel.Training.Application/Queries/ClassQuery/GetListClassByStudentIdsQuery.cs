@@ -38,13 +38,19 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var classStudents = await _classStudentRepository.Queryable.Include(x => x.Class)
-                                            .Where(e => e.Class != null && request.StudentIds.Contains(e.StudentId) && (!request.CourseId.HasValue || e.Class.CourseId == request.CourseId))
-                                            .Select(x => new ClassStudentDetailModel
-                                            {
-                                                StudentId = x.StudentId,
-                                                Code = x.Class!.Code
-                                            }).ToListAsync(cancellationToken: cancellationToken);
+
+            var query = _classStudentRepository.Queryable.WhereBulkContains(request.StudentIds, x => x.StudentId);
+
+            if (request.CourseId.HasValue)
+            {
+                query = query.Where(e => e.Class!.CourseId == request.CourseId);
+            }
+
+            var classStudents = await query.Select(x => new ClassStudentDetailModel
+            {
+                StudentId = x.StudentId,
+                Code = x.Class!.Code
+            }).ToListAsync(cancellationToken: cancellationToken);
 
             methodResult.Result = classStudents;
             methodResult.StatusCode = StatusCodes.Status200OK;

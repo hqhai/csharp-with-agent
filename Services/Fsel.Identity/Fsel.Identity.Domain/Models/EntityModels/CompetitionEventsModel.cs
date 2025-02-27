@@ -2,14 +2,13 @@
 
 namespace Fsel.Identity.Domain.Models.EntityModels
 {
-    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Models.ShareModels;
 
     public class CompetitionEventsModel : BaseModel
     {
         public string? EventCode { get; set; }
-
+        public string? Name { get; set; }
         public string? EventContentStr { get; set; }
 
         public SchoolEventRule? EventContent

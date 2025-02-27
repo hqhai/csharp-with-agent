@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using System;
+    using System.Globalization;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
@@ -138,9 +139,17 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 item.CreatedFullName = users?.FirstOrDefault(x => x.Id == item.CreatedUserId)?.FullName ?? item.CreatedFullName;
             }
 
+            request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.InvariantCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    query = query.Where(m => m.Id == guid);
+                }
+                else
+                {
+                    query = query.Where(m => m.CreatedFullName != null && m.CreatedFullName.Contains(request.Keyword, StringComparison.InvariantCulture));
+                }
             }
             if (request.NumberOfStars != null)
             {

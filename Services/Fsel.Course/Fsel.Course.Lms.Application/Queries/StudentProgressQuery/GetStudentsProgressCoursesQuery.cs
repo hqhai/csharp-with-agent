@@ -4,8 +4,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
     using System.Collections.Generic;
     using System.Linq.Dynamic.Core;
-    using System.Linq.Expressions;
-    using System.Reflection.Metadata;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -68,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             double homeWorkRatio = request.CourseType == EnumCourseType.Academic ? ValueSettings.AcademicStudentResultRatio.HomeWorkRatio : ValueSettings.IeltsStudentResultRatio.HomeWorkRatio;
             double classForumRatio = request.CourseType == EnumCourseType.Academic ? ValueSettings.AcademicStudentResultRatio.ClassForumRatio : ValueSettings.IeltsStudentResultRatio.ClassForumRatio;
 
-            var studentIds = request.StudentIds;
+            var studentIds = request.StudentIds ?? new List<Guid>();
 
             #region validate
 
@@ -80,11 +78,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
             #endregion validate
 
-            studentIds = await _courseResultRepository.Queryable.Where(x =>
-               x.Status != EnumResultStatus.Unfinished &&
-               x.Status != EnumResultStatus.New &&
-               x.WorkingStatus == EnumWorkingStatus.Active &&
-               studentIds.Contains(x.StudentId)).Select(x => x.StudentId).ToListAsync(cancellationToken);
+            studentIds = await _courseResultRepository.Queryable
+                                                      .WhereBulkContains(studentIds, x => x.StudentId)
+                                                      .Where(x => x.Status != EnumResultStatus.Unfinished &&
+                                                                  x.Status != EnumResultStatus.New &&
+                                                                  x.WorkingStatus == EnumWorkingStatus.Active)
+                                                      .Select(x => x.StudentId)
+                                                      .ToListAsync(cancellationToken);
 
             #region Progress
 
@@ -199,19 +199,19 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             #region ClassForum
 
             var courseOfClassForumIds = courseProgress.Select(x => x.CourseId).Distinct().ToList();
+            studentIds ??= new List<Guid>();
 
-            var classForumResultQuery = _classForumResultRepository.Queryable.Include(x => x.ClassForum).ThenInclude(x => x.Lesson).ThenInclude(x => x.LessonResults).
-               Where(x => studentIds.Contains(x.StudentId) && x.ClassForum != null
-            ).Select(x =>
-            new
-            {
-                ClassForumScores = x.ClassForumScores,
-                CorrectCount = x.CorrectCount,
-                CorrectTotal = x.CorrectTotal,
-                StudentId = x.StudentId,
-                CourseId = x.LessonResult.CourseId
-            }
-           ).ToList();
+            var classForumResultQuery = await _classForumResultRepository.Queryable.Include(x => x.ClassForum).ThenInclude(x => x.Lesson).ThenInclude(x => x.LessonResults)
+                .Where(x => x.ClassForum != null)
+                .WhereBulkContains(studentIds, x => x.StudentId)
+                .Select(x => new
+                {
+                    ClassForumScores = x.ClassForumScores,
+                    CorrectCount = x.CorrectCount,
+                    CorrectTotal = x.CorrectTotal,
+                    StudentId = x.StudentId,
+                    CourseId = x.LessonResult!.CourseId
+                }).ToListAsync(cancellationToken);
 
             var joinedClassForumResults = (from courseId in courseOfClassForumIds
                                            join forumResult in classForumResultQuery

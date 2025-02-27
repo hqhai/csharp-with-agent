@@ -6,5 +6,7 @@ namespace Fsel.System.Domain.Models.QueryModels
     {
         public IList<GetFeatureAccessTimeQueryModel> FeatureAccessTimes { get; set; } = new List<GetFeatureAccessTimeQueryModel>();
         public Guid UserId { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }

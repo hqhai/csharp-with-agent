@@ -8,7 +8,7 @@ namespace Fsel.Identity.Domain.IRepositories
 
     public interface IUserSchoolRepository : IRepository<UserSchool>
     {
-        Task<Guid?> GetSchoolIdAsync();
+        Task<Guid> GetSchoolIdAsync();
 
         Task<IList<StudentModel>> GetStudentsByRoleAdminSchoolAsync();
 

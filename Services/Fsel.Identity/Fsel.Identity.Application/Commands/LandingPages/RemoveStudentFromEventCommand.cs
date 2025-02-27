@@ -43,14 +43,20 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 return methodResult;
             }
 
-            var @event = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.EventCode.ToLower() == request.EventCode.ToLower(), cancellationToken);
+            var @event = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(p => p.EventCode == request.EventCode, cancellationToken);
             if (@event == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
 
-            var users = await _userManager.Users.Include(p => p.Human).ThenInclude(p => p.Student).Where(p => request.Emails.Contains(p.UserName) || request.Emails.Contains(p.Email)).ToListAsync(cancellationToken);
+            var userQuery = _userManager.Users.Include(p => p.Human).ThenInclude(p => p.Student);
+            var usersByUserName = userQuery.Where(p => p.UserName != null && request.Emails.Contains(p.UserName));
+            var usersByEmail = userQuery.Where(p => p.Email != null && request.Emails.Contains(p.Email));
+
+            var users = await usersByUserName
+                .Union(usersByEmail)
+                .ToListAsync(cancellationToken);
 
             if (users.Count != request.Emails.Count)
             {

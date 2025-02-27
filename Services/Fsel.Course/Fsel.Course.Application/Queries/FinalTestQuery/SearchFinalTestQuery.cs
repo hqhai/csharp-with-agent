@@ -51,9 +51,18 @@ namespace Fsel.Course.Application.Queries.FinalTestQuery
                                                     ExecutionTime = x.ExecutionTime,
                                                     IsActive = x.CourseUnitMockTests.Count > 0,
                                                 });
+
+            request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                finalTestQuery = finalTestQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    finalTestQuery = finalTestQuery.Where(m => m.Id == guid);
+                }
+                else
+                {
+                    finalTestQuery = finalTestQuery.Where(m => m.Name != null && m.Name.Contains(request.Keyword));
+                }
             }
             if (request.FinalTestLevel != null)
             {
