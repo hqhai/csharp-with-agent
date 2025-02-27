@@ -3,7 +3,6 @@
 using System.Globalization;
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Core.Entities;
@@ -41,8 +40,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IMediator _mediator;
         private readonly IPlatformRepository _platformRepository;
         private readonly AppSetting _appSetting;
-        private readonly ITrainingService _trainingService;
-        private readonly IHumanRepository _humanRepository;
         private readonly UserDbContext _userDbContext;
         private readonly ILogger<SignUpCommandHandler> _logger;
 
@@ -52,9 +49,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IMediator mediator,
             AppSetting appSetting,
             IPlatformRepository platformRepository,
-            ITrainingService trainingService,
-            IHumanRepository humanRepository
-,
             ILogger<SignUpCommandHandler> logger,
             UserDbContext userDbContext)
         {
@@ -64,8 +58,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _mediator = mediator;
             _appSetting = appSetting;
             _platformRepository = platformRepository;
-            _trainingService = trainingService;
-            _humanRepository = humanRepository;
             _logger = logger;
             _userDbContext = userDbContext;
         }
@@ -231,9 +223,18 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                             //await _userManager.AddToRoleAsync(user, request.Role.ToString());
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "SignUpCommand encouters error: {message}", ex.Message);
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate), ex.Message);
+                        return methodResult;
+                    }
 
-                        #region Send Code OTP
+                    #region Send Code OTP
 
+                    try
+                    {
                         var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
                         var param = new SendOtpTemplateModel
                         {
@@ -243,6 +244,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                         var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
                         var sendResult = new MethodResult<bool>();
 
+                        ArgumentNullException.ThrowIfNull(request);
                         if (!string.IsNullOrEmpty(request.Email))
                         {
                             sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, IsCCEmailDefault = true, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
@@ -264,8 +266,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "SignUpCommand encouters error: {message}", ex.Message);
-                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr));
+                        _logger.LogError(ex, "SignUpCommand SendEmail encouters error: {message}", ex.Message);
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr), ex.Message);
+                        return methodResult;
                         //scope.Dispose();
                     }
                 }
