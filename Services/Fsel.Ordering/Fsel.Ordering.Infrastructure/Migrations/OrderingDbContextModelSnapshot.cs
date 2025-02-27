@@ -390,6 +390,12 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.HasIndex("VoucherId");
 
+                    b.HasIndex("IsDeleted", "Code");
+
+                    b.HasIndex("IsDeleted", "IsTrial");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted", "IsTrial"), new[] { "Address", "ClassId", "Code", "CompanyAddress", "CompanyEmail", "CompanyName", "CompanyTaxCode", "CourseId", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "DiscountPercent", "DiscountPrice", "DistrictId", "Email", "EventId", "ExpireDate", "FullName", "IsInvoice", "PackageId", "PaymentMethod", "PhoneNumber", "Price", "ProvinceId", "ReferralCode", "RevenueType", "Status", "TotalPrice", "UpdatedDate", "UpdatedFullName", "UpdatedUserId", "UserId", "VoucherId" });
+
                     b.HasIndex("IsDeleted", "UserId");
 
                     b.HasIndex("IsDeleted", "Status", "UserId", "IsTrial");

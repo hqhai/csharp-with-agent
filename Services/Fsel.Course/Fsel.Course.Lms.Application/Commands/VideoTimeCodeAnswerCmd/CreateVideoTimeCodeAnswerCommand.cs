@@ -15,11 +15,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -186,14 +184,15 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         videoTimeCodeResult.Status = EnumResultStatus.Done;
                     }
 
-                    await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswers);
-                    await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _videoTimeCodeAnswerRepository.BulkMergeAsync(videoTimeCodeAnswers);
                 }
                 else if (updateVideoTimeCodeAnswers.Any())
                 {
                     videoTimeCodeResult.Status = EnumResultStatus.Done;
-                    _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
-                    await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _videoTimeCodeAnswerRepository.BulkMergeAsync(updateVideoTimeCodeAnswers, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = entity => new { entity.VideoResultId, entity.VideoTimeCodeResultId, entity.QuestionId };
+                    });
                 }
                 if (videoTimeCode != null && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
                 {
@@ -203,9 +202,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 {
                     videoTimeCodeResult.HighestStreak = await _videoConverter.GetHighestStreak(videoTimeCodeResult);
                 }
-                _videoResultRepository.Update(videoResult);
+                _videoResultRepository.Update(videoResult, false, x => x.VideoId, x => x.LessonResultId, x => x.StudentId);
                 await _videoResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
+                _videoTimeCodeResultRepository.Update(videoTimeCodeResult, false, x => x.VideoTimeCodeId, x => x.VideoResultId, x => x.StudentId);
                 await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 return methodResult;

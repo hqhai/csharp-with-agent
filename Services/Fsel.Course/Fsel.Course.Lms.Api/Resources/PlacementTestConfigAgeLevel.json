@@ -1,0 +1,80 @@
+[
+  {
+    "Id": "92e6e357-da76-4540-bb2c-b3e9660ff25d",
+    "ResultScenario": "BelowSuggestedLevelAndAge",
+    "Title": "Bạn quá tuyệt vời",
+    "Subtitle": "Chúc mừng bạn đã hoàn thành bài kiểm tra trình độ tiếng Anh với kết quả {0} !",
+    "Translations": [
+      {
+        "Id": "cd821df4-e3e5-475f-a39b-28763ce650c9",
+        "Language": "vi-VN",
+        "Title": "Bạn quá tuyệt vời",
+        "Subtitle": "Chúc mừng bạn đã hoàn thành bài kiểm tra trình độ tiếng Anh với kết quả {0} !"
+      },
+      {
+        "Id": "29d05fa6-94d7-46f7-8ce7-63c830fc547a",
+        "Language": "en-US",
+        "Title": "You're amazing",
+        "Subtitle": "Congratulations on completing your English proficiency test with an {0} result!"
+      },
+      {
+        "Id": "629fa940-2eef-4e84-8e2e-08f5f2f22f2b",
+        "Language": "fr-FR",
+        "Title": "Vous êtes incroyable",
+        "Subtitle": "Félicitations pour avoir terminé votre test de niveau d'anglais avec un résultat {0} !"
+      }
+    ]
+  },
+  {
+    "Id": "70395fa9-6647-41b8-9d1c-ad8fdfae1b6b",
+    "ResultScenario": "EqualToSuggestedLevel",
+    "Title": "Chúc mừng!",
+    "Subtitle": "Chúc mừng bạn đã hoàn thành bài kiểm tra trình độ tiếng Anh với kết quả {0} !",
+    "Translations": [
+      {
+        "Id": "a9d9b113-bced-42d4-881f-6209481097dd",
+        "Language": "vi-VN",
+        "Title": "Chúc mừng!",
+        "Subtitle": "Chúc mừng bạn đã hoàn thành bài kiểm tra trình độ tiếng Anh với kết quả {0} !"
+      },
+      {
+        "Id": "9002ae19-b294-448d-9a4d-037dc34292bb",
+        "Language": "en-US",
+        "Title": "Congratulations!",
+        "Subtitle": "Congratulations on completing your English proficiency test with an {0} result!"
+      },
+      {
+        "Id": "91799a82-ba0a-41c5-bd76-9158ae1ad883",
+        "Language": "fr-FR",
+        "Title": "Félicitations !",
+        "Subtitle": "Félicitations pour avoir terminé votre test de niveau d'anglais avec un résultat {0} !"
+      }
+    ]
+  },
+  {
+    "Id": "33c7dd8d-9579-43e6-a10f-b2fdd9fe6aa3",
+    "ResultScenario": "AboveSuggestedLevel",
+    "Title": "Kết quả của bạn!",
+    "Subtitle": "Chúc mừng bạn đã hoàn thành bài kiểm tra trình độ tiếng Anh với kết quả {0} !",
+    "Translations": [
+      {
+        "Id": "ec6543a9-9ff1-4078-87e7-a00920efb42d",
+        "Language": "vi-VN",
+        "Title": "Kết quả của bạn!",
+        "Subtitle": "Chúc mừng bạn đã hoàn thành bài kiểm tra trình độ tiếng Anh với kết quả {0} !"
+      },
+      {
+        "Id": "b0376f25-a9c4-4138-b32a-16ad6212734a",
+        "Language": "en-US",
+        "Title": "Your results!",
+        "Subtitle": "Congratulations on completing your English proficiency test with an {0} result!"
+      },
+      {
+        "Id": "aad21818-1db9-4cb5-8c53-868907001ba2",
+        "Language": "fr-FR",
+        "Title": "Vos résultats !",
+        "Subtitle": "Félicitations pour avoir terminé votre test de niveau d'anglais avec un résultat {0} !"
+      }
+    ]
+  }
+]

@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 return;
             }
             homeWorkResults = homeWorkResults.Select(x => { x.Status = EnumResultStatus.New; return x; }).ToList();
-            _homeWorkResultRepository.UpdateList(homeWorkResults);
+            _homeWorkResultRepository.UpdateList(homeWorkResults, false, x => x.HomeWorkId, x => x.LessonResultId, x => x.StudentId);
             await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }

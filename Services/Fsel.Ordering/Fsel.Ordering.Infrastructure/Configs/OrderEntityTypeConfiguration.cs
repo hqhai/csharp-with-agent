@@ -45,6 +45,8 @@ namespace Fsel.Ordering.Infrastructure.Configs
 
             builder.HasIndex(c => new { c.IsDeleted, c.Status, c.UserId, c.IsTrial });
             builder.HasIndex(c => new { c.IsDeleted, c.UserId });
+            builder.HasIndex(c => new { c.IsDeleted, c.Code });
+            builder.HasIndexIncludeAllProperties(c => new { c.IsDeleted, c.IsTrial });
         }
     }
 }

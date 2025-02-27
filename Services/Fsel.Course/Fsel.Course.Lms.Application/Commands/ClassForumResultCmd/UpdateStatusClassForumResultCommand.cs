@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             await _classForumResulRepository.ExecuteTransactionAsync(async () =>
              {
                  classForumResult.Status = EnumClassForumResultStatus.Denied;
-                 _classForumResulRepository.Update(classForumResult);
+                 _classForumResulRepository.Update(classForumResult, false, x => x.LessonResultId, x => x.ClassForumId, x => x.StudentId);
                  await _classForumResulRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                  var objectOwnerId = CustomDataForParamMessage(classForumResult!);

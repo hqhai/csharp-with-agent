@@ -12,6 +12,7 @@ namespace Fsel.Interaction.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Interaction.Application.Queries.SurveyQuestionQuery;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -48,6 +49,30 @@ namespace Fsel.Interaction.Api.Controllers
         public async Task<IActionResult> IsSurveyCompletedByStudentId([FromRoute] Guid id)
         {
             MethodResult<bool> queryResult = await _mediator.Send(new GetIsSurveyByStudentIdQuery { Id = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create a Customer Survey
+        /// </summary>
+        [HttpPost("customer-type")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateCustomerByType([FromBody] CreateCustomerSurveyTypeEventCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Check Student by id
+        /// </summary>
+        [HttpGet("check-survey")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckSurveyBySurveyFormType([FromQuery] CheckSurveyBySurveyFormTypeQuery query)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

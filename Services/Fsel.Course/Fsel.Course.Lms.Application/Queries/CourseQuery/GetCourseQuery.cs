@@ -165,7 +165,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
                 return methodResult;
             }
-            var classResult = await _trainingService.GetClassByStudentId(student.Id);
+            var classResult = await _trainingService.GetClassToStudentIdAsync(student.Id);
             if (!classResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));
@@ -337,11 +337,13 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
             if (!course.CourseResults.Any())
             {
-                course.CourseResults.Add(new CourseResult
+                _courseResultRepository.Add(new CourseResult
                 {
                     StudentId = studentId ?? default,
-                    Status = EnumResultStatus.New
+                    Status = EnumResultStatus.New,
+                    CourseId = course.Id
                 });
+                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ToList();
@@ -379,14 +381,20 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                     continue;
                 }
             }
-            try
+            if (course.UnitResults.Any())
             {
-                course = _courseRepository.Update(course);
-                await _courseRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                var unitResults = course.UnitResults.ToList();
+                await _unitResultRepository.BulkMergeAsync(unitResults);
             }
-            catch (DbUpdateException ex)
+            if (course.FinalTestResults.Any())
             {
-                _logger.LogWarning("Duplicate CourseResult : " + ex.Message);
+                var finalTestResults = course.FinalTestResults.ToList();
+                await _finalTestResultRepository.BulkMergeAsync(finalTestResults);
+            }
+            if (course.MockTestResults.Any())
+            {
+                var mockTestResults = course.MockTestResults.ToList();
+                await _mockTestResultRepository.BulkMergeAsync(mockTestResults);
             }
         }
 
@@ -407,6 +415,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             {
                 UnitId = courseUnitMockTest != null ? courseUnitMockTest.UnitId!.Value : default,
                 StudentId = studentId ?? default,
+                CourseId = course.Id,
                 Status = (index == 0 || checkFirstDone) ? EnumResultStatus.New : EnumResultStatus.Unfinished
             });
         }
@@ -419,6 +428,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             {
                 MockTestId = courseUnitMockTest != null ? courseUnitMockTest.MockTestId!.Value : default,
                 StudentId = studentId ?? default,
+                CourseId = course.Id,
                 Status = checkFirstDone ? EnumResultStatus.New : EnumResultStatus.Unfinished
             });
         }
@@ -431,6 +441,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             {
                 FinalTestId = courseUnitMockTest != null ? courseUnitMockTest.FinalTestId!.Value : default,
                 StudentId = studentId ?? default,
+                CourseId = course.Id,
                 Status = checkFirstDone ? EnumResultStatus.New : EnumResultStatus.Unfinished
             });
         }

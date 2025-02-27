@@ -7,14 +7,15 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.InteractionService;
+    using Fsel.Course.Lms.Application.Services.InteractionService.CommandModels;
     using Fsel.Course.Lms.Application.Services.OrderServices;
-    using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -23,6 +24,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
 
     public class GetStudentSettingQuery : IRequest<MethodResult<StudentSettingModel>>
     {
+        public Guid? UserId { get; set; }
     }
 
     public class SettingStudentCheckQueryHandler : IRequestHandler<GetStudentSettingQuery, MethodResult<StudentSettingModel>>
@@ -33,13 +35,15 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
+        private readonly IInteractionService _interactionService;
 
         public SettingStudentCheckQueryHandler(IUserService userService,
             IPlacementTestResultRepository placementTestResultRepository,
             IOrderService orderService,
             ICourseRepository courseRepository,
             IMapper mapper,
-            AuthContext authContext)
+            AuthContext authContext,
+            IInteractionService interactionService)
         {
             _userService = userService;
             _placementTestResultRepository = placementTestResultRepository;
@@ -47,13 +51,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             _courseRepository = courseRepository;
             _mapper = mapper;
             _authContext = authContext;
+            _interactionService = interactionService;
         }
 
         public async Task<MethodResult<StudentSettingModel>> Handle(GetStudentSettingQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StudentSettingModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId ?? _authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
@@ -66,6 +71,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             }
             var settingStudentModel = new StudentSettingModel
             {
+                StudentId = student.Id,
                 ExpiredDate = student.ExpiredDate,
                 NumberOfToken = student.NumberOfToken,
                 BeginnerGuide = student.BeginnerGuide,
@@ -75,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             };
 
             await GetPlacementTestAsync(settingStudentModel, student, cancellationToken);
-            var @eventResults = await _userService.GetEventByUserId(_authContext.CurrentUserId);
+            var @eventResults = await _userService.GetEventByUserId(request.UserId ?? _authContext.CurrentUserId);
             if (@eventResults.IsSuccessStatusCode && @eventResults.Content?.Result != null)
             {
                 var @events = @eventResults.Content?.Result;
@@ -83,9 +89,15 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 var actionConfigs = @events?.Select(p => p.EventContent).Where(p => p != null && p.ActionConfigs != null && p.ActionConfigs.Count > 0).SelectMany(p => p.ActionConfigs!).ToList();
                 settingStudentModel.Actions = actions;
                 settingStudentModel.ActionConfigs = actionConfigs;
+
+                var surveyEvent = await _interactionService.CheckSurveyBySurveyFormType(new CheckSurveyBySurveyFormTypeModel { SurveyFormType = EnumSurveyFormType.Event, CompetitionEventId = events?.FirstOrDefault()?.Id });
+                if (surveyEvent.IsSuccessStatusCode)
+                {
+                    settingStudentModel.IsSurveyEvent = surveyEvent.Content?.Result ?? false;
+                }
             }
 
-            var status = await _orderService.GetCurrentStatusAsync(_authContext.CurrentUserId);
+            var status = await _orderService.GetCurrentStatusAsync(request.UserId ?? _authContext.CurrentUserId);
             if (!status.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(status));

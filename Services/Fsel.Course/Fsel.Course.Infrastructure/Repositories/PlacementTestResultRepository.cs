@@ -41,9 +41,9 @@ namespace Fsel.Course.Infrastructure.Repositories
             return (currentLevel, isLockPT);
         }
 
-        public async Task<List<Guid>> GetStudentPtIdsAsync(DateTime? startDate, DateTime? endDate)
+        public async Task<List<Guid>> GetStudentPtIdsAsync(DateTime? startDate, DateTime? endDate, IList<Guid> studentIds)
         {
-            var query = Queryable;
+            var query = Queryable.WhereBulkContains(studentIds, x => x.StudentId);
             // Áp dụng bộ lọc theo ngày (nếu có)
             if (startDate.HasValue)
             {

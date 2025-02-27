@@ -2,7 +2,10 @@
 
 namespace Fsel.Identity.Application.Queries.ManagerReportQuery
 {
+    using System.Globalization;
+    using System.Text.RegularExpressions;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -46,32 +49,27 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
 
-            var query = _studentRepository.Queryable.Include(x => x.Human)
-                .Select(i => new StudentDtoModel
-                {
-                    Id = i.Id,
-                    FullName = i.Human!.FullName,
-                    BirthDay = i.Human.Birthday,
-                    Email = i.Human.Email,
-                    PhoneNumber = i.Human.PhoneNumber,
-                    CourseLevel = i.CourseLevel,
-                    ExpiredDate = i.ExpiredDate,
-                    School = i.School,
-                    SchoolClass = i.SchoolClass,
-                    SchoolGrade = i.SchoolGrade,
-                    SchoolId = i.SchoolId,
-                    CourseId = i.CourseId,
-                    UserId = i.Human.UserId,
-                    CreatedDate = i.CreatedDate,
-                    BaseCourseLevel = i.BaseCourseLevel,
-                });
+            var query = _studentRepository.Queryable;
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.Where(m => (m.FullName ?? string.Empty).Trim().ToLower().Contains(request.Keyword) ||
-                                         (m.PhoneNumber ?? string.Empty).Trim().ToLower().Contains(request.Keyword) ||
-                                         (m.Email ?? string.Empty).Trim().ToLower().Contains(request.Keyword));
+                request.Keyword = request.Keyword.Trim().ToLower(CultureInfo.CurrentCulture);
+                if (request.Keyword.IsValidEmail())
+                {
+                    query = query.Where(m => m.Human != null && m.Human.Email!.Contains(request.Keyword));
+                }
+                else if (request.Keyword.IsValidPhoneNumber())
+                {
+                    query = query.Where(m => m.Human != null && m.Human.PhoneNumber == request.Keyword);
+                }
+                else if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    query = query.Where(m => m.Id == guid);
+                }
+                else
+                {
+                    query = query.Where(m => m.Human != null && m.Human.FullName != null && m.Human.FullName.Contains(request.Keyword));
+                }
             }
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
             {
@@ -93,13 +91,13 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
 
             if (!string.IsNullOrEmpty(request.SchoolGrade))
             {
-                request.SchoolGrade = request.SchoolGrade.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolGrade) && x.SchoolGrade.Trim().ToLower() == request.SchoolGrade);
+                request.SchoolGrade = request.SchoolGrade.Trim().ToLower(CultureInfo.CurrentCulture);
+                query = query.Where(x => x.SchoolGrade == request.SchoolGrade);
             }
             if (!string.IsNullOrEmpty(request.SchoolClass))
             {
-                request.SchoolClass = request.SchoolClass.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.Where(x => !string.IsNullOrEmpty(x.SchoolClass) && x.SchoolClass.Trim().ToLower() == request.SchoolClass);
+                request.SchoolClass = request.SchoolClass.Trim().ToLower(CultureInfo.CurrentCulture);
+                query = query.Where(x => x.SchoolClass == request.SchoolClass);
             }
             if (request.LearningStatus.HasValue)
             {
@@ -127,15 +125,41 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 query = query.Where(x => x.CourseLevel.HasValue && x.CourseLevel == request.CourseLevel.Value);
             }
 
-            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = query.AsEnumerable()
-                    .OrderBy(x => int.TryParse(x.SchoolGrade, out int graded) ? graded : 0).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName)
-                    .ApplyPaging(request)
-                    .ToList();
+            var dataQuery = query.Select(i => new StudentDtoModel
+            {
+                Id = i.Id,
+                FullName = i.Human!.FullName,
+                BirthDay = i.Human.Birthday,
+                Email = i.Human.Email,
+                PhoneNumber = i.Human.PhoneNumber,
+                CourseLevel = i.CourseLevel,
+                ExpiredDate = i.ExpiredDate,
+                School = i.School,
+                SchoolClass = i.SchoolClass,
+                SchoolGrade = i.SchoolGrade,
+                SchoolId = i.SchoolId,
+                CourseId = i.CourseId,
+                UserId = i.Human.UserId,
+                CreatedDate = i.CreatedDate,
+                BaseCourseLevel = i.BaseCourseLevel,
+            });
+            int totalItem = await dataQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = (await dataQuery.ToListAsync(cancellationToken))
+                         .OrderBy(x => !string.IsNullOrEmpty(x.SchoolGrade) ? ExtractNumber(x.SchoolGrade) : 0)
+                         .ThenBy(x => x.SchoolClass)
+                         .ThenBy(x => x.FullName)
+                         .ApplyPaging(request)
+                         .ToList();
 
             methodResult.Result = new PagingItemsModel<StudentDtoModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private static int ExtractNumber(string input)
+        {
+            var match = Regex.Match(input, @"\d+");
+            return match.Success ? int.Parse(match.Value, CultureInfo.CurrentCulture) : int.MaxValue;
         }
     }
 }

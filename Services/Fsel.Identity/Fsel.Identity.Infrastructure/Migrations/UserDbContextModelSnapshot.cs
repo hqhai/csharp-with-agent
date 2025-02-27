@@ -471,7 +471,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnOrder(103);
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(70)
+                        .HasColumnType("nvarchar(70)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -487,7 +488,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -510,6 +512,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.HasIndex("IsDeleted", "Code");
+
+                    b.HasIndex("IsDeleted", "Email");
+
+                    b.HasIndex("IsDeleted", "PhoneNumber");
 
                     b.ToTable("Humans");
                 });
@@ -938,6 +944,68 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.SchoolImportHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<Guid>("CompetitionEventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid>("SchoolId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SchoolImportHistorys");
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Student", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1024,6 +1092,14 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<Guid?>("PackageId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ParentEmail")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ParentPhoneNumber")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<Guid?>("ProvinceId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1062,6 +1138,16 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("HumanId");
+
+                    b.HasIndex("IsDeleted");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted"), new[] { "CreatedDate", "School", "CourseLevel", "HumanId", "SchoolId" });
+
+                    b.HasIndex("IsDeleted", "SchoolId");
+
+                    b.HasIndex("IsDeleted", "SchoolId", "SchoolClass");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted", "SchoolId", "SchoolClass"), new[] { "BaseCourseLevel", "BeginnerGuideStr", "ClassId", "CourseId", "CourseLevel", "CreatedByParent", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "DistrictId", "ExpiredDate", "HumanId", "NumberOfShield", "Occupation", "PackageId", "ParentEmail", "ParentPhoneNumber", "ProvinceId", "School", "SchoolFaculty", "SchoolGrade", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
 
                     b.ToTable("Students");
                 });
@@ -1126,6 +1212,12 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CompetitionEventId");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CompetitionEventId"), new[] { "StudentId" });
+
+                    b.HasIndex("StudentId");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("StudentId"), new[] { "CompetitionEventId" });
 
                     b.HasIndex("IsDeleted", "StudentId");
 
@@ -1755,7 +1847,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -1818,7 +1910,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
@@ -1858,9 +1951,17 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                        .HasFilter("[NormalizedUserName] IS NOT NULL AND [IsDeleted] = 0");
+
+                    b.HasIndex("Id", "ConcurrencyStamp");
 
                     b.HasIndex("IsDeleted", "Email");
+
+                    b.HasIndex("IsDeleted", "PhoneNumber");
+
+                    b.HasIndex("IsDeleted", "UserName");
+
+                    b.HasIndex("IsDeleted", "Id", "UserName", "Email");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -2072,7 +2173,15 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("RetryCount")
+                        .HasColumnType("int");
+
                     b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -2102,6 +2211,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasIndex("UserId", "OTPCode");
 
                     b.HasIndex("UserId", "Status");
+
+                    b.HasIndex("IsDeleted", "OTPCode", "Status");
 
                     b.ToTable("UserOtpCodes");
                 });
@@ -2450,8 +2561,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<string>("RefreshToken")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime?>("RefreshTokenExpiryTime")
                         .HasColumnType("datetime2");
@@ -2473,6 +2584,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.HasIndex("IsDeleted", "RefreshToken");
 
                     b.ToTable("AspNetUserTokens", (string)null);
                 });

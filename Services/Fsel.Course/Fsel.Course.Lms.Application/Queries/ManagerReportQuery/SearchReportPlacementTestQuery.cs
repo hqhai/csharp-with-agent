@@ -53,10 +53,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
                 SchoolGrade = request.SchoolGrade,
-                EndDate = request.EndDate,
+                SchoolClass = request.SchoolClass,
                 Keyword = request.Keyword,
                 Status = request.Status,
                 StartDate = request.StartDate,
+                EndDate = request.EndDate,
                 CourseLevel = request.CourseLevel,
                 CurrentLevel = request.CurrentLevel,
             }, cancellationToken);
@@ -96,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             }
 
             var studentIds = students.Select(x => x.Id).ToList();
-            var lists = await _placementTestGroupResultRepository.Queryable.Where(x => studentIds.Any(y => y == x.StudentId))
+            var lists = await _placementTestGroupResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                 .Select(x => new
                 {
                     StudentId = x.StudentId,
@@ -107,10 +108,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 })
                 .ToListAsync(cancellationToken);
 
-            var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => studentIds.Contains(x.StudentId))
-                .GroupBy(x => x.StudentId)
-                .Select(x => x.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
-                .ToListAsync(cancellationToken);
+            var placementTestResults = (await _placementTestResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId).ToListAsync(cancellationToken))
+                                        .GroupBy(x => x.StudentId)
+                                        .Select(x => x.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
+                                        .ToList();
 
             var datas = students.Select(item =>
             {

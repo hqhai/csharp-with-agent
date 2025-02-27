@@ -35,11 +35,15 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<StudentModel> methodResult = new MethodResult<StudentModel>();
 
-            var student = await _studentRepository.Queryable
-                                    .Include(x => x.Human).ThenInclude(p => p.User)
-                                    .Where(x => x.Human != null && x.Human.User != null && (x.Human.User.Email.ToLower() == request.Email.ToLower() || x.Human.User.UserName.ToLower() == request.Email.ToLower()))
-                                    .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            var queryUserName = _studentRepository.Queryable
+                                    .Include(x => x.Human)
+                                    .Where(x => x.Human.User.UserName == request.Email);
 
+            var queryEmail = _studentRepository.Queryable
+                                    .Include(x => x.Human)
+                                    .Where(x => x.Human.User.Email == request.Email);
+
+            var student = await queryUserName.Union(queryEmail).FirstOrDefaultAsync(cancellationToken: cancellationToken);
             methodResult.Result = _mapper.Map<StudentModel>(student);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

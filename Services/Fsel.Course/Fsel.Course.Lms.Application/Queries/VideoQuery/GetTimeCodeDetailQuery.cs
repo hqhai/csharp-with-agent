@@ -83,27 +83,13 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 return methodResult;
             }
 
-            var videoTimeCode = await _videoTimeCodeRepository.Queryable
-                                    .Include(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
-                                    .Include(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
-                                        .ThenInclude(x => x.Exercise)
-                                        .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
-                                        .ThenInclude(x => x.Question)
-                                        .ThenInclude(x => x.QuestionExplanationErrors.Where(x => x.VideoResultId == videoResult.Id))
-                                    .Include(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
-                                        .ThenInclude(x => x.Exercise)
-                                        .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
-                                        .ThenInclude(x => x.Question)
-                                        .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => videoResult != null && x.VideoResultId == videoResult.Id && x.VideoTimeCodeId == request.VideoTimeCodeId))
-                                .Where(x => x.Id == request.VideoTimeCodeId && x.VideoId == request.VideoId)
-                                .AsNoTracking()
-                                .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-
+            var videoTimeCode = await _videoTimeCodeRepository.GetByIdAsync(request.VideoTimeCodeId);
             if (videoTimeCode == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCode));
                 return methodResult;
             }
+
             var method = await _mediator.Send(new CreateVideoTimeCodeResultCommand { VideoResultId = videoResult.Id, StudentId = studentId, VideoTimeCodeId = request.VideoTimeCodeId, IsActive = !request.IsCreateAnswer }, cancellationToken);
             if (!method.IsOK)
             {
@@ -111,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 return methodResult;
             }
 
-            methodResult.Result = await _videoConverter.GetVideoTimeCodeAsync(videoTimeCode, method.Result, request.IsShowSubStatus);
+            methodResult.Result = await _videoConverter.GetVideoTimeCodeDetailAsync(videoTimeCode, method.Result ?? new VideoTimeCodeResultModel(), request.IsShowSubStatus);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

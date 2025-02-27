@@ -9,6 +9,7 @@ using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.CompetitionEventsCmd;
 using Fsel.Identity.Application.Queries.CompetitionEventsQuery;
 using Fsel.Identity.Application.Services.SystemService.Model;
+using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
@@ -82,6 +83,18 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
+        /// Lấy liệu sự kiện trong khoảng ngày
+        /// </summary>
+        [HttpGet("event-by-date")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCompetitionEventsByDate([FromQuery] GetCompetitionEventsByDateQuery query)
+        {
+            MethodResult<IList<CompetitionEventsModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Execute-list-query
         /// </summary>
         [HttpGet("execute-list-query")]
@@ -116,6 +129,51 @@ namespace Fsel.Identity.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetEventsByParentIds([FromQuery] GetCompetitionEventsByParentIdsQuery query)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(nameof(query));
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpGet("get-event-parent/{id}")]
+        [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetParentEvent([FromRoute] Guid id)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(nameof(id));
+            var commandResult = await _mediator.Send(new GetParentEventByIdQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpGet("get-child-events/{id}")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEvent>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetChildPEvents([FromRoute] Guid id)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(nameof(id));
+            var commandResult = await _mediator.Send(new GetChildEventsByParentIdQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get event by ids
+        /// </summary>
+        [HttpPost("event-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetEventByIds([FromBody] GetCompetitionEventByIdsQuery query)
+        {
+            MethodResult<IList<CompetitionEventsModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Lấy danh sách Events theo EventCodeStr
+        /// </summary>
+        [HttpGet("get-events-by-event-code-str")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetEventsByEventCodeStr([FromQuery] GetCompetitionEventsToEventCodeStrQuery query)
         {
             ArgumentException.ThrowIfNullOrEmpty(nameof(query));
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);

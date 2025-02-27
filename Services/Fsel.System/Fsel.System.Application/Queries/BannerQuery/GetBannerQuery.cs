@@ -10,6 +10,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetBannerQuery : IRequest<MethodResult<BannerModel>>
     {
@@ -32,7 +33,10 @@ namespace Fsel.System.Application.Queries.BannerQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<BannerModel> methodResult = new MethodResult<BannerModel>();
 
-            var banner = await _bannerRepository.GetByIdAsync(request.Id);
+            var banner = await _bannerRepository.Queryable
+                                                .Include(x => x.BannerScopes)
+                                                .Include(x => x.BannerImages)
+                                                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (banner == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(banner), nameof(request.Id));
@@ -40,8 +44,6 @@ namespace Fsel.System.Application.Queries.BannerQuery
             }
 
             methodResult.Result = _mapper.Map<BannerModel>(banner);
-            methodResult.Result.StartDate = methodResult.Result.StartDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
-            methodResult.Result.EndDate = methodResult.Result.EndDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Fsel.Course.Domain.Models.CommandModels.MockTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
+    using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
@@ -284,7 +285,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 mockTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
                 mockTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
                 mockTestResult = GetMockTestResult(sectionGroupResults, mockTestResult);
-                _mockTestResultRepository.Update(mockTestResult);
+                _mockTestResultRepository.Update(mockTestResult, false, x => x.CourseId, x => x.UnitId, x => x.MockTestId, x => x.StudentId);
                 if (mockTestResult.Status == EnumResultStatus.Done)
                 {
                     await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -346,18 +347,20 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 return methodResult;
             }
             var (createMockTestAnswers, updateMockTestAnswers) = anserResult.Result;
-            if (createMockTestAnswers != null && createMockTestAnswers.Any())
-            {
-                await _mockTestAnswerRepository.AddList(createMockTestAnswers);
-            }
-            if (updateMockTestAnswers != null && updateMockTestAnswers.Any())
-            {
-                _mockTestAnswerRepository.UpdateList(updateMockTestAnswers);
-            }
 
             try
             {
-                await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                if (createMockTestAnswers != null && createMockTestAnswers.Any())
+                {
+                    await _mockTestAnswerRepository.BulkMergeAsync(createMockTestAnswers);
+                }
+                if (updateMockTestAnswers != null && updateMockTestAnswers.Any())
+                {
+                    await _mockTestAnswerRepository.BulkMergeAsync(updateMockTestAnswers, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = entity => new { entity.MockTestResultId, entity.SectionGroupResultId, entity.SectionQuestionId, entity.SectionId, entity.SectionTimeCodeId };
+                    });
+                }
             }
             catch (Exception ex)
             {
