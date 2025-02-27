@@ -28,7 +28,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        [ServerCache(CacheSettings.TimeCache.OneHour)]
+        //[ServerCache(CacheSettings.TimeCache.OneHour)]
         [HttpPost("evaluat-input-result")]
         [ProducesResponseType(typeof(MethodResult<EvaluateInputResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -41,7 +41,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        [ServerCache(CacheSettings.TimeCache.OneHour)]
+        //[ServerCache(CacheSettings.TimeCache.OneHour)]
         [HttpPost("school-summary")]
         [ProducesResponseType(typeof(MethodResult<EvaluateInputResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -54,7 +54,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        [ServerCache(CacheSettings.TimeCache.OneHour)]
+        //[ServerCache(CacheSettings.TimeCache.OneHour)]
         [HttpPost("learning-progress")]
         [ProducesResponseType(typeof(MethodResult<LearningProgressModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -67,11 +67,23 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        [ServerCache(CacheSettings.TimeCache.OneHour)]
+        //[ServerCache(CacheSettings.TimeCache.OneHour)]
         [HttpPost("learning-quality")]
         [ProducesResponseType(typeof(MethodResult<LearningQualityModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> LearningQuality([FromBody] LearningQualityQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [HttpPost("school-info")]
+        [ProducesResponseType(typeof(MethodResult<IList<SchoolInfoModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSchoolInfo([FromBody] GetSchoolInfoQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

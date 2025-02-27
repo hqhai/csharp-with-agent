@@ -8,7 +8,6 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
     using Fsel.Core.Caching;
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Course.Infrastructure;
-    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Data.SqlClient;
@@ -25,6 +24,8 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
         public IList<string>? GroupIds { get; set; }
 
         public IList<string>? SchoolIds { get; set; }
+
+        public DateTime? Date { get; set; }
     }
 
     public class LearningProgressQueryHandler : IRequestHandler<LearningProgressQuery, MethodResult<LearningProgressModel>>
@@ -44,81 +45,81 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<LearningProgressModel>();
 
-            var data = await _cacheService.GetAsync(KeyCache);
-            if (data != null)
-            {
-                methodResult.Result = data;
-                return methodResult;
-            }
+            //var data = await _cacheService.GetAsync(KeyCache);
+            //if (data != null)
+            //{
+            //    methodResult.Result = data;
+            //    return methodResult;
+            //}
 
-            var checkByGroup = 0;
             var districtIdsParam = request.DistrictIds != null ? string.Join(",", request.DistrictIds) : (object)DBNull.Value;
             var groupIdsParam = request.GroupIds != null ? string.Join(",", request.GroupIds) : (object)DBNull.Value;
             var schoolIdsParam = request.SchoolIds != null ? string.Join(",", request.SchoolIds) : (object)DBNull.Value;
+            var date = request.Date != null ? request.Date : (object)DBNull.Value;
 
             var total = await _courseDbContext.Set<TotalLearningProgressModel>()
-                                              .FromSqlRaw("EXEC TotalLearningProgress @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @CheckByGroup",
+                                              .FromSqlRaw("EXEC TotalLearningProgress @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @Date",
                                                   new SqlParameter("@Target", request.Target),
                                                   new SqlParameter("@GroupByType", request.GroupByType),
                                                   new SqlParameter("@DistrictIds", districtIdsParam),
                                                   new SqlParameter("@GroupIds", groupIdsParam),
                                                   new SqlParameter("@SchoolIds", schoolIdsParam),
-                                                  new SqlParameter("@CheckByGroup", checkByGroup))
+                                                  new SqlParameter("@Date", date))
                                               .AsNoTracking()
                                               .ToListAsync(cancellationToken);
 
             var average = await _courseDbContext.Set<AverageLearningProgressModel>()
-                                                .FromSqlRaw("EXEC AverageLearningProgress @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @CheckByGroup",
+                                                .FromSqlRaw("EXEC AverageLearningProgress @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @Date",
                                                     new SqlParameter("@Target", request.Target),
                                                     new SqlParameter("@GroupByType", request.GroupByType),
                                                     new SqlParameter("@DistrictIds", districtIdsParam),
                                                     new SqlParameter("@GroupIds", groupIdsParam),
                                                     new SqlParameter("@SchoolIds", schoolIdsParam),
-                                                    new SqlParameter("@CheckByGroup", checkByGroup))
+                                                  new SqlParameter("@Date", date))
                                                 .AsNoTracking()
                                                 .ToListAsync(cancellationToken);
 
             var unitDoneAca = await _courseDbContext.Set<UnitDoneLearningProgressAcademicModel>()
-                                                    .FromSqlRaw("EXEC UnitDoneLearningProgressAcademic @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @CheckByGroup",
+                                                    .FromSqlRaw("EXEC UnitDoneLearningProgressAcademic @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @Date",
                                                        new SqlParameter("@Target", request.Target),
                                                        new SqlParameter("@GroupByType", request.GroupByType),
                                                        new SqlParameter("@DistrictIds", districtIdsParam),
                                                        new SqlParameter("@GroupIds", groupIdsParam),
                                                        new SqlParameter("@SchoolIds", schoolIdsParam),
-                                                       new SqlParameter("@CheckByGroup", checkByGroup))
+                                                       new SqlParameter("@Date", date))
                                                     .AsNoTracking()
                                                     .ToListAsync(cancellationToken);
 
             var lessonDoneAca = await _courseDbContext.Set<LessonDoneLearningProgressAcademicModel>()
-                                                      .FromSqlRaw("EXEC LessonDoneLearningProgressAcademic @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @CheckByGroup",
+                                                      .FromSqlRaw("EXEC LessonDoneLearningProgressAcademic @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @Date",
                                                            new SqlParameter("@Target", request.Target),
                                                            new SqlParameter("@GroupByType", request.GroupByType),
                                                            new SqlParameter("@DistrictIds", districtIdsParam),
                                                            new SqlParameter("@GroupIds", groupIdsParam),
                                                            new SqlParameter("@SchoolIds", schoolIdsParam),
-                                                           new SqlParameter("@CheckByGroup", checkByGroup))
+                                                           new SqlParameter("@Date", date))
                                                       .AsNoTracking()
                                                       .ToListAsync(cancellationToken);
 
             var unitDoneIelts = await _courseDbContext.Set<UnitDoneLearningProgressIeltsModel>()
-                                                      .FromSqlRaw("EXEC UnitDoneLearningProgressIelts @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @CheckByGroup",
+                                                      .FromSqlRaw("EXEC UnitDoneLearningProgressIelts @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @Date",
                                                          new SqlParameter("@Target", request.Target),
                                                          new SqlParameter("@GroupByType", request.GroupByType),
                                                          new SqlParameter("@DistrictIds", districtIdsParam),
                                                          new SqlParameter("@GroupIds", groupIdsParam),
                                                          new SqlParameter("@SchoolIds", schoolIdsParam),
-                                                         new SqlParameter("@CheckByGroup", checkByGroup))
+                                                         new SqlParameter("@Date", date))
                                                       .AsNoTracking()
                                                       .ToListAsync(cancellationToken);
 
             var lessonDoneIelts = await _courseDbContext.Set<LessonDoneLearningProgressIeltsModel>()
-                                                        .FromSqlRaw("EXEC LessonDoneLearningProgressIelts @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @CheckByGroup",
+                                                        .FromSqlRaw("EXEC LessonDoneLearningProgressIelts @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @Date",
                                                              new SqlParameter("@Target", request.Target),
                                                              new SqlParameter("@GroupByType", request.GroupByType),
                                                              new SqlParameter("@DistrictIds", districtIdsParam),
                                                              new SqlParameter("@GroupIds", groupIdsParam),
                                                              new SqlParameter("@SchoolIds", schoolIdsParam),
-                                                             new SqlParameter("@CheckByGroup", checkByGroup))
+                                                             new SqlParameter("@Date", date))
                                                         .AsNoTracking()
                                                         .ToListAsync(cancellationToken);
 
@@ -133,7 +134,7 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
             };
 
             methodResult.Result = setDataCache;
-            await _cacheService.SetAsync(KeyCache, setDataCache, TimeSpan.FromSeconds(CacheSettings.TimeCache.OneHour));
+            //await _cacheService.SetAsync(KeyCache, setDataCache, TimeSpan.FromSeconds(CacheSettings.TimeCache.OneHour));
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
