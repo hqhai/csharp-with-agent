@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
 {
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -41,9 +42,50 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<TotalLearningProgressModel>>();
 
-            var districtIdsParam = request.DistrictIds != null ? string.Join(",", request.DistrictIds) : (object)DBNull.Value;
-            var groupIdsParam = request.GroupIds != null ? string.Join(",", request.GroupIds) : (object)DBNull.Value;
-            var schoolIdsParam = request.SchoolIds != null ? string.Join(",", request.SchoolIds) : (object)DBNull.Value;
+            StringBuilder sbDistrict = new StringBuilder();
+            if (request.DistrictIds != null)
+            {
+                foreach (var id in request.DistrictIds)
+                {
+                    if (sbDistrict.Length > 0)
+                    {
+                        sbDistrict.Append(",");
+                    }
+
+                    sbDistrict.Append(id);
+                }
+            }
+            var districtIdsParam = sbDistrict.Length > 0 ? sbDistrict.ToString() : (object)DBNull.Value;
+
+            StringBuilder sbGroup = new StringBuilder();
+            if (request.GroupIds != null)
+            {
+                foreach (var id in request.GroupIds)
+                {
+                    if (sbGroup.Length > 0)
+                    {
+                        sbGroup.Append(",");
+                    }
+
+                    sbGroup.Append(id);
+                }
+            }
+            var groupIdsParam = sbGroup.Length > 0 ? sbGroup.ToString() : (object)DBNull.Value;
+
+            StringBuilder sbSchool = new StringBuilder();
+            if (request.SchoolIds != null)
+            {
+                foreach (var id in request.SchoolIds)
+                {
+                    if (sbSchool.Length > 0)
+                    {
+                        sbSchool.Append(",");
+                    }
+
+                    sbSchool.Append(id);
+                }
+            }
+            var schoolIdsParam = sbSchool.Length > 0 ? sbSchool.ToString() : (object)DBNull.Value;
             var date = request.Date != null ? request.Date : (object)DBNull.Value;
 
             var total = await _courseDbContext.Set<TotalLearningProgressModel>()
