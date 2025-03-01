@@ -118,6 +118,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                         CcEmails = _appSetting.CustomerSupportConfig.CCEmail
                     };
                     await _senderService.SendEmailAsync(model);
+
+                    return new UserAiModel
+                    {
+                        ClassForumAIs = null,
+                        ConditionRetry = false
+                    };
                 }
 
                 var userAiConfig = request!.UserAIConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
@@ -146,7 +152,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
                 _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} conditionRetry: {conditionRetry}");
 
-                _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 1: {classForumDetailResult.Serialize(options)}");             
+                _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 1: {classForumDetailResult.Serialize(options)}");
 
                 return new UserAiModel
                 {
