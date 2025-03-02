@@ -97,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             #region Retry
             var retryAI = Policy.HandleResult<UserAiModel>(result => result.ClassForumAIs == null || result.ClassForumAIs.Count == 0 || !result.ConditionRetry)
-                                .WaitAndRetryAsync(Max_Time_Retry, retryAttempt => TimeSpan.FromSeconds(30), async (result, timeSpan, retryCount, context) =>
+                                .WaitAndRetryAsync(Max_Time_Retry, retryAttempt => TimeSpan.FromSeconds(5), async (result, timeSpan, retryCount, context) =>
                                 {
                                     classForumDetailResult.RetryTime += 1;
                                 });
