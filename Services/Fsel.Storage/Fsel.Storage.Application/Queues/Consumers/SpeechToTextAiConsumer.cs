@@ -10,7 +10,9 @@ namespace Fsel.Storage.Application.Queues.Consumers
     using Fsel.Storage.Application.Services.AmazonS3Services;
     using Fsel.Storage.Application.Services.OpenAIServices;
     using Fsel.Storage.Domain.Models.EntityModels;
+    using Fsel.Storage.Infrastructure.ValueSettings;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
     using Polly;
     using Refit;
@@ -20,14 +22,23 @@ namespace Fsel.Storage.Application.Queues.Consumers
         private readonly IOpenAIService _openAIService;
         private readonly IAmazonS3Service _amazonS3Service;
         private readonly SpeechToTextPublisher _speechToTextPublisher;
-        private const string AIModel = "whisper-1";
+        private readonly AppSetting _appSetting;
+        private readonly ILogger<SpeechToTextAiConsumer> _logger;
         private const int Max_Time_Retry = 3;
 
-        public SpeechToTextAiConsumer(AuthContext authContext, IHttpContextAccessor httpContextAccessor, IOpenAIService openAIService, IAmazonS3Service amazonS3Service, SpeechToTextPublisher speechToTextPublisher) : base(authContext, httpContextAccessor)
+        public SpeechToTextAiConsumer(AuthContext authContext,
+                                      IHttpContextAccessor httpContextAccessor,
+                                      IOpenAIService openAIService,
+                                      IAmazonS3Service amazonS3Service,
+                                      SpeechToTextPublisher speechToTextPublisher,
+                                      AppSetting appSetting,
+                                      ILogger<SpeechToTextAiConsumer> logger) : base(authContext, httpContextAccessor)
         {
             _openAIService = openAIService;
             _amazonS3Service = amazonS3Service;
             _speechToTextPublisher = speechToTextPublisher;
+            _appSetting = appSetting;
+            _logger = logger;
         }
 
         private class UserAiModel
@@ -48,16 +59,27 @@ namespace Fsel.Storage.Application.Queues.Consumers
                 return;
             }
 
+            int countRetry = 0;
+
             var retryAI = Policy.HandleResult<UserAiModel>(result => !result.CheckSubAI)
                                 .WaitAndRetryAsync(Max_Time_Retry, retryAttempt => TimeSpan.FromSeconds(5));
 
             var retryResult = await retryAI.ExecuteAsync(async () =>
             {
+                _logger.LogInformation($"CountRetry: {message.UserId} count: {countRetry += 1}");
 
                 var stream = formFile.OpenReadStream();
                 var streamPart = new StreamPart(stream, formFile.FileName, formFile.ContentType);
 
-                var content = await _openAIService.SpeechToTextByAIAsync(streamPart, AIModel);
+                var startDate = DateTime.UtcNow;
+
+                var content = await _openAIService.SpeechToTextByAIAsync(streamPart, _appSetting.OpenAiConfig?.ApprovalAIModel);
+
+                var endDate = DateTime.UtcNow;
+
+                _logger.LogInformation($"CountTimeResponseAI: {(endDate - startDate).TotalSeconds}");
+                _logger.LogInformation($"LogContentAI: {content.Content}");
+
                 if (!content.IsSuccessStatusCode)
                 {
                     return new UserAiModel { CheckSubAI = false };
