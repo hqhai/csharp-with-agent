@@ -34,7 +34,10 @@ namespace Fsel.Course.Domain.Entities
             {
                 return CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount, CorrectTotal) : _percent;
             }
-            set { _percent = CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount, CorrectTotal) : value; }
+            set
+            {
+                _percent = value;
+            }
         }
 
         /// <summary>
