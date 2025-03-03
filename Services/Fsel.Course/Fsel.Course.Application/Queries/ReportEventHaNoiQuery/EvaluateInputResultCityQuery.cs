@@ -8,6 +8,7 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
     using Fsel.Core.Caching;
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Course.Infrastructure;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Data.SqlClient;
@@ -45,12 +46,12 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<EvaluateInputResultModel>();
 
-            //var data = await _cacheService.GetAsync(KeyCache);
-            //if (data != null)
-            //{
-            //    methodResult.Result = data;
-            //    return methodResult;
-            //}
+            var data = await _cacheService.GetAsync(KeyCache);
+            if (data != null)
+            {
+                methodResult.Result = data;
+                return methodResult;
+            }
 
             var districtIdsParam = request.DistrictIds != null ? string.Join(",", request.DistrictIds) : (object)DBNull.Value;
             var groupIdsParam = request.GroupIds != null ? string.Join(",", request.GroupIds) : (object)DBNull.Value;
@@ -110,7 +111,7 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
             };
 
             methodResult.Result = setDataCache;
-            //await _cacheService.SetAsync(KeyCache, setDataCache, TimeSpan.FromSeconds(CacheSettings.TimeCache.OneHour));
+            await _cacheService.SetAsync(KeyCache, setDataCache, TimeSpan.FromSeconds(CacheSettings.TimeCache.OneHour));
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
