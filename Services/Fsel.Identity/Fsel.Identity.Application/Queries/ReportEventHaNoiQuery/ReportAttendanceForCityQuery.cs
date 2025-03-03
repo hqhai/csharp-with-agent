@@ -1,16 +1,18 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
+namespace Fsel.Identity.Application.Queries.ReportEventHaNoiQuery
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
-    using Fsel.Course.Infrastructure;
+    using Fsel.Core.Caching;
+    using Fsel.Identity.Domain.Models.EntityModels.ReportEventHaNoi;
+    using Fsel.Identity.Infrastructure;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
 
-    public class ReportAttendanceTableQuery : IRequest<MethodResult<IList<SummaryDataOnCityModel>>>
+    public class ReportAttendanceForCityQuery : IRequest<MethodResult<OverallStudentModel>>
     {
         public int Target { get; set; } = 1;
 
@@ -24,27 +26,37 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
         public DateTime? Date { get; set; }
     }
 
-    public class ReportAttendanceTableQueryHandler : IRequestHandler<ReportAttendanceTableQuery, MethodResult<IList<SummaryDataOnCityModel>>>
+    public class ReportAttendanceForCityQueryHandler : IRequestHandler<ReportAttendanceForCityQuery, MethodResult<OverallStudentModel>>
     {
-        private readonly CourseDbContext _courseDbContext;
+        private readonly UserDbContext _userDbContext;
+        private readonly ICacheService<OverallStudentModel> _cacheService;
+        private const string KeyCache = "ReportAttendanceForCity";
 
-        public ReportAttendanceTableQueryHandler(CourseDbContext courseDbContext)
+        public ReportAttendanceForCityQueryHandler(UserDbContext userDbContext, ICacheService<OverallStudentModel> cacheService)
         {
-            _courseDbContext = courseDbContext;
+            _userDbContext = userDbContext;
+            _cacheService = cacheService;
         }
 
-        public async Task<MethodResult<IList<SummaryDataOnCityModel>>> Handle(ReportAttendanceTableQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<OverallStudentModel>> Handle(ReportAttendanceForCityQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<SummaryDataOnCityModel>> methodResult = new MethodResult<IList<SummaryDataOnCityModel>>();
+            var methodResult = new MethodResult<OverallStudentModel>();
+
+            var data = await _cacheService.GetAsync(KeyCache);
+            if (data != null)
+            {
+                methodResult.Result = data;
+                return methodResult;
+            }
 
             var checkByGroup = 0;
             var districtIdsParam = request.DistrictIds != null ? string.Join(",", request.DistrictIds) : (object)DBNull.Value;
             var groupIdsParam = request.GroupIds != null ? string.Join(",", request.GroupIds) : (object)DBNull.Value;
             var schoolIdsParam = request.SchoolIds != null ? string.Join(",", request.SchoolIds) : (object)DBNull.Value;
 
-            var summaryDataOnCity = await _courseDbContext.Set<SummaryDataOnCityModel>()
-                                                .FromSqlRaw("EXEC SummaryDataOnCity @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @Date, @CheckByGroup",
+            var totalList = await _userDbContext.Set<OverallStudentModel>()
+                                                .FromSqlRaw("EXEC AttendanceReport @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @Date, @CheckByGroup",
                                                     new SqlParameter("@Target", request.Target),
                                                     new SqlParameter("@GroupByType", request.GroupByType),
                                                     new SqlParameter("@DistrictIds", districtIdsParam),
@@ -55,7 +67,15 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
                                                 .AsNoTracking()
                                                 .ToListAsync(cancellationToken);
 
-            methodResult.Result = summaryDataOnCity;
+
+            var overallStudent = totalList.FirstOrDefault();
+
+            methodResult.Result = overallStudent;
+            if (overallStudent != null)
+            {
+                await _cacheService.SetAsync(KeyCache, overallStudent, TimeSpan.FromSeconds(CacheSettings.TimeCache.ThreeHour));
+            }
+
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
