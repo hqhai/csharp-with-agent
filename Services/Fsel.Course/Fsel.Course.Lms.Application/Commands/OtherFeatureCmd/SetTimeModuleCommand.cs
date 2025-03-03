@@ -96,13 +96,10 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             }.Serialize();
             _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync_1 : {requestInfoUpdate}");
 
-            _videoTimeCodeResultRepository.Update(videoTimeCodeResult, false
-                , x => x.SkillScoresStr, x => x.SkillScoreUngradedStr
-                , x => x.CorrectCount, x => x.CorrectTotal
-                , x => x.CorrectCountUngraded, x => x.CorrectTotalUngraded
-                , x => x.TokenFirstTime, x => x.TokenLastTime, x => x.Status, x => x.HighestStreak
-                , x => x.Percent, x => x.IsWorking, x => x.VideoTimeCodeId, x => x.VideoResultId, x => x.StudentId);
-            await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _videoTimeCodeResultRepository.BulkMergeAsync(new List<VideoTimeCodeResult> { videoTimeCodeResult }, bulk =>
+            {
+                bulk.ColumnInputExpression = entity => new { entity.WorkingTime, entity.RetryWorkingTime };
+            });
 
             var requestInfoUpdate2 = new
             {
@@ -132,11 +129,10 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 }.Serialize();
                 _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync_1 : {requestInfoUpdate}");
 
-                _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.CurrentSectionTimeCodeId
-                , x => x.CorrectCount, x => x.CorrectTotal, x => x.SkillScoresStr
-                , x => x.TokenFirstTime, x => x.TokenLastTime, x => x.Status, x => x.HighestStreak
-                , x => x.Percent, x => x.WorkingTime, x => x.SectionGroupId, x => x.PlacementTestResultId, x => x.MockTestResultId, x => x.FinalTestResultId, x => x.StudentId);
-                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _sectionGroupResultRepository.BulkMergeAsync(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+                {
+                    bulk.ColumnInputExpression = entity => new { entity.WorkingTime };
+                });
 
                 var requestInfoUpdate2 = new
                 {
