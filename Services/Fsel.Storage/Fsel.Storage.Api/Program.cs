@@ -2,6 +2,9 @@
 
 using Fsel.Common.Constants;
 using Fsel.Core.Extensions;
+using Fsel.Shared.Constants;
+using Fsel.Storage.Application.Queues.Consumers;
+using Fsel.Storage.Application.Queues.Publisher;
 using Fsel.Storage.Application.Services.AmazonS3Services;
 using Fsel.Storage.Application.Services.OpenAIServices;
 using Fsel.Storage.Application.Services.SenderServices;
@@ -24,7 +27,16 @@ builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (
         httpClient.DefaultRequestHeaders.Add("Authorization", $"{Settings.Bearer} {appSetting?.OpenAiConfig?.ApiKey}");
     }
 });
+
 builder.Services.AddScoped<IAmazonS3Service, AmazonS3Service>();
+builder.Services.AddScoped<SpeechToTextPublisher>();
+builder.Services.AddScoped<SpeechToTextAiPublisher>();
+
+builder.AddMassTransit(appSetting,
+queues: new Dictionary<string, Type>
+{
+  { QueueSettings.StorageQueue.NameQueue.SpeechToTextAi, typeof(SpeechToTextAiConsumer) }
+});
 
 var app = builder.Build();
 app.UseServices();

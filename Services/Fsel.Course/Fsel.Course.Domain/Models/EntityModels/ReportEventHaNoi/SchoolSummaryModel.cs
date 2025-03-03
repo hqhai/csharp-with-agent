@@ -7,9 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi
     [Keyless]
     public class SchoolSummaryModel
     {
-        public string? DistrictName { get; set; }
-        public string? GroupName { get; set; }
-        public string? SchoolName { get; set; }
+        public string? GroupedValue { get; set; }
         public int? ImportStudent { get; set; }
         public int? RegisterStudent { get; set; }
         public int? TotalStudent { get; set; }

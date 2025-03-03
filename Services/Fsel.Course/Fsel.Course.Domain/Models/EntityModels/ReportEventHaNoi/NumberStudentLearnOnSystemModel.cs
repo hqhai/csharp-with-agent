@@ -5,10 +5,10 @@ namespace Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi
     using Microsoft.EntityFrameworkCore;
 
     [Keyless]
-    public class AverageLearningProgressModel
-    {
-        public string? GroupedValue { get; set; }
 
-        public decimal? PercentLessonDone { get; set; }
+    public class NumberStudentLearnOnSystemModel
+    {
+        public string? ActiveDate { get; set; }
+        public int? ActiveStudentCount { get; set; }
     }
 }
