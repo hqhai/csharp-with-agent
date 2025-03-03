@@ -10,8 +10,11 @@ namespace Fsel.Storage.Application.Queues.Consumers
     using Fsel.Storage.Application.Services.AmazonS3Services;
     using Fsel.Storage.Application.Services.OpenAIServices;
     using Fsel.Storage.Domain.Models.EntityModels;
+    using Fsel.Storage.Infrastructure.ValueSettings;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
+    using Polly;
     using Refit;
 
     public class SpeechToTextAiConsumer : BaseConsumer<SpeechToTextAiConsumerModel>
@@ -19,13 +22,28 @@ namespace Fsel.Storage.Application.Queues.Consumers
         private readonly IOpenAIService _openAIService;
         private readonly IAmazonS3Service _amazonS3Service;
         private readonly SpeechToTextPublisher _speechToTextPublisher;
-        private const string AIModel = "whisper-1";
+        private readonly AppSetting _appSetting;
+        private readonly ILogger<SpeechToTextAiConsumer> _logger;
+        private const int Max_Time_Retry = 3;
 
-        public SpeechToTextAiConsumer(AuthContext authContext, IHttpContextAccessor httpContextAccessor, IOpenAIService openAIService, IAmazonS3Service amazonS3Service, SpeechToTextPublisher speechToTextPublisher) : base(authContext, httpContextAccessor)
+        public SpeechToTextAiConsumer(AuthContext authContext,
+                                      IHttpContextAccessor httpContextAccessor,
+                                      IOpenAIService openAIService,
+                                      IAmazonS3Service amazonS3Service,
+                                      SpeechToTextPublisher speechToTextPublisher,
+                                      AppSetting appSetting,
+                                      ILogger<SpeechToTextAiConsumer> logger) : base(authContext, httpContextAccessor)
         {
             _openAIService = openAIService;
             _amazonS3Service = amazonS3Service;
             _speechToTextPublisher = speechToTextPublisher;
+            _appSetting = appSetting;
+            _logger = logger;
+        }
+
+        private class UserAiModel
+        {
+            public bool CheckSubAI { get; set; }
         }
 
         public async override Task ConsumeQueue(SpeechToTextAiConsumerModel? message)
@@ -41,20 +59,43 @@ namespace Fsel.Storage.Application.Queues.Consumers
                 return;
             }
 
-            var stream = formFile.OpenReadStream();
-            var streamPart = new StreamPart(stream, formFile.FileName, formFile.ContentType);
+            int countRetry = 0;
 
-            var content = await _openAIService.SpeechToTextByAIAsync(streamPart, AIModel);
-            if (!content.IsSuccessStatusCode)
+            var retryAI = Policy.HandleResult<UserAiModel>(result => !result.CheckSubAI)
+                                .WaitAndRetryAsync(Max_Time_Retry, retryAttempt => TimeSpan.FromSeconds(5));
+
+            var retryResult = await retryAI.ExecuteAsync(async () =>
             {
-                return;
-            }
+                _logger.LogError($"CountRetry: {message.UserId} count: {countRetry += 1}");
 
-            var fileInfomation = await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, formFile, EnumFolderType.Videos, false, false);
-            var convertContent = !string.IsNullOrEmpty(content.Content) ? JsonConvert.DeserializeObject<ContentModel>(content.Content)?.Text : string.Empty;
+                var stream = formFile.OpenReadStream();
+                var streamPart = new StreamPart(stream, formFile.FileName, formFile.ContentType);
 
-            // publisher realtime
-            await _speechToTextPublisher.Publish(new SpeechToTextConsumerModel { UserId = message.UserId, TranscriptFile = new Shared.Models.ShareModels.TranscriptFileModel { Content = convertContent, FilePath = fileInfomation.Result } }, CancellationToken.None);
+                var startDate = DateTime.UtcNow;
+
+                var content = await _openAIService.SpeechToTextByAIAsync(streamPart, _appSetting.OpenAiConfig?.ApprovalAIModel);
+
+                var endDate = DateTime.UtcNow;
+
+                _logger.LogError($"CountTimeResponseAI: {(endDate - startDate).TotalSeconds}");
+                _logger.LogError($"LogContentAI: {content.Content}");
+
+                if (!content.IsSuccessStatusCode)
+                {
+                    return new UserAiModel { CheckSubAI = false };
+                }
+
+                var fileInfomation = await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, formFile, EnumFolderType.Videos, false, false);
+                var convertContent = !string.IsNullOrEmpty(content.Content) ? JsonConvert.DeserializeObject<ContentModel>(content.Content)?.Text : string.Empty;
+                if (string.IsNullOrEmpty(convertContent))
+                {
+                    return new UserAiModel { CheckSubAI = false };
+                }
+
+                // publisher real time
+                await _speechToTextPublisher.Publish(new SpeechToTextConsumerModel { UserId = message.UserId, TranscriptFile = new Shared.Models.ShareModels.TranscriptFileModel { Content = convertContent, FilePath = fileInfomation.Result } }, CancellationToken.None);
+                return new UserAiModel { CheckSubAI = true };
+            });
         }
 
         private static IFormFile ConvertToIFormFile(byte[] fileData, string fileName, string contentType)
