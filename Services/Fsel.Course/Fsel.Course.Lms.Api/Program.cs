@@ -182,10 +182,12 @@ builder.AddRefitClients(typeof(INotificationService), appSetting?.Services?.Noti
 builder.AddRefitClients(typeof(IStorageService), appSetting?.Services?.StorageApiUrl);
 builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
 {
+
     httpClient.BaseAddress = new Uri(appSetting?.OpenAiConfig?.Uri ?? string.Empty);
-    if (!string.IsNullOrEmpty(appSetting?.OpenAiConfig?.ApiKey))
+    if (appSetting?.OpenAiConfig?.ApiKeys != null && appSetting.OpenAiConfig.ApiKeys!.Any())
     {
-        httpClient.DefaultRequestHeaders.Add("Authorization", $"{Settings.Bearer} {appSetting?.OpenAiConfig?.ApiKey}");
+        var randomApiKey = appSetting.OpenAiConfig.ApiKeys[Random.Shared.Next(appSetting.OpenAiConfig.ApiKeys.Count)];
+        httpClient.DefaultRequestHeaders.Add("Authorization", $"{Settings.Bearer} {randomApiKey}");
     }
 });
 
