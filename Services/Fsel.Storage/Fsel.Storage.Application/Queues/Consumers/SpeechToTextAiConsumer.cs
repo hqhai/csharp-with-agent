@@ -66,7 +66,7 @@ namespace Fsel.Storage.Application.Queues.Consumers
 
             var retryResult = await retryAI.ExecuteAsync(async () =>
             {
-                _logger.LogInformation($"CountRetry: {message.UserId} count: {countRetry += 1}");
+                _logger.LogError($"CountRetry: {message.UserId} count: {countRetry += 1}");
 
                 var stream = formFile.OpenReadStream();
                 var streamPart = new StreamPart(stream, formFile.FileName, formFile.ContentType);
@@ -77,8 +77,8 @@ namespace Fsel.Storage.Application.Queues.Consumers
 
                 var endDate = DateTime.UtcNow;
 
-                _logger.LogInformation($"CountTimeResponseAI: {(endDate - startDate).TotalSeconds}");
-                _logger.LogInformation($"LogContentAI: {content.Content}");
+                _logger.LogError($"CountTimeResponseAI: {(endDate - startDate).TotalSeconds}");
+                _logger.LogError($"LogContentAI: {content.Content}");
 
                 if (!content.IsSuccessStatusCode)
                 {
