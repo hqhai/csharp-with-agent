@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Net;
-using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Shared.Attributes;
@@ -12,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Storage.Api.Controllers.V1i2
 {
-    [ApiVersion(ApiSettings.APIVersion1i2)]
+    [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/transcript")]
     [ApiController]
     public class TranscriptController : ControllerBase
