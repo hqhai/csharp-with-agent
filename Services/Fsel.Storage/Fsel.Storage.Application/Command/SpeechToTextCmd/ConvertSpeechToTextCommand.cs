@@ -26,14 +26,14 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
         private readonly IOpenAIService _openAIService;
         private readonly IAmazonS3Service _amazonS3Service;
         private const string AIModel = "whisper-1";
-        private readonly ICognitiveProvider _cognitiveProvider;
+        private readonly IDeepgramProvider _deepgramProvider;
 
 
-        public ConvertSpeechToTextCommandHandler(IOpenAIService openAIService, IAmazonS3Service amazonS3Service, ICognitiveProvider cognitiveProvider)
+        public ConvertSpeechToTextCommandHandler(IOpenAIService openAIService, IAmazonS3Service amazonS3Service, IDeepgramProvider deepgramProvider)
         {
             _openAIService = openAIService;
             _amazonS3Service = amazonS3Service;
-            _cognitiveProvider = cognitiveProvider;
+            _deepgramProvider = deepgramProvider;
         }
 
         public async Task<MethodResult<TranscriptFileModel>> Handle(ConvertSpeechToTextCommand request, CancellationToken cancellationToken)
@@ -54,7 +54,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
 
             if (content.Content == null || !content.IsSuccessStatusCode)
             {
-                var contentDeepgram = await _cognitiveProvider.GetTranscriptionAsync(request.FormFile, cancellationToken);
+                var contentDeepgram = await _deepgramProvider.GetTranscriptionAsync(request.FormFile, "nova-2", cancellationToken);
                 var fileInfomationDeepGram = await UpLoadFileAsync(request.FormFile);
                 methodResult.Result = new TranscriptFileModel { FilePath = fileInfomationDeepGram.Result, Content = contentDeepgram ?? string.Empty };
                 return methodResult;
