@@ -28,7 +28,7 @@ namespace Fsel.Storage.Application.Queues.Consumers
         private readonly AppSetting _appSetting;
         private readonly ILogger<SpeechToTextAiConsumer> _logger;
         private const int Max_Time_Retry = 3;
-        private readonly IDeepgramProvider _deepgramProvider;
+        private readonly ICognitiveProvider _cognitiveProvider;
 
         public SpeechToTextAiConsumer(AuthContext authContext,
                                       IHttpContextAccessor httpContextAccessor,
@@ -37,14 +37,14 @@ namespace Fsel.Storage.Application.Queues.Consumers
                                       SpeechToTextPublisher speechToTextPublisher,
                                       AppSetting appSetting,
                                       ILogger<SpeechToTextAiConsumer> logger,
-                                      IDeepgramProvider deepgramProvider) : base(authContext, httpContextAccessor)
+                                      ICognitiveProvider cognitiveProvider) : base(authContext, httpContextAccessor)
         {
             _openAIService = openAIService;
             _amazonS3Service = amazonS3Service;
             _speechToTextPublisher = speechToTextPublisher;
             _appSetting = appSetting;
             _logger = logger;
-            _deepgramProvider = deepgramProvider;
+            _cognitiveProvider = cognitiveProvider;
         }
 
         private class UserAiModel
@@ -88,7 +88,7 @@ namespace Fsel.Storage.Application.Queues.Consumers
 
                 if (!content.IsSuccessStatusCode)
                 {
-                    var deepGramContent = await _deepgramProvider.GetTranscriptionAsync(formFile, "nova-2");
+                    var deepGramContent = await _cognitiveProvider.GetTranscriptionAsync(formFile);
 
                     _logger.LogError($"LogContentDeepGramAI: {deepGramContent}");
 
