@@ -2,8 +2,11 @@
 
 namespace Fsel.Storage.Application.Queues.Consumers
 {
+    using System.Threading;
     using System.Threading.Tasks;
+    using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.Interfaces;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.Storage.Application.Queues.Publisher;
@@ -25,6 +28,7 @@ namespace Fsel.Storage.Application.Queues.Consumers
         private readonly AppSetting _appSetting;
         private readonly ILogger<SpeechToTextAiConsumer> _logger;
         private const int Max_Time_Retry = 3;
+        private readonly ICognitiveProvider _cognitiveProvider;
 
         public SpeechToTextAiConsumer(AuthContext authContext,
                                       IHttpContextAccessor httpContextAccessor,
@@ -32,13 +36,15 @@ namespace Fsel.Storage.Application.Queues.Consumers
                                       IAmazonS3Service amazonS3Service,
                                       SpeechToTextPublisher speechToTextPublisher,
                                       AppSetting appSetting,
-                                      ILogger<SpeechToTextAiConsumer> logger) : base(authContext, httpContextAccessor)
+                                      ILogger<SpeechToTextAiConsumer> logger,
+                                      ICognitiveProvider cognitiveProvider) : base(authContext, httpContextAccessor)
         {
             _openAIService = openAIService;
             _amazonS3Service = amazonS3Service;
             _speechToTextPublisher = speechToTextPublisher;
             _appSetting = appSetting;
             _logger = logger;
+            _cognitiveProvider = cognitiveProvider;
         }
 
         private class UserAiModel
@@ -82,10 +88,21 @@ namespace Fsel.Storage.Application.Queues.Consumers
 
                 if (!content.IsSuccessStatusCode)
                 {
-                    return new UserAiModel { CheckSubAI = false };
+                    var deepGramContent = await _cognitiveProvider.GetTranscriptionAsync(formFile);
+
+                    _logger.LogError($"LogContentDeepGramAI: {deepGramContent}");
+
+                    if (string.IsNullOrEmpty(deepGramContent))
+                    {
+                        return new UserAiModel { CheckSubAI = false };
+                    }
+                    var fileInfomationDeepGram = await UpLoadFileAsync(formFile);
+                    await PublishTextToSocket(message, deepGramContent, fileInfomationDeepGram.Result);
                 }
 
-                var fileInfomation = await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, formFile, EnumFolderType.Videos, false, false);
+                // var fileInfomation = await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, formFile, EnumFolderType.Videos, false, false);
+                var fileInfomation = await UpLoadFileAsync(formFile);
+
                 var convertContent = !string.IsNullOrEmpty(content.Content) ? JsonConvert.DeserializeObject<ContentModel>(content.Content)?.Text : string.Empty;
                 if (string.IsNullOrEmpty(convertContent))
                 {
@@ -93,7 +110,9 @@ namespace Fsel.Storage.Application.Queues.Consumers
                 }
 
                 // publisher real time
-                await _speechToTextPublisher.Publish(new SpeechToTextConsumerModel { UserId = message.UserId, TranscriptFile = new Shared.Models.ShareModels.TranscriptFileModel { Content = convertContent, FilePath = fileInfomation.Result } }, CancellationToken.None);
+                //await _speechToTextPublisher.Publish(new SpeechToTextConsumerModel { UserId = message.UserId, TranscriptFile = new Shared.Models.ShareModels.TranscriptFileModel { Content = convertContent, FilePath = fileInfomation.Result } }, CancellationToken.None);
+
+                await PublishTextToSocket(message, convertContent, fileInfomation.Result);
                 return new UserAiModel { CheckSubAI = true };
             });
         }
@@ -106,6 +125,17 @@ namespace Fsel.Storage.Application.Queues.Consumers
                 Headers = new HeaderDictionary(),
                 ContentType = contentType
             };
+        }
+
+        public async Task<MethodResult<string?>> UpLoadFileAsync(IFormFile formFile)
+        {
+            return await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, formFile, EnumFolderType.Videos, false, false);
+        }
+
+
+        private async Task PublishTextToSocket(SpeechToTextAiConsumerModel message, string? convertContent, string? filePath)
+        {
+            await _speechToTextPublisher.Publish(new SpeechToTextConsumerModel { UserId = message.UserId, TranscriptFile = new Shared.Models.ShareModels.TranscriptFileModel { Content = convertContent, FilePath = filePath } }, CancellationToken.None);
         }
 
     }
