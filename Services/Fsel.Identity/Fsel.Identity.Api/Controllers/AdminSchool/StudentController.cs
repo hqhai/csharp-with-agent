@@ -30,6 +30,19 @@ namespace Fsel.Identity.Api.Controllers.AdminSchool
         }
 
         /// <summary>
+        /// Get SchoolId
+        /// </summary>
+        [HttpGet("schoolId")]
+        [ProducesResponseType(typeof(MethodResult<Guid>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSchoolId()
+        {
+            MethodResult<Guid> methodResult = new MethodResult<Guid>();
+            methodResult.Result = await _userSchoolRepository.GetSchoolIdAsync();
+            return methodResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get Student
         /// </summary>
         [HttpGet]

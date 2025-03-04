@@ -3,6 +3,7 @@
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
 using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
 using Fsel.Course.Infrastructure.Configs;
 using MediatR;
@@ -108,6 +109,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<NumberStudentLearnOnSystemModel> NumberStudentLearnOnSystemResults { get; set; }
         public DbSet<SummaryDataOnCityModel> SummaryDataOnCityResults { get; set; }
         public DbSet<SchoolInfoModel> SchoolInfos { get; set; }
+        public DbSet<ReportLearningProcessModel> ReportLearningProcesses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

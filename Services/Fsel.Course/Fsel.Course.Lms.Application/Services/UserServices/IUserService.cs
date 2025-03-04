@@ -167,5 +167,9 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Get("/v1/admin/other/get-student-event-registrations")]
         Task<IApiResponse<MethodResult<IList<EventRegistrationModel>>>> GetStudentEventRegistrationsAsync([Query] GetReportCompetitionEventQueryModel query);
+
+        [Get("/v1/admin-school/student/schoolId")]
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
+        Task<IApiResponse<MethodResult<Guid>>> GetSchoolIdAsync();
     }
 }
