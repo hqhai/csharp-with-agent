@@ -53,7 +53,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
             var searchResult = await _mediator.Send(searchOrderQuery, cancellationToken).ConfigureAwait(false);
             if (!searchResult.IsOK)
             {
-                methodResult.AddError(searchResult.StatusCode, searchResult.ErrorMessages);
+                methodResult.AddError(searchResult.ErrorMessages);
                 return methodResult;
             }
 

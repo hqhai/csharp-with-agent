@@ -17,6 +17,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class SearchOrderQuery : SearchOrderQueryModel, IRequest<MethodResult<PagingItemsModel<SearchOrderModel>>>
     {
@@ -27,12 +28,14 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
         private readonly IOrderRepository _orderRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly ILogger<SearchOrderQuery> _logger;
 
-        public SearchOrderQueryHandler(IOrderRepository orderRepository, AuthContext authContext, IUserService userService)
+        public SearchOrderQueryHandler(IOrderRepository orderRepository, AuthContext authContext, IUserService userService, ILogger<SearchOrderQuery> logger)
         {
             _orderRepository = orderRepository;
             _authContext = authContext;
             _userService = userService;
+            _logger = logger;
         }
 
         public async Task<MethodResult<PagingItemsModel<SearchOrderModel>>> Handle(SearchOrderQuery request, CancellationToken cancellationToken)
@@ -124,6 +127,13 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
             if (userIds.Any())
             {
                 var studentResults = await _userService.GetStudentsByIdsAsync(userIds);
+                if (!studentResults.IsSuccessStatusCode)
+                {
+                    var error = studentResults.Error.Serialize();
+                    _logger.LogError(error);
+                    methodResult.AddError(studentResults.Error);
+                    return methodResult;
+                }
                 var students = studentResults.Content?.Result;
 
                 var studentDict = students?
