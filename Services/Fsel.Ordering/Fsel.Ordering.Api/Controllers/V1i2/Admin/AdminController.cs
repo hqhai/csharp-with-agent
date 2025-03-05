@@ -2,21 +2,18 @@
 
 namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
 {
-    using Fsel.Common.ActionResults;
     using System.Net;
+    using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Ordering.Application.Commands.OrderCmds.V1i2;
+    using Fsel.Ordering.Application.Queries.OrderQuery.V1i2;
+    using Fsel.Ordering.Domain.Models.EntityModels.V1i2;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
-    using Microsoft.AspNetCore.Mvc;
     using MediatR;
-    using Fsel.Ordering.Application.Commands.OrderCmds.V1i2;
-
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Ordering.Domain.Models.EntityModels.V1i2;
-    using Fsel.Ordering.Application.Queries.OrderQuery.V1i2;
-    using Fsel.Ordering.Application.Queries.VoucherQuery;
-    using Fsel.Ordering.Domain.Models.EntityModels;
+    using Microsoft.AspNetCore.Mvc;
 
     [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/admin/order")]
@@ -87,6 +84,18 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUserVoucherLockByUser([FromBody] CreateVoucherAndSendMailCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create Order For Students Event
+        /// </summary>
+        [HttpPost("create-order-for-students-event")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateOrderForStudentsEvent([FromBody] CreateOrderForStudentsEventCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

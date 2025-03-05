@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Commands.StudentCmd
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Drawing;
     using System.Globalization;
     using System.IO;
@@ -18,6 +19,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Application.Queues.Publishers;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.OrderService;
+    using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
     using Fsel.Identity.Domain.Entities;
@@ -45,15 +47,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly UserManager<User> _userManager;
         private readonly IOrderService _orderService;
         private readonly IPlatformRepository _platformRepository;
-        private readonly IInteractionService _interactionService;
-        private readonly IMediator _mediator;
-        private readonly IHumanRepository _humanRepository;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
-        private readonly IStudentRepository _studentRepository;
         private readonly IServiceProvider _serviceProvider;
         private readonly SendStudentsFromFilePublisher _sendStudentsFromFilePublisher;
-        private readonly ISchoolImportHistoryRepository _schoolImportHistoryRepository;
         private readonly ILogger<CreateStudentsToEventFromFileCommand> _logger;
         private readonly AuthContext _authContext;
         private readonly ISystemService _systemService;
@@ -64,20 +61,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private const string FileNull = "File tải lên không có dữ liệu";
         private const string DataError = "Dữ liệu bị trống hoặc sai định dạng";
 
-        public CreateStudentsToEventFromFileCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IMediator mediator, IHumanRepository humanRepository, ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IStudentRepository studentRepository, IServiceProvider serviceProvider, SendStudentsFromFilePublisher sendStudentsFromFilePublisher, ISchoolImportHistoryRepository schoolImportHistoryRepository, ILogger<CreateStudentsToEventFromFileCommand> logger, AuthContext authContext, ISystemService systemService)
+        public CreateStudentsToEventFromFileCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IServiceProvider serviceProvider, SendStudentsFromFilePublisher sendStudentsFromFilePublisher, ILogger<CreateStudentsToEventFromFileCommand> logger, AuthContext authContext, ISystemService systemService)
         {
             _userManager = userManager;
             _orderService = orderService;
             _platformRepository = platformRepository;
-            _interactionService = interactionService;
-            _mediator = mediator;
-            _humanRepository = humanRepository;
             _competitionEventsRepository = competitionEventsRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
-            _studentRepository = studentRepository;
             _serviceProvider = serviceProvider;
             _sendStudentsFromFilePublisher = sendStudentsFromFilePublisher;
-            _schoolImportHistoryRepository = schoolImportHistoryRepository;
             _logger = logger;
             _authContext = authContext;
             _systemService = systemService;
@@ -110,7 +102,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     return methodResult;
                 }
 
-                var schoolResult = await _systemService.GetLocationByIdsAsync(new GetLocationsByIdsQueryModel()
+                var schoolResult = await _systemService.GetSchoolsAsync(new GetListSchoolQueryModel()
                 {
                     Ids = new List<Guid>() { schoolId.Value }
                 });
@@ -121,11 +113,19 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     return methodResult;
                 }
 
-                var competitionEvents = _competitionEventsRepository.Queryable;
+                var competitionEvents = _competitionEventsRepository.Queryable.ToList();
                 var competitionEvent = competitionEvents.Where(p => p.SchoolIds != null && p.SchoolIds.Contains(schoolId.Value) && p.Category == request.Category).FirstOrDefault();
                 if (competitionEvent == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent));
+                    return methodResult;
+                }
+
+                var expiredDate = competitionEvent.EventContent?.PaymentDate;
+                var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+                if (!expiredDate.HasValue || currentDate >= expiredDate.Value)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(expiredDate));
                     return methodResult;
                 }
 
@@ -342,8 +342,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     return methodResult;
                 }
 
-                var users = new List<User>();
-                var studentIds = new List<Guid>();
+                var studentIds = new ConcurrentBag<Guid>();
+                var studentModels = new ConcurrentBag<CreateOrderForStudentsEventCommandModel>();
+
                 var parallelOptions = new ParallelOptions
                 {
                     MaxDegreeOfParallelism = 50
@@ -408,10 +409,17 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 {
                                     await userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
 
-                                    lock (studentIds)
+                                    studentIds.Add(user.Human.Student.Id);
+
+                                    studentModels.Add(new CreateOrderForStudentsEventCommandModel()
                                     {
-                                        studentIds.Add(user.Human.Student.Id);
-                                    }
+                                        UserId = user.Id,
+                                        StudentId = user.Human.Id,
+                                        Email = user.Email,
+                                        PhoneNumber = user.PhoneNumber,
+                                        FullName = user.FullName,
+                                        StudentCode = user.Human.Code
+                                    });
                                 }
                             }
                         }
@@ -437,6 +445,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     await _studentCompetitionEventsRepository.AddList(studentCompetitionEvents);
                     await _studentCompetitionEventsRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     return methodResult;
+                });
+
+                var createOrdersResult = await _orderService.CreateOrderForStudentsEvent(new CreateOrderForStudentsEventCommandModels()
+                {
+                    Students = studentModels.ToList(),
+                    ExpiredDate = expiredDate.Value
                 });
 
                 methodResult.Result = new CreateStudentsToEventFromFileModel() { NumberOfStudent = studentIds.Count };
