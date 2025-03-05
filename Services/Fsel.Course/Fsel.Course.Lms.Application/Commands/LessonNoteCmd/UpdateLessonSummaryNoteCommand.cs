@@ -41,7 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
             await _lessonResultRepository.ExecuteTransactionAsync(async () =>
             {
                 lessonResult.SummaryNote = request.SummaryNote;
-                lessonResult = _lessonResultRepository.Update(lessonResult);
+                lessonResult = _lessonResultRepository.Update(lessonResult, false, x => x.CourseId, x => x.UnitId, x => x.LessonId, x => x.StudentId);
                 await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;

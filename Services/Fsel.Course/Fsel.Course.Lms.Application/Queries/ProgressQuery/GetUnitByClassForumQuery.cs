@@ -92,7 +92,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var classForums = await _classForumRepository.Queryable.Include(x => x.Lesson)
                                                            .Include(x => x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId)))
                                                            .ThenInclude(x => x.ClassForumDetailResults)
-                                                           .Where(x => lessonIds.Contains(x.LessonId))
+                                                           .WhereBulkContains(lessonIds, x => x.LessonId)
                                                            .ToListAsync();
             return classForums.OrderBy(x => lessonIds.IndexOf(x.LessonId)).Select(x =>
             {

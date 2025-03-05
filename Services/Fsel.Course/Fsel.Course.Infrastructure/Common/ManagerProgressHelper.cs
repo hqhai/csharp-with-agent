@@ -123,8 +123,8 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 if (unitResult != null)
                 {
-                    var query = await _lessonResultRepository.Queryable.Include(x => x.VideoResult).Include(x => x.ClassForumResults).Include(x => x.HomeWorkResults)
-                                   .Where(x => lessonIds.Contains(x.LessonId) && x.UnitId == unitResult.UnitId && x.CourseId == unitResult.CourseId && x.StudentId == unitResult.StudentId)
+                    var query = await _lessonResultRepository.Queryable
+                                   .Where(x => x.UnitId == unitResult.UnitId && x.CourseId == unitResult.CourseId && x.StudentId == unitResult.StudentId)
                                    .Select(x => new
                                    {
                                        CountVideo = x.VideoResult != null && x.VideoResult.Status == EnumResultStatus.Done ? 1 : 0,
@@ -159,7 +159,7 @@ namespace Fsel.Course.Infrastructure.Common
             if (lessonIds != null && lessonIds.Any())
             {
                 var query = await _lessonResultRepository.Queryable
-                                  .Where(x => lessonIds.Contains(x.LessonId) && x.CourseId == courseResult.CourseId && x.StudentId == courseResult.StudentId)
+                                  .Where(x => x.CourseId == courseResult.CourseId && x.StudentId == courseResult.StudentId)
                                   .AsNoTracking()
                                   .Select(x => new
                                   {

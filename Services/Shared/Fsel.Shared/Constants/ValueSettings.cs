@@ -91,7 +91,7 @@ namespace Fsel.Shared.Constants
             public const int NumberDeletedElement = 2; // Số phần tử bị xóa đi trong mảng
 
             public const int Temperature = 0;
-            public const string Model = "gpt-4-turbo";
+            public const string Model = "gpt-4o";
             public const int PresencePenalty = 0;
             public const int TopP = 0;
         }

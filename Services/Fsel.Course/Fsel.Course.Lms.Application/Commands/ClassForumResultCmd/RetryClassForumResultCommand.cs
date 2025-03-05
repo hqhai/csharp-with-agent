@@ -70,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
-                classForumResult = _classForumResultRepository.Update(classForumResult);
+                classForumResult = _classForumResultRepository.Update(classForumResult, false, x => x.LessonResultId, x => x.ClassForumId, x => x.StudentId);
 
                 await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 await SendToAIGrading(classForum, classForumResult, request.WordContent!, cancellationToken);
