@@ -46,5 +46,8 @@ namespace Fsel.Identity.Application.Services.OrderService
 
         [Post("/v1.2/admin/order/create-order-for-students-event")]
         Task<IApiResponse<MethodResult<bool>>> CreateOrderForStudentsEvent([Body] CreateOrderForStudentsEventCommandModels models);
+
+        [Post("/v1.2/admin/order/delete-order-of-students-event")]
+        Task<IApiResponse<MethodResult<bool>>> DeleteOrderOfStudentEvent([Body] DeleteOrderOfStudentsInEventCommandModel model);
     }
 }

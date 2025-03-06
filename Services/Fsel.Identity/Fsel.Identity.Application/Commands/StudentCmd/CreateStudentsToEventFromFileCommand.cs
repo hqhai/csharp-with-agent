@@ -309,6 +309,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         {
                             using (var scope = _serviceProvider.CreateScope())
                             {
+                                var password = DefaultPassword + Shared.Helpers.StringHelper.GenerateLaterPartPassword(4);
+
                                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
                                 var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
                                 Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
@@ -321,7 +323,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                     PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
                                     EmailConfirmed = false,
                                     PhoneNumberConfirmed = false,
-                                    Status = EnumUserStatus.Inactive,
+                                    Status = EnumUserStatus.Active,
+                                    DefaultPassword = password,
                                     Human = new Human()
                                     {
                                         FullName = student.FullName.Trim(),
@@ -353,8 +356,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                     }
                                 };
 
-                                var password = DefaultPassword + Shared.Helpers.StringHelper.GenerateLaterPartPassword(4);
-
                                 identityStudentResult = await userManager.CreateAsync(user, password);
                                 if (identityStudentResult.Succeeded)
                                 {
@@ -365,7 +366,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                     studentModels.Add(new CreateOrderForStudentsEventCommandModel()
                                     {
                                         UserId = user.Id,
-                                        StudentId = user.Human.Id,
+                                        StudentId = user.Human.Student.Id,
                                         Email = user.Email,
                                         PhoneNumber = user.PhoneNumber,
                                         FullName = user.FullName,
