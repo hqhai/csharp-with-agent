@@ -28,6 +28,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
         private readonly IUserService _userService;
         private readonly IEventRepository _eventRepository;
 
+        private const string Letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        private const string Digits = "0123456789";
+
         public CreateOrderForStudentsEventCommandHandler(IOrderRepository orderRepository, IPackageRepository packageRepository, IUserService userService, IEventRepository eventRepository)
         {
             _orderRepository = orderRepository;
@@ -73,23 +77,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             {
                 var randomCode = GenerateRandomString();
                 var code = randomCode + "_" + p.StudentCode;
-                var newOrder = new Order()
-                {
-                    UserId = p.UserId,
-                    FullName = p.FullName,
-                    PhoneNumber = p.PhoneNumber,
-                    PackageId = package.Id,
-                    EventId = @event.Id,
-                    Price = packageEvent.Price,
-                    Code = code,
-                    Email = string.IsNullOrEmpty(p.Email) ? p.PhoneNumber : p.Email,
-                    DiscountPercent = 0,
-                    DiscountPrice = 0,
-                    TotalPrice = packageEvent.Price,
-                    Status = EnumOrderStatus.Payment,
-                    ExpireDate = request.ExpiredDate,
-                    RevenueType = null,
-                };
+                var newOrder = CreateOrder(p, packageEvent, request.ExpiredDate, code);
                 orders.Add(newOrder);
             });
 
@@ -117,32 +105,44 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             return methodResult;
         }
 
+        private static Order CreateOrder(CreateOrderForStudentsEventCommandModel student, PackageEvent packageEvent, DateTime expiredDate, string code)
+        {
+            return new Order()
+            {
+                UserId = student.UserId,
+                FullName = student.FullName,
+                PhoneNumber = student.PhoneNumber,
+                PackageId = packageEvent.PackageId,
+                EventId = packageEvent.EventId,
+                Price = packageEvent.Price,
+                Code = code,
+                Email = string.IsNullOrEmpty(student.Email) ? student.PhoneNumber : student.Email,
+                DiscountPercent = 0,
+                DiscountPrice = 0,
+                TotalPrice = packageEvent.Price,
+                Status = EnumOrderStatus.Payment,
+                ExpireDate = expiredDate,
+                RevenueType = null,
+            };
+        }
+
         private static string GenerateRandomString()
         {
-            // Các ký tự chữ cái
-            const string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            // Các ký tự số
-            const string digits = "0123456789";
-
-            // Sử dụng Random để tạo ngẫu nhiên
             Random random = new Random();
             StringBuilder result = new StringBuilder();
 
-            // Tạo ngẫu nhiên các chữ cái
             for (int i = 0; i < 2; i++)
             {
-                int index = random.Next(letters.Length);
-                result.Append(letters[index]);
+                int index = random.Next(Letters.Length);
+                result.Append(Letters[index]);
             }
 
-            // Tạo ngẫu nhiên các chữ số
             for (int i = 0; i < 1; i++)
             {
-                int index = random.Next(digits.Length);
-                result.Append(digits[index]);
+                int index = random.Next(Digits.Length);
+                result.Append(Digits[index]);
             }
 
-            // Trộn các ký tự ngẫu nhiên
             char[] array = result.ToString().ToCharArray();
             Array.Sort(array, (x, y) => random.Next(-1, 2));
 
