@@ -481,15 +481,9 @@ namespace Fsel.Course.Infrastructure.Common
 
                             join cum in courseUnitMockTestRepository.Queryable
                             on baseQ.CourseId equals cum.CourseId
-
-                            join ur in unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
-
-                            join lr in lessonResultRepository.Queryable
-                            on new { ur.StudentId, ur.UnitId, ur.CourseId } equals new { lr.StudentId, lr.UnitId, lr.CourseId }
-
-                            join vr in videoResultRepository.Queryable on lr.Id equals vr.LessonResultId
-
-                            join clr in classForumResultRepository.Queryable on lr.Id equals clr.LessonResultId
+                            join ur in unitResultRepository.Queryable
+                                                       on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
+                            from ur in unitGroup.DefaultIfEmpty()
 
                             join skmt in mockTestResultRepository.Queryable on new { ur.StudentId, UnitId = (Guid?)ur.UnitId, ur.CourseId } equals new { skmt.StudentId, UnitId = skmt.UnitId, skmt.CourseId } into skmtGroup
                             from skmt in skmtGroup.DefaultIfEmpty()
@@ -501,6 +495,18 @@ namespace Fsel.Course.Infrastructure.Common
                             join mtr in mockTestResultRepository.Queryable
                             on new { baseQ.StudentId, baseQ.CourseId, MockTestId = cum.MockTestId } equals new { mtr.StudentId, mtr.CourseId, MockTestId = (Guid?)mtr.MockTestId } into mtrGroup
                             from mtr in mtrGroup.DefaultIfEmpty()
+
+                            join lr in lessonResultRepository.Queryable
+                            on new { ur.StudentId, ur.UnitId, ur.CourseId } equals new { lr.StudentId, lr.UnitId, lr.CourseId } into lrGroup
+                            from lr in lrGroup.DefaultIfEmpty()
+
+                            join vr in videoResultRepository.Queryable
+                            on lr.Id equals vr.LessonResultId into vrGroup
+                            from vr in vrGroup.DefaultIfEmpty()
+
+                            join clr in classForumResultRepository.Queryable
+                            on lr.Id equals clr.LessonResultId into clrGroup
+                            from clr in clrGroup.DefaultIfEmpty()
 
                             where baseQ.WorkingStatus == EnumWorkingStatus.Active
                             group new { baseQ, ur, lr, vr, clr, mtr, ftr, skmt }
