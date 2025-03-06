@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 {
-    using System.Diagnostics;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
@@ -78,6 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 CourseLevel = request.CourseLevel,
             }, cancellationToken);
             var reportLearningProgress = _mapper.Map<SearchReportLearningProgressModel>(dataOverallResult.Result);
+
             var userResults = await _mediator.Send(new GetStudentReportQuery
             {
                 ListDistrict = request.ListDistrict,
@@ -104,6 +104,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 methodResult.AddError(userResults.ErrorMessages);
                 return methodResult;
             }
+
             var students = userResults?.Result;
             if (students == null || !students.Any())
             {
@@ -112,8 +113,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             }
 
             var lists = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
+
             var courseCompletes = await _managerProgressHelper.GetProgressCompleteModuleAsync(lists, request.EndDate);
             var datas = new List<LearningProgressModel>();
+
             foreach (var item in students)
             {
                 var courseComplete = courseCompletes.FirstOrDefault(x => x.StudentId == item.Id);
