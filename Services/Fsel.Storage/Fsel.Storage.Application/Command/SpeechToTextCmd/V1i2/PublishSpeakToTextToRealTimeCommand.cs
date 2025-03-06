@@ -33,19 +33,19 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
         private readonly ILogger<PublishSpeakToTextToRealTimeCommand> _logger;
         private const int Max_Time_Retry = 3;
         private const int Retry_GPT_Time = 2;
-        private readonly ICognitiveProvider _cognitiveProvider;
+        private readonly IDeepgramProvider _deepgramProvider;
         private int _countRetry;
         private int _intervalRetryTime = 5;
         private DateTime _startDate, _endDate = DateTime.UtcNow;
 
-        public PublishSpeakToTextToRealTimeCommandHandler(IOpenAIService openAIService, IAmazonS3Service amazonS3Service, SpeechToTextPublisher speechToTextPublisher, AppSetting appSetting, ILogger<PublishSpeakToTextToRealTimeCommand> logger, ICognitiveProvider cognitiveProvider)
+        public PublishSpeakToTextToRealTimeCommandHandler(IOpenAIService openAIService, IAmazonS3Service amazonS3Service, SpeechToTextPublisher speechToTextPublisher, AppSetting appSetting, ILogger<PublishSpeakToTextToRealTimeCommand> logger, IDeepgramProvider deepgramProvider)
         {
             _openAIService = openAIService;
             _amazonS3Service = amazonS3Service;
             _speechToTextPublisher = speechToTextPublisher;
             _appSetting = appSetting;
             _logger = logger;
-            _cognitiveProvider = cognitiveProvider;
+            _deepgramProvider = deepgramProvider;
         }
 
         public async Task Handle(PublishSpeakToTextToRealTimeCommand request, CancellationToken cancellationToken)
@@ -93,7 +93,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
                     // Nếu OpenAI thất bại hoặc hết retry, chuyển sang DeepGram
                     if (string.IsNullOrEmpty(contentText) || _countRetry == Max_Time_Retry)
                     {
-                        var deepGramContent = await _cognitiveProvider.GetTranscriptionAsync(formFile, cancellationToken);
+                        var deepGramContent = await _deepgramProvider.GetTranscriptionAsync(formFile);
                         _logger.LogError($"LogContentDeepGramAI: {deepGramContent}");
 
                         if (string.IsNullOrEmpty(deepGramContent))
