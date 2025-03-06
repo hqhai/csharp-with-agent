@@ -35,9 +35,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OverallReportLearningProgressModel>();
-            List<(string, double)> list = new List<(string, double)>();
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
             var userResults = await _mediator.Send(new GetStudentReportQuery
             {
                 ListDistrict = request.ListDistrict,
@@ -58,9 +55,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var students = userResults?.Result;
-            stopwatch.Stop();
-            list.Add(("userResults", stopwatch.ElapsedMilliseconds));
-            stopwatch.Restart();
             var overallReport = new OverallReportLearningProgressModel
             {
                 TotalStudent = students?.Count ?? default,
@@ -70,14 +64,9 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     TotalStudent = students?.Where(x => x.CourseLevel == item).Count() ?? default
                 }).ToList()
             };
-            stopwatch.Stop();
-            list.Add(("overallReport", stopwatch.ElapsedMilliseconds));
-            stopwatch.Restart();
 
             await SetAverageProgress(overallReport, request, students);
 
-            stopwatch.Stop();
-            list.Add(("SetAverageProgress", stopwatch.ElapsedMilliseconds));
             methodResult.Result = overallReport;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
@@ -90,20 +79,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 overallReport.ContentAverageProgress = $"{ValueDefault} / {GetTotalProgress(request)}";
                 return;
             }
-            List<(string, double)> list = new List<(string, double)>();
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-
             var courseResults = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
             var countProgress = await _managerProgressHelper.GetOverallCompleteAsync(courseResults, request.EndDate);
 
-            stopwatch.Stop();
-            list.Add(("countProgress", stopwatch.ElapsedMilliseconds));
-            stopwatch.Restart();
-
             var totalProgress = await _managerProgressHelper.GetTotalCompleteCourseAsync(courseResults);
-            stopwatch.Stop();
-            list.Add(("totalProgress", stopwatch.ElapsedMilliseconds));
             overallReport.ContentAverageProgress = $"{countProgress} / {totalProgress}";
         }
 

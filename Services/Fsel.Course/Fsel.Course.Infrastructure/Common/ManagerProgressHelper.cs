@@ -4,7 +4,6 @@ namespace Fsel.Course.Infrastructure.Common
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
     using System.Text;
     using System.Threading;
@@ -193,9 +192,6 @@ namespace Fsel.Course.Infrastructure.Common
 
         public async Task<double> GetOverallCompleteAsync(IList<CourseResultModel>? courseResults, DateTime? arrivalDate = default)
         {
-            List<(string, double)> list = new List<(string, double)>();
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
             var studentIds = courseResults != null && courseResults.Any() ? courseResults.Select(x => x.StudentId).ToList() : new List<Guid>();
             StringBuilder sb = new StringBuilder();
             foreach (var studentId in studentIds)
@@ -209,9 +205,6 @@ namespace Fsel.Course.Infrastructure.Common
             }
 
             object studentIdsParam = sb.Length > 0 ? sb.ToString() : (object)DBNull.Value;
-            stopwatch.Stop();
-            list.Add(("studentIdsParam", stopwatch.ElapsedMilliseconds));
-            stopwatch.Restart();
 
             var endDate = arrivalDate ?? (object)DBNull.Value;
             var courseReports = await _courseDbContext.Set<CourseCompleteReportModel>()
@@ -223,8 +216,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return default;
             }
-            stopwatch.Stop();
-            list.Add(("courseReports", stopwatch.ElapsedMilliseconds));
+
             return NumberHelper.ConvertRound(courseReports.Sum(x => x.CountComplete) / courseReports.Count);
         }
 
