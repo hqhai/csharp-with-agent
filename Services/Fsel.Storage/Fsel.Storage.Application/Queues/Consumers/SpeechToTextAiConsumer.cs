@@ -38,7 +38,7 @@ namespace Fsel.Storage.Application.Queues.Consumers
                 return;
             }
 
-            await _mediator.Send(new PublishSpeakToTextToRealTimeCommand
+            await _mediator.Publish(new PublishSpeakToTextToRealTimeCommand
             {
                 UserId = message.UserId,
                 FileName = message.FileName,

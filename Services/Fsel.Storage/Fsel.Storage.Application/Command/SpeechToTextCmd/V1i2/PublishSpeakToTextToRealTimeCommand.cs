@@ -20,11 +20,11 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
     using Newtonsoft.Json;
     using Fsel.Storage.Domain.Models.EntityModels;
 
-    public class PublishSpeakToTextToRealTimeCommand : SpeechToTextAiConsumerModel, IRequest<MethodResult<bool>>
+    public class PublishSpeakToTextToRealTimeCommand : SpeechToTextAiConsumerModel, INotification
     {
     }
 
-    public class PublishSpeakToTextToRealTimeCommandHandler : IRequestHandler<PublishSpeakToTextToRealTimeCommand, MethodResult<bool>>
+    public class PublishSpeakToTextToRealTimeCommandHandler : INotificationHandler<PublishSpeakToTextToRealTimeCommand>
     {
         private readonly IOpenAIService _openAIService;
         private readonly IAmazonS3Service _amazonS3Service;
@@ -33,30 +33,28 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
         private readonly ILogger<PublishSpeakToTextToRealTimeCommand> _logger;
         private const int Max_Time_Retry = 3;
         private const int Retry_GPT_Time = 2;
-        private readonly ICognitiveProvider _cognitiveProvider;
+        private readonly IDeepgramProvider _deepgramProvider;
         private int _countRetry;
         private int _intervalRetryTime = 5;
         private DateTime _startDate, _endDate = DateTime.UtcNow;
 
-        public PublishSpeakToTextToRealTimeCommandHandler(IOpenAIService openAIService, IAmazonS3Service amazonS3Service, SpeechToTextPublisher speechToTextPublisher, AppSetting appSetting, ILogger<PublishSpeakToTextToRealTimeCommand> logger, ICognitiveProvider cognitiveProvider)
+        public PublishSpeakToTextToRealTimeCommandHandler(IOpenAIService openAIService, IAmazonS3Service amazonS3Service, SpeechToTextPublisher speechToTextPublisher, AppSetting appSetting, ILogger<PublishSpeakToTextToRealTimeCommand> logger, IDeepgramProvider deepgramProvider)
         {
             _openAIService = openAIService;
             _amazonS3Service = amazonS3Service;
             _speechToTextPublisher = speechToTextPublisher;
             _appSetting = appSetting;
             _logger = logger;
-            _cognitiveProvider = cognitiveProvider;
+            _deepgramProvider = deepgramProvider;
         }
 
-        public async Task<MethodResult<bool>> Handle(PublishSpeakToTextToRealTimeCommand request, CancellationToken cancellationToken)
+        public async Task Handle(PublishSpeakToTextToRealTimeCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<bool>();
-
             IFormFile formFile = ConvertToIFormFile(request.FileData, request.FileName, request.ContentType);
             if (formFile == null)
             {
-                return methodResult;
+                return;
             }
 
             var pollyRetry = Policy.HandleResult<bool>(result => !result)
@@ -95,7 +93,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
                     // Nếu OpenAI thất bại hoặc hết retry, chuyển sang DeepGram
                     if (string.IsNullOrEmpty(contentText) || _countRetry == Max_Time_Retry)
                     {
-                        var deepGramContent = await _cognitiveProvider.GetTranscriptionAsync(formFile);
+                        var deepGramContent = await _deepgramProvider.GetTranscriptionAsync(formFile);
                         _logger.LogError($"LogContentDeepGramAI: {deepGramContent}");
 
                         if (string.IsNullOrEmpty(deepGramContent))
@@ -116,7 +114,6 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
                     }
 
                     await PublishTextToSocket(request, contentText, fileInfomation.Result);
-                    methodResult.StatusCode = StatusCodes.Status200OK;
                 }
                 catch (Exception ex)
                 {
@@ -127,8 +124,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
 
             });
 
-            methodResult.Result = retryResult;
-            return methodResult;
+            return;
         }
 
 

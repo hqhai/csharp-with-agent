@@ -26,7 +26,7 @@ builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (
     {
         var randomApiKey = appSetting.OpenAiConfig.ApiKeys[Random.Shared.Next(appSetting.OpenAiConfig.ApiKeys.Count)];
         httpClient.DefaultRequestHeaders.Add("Authorization", $"{Settings.Bearer} {randomApiKey}");
-        httpClient.Timeout = TimeSpan.FromSeconds(2); // Thiết lập timeout 1 phút 40 giây
+        httpClient.Timeout = TimeSpan.FromSeconds(120); // Thiết lập timeout 1 phút 40 giây
     }
 });
 
