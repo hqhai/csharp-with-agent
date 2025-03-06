@@ -18,8 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Storage.Api.Controllers
 {
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/transcript")]
     [ApiController]
     public class TranscriptController : ControllerBase
@@ -106,6 +105,8 @@ namespace Fsel.Storage.Api.Controllers
         /// <summary>
         /// convert speech to text
         /// </summary>
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [DisableFormValueModelBinding]
         [DisableRequestSizeLimit]
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
