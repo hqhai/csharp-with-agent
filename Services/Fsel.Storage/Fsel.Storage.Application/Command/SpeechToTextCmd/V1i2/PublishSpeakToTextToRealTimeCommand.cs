@@ -34,11 +34,12 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
         private const int Max_Time_Retry = 3;
         private const int Retry_GPT_Time = 2;
         private readonly IDeepgramProvider _deepgramProvider;
+        private readonly ICognitiveProvider _cognitiveProvider;
         private int _countRetry;
         private int _intervalRetryTime = 5;
         private DateTime _startDate, _endDate = DateTime.UtcNow;
 
-        public PublishSpeakToTextToRealTimeCommandHandler(IOpenAIService openAIService, IAmazonS3Service amazonS3Service, SpeechToTextPublisher speechToTextPublisher, AppSetting appSetting, ILogger<PublishSpeakToTextToRealTimeCommand> logger, IDeepgramProvider deepgramProvider)
+        public PublishSpeakToTextToRealTimeCommandHandler(IOpenAIService openAIService, IAmazonS3Service amazonS3Service, SpeechToTextPublisher speechToTextPublisher, AppSetting appSetting, ILogger<PublishSpeakToTextToRealTimeCommand> logger, IDeepgramProvider deepgramProvider, ICognitiveProvider cognitiveProvider)
         {
             _openAIService = openAIService;
             _amazonS3Service = amazonS3Service;
@@ -46,6 +47,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
             _appSetting = appSetting;
             _logger = logger;
             _deepgramProvider = deepgramProvider;
+            _cognitiveProvider = cognitiveProvider;
         }
 
         public async Task Handle(PublishSpeakToTextToRealTimeCommand request, CancellationToken cancellationToken)
@@ -98,7 +100,10 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
 
                         if (string.IsNullOrEmpty(deepGramContent))
                         {
-                            return false;
+                            var cognitiveContent = await _cognitiveProvider.GetTranscriptionAsync(formFile);
+                            var fileInFomationCognitive = await UpLoadFileAsync(formFile);
+                            await PublishTextToSocket(request, cognitiveContent, fileInFomationCognitive.Result);
+                            return true;
                         }
 
                         var fileInfomationDeepGram = await UpLoadFileAsync(formFile);
