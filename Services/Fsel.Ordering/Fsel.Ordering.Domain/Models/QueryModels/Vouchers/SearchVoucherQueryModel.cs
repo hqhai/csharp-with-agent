@@ -6,5 +6,7 @@ namespace Fsel.Ordering.Domain.Models.QueryModels.Vouchers
 
     public class SearchVoucherQueryModel : BaseQueryModel
     {
+        public bool? Status { get; set; }
+        public DateTime? CreatedDate { get; set; }
     }
 }

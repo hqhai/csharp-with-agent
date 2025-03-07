@@ -3,24 +3,24 @@
 namespace Fsel.Course.Lms.Api.Controllers.Admin
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.ReviewFselQuery;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/review-fsel/admin")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
-    public class ReviewFselController : ControllerBase
+    public class ReviewFselController : BaseController
     {
         private readonly IMediator _mediator;
 
@@ -37,6 +37,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SearchReviewAi([FromQuery] SearchFeedbackAIQuery query)
         {
+            SetQuery(query);
             MethodResult<PagingItemsModel<FeedbackClassForumAIModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
@@ -49,6 +50,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SearchStudentStars([FromQuery] SearchStudentFeedbackAIQuery query)
         {
+            SetQuery(query);
             MethodResult<PagingItemsModel<StudentFeedbackModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
@@ -61,6 +63,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SearchReviewLessonDetail([FromQuery] SearchReviewLessonDetailQuery query)
         {
+            SetQuery(query);
             MethodResult<ReviewLessonDetailSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
@@ -73,6 +76,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SearchReviewLessonWithCourse([FromQuery] SearchReviewLessonWithCourseQuery query)
         {
+            SetQuery(query);
             MethodResult<ReviewLessonWithCourseSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
@@ -85,6 +89,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SearchReviewLessonWithUnit([FromQuery] SearchReviewLessonWithUnitQuery query)
         {
+            SetQuery(query);
             MethodResult<ReviewLessonWithUnitSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
@@ -97,6 +102,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SearchReviewLessonWithLesson([FromQuery] SearchReviewLessonWithLessonQuery query)
         {
+            SetQuery(query);
             MethodResult<ReviewLessonWithLessonSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
@@ -109,6 +115,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SearchReviewTeacherRatingDetail([FromQuery] SearchReviewTeacherRatingDetailQuery query)
         {
+            SetQuery(query);
             MethodResult<ReviewTeacherRatingDetailSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
@@ -121,6 +128,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SearchReviewTeacherRating([FromQuery] SearchReviewTeacherRatingQuery query)
         {
+            SetQuery(query);
             MethodResult<PagingItemsModel<ReviewTeacherRatingSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }

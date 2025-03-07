@@ -7,6 +7,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
@@ -22,18 +24,25 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     {
         private readonly UserManager<User> _userManager;
         private readonly IInteractionService _interactionService;
+        private readonly IUserSchoolRepository _userSchoolRepository;
 
-        public GetStudentSurveyQuestionQueryHandler(UserManager<User> userManager, IInteractionService interactionService)
+        public GetStudentSurveyQuestionQueryHandler(UserManager<User> userManager, IInteractionService interactionService, IUserSchoolRepository userSchoolRepository)
         {
             _userManager = userManager;
             _interactionService = interactionService;
+            _userSchoolRepository = userSchoolRepository;
         }
 
         public async Task<MethodResult<IList<StudentSurveyQuestionModel>>> Handle(GetStudentSurveyQuestionQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<StudentSurveyQuestionModel>> methodResult = new MethodResult<IList<StudentSurveyQuestionModel>>();
-
+            var isStudentToSchool = await _userSchoolRepository.CheckStudentToAdminSchoolAsync(request.StudentId);
+            if (!isStudentToSchool)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumUserSchoolErrorCode.StudentNotInSchool), nameof(isStudentToSchool));
+                return methodResult;
+            }
             var user = await _userManager.Users.Include(x => x.Human)
                                         .ThenInclude(x => x!.Student)
                                         .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.StudentId, cancellationToken);

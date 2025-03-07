@@ -11,6 +11,7 @@ using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
+using Fsel.Identity.Infrastructure.Common;
 using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 
@@ -24,6 +25,7 @@ builder.AddDbContexts<UserDbContext>();
 builder.AddIdentity<User, Role, UserDbContext>();
 builder.AddAuthenticationIdentity();
 
+//Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserTokenRepository, UserTokenRepository>();
 builder.Services.AddScoped<IHumanRepository, HumanRepository>();
@@ -40,16 +42,32 @@ builder.Services.AddScoped<IUserPlatformRepository, UserPlatformRepository>();
 builder.Services.AddScoped<IStudentDailyStreakRepository, StudentDailyStreakRepository>();
 builder.Services.AddScoped<IStudentRankingRepository, StudentRankingRepository>();
 builder.Services.AddScoped<IStudentTrialRegistrationRepository, StudentTrialRegistrationRepository>();
+builder.Services.AddScoped<IUserCourseSettingRepository, UserCourseSettingRepository>();
+builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeRepository>();
+builder.Services.AddScoped<IStudentCompetitionSnapShotRepository, StudentCompetitionSnapShotRepository>();
+builder.Services.AddScoped<ICompetitionEventsRepository, CompetitionEventsRepository>();
+builder.Services.AddScoped<IEventRegistrationRepository, EventRegistrationRepository>();
+builder.Services.AddScoped<IStudentCompetitionEventsRepository, StudentCompetitionEventRepository>();
+builder.Services.AddScoped<IStudentRankingEventRepository, StudentRankingEventRepository>();
+builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
+builder.Services.AddScoped<IEventRegistrationRepository, EventRegistrationRepository>();
+builder.Services.AddScoped<IUserDeletionRepository, UserDeletionRepository>();
+builder.Services.AddScoped<IUserSchoolRepository, UserSchoolRepository>();
+builder.Services.AddScoped<ISchoolImportHistoryRepository, SchoolImportHistoryRepository>();
 
 // Queue
 builder.Services.AddScoped<LeaderBoardPublisher>();
-builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
-builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeRepository>();
-
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
+builder.Services.AddScoped<CreateStudentsFromFilePublisher>();
+builder.Services.AddScoped<SendStudentsFromFilePublisher>();
 
+//Common
+builder.Services.AddScoped<SaveOtpCodeConverter>();
+
+//Refit
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);

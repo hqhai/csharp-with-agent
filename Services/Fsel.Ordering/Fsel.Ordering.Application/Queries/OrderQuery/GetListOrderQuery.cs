@@ -4,45 +4,39 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using Amazon.Runtime.Internal;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
-    using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
-    using Fsel.Ordering.Infrastructure.Repositories;
-    using Fsel.Shared.Enums;
-    using MassTransit.Initializers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListOrderQuery : IRequest<MethodResult<Guid>>
+    public class GetListOrderQuery : IRequest<MethodResult<IList<OrderModel>>>
     {
         public Guid? UserId { get; set; }
     }
 
-    public class GetListOrderQueryHandler : IRequestHandler<GetListOrderQuery, MethodResult<Guid>>
+    public class GetListOrderQueryHandler : IRequestHandler<GetListOrderQuery, MethodResult<IList<OrderModel>>>
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly IMapper _mapper;
 
-        public GetListOrderQueryHandler(IOrderRepository orderRepository)
+        public GetListOrderQueryHandler(IOrderRepository orderRepository, IMapper mapper)
         {
             _orderRepository = orderRepository;
+            _mapper = mapper;
         }
 
-        public async Task<MethodResult<Guid>> Handle(GetListOrderQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<OrderModel>>> Handle(GetListOrderQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<Guid>();
-            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == request.UserId, cancellationToken);
+            var methodResult = new MethodResult<IList<OrderModel>>();
+            var orders = await _orderRepository.Queryable.Where(x => x.UserId == request.UserId).ToListAsync(cancellationToken);
 
-            methodResult.Result = order?.PackageId ?? default;
+            methodResult.Result = _mapper.Map<IList<OrderModel>>(orders);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

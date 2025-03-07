@@ -43,7 +43,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<LessonModel>> methodResult = new MethodResult<IList<LessonModel>>();
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var student = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
@@ -53,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
             var lessonQuery = await _lessonRepository.Queryable
                                 .Include(x => x.UnitLessons)
-                                .Include(x => x.LessonResults)
+                                .Include(x => x.LessonResults.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId && x.UnitId == request.UnitId))
                                 .Where(x => x.UnitLessons.Select(x => x.UnitId).Contains(request.UnitId))
                                 .AsNoTracking()
                                 .Select(x => new LessonModel

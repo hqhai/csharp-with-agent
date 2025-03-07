@@ -5,9 +5,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Models;
     using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.OrderService;
@@ -79,6 +77,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Student)
                                                    .ThenInclude(x => x!.ParentStudents)
+                                                   .Include(p => p.Receiver).ThenInclude(p => p.Sender).ThenInclude(p => p.Human)
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 var student = userView?.Human?.Student;
                 if (student != null && student.ParentStudents != null && student.ParentStudents.Count > 0)
@@ -88,6 +87,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                   .ThenInclude(x => x!.ParentStudents)
                                                   .ThenInclude(x => x!.Parent)
                                                   .ThenInclude(x => x!.Human)
+                                                  .Include(p => p.Receiver).ThenInclude(p => p.Sender).ThenInclude(p => p.Human)
                                                   .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 }
             }
@@ -108,6 +108,12 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                                       .ThenInclude(x => x!.User)
                                                                       .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 }
+            }
+            else if (userRoles.FirstOrDefault() == EnumRole.AdminSchool.ToString())
+            {
+                userView = await _userManager.Users.Include(x => x.Human)
+                                                   .Include(x => x.UserSchools)
+                                                   .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId && x.EmailConfirmed, cancellationToken);
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Moderator.ToString() || userRoles.FirstOrDefault() == EnumRole.MasterAdmin.ToString() || userRoles.FirstOrDefault() == EnumRole.Admin.ToString())
             {
@@ -131,7 +137,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                     userModel.CountPTResult = countResult?.Content?.Result ?? default;
                     if (student.CreatedByParent == false)
                     {
-                        var classStudent = await _trainingService.GetClassByStudentId(student.Id);
+                        var classStudent = await _trainingService.GetClassToStudentId(student.Id);
                         if (!classStudent.IsSuccessStatusCode)
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError), nameof(classStudent));
@@ -190,9 +196,17 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                         var school = schoolResult.Content?.Result;
                         userModel.SchoolName = school?.FirstOrDefault(x => x.Id == student.SchoolId)?.Name;*/
                     }
+                    if (userView?.Receiver?.Sender != null)
+                    {
+                        userModel.Sender = new SenderModel()
+                        {
+                            SenderId = userView.Receiver.Sender.Id,
+                            FullName = userView.Receiver.Sender.FullName,
+                            Code = userView.Receiver.Sender.Human?.Code
+                        };
+                    }
                 }
             }
-
             if (userRoles.FirstOrDefault() == EnumRole.Parent.ToString())
             {
                 var parent = userView?.Human?.Parent;
@@ -203,7 +217,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
                     foreach (var student in userModel.Students)
                     {
-                        var classStudent = await _trainingService.GetClassByStudentId(student.Id);
+                        var classStudent = await _trainingService.GetClassToStudentId(student.Id);
                         if (!classStudent.IsSuccessStatusCode)
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError), nameof(classStudent));
@@ -218,7 +232,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                     }
                 }
             }
-
             if (userRoles.FirstOrDefault() == EnumRole.Teacher.ToString())
             {
                 var teacher = userView?.Human?.Teacher;
@@ -228,12 +241,20 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                     _mapper.Map(teacher, userModel);
                 }
             }
-
             if (userRoles.FirstOrDefault() == EnumRole.CSO.ToString())
             {
                 _mapper.Map(userView?.Human?.CSO, userModel);
             }
-
+            if (userRoles.FirstOrDefault() == EnumRole.AdminSchool.ToString())
+            {
+                var schoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
+                if (schoolId.HasValue)
+                {
+                    var schoolResult = await _systemService.GetSchoolByIds(new List<Guid> { schoolId.Value });
+                    userModel.School = schoolResult.Content?.Result?.FirstOrDefault()?.Name;
+                    userModel.SchoolName = schoolResult.Content?.Result?.FirstOrDefault()?.Name;
+                }
+            }
             userModel.Roles = userRoles;
             methodResult.Result = userModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

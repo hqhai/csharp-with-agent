@@ -49,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.SectionGroupResultQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<SectionGroupResultModel>();
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentsResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentsResult));
@@ -89,11 +89,10 @@ namespace Fsel.Course.Lms.Application.Queries.SectionGroupResultQuery
 
         private BandScoresReport GetBandScoresReport(SectionGroupResult sectionGroupResult, double scores)
         {
-            var bandScores = GetBandScores(sectionGroupResult);
-            var bandScoreStudent = bandScores?.FirstOrDefault(x => x.Scores == scores);
+            var bandScores = GetBandScoreConfigs(sectionGroupResult);
             var bandScore = GetBandScore(bandScores, scores);
-
             var bandScoreReport = _mapper.Map<BandScoresReport>(bandScore);
+            var bandScoreStudent = bandScores?.FirstOrDefault(x => x.Scores == scores);
             if (bandScoreStudent != null)
             {
                 bandScoreReport.ScoresStudent = bandScoreStudent.Scores;
@@ -102,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Queries.SectionGroupResultQuery
             return bandScoreReport;
         }
 
-        private static IList<BandScores>? GetBandScores(SectionGroupResult sectionGroupResult)
+        private static IList<BandScores>? GetBandScoreConfigs(SectionGroupResult sectionGroupResult)
         {
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.BandScoreFileName);
             var bandScores = ConvertHelper.DeserializeFromFilePath<IList<BandScores>>(path);
@@ -110,24 +109,13 @@ namespace Fsel.Course.Lms.Application.Queries.SectionGroupResultQuery
             return bandScores;
         }
 
-        private BandScores? GetBandScore(IList<BandScores>? bandScores, double scores)
+        private static BandScores? GetBandScore(IList<BandScores>? bandScores, double scores)
         {
-            var bandScore = new BandScores();
-            if (IsFraction(scores))
+            if (scores > 0)
             {
-                bandScore = bandScores?.FirstOrDefault(x => x.Scores <= scores);
+                return bandScores?.FirstOrDefault(x => x.Scores < scores);
             }
-            else
-            {
-                bandScore = bandScores?.FirstOrDefault(x => x.Scores < scores);
-            }
-
-            return bandScore;
-        }
-
-        public bool IsFraction(double value)
-        {
-            return value % 1 == 0;
+            return bandScores?.FirstOrDefault(x => x.Scores == scores);
         }
     }
 }

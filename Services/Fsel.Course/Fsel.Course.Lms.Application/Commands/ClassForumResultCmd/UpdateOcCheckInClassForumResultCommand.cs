@@ -38,7 +38,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 item.CheckCsoId = null;
                 item.CheckStartDate = null;
             }
-            _classForumResultRepository.UpdateList(classForumResult);
+            _classForumResultRepository.UpdateList(classForumResult, false, x => x.LessonResultId, x => x.ClassForumId, x => x.StudentId);
             await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return methodResult;
         }

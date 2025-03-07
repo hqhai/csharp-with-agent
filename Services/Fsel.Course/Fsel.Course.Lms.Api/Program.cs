@@ -18,6 +18,7 @@ using Fsel.Course.Lms.Application.Services.InteractionService;
 using Fsel.Course.Lms.Application.Services.NotificationServices;
 using Fsel.Course.Lms.Application.Services.OrderServices;
 using Fsel.Course.Lms.Application.Services.SenderService;
+using Fsel.Course.Lms.Application.Services.StorageServices;
 using Fsel.Course.Lms.Application.Services.SystemService;
 using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
@@ -53,6 +54,7 @@ builder.Services.AddScoped<IExtraPracticeResultRepository, ExtraPracticeResultRe
 builder.Services.AddScoped<IExtraPracticeAnswerRepository, ExtraPracticeAnswerRepository>();
 builder.Services.AddScoped<IExtraPracticeChapterRepository, ExtraPracticeChapterRepository>();
 builder.Services.AddScoped<BaseInternalUnitResultEventHandler>();
+builder.Services.AddScoped<BaseInternalEventHandler>();
 builder.Services.AddScoped<MockTestResultInputThenUpdateUnitResultHandler>();
 
 builder.Services.AddScoped<IClassForumRepository, ClassForumRepository>();
@@ -108,12 +110,19 @@ builder.Services.AddScoped<IClassForumDetailResultRepository, ClassForumDetailRe
 builder.Services.AddScoped<IProsodyScoreRepository, ProsodyScoreRepository>();
 builder.Services.AddScoped<ISpeakingAIService, SpeakingAIService>();
 builder.Services.AddScoped<ISpeakingEvaluationAIService, SpeakingEvaluationAIService>();
+builder.Services.AddScoped<IQuestionExplanationErrorRepository, QuestionExplanationErrorRepository>();
+builder.Services.AddScoped<IQuestionExplanationLogRepository, QuestionExplanationLogRepository>();
+builder.Services.AddScoped<IPlacementTestGroupResultRepository, PlacementTestGroupResultRepository>();
+builder.Services.AddScoped<IQuestionShuffleRepository, QuestionShuffleRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<SetTimeRetryMockTestPublisher>();
 builder.Services.AddScoped<SetTimeRetryClassForumPublisher>();
+builder.Services.AddScoped<TechieActionPublisher>();
+builder.Services.AddScoped<CreateLuckyTicketPublisher>();
+builder.Services.AddScoped<AddFeatureMissionPublisher>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
@@ -130,8 +139,13 @@ builder.Services.AddScoped<SectionGroupManagerConverter>();
 // Helper
 builder.Services.AddScoped<LinQHelper>();
 builder.Services.AddScoped<LinQAnswerHelper>();
+builder.Services.AddScoped<ChangeCourseHelper>();
+builder.Services.AddScoped<ManagerProgressHelper>();
 
 // Publisher
+builder.Services.AddScoped<QuestBoardPublisher>();
+builder.Services.AddScoped<SaveUserCourseSettingPublisher>();
+builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<FinishOneFinalTestPublisher>();
 builder.Services.AddScoped<SetTimeClassForumDonePublisher>();
 builder.Services.AddScoped<FinishOneHomeWorkPublisher>();
@@ -141,7 +155,6 @@ builder.Services.AddScoped<FinishOneUnitPublisher>();
 builder.Services.AddScoped<FinishOneUnitTestPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<CreateOrderPublisher>();
-builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<GetTimeToCompleteTestPublisher>();
 builder.Services.AddScoped<SubmitAIResponsePublisher>();
 builder.Services.AddScoped<SubmitClassForumGradingPublisher>();
@@ -151,6 +164,12 @@ builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<DisconnectSocketCalculateTimePublisher>();
 builder.Services.AddScoped<SubmitAiSpeakingAnswerPublisher>();
 builder.Services.AddScoped<GetTimeModulePublisher>();
+builder.Services.AddScoped<SubmitSpeakingAIPublisher>();
+builder.Services.AddScoped<StudentRankingEventsPublisher>();
+builder.Services.AddScoped<RankedStudentPublisher>();
+builder.Services.AddScoped<ExportFileExcelStudentLearningProcessPublisher>();
+builder.Services.AddScoped<SavePlacementTestAnswersPublisher>();
+builder.Services.AddScoped<ErrorExplainPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -160,12 +179,15 @@ builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiU
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(INotificationService), appSetting?.Services?.NotificationApiUrl);
+builder.AddRefitClients(typeof(IStorageService), appSetting?.Services?.StorageApiUrl);
 builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
 {
+
     httpClient.BaseAddress = new Uri(appSetting?.OpenAiConfig?.Uri ?? string.Empty);
-    if (!string.IsNullOrEmpty(appSetting?.OpenAiConfig?.ApiKey))
+    if (appSetting?.OpenAiConfig?.ApiKeys != null && appSetting.OpenAiConfig.ApiKeys!.Any())
     {
-        httpClient.DefaultRequestHeaders.Add("Authorization", $"{Settings.Bearer} {appSetting?.OpenAiConfig?.ApiKey}");
+        var randomApiKey = appSetting.OpenAiConfig.ApiKeys[Random.Shared.Next(appSetting.OpenAiConfig.ApiKeys.Count)];
+        httpClient.DefaultRequestHeaders.Add("Authorization", $"{Settings.Bearer} {randomApiKey}");
     }
 });
 
@@ -184,6 +206,11 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.RetryMockTestAction, typeof(RetryMockTestWhenScoreZeroConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
     { QueueSettings.LmsQueue.NameQueue.RetryClassForumAction, typeof(RetryClassForumConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.SpeakingAI, typeof(SpeakingAIEvaluationConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.RankedStudent, typeof(RankedStudentConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.ExportExcelStudentLearningProcess, typeof(ExportFileExcelStudentLearningProcessConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.SavePlacementTestAnswers, typeof(SavePlacementTestAnswersConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.ErrorExplainGgSheet, typeof(ErrorExplainConsumer) },
 });
 
 var app = builder.Build();

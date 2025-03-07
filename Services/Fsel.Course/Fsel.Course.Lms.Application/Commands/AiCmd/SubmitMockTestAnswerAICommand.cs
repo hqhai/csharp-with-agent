@@ -151,6 +151,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             {
                 return true;
             }
+
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { mockTestResult.StudentId });
             if (!studentResults.IsSuccessStatusCode)
             {
@@ -202,9 +203,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             (double averageScore, double totalScore) = CalculateOverallAverage(taskResponse!, coherence!, lexicalResource!, grammaticalRange!);
 
-            var skillScore = sectionGroupResult!.SkillScores?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Writing);
-
-            var skillScores = sectionGroupResult!.SkillScores?.ToList() ?? new List<SkillScores>();
+            var skillScore = sectionGroupResult.SkillScores?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Writing);
+            var skillScores = sectionGroupResult.SkillScores?.ToList() ?? new List<SkillScores>();
 
             if (skillScore == null)
             {
@@ -243,16 +243,16 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             if (mockTestAnswer != null)
             {
                 mockTestAnswer.GradingAlFeedback = gradingAiFeedBack;
-                _mockTestAnswerRepository.Update(mockTestAnswer);
+                _mockTestAnswerRepository.Update(mockTestAnswer, false, x => x.MockTestResultId, x => x.SectionGroupResultId, x => x.SectionQuestionId, x => x.SectionId, x => x.SectionTimeCodeId);
                 await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                _sectionGroupResultRepository.Update(sectionGroupResult);
+                _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime, x => x.SectionGroupId, x => x.PlacementTestResultId, x => x.MockTestResultId, x => x.FinalTestResultId, x => x.StudentId);
                 await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 if (checkSkillMockTest)
                 {
                     var sections = await _sectionRepository.Queryable.Where(x => x.SectionGroupId == request.SectionGroupId).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken);
-                    _mockTestResultRepository.Update(mockTestResult);
+                    _mockTestResultRepository.Update(mockTestResult, false, x => x.MockTestId, x => x.CourseId, x => x.UnitId, x => x.StudentId);
                     if (skillScore != null)
                     {
                         await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -299,8 +299,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             }
 
             double average = totalScore / bandScoreDescriptions.Length;
-
-            return (NumberHelper.RoundNumberDouble(average), totalScore);
+            return (NumberHelper.RoundReduceNumber(average), totalScore);
         }
 
         private static double CaculateAverageScoreWritingSection(double firstScore, double average, int displayOrder)

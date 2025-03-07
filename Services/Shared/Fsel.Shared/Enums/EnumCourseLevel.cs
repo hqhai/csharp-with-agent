@@ -32,5 +32,14 @@ namespace Fsel.Shared.Enums
 
         [Description("Mindset 3")]
         MS3,
+
+        [Description("English Foundation - Level A1")]
+        EFA1,
+
+        [Description("English Foundation - Level A2")]
+        EFA2,
+
+        [Description("English Foundation - Level B1")]
+        EFB1
     }
 }

@@ -6,6 +6,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
 
     public class StudentRankingModel : BaseModel
     {
@@ -22,6 +23,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public int CurrentPosition { get; set; }
 
         private string? _avatarPath;
+
         public string? AvatarPath
         {
             set { _avatarPath = value; }
@@ -30,12 +32,16 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public string? FullName { get; set; }
 
+        public string? Email { get; set; }
+
         public EnumCourseLevel Level { get; set; }
+
+        public EnumCourseType CourseType { get; set; }
 
         //Tham gia cuộc thi
         public string? SchoolName { get; set; }
 
-        public double? Grade { get; set; }
+        public string? Grade { get; set; }
 
         public double? Process { get; set; }
 
@@ -45,5 +51,11 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public double? RankingScore { get; set; }
 
+        public Guid CourseResultId { get; set; }
+
+        public WeekEvent? WeekEvent { get; set; }
+        public string? EventRankingPosition { get; set; }
+
+        public Guid? SchoolId { get; set; }
     }
 }

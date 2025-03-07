@@ -9,6 +9,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? FullName { get; set; }
         public string? Email { get; set; }
         public DateTime CreatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
         public Guid StudentId { get; set; }
         public Guid CourseId { get; set; }
         public EnumCourseType CourseType { get; set; }

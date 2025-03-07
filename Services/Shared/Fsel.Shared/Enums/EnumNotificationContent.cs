@@ -29,6 +29,30 @@ namespace Fsel.Shared.Enums
         NoticeExpireAfterTwoDay,
         CommentPost,
         LikePost,
-        ReplyCommentPost
+        ReplyCommentPost,
+        CourseChange,
+        LuckyTicket,
+        FselFlowFBEvent,
+
+        //Version 1.1
+        CompletedStreakLogin,
+        CompleteCourse,
+        UpgradeOrder,
+        SubcriptionNotice,
+        NoticeTrialExpired,
+        PlanWeekExtend,
+        PlanDayExtend,
+        ExtendSuccessfully,
+        FirstStudyNotice,
+        SecondStudyNotice,
+        ThirdStudyNotice,
+        FourthStudyNotice,
+        FifthStudyNotice,
+        StopBothering,
+        TreasureExploration,
+        EnergyCollecting,
+        FriendCompletedExam,
+        FriendCompleteUnitOne,
+        FriendPaymentSuccessfully,
     }
 }

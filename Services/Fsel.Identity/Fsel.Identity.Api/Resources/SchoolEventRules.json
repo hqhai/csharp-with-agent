@@ -1,0 +1,56 @@
+[
+  {
+    "schoolCode": "EVNB01_2024",
+    "luckySpin": true,
+    "weekEvents": [
+      {
+        "title": "Cơ cấu giải thưởng",
+        "prizeCount": 1,
+        "rules": [
+          {
+            "prizeQuantity": "Top 10 Học sinh hoàn thành mục tiêu trong tuần đầu tiên đăng nhập hệ thống và có điểm học tập cao nhất trên bảng xếp hạng",
+            "detail": "Được nhận ngay 1 bình nước FSEL",
+            "rewardImagine": "https://s3-sgn10.fptcloud.com/fsel-public/Images/cc_gi_nhit_1512_1721790413524.png",
+            "rank": 1,
+            "rule": "Chặng 1: Khởi động (Tuần 1: Từ 22/07/2024 đến 28/07/2024): học sinh lựa chọn 1 trong 2 chương trình thi đua nhận thưởng và báo với quản lý học tập kết quả sau mỗi tuần:\nChương trình 1: Top 10 Học sinh hoàn thành mục tiêu trong tuần đầu tiên đăng nhập hệ thống và có điểm học tập cao nhất trên bảng xếp hạng sẽ nhận được 01 bình nước FSEL.\n Cách tính điểm thứ tự xếp hạng được tính bằng tổng của 02 chỉ số:\n Tỉ lệ hoàn thành khóa học- Trọng số 75%\n Tỉ lệ tổng số câu đúng trên tổng số câu đã hoàn thành Trọng số 25%\n Tổng điểm = Tỉ lệ hoàn thành khóa học x 75% + Tỉ lệ tổng số câu đúng trên tổng số câu đã hoàn thành x 25%\n Học sinh chụp lại bảng xếp hạng của mình khi nằm trong TOP 10 tại thời điểm kết thúc thi đua tuần (lúc 23h59p ngày 28/07/2024) và gửi lại QLHT phụ trách để đối chiếu và xác nhận trúng thưởng."
+          }
+        ],
+        "weekNumber": 1,
+        "startDate": "2024-07-22T00:00:01.470Z",
+        "endDate": "2024-07-28T23:59:59.470Z"
+      },
+      {
+        "title": "Cơ cấu giải thưởng",
+        "prizeCount": 1,
+        "rules": [
+          {
+            "prizeQuantity": "Thu thập đủ bộ Techie",
+            "detail": "Được nhận ngay 1 Cốc giữ nhiệt FSEL",
+            "rewardImagine": "https://s3-sgn10.fptcloud.com/fsel-public/Images/cc_gi_nhit_1512_1721790413524.png",
+            "rank": 1,
+            "rule": "Chặng 2: Tăng tốc (Tuần 2: Từ  29/07/2024 đến 04/08/2024)\n Học sinh thu thập các khoảnh khắc Techie xuất hiện kèm lời chúc của Techie sau khi đạt các mốc trả lời đúng liên tiếp 05 - 10 - 15  câu hỏi trong phần học Video bằng cách chụp lại màn hình sẽ nhận thưởng tương ứng:\n 05 câu đúng liên tiếp: 01 móc chìa khóa Phi hành gia\n 10 câu đúng liên tiếp: 01 gấu bông Techie\n 15 câu đúng liên tiếp: 01 quạt mini Phi hành gia FSEL  + Voucher tặng 1,5 tháng khi đăng ký khoá học từ 06 tháng trở lên\n *Lưu ý:\n Mỗi mốc hoàn thành, học sinh chỉ được nhận quà 1 lần duy nhất.\n Techie sẽ xuất hiện rất nhanh, hãy thật nhanh tay để bắt trọn khoảng khắc cùng Techie nhé!"
+          }
+        ],
+        "weekNumber": 2,
+        "startDate": "2024-07-29T00:00:01.470Z",
+        "endDate": "2024-08-04T23:59:59.470Z"
+      },
+      {
+        "title": "Cơ cấu giải thưởng",
+        "prizeCount": 1,
+        "rules": [
+          {
+            "prizeQuantity": "Top 5 Học sinh có điểm học tập cao nhất",
+            "detail": "01 Tai nghe máy tính  + Voucher tặng 03 tháng khi đăng ký khoá học từ 12 tháng trở lên",
+            "rewardImagine": "https://s3-sgn10.fptcloud.com/fsel-public/Images/reward1_1853_1721790334841.png",
+            "rank": 1,
+            "rule": "Chặng 3:  Về đích:  (Tuần 3: Từ 05/08/2024 .đến 11/08/2024):  Top 5 Học sinh hoàn thành mục tiêu trong tuần học thứ 3 và có điểm học tập cao nhất trên bảng xếp hạng sẽ nhận được 01 Tai nghe máy tính  + Voucher tặng 03 tháng khi đăng ký khoá học từ 12 tháng trở lên (Voucher có hạn tới 31/08/2024)\n Cách tính điểm: Thứ tự trên bảng xếp hạng được tính bằng tổng của 02 chỉ số: \n Tỉ lệ hoàn thành khóa học - Trong Số 75% \n Tỉ lệ tổng số câu đúng trên tổng số câu đã hoàn thành x 75% + Tỉ lệ tổng số câu đúng trên tổng số câu đã hoàn thành x 25% \n Học sinh chụp lại bảng xếp hạng của mình khi nằm trong TOP 05 tại thời điểm kết thúc thi đua tuần (lúc 23h59p ngày....) và gửi lại QLHT phụ trách để kiểm tra và xác nhận trúng thưởng."
+          }
+        ],
+        "weekNumber": 3,
+        "startDate": "2024-08-05T00:00:01.470Z",
+        "endDate": "2024-08-11T23:59:59.470Z"
+      }
+    ]
+  }
+]

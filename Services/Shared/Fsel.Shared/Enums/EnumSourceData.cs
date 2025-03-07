@@ -24,6 +24,10 @@ namespace Fsel.Shared.Enums
         QuestBoardType,
         RepeatType,
         EnumFeature,
-        MockTestScoreCriteria
+        MockTestScoreCriteria,
+        CompletionStatus,
+        LearningStatus,
+        OverallScore,
+        LearningProgress
     }
 }

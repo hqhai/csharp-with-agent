@@ -3,11 +3,13 @@
 namespace Fsel.System.Domain.Entities
 {
     using Fsel.Common.Helpers;
+    using Fsel.Core.Base.Interfaces;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
+    using Fsel.System.Domain.Models.EntityModels.Configs;
     using global::System.ComponentModel.DataAnnotations.Schema;
 
-    public class TokenHistory : Entity
+    public class TokenHistory : Entity, IMultiLingualObject<TokenHistoryTranslation>
     {
         private double _remainToken;
         public Guid? TokenConfigId { get; set; }
@@ -43,7 +45,7 @@ namespace Fsel.System.Domain.Entities
         public Guid UserId { get; set; }
 
         public Guid? ObjectId { get; set; }
-
+        public Guid? CourseResultId { get; set; }
         public string? ConfigStr { get; set; }
 
         [NotMapped]
@@ -53,8 +55,33 @@ namespace Fsel.System.Domain.Entities
             set { ConfigStr = ConvertHelper.Serialize(value); }
         }
 
-        public EnumTokenHistoryType Type { get; set; }
+        public string? ConfigDataStr { get; set; }
 
+        [NotMapped]
+        public ConfigDataToken? ConfigData
+        {
+            get { return ConvertHelper.Deserialize<ConfigDataToken>(ConfigDataStr); }
+            set { ConfigDataStr = ConvertHelper.Serialize(value); }
+        }
+
+        public EnumTokenHistoryType Type { get; set; }
         public TokenConfig? TokenConfig { get; set; }
+        public ICollection<TokenHistoryTranslation> Translations { get; set; } = new List<TokenHistoryTranslation>();
+    }
+
+    public class TokenHistoryTranslation : Entity, ITranslationObject
+    {
+        public string? Language { get; set; }
+        public string? ConfigStr { get; set; }
+
+        [NotMapped]
+        public object? Config
+        {
+            get { return ConvertHelper.Deserialize<object>(ConfigStr); }
+            set { ConfigStr = ConvertHelper.Serialize(value); }
+        }
+
+        public TokenHistory? TokenHistory { get; set; }
+        public Guid TokenHistoryId { get; set; }
     }
 }

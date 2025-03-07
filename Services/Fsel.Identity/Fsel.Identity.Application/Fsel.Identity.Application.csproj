@@ -10,4 +10,10 @@
     <ProjectReference Include="..\Fsel.Identity.Infrastructure\Fsel.Identity.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Commands\GoogleSheetReadingCmd\" />
+    <Folder Include="Queries\UserOtpCodeQuery\" />
+    <Folder Include="Services\GoogleSheetServices\Models\" />
+  </ItemGroup>
+
 </Project>

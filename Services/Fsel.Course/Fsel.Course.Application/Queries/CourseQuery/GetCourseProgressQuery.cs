@@ -4,7 +4,6 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -48,11 +47,20 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 
             var query = _courseRepository.Queryable.Include(x => x.CourseUnitMockTests)
                                                    .Include(x => x.CourseResults)
+                                                   .Where(x => !x.ParentCourseId.HasValue)
                                                    .Where(x => x.CourseResults.Any() && x.CourseUnitMockTests.Any(x => !x.UnitId.HasValue && !x.MockTestId.HasValue && !x.FinalTestId.HasValue));
 
+            request.Keyword = request.Keyword?.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    query = query.Where(m => m.Id == guid);
+                }
+                else
+                {
+                    query = query.Where(m => m.Name != null && m.Name.Contains(request.Keyword));
+                }
             }
             if (request.CourseLevel != null)
             {

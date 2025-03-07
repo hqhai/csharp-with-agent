@@ -44,7 +44,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
                 return methodResult;
             }
-            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId, cancellationToken);
+            var videoResult = await GetVideoResultAsync(request, cancellationToken);
             if (videoResult == null)
             {
                 return methodResult;
@@ -65,9 +65,24 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
                 return methodResult;
             }
             methodResult.Result = GetLessonReport(video, videoResult);
-
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task<VideoResult?> GetVideoResultAsync(GetLessonReportQuery request, CancellationToken cancellationToken)
+        {
+            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId, cancellationToken);
+            if (videoResult == null)
+            {
+                return videoResult;
+            }
+            if (videoResult.Status == EnumResultStatus.Done && !videoResult.IsShowToken && videoResult.TotalToken == 0)
+            {
+                videoResult.IsShowToken = true;
+                videoResult = _videoResultRepository.Update(videoResult);
+                await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            return videoResult;
         }
 
         private static LessonReportModel GetLessonReport(Video video, VideoResult videoResult)
@@ -80,6 +95,10 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
             lessonReport.CorrectTotal = questions.Where(x => !x!.Ungraded).Sum(x => x!.CorrectTotal);
             lessonReport.Percent = NumberHelper.GetPercent(lessonReport.CorrectCount, lessonReport.CorrectTotal);
             lessonReport.HighestStreak = videoResult.HighestStreak;
+            lessonReport.TimeCodeHighestStreak = videoResult.TimeCodeHighestStreak;
+            lessonReport.StatusVideoResult = videoResult.Status;
+            lessonReport.IsShowToken = videoResult.IsShowToken;
+            lessonReport.TotalToken = videoResult.TotalToken;
             return lessonReport;
         }
     }

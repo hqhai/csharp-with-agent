@@ -15,12 +15,15 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class StartLessonCommand : IRequest<MethodResult<LessonResultModel>>
     {
@@ -33,8 +36,10 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly ILogger<StartLessonCommand> _logger;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly AuthContext _authContext;
+        private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         private readonly ILessonRepository _lessonRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
@@ -44,8 +49,10 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
             , IUnitRepository unitRepository
             , IUserService userService
             , IMapper mapper
+            , ILogger<StartLessonCommand> logger
             , IUnitResultRepository unitResultRepository
             , AuthContext authContext
+            , SaveUserCourseSettingPublisher saveUserCourseSettingPublisher
             , ILessonRepository lessonRepository
             , ILessonResultRepository lessonResultRepository
             , ICourseResultRepository courseResultRepository
@@ -55,8 +62,10 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
             _unitRepository = unitRepository;
             _userService = userService;
             _mapper = mapper;
+            _logger = logger;
             _unitResultRepository = unitResultRepository;
             _authContext = authContext;
+            _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _lessonRepository = lessonRepository;
             _lessonResultRepository = lessonResultRepository;
             _courseResultRepository = courseResultRepository;
@@ -70,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
 
             #region Validation
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
@@ -122,7 +131,17 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
             }).ToList();
 
             lessonResult.Status = EnumResultStatus.Process;
-            lessonResult = _lessonResultRepository.Update(lessonResult);
+            lessonResult = _lessonResultRepository.Update(lessonResult, false, x => x.CourseId, x => x.UnitId, x => x.LessonId, x => x.StudentId);
+
+            try
+            {
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Duplicate Start LessonResult : {ex.Message}");
+            }
+
             await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return lessonResult;
         }
@@ -131,8 +150,9 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
         {
             if (unitResult.Status == EnumResultStatus.New)
             {
+                unitResult.ProcessDate = DateTime.UtcNow;
                 unitResult.Status = EnumResultStatus.Process;
-                _unitResultRepository.Update(unitResult);
+                _unitResultRepository.Update(unitResult, false, x => x.CourseId, x => x.UnitId, x => x.StudentId);
                 await _unitResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
@@ -142,8 +162,17 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
             var courseResult = course.CourseResults.FirstOrDefault(x => x.StudentId == studentId && x.CourseId == course.Id);
             if (courseResult != null && courseResult.Status == EnumResultStatus.New)
             {
+                await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
+                {
+                    CourseLevel = course.CourseLevel,
+                    IsDeduction = true,
+                    Type = EnumUserCourseType.ResetAndLearnAgain,
+                    UserId = _authContext.CurrentUserId
+                }, cancellationToken).ConfigureAwait(false);
+
+                courseResult.ProcessDate = DateTime.UtcNow;
                 courseResult.Status = EnumResultStatus.Process;
-                _courseResultRepository.Update(courseResult);
+                _courseResultRepository.Update(courseResult, false, x => x.CourseId, x => x.StudentId);
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }

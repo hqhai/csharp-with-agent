@@ -5,7 +5,6 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
     using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
-    using Amazon.Runtime.Internal.Util;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
     using Fsel.Common.Models;
@@ -65,7 +64,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
             _logger.LogWarning($"Call WeeklyReportCommand - {DateTime.UtcNow} - body: " + Common.Helpers.ConvertHelper.Serialize(request));
 
-            return methodResult;
+            //return methodResult;
 
             var students = new List<StudentModel>();
 
@@ -84,22 +83,23 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             {
                 return methodResult;
             }
-            students = students.Where(p => p.Human?.Email?.ToLower(CultureInfo.CurrentCulture) == "nguyenhuukhoa5462@gmail.com").ToList();
-            //UserSettingQuery query = new UserSettingQuery
-            //{
-            //    UserIds = students!.Select(x => x.Human!.UserId).ToList(),
-            //};
+            //students = students.Where(p => p.Human?.Email?.ToLower(CultureInfo.CurrentCulture) == "nguyenhuukhoa5462@gmail.com").ToList();
 
-            ////Lấy những học sinh bật thông báo Gửi Email hàng tuần
-            //var studentFilter = await _userService.GetListUserSetting(query);
-            //var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
+            UserSettingQuery query = new UserSettingQuery
+            {
+                UserIds = students!.Select(x => x.Human!.UserId).ToList(),
+            };
 
-            //if (studentFilterResult == null || studentFilterResult.Count == 0)
-            //{
-            //    return methodResult;
-            //}
-            ////filter những học sinh bật thông báo email.
-            //students = students.Where(x => studentFilterResult.Contains(x.Human!.UserId)).ToList();
+            //Lấy những học sinh bật thông báo Gửi Email hàng tuần
+            var studentFilter = await _userService.GetListUserSetting(query);
+            var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
+
+            if (studentFilterResult == null || studentFilterResult.Count == 0)
+            {
+                return methodResult;
+            }
+            //filter những học sinh bật thông báo email.
+            students = students.Where(x => x.Human != null && studentFilterResult.Contains(x.Human.UserId)).OrderBy(x => x.Human!.Email).ToList();
 
             DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value.AddDays(1).Date : DateTime.UtcNow.Date;
 
@@ -170,6 +170,8 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
             foreach (var item in students)
             {
+                _logger.LogInformation("Index {index} of {total}, Email: {email}", students.IndexOf(item) + 1, students.Count, item.Human!.Email);
+
                 var studentDailyStreaks = featureAccessTimeResults.Content?.Result?.Where(p => p.CreatedUserId == item.Human?.UserId).Where(x => x.CreatedDate.HasValue).Select(p => p.CreatedDate!.Value.Date).Distinct().ToList();
 
                 var weeklyReport = new WeeklyReportModel()
@@ -230,7 +232,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                         .ThenInclude(x => x.UnitLessons.Where(x => x.UnitId == unit.UnitId))
                         .Where(p => p.StudentId == item.Id && p.Status == EnumResultStatus.Done && p.UnitId == unit.UnitId)
                         .Where(p => p.UpdatedDate.HasValue && p.UpdatedDate.Value.Date >= lastFridayAt13.Date && p.UpdatedDate.Value.Date < currentDate.Date)
-                        .Where(x => x.ClassForumResults.Any(x => x.Status == EnumClassForumResultStatus.Graded))
+                        .Where(x => x.ClassForumResults.Any(x => x.Status.HasValue))
                         .OrderBy(n => n.CreatedDate).ToListAsync(cancellationToken);
 
                     if (lessonResultsDone.Count > 0)
@@ -400,7 +402,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
         {
             if (businessType == EnumFeatureBussinessType.Learn)
             {
-                return featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.VideoLesson || p.EnumFeature == EnumFeature.HomeWork || p.EnumFeature == EnumFeature.FinalTest || p.EnumFeature == EnumFeature.MockTest).Sum(p => p.AccessTime) ?? 0;
+                return featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.VideoLesson || p.EnumFeature == EnumFeature.HomeWork || p.EnumFeature == EnumFeature.FinalTest || p.EnumFeature == EnumFeature.MockTest || p.EnumFeature == EnumFeature.ChatBot).Sum(p => p.AccessTime) ?? 0;
             }
             else if (businessType == EnumFeatureBussinessType.Social)
             {
@@ -419,7 +421,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             if (lessonResult != null)
             {
                 counts.Add(lessonResult.VideoResult?.Status == EnumResultStatus.Done ? 1 : 0);
-                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && (x.Status == EnumClassForumResultStatus.Denied || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == studentId).Count());
+                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && x.Status.HasValue && x.StudentId == studentId).Count());
                 counts.Add(lessonResult.HomeWorkResults.Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == studentId).GroupBy(x => x.LessonResultId).Count());
             }
             if (counts.Count == 0)

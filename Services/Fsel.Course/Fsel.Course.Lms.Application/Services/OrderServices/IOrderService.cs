@@ -17,10 +17,10 @@ namespace Fsel.Course.Lms.Application.Services.OrderServices
         Task<IApiResponse<MethodResult<EnumOrderStatus?>>> GetStatusAsync([Query] GetStatusByUserCommandModel command);
 
         [Get("/v1.1/order")]
-        Task<IApiResponse<MethodResult<OrderModel?>>> GetOrderAsync();
+        Task<IApiResponse<MethodResult<OrderModel>>> GetOrderAsync();
 
-        [Get("/v1.1/order/{userId}")]
-        Task<IApiResponse<MethodResult<OrderModel?>>> GetOrderAsync([FromRoute] Guid userId);
+        [Get("/v1.1/order/trial/{userId}")]
+        Task<IApiResponse<MethodResult<OrderModel>>> GetOrderTrialAsync([FromRoute] Guid userId);
 
         [Get("/v1/order/get-current-status/{id}")]
         Task<IApiResponse<MethodResult<EnumTrialRegistrationStatus?>>> GetCurrentStatusAsync([FromRoute] Guid id);

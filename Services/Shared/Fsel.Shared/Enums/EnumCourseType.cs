@@ -2,9 +2,17 @@
 
 namespace Fsel.Shared.Enums
 {
+    using System.ComponentModel;
+
     public enum EnumCourseType
     {
+        [Description("Academic")]
         Academic,
-        Ielts
+
+        [Description("Ielts")]
+        Ielts,
+
+        [Description("English Foundation (16+)")]
+        EnglishFoundation
     }
 }

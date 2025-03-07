@@ -4,7 +4,7 @@ namespace Fsel.Identity.Infrastructure.Configs
 {
     using Fsel.Common.Helpers;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -26,6 +26,10 @@ namespace Fsel.Identity.Infrastructure.Configs
                  .HasConversion(
                     v => v.HasValue ? v.ToString() : null,
                     v => v.EnumParse<EnumGender>());
+
+            builder.HasIndex(x => new { x.IsDeleted, x.Code });
+            builder.HasIndex(x => new { x.IsDeleted, x.Email });
+            builder.HasIndex(x => new { x.IsDeleted, x.PhoneNumber });
         }
     }
 }

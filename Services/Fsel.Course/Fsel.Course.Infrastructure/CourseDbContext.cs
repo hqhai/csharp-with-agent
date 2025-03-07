@@ -3,6 +3,9 @@
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
+using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
 using Fsel.Course.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -55,6 +58,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<HomeWorkAnswer> HomeWorkAnswers { get; set; }
         public DbSet<HomeWorkResult> HomeWorkResults { get; set; }
 
+        public DbSet<PlacementTestGroupResult> PlacementTestGroupResults { get; set; }
         public DbSet<PlacementTestSection> PlacementTestSections { get; set; }
         public DbSet<PlacementTestAnswer> PlacementTestAnswers { get; set; }
         public DbSet<PlacementTestResult> PlacementTestResults { get; set; }
@@ -83,6 +87,30 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForumDetailResult> ClassForumDetailResults { get; set; }
         public DbSet<MockTestAICriteriaSetting> MockTestAICriteriaSettings { get; set; }
         public DbSet<ProsodyScore> ProsodyScore { get; set; }
+        public DbSet<QuestionExplanationError> QuestionExplanationErrors { get; set; }
+        public DbSet<QuestionExplanationLog> QuestionExplanationLogs { get; set; }
+        public DbSet<QuestionShuffle> QuestionShuffles { get; set; }
+
+        public DbSet<TotalEvaluateInputResultModel> TotalEvaluateInputResults { get; set; }
+        public DbSet<TotalDetailEvaluateInputResultModel> TotalDetailEvaluateInputResults { get; set; }
+        public DbSet<PercentEvaluateInputResultModel> PercentEvaluateInputResults { get; set; }
+        public DbSet<LevelEvaluateInputResultModel> LevelEvaluateInputResults { get; set; }
+        public DbSet<SchoolSummaryModel> SchoolSummarys { get; set; }
+        public DbSet<TotalLearningProgressModel> TotalLearningProgress { get; set; }
+        public DbSet<AverageLearningProgressModel> AverageLearningProgress { get; set; }
+        public DbSet<UnitDoneLearningProgressIeltsModel> UnitDoneLearningProgressIelts { get; set; }
+        public DbSet<UnitDoneLearningProgressAcademicModel> UnitDoneLearningProgressAcademics { get; set; }
+        public DbSet<LessonDoneLearningProgressIeltsModel> LessonDoneLearningProgressIelts { get; set; }
+        public DbSet<LessonDoneLearningProgressAcademicModel> LessonDoneLearningProgressAcademics { get; set; }
+        public DbSet<TotalLearningModel> TotalLearnings { get; set; }
+        public DbSet<RateLearningModel> RateLearnings { get; set; }
+        public DbSet<TotalLearningQualityModel> TotalLearningQualitys { get; set; }
+        public DbSet<TotalDetailLearningQualityModel> TotalDetailLearningQualitys { get; set; }
+        public DbSet<OverallStudentModel> OverallStudentResults { get; set; }
+        public DbSet<NumberStudentLearnOnSystemModel> NumberStudentLearnOnSystemResults { get; set; }
+        public DbSet<SummaryDataOnCityModel> SummaryDataOnCityResults { get; set; }
+        public DbSet<SchoolInfoModel> SchoolInfos { get; set; }
+        public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -106,7 +134,6 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new LessonExtraPracticeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonHomeWorkEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonVideoEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new MockTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PlacementTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TimeCodeExerciseEntityTypeConfiguration());
@@ -117,7 +144,6 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new VideoTimeCodeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonResultEntityTypeConfiguraion());
             modelBuilder.ApplyConfiguration(new VideoResultEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new CourseResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoTimeCodeAnswerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoTimeCodeResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionFormEntityTypeConfiguration());
@@ -126,7 +152,9 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new HomeWorkResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new HomeWorkQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonNoteEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UnitResultEntityTypeConfiguraion());
 
+            modelBuilder.ApplyConfiguration(new PlacementTestGroupResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PlacementTestSectionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PlacementTestAnswerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PlacementTestResultEntityTypeConfiguration());
@@ -155,7 +183,9 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new MockTestAICriteriaSettingTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumDetailResultTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ProsodyScoreEntityTypeConfiguration());
-
+            modelBuilder.ApplyConfiguration(new QuestionExplanationErrorEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestionExplanationLogEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestionShuffleEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 

@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -17,12 +16,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetUnitByClassForumDetailQuery : IRequest<MethodResult<IList<ClassForumAIModel>>>
+    public class GetUnitByClassForumDetailQuery : IRequest<MethodResult<IList<ClassForumScoreModel>>>
     {
         public Guid ClassForumId { get; set; }
     }
 
-    public class GetUnitByClassForumDetailQueryHandler : IRequestHandler<GetUnitByClassForumDetailQuery, MethodResult<IList<ClassForumAIModel>>>
+    public class GetUnitByClassForumDetailQueryHandler : IRequestHandler<GetUnitByClassForumDetailQuery, MethodResult<IList<ClassForumScoreModel>>>
     {
         private readonly AuthContext _authContext;
         private readonly IClassForumRepository _classForumRepository;
@@ -40,11 +39,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             _userService = userService;
         }
 
-        public async Task<MethodResult<IList<ClassForumAIModel>>> Handle(GetUnitByClassForumDetailQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<ClassForumScoreModel>>> Handle(GetUnitByClassForumDetailQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<ClassForumAIModel>> methodResult = new MethodResult<IList<ClassForumAIModel>>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            MethodResult<IList<ClassForumScoreModel>> methodResult = new MethodResult<IList<ClassForumScoreModel>>();
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
@@ -53,26 +52,17 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var studentId = studentResult?.Content?.Result?.Id;
 
             var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
+                                                     .ThenInclude(x => x.ClassForumScores)
+                                                     .Where(x => x.Id == request.ClassForumId)
                                                      .FirstOrDefaultAsync(x => x.Id == request.ClassForumId, cancellationToken);
             if (classForum == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
                 return methodResult;
             }
-            var classForumResult = classForum.ClassForumResults.Where(x => x.StudentId == studentId).FirstOrDefault();
-            if (classForumResult == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
-                return methodResult;
-            }
-            if (string.IsNullOrEmpty(classForumResult.GradingAlFeedback))
-            {
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
-
-            methodResult.Result = ConvertHelper.Deserialize<List<ClassForumAIModel>>(classForumResult.GradingAlFeedback);
+            var classForumScores = classForum.ClassForumResults.FirstOrDefault()?.ClassForumScores.OrderBy(x => x.Criteria).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = _mapper.Map<IList<ClassForumScoreModel>>(classForumScores ?? default);
             return methodResult;
         }
     }

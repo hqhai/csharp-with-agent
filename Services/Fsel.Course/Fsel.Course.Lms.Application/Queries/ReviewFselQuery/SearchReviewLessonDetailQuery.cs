@@ -57,8 +57,9 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var lessonResultIds = await _lessonResultRepository.Queryable.Where(x => x.LessonId == request.LessonId).Select(x => x.Id).ToListAsync(cancellationToken);
+            var lessonResultIds = await _lessonResultRepository.Queryable.Where(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId && x.CourseId == request.CourseId).Select(x => x.Id).ToListAsync(cancellationToken);
             var videoResults = await _videoResultRepository.Queryable.Where(x => lessonResultIds.Contains(x.LessonResultId) && x.Status == EnumResultStatus.Done)
+                                                       .OrderByDescending(x => x.CreatedDate)
                                                        .ToListAsync(cancellationToken);
             var studentIds = videoResults.Select(x => x.StudentId).Distinct().ToList();
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
@@ -74,7 +75,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             query = query.ToList();
             int totalItem = query.Count();
             var stars = query.Any() ? NumberHelper.ConvertRound(query.Average(x => x.Stars)) : default;
-
             var lists = query.ApplySortAndPaging(request).ToList();
 
             foreach (var item in lists)
@@ -98,6 +98,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 ClassCode = classStudent?.Code,
                 StudentId = x.StudentId,
                 CreatedDate = x.CreatedDate,
+                UpdatedDate = x.UpdatedDate,
                 Feedback = x.Feedback,
                 Stars = x.NumberOfStars
             };

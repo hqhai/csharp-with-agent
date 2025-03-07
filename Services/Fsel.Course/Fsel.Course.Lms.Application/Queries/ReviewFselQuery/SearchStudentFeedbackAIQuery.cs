@@ -13,8 +13,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ReviewFsels;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -26,12 +26,14 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     public class SearchStudentFeedbackAIQueryHandler : IRequestHandler<SearchStudentFeedbackAIQuery, MethodResult<PagingItemsModel<StudentFeedbackModel>>>
     {
         private readonly IStudentFeedbackRepository _studentFeedbackRepository;
+        private readonly IUserService _userService;
         private readonly IClassForumRepository _classForumRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
 
-        public SearchStudentFeedbackAIQueryHandler(IStudentFeedbackRepository studentFeedbackRepository, IClassForumRepository classForumRepository, IClassForumResultRepository classForumResultRepository)
+        public SearchStudentFeedbackAIQueryHandler(IStudentFeedbackRepository studentFeedbackRepository, IUserService userService, IClassForumRepository classForumRepository, IClassForumResultRepository classForumResultRepository)
         {
             _studentFeedbackRepository = studentFeedbackRepository;
+            _userService = userService;
             _classForumRepository = classForumRepository;
             _classForumResultRepository = classForumResultRepository;
         }
@@ -63,22 +65,24 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                             FeedBackStars = baseQ.FeedBackStars,
                             Type = baseQ.Type,
                         };
-
             if (request.NumberOfStars != null)
             {
                 query = query.Where(x => x.FeedBackStars + 0.5 >= request.NumberOfStars && x.FeedBackStars < request.NumberOfStars + 0.5);
             }
+            var result = await query.ToListAsync(cancellationToken);
+            var userResults = await _userService.GetUsersByUserIdsAsync(result.Select(x => x.CreatedUserId).ToList());
+            var users = userResults?.Content?.Result;
+            foreach (var item in result)
+            {
+                item.CreatedFullName = users?.FirstOrDefault(x => x.Id == item.CreatedUserId)?.FullName ?? item.CreatedFullName;
+            }
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => (m.CreatedFullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                result = result.Where(m => m.CreatedFullName != null && m.CreatedFullName.Contains(request.Keyword.ToLower(CultureInfo.InvariantCulture).Trim(), StringComparison.InvariantCulture)).ToList();
             }
-            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await query
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
-
+            int totalItem = result.Count;
+            var lists = result.ApplySortAndPaging(request).ToList();
             methodResult.Result = new PagingItemsModel<StudentFeedbackModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

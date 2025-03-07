@@ -5,7 +5,10 @@ using Fsel.Ordering.Application.Queues.Consumers;
 using Fsel.Ordering.Application.Queues.Publishers;
 using Fsel.Ordering.Application.Services.CourseService;
 using Fsel.Ordering.Application.Services.InAppPurchase;
+using Fsel.Ordering.Application.Services.InAppPurchase.Android;
+using Fsel.Ordering.Application.Services.InAppPurchase.IOS;
 using Fsel.Ordering.Application.Services.PayooService;
+using Fsel.Ordering.Application.Services.SenderService;
 using Fsel.Ordering.Application.Services.SystemService;
 using Fsel.Ordering.Application.Services.TrainingService;
 using Fsel.Ordering.Application.Services.UrBoxService;
@@ -15,9 +18,8 @@ using Fsel.Ordering.Infrastructure;
 using Fsel.Ordering.Infrastructure.Common;
 using Fsel.Ordering.Infrastructure.Repositories;
 using Fsel.Ordering.Infrastructure.ValueSettings;
-using Refit;
 using Fsel.Shared.Constants;
-using Fsel.Ordering.Application.Services.SenderService;
+using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,11 +41,19 @@ builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
 builder.Services.AddScoped<IUserVoucherRepository, UserVoucherRepository>();
 builder.Services.AddScoped<IOrderTransactionRepository, OrderTransactionRepository>();
 builder.Services.AddScoped<INotificationProcessor, NotificationProcessor>();
+builder.Services.AddScoped<IEventRepository, EventRepository>();
+builder.Services.AddScoped<IPackageEventRepository, PackageEventRepository>();
+builder.Services.AddScoped<IGooglePlayBillingService, GooglePlayBillingService>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IUserVoucherLockRepository, UserVoucherLockRepository>();
 builder.Services.AddScoped<VnPayLibrary>();
 
 // Publisher
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
+builder.Services.AddScoped<AddExpiredDateForStudentPublisher>();
+builder.Services.AddScoped<ChangeStatusOrderPublisher>();
+builder.Services.AddScoped<AddFeatureMissionPublisher>();
 
 //Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -62,7 +72,8 @@ builder.Services.AddRefitClient<IAppStoreService>().ConfigureHttpClient(x =>
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.OrderingQueue.NameQueue.NoticePayment, typeof(NoticePaymentConsumer) }
+    { QueueSettings.OrderingQueue.NameQueue.NoticePayment, typeof(NoticePaymentConsumer) },
+    { QueueSettings.OrderingQueue.NameQueue.JobActiveEvent, typeof(JobActiveEventConsumer) },
 });
 //builder.AddMassTransit(appSetting,
 //queues: new Dictionary<string, Type>

@@ -2,14 +2,15 @@
 
 namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 {
+    using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -30,15 +31,17 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IMapper _mapper;
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
-        private readonly ILogger<object> _logger;
+        private readonly ILogger<CreateVideoTimeCodeResultCommand> _logger;
+        private readonly TechieActionPublisher _techieActionPublisher;
 
-        public CreateVideoTimeCodeResultCommandHandler(IVideoResultRepository videoResultRepository, IVideoTimeCodeRepository videoTimeCodeRepository, IMapper mapper, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, ILogger<object> logger)
+        public CreateVideoTimeCodeResultCommandHandler(IVideoResultRepository videoResultRepository, IVideoTimeCodeRepository videoTimeCodeRepository, IMapper mapper, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, ILogger<CreateVideoTimeCodeResultCommand> logger, TechieActionPublisher techieActionPublisher)
         {
             _videoResultRepository = videoResultRepository;
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _mapper = mapper;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _logger = logger;
+            _techieActionPublisher = techieActionPublisher;
         }
 
         public async Task<MethodResult<VideoTimeCodeResultModel>> Handle(CreateVideoTimeCodeResultCommand request, CancellationToken cancellationToken)
@@ -78,8 +81,16 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     WorkingTime = default,
                     VideoTimeCodeId = request.VideoTimeCodeId,
                 };
+
                 videoTimeCodeResult = _videoTimeCodeResultRepository.Add(videoTimeCodeResult);
-                await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                try
+                {
+                    await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Log Duplicate LessonResult : {ex.Message}");
+                }
                 await UpdateVideoResult(videoResult, request.VideoTimeCodeId).ConfigureAwait(false);
             }
 
@@ -89,8 +100,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private async Task UpdateVideoResult(VideoResult videoResult, Guid videoTimeCodeId)
         {
             videoResult.CurrentVideoTimeCodeId = videoTimeCodeId;
-            _videoResultRepository.Update(videoResult);
-            await _videoResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _videoResultRepository.BulkMergeAsync(new List<VideoResult> { videoResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = entity => new { entity.LessonResultId, entity.StudentId, entity.VideoId };
+            });
         }
     }
 }

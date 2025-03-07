@@ -31,12 +31,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            if (request.OldPassword == null)
+            if (string.IsNullOrEmpty(request.OldPassword))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.OldPassword));
                 return methodResult;
             }
-            if (request.Password == null)
+            if (string.IsNullOrEmpty(request.Password))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Password));
                 return methodResult;
@@ -58,6 +58,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (!isCheckPassword)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OldPasswordIncorrect), nameof(request.OldPassword));
+                return methodResult;
+            }
+
+            var passwordValidator = new Microsoft.AspNetCore.Identity.PasswordValidator<Domain.Entities.User>();
+            var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password);
+            if (!validPassword.Succeeded)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIsNotValid));
                 return methodResult;
             }
 

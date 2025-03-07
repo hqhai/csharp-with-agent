@@ -2,7 +2,6 @@
 
 namespace Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys
 {
-    using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Attributes;
 
     public class CreateCustomerSurveyCommandModel
@@ -19,5 +18,7 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys
     {
         public Guid Id { get; set; }
         public object? Answer { get; set; }
+        public bool IsCompleted { get; set; }
+
     }
 }

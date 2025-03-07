@@ -15,7 +15,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
         private readonly IHubContext<LeaderBoardHub> _leaderBoardHubContext;
         private readonly IQueueProvider _queueProvider;
 
-        public LeaderBoardConsumer(IHubContext<LeaderBoardHub> leaderBoardHubContext, IQueueProvider queueProvider, AuthContext authContext) : base(authContext)
+        public LeaderBoardConsumer(IHubContext<LeaderBoardHub> leaderBoardHubContext, IQueueProvider queueProvider, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _leaderBoardHubContext = leaderBoardHubContext;
             _queueProvider = queueProvider;
@@ -28,11 +28,11 @@ namespace Fsel.Realtime.Application.Queues.Consumers
                 var courseLevel = message.CourseLevel.ToString();
                 await _leaderBoardHubContext.GetGroup(courseLevel!).SendAsync(RealtimeSettings.LeaderBoardHub.Methods.LeaderBoardMessage, message);
 
-                try
-                {
-                    _queueProvider.Publish(RealtimeSettings.LeaderBoardHub.Methods.LeaderBoardMessage, courseLevel, message);
-                }
-                catch { }
+                //try
+                //{
+                //    _queueProvider.Publish(RealtimeSettings.LeaderBoardHub.Methods.LeaderBoardMessage, courseLevel, message);
+                //}
+                //catch { }
             }
         }
     }

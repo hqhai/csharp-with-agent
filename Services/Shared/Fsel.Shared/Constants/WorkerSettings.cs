@@ -15,8 +15,16 @@ namespace Fsel.Shared.Constants
             public const string LeaderBoardJob = "LeaderBoardJob";
             public const string CompleteTestWhenTimeOutJob = "CompleteTestWhenTimeOutJob";
             public const string WeeklyReport = "WeeklyReport";
+            public const string TreasureZMatter = "TreasureZMatter";
+            public const string EnergyOfPlanet = "EnergyOfPlanet";
+            public const string WeeklySnapShot = "WeeklySnapShot";
             public const string ReviewFselJob = "ReviewFselJob";
             public const string NoticeAccessTime = "NoticeAccessTime";
+            public const string NoticeExtendPackage = "NoticeExtendPackage";
+            public const string ActiveEvent = "ActiveEvent";
+            public const string UpdateVouchersStatus = "UpdateVouchersStatus";
+            public const string RunEvents = "RunEvents";
+            public const string CheckUserDeletionJob = "CheckUserDeletion";
         }
     }
 }

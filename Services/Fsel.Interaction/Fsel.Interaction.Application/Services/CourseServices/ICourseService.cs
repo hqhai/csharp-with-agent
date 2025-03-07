@@ -5,6 +5,7 @@ namespace Fsel.Interaction.Application.Services.CourseServices
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Interaction.Application.Services.CourseServices.Models;
+    using Fsel.Interaction.Application.Services.CourseServices.QueryModel;
     using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -40,5 +41,14 @@ namespace Fsel.Interaction.Application.Services.CourseServices
 
         [Get("/v1.1/lesson/detail")]
         Task<IApiResponse<MethodResult<LessonModel>>> GetLessonResult([FromRoute] Guid LessonResultId);
+
+        [Get("/v1/other/feature-module")]
+        Task<IApiResponse<MethodResult<FeatureModuleModel>>> GetModuleModel([FromQuery] FeatureModuleQuery query);
+
+        [Get("/v1/admin/other/get-placement-test-event")]
+        Task<IApiResponse<MethodResult<IList<ReportPlacementTestEventModel>>>> GetReportPlacementTestEventAsync([FromQuery] GetReportPlacementTestEventQueryModel query);
+
+        [Get("/v1/admin/other/get-placement-test-school-event")]
+        Task<IApiResponse<MethodResult<IList<ReportPlacementTestEventModel>>>> GetReportPlacementTestEventSchoolAsync([FromQuery] GetReportPlacementTestEventQueryModel query);
     }
 }

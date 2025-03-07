@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumResults;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
+    using Fsel.Course.Lms.Application.Services.TrainingServices.QueryModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -55,11 +56,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
             var csoId = csoResults.Content?.Result?.Id;
 
-            var studentsResult = await _trainingService.GetClassesByCsoIdAsync(csoId ?? default);
-            var students = studentsResult.Content?.Result;
-            var studentIds = students?.SelectMany(x => x.ClassStudents!).Select(x => x.StudentId).ToList();
+            var classResults = await _trainingService.GetClassesByCsoIdAsync(csoId ?? default);
+            var classModels = classResults.Content?.Result;
+            var studentIds = classModels?.SelectMany(x => x.ClassStudents!).Select(x => x.StudentId).ToList();
 
-            var classForumResultQuery = _classForumResultRepository.Queryable
+            var classForumResultQuery = await _classForumResultRepository.Queryable
                                    .Include(x => x.LessonResult)
                                    .ThenInclude(x => x!.Lesson)
                                    .ThenInclude(x => x!.UnitLessons)
@@ -68,6 +69,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                    .Include(x => x.ClassForum)
                                    .Where(x => x.Status == EnumClassForumResultStatus.Pending)
                                    .OrderByDescending(x => x.CreatedDate)
+                                   .AsNoTracking()
                                    .Select(x => new ClassForumResultSearchModel
                                    {
                                        Id = x.Id,
@@ -86,54 +88,57 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                        TeacherId = x.GradingTeacherId,
                                        CourseId = x.LessonResult!.CourseId,
                                        WordContent = x.WordContent
-                                   });
+                                   }).ToListAsync(cancellationToken);
 
+            var userResults = await _userService.GetUsersByUserIdsAsync(classForumResultQuery.Select(x => x.CreatedUserId).ToList());
+            var users = userResults?.Content?.Result;
+            foreach (var item in classForumResultQuery)
+            {
+                item.CreatedFullName = users?.FirstOrDefault(x => x.Id == item.CreatedUserId)?.FullName ?? item.CreatedFullName;
+            }
+            var result = classForumResultQuery.AsEnumerable();
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                classForumResultQuery = classForumResultQuery.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                result = result.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             if (request.TeacherId != null)
             {
-                classForumResultQuery = classForumResultQuery.Where(m => m.TeacherId == request.TeacherId);
+                result = result.Where(m => m.TeacherId == request.TeacherId);
             }
             if (request.CourseId != null)
             {
-                classForumResultQuery = classForumResultQuery.Where(m => m.CourseId == request.CourseId);
+                result = result.Where(m => m.CourseId == request.CourseId);
             }
             if (request.LessonName != null)
             {
-                classForumResultQuery = classForumResultQuery.Where(m => (m.LessonName ?? string.Empty).ToLower().Trim().Contains(request.LessonName.ToLower().Trim()));
+                result = result.Where(m => (m.LessonName ?? string.Empty).ToLower().Trim().Contains(request.LessonName.ToLower().Trim()));
             }
             if (request.UnitName != null)
             {
-                classForumResultQuery = classForumResultQuery.Where(m => (m.UnitName ?? string.Empty).ToLower().Trim().Contains(request.UnitName.ToLower().Trim()));
+                result = result.Where(m => (m.UnitName ?? string.Empty).ToLower().Trim().Contains(request.UnitName.ToLower().Trim()));
             }
             if (request.LessonDisplayOrder != null)
             {
-                classForumResultQuery = classForumResultQuery.Where(m => m.LessonDisplayOrder == request.LessonDisplayOrder);
+                result = result.Where(m => m.LessonDisplayOrder == request.LessonDisplayOrder);
             }
             if (request.UnitDisplayOrder != null)
             {
-                classForumResultQuery = classForumResultQuery.Where(m => m.UnitDisplayOrder == request.UnitDisplayOrder);
+                result = result.Where(m => m.UnitDisplayOrder == request.UnitDisplayOrder);
             }
-            int totalItem = await classForumResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await classForumResultQuery
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+
+            int totalItem = result.Count();
+            var lists = result.ApplySortAndPaging(request).ToList();
+
+            var classToCourseResult = await _trainingService.GetsByCourseIdsAsync(new GetsByCourseIdsQueryModel { CourseIdStr = string.Join(",", lists.Select(x => x.CourseId).Distinct().ToList()) });
+            var classResultModel = classToCourseResult.Content?.Result;
             foreach (var item in lists)
             {
-                var userId = item.CreatedUserId;
-                var studentResult = await _userService.GetStudentByUserIdAsync(userId);
-                var studentId = studentResult.Content?.Result?.Id;
-
-                var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
-                if (classResult.Content?.Result != null)
+                var classModel = classResultModel?.FirstOrDefault(x => x.CourseId == item.CourseId);
+                if (classModel != null)
                 {
-                    item.ClassCode = classResult.Content.Result.Code;
-                    item.PostArea = "L" + item.LessonDisplayOrder + "_" + "U" + item.UnitDisplayOrder + "_" + item.CourseCode;
+                    item.ClassCode = classModel.Code;
                 }
+                item.PostArea = "L" + item.LessonDisplayOrder + "_" + "U" + item.UnitDisplayOrder + "_" + item.CourseCode;
             }
 
             methodResult.Result = new PagingItemsModel<ClassForumResultSearchModel>(lists, request, totalItem);

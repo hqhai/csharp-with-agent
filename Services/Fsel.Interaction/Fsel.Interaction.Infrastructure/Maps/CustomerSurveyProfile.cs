@@ -13,7 +13,9 @@ namespace Fsel.Interaction.Infrastructure.Maps
         public CustomerSurveyProfile()
         {
             CreateMap<CustomerSurvey, CustomerSurveyModel>().IgnoreAllNonExisting();
+            CreateMap<CustomerSurveyModel, CustomerSurvey>().ForMember(dest => dest.Id, opt => opt.Ignore()).IgnoreAllNonExisting();
             CreateMap<CreateCustomerSurveyCommandModel, CustomerSurvey>().IgnoreAllNonExisting();
+            CreateMap<CustomerSurveyGroup, CustomerSurveyGroupModel>().IgnoreAllNonExisting();
         }
     }
 }

@@ -15,11 +15,10 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Attributes;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/class-forum-result")]
     [ApiController]
     [Permission]
@@ -43,7 +42,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         [Permission]
         public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel cmd)
         {
-            SetQuery(cmd);
             var result = await _classForumResultRepository.GetListResultAsync<ClassForumResultModel>(cmd);
             return result.GetActionResult();
         }
@@ -56,6 +54,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Execute([FromQuery] BaseQueryModel query)
         {
+            SetQuery(query);
             var result = await _classForumResultRepository.GetResultAsync<ClassForumResultInfoModel>(BaseQuery ?? query);
             return result.GetActionResult();
         }

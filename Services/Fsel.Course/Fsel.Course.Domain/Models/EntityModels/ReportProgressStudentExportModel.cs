@@ -19,6 +19,15 @@ namespace Fsel.Course.Domain.Models.EntityModels
         [EpplusTableColumn(Header = "Course Name")]
         public string? CourseName { get; set; }
 
+        [EpplusTableColumn(Header = "Content Progress")]
+        public string? ContentProgress { get; set; }
+
+        [EpplusTableColumn(Header = "Percent Progress")]
+        public string? PercentProgress { get; set; }
+
+        [EpplusTableColumn(Header = "Total Lesson Done")]
+        public int? TotalLessonDone { get; set; }
+
         [EpplusTableColumn(Header = "Unit Name")]
         public string? UnitName { get; set; }
 
@@ -40,7 +49,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
         [EpplusTableColumn(Header = "HomeWork Status")]
         public EnumResultStatus? HomeWorkStatus { get; set; }
 
+        [EpplusTableColumn(Header = "Final study period", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
+        public DateTime? FinalStudyPeriod { get; set; }
+
         [EpplusTableColumn(Header = "Last entry", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
-        public DateTime? UpdatedDate { get; set; }
+        public DateTime? LastEntry { get; set; }
     }
 }

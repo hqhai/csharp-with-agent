@@ -12,10 +12,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.UserCmd;
+    using Fsel.Identity.Application.Commands.UserReferrals;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Shared.Enums;
@@ -36,14 +36,16 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private const string DefaultPassword = "Fsel@2024";
         private readonly IInteractionService _interactionService;
         private readonly IMediator _mediator;
+        private readonly IHumanRepository _humanRepository;
 
-        public ImportStudentsIntoPlatformCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IMediator mediator)
+        public ImportStudentsIntoPlatformCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IMediator mediator, IHumanRepository humanRepository)
         {
             _userManager = userManager;
             _orderService = orderService;
             _platformRepository = platformRepository;
             _interactionService = interactionService;
             _mediator = mediator;
+            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<Stream>> Handle(ImportStudentsIntoPlatformCommand request, CancellationToken cancellationToken)
@@ -57,8 +59,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
 
-            var packagesResult = await _orderService.GetPackages();
-
             var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentToPlatformModel x, IList<ImportStudentToPlatformModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
                 if (string.IsNullOrEmpty(x.FullName))
@@ -69,7 +69,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null or malformed" });
                 }
-                else if (_userManager.Users.Any(p => p.Email == x.Email || p.UserName == x.Email))
+                else if (_userManager.Users.Any(p => (p.Email == x.Email) && !p.EmailConfirmed))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email not confirmed email" });
+                }
+                else if (_userManager.Users.Any(p => p.Email == x.Email))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email Already exist" });
                 }
@@ -80,6 +84,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 if (string.IsNullOrEmpty(x.DateOfBirth) || (!string.IsNullOrEmpty(x.DateOfBirth) && !DateTime.TryParse(x.DateOfBirth, out DateTime dob)))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = "Date of birth is null or malformed" });
+                }
+                if (!string.IsNullOrEmpty(x.ReferralCode) && !await _humanRepository.Queryable.AnyAsync(p => p.Code == x.ReferralCode))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.ReferralCode), Message = "Referral code not exist" });
                 }
                 return await Task.FromResult(errors.Count == 0);
             });
@@ -118,18 +126,22 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         UserName = student.Email,
                         Email = student.Email,
                         FullName = student.FullName,
+                        PhoneNumber = student.PhoneNumber,
                         EmailConfirmed = true,
                         Human = new Human()
                         {
                             FullName = student.FullName,
+                            PhoneNumber = student.PhoneNumber,
                             Birthday = Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture),
                             Email = student.Email,
                             Student = new Student()
                             {
                                 CreatedByParent = false,
                                 Occupation = "Student",
-                                CourseLevel = EnumCourseLevel.A1,
                                 School = student.School,
+                                SchoolClass = student.SchoolClass,
+                                SchoolFaculty = student.SchoolFaculty,
+                                SchoolGrade = student.SchoolGrade
                             }
                         },
                         UserPlatforms = new List<UserPlatform>()
@@ -154,7 +166,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
                     if (!string.IsNullOrEmpty(student.ParentEmail))
                     {
-                        var parent = await _userManager.Users.Include(p => p.Human).ThenInclude(p => p.Parent).FirstOrDefaultAsync(p => p.UserName == student.ParentEmail || p.Email == student.ParentEmail, cancellationToken);
+                        var parent = await _userManager.Users.Include(p => p.Human).ThenInclude(p => p.Parent).FirstOrDefaultAsync(p => p.Email == student.ParentEmail, cancellationToken);
                         if (parent == null)
                         {
                             parent = new User()
@@ -199,11 +211,21 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         }
                     }
 
-                    var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = user.Human.Birthday }, cancellationToken);
+                    var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = user.Human.Birthday, SchoolName = student.School }, cancellationToken);
                     if (!updateCode.IsOK)
                     {
                         methodResult.AddErrorBadRequest(updateCode.ErrorMessages);
                         return methodResult;
+                    }
+
+                    if (!string.IsNullOrEmpty(student.ReferralCode))
+                    {
+                        var updateReferralCodeResult = await _mediator.Send(new CreateUserReferralCommand { ReferralCode = student.ReferralCode, ReceiverId = user.Id }, cancellationToken).ConfigureAwait(false);
+                        if (!updateReferralCodeResult.IsOK)
+                        {
+                            methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);
+                            return methodResult;
+                        }
                     }
                 }
                 methodResult.StatusCode = StatusCodes.Status200OK;

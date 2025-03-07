@@ -106,5 +106,125 @@ namespace Fsel.Shared.Helpers
 
             return weekDays;
         }
+
+        public static (DateTime Monday, DateTime Sunday) GetMondayAndSunday(DateTime date)
+        {
+            // Tìm ngày Thứ Hai
+            int diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
+            DateTime monday = date.AddDays(-1 * diff).Date;
+
+            // Tìm ngày Chủ Nhật
+            DateTime sunday = monday.AddDays(6).Date;
+
+            return (monday, sunday);
+        }
+
+        public static string ConvertSecondsToTimeString(long totalSeconds)
+        {
+            int hours = (int)totalSeconds / 3600;
+            int minutes = (int)(totalSeconds % 3600) / 60;
+            return string.Format(CultureInfo.InvariantCulture, "{0}h{1:D2}'", hours, minutes);
+        }
+
+        public static object ConvertSecondsToHours(long seconds)
+        {
+            double hours = (double)seconds / 3600;
+            return hours >= 1 ? (object)(int)hours : Math.Round(hours, 1);
+        }
+
+        public static int ConvertSecondsToHoursRoundUp(long seconds)
+        {
+            int hours = (int)seconds / 3600;
+            if (seconds % 3600 > 0)
+            {
+                hours += 1;
+            }
+            return hours;
+        }
+
+        public static string ConvertSecondsToHoursAndMinutes(long seconds)
+        {
+            int hours = (int)seconds / 3600;
+            int minutes = (int)(seconds % 3600) / 60;
+
+            return $"{hours} giờ {minutes:D2} phút";
+        }
+
+        public static bool IsCurrentDateInRange(DateTime? startDate, DateTime? endDate)
+        {
+            var currentDate = DateTime.UtcNow;
+
+            if (endDate.HasValue && startDate.HasValue && startDate.Value.Date <= currentDate && endDate.Value.Date >= currentDate.Date)
+            {
+                return true;
+            }
+            else if (!endDate.HasValue && startDate.HasValue && startDate.Value.Date <= currentDate)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public static DateTime? GetDayByDayOfWeek(this DateTime currentDay, IList<DayOfWeek>? dayOfWeeks)
+        {
+            ArgumentNullException.ThrowIfNull(dayOfWeeks);
+
+            for (int i = 1; i <= 7; i++)
+            {
+                DateTime candidateDate = currentDay.AddDays(i);
+                if (dayOfWeeks.Contains(candidateDate.DayOfWeek))
+                {
+                    return candidateDate.Date;
+                }
+            }
+
+            return null;
+        }
+
+        public static (int, int) ConvertHoursAndMinutesBySeconds(this long seconds)
+        {
+            int hours = (int)seconds / 3600;
+            int minutes = (int)(seconds % 3600) / 60;
+
+            return (hours, minutes);
+        }
+
+        public static long ConvertDateTimeToSeconds(this DateTime dateTime)
+        {
+            long totalSeconds = dateTime.Hour * 3600 + dateTime.Minute * 60 + dateTime.Second;
+            return totalSeconds;
+        }
+
+        public static bool IsValidDateTime(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return false;
+
+            DateTime parsedDate;
+            var culture = CultureInfo.InvariantCulture;
+
+            string[] formats = { "yyyy-MM-dd", "dd-MM-yyyy", "yyyy/MM/dd", "dd/MM/yyyy" };
+
+            return DateTime.TryParseExact(input, formats, culture, DateTimeStyles.None, out parsedDate);
+        }
+
+        public static DateTime ConvertToDateTime(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return DateTime.UtcNow;
+
+            if (IsValidDateTime(input))
+            {
+                var culture = CultureInfo.InvariantCulture;
+                string[] formats = { "yyyy-MM-dd", "dd-MM-yyyy", "yyyy/MM/dd", "dd/MM/yyyy" };
+
+                if (DateTime.TryParseExact(input, formats, culture, DateTimeStyles.None, out DateTime parsedDate))
+                {
+                    return parsedDate;
+                }
+            }
+            return DateTime.UtcNow;
+        }
     }
 }

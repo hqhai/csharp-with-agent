@@ -6,7 +6,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -16,7 +15,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     public class UpdateStudentByCourseLevelCommand : IRequest<MethodResult<bool>>
     {
         public Guid Id { get; set; }
-        public EnumCourseLevel Level { get; set; }
+        public EnumCourseLevel CourseLevel { get; set; }
+        public EnumCourseLevel? BaseCourseLevel { get; set; }
     }
 
     public class UpdateStudentByCourseLevelCommandHandler : IRequestHandler<UpdateStudentByCourseLevelCommand, MethodResult<bool>>
@@ -41,16 +41,20 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            student.CourseLevel = request.Level;
-
-            await _studentRepository.ExecuteTransactionAsync(async () =>
+            student.CourseLevel = request.CourseLevel;
+            if (request.BaseCourseLevel.HasValue)
             {
-                student = _studentRepository.Update(student);
-                await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = true;
-                return methodResult;
-            });
+                student.BaseCourseLevel = request.BaseCourseLevel.Value;
+            }
+
+            _studentRepository.Update(student, false, x => x.CreatedDate, x => x.CreatedByParent, x => x.CreatedFullName, x => x.CreatedUserId
+            , x => x.DeletedDate, x => x.DeletedFullName, x => x.DeletedUserId, x => x.IsDeleted, x => x.PackageId, x => x.Occupation, x => x.School,
+            x => x.NumberOfShield, x => x.NumberOfToken, x => x.NumberOfTokenExchanged, x => x.NumberOfTokenReceived, x => x.ParentPhoneNumber,
+            x => x.ClassId, x => x.HumanId, x => x.BeginnerGuideStr, x => x.DistrictId, x => x.ProvinceId, x => x.SchoolClass, x => x.SchoolFaculty,
+            x => x.SchoolGrade, x => x.SchoolId, x => x.ExpiredDate, x => x.ParentEmail);
+            await _studentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = true;
             return methodResult;
         }
     }

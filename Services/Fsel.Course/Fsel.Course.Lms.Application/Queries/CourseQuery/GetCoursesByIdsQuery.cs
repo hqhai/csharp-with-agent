@@ -40,16 +40,18 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 return methodResult;
             }
 
-            var courses = await _courseRepository.Queryable.Where(p => request.CourseIds.Contains(p.Id)).Select(x => new CourseModel
-            {
-                Id = x.Id,
-                Code = x.Code,
-                Name = x.Name,
-                CourseLevel = x.CourseLevel,
-                CourseType = x.CourseType,
-                InstructionContent = x.InstructionContent,
-                Status = x.Status,
-            }).ToListAsync(cancellationToken);
+            var courses = await _courseRepository.Queryable
+                                                 .WhereBulkContains(request.CourseIds, p => p.Id)
+                                                 .Select(x => new CourseModel
+                                                 {
+                                                     Id = x.Id,
+                                                     Code = x.Code,
+                                                     Name = x.Name,
+                                                     CourseLevel = x.CourseLevel,
+                                                     CourseType = x.CourseType,
+                                                     InstructionContent = x.InstructionContent,
+                                                     Status = x.Status,
+                                                 }).ToListAsync(cancellationToken);
 
             methodResult.Result = courses;
             methodResult.StatusCode = StatusCodes.Status200OK;

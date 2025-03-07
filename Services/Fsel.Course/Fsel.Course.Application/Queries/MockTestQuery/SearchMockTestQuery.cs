@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Application.Queries.MockTestQuery
 {
+    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -47,11 +48,21 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
                                           MockTestType = x.MockTestType,
                                           CreatedFullName = x.CreatedFullName,
                                           UpdatedFullName = x.UpdatedFullName,
+                                          Version = x.Version,
                                           Skills = x.MockTestSections.Select(x => x.SectionGroup).Select(n => n!.CourseSkill).ToList(),
                                       });
+
+            request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                mockTestQuery = mockTestQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    mockTestQuery = mockTestQuery.Where(m => m.Id == guid);
+                }
+                else
+                {
+                    mockTestQuery = mockTestQuery.Where(m => m.Name != null && m.Name.Contains(request.Keyword));
+                }
             }
 
             if (request.MockTestType != null)

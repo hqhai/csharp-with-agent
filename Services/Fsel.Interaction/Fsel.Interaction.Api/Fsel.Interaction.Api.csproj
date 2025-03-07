@@ -10,4 +10,19 @@
     <ProjectReference Include="..\Fsel.Interaction.Application\Fsel.Interaction.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Resources\ContentAICheckComment.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Resources\ExportExcelTemplates\SurveyQuestionReport.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\ExportExcelTemplates\SurveyQuestionReportSchool.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

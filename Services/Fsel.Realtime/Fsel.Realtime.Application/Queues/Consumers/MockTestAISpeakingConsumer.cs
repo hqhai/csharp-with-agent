@@ -12,7 +12,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
     {
         private readonly IHubContext<MockTestSpeakingHub> _aISpeakingHub;
 
-        public MockTestAISpeakingConsumer(IHubContext<MockTestSpeakingHub> aISpeakingHub, AuthContext authContext) : base(authContext)
+        public MockTestAISpeakingConsumer(IHubContext<MockTestSpeakingHub> aISpeakingHub, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _aISpeakingHub = aISpeakingHub;
         }

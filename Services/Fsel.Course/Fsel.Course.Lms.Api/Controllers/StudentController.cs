@@ -3,20 +3,18 @@
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.CourseQuery;
     using Fsel.Course.Lms.Application.Queries.StudentQuery;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/student")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
@@ -65,6 +63,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         {
             //_logger.LogError("StudentSetting: " + Request.HttpContext.ToCurl());
             MethodResult<StudentSettingModel> queryResult = await _mediator.Send(new GetStudentSettingQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Student Setting
+        /// </summary>
+        [HttpGet("student-setting/{userId}")]
+        [ProducesResponseType(typeof(MethodResult<StudentSettingModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> StudentSettingByUserId([FromRoute] Guid? userId)
+        {
+            MethodResult<StudentSettingModel> queryResult = await _mediator.Send(new GetStudentSettingQuery { UserId = userId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

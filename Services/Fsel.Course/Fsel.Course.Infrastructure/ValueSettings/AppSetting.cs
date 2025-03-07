@@ -15,18 +15,25 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public AzureAiConfig? AzureAiConfig { get; set; }
 
         public CustomerSupportConfig? CustomerSupportConfig { get; set; }
+
+        public GoogleSheetConfig? GoogleSheetConfig { get; set; }
     }
 
     public class ConstantUrl
     {
+        public string? LinkFullMockTestReport { get; set; }
         public string? LinkMockTestReport { get; set; }
     }
-
 
     public class CustomerSupportConfig
     {
         public string? Email { get; set; }
         public IList<string> CCEmail { get; set; } = new List<string>();
+    }
+
+    public class GoogleSheetConfig
+    {
+        public string? StudentGetErrorClassForumSheetId { get; set; }
     }
 
     public class ResourceContent
@@ -38,7 +45,9 @@ namespace Fsel.Course.Infrastructure.ValueSettings
     public class OpenAiConfig
     {
         public string? Uri { get; set; }
-        public string? ApiKey { get; set; }
+        public IList<string>? ApiKeys { get; set; }
+
+        public string? ApprovalAIModel { get; set; }
     }
 
     public class AzureAiConfig
@@ -55,6 +64,7 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public string? SystemApiUrl { get; set; }
         public string? OrderApiUrl { get; set; }
         public string? NotificationApiUrl { get; set; }
+        public string? StorageApiUrl { get; set; }
     }
 
     public class Otp

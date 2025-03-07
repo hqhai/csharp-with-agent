@@ -5,15 +5,13 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
     using System.Globalization;
     using System.IO;
     using System.Text;
-    using System.Text.RegularExpressions;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Commands.AiCmd;
+    using Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
     using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Models;
@@ -47,7 +45,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
         #region Handle
 
-
         /// <summary>
         /// Chấm điểm speaking bằng AI
         /// </summary>
@@ -61,6 +58,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             var mockTestResult = _mockTestResultRepository.Queryable
                 .Include(x => x.MockTestAnswers)
                 .ThenInclude(x => x.SectionTimeCode)
+                .Include(x => x.SectionGroupResults)
                 .FirstOrDefault(x => x.Id == mockTestResultId);
 
             if (mockTestResult == null)
@@ -69,7 +67,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             }
 
             var (questionArray, answerArray, averagePronScore, count) = ExtractQuestionAnswerAndPronunciationScores(mockTestResult);
-
             var scoreRanges = _prosodyScoreRepository.Queryable.ToList();
             (long bandScore, string feedBack) = GetBandScore(averagePronScore, scoreRanges);
 
@@ -122,12 +119,34 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                     skillScore.CorrectCount = score;
                     skillScore.TotalCount = 36;
                     skillScore.Skill = EnumCourseSkill.Speaking;
-                    skillScore.Scores = NumberHelper.RoundNumberDouble((double)score / 4); // sửa sau
+                    skillScore.Scores = NumberHelper.RoundReduceNumber((double)score / 4); // sửa sau
                 }
                 skillScores.Add(skillScore);
             }
             sectionGroupResult.SkillScores = skillScores;
             sectionGroupResult.CorrectCount += (int)score;
+
+            if (mockTestResult.SkillScores != null && mockTestResult.SkillScores.Count > 1)
+            {
+                if (skillScores.Any())
+                {
+                    // Bước 1: Clone danh sách mà không chứa phần tử có Skill là Speaking
+                    var clonedSkillScores = mockTestResult.SkillScores
+                        .Where(x => x.Skill != EnumCourseSkill.Speaking)
+                        .ToList(); // Chuyển đổi thành danh sách
+
+                    // Bước 2: Thêm phần tử từ skillScores.Single() vào danh sách đã clone
+                    var skillScoreToAdd = skillScores.Single();
+                    clonedSkillScores.Add(skillScoreToAdd);
+
+                    // Bước 3: Gán ngược giá trị đã chỉnh sửa vào mockTestResult.SkillScores
+                    mockTestResult.SkillScores = clonedSkillScores;
+                }
+            }
+            else
+            {
+                mockTestResult.SkillScores = skillScores;
+            }
 
             await SendToWebSocket(mockTestScores, cancellationToken);
 
@@ -135,6 +154,9 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
             //save skillscores
             await SaveSectionGroupResultToDatabase(sectionGroupResult, cancellationToken);
+
+            //save MocKTestResult
+            await SaveMockTestResultAsync(mockTestResult, cancellationToken);
 
             return methodResult.Result;
         }
@@ -155,7 +177,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
             foreach (var item in mockTestResult.MockTestAnswers)
             {
-
                 questionArray.Add(item?.SectionTimeCode?.Name ?? string.Empty);
                 answerArray.Add(item?.SpeechTextAnswer ?? string.Empty);
                 pronScore += item != null && item.PronunciationScore.HasValue ? item.PronunciationScore.Value : 0;
@@ -169,7 +190,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             double averagePronScore = Math.Round(count > 0 ? (double)pronScore / count : 0);
             return (questionArray, answerArray, averagePronScore, count);
         }
-
 
         /// <summary>
         /// Tạo model mocktestscore tương ứng
@@ -191,7 +211,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 MockTestResultId = mockTestResultId
             };
         }
-
 
         /// <summary>
         /// Lấy dữ liệu AI
@@ -217,7 +236,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 SettingTopP = 1
             }, cancellationToken).ConfigureAwait(false);
 
-            return RemoveMarkdownFromJson(aIResponse ?? string.Empty);
+            return Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
         }
 
         /// <summary>
@@ -231,7 +250,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             await _mockTestScoreRepository.ExecuteTransactionAsync(async () =>
             {
                 await _mockTestScoreRepository.AddList(mockTestScores);
-
                 await _mockTestScoreRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 return new MethodResult<bool>();
             });
@@ -239,9 +257,9 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
         private async Task SaveSectionGroupResultToDatabase(SectionGroupResult sectionGroupResult, CancellationToken cancellationToken)
         {
-            _sectionGroupResultRepository.Update(sectionGroupResult);
+            _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
+            await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-            await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             //await _mockTestScoreRepository.ExecuteTransactionAsync(async () =>
             //{
             //return new MethodResult<bool>();
@@ -249,23 +267,20 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             //});
         }
 
-
-        #endregion
-        #region Func
-        /// <summary>
-        /// Hàm loại bỏ MarkDown của chatgpt trả về
-        /// </summary>
-        /// <param name="json"></param>
-        /// <returns></returns>
-        public static string RemoveMarkdownFromJson(string json)
+        private async Task SaveMockTestResultAsync(MockTestResult mockTestResult, CancellationToken cancellationToken)
         {
-            // Loại bỏ dấu ```json từ đầu và cuối chuỗi JSON
-            string cleanedJson = Regex.Replace(json, @"^```json\s*|\s*```$", "");
-
-            // Trả về chuỗi JSON đã được loại bỏ dấu ```json
-            return cleanedJson;
+            try
+            {
+                _mockTestResultRepository.Update(mockTestResult);
+                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _mediator.Send(new SendTokenHistoryCommand { MockTestResultId = mockTestResult.Id }, cancellationToken);
+            }
+            catch { }
         }
 
+        #endregion Handle
+
+        #region Func
 
         /// <summary>
         /// Gửi kết quả đển websocket
@@ -277,7 +292,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         {
             foreach (var score in scores)
             {
-
                 SubmitAiSpeakingResponseModel model = new SubmitAiSpeakingResponseModel()
                 {
                     CriteriaName = score.Criteria.ToString(),
@@ -286,9 +300,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                     MockTestResultId = score.MockTestResultId,
                 };
                 await _submitAiSpeakingAnswerPublisher.Publish(model, cancellationToken);
-
             }
-
         }
 
         /// <summary>
@@ -299,7 +311,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         /// <returns></returns>
         public static (long bandScore, string? comment) GetBandScore(double averagePronScore, List<ProsodyScore>? scoreRanges)
         {
-
             if (scoreRanges == null || scoreRanges.Count == 0)
             {
                 return (0, string.Empty);
@@ -346,10 +357,8 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
             result = string.Concat(result, " ", defaultConfigByCriteria);
 
-
             return result;
         }
-
 
         /// <summary>
         /// Lấy config của AI Speaking theo tiêu chí
@@ -365,9 +374,11 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 case EnumMockTestScoreCriteria.GrammaticalRangeAndAccuracy:
                     result = isUserConfig ? File.ReadAllText(ResourceSettings.SpeakingGrammarRole) : File.ReadAllText(ResourceSettings.SpeakingGrammar);
                     break;
+
                 case EnumMockTestScoreCriteria.LexicalResource:
                     result = isUserConfig ? File.ReadAllText(ResourceSettings.SpeakingLexicalRole) : File.ReadAllText(ResourceSettings.SpeakingLexical);
                     break;
+
                 case EnumMockTestScoreCriteria.FluencyAndCoherence:
                     result = isUserConfig ? File.ReadAllText(ResourceSettings.SpeakingFluencyRole) : File.ReadAllText(ResourceSettings.SpeakingFluency);
 
@@ -376,8 +387,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
             return result;
         }
-
-
 
         /// <summary>
         /// Chuyển đổi số thành chữ
@@ -438,6 +447,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             return words;
         }
 
-        #endregion
+        #endregion Func
     }
 }

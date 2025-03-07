@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 {
     using System.Collections.Generic;
+    using System.Globalization;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
@@ -57,7 +58,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             EnumCourseLevel[] enumValues = (EnumCourseLevel[])Enum.GetValues(typeof(EnumCourseLevel));
 
             // Lấy ra danh sách StudentId đã hoàn thành khóa học
-            var studentIds = await _courseResultRepository.Queryable.Where(x => x.Status != EnumResultStatus.New).Select(c => c.StudentId).Distinct().ToListAsync(cancellationToken);
+            var studentIds = await _courseResultRepository.Queryable.Where(x => x.Status != EnumResultStatus.New && x.WorkingStatus == EnumWorkingStatus.Active).Select(c => c.StudentId).Distinct().ToListAsync(cancellationToken);
 
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
             if (!studentResults.IsSuccessStatusCode)
@@ -111,7 +112,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                                     .ToList();
 
             // Gửi thông báo khi đạt top
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var student = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             var studentId = student?.Content?.Result?.Id;
 
             if (studentId != null)
@@ -127,10 +128,10 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 {
                     NotificationSendingQueueModel model = new NotificationSendingQueueModel()
                     {
-                        ObjectId = studentId ?? default,
-                        UserIds = new List<Guid>() { studentId ?? default },
+                        ObjectId = (Guid)studentId,
+                        UserIds = new List<Guid>() { (Guid)studentId },
                         SenderId = _authContext.CurrentUserId,
-                        ParamsMessage = new List<object> { locationStudent.ToString() ?? string.Empty },
+                        ParamsMessage = new List<object> { locationStudent.ToString(CultureInfo.CurrentCulture) },
                         Type = EnumNotificationType.LinkPage,
                         Content = EnumNotificationContent.LeaderBoard
                     };

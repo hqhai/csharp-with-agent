@@ -22,7 +22,23 @@ namespace Fsel.Identity.Domain.Entities
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? School { get; set; }
 
-        public EnumCourseLevel CourseLevel { get; set; }
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? SchoolGrade { get; set; }
+
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? SchoolClass { get; set; }
+
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? SchoolFaculty { get; set; }
+
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? ParentPhoneNumber { get; set; }
+
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? ParentEmail { get; set; }
+
+        public EnumCourseLevel? CourseLevel { get; set; }
+        public EnumCourseLevel? BaseCourseLevel { get; set; }
 
         public bool CreatedByParent { get; set; }
         public long NumberOfToken { get; set; }
@@ -40,14 +56,14 @@ namespace Fsel.Identity.Domain.Entities
             set { BeginnerGuideStr = ConvertHelper.Serialize(value); }
         }
 
+        public Guid? CourseId { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
         public Guid? SchoolId { get; set; }
-
         public Human? Human { get; set; }
-
         public Guid HumanId { get; set; }
-
+        public DateTime? ExpiredDate { get; set; }
+        public EventRegistration? EventRegistration { get; set; }
         public ICollection<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();
         public ICollection<StudentDailyStreak> StudentDailyStreaks { get; set; } = new List<StudentDailyStreak>();
     }

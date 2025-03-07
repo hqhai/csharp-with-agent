@@ -28,6 +28,9 @@ namespace Fsel.System.Infrastructure
             SeedFocusTimeConfig(modelBuilder);
             SeedApprovalTimeConfig(modelBuilder);
             SeedTokenConfig(modelBuilder);
+            SeedTechieConfig(modelBuilder);
+            SeedTechieActionsConfig(modelBuilder);
+            SeedDisplayOrderConfig(modelBuilder);
             modelBuilder.ApplyConfiguration(new TeachingCostEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ReferralDiscountConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardConfigConfiguration());
@@ -50,6 +53,21 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new ErrorReportEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TokenHistoryEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ChatBotEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TechieEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TechieActionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentTechieEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LuckyTicketEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new FselRatingEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseTargetConfigEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseSuggestConfigEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new BannerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BannerScopeEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BannerImageEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BannerSettingEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BannerStudentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TokenHistoryTranslationEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UserConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new DisplayOrderConfigEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -74,11 +92,25 @@ namespace Fsel.System.Infrastructure
         public DbSet<Location> Locations { get; set; }
         public DbSet<School> Schools { get; set; }
         public DbSet<ErrorReport> ErrorReports { get; set; }
-        public DbSet<TokenHistory> TokenHistories { get; set; }
         public DbSet<ChatbotConfig> ChatbotConfigs { get; set; }
         public DbSet<ChatbotSkillConfig> ChatbotSkillConfigs { get; set; }
         public DbSet<ChatbotTokenConfigs> ChatbotTokenConfigs { get; set; }
         public DbSet<ChatBot> ChatBots { get; set; }
+        public DbSet<Techie> Techie { get; set; }
+        public DbSet<TechieAction> TechieActions { get; set; }
+        public DbSet<StudentTechie> StudentTechies { get; set; }
+        public DbSet<UserConfig> UserConfigs { get; set; }
+        public DbSet<LuckyTicket> LuckyTickets { get; set; }
+        public DbSet<CourseTargetConfig> CourseTargetConfigs { get; set; }
+        public DbSet<CourseSuggestConfig> CourseSuggestConfigs { get; set; }
+        public DbSet<Banner> Banners { get; set; }
+        public DbSet<BannerSetting> BannerSettings { get; set; }
+        public DbSet<BannerScope> BannerScopes { get; set; }
+        public DbSet<BannerImage> BannerImages { get; set; }
+        public DbSet<BannerStudent> BannerStudents { get; set; }
+        public DbSet<TokenHistory> TokenHistories { get; set; }
+        public DbSet<TokenHistoryTranslation> TokenHistoryTranslations { get; set; }
+        public DbSet<FselRating> FselRatings { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -129,6 +161,14 @@ namespace Fsel.System.Infrastructure
             builder.Entity<TokenConfig>().HasData(tokenConfigs);
         }
 
+        private static void SeedTechieConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TechieFileName);
+            var techies = ConvertHelper.DeserializeFromFilePath<IList<Techie>>(path);
+            ArgumentNullException.ThrowIfNull(techies);
+            builder.Entity<Techie>().HasData(techies);
+        }
+
         private static void SeedApprovalTimeConfig(ModelBuilder builder)
         {
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.ApprovalTimeFileName);
@@ -136,5 +176,57 @@ namespace Fsel.System.Infrastructure
             ArgumentNullException.ThrowIfNull(approvalTimeConfigs);
             builder.Entity<ApprovalTimeConfig>().HasData(approvalTimeConfigs);
         }
+
+        private static void SeedTechieActionsConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TechieActionFileName);
+            var techieActions = ConvertHelper.DeserializeFromFilePath<IList<TechieAction>>(path);
+            ArgumentNullException.ThrowIfNull(techieActions);
+
+            var packageTranslations = techieActions.SelectMany(x => x.Translations).ToList();
+            techieActions.ForEach(x => x.Translations.Clear());
+
+            builder.Entity<TechieAction>().HasData(techieActions);
+            builder.Entity<TechieActionTranslation>().HasData(packageTranslations);
+        }
+
+        private static void SeedDisplayOrderConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.DisplayOrderConfig);
+            var displayOrderConfigs = ConvertHelper.DeserializeFromFilePath<IList<DisplayOrderConfig>>(path);
+            ArgumentNullException.ThrowIfNull(displayOrderConfigs);
+            builder.Entity<DisplayOrderConfig>().HasData(displayOrderConfigs);
+        }
+
+        //private static void SeedTechieActionsConfig(ModelBuilder builder)
+        //{
+        //    try
+        //    {
+        //        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TechieActionFileName);
+        //        using StreamReader streamReader = new StreamReader(path);
+        //        var a = streamReader.ReadToEnd();
+        //        var techieActions = JsonSerializer.Deserialize<IList<TechieAction>>(a, new JsonSerializerOptions
+        //        {
+        //            Converters = { (JsonConverter)new JsonStringEnumConverter() },
+        //            PropertyNameCaseInsensitive = true,
+        //            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        //        });
+        //        ArgumentNullException.ThrowIfNull(techieActions);
+
+        //        //Console.WriteLine("Tesst Errro: techieActions" + techieActions.Serialize());
+        //        var techieActionTranslations = techieActions.SelectMany(x => x.Translations).ToList();
+        //        techieActions.ForEach(x => x.Translations.Clear());
+
+        //        builder.Entity<TechieAction>().HasData(techieActions);
+        //        builder.Entity<TechieActionTranslation>().HasData(techieActionTranslations);
+
+        //        var b= techieActionTranslations.GroupBy(x => x.Id).Where(x => x.Count() > 1).Select(x => x.Key).ToList();
+        //        Console.WriteLine("Tesst Errro: b" + b.Serialize());
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine("Tesst Errro: " + (ex).ToString());
+        //    }
+        //}
     }
 }

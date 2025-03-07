@@ -2,17 +2,20 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
     public class CourseStudentProgressModel
     {
+        public DateTime? CreatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
         public Guid CourseId { get; set; }
         public string? CourseName { get; set; }
         public Guid ClassId { get; set; }
         public string? CodeClass { get; set; }
-        public Guid PackageId { get; set; }
+        public Guid? PackageId { get; set; }
         public int Visit { get; set; }
-        public EnumPackageCode PackageCode { get; set; }
+        public EnumPackageCode? PackageCode { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public long TimeSpent { get; set; }

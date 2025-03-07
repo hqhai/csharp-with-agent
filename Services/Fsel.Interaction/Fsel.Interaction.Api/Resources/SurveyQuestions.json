@@ -5,9 +5,10 @@
     "question": "Bạn là?",
     "description": "addd",
     "icon": "addd",
-    "displayOrder": 1,
+    "displayOrder": 2,
     "displayLevel": 1,
     "type": "ChooseMultipleColumn",
+    "surveyFormType": "QuestBoard",
     "isPilot": false,
     "answers": [
       {
@@ -76,10 +77,10 @@
     "question": "Bạn biết đến Fsel từ đâu?",
     "description": "addd",
     "icon": "addd",
-    "displayOrder": 2,
+    "displayOrder": 1,
     "displayLevel": 1,
     "type": "ChooseMultipleColumn",
-    "isPilot": false,
+    "isPilot": null,
     "answers": [
       {
         "id": 1,
@@ -271,6 +272,318 @@
     ]
   },
   {
+    "id": "F563DA40-D609-4922-90B9-44E4290EDFEF",
+    "createdDate": "2023-07-21",
+    "question": "Bạn biết đến Fsel từ đâu?",
+    "description": "Câu hỏi biết đến Fsel",
+    "icon": "addd",
+    "displayOrder": 1,
+    "displayLevel": 1,
+    "type": "CheckList",
+    "surveyFormType": "QuestBoard",
+    "isPilot": false,
+    "answers": [
+      {
+        "id": 1,
+        "content": "Google",
+        "image": "gmail-icon.svg"
+      },
+      {
+        "id": 2,
+        "content": "Facebook",
+        "image": "facebook-icon.svg"
+      },
+      {
+        "id": 3,
+        "content": "YouTube",
+        "image": "youtube-icon.svg"
+      },
+      {
+        "id": 4,
+        "content": "Tiktok",
+        "image": "tiktok-icon.svg"
+      },
+      {
+        "id": 5,
+        "content": "Bạn bè/gia đình",
+        "image": "friends_family-icon.svg"
+      },
+      {
+        "id": 6,
+        "content": "Tin tức/báo chí",
+        "image": "blog-icon.svg"
+      },
+      {
+        "id": 7,
+        "content": "TV",
+        "image": "tv-icon.svg"
+      },
+      {
+        "id": 8,
+        "content": "Sự kiện/hội thảo",
+        "image": "event.svg"
+      },
+      {
+        "id": 9,
+        "content": "Trường học",
+        "image": "school.svg"
+      },
+      {
+        "id": 10,
+        "content": "Tờ rơi",
+        "image": "leaflets.svg"
+      },
+      {
+        "id": 11,
+        "content": "Khác....",
+        "image": "others-icon.svg"
+      }
+    ],
+    "translations": [
+      {
+        "id": "2B267643-BB4F-4AC4-A14A-33350FA35108",
+        "createdDate": "2023-10-17",
+        "surveyQuestionId": "F563DA40-D609-4922-90B9-44E4290EDFEF",
+        "question": "Bạn biết đến Fsel từ đâu?",
+        "language": "vi-VN",
+        "description": "addd",
+        "answers": [
+          {
+            "id": 1,
+            "content": "Google",
+            "image": "gmail-icon.svg"
+          },
+          {
+            "id": 2,
+            "content": "Facebook",
+            "image": "facebook-icon.svg"
+          },
+          {
+            "id": 3,
+            "content": "YouTube",
+            "image": "youtube-icon.svg"
+          },
+          {
+            "id": 4,
+            "content": "Tiktok",
+            "image": "tiktok-icon.svg"
+          },
+          {
+            "id": 5,
+            "content": "Bạn bè/gia đình",
+            "image": "friends_family-icon.svg"
+          },
+          {
+            "id": 6,
+            "content": "Tin tức/báo chí",
+            "image": "blog-icon.svg"
+          },
+          {
+            "id": 7,
+            "content": "TV",
+            "image": "tv-icon.svg"
+          },
+          {
+            "id": 8,
+            "content": "Sự kiện/hội thảo",
+            "image": "event.svg"
+          },
+          {
+            "id": 9,
+            "content": "Trường học",
+            "image": "school.svg"
+          },
+          {
+            "id": 10,
+            "content": "Tờ rơi",
+            "image": "leaflets.svg"
+          },
+          {
+            "id": 11,
+            "content": "Khác....",
+            "image": "others-icon.svg"
+          }
+        ]
+      },
+      {
+        "id": "F601E0F3-90C2-4738-8E07-CD5120E39148",
+        "createdDate": "2023-10-17",
+        "surveyQuestionId": "F563DA40-D609-4922-90B9-44E4290EDFEF",
+        "question": "How do you know FSEL?",
+        "language": "en-US",
+        "description": "addd",
+        "answers": [
+          {
+            "id": 1,
+            "content": "Google",
+            "image": "gmail-icon.svg"
+          },
+          {
+            "id": 2,
+            "content": "Facebook",
+            "image": "facebook-icon.svg"
+          },
+          {
+            "id": 3,
+            "content": "YouTube",
+            "image": "youtube-icon.svg"
+          },
+          {
+            "id": 4,
+            "content": "Tiktok",
+            "image": "tiktok-icon.svg"
+          },
+          {
+            "id": 5,
+            "content": "Friends/Family",
+            "image": "friends_family-icon.svg"
+          },
+          {
+            "id": 6,
+            "content": "News/Media",
+            "image": "blog-icon.svg"
+          },
+          {
+            "id": 7,
+            "content": "TV",
+            "image": "tv-icon.svg"
+          },
+          {
+            "id": 8,
+            "content": "Events/Conferences",
+            "image": "event.svg"
+          },
+          {
+            "id": 9,
+            "content": "School",
+            "image": "school.svg"
+          },
+          {
+            "id": 10,
+            "content": "Flyers",
+            "image": "leaflets.svg"
+          },
+          {
+            "id": 11,
+            "content": "Other....",
+            "image": "others-icon.svg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "14787CBF-CC43-4453-A148-6D11A683F311",
+    "createdDate": "2024-08-05",
+    "question": "Mục tiêu học tập của bạn là gì?",
+    "description": "Câu hỏi mục tiêu",
+    "icon": "addd",
+    "displayOrder": 3,
+    "displayLevel": 1,
+    "type": "CheckList",
+    "surveyFormType": "QuestBoard",
+    "isPilot": false,
+    "answers": [
+      {
+        "id": 1,
+        "content": "Nâng cao điểm số",
+        "image": "goal 1.png"
+      },
+      {
+        "id": 2,
+        "content": "Mục tiêu công việc",
+        "image": "work-target-icon.svg"
+      },
+      {
+        "id": 3,
+        "content": "Cải thiện giao tiếp",
+        "image": "friendship 1.png"
+      },
+      {
+        "id": 4,
+        "content": "Thi chứng chỉ",
+        "image": "student.svg"
+      },
+      {
+        "id": 5,
+        "content": "Du học",
+        "image": "plane 1.png"
+      }
+    ],
+    "translations": [
+      {
+        "id": "D823ACB4-62D8-4702-B95C-E6C5A8E49E4E",
+        "createdDate": "2024-08-05",
+        "surveyQuestionId": "14787CBF-CC43-4453-A148-6D11A683F311",
+        "question": "Mục tiêu học tập của bạn là gì?",
+        "language": "vi-VN",
+        "description": "Câu hỏi mục tiêu",
+        "answers": [
+          {
+            "id": 1,
+            "content": "Nâng cao điểm số",
+            "image": "goal 1.png"
+          },
+          {
+            "id": 2,
+            "content": "Mục tiêu công việc",
+            "image": "work-target-icon.svg"
+          },
+          {
+            "id": 3,
+            "content": "Cải thiện giao tiếp",
+            "image": "friendship 1.png"
+          },
+          {
+            "id": 4,
+            "content": "Thi chứng chỉ",
+            "image": "student.svg"
+          },
+          {
+            "id": 5,
+            "content": "Du học",
+            "image": "plane 1.png"
+          }
+        ]
+      },
+      {
+        "id": "877FC41D-D1AB-4285-8349-D8C71B9EA0A2",
+        "createdDate": "2024-08-05",
+        "surveyQuestionId": "14787CBF-CC43-4453-A148-6D11A683F311",
+        "question": "What are your learning goals?",
+        "language": "en-US",
+        "description": "Ask for target",
+        "answers": [
+          {
+            "id": 1,
+            "content": "Improve scores",
+            "image": "goal 1.png"
+          },
+          {
+            "id": 2,
+            "content": "Intended use for work",
+            "image": "work-target-icon.svg"
+          },
+          {
+            "id": 3,
+            "content": "Improve communication",
+            "image": "friendship 1.png"
+          },
+          {
+            "id": 4,
+            "content": "Certificate exam",
+            "image": "student.svg"
+          },
+          {
+            "id": 5,
+            "content": "Oversea",
+            "image": "plane 1.png"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "763D8BB9-CDBE-42E7-AA16-35A1915C3512",
     "createdDate": "2023-07-21",
     "question": "Chọn hướng đi của bạn",
@@ -300,7 +613,7 @@
     "displayOrder": 4,
     "displayLevel": 1,
     "type": "ChooseMultipleColumn",
-    "isPilot": false,
+    "isPilot": null,
     "answers": [
       {
         "id": 1,
@@ -419,8 +732,8 @@
   {
     "id": "713D8BB9-CDBE-42E7-AA16-35A1915C3532",
     "createdDate": "2023-07-21",
-    "question": "Vị trí của bạn",
-    "description": "addd",
+    "question": "Thông tin cá nhân",
+    "description": "Thông tin cá nhân",
     "icon": "wideword.png",
     "displayOrder": 5,
     "displayLevel": 1,
@@ -436,12 +749,13 @@
   {
     "id": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5",
     "createdDate": "2023-07-21",
-    "question": "Trường học của bạn",
+    "question": "Thông tin cá nhân và Trường học",
     "description": "addd",
     "icon": "wideword.png",
     "displayOrder": 6,
     "displayLevel": 1,
     "type": "Location",
+    "surveyFormType": "QuestBoard",
     "isPilot": false,
     "answers": {
       "country": "Other",
@@ -455,7 +769,7 @@
         "id": "365375de-db86-4167-bbe8-e5a3ca2c154e",
         "createdDate": "2023-10-17",
         "surveyQuestionId": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5",
-        "question": "Trường học của bạn",
+        "question": "Thông tin cá nhân và Trường học",
         "language": "vi-VN",
         "description": "addd",
         "answers": {
@@ -470,7 +784,7 @@
         "id": "4393a6a5-ff24-4d2d-b468-4b2c17ae0063",
         "createdDate": "2023-10-17",
         "surveyQuestionId": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5",
-        "question": "Your school",
+        "question": "Personal Infomation And School",
         "language": "en-US",
         "description": "addd",
         "answers": {
@@ -489,9 +803,10 @@
     "question": "Vị trí của bạn?",
     "description": "addd",
     "icon": "wideword.png",
-    "displayOrder": 6,
+    "displayOrder": 4,
     "displayLevel": 1,
     "type": "Location",
+    "surveyFormType": "QuestBoard",
     "isPilot": false,
     "answers": {
       "country": "Other",
@@ -536,7 +851,7 @@
     "displayOrder": 7,
     "type": "AgeGender",
     "displayLevel": 1,
-    "isPilot": false,
+    "isPilot": null,
     "answers": {
       "birthday": null,
       "ageGenderQuestions": [
@@ -1370,5 +1685,573 @@
     "type": "ShortAnswer",
     "isPilot": true,
     "answers": null
+  },
+  {
+    "id": "238CAE89-E1D8-408A-BB3C-1A0B27CD0EDB",
+    "createdDate": "2025-01-16",
+    "question": "Mục tiêu của bạn khi học Tiếng Anh là gì?",
+    "description": null,
+    "icon": null,
+    "displayOrder": 1,
+    "displayLevel": 1,
+    "type": "MultipleChoiceVertical",
+    "surveyFormType": "Event",
+    "competitionEventId": "AE2AA832-8436-4CA8-87C4-A3B563B7B5F3",
+    "isPilot": false,
+    "answers": [
+      {
+        "id": 1,
+        "content": "Cải thiện điểm số ở trường",
+        "image": null
+      },
+      {
+        "id": 2,
+        "content": "Thi chứng chỉ",
+        "image": null
+      },
+      {
+        "id": 3,
+        "content": "Sở thích",
+        "image": null
+      },
+      {
+        "id": 4,
+        "content": "Lý do khác",
+        "image": null
+      }
+    ],
+    "translations": [
+      {
+        "id": "B3E92765-8B8D-4BEC-A5D4-F9A9E213B53F",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "238CAE89-E1D8-408A-BB3C-1A0B27CD0EDB",
+        "question": "Mục tiêu của bạn khi học Tiếng Anh là gì?",
+        "language": "vi-VN",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "Cải thiện điểm số ở trường",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "Thi chứng chỉ",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Sở thích",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Lý do khác",
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "41058318-F3C0-4285-81C9-AC847A1D5364",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "238CAE89-E1D8-408A-BB3C-1A0B27CD0EDB",
+        "question": "What is your goal in learning English?",
+        "language": "en-US",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "Improving school grades",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "Taking certification exams",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Personal interest",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Other reasons",
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "8BB2B7F3-8254-4E83-B13F-F43CDB8D3C18",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "238CAE89-E1D8-408A-BB3C-1A0B27CD0EDB",
+        "question": "Quels sont vos objectifs pour apprendre l'anglais ?",
+        "language": "fr-FR",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "Améliorer vos notes à l'école",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "Passer une certification",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Intérêt personnel",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Autres raisons",
+            "image": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "68C17FA9-1D90-4EB2-8412-EA5062AD26F0",
+    "createdDate": "2025-01-16",
+    "question": "Bạn đánh giá mức độ quan trọng của việc học tiếng Anh như thế nào (thang điểm 5 từ thấp đến cao)?",
+    "description": null,
+    "icon": null,
+    "displayOrder": 2,
+    "displayLevel": 1,
+    "type": "MultipleChoiceVertical",
+    "surveyFormType": "Event",
+    "competitionEventId": "AE2AA832-8436-4CA8-87C4-A3B563B7B5F3",
+    "isPilot": false,
+    "answers": [
+      {
+        "id": 1,
+        "content": "1",
+        "image": null
+      },
+      {
+        "id": 2,
+        "content": "2",
+        "image": null
+      },
+      {
+        "id": 3,
+        "content": "3",
+        "image": null
+      },
+      {
+        "id": 4,
+        "content": "4",
+        "image": null
+      },
+      {
+        "id": 5,
+        "content": "5",
+        "image": null
+      }
+    ],
+    "translations": [
+      {
+        "id": "54D7630B-E27A-4E89-A77B-23384E15DC9B",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "68C17FA9-1D90-4EB2-8412-EA5062AD26F0",
+        "question": "Bạn đánh giá mức độ quan trọng của việc học tiếng Anh như thế nào (thang điểm 5 từ thấp đến cao)?",
+        "language": "vi-VN",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "1",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "2",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "3",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "4",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "5",
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "819F8198-3B77-4243-9DFC-4F5B2AE052A7",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "68C17FA9-1D90-4EB2-8412-EA5062AD26F0",
+        "question": "How would you rate the importance of learning English (on a scale of 1 to 5, from least to most important)?",
+        "language": "en-US",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "1",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "2",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "3",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "4",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "5",
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "90267A54-B716-43BE-A54D-BAE0CEC65729",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "68C17FA9-1D90-4EB2-8412-EA5062AD26F0",
+        "question": "Comment évaluez-vous l'importance de l'apprentissage de l'anglais ? (échelle de 1 à 5, de faible à élevé)?",
+        "language": "fr-FR",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "1",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "2",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "3",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "4",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "5",
+            "image": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "73A7A0C8-1E07-4351-B3F4-3E843623BBAF",
+    "createdDate": "2025-01-16",
+    "question": "Bạn học thêm Tiếng Anh ở đâu?",
+    "description": null,
+    "icon": null,
+    "displayOrder": 1,
+    "displayLevel": 2,
+    "type": "MultipleChoiceVertical",
+    "surveyFormType": "Event",
+    "competitionEventId": "AE2AA832-8436-4CA8-87C4-A3B563B7B5F3",
+    "isPilot": false,
+    "answers": [
+      {
+        "id": 1,
+        "content": "Trung tâm tiếng Anh",
+        "image": null
+      },
+      {
+        "id": 2,
+        "content": "Học online",
+        "image": null
+      },
+      {
+        "id": 3,
+        "content": "Học gia sư",
+        "image": null
+      },
+      {
+        "id": 4,
+        "content": "Học thêm với giáo viên",
+        "image": null
+      },
+      {
+        "id": 5,
+        "content": "Không học thêm tiếng Anh",
+        "image": null
+      }
+    ],
+    "translations": [
+      {
+        "id": "D4D2FAE7-AE44-4652-883C-68C98A2972DE",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "73A7A0C8-1E07-4351-B3F4-3E843623BBAF",
+        "question": "Bạn học thêm Tiếng Anh ở đâu?",
+        "language": "vi-VN",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "Trung tâm tiếng Anh",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "Học online",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Học gia sư",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Học thêm với giáo viên",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "Không học thêm tiếng Anh",
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "3353FB66-5D41-4334-9542-510E327359C7",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "73A7A0C8-1E07-4351-B3F4-3E843623BBAF",
+        "question": "Where do you take additional English lessons?",
+        "language": "en-US",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "English language centers",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "Online learning",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Private tutoring",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Extra classes with teachers",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "Do not take additional English lessons",
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "0BCED45A-CC34-47D4-A1E5-97735F52791B",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "73A7A0C8-1E07-4351-B3F4-3E843623BBAF",
+        "question": "Où prenez-vous des cours supplémentaires d'anglais ?",
+        "language": "fr-FR",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "Centres de langue anglaise",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "Apprentissage en ligne",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Cours particuliers",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Cours supplémentaires avec des enseignants",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "Je ne prends pas de cours supplémentaires d'anglais",
+            "image": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "C6BDA257-0757-4290-86C1-794D0BA6AE3B",
+    "createdDate": "2025-01-16",
+    "question": "Điều bạn thích nhất ở việc học tiếng Anh là gì?",
+    "description": null,
+    "icon": null,
+    "displayOrder": 2,
+    "displayLevel": 2,
+    "type": "MultipleChoiceVertical",
+    "surveyFormType": "Event",
+    "competitionEventId": "AE2AA832-8436-4CA8-87C4-A3B563B7B5F3",
+    "isPilot": false,
+    "answers": [
+      {
+        "id": 1,
+        "content": "Giao tiếp tiếng Anh rất pro trong mắt bạn bè",
+        "image": null
+      },
+      {
+        "id": 2,
+        "content": "Điểm cao được cô giáo khen ngợi trước lớp",
+        "image": null
+      },
+      {
+        "id": 3,
+        "content": "Thích vì tiếng Anh hay ho",
+        "image": null
+      },
+      {
+        "id": 4,
+        "content": "Không thích gì cả",
+        "image": null
+      },
+      {
+        "id": 5,
+        "content": "Ghét tiếng Anh",
+        "image": null
+      }
+    ],
+    "translations": [
+      {
+        "id": "70C9D600-A6A2-4D56-A740-3D0151EFAB1A",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "C6BDA257-0757-4290-86C1-794D0BA6AE3B",
+        "question": "Điều bạn thích nhất ở việc học tiếng Anh là gì?",
+        "language": "vi-VN",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "Giao tiếp tiếng Anh rất pro trong mắt bạn bè",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "Điểm cao được cô giáo khen ngợi trước lớp",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Thích vì tiếng Anh hay ho",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Không thích gì cả",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "Ghét tiếng Anh",
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "1E81A3D3-EDCB-4401-8A59-870FDBF037E5",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "C6BDA257-0757-4290-86C1-794D0BA6AE3B",
+        "question": "What do you like most about learning English?",
+        "language": "en-US",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "Being seen as a pro at English by friends",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "High grades and being praised by the teacher in class",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Enjoying English because it is interesting",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Do not like anything about it",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "Dislike English entirely",
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "97064707-B3D8-4FB5-BF4A-12BB6EB3776E",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "C6BDA257-0757-4290-86C1-794D0BA6AE3B",
+        "question": "Qu'aimez-vous le plus dans l'apprentissage de l'anglais ?",
+        "language": "fr-FR",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "Être considéré comme un expert en anglais par vos amis",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "Obtenir de bonnes notes et être félicité par le professeur en classe",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Aimer l'anglais parce que c'est intéressant",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Ne rien aimer du tout",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "Détester l'anglais complètement",
+            "image": null
+          }
+        ]
+      }
+    ]
   }
 ]

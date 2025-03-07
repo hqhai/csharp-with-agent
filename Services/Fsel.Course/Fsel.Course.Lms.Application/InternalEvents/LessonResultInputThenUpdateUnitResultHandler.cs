@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.InternalEvents
 {
+    using Amazon.Runtime.Internal.Util;
     using Fsel.Core.Applications.InternalEvents;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -10,21 +11,19 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
-    using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
     using Unit = Course.Domain.Entities.Unit;
 
     public class LessonResultInputThenUpdateUnitResultHandler : BaseInternalUnitResultEventHandler,
         INotificationHandler<EntityChangedEvent<LessonResult>>
     {
-        private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
 
-        public LessonResultInputThenUpdateUnitResultHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, ITrainingService trainingService, QuestBoardPublisher questBoardPublisher, ILessonResultRepository lessonResultRepository, IOrderService orderService) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, trainingService, questBoardPublisher, lessonResultRepository, orderService)
+        public LessonResultInputThenUpdateUnitResultHandler(ISystemService systemService, ILessonResultRepository lessonResultRepository, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonNoteRepository lessonNoteRepository, ILogger<BaseInternalUnitResultEventHandler> logger, NotificationMessagePublisher notificationMessagePublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, lessonResultRepository, orderService, lessonNoteRepository, logger, notificationMessagePublisher)
         {
-            _mockTestResultRepository = mockTestResultRepository;
             _lessonResultRepository = lessonResultRepository;
         }
 
@@ -32,14 +31,18 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(notification);
             var lessonResult = notification.Data;
-            var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons)
-                                                    .ThenInclude(x => x.Lesson)
-                                                    .Include(x => x.UnitSkillMockTests)
-                                                    .FirstOrDefaultAsync(x => x.Id == lessonResult.UnitId, cancellationToken);
 
-            var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && (!(unit != null) || x.UnitId == unit.Id) && x.StudentId == lessonResult.StudentId && x.CourseId == lessonResult.CourseId).ToListAsync(cancellationToken);
-            if (unit != null && lessonResult.Status == EnumResultStatus.Done)
+            try
             {
+                var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons)
+                                                        .ThenInclude(x => x.Lesson)
+                                                        .Include(x => x.UnitSkillMockTests)
+                                                        .FirstOrDefaultAsync(x => x.Id == lessonResult.UnitId, cancellationToken);
+                if (unit == null || lessonResult.Status != EnumResultStatus.Done)
+                {
+                    return;
+                }
+                var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && (!(unit != null) || x.UnitId == unit.Id) && x.StudentId == lessonResult.StudentId && x.CourseId == lessonResult.CourseId).ToListAsync(cancellationToken);
                 var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
                 if (lessonResults.Count == unit.UnitLessons.Count && !unit.UnitSkillMockTests.Any())
                 {
@@ -61,6 +64,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Trigger LessonResult : {ex.Message} ");
+            }
         }
 
         private async Task UpdateTheNextLessonAsync(Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
@@ -75,7 +82,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 if (lessonResultNext != null && lessonResultNext.Status == EnumResultStatus.Unfinished)
                 {
                     lessonResultNext.Status = EnumResultStatus.New;
-                    _lessonResultRepository.Update(lessonResultNext);
+                    _lessonResultRepository.Update(lessonResultNext, false, x => x.CourseId, x => x.StudentId, x => x.UnitId, x => x.LessonId);
                     await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
@@ -85,7 +92,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 if (mockTestResult != null && mockTestResult.Status == EnumResultStatus.Unfinished)
                 {
                     mockTestResult.Status = EnumResultStatus.New;
-                    _mockTestResultRepository.Update(mockTestResult);
+                    _mockTestResultRepository.Update(mockTestResult, false, x => x.MockTestId, x => x.UnitId, x => x.StudentId, x => x.CourseId);
                     await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }

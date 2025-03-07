@@ -14,7 +14,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
         private readonly IHubContext<ClassForumAIFeedBackHub> _classForumFeedBackHubContext;
         private readonly IQueueProvider _queueProvider;
 
-        public AIFeedBackConsumer(IHubContext<ClassForumAIFeedBackHub> classForumAIFeedBackHubContext, IQueueProvider queueProvider, AuthContext authContext) : base(authContext)
+        public AIFeedBackConsumer(IHubContext<ClassForumAIFeedBackHub> classForumAIFeedBackHubContext, IQueueProvider queueProvider, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _classForumFeedBackHubContext = classForumAIFeedBackHubContext;
             _queueProvider = queueProvider;
@@ -27,11 +27,11 @@ namespace Fsel.Realtime.Application.Queues.Consumers
                 var classForumResultId = message.ClassForumResultId.ToString();
                 await _classForumFeedBackHubContext.GetGroup(classForumResultId!).SendAsync(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, message);
 
-                try
-                {
-                    _queueProvider.Publish(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, classForumResultId, message);
-                }
-                catch { }
+                //try
+                //{
+                //    _queueProvider.Publish(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, classForumResultId, message);
+                //}
+                //catch { }
             }
         }
     }

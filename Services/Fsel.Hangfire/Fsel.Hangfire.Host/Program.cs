@@ -28,11 +28,17 @@ builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<CompleteTestWhenTimeOutPublisher>();
 builder.Services.AddScoped<ReviewFselPublisher>();
 builder.Services.AddScoped<NoticeAccessTimePublisher>();
+builder.Services.AddScoped<NoticeExtendPackagePublisher>();
 builder.Services.AddScoped<WeeklyReportPublisher>();
+builder.Services.AddScoped<WeeklySnapShotLeaderBoardPublisher>();
 builder.Services.AddScoped<UpdateStatusTrialStudentPublisher>();
 builder.Services.AddScoped<RetryMockTestPublisher>();
 builder.Services.AddScoped<RetryClassForumPublisher>();
 builder.Services.AddScoped<UpdateClassForumResultToExpiredTimePublisher>();
+builder.Services.AddScoped<JobActiveEventPublisher>();
+builder.Services.AddScoped<JobRunEventsPublisher>();
+builder.Services.AddScoped<CheckUserDeletionPublisher>();
+builder.Services.AddScoped<WeeklyNoticePublisher>();
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
@@ -40,7 +46,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.SetTimeRetryMockTest, typeof(SetTimeToRetryMockTestConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SetTimeRetryClassForum, typeof(SetTimeToRetryClassForumConsumer) },
     { QueueSettings.SystemQueue.NameQueue.SetCompleteApprovalPostTimeOut, typeof(SetTimeToCompleteApprovalConsumer) },
-    { QueueSettings.UserQueue.NameQueue.SetTimeToSendReviewFsel, typeof(SetTimeToReviewFselConsumer) },
+    //{ QueueSettings.UserQueue.NameQueue.SetTimeToSendReviewFsel, typeof(SetTimeToReviewFselConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SetTimeClassForumDone, typeof(SetTimeToClassForumApprovalConsumer) },
 });
 var app = builder.Build();

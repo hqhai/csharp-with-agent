@@ -2,57 +2,61 @@
 
 namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 {
-    using System.Text.Json.Serialization;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Constants;
-    using Fsel.Common.Helpers;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Domain.Models.CommandModels.UserOtpCodes;
+    using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
+    using Kros.Extensions;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Hosting;
 
-    public class ConfirmOtpCommand : IRequest<MethodResult<UserOtpCode>>
+    public class ConfirmOtpCommand : ConfirmOtpCommandModel, IRequest<MethodResult<UserOtpCodeModel>>
     {
-        public string? Otp { get; set; }
-        public string? Email { get; set; }
-
-        [JsonIgnore]
-        public bool IsCheckExpiredTime { get; set; } = true;
     }
 
-    public class ConfirmOtpCommandHandler : IRequestHandler<ConfirmOtpCommand, MethodResult<UserOtpCode>>
+    public class ConfirmOtpCommandHandler : IRequestHandler<ConfirmOtpCommand, MethodResult<UserOtpCodeModel>>
     {
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
-        private readonly IHostEnvironment _environment;
-        private readonly string _otpDefault = "123456";
+        private readonly IMapper _mapper;
+        private readonly UserManager<User> _userManager;
 
-        public ConfirmOtpCommandHandler(IUserOtpCodeRepository userOtpCodeRepository, IHostEnvironment environment)
+        public ConfirmOtpCommandHandler(IUserOtpCodeRepository userOtpCodeRepository,
+                                        IMapper mapper,
+                                        UserManager<User> userManager)
         {
             _userOtpCodeRepository = userOtpCodeRepository;
-            _environment = environment;
+            _mapper = mapper;
+            _userManager = userManager;
         }
 
-        public async Task<MethodResult<UserOtpCode>> Handle(ConfirmOtpCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<UserOtpCodeModel>> Handle(ConfirmOtpCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<UserOtpCode> methodResult = new MethodResult<UserOtpCode>();
-            var userOtpCode = await _userOtpCodeRepository.Queryable
-                                   .FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.Otp, cancellationToken);
-            if (!string.IsNullOrEmpty(request.Email) && request.Otp == _otpDefault && (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)))
+            MethodResult<UserOtpCodeModel> methodResult = new MethodResult<UserOtpCodeModel>();
+
+            UserOtpCode? userOtpCode = new UserOtpCode();
+
+            if (request.UserId.HasValue)
             {
-                if (!request.Email.IsValidEmail())
+                var user = await _userManager.Users.FirstOrDefaultAsync(p => p.Id == request.UserId, cancellationToken);
+                if (user == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                    methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.UserDoesNotExist), nameof(request.UserId), request.UserId);
                     return methodResult;
                 }
-                userOtpCode = await _userOtpCodeRepository.Queryable.Include(x => x.User)
-                                   .FirstOrDefaultAsync(x => x.User != null && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.User.Email == request.Email, cancellationToken);
+
+                request.Email = user.Email;
             }
 
+            userOtpCode = await _userOtpCodeRepository.GetUserOtpCodeAsync(request.Otp, request.Email, request.PhoneNumber, (!request.Email.IsNullOrEmpty() ? EnumUserOtpCodeType.Email : EnumUserOtpCodeType.SMS));
             if (userOtpCode == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.InvalidOTP), nameof(request.Otp), request.Otp);
@@ -65,11 +69,30 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 return methodResult;
             }
 
-            userOtpCode.Status = EnumOtpCodeStatus.Verified;
-            _userOtpCodeRepository.Update(userOtpCode);
-            await _userOtpCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            methodResult.Result = userOtpCode;
-            methodResult.StatusCode = StatusCodes.Status200OK;
+            await _userOtpCodeRepository.ExecuteTransactionAsync(async () =>
+            {
+                userOtpCode.Status = EnumOtpCodeStatus.Verified;
+                _userOtpCodeRepository.Update(userOtpCode);
+
+                if (!string.IsNullOrEmpty(request.Email))
+                {
+                    var userTypeSMS = await _userOtpCodeRepository.Queryable
+                                                                  .FirstOrDefaultAsync(p => p.Type == EnumUserOtpCodeType.SMS && p.Status == EnumOtpCodeStatus.New && p.User != null && p.User.Email == request.Email.Trim(), cancellationToken);
+
+                    if (userTypeSMS != null)
+                    {
+                        userTypeSMS.Status = EnumOtpCodeStatus.Verified;
+                        _userOtpCodeRepository.Update(userTypeSMS);
+                    }
+                }
+
+                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                methodResult.Result = _mapper.Map<UserOtpCodeModel>(userOtpCode);
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            });
+
             return methodResult;
         }
     }

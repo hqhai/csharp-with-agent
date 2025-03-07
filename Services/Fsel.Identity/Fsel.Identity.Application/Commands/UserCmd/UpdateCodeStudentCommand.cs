@@ -3,20 +3,21 @@
 namespace Fsel.Identity.Application.Commands.UserCmd
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Models;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
-    using Fsel.Identity.Application.Services.InteractionService;
-    using Fsel.Identity.Application.Services.InteractionService.Models;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -34,18 +35,18 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private readonly IStudentRepository _studentRepository;
         private readonly ISystemService _systemService;
         private readonly IMapper _mapper;
-        private readonly IInteractionService _interactionService;
 
-        public UpdateCodeStudentCommandHandler(UserManager<User> userManager, AuthContext authContext, IStudentRepository studentRepository,
+        public UpdateCodeStudentCommandHandler(UserManager<User> userManager,
+            AuthContext authContext,
+            IStudentRepository studentRepository,
             ISystemService systemService,
-            IMapper mapper, IInteractionService interactionService)
+            IMapper mapper)
         {
             _userManager = userManager;
             _authContext = authContext;
             _studentRepository = studentRepository;
             _systemService = systemService;
             _mapper = mapper;
-            _interactionService = interactionService;
         }
 
         public async Task<MethodResult<UserModel>> Handle(UpdateCodeStudentCommand request, CancellationToken cancellationToken)
@@ -73,19 +74,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             {
                 request.Birthday = new DateTime(request.YearBirthday.Value, 1, 1);
             }
-
-            var stt = await _studentRepository.Queryable.CountAsync(cancellationToken);
-            var currentDate = DateTime.UtcNow;
-            var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
-            var lastDigitOfYear = currentDate.Year % 10;
-            var lastOfBirthDay = request.Birthday!.Value.Year % 100;
-            var number = request.Gender == EnumGender.Male ? 0 : request.Gender == EnumGender.Female ? 1 : 2;
-            var code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfBirthDay}{stt:000}";
-            if (await _studentRepository.Queryable.Include(x => x.Human).AnyAsync(x => x.Human != null && x.Human.Code == code, cancellationToken))
-            {
-                code = $"HN_{weekNumber}{lastDigitOfYear}{number}{2}{lastOfBirthDay}{stt:000}";
-            }
-            user.Human.Code = code;
+            user.Human.Code = await GeneratorCodeAsync(request);
             int age = DateTimeHelper.GetYearOld(request.Birthday);
             if (age <= 13)
             {
@@ -101,42 +90,68 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             user.Human.Student.SchoolId = request.SchoolId;
             if (request.SchoolId.HasValue)
             {
-                var schoolResults = await _systemService.GetSchoolsAsync(new List<Guid> { request.SchoolId.Value });
+                var schoolResults = await _systemService.GetSchoolByIds(new List<Guid> { request.SchoolId.Value });
                 if (schoolResults.IsSuccessStatusCode)
                 {
                     user.Human.Student.School = schoolResults.Content?.Result?.FirstOrDefault()?.Name;
                 }
             }
-            else
+            else if (!string.IsNullOrEmpty(request.SchoolName))
             {
-                user.Human.Student.School = request.SchoolName;
+                var schoolResult = await _systemService.ExecuteListSchoolQueryAsync
+                (
+                    new BaseQueryModel
+                    {
+                        Filters = new List<GenericFilterModel>()
+                        {
+                            new GenericFilterModel
+                            {
+                                Property = "LocationName",
+                                Operator = Common.Enums.EnumFilterOperator.Like,
+                                Value = request.SchoolName
+                            }
+                        }
+                    }
+                );
+                if (!schoolResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(schoolResult.Error);
+                    return methodResult;
+                }
+                var school = schoolResult.Content?.Result?.FirstOrDefault();
+                if (school != null)
+                {
+                    user.Human.Student.School = school.Name;
+                    user.Human.Student.SchoolId = school.Id;
+                }
+                else
+                {
+                    user.Human.Student.School = request.SchoolName;
+                }
             }
 
             _mapper.Map(request, user.Human);
             await _userManager.UpdateAsync(user);
 
-            var isSurveyResult = await _interactionService.IsSurveyCompleted(user.Id);
-            var isSurvey = isSurveyResult.Content?.Result;
-            if (isSurveyResult.IsSuccessStatusCode && isSurvey.HasValue && isSurvey == false)
-            {
-                var createSurveyResult = await _interactionService.CreateSurvey(new CreateCustomerSurveyCommandModel
-                {
-                    Email = user.Email,
-                    UserId = user.Id,
-                    Answers = new List<CreateSurveyCommandModel>
-                {
-                    new CreateSurveyCommandModel
-                    {
-                        Id = Guid.Parse("492D8BB9-CDBE-42E7-AA16-35A1915C3621"),
-                        Answer = new { Id = 1,Content = "Google",Image = "gmail-icon.svg"},
-                    }
-                }
-                });
-            }
-
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;
+        }
+
+        private async Task<string> GeneratorCodeAsync(UpdateCodeStudentCommand request)
+        {
+            var stt = _studentRepository.GetNextSequenceValue<int>(SqlSettings.Sequence.UserSequence);
+            var currentDate = DateTime.UtcNow;
+            var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
+            var lastDigitOfYear = currentDate.Year % 10;
+            var lastOfBirthDay = request.Birthday!.Value.Year % 100;
+            var number = request.Gender == EnumGender.Male ? 0 : request.Gender == EnumGender.Female ? 1 : 2;
+            var code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfBirthDay}{stt:D3}";
+            if (await _studentRepository.Queryable.Include(x => x.Human).AnyAsync(x => x.Human != null && x.Human.Code == code))
+            {
+                code = $"HN_{weekNumber}{lastDigitOfYear}{number}{2}{lastOfBirthDay}{stt:D3}";
+            }
+            return code;
         }
     }
 }

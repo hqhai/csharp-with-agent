@@ -5,7 +5,10 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
     using Fsel.Common.ActionResults;
     using Fsel.Identity.Application.Services.LmsCourseService.CommandModels;
     using Fsel.Identity.Application.Services.LmsCourseService.Model;
+    using Fsel.Identity.Application.Services.LmsCourseService.QueryModels;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -34,6 +37,7 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Delete("/v1/admin/student/delete-student/{id}")]
         Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
+
         [Post("/v1/progress/students-competition")]
         Task<IApiResponse<MethodResult<IList<CompetitionStudentProgressModel>>>> GetStudentProgress([FromQuery] StudentCompetitionStatQueryModel query);
 
@@ -49,7 +53,25 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
         [Post("/v1/course-integration/integration-unit-results")]
         Task<IApiResponse<MethodResult<IList<UnitResultModel>>>> GetUnitResults([FromBody] CourseIntegrationQueryModel query);
 
-        [Get("/v1/course-integration/integration-lesson-results")]
-        Task<IApiResponse<MethodResult<IList<LessonResultModel>>>> GetLessonResults([FromQuery] CourseIntegrationQueryModel query);
+        [Post("/v1/dashboard/active-course-result")]
+        Task<IApiResponse<MethodResult<IList<Guid>>>> GetActiveCourseResultByStudentId([FromBody] ActiveCourseResultModel query);
+
+        [Post("/v1.1/course/retake-course")]
+        Task<IApiResponse<MethodResult<CourseResultModel>>> RetakeCourseAsync([FromBody] RetakeCourseResultCommandModel command);
+
+        [Get("/v1.1/course/get-course-by-level/{courseLevel}")]
+        Task<IApiResponse<MethodResult<CourseModel>>> GetCourseByLevelAsync([FromRoute] EnumCourseLevel courseLevel);
+
+        [Get("/v1.1/course/get-courses-by-levels")]
+        Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetCoursesByLevelsAsync([FromQuery] GetCoursesByCourseLevelsQueryModel query);
+
+        [Post("/v1.1/admin/course")]
+        Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetCoursesByIdsAsync([FromBody] IList<Guid> courseIds);
+
+        [Post("/v1.1/admin/course")]
+        Task<IApiResponse<MethodResult<IList<CourseModel>>>> Get([FromBody] IList<Guid> courseIds);
+
+        [Post("/v1.1/admin/other/param-beginner-guide")]
+        Task<IApiResponse<MethodResult<IList<ParamBeginnerGuideModel>>>> GetParamBeginnerGuide([FromBody] IList<Guid> studentIds);
     }
 }

@@ -2,23 +2,20 @@
 
 namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 {
-    using System.Globalization;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Interaction.Application.Commands.AuthCmd;
+    using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.Entities;
-    using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys;
     using Fsel.Interaction.Domain.Models.EntityModels;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Models.SenderTemplates;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class CreateCustomerSurveyCommand : CreateCustomerSurveyCommandModel, IRequest<MethodResult<IList<CustomerSurveyModel>>>
     {
@@ -32,8 +29,9 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
         private readonly IMapper _mapper;
         private readonly MediatR.IMediator _mediator;
         private readonly IUserService _userService;
+        private readonly QuestBoardPublisher _questBoardPublisher;
 
-        public CreateCustomerSurveyCommandHandler(ICustomerSurveyRepository customerSurveyRepository, AuthContext authContext, ISurveyQuestionRepository surveyQuestionRepository, IMapper mapper, MediatR.IMediator mediator, IUserService userService)
+        public CreateCustomerSurveyCommandHandler(ICustomerSurveyRepository customerSurveyRepository, AuthContext authContext, ISurveyQuestionRepository surveyQuestionRepository, IMapper mapper, MediatR.IMediator mediator, IUserService userService, QuestBoardPublisher questBoardPublisher)
         {
             _customerSurveyRepository = customerSurveyRepository;
             _authContext = authContext;
@@ -41,6 +39,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             _mapper = mapper;
             _mediator = mediator;
             _userService = userService;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<IList<CustomerSurveyModel>>> Handle(CreateCustomerSurveyCommand request, CancellationToken cancellationToken)
@@ -72,28 +71,52 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             #endregion pilot
 
             List<CustomerSurvey> customerSurveys = new List<CustomerSurvey>();
+            List<CustomerSurvey> customerSurveysUpdate = new List<CustomerSurvey>();
+
+            var listExistsAnswers = _customerSurveyRepository.Queryable.Where(x => x.UserId == request.UserId).ToList();
+
+            var listSurveyQuestionId = listExistsAnswers.Select(x => x.SurveyQuestionId).ToList();
+
 
             foreach (var item in request.Answers)
             {
-                var customerSurvey = new CustomerSurvey
+                var customerSurvey = listExistsAnswers.FirstOrDefault(x => x.SurveyQuestionId == item.Id);
+
+
+                CustomerSurveyModel modelAnswer = new CustomerSurveyModel
                 {
                     Answer = item.Answer,
                     UserId = request.UserId ?? _authContext.CurrentUserId,
-                    SurveyQuestionId = item.Id
+                    SurveyQuestionId = item.Id,
+                    IsCompleted = item.IsCompleted
                 };
-                if (!customerSurvey.IsValid())
+
+                if (customerSurvey != null)
                 {
-                    methodResult.AddErrorBadRequest(customerSurvey.ErrorMessages);
-                    return methodResult;
+                    customerSurvey = _mapper.Map(modelAnswer, customerSurvey);
+                    customerSurveysUpdate.Add(customerSurvey);
+                }
+                else
+                {
+                    var newCustomerSurvey = _mapper.Map<CustomerSurvey>(modelAnswer);
+                    customerSurveys.Add(newCustomerSurvey);
                 }
 
-                customerSurveys.Add(customerSurvey);
+            }
+
+            bool completedSurvey = request.Answers.All(x => x.IsCompleted);
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var student = studentResult?.Content?.Result;
+            if (completedSurvey && student != null)
+            {
+                await DoQuestBoard(student.Id, cancellationToken);
             }
 
             await _customerSurveyRepository.ExecuteTransactionAsync(async () =>
             {
                 await _customerSurveyRepository.AddList(customerSurveys);
-                await _customerSurveyRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                _customerSurveyRepository.UpdateList(customerSurveysUpdate);
+                await _customerSurveyRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 #region Send email Survey Pilot
 
@@ -121,6 +144,18 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             });
 
             return methodResult;
+        }
+
+        private async Task DoQuestBoard(Guid studentId, CancellationToken cancellationToken)
+        {
+            QuestBoardQueueModel model = new QuestBoardQueueModel
+            {
+                StudentID = studentId,
+                Type = EnumQuestBoardType.BeginnerQuests,
+                Category = EnumQuestBoardCategory.CompletedSurvey,
+                Value = 1
+            };
+            await _questBoardPublisher.Publish(model, cancellationToken);
         }
     }
 }

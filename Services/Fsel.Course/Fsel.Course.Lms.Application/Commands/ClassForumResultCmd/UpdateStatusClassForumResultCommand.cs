@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -30,8 +31,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly ICourseRepository _courseRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly IMediator _mediator;
 
-        public UpdateStatusClassForumResultCommandHandler(IClassForumResultRepository classForumResulRepository, NotificationMessagePublisher notificationMessagePublisher, AuthContext authContext, ICourseRepository courseRepository, IUnitRepository unitRepository, ILessonResultRepository lessonResultRepository)
+        public UpdateStatusClassForumResultCommandHandler(IClassForumResultRepository classForumResulRepository, NotificationMessagePublisher notificationMessagePublisher, AuthContext authContext, ICourseRepository courseRepository, IUnitRepository unitRepository, ILessonResultRepository lessonResultRepository, IMediator mediator)
         {
             _classForumResulRepository = classForumResulRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
@@ -39,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
             _lessonResultRepository = lessonResultRepository;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<bool>> Handle(UpdateStatusClassForumResultCommand request, CancellationToken cancellationToken)
@@ -63,19 +66,31 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             await _classForumResulRepository.ExecuteTransactionAsync(async () =>
              {
                  classForumResult.Status = EnumClassForumResultStatus.Denied;
-                 _classForumResulRepository.Update(classForumResult);
+                 _classForumResulRepository.Update(classForumResult, false, x => x.LessonResultId, x => x.ClassForumId, x => x.StudentId);
                  await _classForumResulRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                 var (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(classForumResult!, lesson?.Id, classForumResult?.LessonResult?.CourseId, classForumResult?.LessonResult?.UnitId);
+                 var objectOwnerId = CustomDataForParamMessage(classForumResult!);
+
+                 GetFeatureModuleQuery query = new GetFeatureModuleQuery
+                 {
+                     FeatureModule = EnumFeatureModule.ClassForumResult,
+                     ObjectId = classForumResult?.Id ?? default
+                 };
+
+                 var featureModule = await _mediator.Send(query).ConfigureAwait(false);
+                 var featureModuleResult = featureModule?.Result;
+
+                 List<object> paramLinksValue = new List<object> { featureModuleResult?.CourseId ?? default, featureModuleResult?.UnitId ?? default, featureModuleResult?.LessonId ?? default, featureModuleResult?.ClassForumDetailResultId ?? default };
 
                  NotificationSendingQueueModel notificationQueueModel = new NotificationSendingQueueModel()
                  {
                      Type = EnumNotificationType.LinkPage,
                      Content = EnumNotificationContent.DeleteClassForumResult,
                      SenderId = _authContext.CurrentUserId,
-                     ParamsLink = returnedParamsLink,
+                     ParamsLink = paramLinksValue,
                      ObjectId = classForumResult?.Id ?? Guid.NewGuid(),
                      PlatformCode = EnumPlatformCode.LMS,
+                     ParamsMessage = new List<object> { classForumResult?.CreatedFullName ?? string.Empty },
                      UserIds = new List<Guid>() { objectOwnerId },
                  };
 
@@ -89,18 +104,16 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             return methodResult;
         }
 
-        public static (List<object> paramsLink, Guid ownerObjectId) CustomDataForParamMessage(dynamic templateResult, Guid? courseId, Guid? unitId, Guid? lessonId)
+        public static Guid CustomDataForParamMessage(dynamic templateResult)
         {
             if (templateResult == null)
             {
-                return (new List<object>(), Guid.Empty);
+                return Guid.Empty;
             }
 
-            // param
-            var paramsLink = new List<object> { lessonId.ToString() ?? string.Empty, courseId.ToString() ?? string.Empty, unitId.ToString() ?? string.Empty };
             var ownerObjectId = templateResult?.CreatedUserId ?? default;
 
-            return (paramsLink, ownerObjectId);
+            return ownerObjectId;
         }
     }
 }

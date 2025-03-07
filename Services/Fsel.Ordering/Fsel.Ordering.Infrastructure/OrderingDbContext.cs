@@ -22,6 +22,7 @@ namespace Fsel.Ordering.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
             SeedPackages(modelBuilder);
+            SeedEvents(modelBuilder);
 
             modelBuilder.ApplyConfiguration(new OrderEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PackageEntityTypeConfiguration());
@@ -29,7 +30,12 @@ namespace Fsel.Ordering.Infrastructure
             modelBuilder.ApplyConfiguration(new VoucherPackageEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UserVoucherEnityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new OrderTransactionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new EventEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PackageEventEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new EventTranslationEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PackageTranslationEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductTranslationEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -45,7 +51,13 @@ namespace Fsel.Ordering.Infrastructure
 
         public DbSet<UserReferral> UserReferrals { get; set; }
         public DbSet<OrderTransaction> OrderTransactions { get; set; }
+        public DbSet<Event> Events { get; set; }
+        public DbSet<PackageEvent> PackageEvents { get; set; }
+        public DbSet<EventTranslation> EventTranslations { get; set; }
         public DbSet<PackageTranslation> PackageTranslations { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductTranslation> ProductTranslations { get; set; }
+        public DbSet<UserVoucherLock> UserVoucherLocks { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -73,6 +85,22 @@ namespace Fsel.Ordering.Infrastructure
 
             builder.Entity<Package>().HasData(packages);
             builder.Entity<PackageTranslation>().HasData(packageTranslations);
+        }
+
+        private static void SeedEvents(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.EventFileName);
+            var events = ConvertHelper.DeserializeFromFilePath<IList<Event>>(path);
+            ArgumentNullException.ThrowIfNull(events);
+
+            var eventTranslations = events.SelectMany(x => x.Translations).ToList();
+            events.ForEach(x => x.Translations.Clear());
+            var packageEvents = events.SelectMany(x => x.PackageEvents).ToList();
+            events.ForEach(x => x.PackageEvents.Clear());
+
+            builder.Entity<Event>().HasData(events);
+            builder.Entity<EventTranslation>().HasData(eventTranslations);
+            builder.Entity<PackageEvent>().HasData(packageEvents);
         }
     }
 }

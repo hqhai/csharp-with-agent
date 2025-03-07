@@ -2,10 +2,14 @@
 
 namespace Fsel.Shared.Helpers
 {
+    using System.Collections;
+    using System.Collections.Generic;
     using System.Linq;
     using Fsel.Common.Helpers;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public static class EnumCourseLevelHelper
     {
@@ -20,6 +24,9 @@ namespace Fsel.Shared.Helpers
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS1),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS2),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS3),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.EnglishFoundation, EnumCourseLevel.EFA1),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.EnglishFoundation, EnumCourseLevel.EFA2),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.EnglishFoundation, EnumCourseLevel.EFB1),
         };
 
         private static Dictionary<EnumCourseLevel, EnumCourseLevel> s_levelMapping = new Dictionary<EnumCourseLevel, EnumCourseLevel>
@@ -29,14 +36,65 @@ namespace Fsel.Shared.Helpers
                 { EnumCourseLevel.C1, EnumCourseLevel.MS3 }
             };
 
+        public static EnumSkillLevel GetSkillLevel(EnumCourseLevel studentLevel, EnumCourseLevel courseLevel, bool? isStudentsAchieveScore)
+        {
+            var courseLevels = s_courseTypeLevel.Where(x => x.Key == courseLevel.GetEnumCourseType()).Select(x => x.Value).ToList();
+            var skillLevels = ConvertHelper.EnumToList<EnumSkillLevel>();
+            var skillLevel = EnumSkillLevel.Beginner;
+            if (courseLevel.GetEnumCourseType() == EnumCourseType.Academic && studentLevel.GetEnumCourseType() == EnumCourseType.Academic)
+            {
+                if (studentLevel == courseLevel)
+                {
+                    return skillLevel;
+                }
+                var indexDistance = courseLevels.IndexOf(courseLevel) - courseLevels.IndexOf(studentLevel);
+                return indexDistance > 1 ? EnumSkillLevel.Advanced : EnumSkillLevel.Intermediate;
+            }
+            else
+            {
+                var listLevelAca = ConvertHelper.Deserialize<List<LevelDtoModel>>(EnumCourseType.Academic.GetListCourseLevels(studentLevel, isStudentsAchieveScore));
+                if (listLevelAca == null)
+                {
+                    return skillLevel;
+                }
+                foreach (var item in listLevelAca)
+                {
+                    item.SkillLevel = skillLevels[listLevelAca.IndexOf(item)];
+                }
+                if (courseLevel.GetEnumCourseType() != EnumCourseType.Academic)
+                {
+                    courseLevel = s_levelMapping.FirstOrDefault(x => x.Value == courseLevel).Key;
+                }
+                return listLevelAca.FirstOrDefault(x => x.CourseLevel == courseLevel)?.SkillLevel ?? skillLevel;
+            }
+        }
+
+        public static EnumCourseType GetEnumCourseType(this EnumCourseLevel? courseLevel)
+        {
+            return s_courseTypeLevel.FirstOrDefault(x => x.Value == courseLevel).Key;
+        }
+
         public static EnumCourseType GetEnumCourseType(this EnumCourseLevel courseLevel)
         {
             return s_courseTypeLevel.FirstOrDefault(x => x.Value == courseLevel).Key;
         }
 
-        public static EnumCourseLevel GetLevelAcaToLevelIELTS(this EnumCourseLevel courseLevel)
+        public static EnumCourseLevel? GetLevelAcaToLevelIELTS(this EnumCourseLevel courseLevel)
         {
-            return s_levelMapping.FirstOrDefault(x => x.Value == courseLevel).Key;
+            if (s_levelMapping.Any(x => x.Value == courseLevel))
+            {
+                return s_levelMapping.FirstOrDefault(x => x.Value == courseLevel).Key;
+            }
+            return default;
+        }
+
+        public static EnumCourseLevel? GetLevelIELTSToAca(this EnumCourseLevel? courseLevel)
+        {
+            if (s_levelMapping.Any(x => x.Key == courseLevel))
+            {
+                return s_levelMapping.FirstOrDefault(x => x.Key == courseLevel).Value;
+            }
+            return default;
         }
 
         public static object GetEnumPlacementTestSkills()
@@ -72,6 +130,16 @@ namespace Fsel.Shared.Helpers
                 }
             }
             return default;
+        }
+
+        public static IList<EnumCourseLevel> GetCourseLevels(this IList<EnumCourseType>? courseTypes, IList<EnumCourseLevel>? courseLevels)
+        {
+            var listCourseLevels = courseTypes?.SelectMany(x => GetEnumCourseLevels(x)).ToList() ?? new List<EnumCourseLevel>();
+            if (courseLevels != null && courseLevels.Any())
+            {
+                listCourseLevels = courseLevels.ToList();
+            }
+            return listCourseLevels;
         }
 
         public static EnumPlacementTestLevel GetPlacementTestLevelByCourseLevel(this EnumCourseLevel level)
@@ -131,34 +199,69 @@ namespace Fsel.Shared.Helpers
             return GetEnumCourseLevels(courseType).Select(x => x.ToString()).ToList();
         }
 
-        public static object? GetListCourseLevels(this EnumCourseType? courseType, EnumCourseLevel courseLevel)
+        public static bool CheckLevelByPass(this EnumCourseLevel? courseLevelStudent, EnumCourseLevel courseLevelChoose, bool? isDoneCourse)
+        {
+            var courseType = courseLevelChoose.GetEnumCourseType();
+            var datas = courseType.GetListCourseLevels(courseLevelStudent ?? default, isDoneCourse);
+            if (datas != null && datas is IList list)
+            {
+                var objects = list.Cast<object>().ToList();
+                return objects.Any(x => x.GetPropValue<EnumCourseLevel>("CourseLevel") == courseLevelChoose);
+            }
+            return false;
+        }
+
+        public static object? GetListCourseLevels(this EnumCourseType courseType, EnumCourseLevel courseLevel, bool? isCourseDoneAndAchieveGrade = null)
         {
             int index = (int)s_courseTypeLevel.FirstOrDefault(x => x.Key == courseLevel.GetEnumCourseType() && x.Value == courseLevel).Value;
-            var levels = s_courseTypeLevel
-                        .Where((x, i) => i >= index - 1 && i <= index + 1 && x.Key == courseLevel.GetEnumCourseType())
-                        .Select(x => new
-                        {
-                            CourseLevel = x.Value,
-                            LevelName = x.Value.GetDescription()
-                        })
-                        .ToList();
-            if (levels == null || !levels.Any())
+            var relevantLevels = s_courseTypeLevel
+                .Where((x, i) => isCourseDoneAndAchieveGrade.HasValue ? isCourseDoneAndAchieveGrade.Value ? (i >= index && i <= index + 2) : (i >= index && i <= index + 1) : (i >= index - 1 && i <= index + 1))
+                .Where(x => x.Key == courseLevel.GetEnumCourseType())
+                .ToList();
+            if (relevantLevels == null || !relevantLevels.Any())
             {
                 return default;
             }
             if (courseType == EnumCourseType.Academic)
             {
-                return levels;
-            }
-            else
-            {
-                var listCourselevel = levels.Select(x => x.CourseLevel).ToList();
-                var courseLevelIELSTs = s_levelMapping.Where(x => listCourselevel.Contains(x.Key)).Select(x => x.Value).ToList();
-                return s_courseTypeLevel.Where(x => x.Key == courseType && courseLevelIELSTs.Contains(x.Value)).Select(x => new
+                if (courseLevel.GetEnumCourseType() != EnumCourseType.Academic)
+                {
+                    var listCourselevel = relevantLevels.Select(x => x.Value).ToList();
+                    var courseLevelAcas = s_levelMapping.Where(x => listCourselevel.Contains(x.Value)).Select(x => x.Key).ToList();
+                    return s_courseTypeLevel
+                    .Where(x => x.Key == courseType && courseLevelAcas.Contains(x.Value))
+                    .Select(x => new
+                    {
+                        CourseLevel = x.Value,
+                        LevelName = x.Value.GetDescription()
+                    }).ToList();
+                }
+                return relevantLevels.Select(x => new
                 {
                     CourseLevel = x.Value,
                     LevelName = x.Value.GetDescription()
                 }).ToList();
+            }
+            else
+            {
+                var courseLevelIELSTs = new List<EnumCourseLevel>();
+                var listCourselevel = relevantLevels.Select(x => x.Value).ToList();
+
+                if (courseLevel.GetEnumCourseType() == EnumCourseType.Academic)
+                {
+                    courseLevelIELSTs = s_levelMapping.Where(x => listCourselevel.Contains(x.Key)).Select(x => x.Value).ToList();
+                }
+                else
+                {
+                    courseLevelIELSTs = listCourselevel;
+                }
+                return s_courseTypeLevel
+                    .Where(x => x.Key == courseType && courseLevelIELSTs.Contains(x.Value))
+                    .Select(x => new
+                    {
+                        CourseLevel = x.Value,
+                        LevelName = x.Value.GetDescription()
+                    }).ToList();
             }
         }
 
@@ -299,6 +402,21 @@ namespace Fsel.Shared.Helpers
 
                 default:
                     return string.Empty;
+            }
+        }
+
+        public static int GetTotalProgress(this EnumCourseType courseType)
+        {
+            switch (courseType)
+            {
+                case EnumCourseType.Academic:
+                    return CourseProgressValue.ProgressAcademic;
+
+                case EnumCourseType.Ielts:
+                    return CourseProgressValue.ProgressIELTS;
+
+                default:
+                    return 0;
             }
         }
     }

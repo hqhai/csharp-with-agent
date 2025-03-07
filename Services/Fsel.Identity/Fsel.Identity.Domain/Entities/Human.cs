@@ -7,7 +7,7 @@ namespace Fsel.Identity.Domain.Entities
     using Fsel.Common.Attributes;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
-    using Fsel.Identity.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class Human : Entity
     {
@@ -21,12 +21,14 @@ namespace Fsel.Identity.Domain.Entities
         public DateTime? Birthday { get; set; }
 
         [PhoneValid(ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [MaxLength(20, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? PhoneNumber { get; set; }
 
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Address { get; set; }
 
         [EmailValid(ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [MaxLength(70, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Email { get; set; }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]

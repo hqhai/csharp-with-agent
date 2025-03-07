@@ -3,19 +3,26 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
 
     public class StudentSettingModel
     {
+        public Guid StudentId { get; set; }
         public bool IsPlacementTest { get; set; }
         public Guid? ClassId { get; set; }
-        public EnumCourseLevel Level { get; set; }
+        public EnumCourseLevel? Level { get; set; }
+        public EnumCourseLevel? BaseCourseLevel { get; set; }
         public EnumPlacementTestLevel? PTLevel { get; set; }
         public EnumCourseLevel? StartPTLevel { get; set; }
+        public IList<EnumSchoolEventRuleAction>? Actions { get; set; }
+        public IList<ActionConfig>? ActionConfigs { get; set; }
         public int ModuleNumber { get; set; }
         public bool IsLockPT { get; set; }
         public EnumTrialRegistrationStatus? Status { get; set; }
+        public DateTime? ExpiredDate { get; set; }
         public StudentBeginnerGuideModel? BeginnerGuide { get; set; }
         public double NumberOfToken { get; set; }
         public CourseModel? Course { get; set; }
+        public bool IsSurveyEvent { get; set; }
     }
 }

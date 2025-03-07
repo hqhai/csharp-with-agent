@@ -41,17 +41,23 @@ namespace Fsel.Course.Application.Commands.CourseCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<CourseModel>();
+            var course = await _courseRepository.Queryable.Include(e => e.CourseUnitMockTests)
+                                            .Include(e => e.CourseTeachers)
+                                            .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course), request.Id);
+                return methodResult;
+            }
+            _mapper.Map(request, course);
+            if (!course.IsValid())
+            {
+                methodResult.AddErrorBadRequest(course.ErrorMessages);
+                return methodResult;
+            }
 
             #region Validation
 
-            var course = await _courseRepository.Queryable.Include(e => e.CourseUnitMockTests)
-                                                        .Include(e => e.CourseTeachers)
-                                                        .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
-            if (course == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                return methodResult;
-            }
             var method = await _courseHelper.ValidateV1i1(course, request);
             if (!method.IsOK)
             {
@@ -59,12 +65,6 @@ namespace Fsel.Course.Application.Commands.CourseCmd.V1i1
                 return methodResult;
             }
 
-            _mapper.Map(request, course);
-            if (!course.IsValid())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course.Id), course.Id);
-                return methodResult;
-            }
             var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course.CourseTeachers.Select(x => x.TeacherId).ToList() });
             if (!teachers.IsSuccessStatusCode)
             {

@@ -56,13 +56,19 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<OverallScoreReportByMockTestModel>> methodResult = new MethodResult<IList<OverallScoreReportByMockTestModel>>();
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
                 return methodResult;
             }
-            var studentId = studentResult?.Content?.Result?.Id;
+            var student = studentResult?.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+            var studentId = student.Id;
             var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests.OrderBy(x => x.DisplayOrder))
                                                             .Where(x => x.Id == request.CourseId)
                                                             .AsNoTracking()

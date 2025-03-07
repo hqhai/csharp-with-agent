@@ -15,6 +15,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Fsel.Shared.Enums;
+using System.Globalization;
 
 namespace Fsel.Course.Application.Queries.UnitQuery
 {
@@ -61,18 +62,30 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                 IsActive = unit.CourseUnitMockTests.Where(n => !n.IsDeleted).Any(),
                                 CourseLevel = unit.CourseLevel,
                                 CreatedDate = unit.CreatedDate,
+                                CreatedFullName = unit.CreatedFullName,
                                 CreatedUserId = unit.CreatedUserId,
                                 UpdatedDate = unit.UpdatedDate,
                                 UpdatedUserId = unit.UpdatedUserId,
+                                UpdatedFullName = unit.UpdatedFullName,
                                 TeacherIds = unit.UnitLessons.Select(l => l.Lesson)
                                                 .SelectMany(lv => lv!.LessonVideos.Where(n => !n.IsDeleted))
                                                 .Select(v => v.Video)
                                                 .Select(n => n!.TeacherId).ToList()
                             });
 
+            request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                unitQuery = unitQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Code ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()) || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    unitQuery = unitQuery.Where(m => m.Id == guid);
+                }
+                else
+                {
+                    var unitCodeQuery = unitQuery.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
+                    var unitNameQuery = unitQuery.Where(m => m.Name != null && m.Name.Contains(request.Keyword));
+                    unitQuery = unitCodeQuery.Union(unitNameQuery);
+                }
             }
 
             if (request.CourseLevel != null)

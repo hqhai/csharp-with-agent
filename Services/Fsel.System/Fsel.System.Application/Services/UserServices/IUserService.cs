@@ -3,7 +3,11 @@
 namespace Fsel.System.Application.Services.UserServices
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Models.ShareModels.EntityModels;
+    using Fsel.Shared.Models.ShareModels.QueryModels;
     using Fsel.System.Application.Services.UserServices.Models;
     using Fsel.System.Application.Services.UserServices.Models.QueryModels;
     using Microsoft.AspNetCore.Mvc;
@@ -59,8 +63,40 @@ namespace Fsel.System.Application.Services.UserServices
         [Post("/v1/platform/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<PlatformModel>>>> GetPlatformsQueryAsync([Body] BaseQueryModel query);
 
-
         [Get("/v1/user/get-users-by-role")]
         Task<IApiResponse<MethodResult<IList<UserModel>>>> GetUserByRoleAsync([Query] GetUsersByRoleQueryModel query);
+
+        [Post("/v1/student/get-student-by-emails")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByEmails([Body] IList<string> emails);
+
+        [Get("/v1/student-ranking/check-lucky-spin")]
+        Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>?>>> CheckLuckySpin([Query] Guid? userId);
+
+        [Post("/v1/student-focus-time")]
+        Task<IApiResponse<MethodResult<IList<StudentFocusTimeModel>>>> SaveFocusTime([Body] StudentFocusTimeCommandModel cmd);
+
+        [Post("/v1/student-daily-streak")]
+        Task<IApiResponse<MethodResult<bool>>> SaveDailyStreak([Body] StudentDailyStreakCommandModel cmd);
+
+
+        [Get("/v1/student-ranking/get-events-by-user-id")]
+        Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>?>>> GetEventsByUserId([Query] Guid? userId);
+
+        [Post("/v1/user/get-users-by-userids")]
+        Task<IApiResponse<MethodResult<IList<UserModel>>>> GetUsersByUserIdsAsync([FromBody] IList<Guid>? userIds);
+
+        [Get("/v1/user/get-user-profile")]
+        Task<IApiResponse<MethodResult<UserModel>>> GetUserProfileAsync();
+
+        [RefitCache(CacheSettings.TimeCache.TenMinutes)]
+        [Get("/v1/admin/student/search")]
+        Task<IApiResponse<MethodResult<PagingItemsModel<StudentDtoModel>>>> SearchStudentSchoolAsync([FromBody] SearchStudentSchoolQueryModel query);
+
+        [RefitCache(CacheSettings.TimeCache.TenMinutes)]
+        [Get("/v1/admin/student/gets")]
+        Task<IApiResponse<MethodResult<IList<StudentDtoModel>>>> GetStudentsSchoolAsync([FromQuery] SearchStudentSchoolQueryModel query);
+
+        [Post("/v1/event/event-ids")]
+        Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>>>> GetEventByIds([FromBody] GetEventByIdsModel query);
     }
 }

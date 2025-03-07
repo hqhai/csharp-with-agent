@@ -26,10 +26,12 @@ namespace Fsel.Identity.Infrastructure
             builder.Entity<Role>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<UserToken>().HasQueryFilter(e => !e.IsDeleted);
+            builder.HasSequence<int>(SqlSettings.Sequence.UserSequence).StartsAt(100000).IncrementsBy(1);
 
             SeedPlatforms(builder);
             SeedRoles(builder);
 
+            base.OnModelCreating(builder);
             builder.ApplyConfiguration(new HumanEntityTypeConfiguration());
             builder.ApplyConfiguration(new TeacherEntityTypeConfiguration());
             builder.ApplyConfiguration(new TeacherBankAccountEntityTypeConfiguration());
@@ -42,10 +44,20 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new UserSettingEntityTypeConfiguration());
             builder.ApplyConfiguration(new PlatformEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserPlatformEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserCourseSettingEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudenrRankingEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentFocusTimeEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentTrialRegistrationEntityTypeConfiguration());
-            base.OnModelCreating(builder);
+            builder.ApplyConfiguration(new StudentCompetitionEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentCompetitionEventsEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentRankingEventEntityTypeConfiguration());
+            builder.ApplyConfiguration(new CompetitionEventsEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserReferralEntityTypeConfiguration());
+            builder.ApplyConfiguration(new EventRegistrationEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserDeletionEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentDailyStreakEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserSchoolEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserTokenEntityTypeConfiguration());
         }
 
         #region Db Set
@@ -62,11 +74,21 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<ParentStudent> ParentStudents { get; set; }
         public DbSet<UserOtpCode> UserOtpCodes { get; set; }
         public DbSet<UserSetting> UserSettings { get; set; }
+        public DbSet<UserCourseSetting> UserCourseSettings { get; set; }
         public DbSet<Platform> Platform { get; set; }
         public DbSet<UserPlatform> UserPlatforms { get; set; }
         public DbSet<StudentRanking> StudentRankings { get; set; }
         public DbSet<StudentFocusTime> StudentFocusTimes { get; set; }
         public DbSet<StudentTrialRegistration> StudentTrialRegistrations { get; set; }
+        public DbSet<StudentCompetitionSnapShot> StudentCompetitionSnapShots { get; set; }
+        public DbSet<StudentCompetitionEvent> StudentCompetitionEvents { get; set; }
+        public DbSet<StudentRankingEvent> StudentRankingEvents { get; set; }
+        public DbSet<CompetitionEvent> CompetitionEvents { get; set; }
+        public DbSet<UserReferral> UserReferrals { get; set; }
+        public DbSet<EventRegistration> EventRegistrations { get; set; }
+        public DbSet<UserDeletion> UserDeletions { get; set; }
+        public DbSet<UserSchool> UserSchools { get; set; }
+        public DbSet<SchoolImportHistory> SchoolImportHistorys { get; set; }
 
         #endregion Db Set
 

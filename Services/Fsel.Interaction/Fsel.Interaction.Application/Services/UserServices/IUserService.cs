@@ -7,6 +7,8 @@ namespace Fsel.Interaction.Application.Services.UserServices
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Interaction.Application.Services.UserServices.Models;
+    using Fsel.Interaction.Application.Services.UserServices.QueryModels;
+    using Fsel.Shared.Models.ShareModels.EntityModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -33,5 +35,19 @@ namespace Fsel.Interaction.Application.Services.UserServices
         [Put("/v1/student/update-student-token")]
         Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByTokenAsync([Body] UpdateStudentByTokenModel command);
 
+        [Get("/v1/student-ranking/get-events-by-user-id")]
+        Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>>>> GetEventByUserId([Query] Guid? userId);
+
+        [Get("/v1/event/get-event-parent/{id}")]
+        Task<IApiResponse<MethodResult<Guid>>> GetParentEventId([FromRoute] Guid? id);
+
+        [Get("/v1/admin/other/report-competition-event")]
+        Task<IApiResponse<MethodResult<IList<ReportCompetitionEventModel>>>> GetReportCompetitionEventAsync([Query] GetReportCompetitionEventQueryModel query);
+
+        [Get("/v1/admin/other/report-competition-event-school")]
+        Task<IApiResponse<MethodResult<IList<ReportCompetitionEventModel>>>> GetReportCompetitionEventSchoolAsync([Query] GetReportCompetitionEventQueryModel query);
+
+        [Get("/v1/event/get-events-by-event-code-str")]
+        Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>>>> GetEventToEventCodeStrAsync([Query] GetReportCompetitionEventQueryModel query);
     }
 }

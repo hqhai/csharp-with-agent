@@ -11,12 +11,42 @@ namespace Fsel.Shared.Constants
             public const int Random_Daily_QuestBoard = 3; // Lấy ngẫu nhiên 3 nhiệm vụ trong daily questboard
         }
 
+        public const int ValueDefault = 0;
+
         public const int DelayOneMinute = 1;
         public const int DelayThreeMinute = 3;
         public const int DelayTenMinutes = 10;
         public const int DelayTwoHours = 2;
         public const int DelayWorkerSecond = 60;
         public const int AmountTrialDays = 14;
+        public const int AmountStudentSending = 1000;
+        public const int MaxSendingRateApp = 3;
+        public const int MinCompletePercent = 75;
+
+        public const int BatchSize1000 = 1000; // Số lượng bản ghi mỗi lần truy vấn
+        public const int BatchSize = 500; // Số lượng bản ghi mỗi lần truy vấn
+        public const int BatchSize200 = 200; // Số lượng bản ghi mỗi lần truy vấn
+        public const string FSEL_PUBLIC_FILES_URL = "https://s3-sgn10.fptcloud.com/fsel-public/Files/";
+
+        public static class AgeMilestone
+        {
+            public const int ChildrenAge = 13;
+            public const int StudentAge = 14;
+        }
+
+        public static class SectionGroupIELST
+        {
+            public const int ExecutionTimeReading = 3600;
+            public const int AdditionalTimeListening = 120;
+
+            public const int MaxSectionSkillWriting = 2;
+            public const int MaxSectionSkillListening = 4;
+            public const int MaxSectionSkillReading = 3;
+
+            public const int MaxScoreSkillListening = 10;
+            public const int MinScoreSkillReading = 13;
+            public const int MaxScoreSkillReading = 14;
+        }
 
         public static class CreateAction
         {
@@ -61,16 +91,83 @@ namespace Fsel.Shared.Constants
             public const int NumberDeletedElement = 2; // Số phần tử bị xóa đi trong mảng
 
             public const int Temperature = 0;
-            public const string Model = "gpt-4-turbo";
+            public const string Model = "gpt-4o";
             public const int PresencePenalty = 0;
             public const int TopP = 0;
         }
 
+        public static class StudentDailyStreak
+        {
+            public const int CheckInGoalTime = 900;
+        }
 
         public static class CustomerSupport
         {
             public const string TitleMail = "Xử lý sự cố ChatGPT học sinh {0}";
             public const string Content = "Sự cố ChatGPT học sinh {0}\r\n\r\nVị trí gặp sự cố: {1}";
+        }
+
+        public static class TimeCodeStreak
+        {
+            public const int StreakFiveTimeCode = 5;
+            public const int StreakTenTimeCode = 10;
+            public const int StreakFifTeenTimeCode = 15;
+            public const int StreakTwentyTimeCode = 20;
+            public const int StreakTwentyFiveTimeCode = 25;
+            public const int StreakThirtyTimeCode = 30;
+            public const int StreakThirtyFiveTimeCode = 35;
+            public const int StreakFourtyTimeCode = 40;
+            public const int StreakFourtyFiveTimeCode = 45;
+            public const int StreakFiftyTimeCode = 50;
+        }
+
+        public static class ExtendMonth
+        {
+            public const int TwentyFourMonth = 24;
+            public const int TwelveMonth = 12;
+            public const int SixMonth = 6;
+            public const int ThreeMonth = 3;
+        }
+
+        public static class FselRatingValue
+        {
+            public const int DelayDateSendingRate = 5;
+            public const int MoreThanOneDevice = 1;
+        }
+
+        public static class CourseProgressValue
+        {
+            public const int ProgressAcademic = 217;
+            public const int ProgressIELTS = 106;
+            public const int CountUnitAca = 12;
+            public const int CountUnitIELTS = 8;
+            public const int CountFullMockTest = 2;
+            public const int CountFinalTest = 1;
+            public const int MockTestPosition = 5;
+            public const int SkillFullMocKTest = 4;
+            public const int CountLessonAca = 6;
+            public const int CountLessonIELTS = 4;
+        }
+
+        public static class ValueOrderIndex
+        {
+            public const int OrderIndexProcess = 0;
+            public const int OrderIndexNew = 1;
+            public const int OrderIndexDone = 2;
+            public const int OrderIndexOther = 3;
+        }
+
+        public static class ValueStatusUser
+        {
+            public const string CompletedPlacementTest = "Hoàn Thành PT";
+            public const string NotCompletedPlacementTest = "Chưa Hoàn Thành PT";
+            public const string InProgress = "Đang Học";
+            public const string NotStarted = "Chưa Học";
+        }
+
+        public static class ValueCourseLevel
+        {
+            public const string PreA1 = "Pre-A1";
         }
     }
 }

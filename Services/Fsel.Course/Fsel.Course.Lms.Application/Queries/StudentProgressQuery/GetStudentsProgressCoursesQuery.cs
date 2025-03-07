@@ -4,8 +4,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
     using System.Collections.Generic;
     using System.Linq.Dynamic.Core;
-    using System.Linq.Expressions;
-    using System.Reflection.Metadata;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -15,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Fsel.Shared.Constants;
@@ -34,6 +33,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     public class GetStudentsProgressCoursesQueryHandler : IRequestHandler<GetStudentsProgressCoursesQuery, MethodResult<IList<CompetitionStudentProgressModel>>>
     {
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly ManagerProgressHelper _managerProgressHelper;
         private readonly ICourseRepository _courseRepository;
         private readonly ITrainingService _trainingService;
         private readonly IVideoResultRepository _videoResultRepository;
@@ -44,9 +44,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private const int TotalProcessIelsts = 106; // tổng số tiến trình hiện có của Ielts
         private const int ClassForumDominator = 36;
 
-        public GetStudentsProgressCoursesQueryHandler(ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, ITrainingService trainingService, IVideoResultRepository videoResultRepository, IHomeWorkResultRepository homeWorkResultRepository, IFinalTestResultRepository finalTestResultRepository, IClassForumResultRepository classForumResultRepository)
+        public GetStudentsProgressCoursesQueryHandler(ICourseResultRepository courseResultRepository, ManagerProgressHelper managerProgressHelper, ICourseRepository courseRepository, ITrainingService trainingService, IVideoResultRepository videoResultRepository, IHomeWorkResultRepository homeWorkResultRepository, IFinalTestResultRepository finalTestResultRepository, IClassForumResultRepository classForumResultRepository)
         {
             _courseResultRepository = courseResultRepository;
+            _managerProgressHelper = managerProgressHelper;
             _courseRepository = courseRepository;
             _trainingService = trainingService;
             _videoResultRepository = videoResultRepository;
@@ -65,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             double homeWorkRatio = request.CourseType == EnumCourseType.Academic ? ValueSettings.AcademicStudentResultRatio.HomeWorkRatio : ValueSettings.IeltsStudentResultRatio.HomeWorkRatio;
             double classForumRatio = request.CourseType == EnumCourseType.Academic ? ValueSettings.AcademicStudentResultRatio.ClassForumRatio : ValueSettings.IeltsStudentResultRatio.ClassForumRatio;
 
-            var studentIds = request.StudentIds;
+            var studentIds = request.StudentIds ?? new List<Guid>();
 
             #region validate
 
@@ -77,6 +78,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
             #endregion validate
 
+            studentIds = await _courseResultRepository.Queryable
+                                                      .WhereBulkContains(studentIds, x => x.StudentId)
+                                                      .Where(x => x.Status != EnumResultStatus.Unfinished &&
+                                                                  x.Status != EnumResultStatus.New &&
+                                                                  x.WorkingStatus == EnumWorkingStatus.Active)
+                                                      .Select(x => x.StudentId)
+                                                      .ToListAsync(cancellationToken);
+
             #region Progress
 
             var classStudentResults = await _trainingService.GetListClassBySpecificStudentIdsAsync(new GetClassListBySpecificStudentIdsModel { StudentIds = request.StudentIds });
@@ -85,14 +94,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             if (classStudentResultsContent != null && classStudentResultsContent.Any())
             {
                 var courseIds = classStudentResultsContent.Select(x => x.CourseId).ToList();
-                var studentCourseIds = classStudentResultsContent.Select(x => x.StudentId).ToList();
+                var studentCourseIds = classStudentResultsContent.Select(x => x.StudentId).Distinct().ToList();
                 var courses = await _courseRepository.GetByIdsAsync(courseIds);
                 if (courses == null || !courses.Any())
                 {
                     methodResult.StatusCode = StatusCodes.Status200OK;
                     return methodResult;
                 }
-                var courseQuery = _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentCourseIds.Contains(x.StudentId)).ToList();
+                var courseQuery = _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentCourseIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).ToList();
 
                 foreach (var (item, studentId) in courses.SelectMany(course => studentCourseIds.Select(sid => (course, sid))))
                 {
@@ -110,7 +119,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         CourseId = courseResult.CourseId,
                         StudentId = studentId
                     };
-                    var (currentProgress, progress) = await _courseRepository.GetContentComplete(courseResultModel);
+                    var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResultModel);
 
                     double progressPercentage = ((float)currentProgress / TotalProcessIelsts) * 100;
                     // Update số lượng process do trên dữ liệu chưa nhập đủ
@@ -123,6 +132,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     courseStudentProgress.CourseName = item.Code;
                     courseStudentProgress.CourseId = item.Id;
                     courseStudentProgress.StudentId = studentId;
+                    courseStudentProgress.CourseResultId = courseResult.Id;
                     courseProgress.Add(courseStudentProgress);
                 }
             }
@@ -188,17 +198,36 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
             #region ClassForum
 
-            var classForumResultQuery = _classForumResultRepository.Queryable.Include(x => x.ClassForumScores).Where(x => studentIds.Contains(x.StudentId) && x.ClassForum != null).Select(x =>
-            new
-            {
-                ClassForumScores = x.ClassForumScores,
-                StudentId = x.StudentId,
-            }
-           ).ToList();
+            var courseOfClassForumIds = courseProgress.Select(x => x.CourseId).Distinct().ToList();
+            studentIds ??= new List<Guid>();
 
-            int countClassForumDistinct = classForumResultQuery.Select(x => x.StudentId).Count();
+            var classForumResultQuery = await _classForumResultRepository.Queryable.Include(x => x.ClassForum).ThenInclude(x => x.Lesson).ThenInclude(x => x.LessonResults)
+                .Where(x => x.ClassForum != null)
+                .WhereBulkContains(studentIds, x => x.StudentId)
+                .Select(x => new
+                {
+                    ClassForumScores = x.ClassForumScores,
+                    CorrectCount = x.CorrectCount,
+                    CorrectTotal = x.CorrectTotal,
+                    StudentId = x.StudentId,
+                    CourseId = x.LessonResult!.CourseId
+                }).ToListAsync(cancellationToken);
 
-            var classForumResults = classForumResultQuery
+            var joinedClassForumResults = (from courseId in courseOfClassForumIds
+                                           join forumResult in classForumResultQuery
+                                                       on courseId equals forumResult.CourseId
+                                           select new
+                                           {
+                                               forumResult.ClassForumScores,
+                                               forumResult.CorrectCount,
+                                               forumResult.CorrectTotal,
+                                               forumResult.StudentId,
+                                               forumResult.CourseId
+                                           }).ToList();
+
+            int countClassForumDistinct = joinedClassForumResults.Select(x => x.StudentId).Count();
+
+            var classForumResults = joinedClassForumResults
                      .GroupBy(x => x.StudentId) // Nhóm theo StudentId
                      .Select(group =>
                          new StudentCompetitionAverageScore
@@ -206,7 +235,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                              StudentId = group.Key,
                              LearnRatio = countClassForumDistinct == 0 ? 0 : classForumRatio / group.Count(),
                              TotalRecords = group.Count(),
-                             AverageScoreByType = group.Sum(x => x.ClassForumScores.Sum(score => score.Score) / ClassForumDominator),
+                             AverageScoreByType = group.Sum(x => x.CorrectTotal == 0 ? 0 : (double)x.CorrectCount / x.CorrectTotal),
                              LearnType = EnumLearnType.ClassForum
                          })
                      .ToList();
@@ -245,7 +274,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                               CourseId = progress.CourseId,
                               CourseName = progress.CourseName,
                               ContentCompleted = progress.ContentCompleted,
-                              TotalScore = NumberHelper.RoundNumberDouble(overall.TotalScore)
+                              TotalScore = NumberHelper.RoundNumberDouble(overall.TotalScore),
+                              CourseResultId = progress.CourseResultId,
+                              CourseType = request.CourseType,
                           }).ToList();
 
             #endregion Result

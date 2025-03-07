@@ -31,10 +31,13 @@ namespace Fsel.Course.Infrastructure.Configs
                   .OnDelete(DeleteBehavior.NoAction);
 
             builder.Property(e => e.Status)
-           .HasMaxLength(100)
-           .HasConversion(
-               v => v.ToString(),
-               v => v.EnumParse<EnumAnswerStatus>());
+                   .HasMaxLength(100)
+                   .HasConversion(
+                       v => v.ToString(),
+                       v => v.EnumParse<EnumAnswerStatus>());
+
+            builder.HasIndex(c => new { c.PlacementTestResultId, c.SectionGroupResultId, c.SectionQuestionId }).IsUnique();
+            builder.HasIndex(c => new { c.PlacementTestResultId, c.SectionQuestionId });
         }
     }
 }

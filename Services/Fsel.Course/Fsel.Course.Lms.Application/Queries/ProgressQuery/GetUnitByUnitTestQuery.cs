@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 {
+    using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -27,19 +28,25 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     {
         private readonly AuthContext _authContext;
         private readonly IUnitRepository _unitRepository;
-        private readonly IVideoRepository _videoRepository;
+        private readonly ILessonRepository _lessonRepository;
+        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IUserService _userService;
 
         public GetUnitByUnitTestQueryHandler(AuthContext authContext
             , IUnitRepository unitRepository
-            , IVideoRepository videoRepository
+            , ILessonRepository lessonRepository
+            , IVideoTimeCodeRepository videoTimeCodeRepository
+            , ILessonResultRepository lessonResultRepository
             , IVideoResultRepository videoResultRepository
             , IUserService userService)
         {
             _authContext = authContext;
             _unitRepository = unitRepository;
-            _videoRepository = videoRepository;
+            _lessonRepository = lessonRepository;
+            _videoTimeCodeRepository = videoTimeCodeRepository;
+            _lessonResultRepository = lessonResultRepository;
             _videoResultRepository = videoResultRepository;
             _userService = userService;
         }
@@ -49,52 +56,35 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<OverallScoreReportModel> methodResult = new MethodResult<OverallScoreReportModel>();
             OverallScoreReportModel overallScoreReport = new OverallScoreReportModel();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!request.Type.HasValue)
+            {
+                request.Type = EnumTimeCodeType.UnitTest;
+            }
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
                 return methodResult;
             }
-            var studentId = studentResult?.Content?.Result?.Id;
-            var unit = await _unitRepository.Queryable
-                              .Include(x => x.LessonResults.Where(x => x.StudentId == studentId))
-                              .Include(x => x.UnitLessons)
-                              .ThenInclude(x => x.Lesson)
-                              .ThenInclude(x => x!.LessonVideos)
-                              .Include(x => x.CourseUnitMockTests)
-                              .Where(x => x.CourseUnitMockTests.Any(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId))
-                              .FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
-
-            if (unit == null)
+            var student = studentResult?.Content?.Result;
+            if (student == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            var lessonResultIds = unit.LessonResults.Where(x => x.StudentId == studentId).Select(x => x.Id).ToList();
-            var videoIds = unit.UnitLessons.Select(x => x.Lesson).SelectMany(x => x!.LessonVideos).Select(x => x!.VideoId).ToList();
-            var videoResultIds = await _videoResultRepository.Queryable.Where(x => x.StudentId == studentId && lessonResultIds.Contains(x.LessonResultId)).Select(x => x.Id).ToListAsync(cancellationToken);
-            var videos = await _videoRepository.Queryable.Include(x => x.VideoTimeCodes)
-                                                        .ThenInclude(x => x.VideoTimeCodeResults.Where(x => videoResultIds.Contains(x.VideoResultId)))
-                                                        .Where(x => videoIds.Contains(x.Id))
-                                                        .AsNoTracking()
-                                                        .ToListAsync(cancellationToken);
-            if (videos == null || videos.Count == 0)
+            var studentId = student.Id;
+
+            var videoTimeCodeResults = await GetVideoTimeCodeResultsAsync(request, studentId, cancellationToken);
+            if (videoTimeCodeResults == null || !videoTimeCodeResults.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videos));
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            if (!request.Type.HasValue)
-            {
-                request.Type = EnumTimeCodeType.UnitTest;
-            }
-
-            var videoTimeCodes = videos.SelectMany(x => x.VideoTimeCodes).Where(x => x.TimeCodeType == request.Type).ToList();
-            var videoTimeCodeResults = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).ToList();
             var workingTime = videoTimeCodeResults.Sum(x => GetSecond(x));
             var skillScores = videoTimeCodeResults.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).ToList();
             skillScores = skillScores.GroupBy(x => x!.Skill).Select(x =>
             {
-                var skillScore = new SkillScores
+                return new SkillScores
                 {
                     Skill = x.Key,
                     CountQuestion = x.Sum(x => x.CountQuestion),
@@ -102,17 +92,54 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     CorrectCount = x.Sum(x => x.CorrectCount),
                     TotalCount = x.Sum(x => x.TotalCount),
                 };
-                return skillScore;
             }).ToList();
             overallScoreReport.HighestStreak = videoTimeCodeResults.Max(x => x.HighestStreak);
             overallScoreReport.SkillScores = skillScores;
-            overallScoreReport.WorkingTime = videoTimeCodeResults.Sum(x => GetSecond(x));
+            overallScoreReport.WorkingTime = workingTime;
             overallScoreReport.CourseSkills = skillScores.Select(x => x.Skill).ToList();
             overallScoreReport.CountQuestion = overallScoreReport.SkillScores.Sum(x => x.CountQuestion);
             overallScoreReport.TotalQuestion = overallScoreReport.SkillScores.Sum(x => x.TotalQuestion);
-            methodResult.StatusCode = StatusCodes.Status200OK;
+
             methodResult.Result = overallScoreReport;
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task<IList<VideoTimeCodeResult>> GetVideoTimeCodeResultsAsync(GetUnitByUnitTestQuery request, Guid studentId, CancellationToken cancellationToken)
+        {
+            var lessonResultIds = await GetLessonResultIdsAsync(request, studentId);
+            var videoIds = await GetVideoIdsAsync(request);
+            var videoResultIds = await _videoResultRepository.Queryable.Where(x => x.StudentId == studentId && lessonResultIds.Contains(x.LessonResultId)).Select(x => x.Id).ToListAsync(cancellationToken);
+
+            var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeResults.Where(x => videoResultIds.Contains(x.VideoResultId)))
+                                                        .Where(x => x.TimeCodeType == request.Type && videoIds.Contains(x.VideoId))
+                                                        .ToListAsync(cancellationToken);
+            return videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).ToList();
+        }
+
+        private async Task<IList<Guid>> GetLessonIdsAsync(GetUnitByUnitTestQuery request)
+        {
+            return await _unitRepository.Queryable.Include(x => x.UnitLessons)
+                                                  .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId && x.UnitId == request.UnitId))
+                                                  .SelectMany(x => x.UnitLessons)
+                                                  .OrderBy(x => x.DisplayOrder)
+                                                  .Select(x => x.LessonId)
+                                                  .ToListAsync();
+        }
+
+        private async Task<List<Guid>> GetVideoIdsAsync(GetUnitByUnitTestQuery request)
+        {
+            var lessonIds = await GetLessonIdsAsync(request);
+            return await _lessonRepository.Queryable.Include(x => x.LessonVideos)
+                                                  .WhereBulkContains(lessonIds, x => x.Id)
+                                                  .SelectMany(x => x.LessonVideos)
+                                                  .Select(x => x.VideoId)
+                                                  .ToListAsync();
+        }
+
+        private async Task<IList<Guid>> GetLessonResultIdsAsync(GetUnitByUnitTestQuery request, Guid studentId)
+        {
+            return await _lessonResultRepository.Queryable.Where(x => x.StudentId == studentId && x.UnitId == request.UnitId && x.CourseId == request.CourseId).Select(x => x.Id).ToListAsync();
         }
 
         private static long GetSecond(VideoTimeCodeResult x)

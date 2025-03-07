@@ -10,9 +10,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Services.InteractionService;
-    using Fsel.Identity.Application.Services.InteractionService.Models;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.LandingPages;
@@ -29,14 +27,12 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     {
         private readonly UserManager<User> _userManager;
         private readonly IPlatformRepository _platformRepository;
-        private readonly IInteractionService _interactionService;
         private readonly IMediator _mediator;
 
-        public CreateAccountFromLandingPageCommandHandler(UserManager<User> userManager, IPlatformRepository platformRepository, IInteractionService interactionService, IMediator mediator)
+        public CreateAccountFromLandingPageCommandHandler(UserManager<User> userManager, IPlatformRepository platformRepository, IMediator mediator)
         {
             _userManager = userManager;
             _platformRepository = platformRepository;
-            _interactionService = interactionService;
             _mediator = mediator;
         }
 
@@ -56,7 +52,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
                 return methodResult;
             }
-            user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber.ToLower() == request.PhoneNumber.ToLower(), cancellationToken: cancellationToken);
+            user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
             if (user != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
@@ -67,7 +63,11 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
                 return methodResult;
             }
-            user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email.ToLower() == request.Email.ToLower() || x.UserName.ToLower() == request.Email.ToLower(), cancellationToken: cancellationToken);
+
+            var queryByEmail = _userManager.Users.Where(x => x.Email == request.Email);
+            var queryByUserName = _userManager.Users.Where(x => x.UserName == request.Email);
+            user = await queryByEmail.Union(queryByUserName).FirstOrDefaultAsync(cancellationToken);
+
             if (user != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
@@ -115,6 +115,14 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     }
             };
 
+            var passwordValidator = new Microsoft.AspNetCore.Identity.PasswordValidator<User>();
+            var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password);
+            if (!validPassword.Succeeded)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIsNotValid));
+                return methodResult;
+            }
+
             if (!user.IsValid())
             {
                 methodResult.AddError(user.ErrorMessages);
@@ -135,20 +143,6 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 methodResult.AddErrorBadRequest(updateCode.ErrorMessages);
                 return methodResult;
             }
-
-            var createSurveyResult = await _interactionService.CreateSurvey(new CreateCustomerSurveyCommandModel
-            {
-                Email = user.Email,
-                UserId = user.Id,
-                Answers = new List<CreateSurveyCommandModel>
-                {
-                    new CreateSurveyCommandModel
-                    {
-                        Id = Guid.Parse("492D8BB9-CDBE-42E7-AA16-35A1915C3621"),
-                        Answer = new { Id = 1,Content = "Google",Image = "gmail-icon.svg"},
-                    }
-                }
-            });
 
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;

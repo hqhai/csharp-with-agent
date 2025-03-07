@@ -16,7 +16,7 @@ namespace Fsel.Notification.Application.Queues.Consumers
         private readonly IMediator _mediator;
         private readonly INotificationTypeRepository _notificationTypeRepository;
 
-        public InterationActionConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository, AuthContext authContext) : base(authContext)
+        public InterationActionConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
             _notificationTypeRepository = notificationTypeRepository;
@@ -40,7 +40,6 @@ namespace Fsel.Notification.Application.Queues.Consumers
                     {
                         UserIds = message.UserIds ?? default,
                         ObjectId = message.ObjectId,
-                        Message = messageNoti,
                         Link = link,
                         Roles = message.Roles,
                         NotificationTypeId = notificationType?.Id ?? default,
@@ -57,7 +56,8 @@ namespace Fsel.Notification.Application.Queues.Consumers
                         Message = messageNoti,
                         Link = link,
                         NotificationTypeId = notificationType?.Id ?? default,
-                        SenderId = message.SenderId ?? default
+                        SenderId = message.SenderId ?? default,
+                        Status = EnumNotificationStatus.Sent,
                     };
                     await _mediator.Send(model).ConfigureAwait(false);
                 }

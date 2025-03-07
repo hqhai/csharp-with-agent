@@ -58,6 +58,18 @@ namespace Fsel.Training.Api.Controllers
         }
 
         /// <summary>
+        /// get class list status new
+        /// </summary>
+        [HttpGet("get-class-to-student/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetClassToStudentId([FromRoute] Guid studentId)
+        {
+            MethodResult<ClassModel> commandResult = await _mediator.Send(new GetClassToStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// get new class code
         /// </summary>
         [HttpGet("get-new-class-code")]
@@ -210,6 +222,30 @@ namespace Fsel.Training.Api.Controllers
         public async Task<IActionResult> AddStudentIntoClass([FromBody] AddStudentIntoClassCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Add student into class
+        /// </summary>
+        [HttpPost("choose-level-by-student")]
+        [ProducesResponseType(typeof(MethodResult<Guid>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ChooseLevelByStudent([FromBody] ChooseLevelByStudentCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get List Classes To Course Ids
+        /// </summary>
+        [HttpGet("gets-by-course-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetsByCourseIds([FromQuery] GetListClassByCourseIdsQuery query)
+        {
+            MethodResult<IList<ClassModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

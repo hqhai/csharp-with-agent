@@ -55,7 +55,9 @@ namespace Fsel.Notification.Application.Commands
             NotificationMessage notificationNew = new NotificationMessage();
             if (isExistsNotification)
             {
-                var notificationQuery = _notificationsRepository.Queryable.FirstOrDefault(x => x.ObjectId == request.ObjectId)!;
+                var notificationQuery = _notificationsRepository.Queryable.Include(x => x.NotificationType).FirstOrDefault(x => x.ObjectId == request.ObjectId
+                                                                                                                           && x.NotificationType != null
+                                                                                                                           && x.NotificationType.Id == request.NotificationTypeId)!;
                 notificationNew = _mapper.Map(request, notificationQuery);
             }
             else
@@ -97,6 +99,7 @@ namespace Fsel.Notification.Application.Commands
                 await _notificationsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 List<Guid> listUserReceive = new List<Guid>() { request.UserId };
+
                 //Push notification to onesignal
                 await PushToOneSignal(notificationType, notificationNew, listUserReceive, avatarPath, cancellationToken);
 

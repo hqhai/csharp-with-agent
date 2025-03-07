@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -26,15 +27,19 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IClassForumDetailResultRepository _classforumDetailResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private readonly RankedStudentPublisher _rankedStudentPublisher;
+        private readonly IMediator _mediator;
         private const int MaxScoreClassForum = 2;
         private const int MaxTagetScore = 1;
 
-        public UpdateClassForumResultToExpiredTimeCommandHandler(IClassForumResultRepository classForumResultRepository, IClassForumDetailResultRepository classForumDetailResultRepository, NotificationMessagePublisher notificationMessagePublisher)
+        public UpdateClassForumResultToExpiredTimeCommandHandler(IClassForumResultRepository classForumResultRepository, IClassForumDetailResultRepository classForumDetailResultRepository, NotificationMessagePublisher notificationMessagePublisher, RankedStudentPublisher rankedStudentPublisher, IMediator mediator)
 
         {
             _classForumResultRepository = classForumResultRepository;
             _classforumDetailResultRepository = classForumDetailResultRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
+            _rankedStudentPublisher = rankedStudentPublisher;
+            _mediator = mediator;
         }
 
         public async Task<bool> Handle(UpdateClassForumResultToExpiredTimeCommand request, CancellationToken cancellationToken)
@@ -59,6 +64,19 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             await UpdateClassForumDetailResultsAsync(classForumResult.ClassForumDetailResults.ToList(), classForumDetailResult);
             await UpdateClassForumResultAsync(classForumResult, classForumDetailResult);
 
+            await _mediator.Send(new AutoApprovalClassForumCommand
+            {
+                ClassForumResulId = classForumResult.Id
+            }, cancellationToken);
+
+            #region RankedStudent
+
+            await PublishRankedStudent(classForumDetailResult.CreatedUserId, cancellationToken);
+
+            #endregion RankedStudent
+
+            #region Notification
+
             IList<EnumRole> roles = new List<EnumRole>();
             roles.Add(EnumRole.CSO);
 
@@ -72,6 +90,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 PlatformCode = EnumPlatformCode.LMSAdmin
             };
             await _notificationMessagePublisher.Publish(model, cancellationToken);
+
+            #endregion Notification
 
             return true;
         }
@@ -123,7 +143,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     item.CompletionDate = DateTime.UtcNow;
                 }
             }
-            _classforumDetailResultRepository.UpdateList(classForumDetailResults);
+            _classforumDetailResultRepository.UpdateList(classForumDetailResults, false, x => x.ClassForumResultId, x => x.SubmissionCount);
             await _classforumDetailResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
 
@@ -131,7 +151,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         {
             ArgumentNullException.ThrowIfNull(classForumDetailResult);
             ArgumentNullException.ThrowIfNull(classForumResult);
-            var targetScore = GetTargetCount(classForumDetailResult, classForumResult);
+
             var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(classForumDetailResult.GradingAlFeedback);
 
             classForumResult.Status = EnumClassForumResultStatus.Pending;
@@ -140,35 +160,43 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             classForumResult.Content = classForumDetailResult.Content;
             classForumResult.SubmissionCount = classForumDetailResult.SubmissionCount;
             classForumResult.GradingAlFeedback = classForumDetailResult.GradingAlFeedback;
-            if (classForumAIs != null && classForumAIs.Any() && classForumResult.CorrectCount == default)
+            classForumResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
+
+            classForumResult.CorrectCount = GetTargetCount(classForumDetailResult, classForumResult);
+            classForumResult.CorrectTotal = MaxTagetScore;
+            if (classForumAIs != null && classForumAIs.Any())
             {
-                var correctCount = classForumAIs.Sum(x => x.Score) + targetScore;
-                var correctTotal = classForumAIs.Count * MaxScoreClassForum + MaxTagetScore;
-                classForumResult.CorrectCount = correctCount;
-                classForumResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
-                classForumResult.CorrectTotal = correctTotal;
-                if (classForumResult.SkillScores != null && classForumResult.SkillScores.Any())
-                {
-                    classForumResult.SkillScores.Single().CorrectCount = correctCount;
-                    classForumResult.SkillScores.Single().TotalCount = correctTotal;
-                }
-                else
-                {
-                    classForumResult.SkillScores = new List<SkillScores>
-                    {
-                        new SkillScores
-                        {
-                            CorrectCount = correctCount,
-                            TotalCount = correctTotal,
-                            CountQuestion = 1,
-                            TotalQuestion = 1,
-                            Skill = classForumResult.ClassForum?.CourseSkill ?? default
-                        }
-                    };
-                }
+                classForumResult.CorrectCount += classForumAIs.Sum(x => x.Score);
+                classForumResult.CorrectTotal += classForumAIs.Count * MaxScoreClassForum;
             }
-            _classForumResultRepository.Update(classForumResult);
+
+            if (classForumResult.SkillScores != null && classForumResult.SkillScores.Any())
+            {
+                classForumResult.SkillScores.Single().CorrectCount = classForumResult.CorrectCount;
+                classForumResult.SkillScores.Single().TotalCount = classForumResult.CorrectTotal;
+            }
+            else
+            {
+                classForumResult.SkillScores = new List<SkillScores>
+                {
+                    new SkillScores
+                    {
+                        CorrectCount = classForumResult.CorrectCount,
+                        TotalCount = classForumResult.CorrectTotal,
+                        CountQuestion = 1,
+                        TotalQuestion = 1,
+                        Skill = classForumResult.ClassForum?.CourseSkill ?? default
+                    }
+                };
+            }
+            _classForumResultRepository.Update(classForumResult, false, x => x.LessonResultId, x => x.ClassForumId, x => x.StudentId);
             await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+        }
+
+        private async Task PublishRankedStudent(Guid userId, CancellationToken cancellationToken)
+        {
+            StudentRankingEventModel baseQueue = new StudentRankingEventModel { UserId = userId };
+            await _rankedStudentPublisher.Publish(baseQueue, cancellationToken);
         }
     }
 }

@@ -6,10 +6,10 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -23,24 +23,27 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     public class GetProgressMenuQueryHandler : IRequestHandler<GetProgressMenuQuery, MethodResult<ProgressMenuModel>>
     {
         private readonly AuthContext _authContext;
-        private readonly IClassForumRepository _classForumRepository;
-        private readonly IUnitRepository _unitRepository;
-        private readonly ILessonExtraPracticeRepository _lessonExtraPracticeRepository;
-        private readonly ISystemService _systemService;
+        private readonly IClassForumResultRepository _classForumResultRepository;
+        private readonly IUnitResultRepository _unitResultRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
+        private readonly ICourseRepository _courseRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IUserService _userService;
 
         public GetProgressMenuQueryHandler(AuthContext authContext
-            , IClassForumRepository classForumRepository
-            , IUnitRepository unitRepository
-            , ILessonExtraPracticeRepository lessonExtraPracticeRepository
-            , ISystemService systemService
+            , IClassForumResultRepository classForumResultRepository
+            , IUnitResultRepository unitResultRepository
+            , ICourseResultRepository courseResultRepository
+            , ICourseRepository courseRepository
+            , ILessonResultRepository lessonResultRepository
             , IUserService userService)
         {
             _authContext = authContext;
-            _classForumRepository = classForumRepository;
-            _unitRepository = unitRepository;
-            _lessonExtraPracticeRepository = lessonExtraPracticeRepository;
-            _systemService = systemService;
+            _classForumResultRepository = classForumResultRepository;
+            _unitResultRepository = unitResultRepository;
+            _courseResultRepository = courseResultRepository;
+            _courseRepository = courseRepository;
+            _lessonResultRepository = lessonResultRepository;
             _userService = userService;
         }
 
@@ -49,52 +52,26 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ProgressMenuModel> methodResult = new MethodResult<ProgressMenuModel>();
             ProgressMenuModel progressMenu = new ProgressMenuModel();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
+
+            var method = await ValidateAsync(request);
+            if (!method.IsOK)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
-            var studentId = studentResult?.Content?.Result?.Id;
-
-            var units = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.CourseId == request.CourseId && x.StudentId == studentId))
-                                                        .Include(x => x.CourseUnitMockTests.Where(x => x.CourseId == request.CourseId))
-                                                        .Include(x => x.UnitLessons)
-                                                        .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
-                                                        .ToListAsync(cancellationToken);
-            if (units == null || units.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
-                return methodResult;
-            }
-            var numberOfUnitDone = units.SelectMany(x => x.UnitResults).Where(x => x.Status == EnumResultStatus.Done).Count();
-            var lessonIds = units.SelectMany(x => x.UnitLessons).Select(x => x.LessonId).ToList();
-
-            var lessonExtraPractices = await _lessonExtraPracticeRepository.Queryable.Include(x => x.ExtraPractice)
-                .ThenInclude(x => x!.ExtraPracticeResults.Where(x => x.StudentId == studentId))
-                .Where(x => lessonIds.Contains(x.LessonId))
-                .ToListAsync(cancellationToken);
-            if (lessonExtraPractices.Any())
-            {
-                progressMenu.NumberOfPracticesDone = lessonExtraPractices.Select(x => x.ExtraPractice)
-                                                            .Where(x => x!.ExtraPracticeResults.Count > 0)
-                                                            .SelectMany(x => x!.ExtraPracticeResults)
-                                                            .Where(x => x.Status == EnumResultStatus.Done)
-                                                            .Count();
-            }
-
-            var classForums = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                                                                   .Where(x => lessonIds.Contains(x.LessonId))
-                                                                   .ToListAsync(cancellationToken);
-            var numberOfPostsCreated = classForums.SelectMany(x => x.ClassForumResults)
-                                                    .Where(x => x.Status == EnumClassForumResultStatus.Graded)
-                                                    .Count();
-            var dailyStreakResult = await _userService.GetDailyStreak(studentId ?? default);
+            var (course, courseResult) = method.Result;
+            var lessonResultIds = await _lessonResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == course.Id).Select(x => x.Id).ToListAsync(cancellationToken);
+            progressMenu.NumberOfUnitDone = await _unitResultRepository.Queryable.Where(x => x.CourseId == course.Id && x.StudentId == courseResult.StudentId && x.Status == EnumResultStatus.Done).CountAsync(cancellationToken);
+            progressMenu.NumberOfPostsCreated = await _classForumResultRepository.Queryable.Where(x => lessonResultIds.Contains(x.LessonResultId))
+                                                                                           .Where(x => x.Status.HasValue)
+                                                                                           .CountAsync(cancellationToken);
+            var dailyStreakResult = await _userService.GetDailyStreak(courseResult.StudentId);
             if (!dailyStreakResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(dailyStreakResult));
                 return methodResult;
             }
+
             var dailyStreak = dailyStreakResult?.Content?.Result;
             if (dailyStreak != null)
             {
@@ -102,10 +79,41 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 progressMenu.IsDaysStreakIncrease = dailyStreak.IsDaysStreakIncrease;
             }
 
-            progressMenu.NumberOfUnitDone = numberOfUnitDone;
-            progressMenu.NumberOfPostsCreated = numberOfPostsCreated;
-            methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = progressMenu;
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+
+        private async Task<MethodResult<(Course, CourseResult)>> ValidateAsync(GetProgressMenuQuery request)
+        {
+            var methodResult = new MethodResult<(Course, CourseResult)>();
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
+                return methodResult;
+            }
+            var student = studentResult?.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+
+            var course = await _courseRepository.GetByIdAsync(request.CourseId);
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                return methodResult;
+            }
+
+            var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id && x.CourseId == course.Id);
+            if (courseResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courseResult));
+                return methodResult;
+            }
+            methodResult.Result = (course, courseResult);
             return methodResult;
         }
     }

@@ -22,6 +22,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class GetLessonsQuery : IRequest<MethodResult<IList<LessonMockTestResultModel>>>
     {
@@ -34,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
     {
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;
+        private readonly ILogger<GetLessonsQuery> _logger;
         private readonly ICourseRepository _courseRepository;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
@@ -47,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
             IMapper mapper,
             ILessonResultRepository lessonResultRepository,
             IUserService userService,
+            ILogger<GetLessonsQuery> logger,
             ICourseRepository courseRepository,
             IMockTestRepository mockTestRepository,
             IMockTestResultRepository mockTestResultRepository,
@@ -57,6 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
             _authContext = authContext;
             _sectionGroupConverter = sectionGroupConverter;
             _userService = userService;
+            _logger = logger;
             _courseRepository = courseRepository;
             _mockTestRepository = mockTestRepository;
             _mockTestResultRepository = mockTestResultRepository;
@@ -68,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<LessonMockTestResultModel>>();
             var userId = request.UserId ?? _authContext.CurrentUserId;
-            var studentsResult = await _userService.GetStudentByUserIdAsync(userId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(userId);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentsResult));
@@ -151,7 +155,14 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
         private async Task CreateLessonResultAsync(LessonResult lessonResult, CancellationToken cancellationToken)
         {
             _lessonResultRepository.Add(lessonResult);
-            await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Log Duplicate LessonResult : {ex.Message}");
+            }
         }
 
         private async Task<LessonMockTestResultModel> UpdateMockTestResults(GetLessonsQuery request, Guid? studentId, Domain.Entities.Unit unit, Course course, CancellationToken cancellationToken)
@@ -170,7 +181,14 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
                 };
 
                 _mockTestResultRepository.Add(mockTestResult);
-                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                try
+                {
+                    await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Log Duplicate Skill MockTestResult : {ex.Message}");
+                }
             }
             var mockTest = await _mockTestRepository.Queryable.Where(x => x.Id == mockTestResult.MockTestId)
                                         .Include(x => x!.MockTestSections)

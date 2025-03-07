@@ -9,7 +9,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
-    using Fsel.Shared.Helpers;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -23,52 +23,40 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
     {
         private readonly IMapper _mapper;
         private readonly IVoucherRepository _voucherRepository;
+        private readonly IEventRepository _eventRepository;
 
-        public GetVoucherQueryHandler(IMapper mapper, IVoucherRepository voucherRepository)
+        public GetVoucherQueryHandler(IMapper mapper, IVoucherRepository voucherRepository, IEventRepository eventRepository)
         {
             _mapper = mapper;
             _voucherRepository = voucherRepository;
+            _eventRepository = eventRepository;
         }
 
         public async Task<MethodResult<VoucherModel>> Handle(GetVoucherQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            MethodResult<VoucherModel> methodResult = new MethodResult<VoucherModel>();
+            var methodResult = new MethodResult<VoucherModel>();
 
-            var voucherQuery = await _voucherRepository.Queryable
-                                    .Include(x => x.VoucherPackages)
-                                    .ThenInclude(x => x.Package)
-                                    .Where(x => x.Id == request.Id)
-                                    .Select(x => new VoucherModel
-                                    {
-                                        Id = x.Id,
-                                        Name = x.Name,
-                                        StartDate = x.StartDate,
-                                        EndDate = x.EndDate,
-                                        CustomerTypes = x.CustomerTypes,
-                                        CreatedDate = x.CreatedDate,
-                                        IsActive = (x.IsActive == null ? (x.StartDate <= DateTime.UtcNow && DateTime.UtcNow <= x.EndDate) : x.IsActive),
-                                        ContentFilePath = x.ContentFilePath,
-                                        CourseLevels = x.CourseLevels,
-                                        CreatedFullName = x.CreatedFullName,
-                                        VoucherPackages = x.VoucherPackages.Select(x => new VoucherPackageModel
-                                        {
-                                            Id = x.Id,
-                                            PackageId = x.PackageId,
-                                            Percentage = x.Percentage,
-                                            VoucherId = x.VoucherId,
-                                            DiscountedPrice = (double)x.Package!.Price - NumberHelper.ConvertDoublePercent(x.Percentage * (double)x.Package!.Price),
-                                            Price = (double)x.Package!.Price,
-                                        }).ToList(),
-                                    }).FirstOrDefaultAsync(cancellationToken);
+            var voucher = await _voucherRepository.Queryable.Include(p => p.VoucherPackages).Include(p => p.Orders).FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
-            if (voucherQuery == null)
+            if (voucher == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucherQuery));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucher));
                 return methodResult;
             }
-            var voucherModel = _mapper.Map<VoucherModel>(voucherQuery);
+            var voucherModel = _mapper.Map<VoucherModel>(voucher);
+
+            voucherModel.QuantityUsed = voucher.Orders.Where(p => p.Status == EnumOrderStatus.New || p.Status == EnumOrderStatus.Payment).Count();
+
+            var @events = await _eventRepository.Queryable.Where(p => voucherModel.EventIds != null && voucherModel.EventIds.Contains(p.Id)).ToListAsync(cancellationToken);
+
+            voucherModel.EventModels = @events.Select(p => new EventModel()
+            {
+                Id = p.Id,
+                Name = p.Name,
+            }).ToList();
+
             methodResult.Result = voucherModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

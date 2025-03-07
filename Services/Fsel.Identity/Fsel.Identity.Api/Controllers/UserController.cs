@@ -7,9 +7,12 @@ using Fsel.Common.Constants;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Application.Commands.LandingPages;
 using Fsel.Identity.Application.Commands.UserCmd;
+using Fsel.Identity.Application.Commands.UserReferrals;
 using Fsel.Identity.Application.Queries.UserQuery;
+using Fsel.Identity.Application.Queries.UserReferrals;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -116,6 +119,18 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
+        /// Get users by ids
+        /// </summary>
+        [HttpPost("get-users-by-userids")]
+        [ProducesResponseType(typeof(MethodResult<IList<UserModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUsersByUserIds([FromBody] IList<Guid>? userIds)
+        {
+            MethodResult<IList<UserModel>> commandResult = await _mediator.Send(new GetUsersByUserIdsQuery { UserIds = userIds }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get info student or guest by student id
         /// </summary>
         [HttpGet("get-by-student-id/{id}")]
@@ -149,6 +164,70 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> ReceiveDataFromLandingPage([FromBody] ReceiveDataFromLandingPageCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// create user referral
+        /// </summary>
+        [HttpPost("create-user-referral")]
+        [ProducesResponseType(typeof(MethodResult<VoidMethodResult>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateUserReferral([FromBody] CreateUserReferralCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get user referrals
+        /// </summary>
+        [HttpGet("get-user-referrals")]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        [ProducesResponseType(typeof(MethodResult<UserReferralsModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUserReferral([FromQuery] GetUserReferralsByUserQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// check user referral code
+        /// </summary>
+        [HttpGet("check-user-referral-code")]
+        [ProducesResponseType(typeof(MethodResult<SenderModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckUserReferralCode([FromQuery] CheckReferralCodeQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// check user referral code
+        /// </summary>
+        [HttpGet("get-sender-by-code")]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        [ProducesResponseType(typeof(MethodResult<SenderModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSenderByCode([FromQuery] GetSenderByCodeQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Tool get otp of student
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpGet("tool-get-otp-for-user")]
+        [ProducesResponseType(typeof(MethodResult<UserOtpCodeModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ToolGetOtp([FromQuery] ToolGetOtpQuery query)
+        {
+            MethodResult<UserOtpCodeModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

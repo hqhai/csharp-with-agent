@@ -53,6 +53,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels.IntegrationModel
 
         public DateTime? DateEdit { get; set; }
 
+        public DateTime? CreateAccount { get; set; }
+
         public IList<IntegrationPlacementTestResultModels>? PlacementTestResults { get; set; }
     }
 

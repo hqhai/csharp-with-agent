@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -17,18 +18,20 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
 
     public class GetFinalTestReportQuery : IRequest<MethodResult<FinalTestResultModel>>
     {
-        public Guid? FinalTestResultId { get; set; }
+        public Guid FinalTestResultId { get; set; }
     }
 
     public class GetFinalTestReportQueryHandler : IRequestHandler<GetFinalTestReportQuery, MethodResult<FinalTestResultModel>>
     {
         private readonly IFinalTestResultRepository _finalTestResultRepository;
+        private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
 
-        public GetFinalTestReportQueryHandler(IFinalTestResultRepository finalTestResultRepository, AuthContext authContext, IUserService userService)
+        public GetFinalTestReportQueryHandler(IFinalTestResultRepository finalTestResultRepository, IMapper mapper, AuthContext authContext, IUserService userService)
         {
             _finalTestResultRepository = finalTestResultRepository;
+            _mapper = mapper;
             _authContext = authContext;
             _userService = userService;
         }
@@ -38,28 +41,15 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<FinalTestResultModel> methodResult = new MethodResult<FinalTestResultModel>();
 
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!student.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
-                return methodResult;
-            }
-            var studentId = student?.Content?.Result?.Id;
-            var finalTestResult = await _finalTestResultRepository.Queryable
-                                        .Where(x => x.Id == request.FinalTestResultId)
-                                        .Select(x => new FinalTestResultModel
-                                        {
-                                            Id = x.Id,
-                                            CorrectCount = x.CorrectCount,
-                                            CorrectTotal = x.CorrectTotal,
-                                            CourseId = x.CourseId,
-                                            FinalTestId = x.FinalTestId,
-                                            Percent = x.Percent,
-                                            SkillScores = x.SkillScores,
-                                            Status = x.Status,
-                                            StudentId = x.StudentId
-                                        }).FirstOrDefaultAsync(cancellationToken);
-            methodResult.Result = finalTestResult;
+            //var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            //if (!student.IsSuccessStatusCode)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+            //    return methodResult;
+            //}
+            //var studentId = student?.Content?.Result?.Id;
+            var finalTestResult = await _finalTestResultRepository.GetByIdAsync(request.FinalTestResultId);
+            methodResult.Result = _mapper.Map<FinalTestResultModel>(finalTestResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -20,8 +20,16 @@ namespace Fsel.Interaction.Domain.Entities
             set { AnswerStr = ConvertHelper.Serialize(value); }
         }
 
-        public Guid? UserId { get; set; }
-        public SurveyQuestion? SurveyQuestion { get; set; }
+        public Guid UserId { get; set; }
+
+        public bool IsCompleted { get; set; }
+
         public Guid SurveyQuestionId { get; set; }
+
+        public Guid? CustomerSurveyGroupId { get; set; }
+
+        public SurveyQuestion? SurveyQuestion { get; set; }
+
+        public CustomerSurveyGroup? CustomerSurveyGroup { get; set; }
     }
 }

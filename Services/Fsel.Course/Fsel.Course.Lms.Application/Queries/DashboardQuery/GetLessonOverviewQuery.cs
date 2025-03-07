@@ -116,14 +116,14 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         public async Task<MethodResult<(Guid?, Guid)>> Validate()
         {
             MethodResult<(Guid?, Guid)> methodResult = new MethodResult<(Guid?, Guid)>();
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentsResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentsResult));
                 return methodResult;
             }
             var studentId = studentsResult.Content?.Result?.Id;
-            var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
+            var classResult = await _trainingService.GetClassToStudentIdAsync(studentId ?? default);
             if (!classResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));
@@ -175,7 +175,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         private async Task<LessonOverview> GetLesson(LessonResult? lessonResult, CourseResult courseResult, Course course, CancellationToken cancellationToken)
         {
             var lessonOverview = await GetUnitId(lessonResult, courseResult, course);
-            var unit = await _unitRepository.GetIncludeAsync(lessonOverview.UnitId, courseResult.StudentId);
+            var unit = await _unitRepository.GetIncludeAsync(lessonOverview.UnitId, courseResult.CourseId, courseResult.StudentId);
             if (unit != null)
             {
                 var lessonFirstId = unit.UnitLessons.OrderBy(x => x.DisplayOrder).Select(x => x.LessonId).FirstOrDefault();
@@ -354,7 +354,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 
         private static (EnumResultStatus, double) GetStatus(ClassForumResult? classForumResult, EnumResultStatus status)
         {
-            if (classForumResult != null && classForumResult.Status != EnumClassForumResultStatus.Draft)
+            if (classForumResult != null && classForumResult.Status.HasValue)
             {
                 return (EnumResultStatus.Done, PercentClassForum);
             }

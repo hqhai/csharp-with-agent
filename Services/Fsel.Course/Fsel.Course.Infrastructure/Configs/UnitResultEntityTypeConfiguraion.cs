@@ -14,21 +14,25 @@ namespace Fsel.Course.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            builder.HasOne(a => a.Course)
-                .WithMany(b => b.UnitResults)
-                .HasForeignKey(b => b.CourseId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //builder.HasOne(a => a.Course)
+            //    .WithMany(b => b.UnitResults)
+            //    .HasForeignKey(b => b.CourseId)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(a => a.Unit)
-                .WithMany(b => b.UnitResults)
-                .HasForeignKey(b => b.UnitId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //builder.HasOne(a => a.Unit)
+            //    .WithMany(b => b.UnitResults)
+            //    .HasForeignKey(b => b.UnitId)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Property(e => e.Status)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumResultStatus>());
+            //builder.Property(e => e.Status)
+            //    .HasMaxLength(100)
+            //    .HasConversion(
+            //        v => v.ToString(),
+            //        v => v.EnumParse<EnumResultStatus>());
+
+            builder.HasIndex(c => new { c.CourseId, c.UnitId, c.StudentId }).IsUnique();
+            builder.HasIndex(c => new { c.StudentId, c.Status });
+            builder.HasIndexIncludeAllProperties(c => new { c.CreatedUserId });
         }
     }
 }
