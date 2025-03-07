@@ -2,6 +2,7 @@
 
 namespace Fsel.Shared.Helpers
 {
+    using System;
     using System.ComponentModel;
     using System.Globalization;
     using System.Text;
@@ -276,6 +277,30 @@ namespace Fsel.Shared.Helpers
             return new string(password.OrderBy(_ => random.Next()).ToArray());
         }
 
+        public static string GenerateLaterPartPassword(int length)
+        {
+            if (length < 3)
+            {
+                throw new ArgumentException("Độ dài mật khẩu phải lớn hơn hoặc bằng 3 để đảm bảo các yêu cầu.");
+            }
+
+            Random random = new Random();
+
+            const string Letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+            const string Digits = "0123456789";
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append(Digits[random.Next(Digits.Length)]);
+
+            for (int i = 1; i < length; i++)
+            {
+                string chars = Letters + Digits;
+                sb.Append(chars[random.Next(chars.Length)]);
+            }
+
+            return new string(sb.ToString().OrderBy(_ => random.Next()).ToArray());
+        }
+
         public static string JoinWithComma(ICollection<string> items)
         {
             // Kiểm tra nếu danh sách rỗng hoặc null
@@ -337,6 +362,20 @@ namespace Fsel.Shared.Helpers
         {
             string objStr = data?.ToString() ?? string.Empty;
             return string.Format(objStr, param ?? Array.Empty<object>());
+        }
+
+        public static string GenerateUsername(string fullName, string phoneNumber)
+        {
+            if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(phoneNumber))
+            {
+                throw new ArgumentException("Full name and phone number cannot be empty.");
+            }
+
+            CultureInfo cultureInfo = CultureInfo.InvariantCulture;
+
+            string initials = string.Join("", fullName.Split(' ').Where(s => s.Length > 0).Select(s => s[0])).ToUpper(cultureInfo);
+
+            return $"{initials}_{phoneNumber}";
         }
     }
 }

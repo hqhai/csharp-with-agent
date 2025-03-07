@@ -214,5 +214,44 @@ namespace Fsel.Identity.Api.Controllers.Admin
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteStudentByUserIdCommand { UserId = userId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        [RequestSizeLimit(1 * 1024 * 1024)] // 1 MB
+        [RequestFormLimits(MultipartBodyLengthLimit = 1 * 1024 * 1024)]
+        [HttpPost("create-students-to-event-from-file")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateStudentsFromFile([FromForm] CreateStudentsFromFileCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// export template create students to event
+        /// </summary>
+        [HttpPost("export-template-create-students-to-event-from-file")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportTemplateStudentsIntoPlatform()
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(new ExportTemplateCreateStudentsToEventFromFileCommand { }).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Template_Import_StudentHN.xlsx");
+        }
+
+        /// <summary>
+        /// cập nhật expired date cho students
+        /// </summary>
+        [HttpPut("update-expired-date-for-students")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateCompetitionEvents([FromBody] UpdateExpiredDateForStudentsEventCommand cmd)
+        {
+            var commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
