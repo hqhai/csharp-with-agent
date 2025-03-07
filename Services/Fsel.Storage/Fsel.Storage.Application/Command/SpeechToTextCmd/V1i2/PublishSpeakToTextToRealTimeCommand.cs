@@ -100,9 +100,10 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
 
                         if (string.IsNullOrEmpty(deepGramContent))
                         {
-                           var fileInFomationCognitive = await _cognitiveProvider.GetTranscriptionAsync(formFile);
-                           await PublishTextToSocket(request, deepGramContent, fileInFomationCognitive);
-                           return true;
+                            var cognitiveContent = await _cognitiveProvider.GetTranscriptionAsync(formFile);
+                            var fileInFomationCognitive = await UpLoadFileAsync(formFile);
+                            await PublishTextToSocket(request, cognitiveContent, fileInFomationCognitive.Result);
+                            return true;
                         }
 
                         var fileInfomationDeepGram = await UpLoadFileAsync(formFile);
