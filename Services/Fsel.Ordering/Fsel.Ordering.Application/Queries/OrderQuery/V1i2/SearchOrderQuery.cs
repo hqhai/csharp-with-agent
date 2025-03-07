@@ -10,6 +10,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Ordering.Application.Services.UserService;
+    using Fsel.Ordering.Application.Services.UserService.Models;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels.V1i2;
     using Fsel.Ordering.Domain.Models.QueryModels.Oders.V1i2;
@@ -29,6 +30,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly ILogger<SearchOrderQuery> _logger;
+        private const int BatchSize = 10000;
 
         public SearchOrderQueryHandler(IOrderRepository orderRepository, AuthContext authContext, IUserService userService, ILogger<SearchOrderQuery> logger)
         {
@@ -126,17 +128,27 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
             var userIds = lists.Select(l => l.UserId).Distinct().ToList();
             if (userIds.Any())
             {
-                var studentResults = await _userService.GetStudentsByIdsAsync(userIds);
-                if (!studentResults.IsSuccessStatusCode)
-                {
-                    var error = studentResults.Error.Serialize();
-                    _logger.LogError(error);
-                    methodResult.AddError(studentResults.Error);
-                    return methodResult;
-                }
-                var students = studentResults.Content?.Result;
+                var batches = SplitList(userIds, BatchSize);
 
-                var studentDict = students?
+                var students = new List<StudentModel>();
+                foreach (var batch in batches)
+                {
+                    var studentResults = await _userService.GetStudentsByIdsAsync(batch);
+                    if (!studentResults.IsSuccessStatusCode)
+                    {
+                        methodResult.AddError(studentResults.Error);
+                        return methodResult;
+                    }
+                    else
+                    {
+                        if (studentResults.Content?.Result != null && studentResults.Content.Result.Count > 0)
+                        {
+                            students.AddRange(studentResults.Content.Result.ToList());
+                        }
+                    }
+                }
+
+                var studentDict = students
                     .Where(x => x.Human != null && x.Human.UserId.HasValue)
                     .ToDictionary(x => x.Human?.UserId ?? default, x => x);
 
@@ -159,6 +171,14 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
             methodResult.Result = new PagingItemsModel<SearchOrderModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private static List<List<Guid>> SplitList(List<Guid> userIds, int batchSize)
+        {
+            return userIds.Select((x, i) => new { Index = i, Value = x })
+                         .GroupBy(x => x.Index / batchSize)
+                         .Select(g => g.Select(x => x.Value).ToList())
+                         .ToList();
         }
     }
 }
