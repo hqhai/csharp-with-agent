@@ -44,8 +44,6 @@ namespace Fsel.Storage.Application.Queues.Consumers
                 });
             });
 
-            _logger.LogCritical("Processing Out Of Task Run");
-
         }
 
     }
