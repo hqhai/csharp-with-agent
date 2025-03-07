@@ -9,7 +9,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -76,7 +75,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                   where s.SchoolId == schoolId.Value && ce.Id == competitionEvent.Id
                                   select new { User = u, Human = h, Student = s, StudentCompetitionEvent = sce };
 
-            var users = studentEntities.Select(p => p.User);
+            var users = await studentEntities.Select(p => p.User).ToListAsync(cancellationToken);
             var humans = studentEntities.Select(p => p.Human);
             var students = studentEntities.Select(p => p.Student);
             var studentCompetitionEvents = studentEntities.Select(p => p.StudentCompetitionEvent);
@@ -85,12 +84,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             await _studentRepository.ExecuteTransactionAsync(async () =>
             {
-                await _studentCompetitionEventsRepository.BulkDeleteList(studentCompetitionEvents, false, options: null);
-                await _studentRepository.BulkDeleteList(students, false, options: null);
-                await _humanRepository.BulkDeleteList(humans, false, options: null);
-                await _studentRepository.DbContext.BulkDeleteAsync(users);
+                await _studentCompetitionEventsRepository.BulkDeleteList(studentCompetitionEvents, false);
+                await _studentRepository.BulkDeleteList(students, false);
+                await _humanRepository.BulkDeleteList(humans, false);
 
-                await DbContextExtensions.BulkSaveChangesAsync(_studentRepository.DbContext);
+                await _studentRepository.DbContext.BulkDeleteAsync(users, bulkConfig: null);
 
                 var deleteOrdersResult = await _orderService.DeleteOrderOfStudentEvent(new DeleteOrderOfStudentsInEventCommandModel()
                 {
