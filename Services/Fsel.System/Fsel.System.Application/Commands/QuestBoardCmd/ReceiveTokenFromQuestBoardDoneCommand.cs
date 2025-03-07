@@ -98,6 +98,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             {
                 questBoardOverallStudent = await _questBoardOverallStudentRepository.Queryable.Where(p => p.QuestBoardOverallId == questBoardOverall.Id && p.StudentId == studentId && p.CreatedDate.Date >= monDay.Date && p.CreatedDate.Date <= sunDay.Date).OrderBy(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
             }
+
             if (questBoardOverallStudent == null || questBoardOverall.TargetValue > questBoardOverallStudent.CurrentValue)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorCode.HaveNotCompletedTheTask));
@@ -108,6 +109,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
                 return;
             }
+
             await _questBoardOverallStudentRepository.ExecuteTransactionAsync(async () =>
             {
                 var updateTokenStudent = await _mediator.Send(new CreateTokenHistoryCommand()
