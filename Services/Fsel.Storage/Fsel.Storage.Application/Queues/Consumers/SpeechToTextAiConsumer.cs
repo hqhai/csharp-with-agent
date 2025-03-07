@@ -34,7 +34,6 @@ namespace Fsel.Storage.Application.Queues.Consumers
                 using var scope = _serviceScopeFactory.CreateScope();
                 var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-                _logger.LogCritical("Processing In Task Run");
                 await mediator.Publish(new PublishSpeakToTextToRealTimeCommand
                 {
                     UserId = message.UserId,
