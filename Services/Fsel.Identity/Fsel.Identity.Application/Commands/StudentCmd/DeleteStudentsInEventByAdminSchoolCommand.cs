@@ -103,8 +103,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     return methodResult;
                 }
 
-                await _studentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = true;
                 return methodResult;
