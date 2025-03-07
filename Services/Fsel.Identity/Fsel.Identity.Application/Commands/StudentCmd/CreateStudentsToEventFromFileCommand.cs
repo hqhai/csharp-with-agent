@@ -59,6 +59,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private const string ErrorMessage = "Error Message\n(Thông báo lỗi)";
         private const string FileNull = "File tải lên không có dữ liệu";
         private const string DataError = "Dữ liệu bị trống hoặc sai định dạng";
+        private const string UserDoesNotExist = "Tài khoản không tồn tại";
+        private const string UserDoesNotExistSchool = "Tài khoản chưa được gắn với trường";
+        private const string SchoolDoesNotExist = "Trường học không tồn tại";
+        private const string SchoolDoesNotExistInEvent = "Trường học chưa được gắn vào sự kiện";
+        private const string ExpiredDate = "Đã hết thời gian tạo tài khoản";
 
         private const string DefaultPassword = "Fsel@";
 
@@ -93,6 +98,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 if (currentUser == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(currentUser));
+                    await SendNotify(request.Key ?? string.Empty, UserDoesNotExist, 0, StatusCodes.Status400BadRequest, null, cancellationToken);
                     return methodResult;
                 }
 
@@ -100,6 +106,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 if (!schoolId.HasValue)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(schoolId));
+                    await SendNotify(request.Key ?? string.Empty, UserDoesNotExistSchool, 0, StatusCodes.Status400BadRequest, null, cancellationToken);
                     return methodResult;
                 }
 
@@ -111,6 +118,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 if (school == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(school));
+                    await SendNotify(request.Key ?? string.Empty, SchoolDoesNotExist, 0, StatusCodes.Status400BadRequest, null, cancellationToken);
                     return methodResult;
                 }
 
@@ -119,6 +127,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 if (competitionEvent == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent));
+                    await SendNotify(request.Key ?? string.Empty, SchoolDoesNotExistInEvent, 0, StatusCodes.Status400BadRequest, null, cancellationToken);
                     return methodResult;
                 }
 
@@ -127,6 +136,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 if (!expiredDate.HasValue || currentDate >= expiredDate.Value)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(expiredDate));
+                    await SendNotify(request.Key ?? string.Empty, ExpiredDate, 0, StatusCodes.Status400BadRequest, null, cancellationToken);
                     return methodResult;
                 }
 
@@ -251,25 +261,17 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                 if (!result.IsValidHeader)
                 {
-                    await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
-                    {
-                        StatusCode = StatusCodes.Status400BadRequest,
-                        Key = request.Key,
-                        Message = ErrorTemplate,
-                    }, cancellationToken);
+                    await SendNotify(request.Key ?? string.Empty, ErrorTemplate, 0, StatusCodes.Status400BadRequest, null, cancellationToken);
+
                     return methodResult;
                 }
 
                 if (result.Stream != null)
                 {
                     var file = ConvertHelper.StreamToByteArray(result.Stream);
-                    await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
-                    {
-                        StatusCode = StatusCodes.Status400BadRequest,
-                        File = file,
-                        Key = request.Key,
-                        Message = DataError
-                    }, cancellationToken);
+
+                    await SendNotify(request.Key ?? string.Empty, DataError, 0, StatusCodes.Status400BadRequest, file, cancellationToken);
+
                     return methodResult;
                 }
 
@@ -284,12 +286,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 if (students == null || students.Count == 0)
                 {
                     methodResult.AddErrorBadRequest(FileNull);
-                    await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
-                    {
-                        StatusCode = StatusCodes.Status400BadRequest,
-                        Key = request.Key,
-                        Message = FileNull
-                    }, cancellationToken);
+
+                    await SendNotify(request.Key ?? string.Empty, FileNull, 0, StatusCodes.Status400BadRequest, null, cancellationToken);
+
                     return methodResult;
                 }
 
@@ -408,25 +407,16 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 methodResult.Result = new CreateStudentsToEventFromFileModel() { NumberOfStudent = studentIds.Count };
                 methodResult.StatusCode = StatusCodes.Status200OK;
 
-                await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
-                {
-                    StatusCode = StatusCodes.Status200OK,
-                    Key = request.Key,
-                    Message = Success,
-                    NumberOfStudent = studentIds.Count,
-                }, cancellationToken);
+                await SendNotify(request.Key ?? string.Empty, Success, studentIds.Count, StatusCodes.Status200OK, null, cancellationToken);
 
                 return methodResult;
             }
             catch (Exception ex)
             {
                 methodResult.AddErrorBadRequest(ex.Message);
-                await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
-                {
-                    StatusCode = StatusCodes.Status400BadRequest,
-                    Key = request.Key,
-                    Message = ErrorTemplate
-                }, cancellationToken);
+
+                await SendNotify(request.Key ?? string.Empty, ErrorTemplate, 0, StatusCodes.Status400BadRequest, null, cancellationToken);
+
                 _logger.LogError(ex, "CreateStudentsToEventFromFileCommandHandler error");
             }
 
@@ -443,6 +433,18 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var number = gender == EnumGender.Male ? 0 : gender == EnumGender.Female ? 1 : 2;
             var code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfBirthDay}{stt:D3}";
             return code;
+        }
+
+        private async Task SendNotify(string key, string message, int statusCodes, int numberOfStudent, byte[]? file, CancellationToken cancellationToken)
+        {
+            await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
+            {
+                StatusCode = statusCodes,
+                Key = key,
+                Message = message,
+                NumberOfStudent = numberOfStudent,
+                File = file
+            }, cancellationToken);
         }
     }
 }
