@@ -37,7 +37,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
         private readonly ICognitiveProvider _cognitiveProvider;
         private int _countRetry;
         private int _intervalRetryTime = 5;
-        private DateTime _startDate, _endDate = DateTime.UtcNow;
+        private DateTime _startDate, _endDate;
 
         public PublishSpeakToTextToRealTimeCommandHandler(IOpenAIService openAIService, IAmazonS3Service amazonS3Service, SpeechToTextPublisher speechToTextPublisher, AppSetting appSetting, ILogger<PublishSpeakToTextToRealTimeCommand> logger, IDeepgramProvider deepgramProvider, ICognitiveProvider cognitiveProvider)
         {
@@ -76,9 +76,10 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
                     {
                         if (_countRetry <= Retry_GPT_Time)
                         {
+                            _startDate = DateTime.UtcNow;
                             var content = await _openAIService.SpeechToTextByAIAsync(streamPart, _appSetting.OpenAiConfig?.ApprovalAIModel);
                             contentText = !string.IsNullOrEmpty(content.Content) ? JsonConvert.DeserializeObject<ContentModel>(content.Content)?.Text : string.Empty;
-
+                            _endDate = DateTime.UtcNow;
                             _logger.LogError($"CountTimeResponseAI: {(_endDate - _startDate).TotalSeconds}");
                             _logger.LogError($"LogContentAI: {content.Content}");
                         }
