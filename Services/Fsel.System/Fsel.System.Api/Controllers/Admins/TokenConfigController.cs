@@ -55,12 +55,12 @@ namespace Fsel.System.Api.Controllers.Admins
         /// <summary>
         /// Notification
         /// </summary>
-        [HttpPost("noti-recall-coin")]
+        [HttpPost("recall-coin")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SendNotificationRecallCoinSurvey()
         {
-            var commandResult = await _mediator.Send(new SendNotificationRecallCoinSurveyCommand()).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(new RecallCoinSurveyCommand()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
