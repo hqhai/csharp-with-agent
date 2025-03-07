@@ -100,5 +100,17 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// delete Order of Students Event
+        /// </summary>
+        [HttpPost("delete-order-of-students-event")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> DeleteOrderOfStudentsEvent([FromBody] DeleteOrderOfStudentsInEventCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
