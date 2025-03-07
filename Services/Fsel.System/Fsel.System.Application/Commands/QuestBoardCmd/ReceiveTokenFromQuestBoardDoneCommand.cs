@@ -99,9 +99,15 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             {
                 questBoardOverallStudent = await _questBoardOverallStudentRepository.Queryable.Where(p => p.QuestBoardOverallId == questBoardOverall.Id && p.StudentId == studentId && p.CurrentValue >= TargetValue && p.Status == EnumQuestBoardOverallStudentStatus.NotReceived).OrderBy(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
             }
-            if (questBoardOverallStudent == null)
+
+            if (questBoardOverallStudent == null || questBoardOverall.TargetValue > questBoardOverallStudent.CurrentValue)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorCode.HaveNotCompletedTheTask));
+                return;
+            }
+            if (questBoardOverallStudent.Status == EnumQuestBoardOverallStudentStatus.Received)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorCode.TokensHaveBeenReceived));
                 return;
             }
 
