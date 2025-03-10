@@ -76,5 +76,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Post("/v1/feature-access-time/get-feature-accesstime")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetAccessTimeByUserAndFeature([Body] GetAccessTimeByUserAndFeatureQueryModel query);
+
+        [Post("/v1/course-suggest-config/execute-list-query")]
+        Task<IApiResponse<MethodResult<IList<CourseSuggestConfigModel>>>> CourseSuggestConfigQuery([Body] BaseQueryModel model);
     }
 }

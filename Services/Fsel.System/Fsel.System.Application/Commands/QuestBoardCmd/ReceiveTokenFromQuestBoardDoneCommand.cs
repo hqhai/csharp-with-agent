@@ -107,7 +107,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             }
             if (questBoardOverallStudent.Status == EnumQuestBoardOverallStudentStatus.Received)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorCode.TokensHaveBeenReceived));
                 return;
             }
 
