@@ -78,5 +78,31 @@ namespace Fsel.System.Api.Controllers
             var queryResult = await _mediator.Send(new GetCourseSuggestConfigByIdQuery { Id = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Course Suggest Config
+        /// </summary>
+        [HttpGet("level-suggestion")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseSuggestConfigStudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
+        public async Task<IActionResult> GetCourseSuggestConfigStudent()
+        {
+            var queryResult = await _mediator.Send(new GetCourseSuggestConfigStudentQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Check Course Suggest Config
+        /// </summary>
+        [HttpGet("check-suggestion")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseSuggestConfigStudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
+        public async Task<IActionResult> CheckCourseSuggetConfigByStudent([FromQuery] CheckCourseSuggetConfigByStudentQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
