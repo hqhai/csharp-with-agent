@@ -24,7 +24,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
         public DateTime Birthday { get; set; }
 
         [Required]
-        public string? ParentPhonenumber { get; set; }
+        public string? ParentPhoneNumber { get; set; }
 
         public string? ParentEmail { get; set; }
     }
@@ -62,14 +62,14 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
                 return methodResult;
             }
 
-            if (string.IsNullOrEmpty(request.ParentPhonenumber))
+            if (string.IsNullOrEmpty(request.ParentPhoneNumber))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ParentPhonenumber), request.ParentPhonenumber);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ParentPhoneNumber), request.ParentPhoneNumber);
                 return methodResult;
             }
-            if (!request.ParentPhonenumber.IsValidPhoneNumber())
+            if (!request.ParentPhoneNumber.IsValidPhoneNumber())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.ParentPhonenumber), request.ParentPhonenumber);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.ParentPhoneNumber), request.ParentPhoneNumber);
                 return methodResult;
             }
 
@@ -140,7 +140,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
                 student.CourseLevel = EnumCourseLevel.B1;
             }
             student.ParentEmail = request.ParentEmail;
-            student.ParentPhoneNumber = request.ParentPhonenumber;
+            student.ParentPhoneNumber = request.ParentPhoneNumber;
             _studentRepository.Update(student);
             await _studentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }

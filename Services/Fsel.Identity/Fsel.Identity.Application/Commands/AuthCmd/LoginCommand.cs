@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using System.Linq.Dynamic.Core;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Base;
@@ -31,13 +32,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IPlatformRepository _platformRepository;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IHumanRepository _humanRepository;
+        private readonly IStudentRepository _studentRepository;
+        private readonly ICompetitionEventsRepository _competitionEventsRepository;
 
         public LoginCommandHandler(UserManager<User> userManager,
             Microsoft.AspNetCore.Identity.SignInManager<User> signInManager,
             IMediator mediator,
             IPlatformRepository platformRepository,
             IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
-            IHumanRepository humanRepository)
+            IHumanRepository humanRepository,
+            IStudentRepository studentRepository,
+            ICompetitionEventsRepository competitionEventsRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -45,6 +50,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _platformRepository = platformRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _humanRepository = humanRepository;
+            _studentRepository = studentRepository;
+            _competitionEventsRepository = competitionEventsRepository;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -86,18 +93,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            var student = await _humanRepository.Queryable.Where(x => x.UserId == user.Id).Select(x => x.Student).FirstOrDefaultAsync(cancellationToken);
-            if (student == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), student);
-                return methodResult;
-            }
+            var competitionEvent = await (from baseQ in _humanRepository.Queryable
+                                          join s in _studentRepository.Queryable on baseQ.Id equals s.HumanId
+                                          join sce in _studentCompetitionEventsRepository.Queryable on s.Id equals sce.StudentId
+                                          join ce in _competitionEventsRepository.Queryable on sce.CompetitionEventId equals ce.Id
+                                          where baseQ.UserId == user.Id
+                                          select ce).FirstOrDefaultAsync(cancellationToken);
 
-            var studentCompetitionEvent = await _studentCompetitionEventsRepository.Queryable.Include(x => x.CompetitionEvents)
-                                                                                   .Where(x => x.StudentId == student.Id)
-                                                                                   .FirstOrDefaultAsync(cancellationToken);
-
-            var isByPassEmailComfirm = studentCompetitionEvent?.CompetitionEvents?.EventContent?.IsByPassEmailComfirm ?? default;
+            var isByPassEmailComfirm = competitionEvent?.EventContent?.IsByPassEmailComfirm ?? default;
             if (user.EmailConfirmed || !isByPassEmailComfirm)
             {
                 var result = await _signInManager.PasswordSignInAsync(user, request.Password, false, false);
