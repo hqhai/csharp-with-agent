@@ -44,10 +44,8 @@ namespace Fsel.Shared.Helpers
         public static string FormatTimeSpanAsClock(long totalMinutes)
         {
             TimeSpan timeSpan = TimeSpan.FromMinutes(totalMinutes);
-
-            int hours = timeSpan.Hours;
+            int hours = (int)timeSpan.TotalHours;
             int minutes = timeSpan.Minutes;
-
             return $"{hours}h{minutes:D2}ph";
         }
 

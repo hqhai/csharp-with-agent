@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LessonsMockTestModel> methodResult = new MethodResult<LessonsMockTestModel>();
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId).ConfigureAwait(false);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId).ConfigureAwait(false);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));
@@ -192,7 +192,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var lessonIds = lessons.Select(x => x.Id).ToList();
             var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.VideoResult)
                                                         .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                                                        .Where(x => x.StudentId == studentId && lessonIds.Contains(x.LessonId) && x.UnitId == request.UnitId && x.CourseId == request.CourseId)
+                                                        .WhereBulkContains(lessonIds, x => x.LessonId)
+                                                        .Where(x => x.StudentId == studentId && x.UnitId == request.UnitId && x.CourseId == request.CourseId)
                                                         .AsNoTracking()
                                                         .ToListAsync(cancellationToken);
             return lessons.Select(x =>

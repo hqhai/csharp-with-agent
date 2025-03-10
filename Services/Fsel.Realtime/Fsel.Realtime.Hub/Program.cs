@@ -21,6 +21,9 @@ builder.Services.AddScoped<ChatBotPublisher>();
 builder.Services.AddScoped<TechieActionPublisher>();
 builder.Services.AddScoped<SetTimeModuleHub>();
 builder.Services.AddScoped<TechieHub>();
+builder.Services.AddScoped<BannerHub>();
+builder.Services.AddScoped<BannerPublisher>();
+builder.Services.AddScoped<TranscriptHub>();
 
 builder.AddMassTransit(appSetting,
 multicastQueues: new Dictionary<string, Type>
@@ -36,6 +39,9 @@ multicastQueues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
     { QueueSettings.SystemQueue.NameQueue.Techie, typeof(StudentTechieConsumer) },
     { QueueSettings.OrderingQueue.NameQueue.ChangeStatusOrder, typeof(ChangeStatusOrderConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.SendStudentsFromFile, typeof(SendStudentsFromFileConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.BannerRealTime, typeof(BannerConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.SpeechToTextRealTime, typeof(SpeechToTextConsumer) }
 });
 
 var app = builder.Build();
@@ -51,5 +57,8 @@ app.UseHubs<SetTimeModuleHub>(RealtimeSettings.SetTimeModuleHub.Pattern);
 app.UseHubs<ChatBotHub>(RealtimeSettings.ChatBotHub.Pattern);
 app.UseHubs<TechieHub>(RealtimeSettings.TechieHub.Pattern);
 app.UseHubs<PaymentHub>(RealtimeSettings.PaymentHub.Pattern);
+app.UseHubs<SendStudentsFromFileHub>(RealtimeSettings.SendStudentsFromFileHub.Pattern);
+app.UseHubs<BannerHub>(RealtimeSettings.BannerHub.Pattern);
+app.UseHubs<TranscriptHub>(RealtimeSettings.TranscriptHub.Pattern);
 
 app.Run();

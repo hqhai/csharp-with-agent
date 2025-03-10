@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Application.Queries.HomeWorkQuery
 {
+    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -52,9 +53,17 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                                         CourseSkill = x.CourseSkill,
                                     });
 
+            request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                homeWorkQuery = homeWorkQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Code ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    homeWorkQuery = homeWorkQuery.Where(m => m.Id == guid);
+                }
+                else
+                {
+                    homeWorkQuery = homeWorkQuery.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
+                }
             }
 
             if (request.CourseLevel != null)

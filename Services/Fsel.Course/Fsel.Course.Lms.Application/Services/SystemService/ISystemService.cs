@@ -3,10 +3,13 @@
 namespace Fsel.Course.Lms.Application.Services.SystemService
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Lms.Application.Services.SystemService.CommandModels;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
+    using Fsel.Shared.Constants;
+    using Fsel.Course.Lms.Application.Services.SystemService.QueryModels;
     using Fsel.Shared.Models.ShareModels;
+    using Fsel.Shared.Models.ShareModels.QueryModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -30,15 +33,19 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
         [Post("/v1/feature-access-time/get-to-modules")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetFeatureAccessTimeToModulesAsync([FromBody] FeatureAccessTimesQueryModel query);
 
+        [RefitCache(CacheSettings.TimeCache.FiveMinutes)]
         [Get("/v1/feature-access-time/get-detail")]
         Task<IApiResponse<MethodResult<FeatureAccessTimeModel>>> GetFeatureAccessTimeAsync([FromQuery] FeatureAccessTimeQueryModel query);
 
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
         [Get("/v1/forbidden-word/get-list-forbidden-word")]
         Task<IApiResponse<MethodResult<IList<string>>>> CheckContainForbiddenWord([FromQuery] string Word);
 
+        [RefitCache(CacheSettings.TimeCache.TenMinutes)]
         [Get("/v1/token-config/get-token")]
         Task<IApiResponse<MethodResult<TokenConfigModel>>> GetTokenConfigAsync([Query] GetTokenQueryModel query);
 
+        [RefitCache(CacheSettings.TimeCache.TenMinutes)]
         [Get("/v1/token-config/get-tokens")]
         Task<IApiResponse<MethodResult<IList<TokenConfigModel>>>> GetTokenConfigsAsync([Query] GetTokenConfigsQueryModel query);
 
@@ -48,6 +55,7 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
         [Get("/v1/feature-access-time/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetListFeatureAccessTime([FromQuery] BaseQueryModel model);
 
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
         [Post("/v1/school/get-by-ids")]
         Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolsAsync([Body] IList<Guid>? ids);
 
@@ -56,6 +64,18 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Post("/v1/google-sheet/add-error-report-explanation-question")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> AddErrorReportExplanationQuestionToGoogleSheet([FromBody] AddErrorReportExplanationQuestionModel model);
+
+        [Post("/v1/feature-access-time/get-feature-access-time-to-modules")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetFeatureAccessTimesAsync([FromBody] GetFeatureAccessTimeToExportQueryModel query);
+
+        [Post("/v1/school/get-ids")]
+        Task<IApiResponse<MethodResult<IList<Guid>>>> GetSchoolIdsAsync([Body] GetSchoolsQueryModel query);
+
+        [Delete("/v1/course-target-student/{studentId}")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> DeleteCourseTargetStudent([FromRoute] Guid studentId);
+
+        [Post("/v1/feature-access-time/get-feature-accesstime")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetAccessTimeByUserAndFeature([Body] GetAccessTimeByUserAndFeatureQueryModel query);
 
         [Post("/v1/course-suggest-config/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<CourseSuggestConfigModel>>>> CourseSuggestConfigQuery([Body] BaseQueryModel model);

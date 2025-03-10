@@ -57,6 +57,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new UserDeletionEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentDailyStreakEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserSchoolEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserTokenEntityTypeConfiguration());
         }
 
         #region Db Set
@@ -87,6 +88,7 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<EventRegistration> EventRegistrations { get; set; }
         public DbSet<UserDeletion> UserDeletions { get; set; }
         public DbSet<UserSchool> UserSchools { get; set; }
+        public DbSet<SchoolImportHistory> SchoolImportHistorys { get; set; }
 
         #endregion Db Set
 

@@ -6,8 +6,8 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Identity.Infrastructure.ValueSettings;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -41,7 +41,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             try
             {
                 var userOtpCode = await _userOtpCodeRepository.Queryable
-                                     .FirstOrDefaultAsync(x => x.UserId == request.Id && x.Status == EnumOtpCodeStatus.New, cancellationToken);
+                                     .FirstOrDefaultAsync(x => x.UserId == request.Id && x.Type == EnumUserOtpCodeType.Email && x.Status == EnumOtpCodeStatus.New, cancellationToken);
                 var otp = NumberHelper.GetRandomCode();
 
                 var expiredTime = request.ExpiredTime ?? DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime);
@@ -53,6 +53,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                         UserId = request.Id,
                         OTPCode = otp,
                         Status = EnumOtpCodeStatus.New,
+                        Type = EnumUserOtpCodeType.Email,
                         ExpiredTime = expiredTime
                     };
                     _userOtpCodeRepository.Add(userOtpCode);

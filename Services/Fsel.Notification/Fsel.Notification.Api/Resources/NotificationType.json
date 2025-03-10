@@ -491,7 +491,6 @@
         "language": "fr-FR"
       }
     ]
-
   },
   {
     "id": "F9D5A75F-FD55-4B1E-ADE8-A446B6465E34",
@@ -1049,7 +1048,7 @@
     "content": "FriendCompletedExam",
     "icon": "",
     "priority": 1,
-    "templateMessage": "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được 100 xu, nhấn để xem chi tiết",
+    "templateMessage": "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được {1} xu, nhấn để xem chi tiết",
     "templateLink": "",
     "createdDate": "2023-08-28",
     "translations": [
@@ -1057,21 +1056,21 @@
         "id": "AB10DEE3-6D3B-4482-92EA-65DCAC210FE0",
         "createdDate": "2024-08-28",
         "notificationTypeId": "5E7E39F8-750A-4709-82B2-12805FC9E2E9",
-        "templateMessage": "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được 100 xu, nhấn để xem chi tiết",
+        "templateMessage": "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được {1} xu, nhấn để xem chi tiết",
         "language": "vi-VN"
       },
       {
         "id": "41150D47-6270-4420-8A08-627BF4BABD45",
         "createdDate": "2024-08-28",
         "notificationTypeId": "5E7E39F8-750A-4709-82B2-12805FC9E2E9",
-        "templateMessage": "{0} has completed the placement test, and you have just received 100 xu. Tap to see details.",
+        "templateMessage": "{0} has completed the placement test, and you have just received {1} xu. Tap to see details.",
         "language": "en-US"
       },
       {
         "id": "593CA78C-074B-4DA6-BC31-421A672C04EC",
         "createdDate": "2024-08-28",
         "notificationTypeId": "5E7E39F8-750A-4709-82B2-12805FC9E2E9",
-        "templateMessage": "{0} a terminé le test de positionnement, et vous venez de recevoir 100 xu. Appuyez pour voir les détails.",
+        "templateMessage": "{0} a terminé le test de positionnement, et vous venez de recevoir {1} xu. Appuyez pour voir les détails.",
         "language": "fr-FR"
       }
     ]
@@ -1083,7 +1082,7 @@
     "content": "FriendCompleteUnitOne",
     "icon": "",
     "priority": 1,
-    "templateMessage": "{0} đã hoàn thành unit 1,bạn vừa nhận được 500 xu, nhấn để xem chi tiết ",
+    "templateMessage": "{0} đã hoàn thành unit 1,bạn vừa nhận được {1} xu, nhấn để xem chi tiết ",
     "templateLink": "",
     "createdDate": "2023-08-28",
     "translations": [
@@ -1091,21 +1090,21 @@
         "id": "22E0B002-3122-4D83-B238-7496153CBA03",
         "createdDate": "2024-08-28",
         "notificationTypeId": "A3D6129B-9844-448D-AA1C-D6155B89CE6B",
-        "templateMessage": "{0} đã hoàn thành unit 1,bạn vừa nhận được 500 xu, nhấn để xem chi tiết ",
+        "templateMessage": "{0} đã hoàn thành unit 1,bạn vừa nhận được {1} xu, nhấn để xem chi tiết ",
         "language": "vi-VN"
       },
       {
         "id": "4ACDFDE0-273F-40CC-8F21-B05AB07921B4",
         "createdDate": "2024-08-28",
         "notificationTypeId": "A3D6129B-9844-448D-AA1C-D6155B89CE6B",
-        "templateMessage": "{0} has completed Unit 1, and you have just received 500 xu. Tap to see details",
+        "templateMessage": "{0} has completed Unit 1, and you have just received {1} xu. Tap to see details",
         "language": "en-US"
       },
       {
         "id": "06BEEE4E-1723-4079-8CF4-EDE3F755B2F7",
         "createdDate": "2024-08-28",
         "notificationTypeId": "A3D6129B-9844-448D-AA1C-D6155B89CE6B",
-        "templateMessage": "{0} a terminé l'Unité 1, et vous venez de recevoir 500 xu. Appuyez pour voir les détails.",
+        "templateMessage": "{0} a terminé l'Unité 1, et vous venez de recevoir {1} xu. Appuyez pour voir les détails.",
         "language": "fr-FR"
       }
     ]
@@ -1117,7 +1116,7 @@
     "content": "FriendPaymentSuccessfully",
     "icon": "",
     "priority": 1,
-    "templateMessage": "{0} đã đăng kí thành công gói học FSEL,bạn vừa nhận được {1}🟡, nhấn để xem chi tiết ",
+    "templateMessage": "{0} đã đăng kí thành công gói học FSEL,bạn vừa nhận được {1} xu, nhấn để xem chi tiết ",
     "templateLink": "",
     "createdDate": "2023-08-28",
     "translations": [
@@ -1140,6 +1139,40 @@
         "createdDate": "2024-08-28",
         "notificationTypeId": "4E496AAD-C2CE-42A2-8971-71CD28CF3FAE",
         "templateMessage": "{0} s'est inscrit avec succès au forfait de cours FSEL, et vous venez de recevoir {1} xu. Appuyez pour voir les détails.",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "46540FC5-A4FD-4DAC-BB8F-EF86698528DC",
+    "type": "Text",
+    "content": "RecallCoinSurvey",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Chúng tôi đã phát hiện một số tài khoản lợi dụng lỗi hệ thống khi làm khảo sát đầu vào (survey) để giành một số coins trái với quy định. Số coins và vật phẩm quy đổi từ đó sẽ bị thu hồi. Hãy tuân thủ quy định để tránh bị cấm tài khoản!",
+    "templateLink": "",
+    "createdDate": "2025-02-26",
+    "translations": [
+      {
+        "id": "9AC2883D-B2AD-4D94-A724-91494C1E5B5F",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "46540FC5-A4FD-4DAC-BB8F-EF86698528DC",
+        "templateMessage": "Chúng tôi đã phát hiện một số tài khoản lợi dụng lỗi hệ thống khi làm khảo sát đầu vào (survey) để giành một số coins trái với quy định. Số coins và vật phẩm quy đổi từ đó sẽ bị thu hồi. Hãy tuân thủ quy định để tránh bị cấm tài khoản!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "1867EBCA-AA7D-4FBC-9DE9-8E432BB3B87A",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "46540FC5-A4FD-4DAC-BB8F-EF86698528DC",
+        "templateMessage": "We have detected some accounts exploiting a system error in the entry survey to gain coins in violation of the regulations. The coins and any redeemed items obtained through this method will be revoked. Please follow the regulations to avoid account suspension!",
+        "language": "en-US"
+      },
+      {
+        "id": "F6943CC3-15C1-4849-A852-309BE6D17EB4",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "46540FC5-A4FD-4DAC-BB8F-EF86698528DC",
+        "templateMessage": "Nous avons détecté certains comptes exploitant une erreur du système lors du sondage d'entrée pour obtenir des pièces en violation des règles. Les pièces et les objets échangés de cette manière seront annulés. Veuillez respecter les règlements afin d’éviter la suspension de votre compte !",
         "language": "fr-FR"
       }
     ]

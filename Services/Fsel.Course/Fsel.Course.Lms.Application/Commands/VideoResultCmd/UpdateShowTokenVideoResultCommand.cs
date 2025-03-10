@@ -61,7 +61,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             videoResult.IsShowToken = true;
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {
-                videoResult = _videoResultRepository.Update(videoResult);
+                videoResult = _videoResultRepository.Update(videoResult, false, x => x.VideoId, x => x.StudentId, x => x.LessonResultId);
                 await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;

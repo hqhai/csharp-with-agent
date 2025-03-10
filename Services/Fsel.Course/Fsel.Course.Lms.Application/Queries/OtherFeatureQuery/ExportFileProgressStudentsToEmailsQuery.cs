@@ -13,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -24,6 +23,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class ExportFileProgressStudentsToEmailsQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
@@ -41,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly ILessonRepository _lessonRepository;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
+        private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
 
         public ExportFileProgressStudentsToEmailsQueryHandler(IUserService userService,
             ICourseResultRepository courseResultRepository,
@@ -50,7 +51,8 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             ILessonResultRepository lessonResultRepository,
             IPlacementTestResultRepository placementTestResultRepository,
             ILessonRepository lessonRepository,
-            ICourseUnitMockTestRepository courseUnitMockTestRepository)
+            ICourseUnitMockTestRepository courseUnitMockTestRepository,
+            IPlacementTestGroupResultRepository placementTestGroupResultRepository)
         {
             _userService = userService;
             _courseResultRepository = courseResultRepository;
@@ -61,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             _placementTestResultRepository = placementTestResultRepository;
             _lessonRepository = lessonRepository;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
+            _placementTestGroupResultRepository = placementTestGroupResultRepository;
         }
 
         public async Task<MethodResult<Stream>> Handle(ExportFileProgressStudentsToEmailsQuery request, CancellationToken cancellationToken)
@@ -90,7 +93,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var listEmail = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).ToList();
+            var listEmail = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!.ToLower(System.Globalization.CultureInfo.CurrentCulture)).ToList();
             var studentResultToEmail = await _userService.GetStudentByEmailsAsync(listEmail);
             if (!studentResultToEmail.IsSuccessStatusCode)
             {
@@ -129,67 +132,101 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 studentRankings = studentRankingResults.Content?.Result?.Items?.ToList();
             }
 
-            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course)
-                .Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active)
-                .ToListAsync(cancellationToken);
+            // 1️⃣ Lấy danh sách CourseResults và ánh xạ vào Dictionary để tra cứu nhanh hơn
+            var courseResults = await _courseResultRepository.Queryable
+                .WhereBulkContains(studentIds, x => x.StudentId)
+                .Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
+                .Include(x => x.Course)
+                .ToDictionaryAsync(x => x.StudentId, cancellationToken);
+
+            // 2️⃣ Lấy danh sách Placement Test Results và chuyển thành Dictionary
+            var placemenTestResultGroups = (await _placementTestGroupResultRepository.Queryable
+                .WhereBulkContains(studentIds, x => x.StudentId)
+                .Where(x => x.Status == EnumResultStatus.Done)
+                .ToListAsync(cancellationToken))
+                .ToDictionary(x => x.StudentId);
+
+            // 3️⃣ Lấy danh sách UnitResults theo StudentId bằng ToLookup() (tối ưu hơn GroupBy)
+            var unitResultGroups = (await (from baseQ in _courseResultRepository.Queryable
+                                           .WhereBulkContains(studentIds, x => x.StudentId)
+                                           join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
+                                           join ur in _unitResultRepository.Queryable
+                                               on new { cum.CourseId, baseQ.StudentId, UnitId = cum.UnitId }
+                                               equals new { ur.CourseId, ur.StudentId, UnitId = (Guid?)ur.UnitId }
+                                           where baseQ.WorkingStatus == EnumWorkingStatus.Active
+                                           select new { ur.StudentId, ur })
+                                          .ToListAsync(cancellationToken))
+                .ToLookup(x => x.StudentId, x => x.ur);
+
+            // 4️⃣ Lấy danh sách Progress Completes
+            var courseProgressCompletes = await _managerProgressHelper
+                .GetProgressCompleteModuleExportAsync(courseResults
+                    .Select(x => new CourseResultModel { CourseId = x.Value.CourseId, StudentId = x.Key })
+                    .ToList());
+
+            // 5️⃣ Lấy danh sách LessonResults
+            var lessonResultIds = courseProgressCompletes
+                .Where(x => x.LessonResult != null)
+                .Select(x => x.LessonResult.Id)
+                .ToList();
+
+            var lessonResults = (await _lessonResultRepository.Queryable.WhereBulkContains(lessonResultIds, x => x.Id)
+                                                                .Select(x => new { x.StudentId, LessonName = x.Lesson != null ? x.Lesson.Name : string.Empty })
+                                                                .ToListAsync(cancellationToken))
+                                                                .ToDictionary(x => x.StudentId);
+
+            // 🔥 Bắt đầu vòng lặp chính
             foreach (var student in students)
             {
-                var courseResult = courseResults.FirstOrDefault(x => x.StudentId == student.Id);
+                var courseResult = courseResults.GetValueOrDefault(student.Id);
+                var courseComplete = courseProgressCompletes.FirstOrDefault(x => x.StudentId == student.Id);
+                var placemenTestResultGroup = placemenTestResultGroups.GetValueOrDefault(student.Id);
+                var unitResults = unitResultGroups[student.Id]?.OrderBy(x => x.CreatedDate).ToList();
+                var lessonResult = lessonResults.GetValueOrDefault(student.Id);
+
                 var studentProgressReport = new StudentProgressReportModel
                 {
                     FullName = student.Human?.FullName,
                     Email = student.Human?.Email,
                     School = student.School ?? schools?.FirstOrDefault(x => x.Id == student.SchoolId)?.Name,
                     ProcessDate = courseResult?.ProcessDate,
-                    ExpiredDate = student.ExpiredDate
+                    ExpiredDate = student.ExpiredDate,
+                    CourseName = student.ExpiredDate.HasValue
+                        ? EnumCourseLevelHelper.GetCodeByEnumCourseLevel(courseResult?.Course?.CourseLevel)
+                        : string.Empty,
+                    StatusUser = courseResult != null ? ValueStatusUser.InProgress :
+                                 placemenTestResultGroup != null ? ValueStatusUser.CompletedPlacementTest :
+                                 ValueStatusUser.NotCompletedPlacementTest
                 };
-                await SetProgressPlacementTestAsync(studentProgressReport, student, cancellationToken);
+
+                if (unitResults != null && unitResults.Any())
+                {
+                    SetOverallPercentUnitAsync(studentProgressReport, unitResults);
+                }
+
+                if (courseComplete != null)
+                {
+                    studentProgressReport.TotalLessonDone = courseComplete.TotalLessonDone;
+                    studentProgressReport.ProgressPercent = NumberHelper.GetPercent(courseComplete.CountComplete, courseComplete.TotalComplete);
+                    studentProgressReport.CurrentPosition = lessonResult == null
+                        ? $"Unit{courseComplete.UnitDisplayOrder}"
+                        : $"{lessonResult.LessonName}_Unit{courseComplete.UnitDisplayOrder}";
+                }
+
                 if (courseResult != null)
                 {
-                    await SetProgressCourseAsync(studentProgressReport, courseResult);
-                    await SetProgressModuleAsync(studentProgressReport, courseResult);
-                    await SetOverallPercentUnitAsync(studentProgressReport, courseResult);
                     await SetFeatureAccessTimeAsync(studentProgressReport, student, courseResult);
-                    studentProgressReport.LeaderboardPercent = studentRankings?.FirstOrDefault(x => x.StudentId == student.Id && x.CourseResultId == courseResult.Id)?.OverallScore ?? default;
+                    studentProgressReport.LeaderboardPercent = studentRankings?
+                        .FirstOrDefault(x => x.StudentId == student.Id && x.CourseResultId == courseResult.Id)?
+                        .OverallScore ?? default;
                 }
 
                 studentProgressReports.Add(studentProgressReport);
             }
 
-            methodResult.Result = studentProgressReports.ExportExcel();
+            methodResult.Result = studentProgressReports.OrderBy(x => listEmail.IndexOf(x.Email!.ToLower(System.Globalization.CultureInfo.CurrentCulture))).ToList().ExportExcel();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        private async Task SetProgressPlacementTestAsync(StudentProgressReportModel studentProgressReport, StudentModel student, CancellationToken cancellationToken)
-        {
-            var placementTestResultCurrent = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == student.Id)
-                                                                                              .OrderByDescending(x => x.UpdatedDate)
-                                                                                              .ThenByDescending(x => x.CreatedDate)
-                                                                                              .FirstOrDefaultAsync(cancellationToken);
-            if (placementTestResultCurrent == null)
-            {
-                return;
-            }
-            var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == student.Id)
-                                                          .OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-            int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
-            var (levelCompleted, isLock) = placementTestResultCurrent.Level.GetLevelInScore(placementTestResultCurrent.Percent, IeltsScoreHelper.GetInitialAge(placementTestResult?.Level, age));
-            studentProgressReport.StatusUser = isLock ? "Hoàn Thành PT" : "Chưa Hoàn Thành PT";
-        }
-
-        private async Task SetProgressCourseAsync(StudentProgressReportModel studentProgressReport, CourseResult courseResult)
-        {
-            var courseResultModel = new CourseResultModel
-            {
-                CourseType = courseResult.Course?.CourseType,
-                CourseId = courseResult.CourseId,
-                StudentId = courseResult.StudentId,
-            };
-            var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResultModel);
-            studentProgressReport.CourseName = courseResult.Course?.Name;
-            studentProgressReport.ProgressPercent = NumberHelper.GetPercent(currentProgress, progress);
-            studentProgressReport.StatusUser = "Đang Học";
         }
 
         private async Task SetFeatureAccessTimeAsync(StudentProgressReportModel studentProgressReport, StudentModel student, CourseResult courseResult)
@@ -211,9 +248,12 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             studentProgressReport.TotalVisit = featureAccessTimes?.Sum(x => x.TotalVisit) ?? default;
         }
 
-        private async Task SetOverallPercentUnitAsync(StudentProgressReportModel studentProgressReport, CourseResult courseResult)
+        private static void SetOverallPercentUnitAsync(StudentProgressReportModel studentProgressReport, IList<UnitResult>? unitResults)
         {
-            var unitResults = await GetUnitResultsAsync(courseResult, CancellationToken.None);
+            if (unitResults == null || !unitResults.Any())
+            {
+                return;
+            }
             foreach (var unitResult in unitResults)
             {
                 var index = unitResults.IndexOf(unitResult);
@@ -224,63 +264,6 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 }
                 unitField.SetValue(studentProgressReport, unitResult.Percent);
             }
-        }
-
-        private async Task<IList<UnitResult>> GetUnitResultsAsync(CourseResult courseResult, CancellationToken cancellationToken)
-        {
-            var unitIds = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == courseResult.CourseId && x.UnitId.HasValue)
-                                                                                   .OrderBy(x => x.DisplayOrder)
-                                                                                   .Select(x => x.UnitId!)
-                                                                                   .ToListAsync(cancellationToken);
-            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit)
-                                                        .Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && unitIds.Contains(x.UnitId))
-                                                        .Where(x => x.Status == EnumResultStatus.Done)
-                                                        .OrderByDescending(x => x.CreatedDate)
-                                                        .ToListAsync(cancellationToken);
-            return unitResults.OrderBy(x => unitIds.IndexOf(x.UnitId)).ToList();
-        }
-
-        private async Task<UnitResult?> GetUnitResultProgressAsync(CourseResult courseResult, CancellationToken cancellationToken)
-        {
-            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit)
-                                                        .Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId)
-                                                        .Where(x => x.Status != EnumResultStatus.Unfinished)
-                                                        .OrderByDescending(x => x.CreatedDate)
-                                                        .ToListAsync(cancellationToken);
-            var unitResult = unitResults.Where(x => x.Status != EnumResultStatus.Done).OrderByDescending(x => x.CreatedDate).FirstOrDefault();
-            if (unitResult == null)
-            {
-                var courseUnitMockTest = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == courseResult.CourseId && x.UnitId.HasValue)
-                    .OrderByDescending(x => x.DisplayOrder)
-                    .FirstOrDefaultAsync(cancellationToken);
-                if (courseUnitMockTest != null)
-                {
-                    unitResult = unitResults.FirstOrDefault(x => x.CourseId == courseResult.CourseId && x.UnitId == courseUnitMockTest.UnitId);
-                }
-            }
-            return unitResult;
-        }
-
-        private async Task SetProgressModuleAsync(StudentProgressReportModel studentProgressReport, CourseResult courseResult)
-        {
-            var unitResult = await GetUnitResultProgressAsync(courseResult, CancellationToken.None);
-            if (unitResult == null)
-            {
-                return;
-            }
-            var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.Lesson).Where(x => x.StudentId == courseResult.StudentId && x.UnitId == unitResult.UnitId)
-                                                                      .Where(x => x.Status != EnumResultStatus.Unfinished && x.CourseId == courseResult.CourseId)
-                                                                      .OrderByDescending(x => x.CreatedDate)
-                                                                      .ThenByDescending(x => x.UpdatedDate)
-                                                                      .FirstOrDefaultAsync();
-            var lesson = lessonResult?.Lesson;
-            if (lesson == null)
-            {
-                lesson = await _lessonRepository.Queryable.Include(x => x.UnitLessons.Where(y => y.UnitId == unitResult.UnitId)).Where(x => x.UnitLessons.Any(y => y.UnitId == unitResult.UnitId))
-                                                                                      .OrderBy(x => x.UnitLessons.Max(x => x.DisplayOrder))
-                                                                                      .FirstOrDefaultAsync();
-            }
-            studentProgressReport.CurrentPosition = string.Concat(lesson?.Name, "_", unitResult.Unit?.Name);
         }
     }
 }

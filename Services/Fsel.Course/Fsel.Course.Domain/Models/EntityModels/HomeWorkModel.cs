@@ -19,7 +19,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public IEnumerable<string>? VideoPaths => StringHelper.GetIframeUrls(MediaPost, false);
 
-        public IList<QuestionModel>? Questions { get; set; }
+        public IList<QuestionModel> Questions { get; set; } = new List<QuestionModel>();
 
         public bool IsActive { get; set; }
 

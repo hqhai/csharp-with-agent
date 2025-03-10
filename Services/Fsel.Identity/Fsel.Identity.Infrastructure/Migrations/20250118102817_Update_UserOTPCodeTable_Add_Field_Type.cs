@@ -1,0 +1,34 @@
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace Fsel.Identity.Infrastructure.Migrations
+{
+    /// <inheritdoc />
+    public partial class Update_UserOTPCodeTable_Add_Field_Type : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<string>(
+                name: "Type",
+                table: "UserOtpCodes",
+                type: "nvarchar(100)",
+                maxLength: 100,
+                nullable: false,
+                defaultValue: "");
+
+            migrationBuilder.Sql(
+                "UPDATE UserOtpCodes set Type = 'Email'"
+            );
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "Type",
+                table: "UserOtpCodes");
+        }
+    }
+}

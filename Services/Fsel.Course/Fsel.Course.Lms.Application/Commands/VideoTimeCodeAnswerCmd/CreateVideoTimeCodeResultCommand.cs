@@ -81,6 +81,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     WorkingTime = default,
                     VideoTimeCodeId = request.VideoTimeCodeId,
                 };
+
                 videoTimeCodeResult = _videoTimeCodeResultRepository.Add(videoTimeCodeResult);
                 try
                 {
@@ -99,8 +100,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private async Task UpdateVideoResult(VideoResult videoResult, Guid videoTimeCodeId)
         {
             videoResult.CurrentVideoTimeCodeId = videoTimeCodeId;
-            _videoResultRepository.Update(videoResult);
-            await _videoResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _videoResultRepository.BulkMergeAsync(new List<VideoResult> { videoResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = entity => new { entity.LessonResultId, entity.StudentId, entity.VideoId };
+            });
         }
     }
 }
