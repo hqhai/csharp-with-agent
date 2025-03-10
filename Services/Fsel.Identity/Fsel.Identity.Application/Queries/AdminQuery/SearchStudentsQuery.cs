@@ -18,8 +18,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     public class SearchStudentsQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<StudentSearchAdminModel>>>
     {
         public string? SchoolName { get; set; }
-        public string? Grade { get; set; }
-        public string? Class { get; set; }
+        public IList<string>? ListSchoolGrade { get; set; }
+        public IList<string>? ListSchoolClass { get; set; }
     }
 
     public class SearchStudentsQueryHandler : IRequestHandler<SearchStudentsQuery, MethodResult<PagingItemsModel<StudentSearchAdminModel>>>
@@ -73,15 +73,13 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 request.SchoolName = request.SchoolName.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
                 query = query.Where(m => m.School != null && m.School.Contains(request.SchoolName));
             }
-            if (!string.IsNullOrEmpty(request.Grade))
+            if (request.ListSchoolGrade != null && request.ListSchoolGrade.Count > 0)
             {
-                request.Grade = request.Grade.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.WhereBulkContains(request.Grade, x => x.SchoolGrade);
+                query = query.WhereBulkContains(request.ListSchoolGrade, x => x.SchoolGrade);
             }
-            if (!string.IsNullOrEmpty(request.Class))
+            if (request.ListSchoolClass != null && request.ListSchoolClass.Count > 0)
             {
-                request.Class = request.Class.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.WhereBulkContains(request.Class, x => x.SchoolClass);
+                query = query.WhereBulkContains(request.ListSchoolClass, x => x.SchoolClass);
             }
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
             {
