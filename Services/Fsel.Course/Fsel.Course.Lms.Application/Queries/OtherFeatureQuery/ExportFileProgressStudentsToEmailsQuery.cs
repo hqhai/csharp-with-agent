@@ -41,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly ILessonRepository _lessonRepository;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
+        private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
 
         public ExportFileProgressStudentsToEmailsQueryHandler(IUserService userService,
             ICourseResultRepository courseResultRepository,
@@ -50,7 +51,8 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             ILessonResultRepository lessonResultRepository,
             IPlacementTestResultRepository placementTestResultRepository,
             ILessonRepository lessonRepository,
-            ICourseUnitMockTestRepository courseUnitMockTestRepository)
+            ICourseUnitMockTestRepository courseUnitMockTestRepository,
+            IPlacementTestGroupResultRepository placementTestGroupResultRepository)
         {
             _userService = userService;
             _courseResultRepository = courseResultRepository;
@@ -61,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             _placementTestResultRepository = placementTestResultRepository;
             _lessonRepository = lessonRepository;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
+            _placementTestGroupResultRepository = placementTestGroupResultRepository;
         }
 
         public async Task<MethodResult<Stream>> Handle(ExportFileProgressStudentsToEmailsQuery request, CancellationToken cancellationToken)
@@ -129,52 +132,57 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 studentRankings = studentRankingResults.Content?.Result?.Items?.ToList();
             }
 
-            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course)
+            // 1️⃣ Lấy danh sách CourseResults và ánh xạ vào Dictionary để tra cứu nhanh hơn
+            var courseResults = await _courseResultRepository.Queryable
                 .WhereBulkContains(studentIds, x => x.StudentId)
                 .Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
-                .ToListAsync(cancellationToken);
-            var placemenTestResults = await _placementTestResultRepository.Queryable
-                                                                          .WhereBulkContains(studentIds, x => x.StudentId)
-                                                                          .Where(x => x.Status == EnumResultStatus.Done)
-                                                                          .ToListAsync(cancellationToken);
+                .Include(x => x.Course)
+                .ToDictionaryAsync(x => x.StudentId, cancellationToken);
 
-            var placemenTestResultGroups = placemenTestResults.GroupBy(x => x.StudentId)
-                                                              .Select(x => new
-                                                              {
-                                                                  StudentId = x.Key,
-                                                                  PlacementTestCurrent = x.Select(x => x).OrderBy(x => x.CreatedDate).FirstOrDefault(),
-                                                                  PlacementTestEnd = x.Select(x => x).OrderByDescending(x => x.CreatedDate).FirstOrDefault(),
-                                                              }).ToList();
+            // 2️⃣ Lấy danh sách Placement Test Results và chuyển thành Dictionary
+            var placemenTestResultGroups = (await _placementTestGroupResultRepository.Queryable
+                .WhereBulkContains(studentIds, x => x.StudentId)
+                .Where(x => x.Status == EnumResultStatus.Done)
+                .ToListAsync(cancellationToken))
+                .ToDictionary(x => x.StudentId);
 
-            var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
-                                          join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
-                                          join ur in _unitResultRepository.Queryable on new { cum.CourseId, baseQ.StudentId, UnitId = cum.UnitId } equals new { ur.CourseId, ur.StudentId, UnitId = (Guid?)ur.UnitId }
-                                          where baseQ.WorkingStatus == EnumWorkingStatus.Active
-                                          group ur by ur.StudentId into g
-                                          select new
-                                          {
-                                              StudentId = g.Key,
-                                              UnitResults = g.Select(x => x).OrderBy(x => x.CreatedDate).ToList()
-                                          }).ToListAsync(cancellationToken);
+            // 3️⃣ Lấy danh sách UnitResults theo StudentId bằng ToLookup() (tối ưu hơn GroupBy)
+            var unitResultGroups = (await (from baseQ in _courseResultRepository.Queryable
+                                           .WhereBulkContains(studentIds, x => x.StudentId)
+                                           join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
+                                           join ur in _unitResultRepository.Queryable
+                                               on new { cum.CourseId, baseQ.StudentId, UnitId = cum.UnitId }
+                                               equals new { ur.CourseId, ur.StudentId, UnitId = (Guid?)ur.UnitId }
+                                           where baseQ.WorkingStatus == EnumWorkingStatus.Active
+                                           select new { ur.StudentId, ur })
+                                          .ToListAsync(cancellationToken))
+                .ToLookup(x => x.StudentId, x => x.ur);
 
-            var courseProgressCompletes = await _managerProgressHelper.GetProgressCompleteModuleExportAsync(courseResults.Select(x => new CourseResultModel { CourseId = x.CourseId, StudentId = x.StudentId }).ToList());
-            var lessonResultIds = courseProgressCompletes.Where(x => x.LessonResult != null).Select(x => x.LessonResult).Select(x => x.Id).ToList();
+            // 4️⃣ Lấy danh sách Progress Completes
+            var courseProgressCompletes = await _managerProgressHelper
+                .GetProgressCompleteModuleExportAsync(courseResults
+                    .Select(x => new CourseResultModel { CourseId = x.Value.CourseId, StudentId = x.Key })
+                    .ToList());
 
-            var lessonResults = await _lessonResultRepository.Queryable.WhereBulkContains(lessonResultIds, x => x.Id)
-               .Select(x => new
-               {
-                   StudentId = x.StudentId,
-                   LessonName = x.Lesson != null ? x.Lesson.Name : string.Empty,
-               })
-               .ToListAsync(cancellationToken);
+            // 5️⃣ Lấy danh sách LessonResults
+            var lessonResultIds = courseProgressCompletes
+                .Where(x => x.LessonResult != null)
+                .Select(x => x.LessonResult.Id)
+                .ToList();
 
+            var lessonResults = (await _lessonResultRepository.Queryable.WhereBulkContains(lessonResultIds, x => x.Id)
+                                                                .Select(x => new { x.StudentId, LessonName = x.Lesson != null ? x.Lesson.Name : string.Empty })
+                                                                .ToListAsync(cancellationToken))
+                                                                .ToDictionary(x => x.StudentId);
+
+            // 🔥 Bắt đầu vòng lặp chính
             foreach (var student in students)
             {
-                var courseResult = courseResults.FirstOrDefault(x => x.StudentId == student.Id);
+                var courseResult = courseResults.GetValueOrDefault(student.Id);
                 var courseComplete = courseProgressCompletes.FirstOrDefault(x => x.StudentId == student.Id);
-                var placementTestStudent = placemenTestResultGroups.FirstOrDefault(x => x.StudentId == student.Id);
-                var unitResultGroup = unitResultGroups.FirstOrDefault(x => x.StudentId == student.Id);
-                var lessonResult = lessonResults.FirstOrDefault(x => x.StudentId == student.Id);
+                var placemenTestResultGroup = placemenTestResultGroups.GetValueOrDefault(student.Id);
+                var unitResults = unitResultGroups[student.Id]?.OrderBy(x => x.CreatedDate).ToList();
+                var lessonResult = lessonResults.GetValueOrDefault(student.Id);
 
                 var studentProgressReport = new StudentProgressReportModel
                 {
@@ -183,36 +191,34 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                     School = student.School ?? schools?.FirstOrDefault(x => x.Id == student.SchoolId)?.Name,
                     ProcessDate = courseResult?.ProcessDate,
                     ExpiredDate = student.ExpiredDate,
-                    CourseName = student.ExpiredDate.HasValue ? EnumCourseLevelHelper.GetCodeByEnumCourseLevel(courseResult?.Course?.CourseLevel) : string.Empty,
+                    CourseName = student.ExpiredDate.HasValue
+                        ? EnumCourseLevelHelper.GetCodeByEnumCourseLevel(courseResult?.Course?.CourseLevel)
+                        : string.Empty,
+                    StatusUser = courseResult != null ? ValueStatusUser.InProgress :
+                                 placemenTestResultGroup != null ? ValueStatusUser.CompletedPlacementTest :
+                                 ValueStatusUser.NotCompletedPlacementTest
                 };
-                if (unitResultGroup != null)
+
+                if (unitResults != null && unitResults.Any())
                 {
-                    SetOverallPercentUnitAsync(studentProgressReport, unitResultGroup.UnitResults);
+                    SetOverallPercentUnitAsync(studentProgressReport, unitResults);
                 }
-                if (placementTestStudent != null && placementTestStudent.PlacementTestEnd != null)
-                {
-                    int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
-                    var (levelCompleted, isLock) = placementTestStudent.PlacementTestEnd.Level.GetLevelInScore(placementTestStudent.PlacementTestEnd.Percent, IeltsScoreHelper.GetInitialAge(placementTestStudent.PlacementTestCurrent?.Level, age));
-                    studentProgressReport.StatusUser = isLock ? ValueStatusUser.CompletedPlacementTest : ValueStatusUser.NotCompletedPlacementTest;
-                }
+
                 if (courseComplete != null)
                 {
                     studentProgressReport.TotalLessonDone = courseComplete.TotalLessonDone;
                     studentProgressReport.ProgressPercent = NumberHelper.GetPercent(courseComplete.CountComplete, courseComplete.TotalComplete);
-                    if (lessonResult == null)
-                    {
-                        studentProgressReport.CurrentPosition = string.Concat(nameof(Domain.Entities.Unit), courseComplete.UnitDisplayOrder);
-                    }
-                    else
-                    {
-                        studentProgressReport.CurrentPosition = string.Concat(lessonResult.LessonName, "_", nameof(Domain.Entities.Unit), courseComplete.UnitDisplayOrder);
-                    }
+                    studentProgressReport.CurrentPosition = lessonResult == null
+                        ? $"Unit{courseComplete.UnitDisplayOrder}"
+                        : $"{lessonResult.LessonName}_Unit{courseComplete.UnitDisplayOrder}";
                 }
+
                 if (courseResult != null)
                 {
-                    studentProgressReport.StatusUser = ValueStatusUser.InProgress;
                     await SetFeatureAccessTimeAsync(studentProgressReport, student, courseResult);
-                    studentProgressReport.LeaderboardPercent = studentRankings?.FirstOrDefault(x => x.StudentId == student.Id && x.CourseResultId == courseResult.Id)?.OverallScore ?? default;
+                    studentProgressReport.LeaderboardPercent = studentRankings?
+                        .FirstOrDefault(x => x.StudentId == student.Id && x.CourseResultId == courseResult.Id)?
+                        .OverallScore ?? default;
                 }
 
                 studentProgressReports.Add(studentProgressReport);
