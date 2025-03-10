@@ -10,6 +10,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Infrastructure.Repositories;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -41,7 +42,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
 
             var surveyQuestionquery = await _surveyQuestionRepository.Queryable
                                             .Include(x => x.Translations)
-                                            .Where(x => x.DisplayLevel == request.DisplayLevel && x.IsPilot == request.IsPilot)
+                                            .Where(x => x.DisplayLevel == request.DisplayLevel && x.IsPilot == request.IsPilot && x.SurveyFormType != EnumSurveyFormType.Event)
                                             .OrderBy(x => x.DisplayOrder)
                                             .ToListAsync(cancellationToken: cancellationToken);
 

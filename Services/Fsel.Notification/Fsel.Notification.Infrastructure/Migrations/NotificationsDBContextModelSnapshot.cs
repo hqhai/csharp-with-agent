@@ -100,6 +100,12 @@ namespace Fsel.Notification.Infrastructure.Migrations
 
                     b.HasIndex("NotificationTypeId");
 
+                    b.HasIndex("IsDeleted", "UserId");
+
+                    b.HasIndex("IsDeleted", "UserId", "SenderId");
+
+                    b.HasIndex("IsDeleted", "UserId", "Status");
+
                     b.ToTable("NotificationMessages");
                 });
 
@@ -900,7 +906,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Priority = 1,
                             TemplateLink = "",
-                            TemplateMessage = "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được 100 xu, nhấn để xem chi tiết",
+                            TemplateMessage = "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được {1} xu, nhấn để xem chi tiết",
                             Type = "LinkPage"
                         },
                         new
@@ -914,7 +920,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Priority = 1,
                             TemplateLink = "",
-                            TemplateMessage = "{0} đã hoàn thành unit 1,bạn vừa nhận được 500 xu, nhấn để xem chi tiết ",
+                            TemplateMessage = "{0} đã hoàn thành unit 1,bạn vừa nhận được {1} xu, nhấn để xem chi tiết ",
                             Type = "LinkPage"
                         },
                         new
@@ -928,8 +934,22 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Priority = 1,
                             TemplateLink = "",
-                            TemplateMessage = "{0} đã đăng kí thành công gói học FSEL,bạn vừa nhận được {1}🟡, nhấn để xem chi tiết ",
+                            TemplateMessage = "{0} đã đăng kí thành công gói học FSEL,bạn vừa nhận được {1} xu, nhấn để xem chi tiết ",
                             Type = "LinkPage"
+                        },
+                        new
+                        {
+                            Id = new Guid("46540fc5-a4fd-4dac-bb8f-ef86698528dc"),
+                            Content = "RecallCoinSurvey",
+                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "",
+                            TemplateMessage = "Chúng tôi đã phát hiện một số tài khoản lợi dụng lỗi hệ thống khi làm khảo sát đầu vào (survey) để giành một số coins trái với quy định. Số coins và vật phẩm quy đổi từ đó sẽ bị thu hồi. Hãy tuân thủ quy định để tránh bị cấm tài khoản!",
+                            Type = "Text"
                         });
                 });
 
@@ -1901,7 +1921,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "vi-VN",
                             NotificationTypeId = new Guid("5e7e39f8-750a-4709-82b2-12805fc9e2e9"),
-                            TemplateMessage = "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được 100 xu, nhấn để xem chi tiết"
+                            TemplateMessage = "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được {1} xu, nhấn để xem chi tiết"
                         },
                         new
                         {
@@ -1912,7 +1932,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "en-US",
                             NotificationTypeId = new Guid("5e7e39f8-750a-4709-82b2-12805fc9e2e9"),
-                            TemplateMessage = "{0} has completed the placement test, and you have just received 100 xu. Tap to see details."
+                            TemplateMessage = "{0} has completed the placement test, and you have just received {1} xu. Tap to see details."
                         },
                         new
                         {
@@ -1923,7 +1943,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "fr-FR",
                             NotificationTypeId = new Guid("5e7e39f8-750a-4709-82b2-12805fc9e2e9"),
-                            TemplateMessage = "{0} a terminé le test de positionnement, et vous venez de recevoir 100 xu. Appuyez pour voir les détails."
+                            TemplateMessage = "{0} a terminé le test de positionnement, et vous venez de recevoir {1} xu. Appuyez pour voir les détails."
                         },
                         new
                         {
@@ -1934,7 +1954,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "vi-VN",
                             NotificationTypeId = new Guid("a3d6129b-9844-448d-aa1c-d6155b89ce6b"),
-                            TemplateMessage = "{0} đã hoàn thành unit 1,bạn vừa nhận được 500 xu, nhấn để xem chi tiết "
+                            TemplateMessage = "{0} đã hoàn thành unit 1,bạn vừa nhận được {1} xu, nhấn để xem chi tiết "
                         },
                         new
                         {
@@ -1945,7 +1965,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "en-US",
                             NotificationTypeId = new Guid("a3d6129b-9844-448d-aa1c-d6155b89ce6b"),
-                            TemplateMessage = "{0} has completed Unit 1, and you have just received 500 xu. Tap to see details"
+                            TemplateMessage = "{0} has completed Unit 1, and you have just received {1} xu. Tap to see details"
                         },
                         new
                         {
@@ -1956,7 +1976,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "fr-FR",
                             NotificationTypeId = new Guid("a3d6129b-9844-448d-aa1c-d6155b89ce6b"),
-                            TemplateMessage = "{0} a terminé l'Unité 1, et vous venez de recevoir 500 xu. Appuyez pour voir les détails."
+                            TemplateMessage = "{0} a terminé l'Unité 1, et vous venez de recevoir {1} xu. Appuyez pour voir les détails."
                         },
                         new
                         {
@@ -1990,6 +2010,39 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Language = "fr-FR",
                             NotificationTypeId = new Guid("4e496aad-c2ce-42a2-8971-71cd28cf3fae"),
                             TemplateMessage = "{0} s'est inscrit avec succès au forfait de cours FSEL, et vous venez de recevoir {1} xu. Appuyez pour voir les détails."
+                        },
+                        new
+                        {
+                            Id = new Guid("9ac2883d-b2ad-4d94-a724-91494c1e5b5f"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("46540fc5-a4fd-4dac-bb8f-ef86698528dc"),
+                            TemplateMessage = "Chúng tôi đã phát hiện một số tài khoản lợi dụng lỗi hệ thống khi làm khảo sát đầu vào (survey) để giành một số coins trái với quy định. Số coins và vật phẩm quy đổi từ đó sẽ bị thu hồi. Hãy tuân thủ quy định để tránh bị cấm tài khoản!"
+                        },
+                        new
+                        {
+                            Id = new Guid("1867ebca-aa7d-4fbc-9de9-8e432bb3b87a"),
+                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("46540fc5-a4fd-4dac-bb8f-ef86698528dc"),
+                            TemplateMessage = "We have detected some accounts exploiting a system error in the entry survey to gain coins in violation of the regulations. The coins and any redeemed items obtained through this method will be revoked. Please follow the regulations to avoid account suspension!"
+                        },
+                        new
+                        {
+                            Id = new Guid("f6943cc3-15c1-4849-a852-309be6d17eb4"),
+                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            NotificationTypeId = new Guid("46540fc5-a4fd-4dac-bb8f-ef86698528dc"),
+                            TemplateMessage = "Nous avons détecté certains comptes exploitant une erreur du système lors du sondage d'entrée pour obtenir des pièces en violation des règles. Les pièces et les objets échangés de cette manière seront annulés. Veuillez respecter les règlements afin d’éviter la suspension de votre compte !"
                         });
                 });
 

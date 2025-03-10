@@ -2,25 +2,29 @@
 
 namespace Fsel.Interaction.Application.Commands.CommentCmd
 {
+    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Models;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Interaction.Application.Commands.AiCmd;
     using Fsel.Interaction.Application.Queues.Publishers;
+    using Fsel.Interaction.Application.Services.AIService.Models;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Application.Services.CourseServices.Models;
     using Fsel.Interaction.Application.Services.CourseServices.QueryModel;
     using Fsel.Interaction.Application.Services.SystemService;
     using Fsel.Interaction.Application.Services.UserServices;
-    using Fsel.Interaction.Application.Services.UserServices.Models;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Comments;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Interaction.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -44,8 +48,23 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private readonly IUserService _userService;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly IPostRepository _postRepository;
+        private readonly IMediator _mediator;
+        private readonly AppSetting _appSetting;
+        private const int MinLength = 20;
+        private const int MaxLength = 225;
 
-        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher notificationMessagePublisher, ICourseService courseService, ISystemService systemService, IUserService userService, QuestBoardPublisher questBoardPublisher, IPostRepository postRepository)
+        public CreateCommentCommandHandler(IMapper mapper,
+                                           ICommentRepository commentRepository,
+                                           AuthContext authContext,
+                                           DiscussionBoardCommentPublisher discussionBoardCommentPublisher,
+                                           NotificationMessagePublisher notificationMessagePublisher,
+                                           ICourseService courseService,
+                                           ISystemService systemService,
+                                           IUserService userService,
+                                           QuestBoardPublisher questBoardPublisher,
+                                           IPostRepository postRepository,
+                                           IMediator mediator,
+                                           AppSetting appSetting )
         {
             _mapper = mapper;
             _commentRepository = commentRepository;
@@ -57,37 +76,52 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             _userService = userService;
             _questBoardPublisher = questBoardPublisher;
             _postRepository = postRepository;
+            _mediator = mediator;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<CommentModel>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            ArgumentNullException.ThrowIfNull(request.Content);
             MethodResult<CommentModel> methodResult = new MethodResult<CommentModel>();
 
-            Comment comment = _mapper.Map<Comment>(request);
-            comment.UserId = _authContext.CurrentUserId;
+            if (string.IsNullOrEmpty(request.Content))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCommentErrorCode.ContentNotNull), nameof(request.Content), request.Content);
+                return methodResult;
+            }
+
+            Comment comment = new Comment();
+            if (request.IsUpdate)
+            {
+                var commentQuery = await _commentRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.ObjectId, cancellationToken);
+                if (commentQuery == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ObjectId), request.ObjectId);
+                    return methodResult;
+                }
+
+                comment = commentQuery;
+                comment.Content = request.Content;
+            }
+            else
+            {
+                comment = _mapper.Map<Comment>(request);
+                comment.UserId = _authContext.CurrentUserId;
+            }
+
             if (!comment.IsValid())
             {
                 methodResult.AddErrorBadRequest(comment.ErrorMessages);
                 return methodResult;
             }
 
-            #region Check từ khoá cấm
-
-            var listForbiddenWordResult = await _systemService.CheckContainForbiddenWord(request.Content);
-            var forbiddenWord = listForbiddenWordResult.Content?.Result;
-            if (forbiddenWord == null || forbiddenWord.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCommentErrorCode.ContainsForbiddenKeywords), string.Join(", ", forbiddenWord));
-                return methodResult;
-            }
-
-            #endregion Check từ khoá cấm
+            // check các tiêu chí
+            await AIHandler(request, comment);
 
             await _commentRepository.ExecuteTransactionAsync(async () =>
             {
-                comment = _commentRepository.Add(comment);
+                comment = request.IsUpdate ? _commentRepository.Update(comment) : _commentRepository.Add(comment);
                 await _commentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 List<object> paramLinksValue = new List<object>();
@@ -298,6 +332,47 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             };
 
             await _notificationMessagePublisher.Publish(model, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<VoidMethodResult> AIHandler(CreateCommentCommandModel request, Comment comment)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(request.Content);
+            VoidMethodResult methodResult = new VoidMethodResult();
+
+            // Check từ khoá cấm
+            var listForbiddenWordResult = await _systemService.CheckContainForbiddenWord(request.Content);
+            var forbiddenWord = listForbiddenWordResult.Content?.Result;
+
+            // Check max length
+            int length = request.Content.Count(c => char.IsLetterOrDigit(c));
+
+            if ((forbiddenWord != null && forbiddenWord.Any()) || length <= MinLength || length >= MaxLength)
+            {
+                comment.Status = EnumCommentStatus.NotValid;
+                return methodResult;
+            }
+
+            // Call ChatGpt
+            var contentAICheckComment = File.ReadAllText(ResourceSettings.ContentAICheckComment);
+            var checkContentForAI = await _mediator.Send(new SubmitAICommand { SettingModel = _appSetting.OpenAiConfig?.ModelCommentAI, SystemRoleAlConfig = contentAICheckComment, UserAIConfig = request.Content });
+            if (string.IsNullOrEmpty(checkContentForAI))
+            {
+                comment.Status = EnumCommentStatus.Pending;
+                return methodResult;
+            }
+
+            var determination = JsonSerializer.Deserialize<DeterminationData>(checkContentForAI);
+            if (determination != null && !string.IsNullOrEmpty(determination.Determination))
+            {
+                comment.Status = determination.Determination == "YES" ? EnumCommentStatus.NotValid : EnumCommentStatus.Approver;
+            }
+            else
+            {
+                comment.Status = EnumCommentStatus.Pending;
+            }
+
+            return methodResult;
         }
     }
 }

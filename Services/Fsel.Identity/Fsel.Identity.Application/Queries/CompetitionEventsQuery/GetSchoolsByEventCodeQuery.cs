@@ -10,6 +10,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
     using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Shared.Enums;
     using MassTransit.Initializers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -20,6 +21,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
         public string? EventCode { get; set; }
 
         public Guid? LocationId { get; set; }
+        public EnumEducationLevel? EducationLevel { get; set; }
     }
     public class GetSchoolsByEventCodeQueryHandler : IRequestHandler<GetSchoolsByEventCodeQuery, MethodResult<IList<SchoolModel>>>
     {
@@ -49,14 +51,20 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 
             if (!string.IsNullOrEmpty(request.EventCode) && request.LocationId == null)
             {
-                competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.EventCode == request.EventCode, cancellationToken);
+                competitionEvent = await _competitionEventsRepository.Queryable.Include(x => x.CompetitionEvents).FirstOrDefaultAsync(x => x.EventCode == request.EventCode, cancellationToken);
 
             }
             else
             {
-                var parentEventId = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.EventCode == request.EventCode, cancellationToken).Select(x => x.Id);
+                var parentEvent = await _competitionEventsRepository.Queryable.Include(x => x.CompetitionEvents).FirstOrDefaultAsync(x => x.EventCode == request.EventCode, cancellationToken);
 
-                competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.LocationId == request.LocationId && x.ParentEventId == parentEventId, cancellationToken);
+                var parentEventId = parentEvent?.Id ?? default;
+
+
+                var childEvent = parentEvent?.CompetitionEvents.Select(x => x.Id).ToList() ?? default;
+
+
+                competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.LocationId == request.LocationId && (x.ParentEventId == parentEventId || (x.ParentEventId != null && childEvent != null && childEvent.Contains(x.ParentEventId.Value))), cancellationToken);
             }
 
             if (competitionEvent == null || competitionEvent.SchoolIds == null)
@@ -67,14 +75,18 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 
             IList<Guid> schoolIds = competitionEvent.SchoolIds;
             var listSchool = await _systemService.GetSchoolByIds(schoolIds);
-
             if (listSchool == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
+            var listSchoolTemp = listSchool.Content?.Result;
+            if (request.EducationLevel != null)
+            {
+                listSchoolTemp = listSchoolTemp?.Where(x => x.EducationLevel == request.EducationLevel || x.EducationLevel == EnumEducationLevel.InterLevel).ToList();
+            }
 
-            methodResult.Result = listSchool.Content?.Result;
+            methodResult.Result = listSchoolTemp;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

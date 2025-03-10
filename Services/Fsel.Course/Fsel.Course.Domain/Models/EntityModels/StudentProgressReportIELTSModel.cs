@@ -27,6 +27,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
         [EpplusTableColumn(Header = "Tiến độ học tập theo %")]
         public string? ProgressPercent { get; set; }
 
+        [EpplusTableColumn(Header = "Tổng số lesson đã hoàn thành")]
+        public double? TotalLessonDone { get; set; }
+
         [EpplusTableColumn(Header = "Vị trí học hiện tại Unit")]
         public string? CurrentPositionUnit { get; set; }
 
@@ -127,19 +130,19 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? BandFullMockTestSpeaking2 { get; set; }
 
         [EpplusTableColumn(Header = "Thời gian truy cập - Video lesson")]
-        public double TimeVideoLesson { get; set; }
+        public double? TimeVideoLesson { get; set; }
 
         [EpplusTableColumn(Header = "Thời gian truy cập - Class forum")]
-        public double TimeClassForum { get; set; }
+        public double? TimeClassForum { get; set; }
 
         [EpplusTableColumn(Header = "Thời gian truy cập - Homework")]
-        public double TimeHomeWork { get; set; }
+        public double? TimeHomeWork { get; set; }
 
         [EpplusTableColumn(Header = "Tổng thời gian truy cập")]
-        public double TotalTime { get; set; }
+        public double? TotalTime { get; set; }
 
         [EpplusTableColumn(Header = "Tổng số lần truy cập")]
-        public double TotalVisit { get; set; }
+        public double? TotalVisit { get; set; }
 
         [EpplusTableColumn(Header = "Thời gian bắt đầu học", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
         public DateTime? ProcessDate { get; set; }

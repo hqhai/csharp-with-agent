@@ -20,7 +20,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [ApiController]
     [Route(Settings.APIDefaultRoute + "/question")]
-    [Permission(role: nameof(EnumRole.Student))]
     public class QuestionController : ControllerBase
     {
         private readonly IMediator _mediator;

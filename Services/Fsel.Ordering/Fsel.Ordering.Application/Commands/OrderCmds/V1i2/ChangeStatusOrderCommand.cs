@@ -46,7 +46,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
-
             if (request.Status == EnumOrderStatus.Payment && !request.RevenueType.HasValue)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));

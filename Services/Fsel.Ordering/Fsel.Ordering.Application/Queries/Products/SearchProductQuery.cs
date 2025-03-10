@@ -6,6 +6,7 @@ namespace Fsel.Ordering.Application.Queries.Products
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -72,6 +73,8 @@ namespace Fsel.Ordering.Application.Queries.Products
                 query = query.Where(p => p.Status == request.Status).ToList();
             }
 
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
             if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
             {
                 var queryShowPriority = query.Where(p => p.ShowPriority).ToList();
@@ -94,7 +97,7 @@ namespace Fsel.Ordering.Application.Queries.Products
 
                 query = query.Where(p => p.EventIds != null && request.EventIds != null && request.EventIds.Any(x => p.EventIds.Contains(x))).ToList();
 
-                query = query.Where(p => p.ExpireDate.Date >= DateTime.UtcNow.Date && p.RemainingQuantity > 0).ToList();
+                query = query.Where(p => p.ExpireDate >= currentDate && p.RemainingQuantity > 0).ToList();
             }
 
             IQueryable<ProductModel> queryable = query.AsQueryable();

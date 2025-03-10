@@ -60,9 +60,17 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                                   TeacherIds = course.CourseTeachers.Where(n => !n.IsDeleted).Select(x => x.TeacherId).Distinct().ToList(),
                               });
 
+            request.Keyword = request.Keyword?.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                courseQuery = courseQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Code ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    courseQuery = courseQuery.Where(m => m.Id == guid);
+                }
+                else
+                {
+                    courseQuery = courseQuery.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
+                }
             }
 
             if (request.CourseLevel != null)

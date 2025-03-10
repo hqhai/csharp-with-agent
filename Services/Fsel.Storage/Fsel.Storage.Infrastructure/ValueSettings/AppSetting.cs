@@ -18,7 +18,8 @@ namespace Fsel.Storage.Infrastructure.ValueSettings
     public class OpenAiConfig
     {
         public string? Uri { get; set; }
-        public string? ApiKey { get; set; }
+        public IList<string>? ApiKeys { get; set; }
+        public string? ApprovalAIModel { get; set; }
     }
 
     public class StorageFolder

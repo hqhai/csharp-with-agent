@@ -2,7 +2,7 @@
 
 namespace Fsel.Identity.Application.Commands.AdminCmd
 {
-    using System.Transactions;
+    using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -61,10 +61,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null or malformed" });
                 }
-                if (await _userManager.Users.AnyAsync(y => y.Email.Trim().ToLower().Contains(x.Email.Trim().ToLower()), cancellationToken))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = $"{nameof(x.Email)} {nameof(EnumSystemErrorCode.DataAlreadyExist)}" });
-                }
                 if (!string.IsNullOrEmpty(x.Password))
                 {
                     foreach (IPasswordValidator<User> passwordValidator in _userManager.PasswordValidators)
@@ -85,6 +81,27 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 return methodResult;
             }
             var emails = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!.Trim()).ToList();
+            var emailsDuplicates = emails.GroupBy(x => x).Where(x => x.Count() > 1).Select(x => x.Key).ToList();
+
+            if (emailsDuplicates.Any())
+            {
+                methodResult.AddErrorBadRequest(new List<ErrorResult>
+                {
+                    new ErrorResult
+                    {
+                        ErrorCode = nameof(emailsDuplicates),
+                        Errors = new List<Error>
+                        {
+                            new Error
+                            {
+                                FieldName  = nameof(emailsDuplicates),
+                                ErrorValues = emailsDuplicates.Cast<object>().ToList()
+                            }
+                        }
+                    }
+                });
+                return methodResult;
+            }
             var role = await _roleManager.FindByNameAsync(nameof(EnumRole.AdminSchool));
             if (role == null)
             {
@@ -106,45 +123,37 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 {
                     continue;
                 }
-                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                try
                 {
-                    try
+                    var user = new User();
+                    user.UserName = item.Email;
+                    user.Email = item.Email;
+                    user.FullName = item.FullName ?? item.Email;
+                    user.EmailConfirmed = true;
+                    if (Guid.TryParse(item.SchoolId, out Guid schoolId))
                     {
-                        var user = new User();
-                        user.UserName = item.Email;
-                        user.Email = item.Email;
-                        user.FullName = item.FullName ?? item.Email;
-                        user.EmailConfirmed = true;
-                        if (Guid.TryParse(item.SchoolId, out Guid schoolId))
+                        user.UserSchools = new List<UserSchool>
                         {
-                            user.UserSchools = new List<UserSchool>
-                            {
-                                new UserSchool { SchoolId = schoolId }
-                            };
-                        }
+                            new UserSchool { SchoolId = schoolId }
+                        };
+                    }
 
-                        if (!user.IsValid())
-                        {
-                            methodResult.AddErrorBadRequest(user.ErrorMessages);
-                            return methodResult;
-                        }
-                        var resultUser = await _userManager.CreateAsync(user, item.Password ?? DefaultPassword);
-                        if (!resultUser.Succeeded)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
-                            return methodResult;
-                        }
-                        await _userManager.AddToRoleAsync(user, nameof(EnumRole.AdminSchool));
-                        scope.Complete();
-                    }
-                    catch
+                    if (!user.IsValid())
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr));
-                        scope.Dispose();
+                        methodResult.AddErrorBadRequest(user.ErrorMessages);
+                        return methodResult;
                     }
+                    var resultUser = await _userManager.CreateAsync(user, item.Password ?? DefaultPassword);
+                    if (!resultUser.Succeeded)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
+                        return methodResult;
+                    }
+                    await _userManager.AddToRoleAsync(user, nameof(EnumRole.AdminSchool));
                 }
-                if (!methodResult.IsOK)
+                catch (Exception e)
                 {
+                    methodResult.AddError(nameof(EnumAuthUserErrorCode.SendAuthErorr), e.Message);
                     return methodResult;
                 }
             }

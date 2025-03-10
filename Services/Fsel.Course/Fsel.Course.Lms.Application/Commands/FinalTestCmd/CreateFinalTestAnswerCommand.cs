@@ -77,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var student = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
@@ -193,7 +193,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 // làm nhiệm vụ
                 // await DoQuestBoard(courseId, cancellationToken);
 
-                finalTestResult = _finalTestResultRepository.Update(finalTestResult);
+                finalTestResult = _finalTestResultRepository.Update(finalTestResult, false, x => x.CourseId, x => x.FinalTestId, x => x.StudentId);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

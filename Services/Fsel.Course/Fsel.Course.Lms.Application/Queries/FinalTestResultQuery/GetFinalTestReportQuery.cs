@@ -41,13 +41,13 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<FinalTestResultModel> methodResult = new MethodResult<FinalTestResultModel>();
 
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!student.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
-                return methodResult;
-            }
-            var studentId = student?.Content?.Result?.Id;
+            //var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            //if (!student.IsSuccessStatusCode)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+            //    return methodResult;
+            //}
+            //var studentId = student?.Content?.Result?.Id;
             var finalTestResult = await _finalTestResultRepository.GetByIdAsync(request.FinalTestResultId);
             methodResult.Result = _mapper.Map<FinalTestResultModel>(finalTestResult);
             methodResult.StatusCode = StatusCodes.Status200OK;

@@ -55,7 +55,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             var videoResultIds = lessonResults.Where(x => x.VideoResult != null).Select(x => x.VideoResult!.Id).ToList();
 
             var videoIds = await _lessonRepository.Queryable.Include(x => x.LessonVideos)
-                                                .Where(x => lessonIds.Contains(x.Id))
+                                                .WhereBulkContains(lessonIds, x => x.Id)
                                                 .SelectMany(x => x.LessonVideos)
                                                 .Select(x => x.VideoId)
                                                 .ToListAsync();

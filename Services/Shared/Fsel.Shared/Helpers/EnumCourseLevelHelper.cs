@@ -9,6 +9,7 @@ namespace Fsel.Shared.Helpers
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public static class EnumCourseLevelHelper
     {
@@ -23,9 +24,9 @@ namespace Fsel.Shared.Helpers
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS1),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS2),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS3),
-            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.AdultFoundation, EnumCourseLevel.AF1),
-            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.AdultFoundation, EnumCourseLevel.AF2),
-            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.AdultFoundation, EnumCourseLevel.AF3),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.EnglishFoundation, EnumCourseLevel.EFA1),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.EnglishFoundation, EnumCourseLevel.EFA2),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.EnglishFoundation, EnumCourseLevel.EFB1),
         };
 
         private static Dictionary<EnumCourseLevel, EnumCourseLevel> s_levelMapping = new Dictionary<EnumCourseLevel, EnumCourseLevel>
@@ -129,6 +130,16 @@ namespace Fsel.Shared.Helpers
                 }
             }
             return default;
+        }
+
+        public static IList<EnumCourseLevel> GetCourseLevels(this IList<EnumCourseType>? courseTypes, IList<EnumCourseLevel>? courseLevels)
+        {
+            var listCourseLevels = courseTypes?.SelectMany(x => GetEnumCourseLevels(x)).ToList() ?? new List<EnumCourseLevel>();
+            if (courseLevels != null && courseLevels.Any())
+            {
+                listCourseLevels = courseLevels.ToList();
+            }
+            return listCourseLevels;
         }
 
         public static EnumPlacementTestLevel GetPlacementTestLevelByCourseLevel(this EnumCourseLevel level)
@@ -391,6 +402,21 @@ namespace Fsel.Shared.Helpers
 
                 default:
                     return string.Empty;
+            }
+        }
+
+        public static int GetTotalProgress(this EnumCourseType courseType)
+        {
+            switch (courseType)
+            {
+                case EnumCourseType.Academic:
+                    return CourseProgressValue.ProgressAcademic;
+
+                case EnumCourseType.Ielts:
+                    return CourseProgressValue.ProgressIELTS;
+
+                default:
+                    return 0;
             }
         }
     }

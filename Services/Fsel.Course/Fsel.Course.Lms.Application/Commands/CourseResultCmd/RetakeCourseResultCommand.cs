@@ -243,7 +243,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             if (courseResultActive != null)
             {
                 courseResultActive.WorkingStatus = EnumWorkingStatus.InActive;
-                _courseResultRepository.Update(courseResultActive);
+                _courseResultRepository.Update(courseResultActive, false, x => x.CourseId, x => x.StudentId);
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
@@ -264,7 +264,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             {
                 x.WorkingStatus = EnumWorkingStatus.NotWorking;
                 return x;
-            }).ToList());
+            }).ToList(), false, x => x.CourseId, x => x.StudentId);
             await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return courseResults.Select(x => x.CourseId).ToList();
         }

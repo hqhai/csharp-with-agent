@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonNoteQuery
 
                 #region Do QuestBoard
 
-                await DoQuestBoard(lessonResult.StudentId, cancellationToken);
+                //await DoQuestBoard(lessonResult.StudentId, cancellationToken);
 
                 #endregion Do QuestBoard
             }

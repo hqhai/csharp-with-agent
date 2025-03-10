@@ -50,7 +50,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<ClassForumReportModel>> methodResult = new MethodResult<IList<ClassForumReportModel>>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
@@ -92,7 +92,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var classForums = await _classForumRepository.Queryable.Include(x => x.Lesson)
                                                            .Include(x => x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId)))
                                                            .ThenInclude(x => x.ClassForumDetailResults)
-                                                           .Where(x => lessonIds.Contains(x.LessonId))
+                                                           .WhereBulkContains(lessonIds, x => x.LessonId)
                                                            .ToListAsync();
             return classForums.OrderBy(x => lessonIds.IndexOf(x.LessonId)).Select(x =>
             {
