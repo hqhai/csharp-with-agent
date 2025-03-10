@@ -9,15 +9,16 @@ namespace Fsel.Hangfire.Application.Workers
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
 
-    public class WeeklyReportWorker : IWorker
+    public class SendWeeklyReportWorker : IWorker
     {
-        //private readonly WeeklyReportPublisher _weeklyReportPublisher;
+        //private readonly SendWeeklyReportPublisher _sendWeeklyReportPublisher;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly ILogger<WeeklyReportWorker> _logger;
 
-        public WeeklyReportWorker(/*WeeklyReportPublisher weeklyReportPublisher, */IWebHostEnvironment webHostEnvironment, ILogger<WeeklyReportWorker> logger)
+        private readonly ILogger<SendWeeklyReportWorker> _logger;
+
+        public SendWeeklyReportWorker(/*SendWeeklyReportPublisher sendWeeklyReportPublisher, */IWebHostEnvironment webHostEnvironment, ILogger<SendWeeklyReportWorker> logger)
         {
-            //_weeklyReportPublisher = weeklyReportPublisher;
+            //_sendWeeklyReportPublisher = sendWeeklyReportPublisher;
             _webHostEnvironment = webHostEnvironment;
             _logger = logger;
         }
@@ -28,7 +29,7 @@ namespace Fsel.Hangfire.Application.Workers
             {
                 _logger.LogWarning($"Call WeeklyReportWorker - {DateTime.UtcNow}");
                 _logger.LogWarning($"Call WeeklyReportWorker, Disable WeeklyReportPublisher - {DateTime.UtcNow}");
-                //await _weeklyReportPublisher.Publish(CancellationToken.None);
+                //await _sendWeeklyReportPublisher.Publish(CancellationToken.None);
             }
         }
     }

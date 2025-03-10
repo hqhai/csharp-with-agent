@@ -111,6 +111,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<SummaryDataOnCityModel> SummaryDataOnCityResults { get; set; }
         public DbSet<SchoolInfoModel> SchoolInfos { get; set; }
         public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
+        public DbSet<WeeklyReport> WeeklyReports { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
