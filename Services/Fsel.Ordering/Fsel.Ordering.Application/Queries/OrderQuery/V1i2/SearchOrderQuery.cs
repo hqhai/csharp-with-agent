@@ -40,12 +40,14 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<SearchOrderModel>>();
 
-            var query = _orderRepository.Queryable.Include(p => p.Package).Where(p => !p.IsTrial).Select(x => new SearchOrderModel
+            var query = _orderRepository.Queryable.Where(p => !p.IsTrial).Select(x => new SearchOrderModel
             {
                 Id = x.Id,
                 Code = x.Code,
+                Email = x.Email,
+                FullName = x.FullName,
                 UserId = x.UserId,
-                CreatedDate = x.CreatedDate,
+                CreatedDate = x.UpdatedDate ?? x.CreatedDate,
                 UpdatedDate = x.UpdatedDate,
                 CreatedFullName = x.CreatedFullName,
                 Status = x.Status,
@@ -78,12 +80,15 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 }
                 else
                 {
-                    query = query.Where(p => (!string.IsNullOrEmpty(p.Code) && p.Code.Contains(request.Keyword)) || (!string.IsNullOrEmpty(p.FullName) && p.FullName.Contains(request.Keyword)));
+                    var codeQuery = query.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
+                    var fullNameQuery = query.Where(m => m.FullName != null && m.FullName.Contains(request.Keyword));
+                    query = codeQuery.Union(fullNameQuery);
                 }
             }
 
             if (request.PackageIds != null && request.PackageIds.Count > 0)
             {
+                request.PackageIds = request.PackageIds.Distinct().ToList();
                 query = query.Where(p => p.PackageId.HasValue && request.PackageIds.Contains(p.PackageId.Value));
             }
 
@@ -105,23 +110,29 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 query = query.Where(p => p.RevenueType == request.RevenueType);
             }
 
-            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            int totalItem = await query.CountAsync(cancellationToken);
             var lists = await query
                     .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+                    .ToListAsync(cancellationToken);
+
 
             var userIds = lists.Select(l => l.UserId).Distinct().ToList();
             if (userIds.Any())
             {
                 var studentResults = await _userService.GetStudentsByIdsAsync(userIds);
                 var students = studentResults.Content?.Result;
+
+                // Code sau khi Optimize
+                var studentLookup = students?
+                                    .Where(x => x.Human != null && x.Human.UserId.HasValue)
+                                    .ToDictionary(x => x.Human!.UserId!.Value, x => x.Human);
                 lists.ForEach(p =>
                 {
-                    var student = students?.FirstOrDefault(x => x.Human != null && x.Human.UserId == p.UserId);
-                    p.Email = student?.Human?.Email;
-                    p.FullName = student?.Human?.FullName;
+                    if (studentLookup != null && studentLookup.TryGetValue(p.UserId, out var human))
+                    {
+                        p.Email ??= human?.Email;
+                        p.FullName ??= human?.FullName;
+                    }
                 });
             }
 

@@ -61,13 +61,13 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                 new FeatureAccessTimeBusinessModel()
                 {
                     FeatureBusinessType = EnumFeatureBussinessType.Social,
-                    TotalVisit = learn.Sum(p => p.Visit),
+                    TotalVisit = social.Sum(p => p.Visit),
                     AccessTime = social.Sum(p => p.AccessTime),
                 },
                 new FeatureAccessTimeBusinessModel()
                 {
                     FeatureBusinessType = EnumFeatureBussinessType.Other,
-                    TotalVisit = learn.Sum(p => p.Visit),
+                    TotalVisit = other.Sum(p => p.Visit),
                     AccessTime = other.Sum(p => p.AccessTime),
                 }
             };

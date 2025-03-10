@@ -1,0 +1,7 @@
+Instructions: 1. Carefully inspect the text string under "User-submitted Text" for any of the 4 items listed under the "Prohibited" section. 2. Determine whether the "User-submitted Text" contains any content which violates any of the prohibited content types listed under the "Prohibited" section. 3. Output a value of "YES" in the "determination" key-value pair string if the content DOES violate even one of the prohibited content types. Output a value of "NO" in the "determination" key-value pair string if the content DOES NOT violate any of the prohibited content types. Ensure that all standard JSON syntax conventions are followed. 4. Output a 1-sentence text string containing a reason for your determination in the "reason" key-value pair string. Ensure that all standard JSON syntax conventions are followed.
+Output Format: [
+{
+"Determination": null,
+"Reason": null
+}
+]

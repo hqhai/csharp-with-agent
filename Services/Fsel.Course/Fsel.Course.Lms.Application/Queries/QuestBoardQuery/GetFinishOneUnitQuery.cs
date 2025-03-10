@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             MethodResult<QuestBoardCategoryModel> methodResult = new MethodResult<QuestBoardCategoryModel>();
             QuestBoardCategoryModel questBoardCategoryModel = new QuestBoardCategoryModel();
 
-            var classResult = await _trainingService.GetClassByStudentId(request.StudentId);
+            var classResult = await _trainingService.GetClassToStudentIdAsync(request.StudentId);
             if (!classResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));

@@ -46,10 +46,25 @@ namespace Fsel.Ordering.Application.Commands.Products
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<string>();
 
+            methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.GiftExchangeOff));
+            return methodResult;
+
+            if (string.IsNullOrEmpty(request.PhoneNumber))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.EmptyPhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
+                return methodResult;
+            }
+
+            if (!request.PhoneNumber.IsValidPhoneNumber())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.PhoneNumberIsInvalid), nameof(request.PhoneNumber), request.PhoneNumber);
+                return methodResult;
+            }
+
             var product = await _productRepository.Queryable.Include(p => p.OrderTransactions).FirstOrDefaultAsync(p => p.Id == request.ProductId, cancellationToken);
             if (product == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.ProductNotExist));
                 return methodResult;
             }
 
@@ -77,7 +92,9 @@ namespace Fsel.Ordering.Application.Commands.Products
                 return methodResult;
             }
 
-            if (product.ExpireDate.Date < DateTime.UtcNow.Date)
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+            if (product.ExpireDate < currentDate)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.ExchangeExpirationDate));
                 return methodResult;

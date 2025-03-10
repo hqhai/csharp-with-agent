@@ -9,6 +9,7 @@ namespace Fsel.Shared.Helpers
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public static class EnumCourseLevelHelper
     {
@@ -132,6 +133,16 @@ namespace Fsel.Shared.Helpers
                 }
             }
             return default;
+        }
+
+        public static IList<EnumCourseLevel> GetCourseLevels(this IList<EnumCourseType>? courseTypes, IList<EnumCourseLevel>? courseLevels)
+        {
+            var listCourseLevels = courseTypes?.SelectMany(x => GetEnumCourseLevels(x)).ToList() ?? new List<EnumCourseLevel>();
+            if (courseLevels != null && courseLevels.Any())
+            {
+                listCourseLevels = courseLevels.ToList();
+            }
+            return listCourseLevels;
         }
 
         public static EnumPlacementTestLevel GetPlacementTestLevelByCourseLevel(this EnumCourseLevel level)
@@ -399,6 +410,21 @@ namespace Fsel.Shared.Helpers
 
                 default:
                     return string.Empty;
+            }
+        }
+
+        public static int GetTotalProgress(this EnumCourseType courseType)
+        {
+            switch (courseType)
+            {
+                case EnumCourseType.Academic:
+                    return CourseProgressValue.ProgressAcademic;
+
+                case EnumCourseType.Ielts:
+                    return CourseProgressValue.ProgressIELTS;
+
+                default:
+                    return 0;
             }
         }
     }

@@ -165,20 +165,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Delete Video Time Code Answers
-        /// </summary>
-        [HttpPost("queue-test/{queueName}/{queueTopic}")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public IActionResult QueueTest([FromRoute] string queueName, [FromRoute] string queueTopic, [FromBody] QueueTestModel data)
-        {
-            _queueProvider.Publish(queueName, queueTopic, data?.Data);
-
-            MethodResult<bool> queryResult = new MethodResult<bool>();
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Import Module Process
         /// </summary>
         [HttpGet("unauthorized")]

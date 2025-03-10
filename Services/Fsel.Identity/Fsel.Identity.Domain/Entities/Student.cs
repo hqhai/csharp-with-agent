@@ -31,6 +31,12 @@ namespace Fsel.Identity.Domain.Entities
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SchoolFaculty { get; set; }
 
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? ParentPhoneNumber { get; set; }
+
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? ParentEmail { get; set; }
+
         public EnumCourseLevel? CourseLevel { get; set; }
         public EnumCourseLevel? BaseCourseLevel { get; set; }
 

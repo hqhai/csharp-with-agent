@@ -93,7 +93,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         unitResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
                         unitResult.Percent = percent;
                         unitResult.SkillScores = skillScores;
-                        _unitResultRepository.Update(unitResult);
+                        _unitResultRepository.Update(unitResult, false, x => x.UnitId, x => x.StudentId, x => x.CourseId);
                         try
                         {
                             await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

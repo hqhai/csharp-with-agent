@@ -13,6 +13,7 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.CourseServices;
+    using Fsel.Training.Application.Services.CourseServices.CommandModels;
     using Fsel.Training.Application.Services.OrderServices;
     using Fsel.Training.Application.Services.OrderServices.Model;
     using Fsel.Training.Application.Services.UserServices;
@@ -87,6 +88,11 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 return methodResult;
             }
 
+            await _courseService.ChooseLevelPTAsync(new SavePlacementTestGroupResultCommandModel
+            {
+                ChooseCourseLevel = request.CourseLevel
+            });
+
             var eventResults = await _userService.GetEventByUserId(_authContext.CurrentUserId);
 
             if (eventResults.IsSuccessStatusCode && eventResults.Content != null && eventResults.Content.Result != null && eventResults.Content.Result.Any(p => p.EventContent != null && p.EventContent.IsByPassPayment))
@@ -100,9 +106,7 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 var student = studentResult.Content?.Result;
 
                 var @events = eventResults.Content.Result;
-
                 var @event = @events.Where(p => p.EventContent != null && p.EventContent.IsByPassPayment).Select(p => p.EventContent).FirstOrDefault();
-
                 if (@event != null)
                 {
                     await _orderService.CreateOrderForUserLeaderBoard(new CreateOrderForUserFromLeaderBoardCommandModel()

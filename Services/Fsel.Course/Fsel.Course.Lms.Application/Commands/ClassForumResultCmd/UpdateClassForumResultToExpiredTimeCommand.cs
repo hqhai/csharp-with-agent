@@ -5,12 +5,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -28,16 +28,18 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly IClassForumDetailResultRepository _classforumDetailResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly RankedStudentPublisher _rankedStudentPublisher;
+        private readonly IMediator _mediator;
         private const int MaxScoreClassForum = 2;
         private const int MaxTagetScore = 1;
 
-        public UpdateClassForumResultToExpiredTimeCommandHandler(IClassForumResultRepository classForumResultRepository, IClassForumDetailResultRepository classForumDetailResultRepository, NotificationMessagePublisher notificationMessagePublisher, RankedStudentPublisher rankedStudentPublisher)
+        public UpdateClassForumResultToExpiredTimeCommandHandler(IClassForumResultRepository classForumResultRepository, IClassForumDetailResultRepository classForumDetailResultRepository, NotificationMessagePublisher notificationMessagePublisher, RankedStudentPublisher rankedStudentPublisher, IMediator mediator)
 
         {
             _classForumResultRepository = classForumResultRepository;
             _classforumDetailResultRepository = classForumDetailResultRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
             _rankedStudentPublisher = rankedStudentPublisher;
+            _mediator = mediator;
         }
 
         public async Task<bool> Handle(UpdateClassForumResultToExpiredTimeCommand request, CancellationToken cancellationToken)
@@ -62,12 +64,19 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             await UpdateClassForumDetailResultsAsync(classForumResult.ClassForumDetailResults.ToList(), classForumDetailResult);
             await UpdateClassForumResultAsync(classForumResult, classForumDetailResult);
 
+            await _mediator.Send(new AutoApprovalClassForumCommand
+            {
+                ClassForumResulId = classForumResult.Id
+            }, cancellationToken);
 
             #region RankedStudent
+
             await PublishRankedStudent(classForumDetailResult.CreatedUserId, cancellationToken);
-            #endregion
+
+            #endregion RankedStudent
 
             #region Notification
+
             IList<EnumRole> roles = new List<EnumRole>();
             roles.Add(EnumRole.CSO);
 
@@ -81,7 +90,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 PlatformCode = EnumPlatformCode.LMSAdmin
             };
             await _notificationMessagePublisher.Publish(model, cancellationToken);
-            #endregion
+
+            #endregion Notification
 
             return true;
         }
@@ -133,7 +143,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     item.CompletionDate = DateTime.UtcNow;
                 }
             }
-            _classforumDetailResultRepository.UpdateList(classForumDetailResults);
+            _classforumDetailResultRepository.UpdateList(classForumDetailResults, false, x => x.ClassForumResultId, x => x.SubmissionCount);
             await _classforumDetailResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
 
@@ -179,7 +189,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     }
                 };
             }
-            _classForumResultRepository.Update(classForumResult);
+            _classForumResultRepository.Update(classForumResult, false, x => x.LessonResultId, x => x.ClassForumId, x => x.StudentId);
             await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
         }
 

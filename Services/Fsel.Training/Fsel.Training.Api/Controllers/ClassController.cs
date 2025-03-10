@@ -6,7 +6,6 @@ namespace Fsel.Training.Api.Controllers
     using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
@@ -55,6 +54,18 @@ namespace Fsel.Training.Api.Controllers
         public async Task<IActionResult> GetClassByStudentId([FromRoute] Guid studentId)
         {
             MethodResult<ClassModel> commandResult = await _mediator.Send(new GetClassByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get class list status new
+        /// </summary>
+        [HttpGet("get-class-to-student/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetClassToStudentId([FromRoute] Guid studentId)
+        {
+            MethodResult<ClassModel> commandResult = await _mediator.Send(new GetClassToStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

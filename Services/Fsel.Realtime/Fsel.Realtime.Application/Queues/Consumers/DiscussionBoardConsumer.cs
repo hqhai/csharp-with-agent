@@ -25,11 +25,11 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             {
                 await _discussionBoardHubContext.Clients.All.SendAsync(RealtimeSettings.DiscussionBoardHub.Methods.CommentLikeMessage, message);
 
-                try
-                {
-                    _queueProvider.Publish(RealtimeSettings.DiscussionBoardHub.Methods.CommentLikeMessage, RealtimeSettings.DiscussionBoardHub.Methods.CommentLikeMessage, message);
-                }
-                catch { }
+                //try
+                //{
+                //    _queueProvider.Publish(RealtimeSettings.DiscussionBoardHub.Methods.CommentLikeMessage, RealtimeSettings.DiscussionBoardHub.Methods.CommentLikeMessage, message);
+                //}
+                //catch { }
             }
         }
     }

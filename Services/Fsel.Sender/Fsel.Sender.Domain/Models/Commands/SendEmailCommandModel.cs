@@ -2,6 +2,7 @@
 
 namespace Fsel.Sender.Domain.Models.Commands
 {
+    using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Http;
 
     public class SendEmailCommandModel
@@ -14,5 +15,6 @@ namespace Fsel.Sender.Domain.Models.Commands
         public IList<IFormFile>? Attachments { get; set; }
         public bool? IsCCEmail { get; set; }
         public bool? IsCCEmailDefault { get; set; }
+        public EnumSenderTemplate? Template { get; set; }
     }
 }

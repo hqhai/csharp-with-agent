@@ -66,10 +66,17 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var courseResult = method.Result!;
             var lessonResultIds = await GetLessonResultIdsAsync(request, courseResult.StudentId);
             var classForumIds = await GetClassForumIdsAsync(request);
-            var groupClassForum = await _classForumRepository.Queryable.Where(x => classForumIds.Contains(x.Id))
-                                                                   .GroupBy(x => x.CourseSkill)
-                                                                   .Select(x => new { x.Key, ClassFourmIds = x.Select(x => x.Id).ToList() })
-                                                                   .ToListAsync(cancellationToken);
+            if (classForumIds == null || !classForumIds.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumIds));
+                return methodResult;
+            }
+
+            var groupClassForumResults = await _classForumRepository.Queryable.WhereBulkContains(classForumIds, x => x.Id).ToListAsync(cancellationToken);
+            var groupClassForum = groupClassForumResults.GroupBy(x => x.CourseSkill)
+                                                        .Select(x => new { x.Key, ClassFourmIds = x.Select(x => x.Id).ToList() })
+                                                        .ToList();
+
             if (groupClassForum == null || !groupClassForum.Any())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(groupClassForum));
@@ -99,7 +106,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private async Task<MethodResult<CourseResult>> Validate(GetOverallScoreByClassForumQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<CourseResult>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
@@ -162,7 +169,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private async Task<IList<Guid>> GetClassForumIdsAsync(GetOverallScoreByClassForumQuery request)
         {
             var lessonIds = await GetLessonIdsAsync(request);
-            return await _classForumRepository.Queryable.Where(x => lessonIds.Contains(x.LessonId)).Select(x => x.Id).ToListAsync();
+            return await _classForumRepository.Queryable.WhereBulkContains(lessonIds, x => x.LessonId).Select(x => x.Id).ToListAsync();
         }
     }
 }

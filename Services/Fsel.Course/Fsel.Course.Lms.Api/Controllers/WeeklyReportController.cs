@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
@@ -71,6 +70,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CompleteCourse([FromBody] SendMailStudentFinishCourseCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// send mail reminder to do pt
+        /// </summary>
+        [HttpPost("send-mail-reminder-pt-and-kickoff-event")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendMailReminderToDoPT([FromForm] SendMailReminderPTAndKickOffEventCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

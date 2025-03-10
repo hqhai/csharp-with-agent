@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.MockTestResultQuery;
     using Fsel.Shared.Attributes;
@@ -30,7 +31,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// get mock test ranking
         /// </summary>
         [HttpGet("mock-test-ranking")]
-        [ProducesResponseType(typeof(MethodResult<IList<TestResultRankingModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<TestResultRankingModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetMockTestRankingQuery command)
         {

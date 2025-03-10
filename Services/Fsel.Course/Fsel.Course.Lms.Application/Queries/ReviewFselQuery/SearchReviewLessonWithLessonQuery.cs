@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
+    using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -94,7 +95,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                     Id = group.Key.Id,
                     Name = group.Key.Name,
                     CreatedDate = group.Key.CreatedDate,
-                    Stars = group.Select(x => x.Stars).Average(),
+                    Stars = group.Any() ? group.Average(x => x.Stars) : default,
                     TeacherId = group.Key.TeacherId,
                     TotalStart = group.Sum(x => x.Stars),
                     TotalResult = group.Select(x => x.Stars).Count()

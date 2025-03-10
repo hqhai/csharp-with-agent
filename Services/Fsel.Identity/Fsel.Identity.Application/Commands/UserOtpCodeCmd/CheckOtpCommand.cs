@@ -8,6 +8,8 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.UserOtpCodes;
+    using Fsel.Shared.Enums;
+    using Kros.Extensions;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -28,20 +30,25 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-            var userOtpCode = await _userOtpCodeRepository.GetUserOtpCodeAsync(request.Otp, request.Email);
+
+            var userOtpCode = await _userOtpCodeRepository.GetUserOtpCodeAsync(request.Otp, request.Email, request.PhoneNumber, (!request.Email.IsNullOrEmpty() ? EnumUserOtpCodeType.Email : EnumUserOtpCodeType.SMS));
             if (userOtpCode == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.InvalidOTP), nameof(request.Otp), request.Otp);
                 return methodResult;
             }
+
             if (request.IsCheckExpiredTime && DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OTPExpired), nameof(request.Otp), request.Otp);
                 return methodResult;
             }
+
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
+
+
     }
 }

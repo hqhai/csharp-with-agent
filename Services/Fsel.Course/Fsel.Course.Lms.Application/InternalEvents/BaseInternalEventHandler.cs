@@ -452,7 +452,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     if (unitResultNext.Status == EnumResultStatus.Unfinished && currentAccountStatus == EnumTrialRegistrationStatus.Payment)
                     {
                         unitResultNext.Status = EnumResultStatus.New;
-                        _unitResultRepository.Update(unitResultNext);
+                        _unitResultRepository.Update(unitResultNext, false, x => x.UnitId, x => x.StudentId, x => x.CourseId);
                         await _unitResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     }
                     break;
@@ -462,7 +462,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     if (finalTestResultNext != null && finalTestResultNext.Status == EnumResultStatus.Unfinished)
                     {
                         finalTestResultNext.Status = EnumResultStatus.New;
-                        _finalTestResultRepository.Update(finalTestResultNext);
+                        _finalTestResultRepository.Update(finalTestResultNext, false, x => x.FinalTestId, x => x.StudentId, x => x.CourseId);
                         await _finalTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     }
                     break;
@@ -472,7 +472,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     if (mockTestResultNext != null && mockTestResultNext.Status == EnumResultStatus.Unfinished)
                     {
                         mockTestResultNext.Status = EnumResultStatus.New;
-                        _mockTestResultRepository.Update(mockTestResultNext);
+                        _mockTestResultRepository.Update(mockTestResultNext, false, x => x.MockTestId, x => x.UnitId, x => x.StudentId, x => x.CourseId);
                         await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     }
                     break;
@@ -500,7 +500,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     courseResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
                     courseResult.Percent = NumberHelper.ConvertRound(percent);
                     courseResult.SkillScores = skillScores;
-                    _courseResultRepository.Update(courseResult);
+                    _courseResultRepository.Update(courseResult, false, x => x.StudentId, x => x.CourseId);
                     await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
@@ -558,7 +558,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
 
                 courseResult.Status = EnumResultStatus.Done;
-                _courseResultRepository.Update(courseResult);
+                _courseResultRepository.Update(courseResult, false, x => x.StudentId, x => x.CourseId);
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 await SendStudentCompleteCourse(studentId, course.Id, courseResult, cancellationToken);
             }
