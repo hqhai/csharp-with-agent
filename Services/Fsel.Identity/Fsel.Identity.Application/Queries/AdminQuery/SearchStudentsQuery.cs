@@ -76,12 +76,12 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             if (!string.IsNullOrEmpty(request.Grade))
             {
                 request.Grade = request.Grade.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.Where(m => m.SchoolGrade != null && m.SchoolGrade.Contains(request.Grade));
+                query = query.WhereBulkContains(request.Grade, x => x.SchoolGrade);
             }
             if (!string.IsNullOrEmpty(request.Class))
             {
-                request.Grade = request.Class.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.Where(m => m.SchoolClass != null && m.SchoolClass.Contains(request.Class));
+                request.Class = request.Class.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+                query = query.WhereBulkContains(request.Class, x => x.SchoolClass);
             }
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
             {
