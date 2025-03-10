@@ -330,7 +330,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                             }
                         }
                     }
-                    else if (courseType == EnumCourseType.Academic)
+                    else if (courseType == EnumCourseType.Academic || courseType == EnumCourseType.EnglishFoundation)
                     {
                         var finalTestResult = await _finalTestResultRepository.Queryable.Include(fn => fn.FinalTest).Where(x => x.StudentId == item.Id && x.Status != EnumResultStatus.Done).OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
                         weeklyReport.NextUnit = finalTestResult?.FinalTest?.Name;
