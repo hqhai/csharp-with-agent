@@ -25,6 +25,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public CourseModel? Course { get; set; }
         public bool IsSurveyEvent { get; set; }
         public bool EmailConfirmed { get; set; }
-        public bool IsUsedUser { get; set; } = true;
+        public bool IsActivedAccount { get; set; } = true;
     }
 }
