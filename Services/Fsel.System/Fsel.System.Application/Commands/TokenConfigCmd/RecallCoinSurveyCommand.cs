@@ -66,7 +66,7 @@ namespace Fsel.System.Application.Commands.TokenConfigCmd
                         {
                              VolatileToken = item.VolatileToken,
                              UserId = item.UserId,
-                             Feature = EnumTokenFeature.FselEvent,
+                             Feature = EnumTokenFeature.ReclaimGift,
                              Mission = EnumTokenMission.ReclaimGiftCoins,
                              Type = EnumTokenHistoryType.Recevived,
                              Config = item.Config
@@ -92,7 +92,7 @@ namespace Fsel.System.Application.Commands.TokenConfigCmd
                     {
                         VolatileToken = coin - 80,
                         UserId = user.UserId,
-                        Feature = EnumTokenFeature.FselEvent,
+                        Feature = EnumTokenFeature.RecallCoinBug,
                         Mission = EnumTokenMission.RecallCoinsSurveyEvent,
                         Type = EnumTokenHistoryType.Exchanged
                     }
@@ -104,7 +104,7 @@ namespace Fsel.System.Application.Commands.TokenConfigCmd
             // gửi thông báo
             await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
             {
-                UserIds = userBugCoins.Select(x => x.UserId).ToList(),
+                UserIds = userBugCoins.Select(x => x.UserId).Distinct().ToList(),
                 ObjectId = Guid.Empty,
                 Type = EnumNotificationType.Text,
                 Content = EnumNotificationContent.RecallCoinSurvey,
