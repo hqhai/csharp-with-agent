@@ -18,6 +18,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     public class SearchStudentsQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<StudentSearchAdminModel>>>
     {
         public string? SchoolName { get; set; }
+        public string? Grade { get; set; }
+        public string? Class { get; set; }
     }
 
     public class SearchStudentsQueryHandler : IRequestHandler<SearchStudentsQuery, MethodResult<PagingItemsModel<StudentSearchAdminModel>>>
@@ -71,6 +73,16 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 request.SchoolName = request.SchoolName.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
                 query = query.Where(m => m.School != null && m.School.Contains(request.SchoolName));
             }
+            if (!string.IsNullOrEmpty(request.Grade))
+            {
+                request.Grade = request.Grade.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+                query = query.Where(m => m.SchoolGrade != null && m.SchoolGrade.Contains(request.Grade));
+            }
+            if (!string.IsNullOrEmpty(request.Class))
+            {
+                request.Grade = request.Class.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+                query = query.Where(m => m.SchoolClass != null && m.SchoolClass.Contains(request.Class));
+            }
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
             {
                 var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
@@ -89,6 +101,9 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 Type = x.CourseLevel.GetEnumCourseType(),
                 SchoolId = x.SchoolId,
                 SchoolName = x.School,
+                Class = x.SchoolClass,
+                Grade = x.SchoolGrade,
+                UserName = x.Human.User!.UserName
             });
             int totalItem = await dataQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await dataQuery
