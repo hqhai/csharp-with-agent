@@ -75,7 +75,7 @@ namespace Fsel.Shared.Helpers
 
         public static string GetInfoCourse(EnumCourseType currentValue)
         {
-            if (currentValue == EnumCourseType.AdultFoundation)
+            if (currentValue == EnumCourseType.EnglishFoundation)
             {
                 return SendMailSetting.EnglishFoundation;
             }
@@ -91,7 +91,7 @@ namespace Fsel.Shared.Helpers
 
         public static string GetCourseTitle(EnumCourseType currentValue)
         {
-            if (currentValue == EnumCourseType.AdultFoundation)
+            if (currentValue == EnumCourseType.EnglishFoundation)
             {
                 return "English Foundation (16+)";
             }
