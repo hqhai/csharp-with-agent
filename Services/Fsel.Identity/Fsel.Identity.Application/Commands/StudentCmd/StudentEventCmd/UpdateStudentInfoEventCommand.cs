@@ -15,6 +15,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class UpdateStudentInfoEventCommand : IRequest<MethodResult<bool>>
     {
@@ -131,11 +132,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
                 return;
             }
             int age = Shared.Helpers.DateTimeHelper.GetYearOld(request.Birthday);
-            if (age <= 13)
+            if (age <= AgeMilestone.ChildrenAge)
             {
                 student.CourseLevel = EnumCourseLevel.A2;
             }
-            else if (age >= 14)
+            else if (age >= AgeMilestone.StudentAge)
             {
                 student.CourseLevel = EnumCourseLevel.B1;
             }
