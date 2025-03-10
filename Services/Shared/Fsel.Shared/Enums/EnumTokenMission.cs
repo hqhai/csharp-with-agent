@@ -71,6 +71,8 @@ namespace Fsel.Shared.Enums
         PhaseV,
         PhaseVI,
         SurveyEvent,
+        RecallCoinsSurveyEvent,
+        ReclaimGiftCoins,
 
         #region QuestBoard
 
