@@ -690,7 +690,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             var lessonIds = course.CourseUnitMockTests.Where(p => p.Unit != null).Select(p => p.Unit).Where(p => p.UnitLessons != null && p.UnitLessons.Count > 0).SelectMany(p => p.UnitLessons).Select(p => p.LessonId).ToList();
 
-            var lessonResultIds = await _lessonResultRepository.Queryable.Where(p => lessonIds != null && lessonIds.Contains(p.LessonId) && p.StudentId == studentId && p.CourseId == course.Id && p.Status == EnumResultStatus.Done).Select(p => p.Id).ToListAsync(cancellationToken);
+            var lessonResultIds = await _lessonResultRepository.Queryable.Where(p => lessonIds != null && lessonIds.Contains(p.LessonId) && p.StudentId == studentId && p.Status == EnumResultStatus.Done).Select(p => p.Id).ToListAsync(cancellationToken);
 
             if (lessonResultIds == null || lessonResultIds.Count == 0 || lessonResultIds.Count != lessonIds.Count)
             {
@@ -808,7 +808,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             var sendStudentCompleteCourseModel = new SendStudentCompleteCourseModel
             {
-                CoursePhoto = SendMailHelper.GetCoursePhoto(course.CourseLevel),
                 CourseLevel = course.CourseLevel.GetDescription(),
                 Percent = courseResult.Percent.ToString(cultureInfo),
                 StartDate = courseResult.CreatedDate.ToString("dd-MM-yyyy", cultureInfo),
