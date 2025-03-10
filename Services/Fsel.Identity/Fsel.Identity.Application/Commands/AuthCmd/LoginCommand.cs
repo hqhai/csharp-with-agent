@@ -1,6 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums.ErrorCodes;
+using Fsel.Core.Base;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.UserDeletionCmd;
 using Fsel.Identity.Domain.Entities;
@@ -9,6 +11,7 @@ using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Identity.Domain.Models.EntityModels;
+using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -26,16 +29,22 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly Microsoft.AspNetCore.Identity.SignInManager<User> _signInManager;
         private readonly IMediator _mediator;
         private readonly IPlatformRepository _platformRepository;
+        private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
+        private readonly IHumanRepository _humanRepository;
 
         public LoginCommandHandler(UserManager<User> userManager,
             Microsoft.AspNetCore.Identity.SignInManager<User> signInManager,
             IMediator mediator,
-            IPlatformRepository platformRepository)
+            IPlatformRepository platformRepository,
+            IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
+            IHumanRepository humanRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _mediator = mediator;
             _platformRepository = platformRepository;
+            _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
+            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -69,13 +78,37 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            var result = await _signInManager.PasswordSignInAsync(user, request.Password, false, false);
-            if (!result.Succeeded)
+            var isCheckPassword = await _userManager.CheckPasswordAsync(user, request.Password);
+            if (!isCheckPassword)
             {
                 methodResult.AddError(
-                    StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.UserNameAndPasswordIncorrect), new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
+                                      StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.UserNameAndPasswordIncorrect), new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
                 return methodResult;
             }
+
+            var student = await _humanRepository.Queryable.Where(x => x.UserId == user.Id).Select(x => x.Student).FirstOrDefaultAsync(cancellationToken);
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), student);
+                return methodResult;
+            }
+
+            var studentCompetitionEvent = await _studentCompetitionEventsRepository.Queryable.Include(x => x.CompetitionEvents)
+                                                                                   .Where(x => x.StudentId == student.Id)
+                                                                                   .FirstOrDefaultAsync(cancellationToken);
+
+            var isByPassEmailComfirm = studentCompetitionEvent?.CompetitionEvents?.EventContent?.IsByPassEmailComfirm ?? default;
+            if (user.EmailConfirmed || !isByPassEmailComfirm)
+            {
+                var result = await _signInManager.PasswordSignInAsync(user, request.Password, false, false);
+                if (!result.Succeeded)
+                {
+                    methodResult.AddError(
+                        StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.UserNameAndPasswordIncorrect), new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
+                    return methodResult;
+                }
+            }
+
             await _mediator.Send(new UpdateStatusUserDeletionCommand { UserId = user.Id, Status = EnumUserDeletionStatus.Cancel }, cancellationToken).ConfigureAwait(false);
             var generateToken = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
             methodResult = generateToken;

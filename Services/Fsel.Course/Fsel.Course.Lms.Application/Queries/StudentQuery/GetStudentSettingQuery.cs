@@ -77,7 +77,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 BeginnerGuide = student.BeginnerGuide,
                 Level = student.CourseLevel,
                 BaseCourseLevel = student.BaseCourseLevel,
-                ClassId = student.ClassId
+                ClassId = student.ClassId,
+                EmailConfirmed = student.Human?.User?.EmailConfirmed ?? default
             };
 
             await GetPlacementTestAsync(settingStudentModel, student, cancellationToken);
