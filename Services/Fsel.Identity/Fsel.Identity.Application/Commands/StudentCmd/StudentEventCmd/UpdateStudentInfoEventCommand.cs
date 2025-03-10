@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
 {
     using System.ComponentModel.DataAnnotations;
+    using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -83,35 +84,52 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Email), request.Email);
                 return methodResult;
             }
-            var human = await _humanRepository.Queryable.Include(x => x.Student).Include(x => x.User)
-                                                        .FirstOrDefaultAsync(x => x.UserId == _authContext.CurrentUserId, cancellationToken);
-            var user = human?.User;
-            var student = human?.Student;
-            if (user == null || human == null || student == null)
+
+            await UpdateUserAsync(request, cancellationToken);
+            var human = await UpdateHumanAsync(request, cancellationToken);
+            if (human != null)
             {
-                return methodResult;
+                await UpdateStudentAsync(request, human.Id, cancellationToken);
             }
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = true;
+            return methodResult;
+        }
 
-            #region Update User
-
+        private async Task UpdateUserAsync(UpdateStudentInfoEventCommand request, CancellationToken cancellationToken)
+        {
+            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
+            if (user == null)
+            {
+                return;
+            }
             user.Email = request.Email;
             user.EmailConfirmed = true;
-            user.NormalizedEmail = request.Email.ToUpper(System.Globalization.CultureInfo.CurrentCulture);
+            user.NormalizedEmail = request.Email?.ToUpper(System.Globalization.CultureInfo.CurrentCulture);
             await _userManager.UpdateAsync(user);
+        }
 
-            #endregion Update User
-
-            #region Update Human
-
+        private async Task<Human?> UpdateHumanAsync(UpdateStudentInfoEventCommand request, CancellationToken cancellationToken)
+        {
+            var human = await _humanRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == _authContext.CurrentUserId, cancellationToken);
+            if (human == null)
+            {
+                return human;
+            }
             human.Email = request.Email;
             human.Birthday = request.Birthday;
             _humanRepository.Update(human);
             await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            return human;
+        }
 
-            #endregion Update Human
-
-            #region Update Student
-
+        private async Task UpdateStudentAsync(UpdateStudentInfoEventCommand request, Guid humanId, CancellationToken cancellationToken)
+        {
+            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(x => x.HumanId == humanId, cancellationToken);
+            if (student == null)
+            {
+                return;
+            }
             int age = Shared.Helpers.DateTimeHelper.GetYearOld(request.Birthday);
             if (age <= 13)
             {
@@ -125,12 +143,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
             student.ParentPhoneNumber = request.ParentPhonenumber;
             _studentRepository.Update(student);
             await _studentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-            #endregion Update Student
-
-            methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = true;
-            return methodResult;
         }
     }
 }
