@@ -2,8 +2,7 @@
 
 using System.Linq.Dynamic.Core;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Enums.ErrorCodes;
-using Fsel.Core.Base;
+using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.UserDeletionCmd;
 using Fsel.Identity.Domain.Entities;
@@ -12,7 +11,6 @@ using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Identity.Domain.Models.EntityModels;
-using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -93,12 +91,20 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            var competitionEvent = await (from baseQ in _humanRepository.Queryable
-                                          join s in _studentRepository.Queryable on baseQ.Id equals s.HumanId
-                                          join sce in _studentCompetitionEventsRepository.Queryable on s.Id equals sce.StudentId
-                                          join ce in _competitionEventsRepository.Queryable on sce.CompetitionEventId equals ce.Id
-                                          where baseQ.UserId == user.Id
-                                          select ce).FirstOrDefaultAsync(cancellationToken);
+            var competitionEvents = await (from baseQ in _humanRepository.Queryable
+                                           join s in _studentRepository.Queryable on baseQ.Id equals s.HumanId
+                                           join sce in _studentCompetitionEventsRepository.Queryable on s.Id equals sce.StudentId
+                                           join ce in _competitionEventsRepository.Queryable on sce.CompetitionEventId equals ce.Id
+                                           where baseQ.UserId == user.Id
+                                           select ce).ToListAsync(cancellationToken);
+
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+            var competitionEvent = competitionEvents.Where(x => x.EventContent != null &&
+            ((!x.EventContent.StartDate.HasValue && !x.EventContent.EndDate.HasValue) ||
+            (x.EventContent.StartDate.HasValue &&
+             x.EventContent.EndDate.HasValue &&
+             x.EventContent.EndDate.Value.Date >= currentDate.Date)
+            )).FirstOrDefault();
 
             var isByPassEmailComfirm = competitionEvent?.EventContent?.IsByPassEmailComfirm ?? default;
             if (user.EmailConfirmed || !isByPassEmailComfirm)
