@@ -93,35 +93,35 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 ChooseCourseLevel = request.CourseLevel
             });
 
-            var eventResults = await _userService.GetEventByUserId(_authContext.CurrentUserId);
+            //var eventResults = await _userService.GetEventByUserId(_authContext.CurrentUserId);
 
-            if (eventResults.IsSuccessStatusCode && eventResults.Content != null && eventResults.Content.Result != null && eventResults.Content.Result.Any(p => p.EventContent != null && p.EventContent.IsByPassPayment))
-            {
-                var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-                if (!studentResult.IsSuccessStatusCode)
-                {
-                    methodResult.AddError(studentResult.Error);
-                    return methodResult;
-                }
-                var student = studentResult.Content?.Result;
+            //if (eventResults.IsSuccessStatusCode && eventResults.Content != null && eventResults.Content.Result != null && eventResults.Content.Result.Any(p => p.EventContent != null && p.EventContent.IsByPassPayment))
+            //{
+            //    var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            //    if (!studentResult.IsSuccessStatusCode)
+            //    {
+            //        methodResult.AddError(studentResult.Error);
+            //        return methodResult;
+            //    }
+            //    var student = studentResult.Content?.Result;
 
-                var @events = eventResults.Content.Result;
-                var @event = @events.Where(p => p.EventContent != null && p.EventContent.IsByPassPayment).Select(p => p.EventContent).FirstOrDefault();
-                if (@event != null)
-                {
-                    await _orderService.CreateOrderForUserLeaderBoard(new CreateOrderForUserFromLeaderBoardCommandModel()
-                    {
-                        UserId = _authContext.CurrentUserId,
-                        Month = @event.PaymentMonth,
-                        FullName = student?.Human?.FullName,
-                        Email = student?.Human?.Email,
-                        PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
-                        PackageId = default,
-                        EventId = default,
-                        ExpiredDate = @event.PaymentDate,
-                    });
-                }
-            }
+            //    var @events = eventResults.Content.Result;
+            //    var @event = @events.Where(p => p.EventContent != null && p.EventContent.IsByPassPayment).Select(p => p.EventContent).FirstOrDefault();
+            //    if (@event != null && student != null && !student.ExpiredDate.HasValue)
+            //    {
+            //        await _orderService.CreateOrderForUserLeaderBoard(new CreateOrderForUserFromLeaderBoardCommandModel()
+            //        {
+            //            UserId = _authContext.CurrentUserId,
+            //            Month = @event.PaymentMonth,
+            //            FullName = student.Human?.FullName,
+            //            Email = student.Human?.Email,
+            //            PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
+            //            PackageId = default,
+            //            EventId = default,
+            //            ExpiredDate = @event.PaymentDate,
+            //        });
+            //    }
+            //}
 
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;

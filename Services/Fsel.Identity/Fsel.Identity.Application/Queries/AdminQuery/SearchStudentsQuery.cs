@@ -9,17 +9,15 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using Fsel.Core.Extensions;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Identity.Domain.Models.QueryModels.Students;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchStudentsQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<StudentSearchAdminModel>>>
+    public class SearchStudentsQuery : SearchStudentsQueryModel, IRequest<MethodResult<PagingItemsModel<StudentSearchAdminModel>>>
     {
-        public string? SchoolName { get; set; }
-        public IList<string>? ListSchoolGrade { get; set; }
-        public IList<string>? ListSchoolClass { get; set; }
     }
 
     public class SearchStudentsQueryHandler : IRequestHandler<SearchStudentsQuery, MethodResult<PagingItemsModel<StudentSearchAdminModel>>>
@@ -73,13 +71,13 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 request.SchoolName = request.SchoolName.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
                 query = query.Where(m => m.School != null && m.School.Contains(request.SchoolName));
             }
-            if (request.ListSchoolGrade != null && request.ListSchoolGrade.Count > 0)
+            if (request.Grades != null && request.Grades.Count > 0)
             {
-                query = query.WhereBulkContains(request.ListSchoolGrade, x => x.SchoolGrade);
+                query = query.WhereBulkContains(request.Grades, x => x.SchoolGrade);
             }
-            if (request.ListSchoolClass != null && request.ListSchoolClass.Count > 0)
+            if (request.Classes != null && request.Classes.Count > 0)
             {
-                query = query.WhereBulkContains(request.ListSchoolClass, x => x.SchoolClass);
+                query = query.WhereBulkContains(request.Classes, x => x.SchoolClass);
             }
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
             {
