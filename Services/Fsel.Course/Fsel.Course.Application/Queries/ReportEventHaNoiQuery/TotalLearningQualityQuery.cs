@@ -47,7 +47,7 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<TotalLearningModel>>();
 
-            var keyCache = ConvertHelper.Serialize(request);
+            var keyCache = $"TotalLearningResults_{ConvertHelper.Serialize(request)}";
             var data = await _cacheService.GetAsync(keyCache);
             if (data != null)
             {

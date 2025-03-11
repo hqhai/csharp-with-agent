@@ -44,7 +44,7 @@ namespace Fsel.Identity.Application.Queries.ReportEventHaNoiQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<NumberStudentLearnOnSystemModel>>();
 
-            var keyCache = ConvertHelper.Serialize(request);
+            var keyCache = $"NumberStudentLearnOnSystem_{ConvertHelper.Serialize(request)}";
             var data = await _cacheService.GetAsync(keyCache);
             if (data != null)
             {
