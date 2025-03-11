@@ -100,16 +100,18 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 var eventStudentIdsSet = reportCompetitionEvent.StudentIds?.ToHashSet() ?? new HashSet<Guid>();
                 var numberStudentsCompletedPT = placementTestResultGroups.Where(x => eventStudentIdsSet.Contains(x.StudentId)).Select(x => x.StudentId).Distinct().Count();
-                var numberStudentToLearn = courseStudentResults.Where(x => eventStudentIdsSet.Contains(x)).Distinct().Count();
+                var studentDistrictIds = courseStudentResults.Where(x => eventStudentIdsSet.Contains(x)).Distinct().ToList();
                 var reportPlacementTestEvent = new ReportPlacementTestEventModel
                 {
                     LocationName = reportCompetitionEvent.DistrictName,
+                    NumberStudentAccountRegister = reportCompetitionEvent.NumberStudentAccountRegister,
+                    NumberStudentCompleteVerify = reportCompetitionEvent.NumberStudentCompleteVerify,
                     NumberRegisteredSchool = reportCompetitionEvent.NumberRegisteredSchool,
                     NumberActualParticipatingSchool = reportCompetitionEvent.NumberActualParticipatingSchool,
                     NumberValidStudentAccount = reportCompetitionEvent.NumberValidStudentAccount,
                     NumberStudentsCompletedPT = numberStudentsCompletedPT,
-                    NumberStudentToLearn = numberStudentToLearn,
-                    LearningProgressLearns = await GetStudyPositionAsync(request.CourseType, eventStudentIdsSet.ToList()),
+                    NumberStudentToLearn = studentDistrictIds.Count,
+                    LearningProgressLearns = await GetStudyPositionAsync(request.CourseType, studentDistrictIds),
                 };
                 reportPlacementTestEvents.Add(reportPlacementTestEvent);
             };
