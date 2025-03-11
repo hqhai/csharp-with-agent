@@ -18,8 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Storage.Api.Controllers
 {
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/transcript")]
     [ApiController]
     public class TranscriptController : ControllerBase
@@ -99,13 +98,15 @@ namespace Fsel.Storage.Api.Controllers
         public async Task<IActionResult> PostSpeech([FromBody] UrlRequestModel request)
         {
             MethodResult<string> result = new MethodResult<string>();
-            result.Result = await _cognitiveProvider.GetTranscriptionAsync(request?.Url ?? string.Empty);
+            result.Result = await _deepgramProvider.GetTranscriptionAsync(request?.Url ?? string.Empty, "nova-2");
             return result.GetActionResult();
         }
 
         /// <summary>
         /// convert speech to text
         /// </summary>
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [DisableFormValueModelBinding]
         [DisableRequestSizeLimit]
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]

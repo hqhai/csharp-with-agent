@@ -102,16 +102,16 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                         var courseLearnIds = (await _managerProgressHelper.GetCourseLearnsAsync(courseResults)).Select(x => x.StudentId).ToHashSet();
                         students = students.Where(x => courseLearnIds.Contains(x.Id)).ToList();
                     }
-                    else if (request.IsSearchReport && request.SortBy.Any())
+                    else if (request.SortBy.Any())
                     {
                         IList<CourseCompleteModel> courseCompletes = new List<CourseCompleteModel>();
                         if (request.SortBy.Any(x => x.Property == nameof(CourseCompleteModel.UnitDisplayOrder)))
                         {
-                            courseCompletes = await _managerProgressHelper.GetCourseCompletesFilterAsync(courseResults, request, request.EndDate);
+                            courseCompletes = await _managerProgressHelper.GetCourseCompletesFilterAsync(courseResults, request, request.EndDate, request.IsSearchReport);
                         }
                         else
                         {
-                            courseCompletes = await _managerProgressHelper.GetCourseCompletesFilterCountCompleteAsync(courseResults, request, request.EndDate);
+                            courseCompletes = await _managerProgressHelper.GetCourseCompletesFilterCountCompleteAsync(courseResults, request, request.EndDate, request.IsSearchReport);
                         }
                         var studentLearnIds = courseCompletes.Select(x => x.StudentId).ToHashSet();
                         students = students.Where(x => studentLearnIds.Contains(x.Id)).OrderBy(x => studentLearnIds.ToList().IndexOf(x.Id)).ToList();
