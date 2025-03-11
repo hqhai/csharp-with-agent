@@ -106,7 +106,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        //[ServerCache(CacheSettings.TimeCache.OneHour)]
+        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
         [HttpPost("average-learning-progress")]
         [ProducesResponseType(typeof(MethodResult<IList<AverageLearningProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
