@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Queries.ReportEventHaNoiQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Caching;
     using Fsel.Identity.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Identity.Infrastructure;
@@ -30,7 +31,6 @@ namespace Fsel.Identity.Application.Queries.ReportEventHaNoiQuery
     {
         private readonly UserDbContext _userDbContext;
         private readonly ICacheService<OverallStudentModel> _cacheService;
-        private const string KeyCache = "ReportAttendanceForCity";
 
         public ReportAttendanceForCityQueryHandler(UserDbContext userDbContext, ICacheService<OverallStudentModel> cacheService)
         {
@@ -43,7 +43,8 @@ namespace Fsel.Identity.Application.Queries.ReportEventHaNoiQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OverallStudentModel>();
 
-            var data = await _cacheService.GetAsync(KeyCache);
+            var keyCache = ConvertHelper.Serialize(request);
+            var data = await _cacheService.GetAsync(keyCache);
             if (data != null)
             {
                 methodResult.Result = data;
@@ -73,7 +74,7 @@ namespace Fsel.Identity.Application.Queries.ReportEventHaNoiQuery
             methodResult.Result = overallStudent;
             if (overallStudent != null)
             {
-                await _cacheService.SetAsync(KeyCache, overallStudent, TimeSpan.FromSeconds(CacheSettings.TimeCache.ThreeHour));
+                await _cacheService.SetAsync(keyCache, overallStudent, TimeSpan.FromSeconds(CacheSettings.TimeCache.ThreeHour));
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
