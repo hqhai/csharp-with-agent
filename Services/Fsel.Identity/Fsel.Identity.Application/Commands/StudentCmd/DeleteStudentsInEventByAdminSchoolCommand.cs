@@ -76,6 +76,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                   select new { User = u, Human = h, Student = s, StudentCompetitionEvent = sce };
 
             var users = await studentEntities.Select(p => p.User).ToListAsync(cancellationToken);
+            if (users == null || users.Count == 0)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
             var humans = studentEntities.Select(p => p.Human);
             var students = studentEntities.Select(p => p.Student);
             var studentCompetitionEvents = studentEntities.Select(p => p.StudentCompetitionEvent);
