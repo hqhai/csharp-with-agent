@@ -43,7 +43,7 @@ namespace Fsel.Identity.Application.Queries.ReportEventHaNoiQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<SummaryDataOnCityModel>>();
 
-            var keyCache = ConvertHelper.Serialize(request);
+            var keyCache = $"SummaryDataOnCity_{ConvertHelper.Serialize(request)}";
             var data = await _cacheService.GetAsync(keyCache);
             if (data != null)
             {
