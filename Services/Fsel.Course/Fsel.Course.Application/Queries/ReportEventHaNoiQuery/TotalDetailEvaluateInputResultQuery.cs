@@ -13,30 +13,34 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
     using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetSchoolInfoQuery : IRequest<MethodResult<IList<SchoolInfoModel>>>
+    public class TotalDetailEvaluateInputResultQuery : IRequest<MethodResult<IList<TotalDetailEvaluateInputResultModel>>>
     {
-        public int Type { get; set; } = 1;
+        public int Target { get; set; } = 1;
 
-        public IList<string>? GroupIds { get; set; }
+        public int GroupByType { get; set; } = 1;
 
         public IList<string>? DistrictIds { get; set; }
 
-        public IList<string>? Levels { get; set; }
+        public IList<string>? GroupIds { get; set; }
+
+        public IList<string>? SchoolIds { get; set; }
+
+        public DateTime? Date { get; set; }
     }
 
-    public class GetSchoolInfoQueryHandler : IRequestHandler<GetSchoolInfoQuery, MethodResult<IList<SchoolInfoModel>>>
+    public class TotalDetailEvaluateInputResultQueryHandler : IRequestHandler<TotalDetailEvaluateInputResultQuery, MethodResult<IList<TotalDetailEvaluateInputResultModel>>>
     {
         private readonly CourseDbContext _courseDbContext;
 
-        public GetSchoolInfoQueryHandler(CourseDbContext courseDbContext)
+        public TotalDetailEvaluateInputResultQueryHandler(CourseDbContext courseDbContext)
         {
             _courseDbContext = courseDbContext;
         }
 
-        public async Task<MethodResult<IList<SchoolInfoModel>>> Handle(GetSchoolInfoQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<TotalDetailEvaluateInputResultModel>>> Handle(TotalDetailEvaluateInputResultQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<SchoolInfoModel>> methodResult = new MethodResult<IList<SchoolInfoModel>>();
+            var methodResult = new MethodResult<IList<TotalDetailEvaluateInputResultModel>>();
 
             StringBuilder sbDistrict = new StringBuilder();
             if (request.DistrictIds != null)
@@ -68,31 +72,34 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
             }
             var groupIdsParam = sbGroup.Length > 0 ? sbGroup.ToString() : (object)DBNull.Value;
 
-            StringBuilder sbLevel = new StringBuilder();
-            if (request.Levels != null)
+            StringBuilder sbSchool = new StringBuilder();
+            if (request.SchoolIds != null)
             {
-                foreach (var id in request.Levels)
+                foreach (var id in request.SchoolIds)
                 {
-                    if (sbLevel.Length > 0)
+                    if (sbSchool.Length > 0)
                     {
-                        sbLevel.Append(",");
+                        sbSchool.Append(",");
                     }
 
-                    sbLevel.Append(id);
+                    sbSchool.Append(id);
                 }
             }
-            var levelsParam = sbLevel.Length > 0 ? sbLevel.ToString() : (object)DBNull.Value;
+            var schoolIdsParam = sbSchool.Length > 0 ? sbSchool.ToString() : (object)DBNull.Value;
+            var date = request.Date != null ? request.Date : (object)DBNull.Value;
 
-            var schoolInfos = await _courseDbContext.Set<SchoolInfoModel>()
-                                                    .FromSqlRaw("EXEC SchoolInfoQuery @Type, @GroupIds, @DistrictIds, @Level",
-                                                        new SqlParameter("@Type", request.Type),
-                                                        new SqlParameter("@GroupIds", groupIdsParam),
+            var totalDetail = await _courseDbContext.Set<TotalDetailEvaluateInputResultModel>()
+                                                    .FromSqlRaw("EXEC TotalDetailEvaluateInputResults @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @Date",
+                                                        new SqlParameter("@Target", request.Target),
+                                                        new SqlParameter("@GroupByType", request.GroupByType),
                                                         new SqlParameter("@DistrictIds", districtIdsParam),
-                                                        new SqlParameter("@Level", levelsParam))
+                                                        new SqlParameter("@GroupIds", groupIdsParam),
+                                                        new SqlParameter("@SchoolIds", schoolIdsParam),
+                                                        new SqlParameter("@Date", date))
                                                     .AsNoTracking()
                                                     .ToListAsync(cancellationToken);
 
-            methodResult.Result = schoolInfos;
+            methodResult.Result = totalDetail;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
