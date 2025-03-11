@@ -6,8 +6,11 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
+    using Fsel.Core.Caching;
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Course.Infrastructure;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Data.SqlClient;
@@ -31,16 +34,26 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
     public class LessonDoneLearningProgressIeltsQueryHandler : IRequestHandler<LessonDoneLearningProgressIeltsQuery, MethodResult<IList<LessonDoneLearningProgressIeltsModel>>>
     {
         private readonly CourseDbContext _courseDbContext;
+        private readonly ICacheService<IList<LessonDoneLearningProgressIeltsModel>> _cacheService;
 
-        public LessonDoneLearningProgressIeltsQueryHandler(CourseDbContext courseDbContext)
+        public LessonDoneLearningProgressIeltsQueryHandler(CourseDbContext courseDbContext, ICacheService<IList<LessonDoneLearningProgressIeltsModel>> cacheService)
         {
             _courseDbContext = courseDbContext;
+            _cacheService = cacheService;
         }
 
         public async Task<MethodResult<IList<LessonDoneLearningProgressIeltsModel>>> Handle(LessonDoneLearningProgressIeltsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<LessonDoneLearningProgressIeltsModel>>();
+
+            var keyCache = ConvertHelper.Serialize(request);
+            var data = await _cacheService.GetAsync(keyCache);
+            if (data != null)
+            {
+                methodResult.Result = data;
+                return methodResult;
+            }
 
             StringBuilder sbDistrict = new StringBuilder();
             if (request.DistrictIds != null)
@@ -100,6 +113,7 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
                                                         .ToListAsync(cancellationToken);
 
             methodResult.Result = lessonDoneIelts;
+            await _cacheService.SetAsync(keyCache, lessonDoneIelts, TimeSpan.FromSeconds(CacheSettings.TimeCache.ThreeHour));
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
