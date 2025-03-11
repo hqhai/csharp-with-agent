@@ -2,6 +2,8 @@
 
 namespace Fsel.Identity.Application.Queries.ManagerReportQuery
 {
+    using System.Globalization;
+    using System.Text.RegularExpressions;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
@@ -51,14 +53,14 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+                request.Keyword = request.Keyword.Trim().ToLower(CultureInfo.CurrentCulture);
                 if (request.Keyword.IsValidEmail())
                 {
-                    query = query.Where(m => m.Human != null && m.Human.Email != null && m.Human.Email.Contains(request.Keyword));
+                    query = query.Where(m => m.Human != null && m.Human.Email!.Contains(request.Keyword));
                 }
                 else if (request.Keyword.IsValidPhoneNumber())
                 {
-                    query = query.Where(m => m.Human != null && m.Human.PhoneNumber != null && m.Human.PhoneNumber == request.Keyword);
+                    query = query.Where(m => m.Human != null && m.Human.PhoneNumber == request.Keyword);
                 }
                 else if (Guid.TryParse(request.Keyword, out var guid))
                 {
@@ -89,12 +91,12 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
 
             if (!string.IsNullOrEmpty(request.SchoolGrade))
             {
-                request.SchoolGrade = request.SchoolGrade.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+                request.SchoolGrade = request.SchoolGrade.Trim().ToLower(CultureInfo.CurrentCulture);
                 query = query.Where(x => x.SchoolGrade == request.SchoolGrade);
             }
             if (!string.IsNullOrEmpty(request.SchoolClass))
             {
-                request.SchoolClass = request.SchoolClass.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+                request.SchoolClass = request.SchoolClass.Trim().ToLower(CultureInfo.CurrentCulture);
                 query = query.Where(x => x.SchoolClass == request.SchoolClass);
             }
             if (request.LearningStatus.HasValue)
@@ -142,14 +144,22 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 BaseCourseLevel = i.BaseCourseLevel,
             });
             int totalItem = await dataQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = dataQuery.AsEnumerable()
-                    .OrderBy(x => int.TryParse(x.SchoolGrade, out int graded) ? graded : 0).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName)
-                    .ApplyPaging(request)
-                    .ToList();
+            var lists = (await dataQuery.ToListAsync(cancellationToken))
+                         .OrderBy(x => !string.IsNullOrEmpty(x.SchoolGrade) ? ExtractNumber(x.SchoolGrade) : 0)
+                         .ThenBy(x => x.SchoolClass)
+                         .ThenBy(x => x.FullName)
+                         .ApplyPaging(request)
+                         .ToList();
 
             methodResult.Result = new PagingItemsModel<StudentDtoModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private static int ExtractNumber(string input)
+        {
+            var match = Regex.Match(input, @"\d+");
+            return match.Success ? int.Parse(match.Value, CultureInfo.CurrentCulture) : int.MaxValue;
         }
     }
 }

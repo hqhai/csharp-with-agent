@@ -58,7 +58,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 if (videoResult != null)
                 {
                     videoResult.Status = EnumResultStatus.Process;
-                    _videoResultRepository.Update(videoResult);
+                    _videoResultRepository.Update(videoResult, false, x => x.StudentId, x => x.VideoId, x => x.LessonResultId);
                     await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
 
@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 if (lessonResult != null)
                 {
                     lessonResult.Status = EnumResultStatus.Process;
-                    _lessonResultRepository.Update(lessonResult);
+                    _lessonResultRepository.Update(lessonResult, false, x => x.LessonId, x => x.CourseId, x => x.UnitId, x => x.StudentId);
                     await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
                 methodResult.Result = true;

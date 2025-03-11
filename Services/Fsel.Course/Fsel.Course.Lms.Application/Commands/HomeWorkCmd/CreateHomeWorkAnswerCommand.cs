@@ -170,7 +170,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             #endregion Validation
 
-            _homeWorkResultRepository.Update(homeWorkResult);
+            _homeWorkResultRepository.Update(homeWorkResult, false, x => x.LessonResultId, x => x.HomeWorkId, x => x.StudentId);
             await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
             var homeworkresulttoday = _homeWorkResultRepository.Queryable.Where(x => x.CreatedUserId == _authContext.CurrentUserId);

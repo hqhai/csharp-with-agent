@@ -37,6 +37,7 @@ namespace Fsel.Identity.Infrastructure.Configs
             builder.HasIndex(x => new { x.Status });
             builder.HasIndex(x => new { x.UserId, x.Status });
             builder.HasIndex(x => new { x.UserId, x.OTPCode });
+            builder.HasIndex(x => new { x.IsDeleted, x.OTPCode, x.Status });
         }
     }
 }

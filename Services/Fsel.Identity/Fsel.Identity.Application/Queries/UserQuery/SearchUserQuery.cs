@@ -70,7 +70,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                 }
                 else
                 {
-                    query = query.Where(m => m.FullName != null && m.FullName.Contains(request.Keyword));
+                    query = query.Where(m => m.FullName!.Contains(request.Keyword));
                 }
             }
 

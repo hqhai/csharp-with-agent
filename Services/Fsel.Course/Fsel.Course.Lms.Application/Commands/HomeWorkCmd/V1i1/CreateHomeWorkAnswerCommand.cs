@@ -302,9 +302,12 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 }
                 homeWorkResult = await GetHomeWorkResult(homeWorkResult, homeWorkQuestionCount, isHomeWorkDone, (int)tokensAchieved);
             }
-            _homeWorkResultRepository.Update(homeWorkResult);
+
+            _homeWorkResultRepository.Update(homeWorkResult, false, x => x.HomeWorkId, x => x.LessonResultId, x => x.StudentId);
+            homeWorkResult.HomeWorkAnswers.ForEach(answer => _homeWorkResultRepository.DbContext.Entry(answer).State = EntityState.Unchanged);
             await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            await PublishRankedStudent(homeWorkResult.CreatedUserId, cancellationToken);
+
+            await PublishRankedStudent(homeWorkResult.CreatedUserId, cancellationToken).ConfigureAwait(false);
             methodResult.Result = true;
             return methodResult;
         }

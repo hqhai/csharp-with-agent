@@ -4,7 +4,9 @@ using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Core.Entities;
+using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Models.EntityModels.ReportEventHaNoi;
 using Fsel.Identity.Infrastructure.Configs;
 using Fsel.Shared.Constants;
 using MediatR;
@@ -57,6 +59,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new UserDeletionEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentDailyStreakEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserSchoolEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserTokenEntityTypeConfiguration());
         }
 
         #region Db Set
@@ -89,6 +92,11 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<UserSchool> UserSchools { get; set; }
         public DbSet<SchoolImportHistory> SchoolImportHistorys { get; set; }
 
+        public DbSet<OverallStudentModel> OverallStudentResults { get; set; }
+
+        public DbSet<NumberStudentLearnOnSystemModel> NumberStudentLearnOnSystemResults { get; set; }
+
+        public DbSet<SummaryDataOnCityModel> SummaryDataOnCityResults { get; set; }
         #endregion Db Set
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

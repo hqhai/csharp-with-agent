@@ -19,6 +19,8 @@ namespace Fsel.System.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumLuckyTicketStatus>());
+
+            builder.HasIndex(c => new { c.IsDeleted, c.LessonResultId, c.StudentId });
         }
     }
 }

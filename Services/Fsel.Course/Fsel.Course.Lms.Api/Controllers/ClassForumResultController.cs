@@ -42,7 +42,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         [Permission]
         public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel cmd)
         {
-            SetQuery(cmd);
             var result = await _classForumResultRepository.GetListResultAsync<ClassForumResultModel>(cmd);
             return result.GetActionResult();
         }
@@ -55,6 +54,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Execute([FromQuery] BaseQueryModel query)
         {
+            SetQuery(query);
             var result = await _classForumResultRepository.GetResultAsync<ClassForumResultInfoModel>(BaseQuery ?? query);
             return result.GetActionResult();
         }

@@ -59,6 +59,7 @@ namespace Fsel.Shared.Helpers
         public static IList<T> ToList<T>(this IEnumerable<string>? values, char separator = ',')
         {
             var results = new List<T>();
+            values = values?.Where(x => x != null).ToList();
             if (values == null)
             {
                 return results;

@@ -128,7 +128,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             }).ToList();
 
             lessonResult.Status = EnumResultStatus.Process;
-            lessonResult = _lessonResultRepository.Update(lessonResult);
+            lessonResult = _lessonResultRepository.Update(lessonResult, false, x => x.CourseId, x => x.UnitId, x => x.LessonId, x => x.StudentId);
             await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return lessonResult;
         }
@@ -138,7 +138,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             if (unitResult.Status == EnumResultStatus.New)
             {
                 unitResult.Status = EnumResultStatus.Process;
-                _unitResultRepository.Update(unitResult);
+                _unitResultRepository.Update(unitResult, false, x => x.CourseId, x => x.UnitId, x => x.StudentId);
                 await _unitResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
@@ -149,7 +149,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             if (courseResult != null && courseResult.Status == EnumResultStatus.New)
             {
                 courseResult.Status = EnumResultStatus.Process;
-                _courseResultRepository.Update(courseResult);
+                _courseResultRepository.Update(courseResult, false, x => x.CourseId, x => x.StudentId);
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }

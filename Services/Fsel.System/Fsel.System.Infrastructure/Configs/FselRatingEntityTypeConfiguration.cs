@@ -11,6 +11,8 @@ namespace Fsel.System.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<FselRating> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+
+            builder.HasIndex(c => new { c.CreatedUserId, c.IsDeleted });
         }
     }
 }

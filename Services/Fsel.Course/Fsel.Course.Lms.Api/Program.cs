@@ -169,6 +169,7 @@ builder.Services.AddScoped<StudentRankingEventsPublisher>();
 builder.Services.AddScoped<RankedStudentPublisher>();
 builder.Services.AddScoped<ExportFileExcelStudentLearningProcessPublisher>();
 builder.Services.AddScoped<SavePlacementTestAnswersPublisher>();
+builder.Services.AddScoped<ErrorExplainPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -207,6 +208,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.RankedStudent, typeof(RankedStudentConsumer) },
     { QueueSettings.LmsQueue.NameQueue.ExportExcelStudentLearningProcess, typeof(ExportFileExcelStudentLearningProcessConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SavePlacementTestAnswers, typeof(SavePlacementTestAnswersConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.ErrorExplainGgSheet, typeof(ErrorExplainConsumer) },
 });
 
 var app = builder.Build();

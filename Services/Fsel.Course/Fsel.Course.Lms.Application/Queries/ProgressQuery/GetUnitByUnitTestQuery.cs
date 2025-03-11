@@ -131,7 +131,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         {
             var lessonIds = await GetLessonIdsAsync(request);
             return await _lessonRepository.Queryable.Include(x => x.LessonVideos)
-                                                  .Where(x => lessonIds.Contains(x.Id))
+                                                  .WhereBulkContains(lessonIds, x => x.Id)
                                                   .SelectMany(x => x.LessonVideos)
                                                   .Select(x => x.VideoId)
                                                   .ToListAsync();
