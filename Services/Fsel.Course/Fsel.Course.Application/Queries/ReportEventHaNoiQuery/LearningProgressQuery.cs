@@ -135,7 +135,7 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
             };
 
             methodResult.Result = setDataCache;
-            await _cacheService.SetAsync(KeyCache, setDataCache, TimeSpan.FromSeconds(CacheSettings.TimeCache.OneHour));
+            await _cacheService.SetAsync(KeyCache, setDataCache, TimeSpan.FromSeconds(CacheSettings.TimeCache.ThreeHour));
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
