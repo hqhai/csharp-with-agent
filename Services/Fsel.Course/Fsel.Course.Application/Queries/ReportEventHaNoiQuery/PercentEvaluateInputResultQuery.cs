@@ -6,8 +6,11 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
+    using Fsel.Core.Caching;
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Course.Infrastructure;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Data.SqlClient;
@@ -31,16 +34,26 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
     public class PercentEvaluateInputResultQueryHandler : IRequestHandler<PercentEvaluateInputResultQuery, MethodResult<IList<PercentEvaluateInputResultModel>>>
     {
         private readonly CourseDbContext _courseDbContext;
+        private readonly ICacheService<IList<PercentEvaluateInputResultModel>> _cacheService;
 
-        public PercentEvaluateInputResultQueryHandler(CourseDbContext courseDbContext)
+        public PercentEvaluateInputResultQueryHandler(CourseDbContext courseDbContext, ICacheService<IList<PercentEvaluateInputResultModel>> cacheService)
         {
             _courseDbContext = courseDbContext;
+            _cacheService = cacheService;
         }
 
         public async Task<MethodResult<IList<PercentEvaluateInputResultModel>>> Handle(PercentEvaluateInputResultQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<PercentEvaluateInputResultModel>>();
+
+            var keyCache = ConvertHelper.Serialize(request);
+            var data = await _cacheService.GetAsync(keyCache);
+            if (data != null)
+            {
+                methodResult.Result = data;
+                return methodResult;
+            }
 
             StringBuilder sbDistrict = new StringBuilder();
             if (request.DistrictIds != null)
@@ -100,6 +113,7 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
                                                 .ToListAsync(cancellationToken);
 
             methodResult.Result = percent;
+            await _cacheService.SetAsync(keyCache, percent, TimeSpan.FromSeconds(CacheSettings.TimeCache.ThreeHour));
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
