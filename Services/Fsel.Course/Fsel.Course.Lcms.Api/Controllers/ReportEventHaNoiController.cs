@@ -28,7 +28,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        //[ServerCache(CacheSettings.TimeCache.OneHour)]
+        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
         [HttpPost("evaluat-input-result")]
         [ProducesResponseType(typeof(MethodResult<IList<TotalEvaluateInputResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -41,7 +41,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        //[ServerCache(CacheSettings.TimeCache.OneHour)]
+        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
         [HttpPost("evaluat-detail-input-result")]
         [ProducesResponseType(typeof(MethodResult<IList<TotalDetailEvaluateInputResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -54,7 +54,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        //[ServerCache(CacheSettings.TimeCache.OneHour)]
+        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
         [HttpPost("percent-evaluat-input-result")]
         [ProducesResponseType(typeof(MethodResult<IList<PercentEvaluateInputResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -67,7 +67,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        //[ServerCache(CacheSettings.TimeCache.OneHour)]
+        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
         [HttpPost("level-input-result")]
         [ProducesResponseType(typeof(MethodResult<IList<LevelEvaluateInputResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -80,7 +80,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        //[ServerCache(CacheSettings.TimeCache.OneHour)]
+        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
         [HttpPost("school-summary")]
         [ProducesResponseType(typeof(MethodResult<EvaluateInputResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -93,7 +93,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        //[ServerCache(CacheSettings.TimeCache.OneHour)]
+        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
         [HttpPost("total-learning-progress")]
         [ProducesResponseType(typeof(MethodResult<IList<TotalLearningProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -119,7 +119,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        //[ServerCache(CacheSettings.TimeCache.OneHour)]
+        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
         [HttpPost("unit-aca-learning-progress")]
         [ProducesResponseType(typeof(MethodResult<IList<UnitDoneLearningProgressAcademicModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -132,7 +132,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        //[ServerCache(CacheSettings.TimeCache.OneHour)]
+        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
         [HttpPost("unit-ielts-learning-progress")]
         [ProducesResponseType(typeof(MethodResult<IList<UnitDoneLearningProgressIeltsModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -145,7 +145,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        //[ServerCache(CacheSettings.TimeCache.OneHour)]
+        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
         [HttpPost("lesson-ielts-learning-progress")]
         [ProducesResponseType(typeof(MethodResult<IList<LessonDoneLearningProgressIeltsModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -158,7 +158,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        //[ServerCache(CacheSettings.TimeCache.OneHour)]
+        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
         [HttpPost("lesson-aca-learning-progress")]
         [ProducesResponseType(typeof(MethodResult<IList<LessonDoneLearningProgressAcademicModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -171,7 +171,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        //[ServerCache(CacheSettings.TimeCache.OneHour)]
+        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
         [HttpPost("total-learning-quality")]
         [ProducesResponseType(typeof(MethodResult<IList<TotalLearningModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -184,7 +184,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        //[ServerCache(CacheSettings.TimeCache.OneHour)]
+        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
         [HttpPost("rate-learning-quality")]
         [ProducesResponseType(typeof(MethodResult<IList<RateLearningModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -197,7 +197,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        //[ServerCache(CacheSettings.TimeCache.OneHour)]
+        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
         [HttpPost("chart-learning-quality")]
         [ProducesResponseType(typeof(MethodResult<IList<TotalLearningQualityModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -210,7 +210,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        //[ServerCache(CacheSettings.TimeCache.OneHour)]
+        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
         [HttpPost("total-detail-learning-quality")]
         [ProducesResponseType(typeof(MethodResult<IList<TotalDetailLearningQualityModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
