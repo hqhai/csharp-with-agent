@@ -78,6 +78,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var users = await studentEntities.Select(p => p.User).ToListAsync(cancellationToken);
             if (users == null || users.Count == 0)
             {
+                methodResult.Result = true;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
