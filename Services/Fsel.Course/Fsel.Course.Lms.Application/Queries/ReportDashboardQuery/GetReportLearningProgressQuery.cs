@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 {
     using System.Linq;
+    using System.Text;
     using System.Text.Json.Serialization;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
@@ -18,7 +19,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     using MediatR;
     using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
-    using static Fsel.Shared.Constants.ValueSettings;
     using Unit = Domain.Entities.Unit;
 
     public class GetReportLearningProgressQuery : IRequest<MethodResult<DashBoardLearningProgressModel>>
@@ -107,8 +107,15 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             }
             var schoolIdResult = await _userService.GetSchoolIdAsync();
             var schoolId = schoolIdResult.Content?.Result ?? Guid.NewGuid();
-
-            var courseLevelsParam = courseLevels != null && courseLevels.Any() ? string.Join(",", courseLevels) : (object)DBNull.Value;
+            var courseLevelsParam = new StringBuilder();
+            if (courseLevels != null && courseLevels.Any())
+            {
+                courseLevelsParam.AppendJoin(",", courseLevels);
+            }
+            else
+            {
+                courseLevelsParam.Append(DBNull.Value);
+            }
             var schoolClassParam = request.SchoolClassStr != null ? request.SchoolClassStr : (object)DBNull.Value;
             var endDate = request.EndDate ?? (object)DBNull.Value;
 
