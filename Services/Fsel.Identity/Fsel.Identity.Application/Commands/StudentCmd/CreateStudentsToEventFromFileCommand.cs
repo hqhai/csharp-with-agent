@@ -33,7 +33,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
-    using Microsoft.IdentityModel.Tokens;
     using OfficeOpenXml;
     using OfficeOpenXml.Style;
 
@@ -132,8 +131,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 }
 
                 var expiredDate = competitionEvent.EventContent?.PaymentDate;
+
+                var expiredDateImport = competitionEvent.EventContent?.ActionConfigs?.FirstOrDefault(p => p.Action == EnumSchoolEventRuleAction.ImportStudent);
+
                 var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
-                if (!expiredDate.HasValue || currentDate >= expiredDate.Value)
+                if (!expiredDate.HasValue || currentDate >= expiredDate.Value || expiredDateImport == null || !expiredDateImport.EndDate.HasValue || expiredDateImport.EndDate.Value < currentDate)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(expiredDate));
                     await SendNotify(request.Key ?? string.Empty, ExpiredDate, StatusCodes.Status400BadRequest, 0, null, cancellationToken);
