@@ -9,14 +9,13 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Queues.Publishers;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
 
     public class CreateStudentsToEventFromFileCommandModel : BaseImportCommandModel
     {
-        public Guid DistrictId { get; set; }
-        public Guid SchoolId { get; set; }
-        public string? SchoolName { get; set; }
+        public EnumCompetitionEventCategory Category { get; set; }
         public string? Key { get; set; }
     }
 
@@ -40,9 +39,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             await _createStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromByteModel
             {
-                DistrictId = request.DistrictId,
-                SchoolId = request.SchoolId,
-                SchoolName = request.SchoolName,
+                Category = request.Category,
                 Key = request.Key,
                 File = ConvertHelper.FileToByteArray(request.FormFile),
             }, cancellationToken);
