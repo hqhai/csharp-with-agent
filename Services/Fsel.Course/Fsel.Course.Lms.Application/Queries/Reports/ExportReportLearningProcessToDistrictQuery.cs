@@ -264,7 +264,10 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         public async Task<IList<LearningProgressLearnModel>> GetStudyPositionAsync(EnumCourseType courseType, IList<Guid> studentIds)
         {
             var listLearningProcess = new List<LearningProgressLearnModel>();
-
+            if (!studentIds.Any())
+            {
+                return listLearningProcess;
+            }
             using (var scope = _serviceProvider.CreateScope())
             {
                 var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();

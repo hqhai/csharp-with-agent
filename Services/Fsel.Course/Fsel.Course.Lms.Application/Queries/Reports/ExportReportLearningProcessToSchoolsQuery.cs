@@ -103,6 +103,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
             var studentToLearns = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(courseStudentIds, x => x.StudentId)
                                          join lr in _lessonResultRepository.Queryable on new { baseQ.CourseId, baseQ.StudentId } equals new { lr.CourseId, lr.StudentId }
+                                         where baseQ.WorkingStatus == EnumWorkingStatus.Active
                                          select baseQ.StudentId).Distinct().ToListAsync(cancellationToken);
 
             var studentToLearnHashSet = studentToLearns.ToHashSet();
@@ -112,8 +113,8 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 var studentDistrictIdsSet = reportCompetitionEvent.StudentIds?.ToHashSet() ?? new HashSet<Guid>();
                 var placementTestResultDistrictReports = placementTestResultReports.Where(x => studentDistrictIdsSet.Contains(x));
-                var studentResultDistrictIds = resultStudentIds.Where(x => studentDistrictIdsSet.Contains(x)).ToList();
-                var studentLearnHashSet = studentToLearnHashSet.Where(x => studentDistrictIdsSet.Contains(x)).ToList();
+                var studentResultDistrictIds = resultStudentIds.Where(x => studentDistrictIdsSet.Contains(x)).ToHashSet();
+                var studentLearnHashSet = studentToLearnHashSet.Where(x => studentDistrictIdsSet.Contains(x)).ToHashSet();
 
                 var reportPlacementTestEvent = new ReportPlacementTestEventModel
                 {
@@ -124,10 +125,11 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 foreach (var eventSchool in reportCompetitionEvent.ReportCompetitionEventSchools)
                 {
                     var eventStudentIdsSet = eventSchool.StudentIds?.ToHashSet() ?? new HashSet<Guid>();
-                    var placementTestResultSchools = placementTestResultDistrictReports.Where(studentId => eventStudentIdsSet.Contains(studentId)).Count();
-                    var studentResultSchoolIds = studentResultDistrictIds.Where(studentId => eventStudentIdsSet.Contains(studentId)).ToList();
+                    var placementTestResultSchools = placementTestResultDistrictReports.Where(studentId => eventStudentIdsSet.Contains(studentId)).Distinct().Count();
+                    var studentResultSchoolIds = studentResultDistrictIds.Where(studentId => eventStudentIdsSet.Contains(studentId)).Distinct().ToList();
 
-                    var studentLearnSchool = studentLearnHashSet.Where(x => eventStudentIdsSet.Contains(x)).ToList();
+                    var studentLearnSchool = studentLearnHashSet.Where(x => eventStudentIdsSet.Contains(x)).Distinct().ToList();
+
                     var learningProgressLearns = await GetStudyPositionAsync(request.CourseType, studentResultSchoolIds);
                     reportPlacementTestEvent.ReportPlacementTestEventSchools.Add(new ReportPlacementTestEventSchoolModel
                     {
@@ -311,10 +313,12 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         public async Task<IList<LearningProgressLearnModel>> GetStudyPositionAsync(EnumCourseType courseType, IList<Guid> studentIds)
         {
             var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(courseType);
-
-            // Chia danh sách thành từng nhóm
-
             var listLearningProcess = new List<LearningProgressLearnModel>();
+
+            if (!studentIds.Any())
+            {
+                return listLearningProcess;
+            }
 
             using (var scope = _serviceProvider.CreateScope())
             {
