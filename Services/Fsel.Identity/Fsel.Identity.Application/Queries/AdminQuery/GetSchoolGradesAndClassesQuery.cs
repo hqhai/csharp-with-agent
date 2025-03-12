@@ -100,9 +100,9 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
 
             methodResult.Result = new SchoolGradeClassModel()
             {
-                IsHaveConfigStudent = userCompetitionEvents.Any(p => p.Category == EnumCompetitionEventCategory.Student && p.EventContent != null && p.EventContent.ActionConfigs != null && p.EventContent.ActionConfigs.Any(x => x.Action == EnumSchoolEventRuleAction.ImportStudent && x.EndDate > currentDate)),
+                IsHaveConfigStudent = userCompetitionEvents.Any(p => p.Category == EnumCompetitionEventCategory.Student && p.EventContent != null && p.EventContent.ActionConfigs != null && p.EventContent.ActionConfigs.Any(x => x.Action == EnumSchoolEventRuleAction.ImportStudent && x.EndDate.HasValue && x.EndDate.Value > currentDate)),
 
-                IsHaveConfigTeacher = userCompetitionEvents.Any(p => p.Category == EnumCompetitionEventCategory.Teacher && p.EventContent != null && p.EventContent.ActionConfigs != null && p.EventContent.ActionConfigs.Any(x => x.Action == EnumSchoolEventRuleAction.ImportStudent && x.EndDate > currentDate)),
+                IsHaveConfigTeacher = userCompetitionEvents.Any(p => p.Category == EnumCompetitionEventCategory.Teacher && p.EventContent != null && p.EventContent.ActionConfigs != null && p.EventContent.ActionConfigs.Any(x => x.Action == EnumSchoolEventRuleAction.ImportStudent && x.EndDate.HasValue && x.EndDate.Value > currentDate)),
 
                 GradesAndClasses = gradeClassList.OrderBy(p => p.Grade).ToList()
             };
