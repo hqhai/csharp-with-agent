@@ -391,6 +391,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     });
                 });
 
+                if (studentCompetitionEvents.Count == 0)
+                {
+                    methodResult.AddErrorBadRequest(FileNull);
+
+                    await SendNotify(request.Key ?? string.Empty, FileNull, StatusCodes.Status400BadRequest, 0, null, cancellationToken);
+
+                    return methodResult;
+                }
+
                 await _studentCompetitionEventsRepository.ExecuteTransactionAsync(async () =>
                 {
                     await _studentCompetitionEventsRepository.AddList(studentCompetitionEvents);
