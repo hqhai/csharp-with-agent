@@ -1142,6 +1142,40 @@
         "language": "fr-FR"
       }
     ]
+  },
+
+  {
+    "id": "46540FC5-A4FD-4DAC-BB8F-EF86698528DC",
+    "type": "Text",
+    "content": "RecallCoinSurvey",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Chúng tôi đã phát hiện một số tài khoản lợi dụng lỗi hệ thống khi làm khảo sát đầu vào (survey) để giành một số coins trái với quy định. Số coins và vật phẩm quy đổi từ đó sẽ bị thu hồi. Hãy tuân thủ quy định để tránh bị cấm tài khoản!",
+    "templateLink": "",
+    "createdDate": "2025-02-26",
+    "translations": [
+      {
+        "id": "9AC2883D-B2AD-4D94-A724-91494C1E5B5F",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "46540FC5-A4FD-4DAC-BB8F-EF86698528DC",
+        "templateMessage": "Chúng tôi đã phát hiện một số tài khoản lợi dụng lỗi hệ thống khi làm khảo sát đầu vào (survey) để giành một số coins trái với quy định. Số coins và vật phẩm quy đổi từ đó sẽ bị thu hồi. Hãy tuân thủ quy định để tránh bị cấm tài khoản!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "1867EBCA-AA7D-4FBC-9DE9-8E432BB3B87A",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "46540FC5-A4FD-4DAC-BB8F-EF86698528DC",
+        "templateMessage": "We have detected some accounts exploiting a system error in the entry survey to gain coins in violation of the regulations. The coins and any redeemed items obtained through this method will be revoked. Please follow the regulations to avoid account suspension!",
+        "language": "en-US"
+      },
+      {
+        "id": "F6943CC3-15C1-4849-A852-309BE6D17EB4",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "46540FC5-A4FD-4DAC-BB8F-EF86698528DC",
+        "templateMessage": "Nous avons détecté certains comptes exploitant une erreur du système lors du sondage d'entrée pour obtenir des pièces en violation des règles. Les pièces et les objets échangés de cette manière seront annulés. Veuillez respecter les règlements afin d’éviter la suspension de votre compte !",
+        "language": "fr-FR"
+      }
+    ]
   }
 
 ]
