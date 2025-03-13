@@ -7,6 +7,7 @@ namespace Fsel.Identity.Application.Queries.ReportEventHaNoiQuery
     using Fsel.Core.Caching;
     using Fsel.Identity.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Identity.Infrastructure;
+    using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -31,11 +32,15 @@ namespace Fsel.Identity.Application.Queries.ReportEventHaNoiQuery
     {
         private readonly UserDbContext _userDbContext;
         private readonly ICacheService<IList<SummaryDataOnCityModel>> _cacheService;
+        private readonly AppSetting _appSetting;
 
-        public ReportAttendanceTableQueryHandler(UserDbContext userDbContext, ICacheService<IList<SummaryDataOnCityModel>> cacheService)
+        public ReportAttendanceTableQueryHandler(UserDbContext userDbContext,
+                                                 ICacheService<IList<SummaryDataOnCityModel>> cacheService,
+                                                 AppSetting appSetting)
         {
             _userDbContext = userDbContext;
             _cacheService = cacheService;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<IList<SummaryDataOnCityModel>>> Handle(ReportAttendanceTableQuery request, CancellationToken cancellationToken)
@@ -45,7 +50,7 @@ namespace Fsel.Identity.Application.Queries.ReportEventHaNoiQuery
 
             var keyCache = $"SummaryDataOnCity_{ConvertHelper.Serialize(request)}";
             var data = await _cacheService.GetAsync(keyCache);
-            if (data != null)
+            if (data != null && _appSetting.CacheConfig != null && _appSetting.CacheConfig.TurnOnCaching)
             {
                 methodResult.Result = data;
                 return methodResult;
@@ -70,7 +75,10 @@ namespace Fsel.Identity.Application.Queries.ReportEventHaNoiQuery
 
 
             methodResult.Result = summaryDataOnCity;
-            await _cacheService.SetAsync(keyCache, summaryDataOnCity, TimeSpan.FromSeconds(CacheSettings.TimeCache.ThreeHour));
+            if (_appSetting.CacheConfig != null && _appSetting.CacheConfig.TurnOnCaching)
+            {
+                await _cacheService.SetAsync(keyCache, summaryDataOnCity, TimeSpan.FromSeconds(_appSetting.CacheConfig.CachingDuration));
+            }
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
