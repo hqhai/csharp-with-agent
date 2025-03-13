@@ -133,7 +133,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 
             var queryPieChart = await _courseDbContext.Set<ReportLearningProcessModel>()
                                    .FromSqlRaw("EXEC DashBoardStudentProgress @CourseLevels, @SchoolClasses, @SchoolId , @EndDate",
-                                        new SqlParameter("@CourseLevels", courseLevelsParam),
+                                        new SqlParameter("@CourseLevels", courseLevelsParam.ToString()),
                                         new SqlParameter("@SchoolClasses", schoolClassParam),
                                         new SqlParameter("@SchoolId", schoolId),
                                         new SqlParameter("@EndDate", endDate))
