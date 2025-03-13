@@ -107,21 +107,21 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             }
             var schoolIdResult = await _userService.GetSchoolIdAsync();
             var schoolId = schoolIdResult.Content?.Result ?? Guid.NewGuid();
-            var courseLevelsParam = new StringBuilder();
+            object? courseLevelsParam = null;
             if (courseLevels != null && courseLevels.Any())
             {
-                courseLevelsParam.AppendJoin(",", courseLevels);
+                courseLevelsParam = new StringBuilder().AppendJoin(",", courseLevels).ToString();
             }
             else
             {
-                courseLevelsParam.Append(DBNull.Value);
+                courseLevelsParam = DBNull.Value;
             }
             var schoolClassParam = request.SchoolClassStr != null ? request.SchoolClassStr : (object)DBNull.Value;
             var endDate = request.EndDate ?? (object)DBNull.Value;
 
             var queryPieChart = await _courseDbContext.Set<ReportLearningProcessModel>()
                                    .FromSqlRaw("EXEC DashBoardStudentProgress @CourseLevels, @SchoolClasses, @SchoolId , @EndDate",
-                                        new SqlParameter("@CourseLevels", courseLevelsParam.ToString()),
+                                        new SqlParameter("@CourseLevels", courseLevelsParam),
                                         new SqlParameter("@SchoolClasses", schoolClassParam),
                                         new SqlParameter("@SchoolId", schoolId),
                                         new SqlParameter("@EndDate", endDate))
@@ -175,7 +175,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             {
                 var unitOverallsDict = await _courseDbContext.Set<ReportLearningProcessModel>()
                        .FromSqlRaw("EXEC DashBoardUnitStudentProgress @CourseLevels , @SchoolClasses, @SchoolId, @EndDate",
-                                new SqlParameter("@CourseLevels", courseLevelsParam.ToString()),
+                                new SqlParameter("@CourseLevels", courseLevelsParam),
                                 new SqlParameter("@SchoolClasses", schoolClassParam),
                                 new SqlParameter("@SchoolId", schoolId),
                                 new SqlParameter("@EndDate", endDate))
@@ -212,7 +212,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             {
                 var lessonOverallsDict = await _courseDbContext.Set<ReportLearningProcessModel>()
                                                                .FromSqlRaw("EXEC DashBoardLessonStudentProgress @CourseLevels, @SchoolClasses, @SchoolId, @EndDate,@DisplayOrderUnit",
-                                                                 new SqlParameter("@CourseLevels", courseLevelsParam.ToString()),
+                                                                 new SqlParameter("@CourseLevels", courseLevelsParam),
                                                                  new SqlParameter("@SchoolClasses", schoolClassParam),
                                                                  new SqlParameter("@SchoolId", schoolId),
                                                                  new SqlParameter("@EndDate", endDate),
