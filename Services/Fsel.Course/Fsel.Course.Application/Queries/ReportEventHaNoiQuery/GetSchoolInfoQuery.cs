@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
 {
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -37,9 +38,50 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<SchoolInfoModel>> methodResult = new MethodResult<IList<SchoolInfoModel>>();
 
-            var districtIdsParam = request.DistrictIds != null ? string.Join(",", request.DistrictIds) : (object)DBNull.Value;
-            var groupIdsParam = request.GroupIds != null ? string.Join(",", request.GroupIds) : (object)DBNull.Value;
-            var levelsParam = request.Levels != null ? string.Join(",", request.Levels) : (object)DBNull.Value;
+            StringBuilder sbDistrict = new StringBuilder();
+            if (request.DistrictIds != null)
+            {
+                foreach (var id in request.DistrictIds)
+                {
+                    if (sbDistrict.Length > 0)
+                    {
+                        sbDistrict.Append(",");
+                    }
+
+                    sbDistrict.Append(id);
+                }
+            }
+            var districtIdsParam = sbDistrict.Length > 0 ? sbDistrict.ToString() : (object)DBNull.Value;
+
+            StringBuilder sbGroup = new StringBuilder();
+            if (request.GroupIds != null)
+            {
+                foreach (var id in request.GroupIds)
+                {
+                    if (sbGroup.Length > 0)
+                    {
+                        sbGroup.Append(",");
+                    }
+
+                    sbGroup.Append(id);
+                }
+            }
+            var groupIdsParam = sbGroup.Length > 0 ? sbGroup.ToString() : (object)DBNull.Value;
+
+            StringBuilder sbLevel = new StringBuilder();
+            if (request.Levels != null)
+            {
+                foreach (var id in request.Levels)
+                {
+                    if (sbLevel.Length > 0)
+                    {
+                        sbLevel.Append(",");
+                    }
+
+                    sbLevel.Append(id);
+                }
+            }
+            var levelsParam = sbLevel.Length > 0 ? sbLevel.ToString() : (object)DBNull.Value;
 
             var schoolInfos = await _courseDbContext.Set<SchoolInfoModel>()
                                                     .FromSqlRaw("EXEC SchoolInfoQuery @Type, @GroupIds, @DistrictIds, @Level",
