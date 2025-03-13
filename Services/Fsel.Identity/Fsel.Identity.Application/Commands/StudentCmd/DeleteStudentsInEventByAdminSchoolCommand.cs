@@ -75,16 +75,18 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                   where s.SchoolId == schoolId.Value && ce.Id == competitionEvent.Id
                                   select new { User = u, Human = h, Student = s, StudentCompetitionEvent = sce };
 
-            var users = await studentEntities.Select(p => p.User).ToListAsync(cancellationToken);
+            var query = await studentEntities.ToListAsync(cancellationToken);
+
+            var users = query.Select(p => p.User).ToList();
             if (users == null || users.Count == 0)
             {
                 methodResult.Result = true;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var humans = studentEntities.Select(p => p.Human);
-            var students = studentEntities.Select(p => p.Student);
-            var studentCompetitionEvents = studentEntities.Select(p => p.StudentCompetitionEvent);
+            var humans = query.Select(p => p.Human).ToList();
+            var students = query.Select(p => p.Student).ToList();
+            var studentCompetitionEvents = query.Select(p => p.StudentCompetitionEvent).ToList();
 
             var userIds = users.Select(p => p.Id).ToList();
 
