@@ -7,6 +7,7 @@ namespace Fsel.Identity.Application.Queries.ReportEventHaNoiQuery
     using Fsel.Core.Caching;
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Identity.Infrastructure;
+    using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -32,11 +33,15 @@ namespace Fsel.Identity.Application.Queries.ReportEventHaNoiQuery
     {
         private readonly UserDbContext _userDbContext;
         private readonly ICacheService<IList<NumberStudentLearnOnSystemModel>> _cacheService;
+        private readonly AppSetting _appSetting;
 
-        public ReportAttendanceGraphQueryHandler(UserDbContext userDbContext, ICacheService<IList<NumberStudentLearnOnSystemModel>> cacheService)
+        public ReportAttendanceGraphQueryHandler(UserDbContext userDbContext,
+                                                 ICacheService<IList<NumberStudentLearnOnSystemModel>> cacheService,
+                                                 AppSetting appSetting)
         {
             _userDbContext = userDbContext;
             _cacheService = cacheService;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<IList<NumberStudentLearnOnSystemModel>>> Handle(ReportAttendanceGraphQuery request, CancellationToken cancellationToken)
@@ -46,7 +51,7 @@ namespace Fsel.Identity.Application.Queries.ReportEventHaNoiQuery
 
             var keyCache = $"NumberStudentLearnOnSystem_{ConvertHelper.Serialize(request)}";
             var data = await _cacheService.GetAsync(keyCache);
-            if (data != null)
+            if (data != null && _appSetting.CacheConfig != null && _appSetting.CacheConfig.TurnOnCaching)
             {
                 methodResult.Result = data;
                 return methodResult;
@@ -71,7 +76,10 @@ namespace Fsel.Identity.Application.Queries.ReportEventHaNoiQuery
                                                                  .ToListAsync(cancellationToken);
 
             methodResult.Result = numberStudentLearnOnSystem;
-            await _cacheService.SetAsync(keyCache, numberStudentLearnOnSystem, TimeSpan.FromSeconds(CacheSettings.TimeCache.ThreeHour));
+            if (_appSetting.CacheConfig != null && _appSetting.CacheConfig.TurnOnCaching)
+            {
+                await _cacheService.SetAsync(keyCache, numberStudentLearnOnSystem, TimeSpan.FromSeconds(_appSetting.CacheConfig.CachingDuration));
+            }
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
