@@ -31,6 +31,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
         private readonly IQuestBoardStudentRepository _questBoardStudentRepository;
         private readonly IMediator _mediator;
         private readonly IUserService _userService;
+        private const int TargetValue = 140;
 
         public ReceiveTokenFromQuestBoardDoneCommandHandler(IQuestBoardOverallRepository questBoardOverallRepository, IQuestBoardOverallStudentRepository questBoardOverallStudentRepository, AuthContext authContext, IQuestBoardRepository questBoardRepository, IQuestBoardStudentRepository questBoardStudentRepository, IMediator mediator, IUserService userService)
         {
@@ -96,8 +97,9 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             }
             else
             {
-                questBoardOverallStudent = await _questBoardOverallStudentRepository.Queryable.Where(p => p.QuestBoardOverallId == questBoardOverall.Id && p.StudentId == studentId && p.CreatedDate.Date >= monDay.Date && p.CreatedDate.Date <= sunDay.Date).OrderBy(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+                questBoardOverallStudent = await _questBoardOverallStudentRepository.Queryable.Where(p => p.QuestBoardOverallId == questBoardOverall.Id && p.StudentId == studentId && p.CurrentValue >= TargetValue && p.Status == EnumQuestBoardOverallStudentStatus.NotReceived).OrderBy(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
             }
+
             if (questBoardOverallStudent == null || questBoardOverall.TargetValue > questBoardOverallStudent.CurrentValue)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorCode.HaveNotCompletedTheTask));
@@ -105,9 +107,10 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             }
             if (questBoardOverallStudent.Status == EnumQuestBoardOverallStudentStatus.Received)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorCode.TokensHaveBeenReceived));
                 return;
             }
+
             await _questBoardOverallStudentRepository.ExecuteTransactionAsync(async () =>
             {
                 var updateTokenStudent = await _mediator.Send(new CreateTokenHistoryCommand()

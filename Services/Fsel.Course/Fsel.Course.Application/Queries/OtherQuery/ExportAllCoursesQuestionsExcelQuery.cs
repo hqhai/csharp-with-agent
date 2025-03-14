@@ -108,7 +108,9 @@ namespace Fsel.Course.Application.Queries.OtherQuery
 
         private async Task GetTotalQuestionVideosAsync(CourseModuleQuestionExportModel courseModuleQuestionExport, IList<Guid> lessonIds)
         {
-            var videoLessons = await _lessonVideoRepository.Queryable.Where(x => lessonIds.Contains(x.LessonId))
+            var videoLessons = await _lessonVideoRepository
+                .Queryable
+                .WhereBulkContains(lessonIds,x=>x.LessonId)
                 .Select(x => new
                 {
                     VideoId = x.VideoId,
@@ -149,7 +151,7 @@ namespace Fsel.Course.Application.Queries.OtherQuery
 
         private async Task<long> GetTotalQuestionHomeWorkAsync(IList<Guid> lessonIds)
         {
-            var lessonHomeworks = await _lessonHomeWorkRepository.Queryable.Where(x => lessonIds.Contains(x.LessonId))
+            var lessonHomeworks = await _lessonHomeWorkRepository.Queryable.WhereBulkContains(lessonIds, x => x.LessonId)
                                                       .GroupBy(x => x.LessonId)
                                                       .Select(x => new
                                                       {

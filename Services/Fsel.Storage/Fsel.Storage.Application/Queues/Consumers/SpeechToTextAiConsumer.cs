@@ -4,30 +4,24 @@ namespace Fsel.Storage.Application.Queues.Consumers
 {
     using System.Threading.Tasks;
     using Fsel.Core.Base;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
-    using Fsel.Storage.Application.Queues.Publisher;
-    using Fsel.Storage.Application.Services.AmazonS3Services;
-    using Fsel.Storage.Application.Services.OpenAIServices;
-    using Fsel.Storage.Domain.Models.EntityModels;
-    using Microsoft.AspNetCore.Http;
-    using Newtonsoft.Json;
-    using Refit;
+    using Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2;
+    using MediatR;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
 
     public class SpeechToTextAiConsumer : BaseConsumer<SpeechToTextAiConsumerModel>
     {
-        private readonly IOpenAIService _openAIService;
-        private readonly IAmazonS3Service _amazonS3Service;
-        private readonly SpeechToTextPublisher _speechToTextPublisher;
-        private const string AIModel = "whisper-1";
+        private readonly IMediator _mediator;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly ILogger<SpeechToTextAiConsumer> _logger;
 
-        public SpeechToTextAiConsumer(AuthContext authContext, IHttpContextAccessor httpContextAccessor, IOpenAIService openAIService, IAmazonS3Service amazonS3Service, SpeechToTextPublisher speechToTextPublisher) : base(authContext, httpContextAccessor)
+        public SpeechToTextAiConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor, IServiceScopeFactory serviceScopeFactory, ILogger<SpeechToTextAiConsumer> logger) : base(authContext, httpContextAccessor)
         {
-            _openAIService = openAIService;
-            _amazonS3Service = amazonS3Service;
-            _speechToTextPublisher = speechToTextPublisher;
+            _mediator = mediator;
+            _serviceScopeFactory = serviceScopeFactory;
+            _logger = logger;
         }
-
         public async override Task ConsumeQueue(SpeechToTextAiConsumerModel? message)
         {
             if (message == null)
@@ -35,36 +29,20 @@ namespace Fsel.Storage.Application.Queues.Consumers
                 return;
             }
 
-            IFormFile formFile = ConvertToIFormFile(message.FileData, message.FileName, message.ContentType);
-            if (formFile == null)
+            _ = Task.Run(async () =>
             {
-                return;
-            }
+                using var scope = _serviceScopeFactory.CreateScope();
+                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-            var stream = formFile.OpenReadStream();
-            var streamPart = new StreamPart(stream, formFile.FileName, formFile.ContentType);
+                await mediator.Publish(new PublishSpeakToTextToRealTimeCommand
+                {
+                    UserId = message.UserId,
+                    FileName = message.FileName,
+                    ContentType = message.ContentType,
+                    FileData = message.FileData
+                });
+            });
 
-            var content = await _openAIService.SpeechToTextByAIAsync(streamPart, AIModel);
-            if (!content.IsSuccessStatusCode)
-            {
-                return;
-            }
-
-            var fileInfomation = await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, formFile, EnumFolderType.Videos, false, false);
-            var convertContent = !string.IsNullOrEmpty(content.Content) ? JsonConvert.DeserializeObject<ContentModel>(content.Content)?.Text : string.Empty;
-
-            // publisher realtime
-            await _speechToTextPublisher.Publish(new SpeechToTextConsumerModel { UserId = message.UserId, TranscriptFile = new Shared.Models.ShareModels.TranscriptFileModel { Content = convertContent, FilePath = fileInfomation.Result } }, CancellationToken.None);
-        }
-
-        private static IFormFile ConvertToIFormFile(byte[] fileData, string fileName, string contentType)
-        {
-            var stream = new MemoryStream(fileData);
-            return new FormFile(stream, 0, fileData.Length, "file", fileName)
-            {
-                Headers = new HeaderDictionary(),
-                ContentType = contentType
-            };
         }
 
     }

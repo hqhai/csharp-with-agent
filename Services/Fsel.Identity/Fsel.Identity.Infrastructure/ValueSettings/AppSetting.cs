@@ -14,6 +14,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public GoogleSheetConfig? GoogleSheetConfig { get; set; }
         public UserReferralConfig? UserReferralConfig { get; set; }
         public UserDeletionConfig? UserDeletionConfig { get; set; }
+        public CacheConfig? CacheConfig { get; set; }
     }
 
     public class UserReferralConfig
@@ -73,5 +74,11 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     {
         public int DeletionDays { get; set; }
         public int DeletionMinutes { get; set; }
+    }
+
+    public class CacheConfig
+    {
+        public bool TurnOnCaching { get; set; }
+        public int CachingDuration { get; set; }
     }
 }
