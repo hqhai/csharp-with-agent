@@ -66,9 +66,9 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 
             await _userOtpCodeRepository.ExecuteTransactionAsync(async () =>
             {
-                var otp = NumberHelper.GetRandomCode();
                 if (userOtpCode == null)
                 {
+                    var otp = NumberHelper.GetRandomCode();
                     userOtpCode = new UserOtpCode
                     {
                         UserId = user.Id,
@@ -82,7 +82,6 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 }
                 else
                 {
-                    userOtpCode.OTPCode = otp;
                     userOtpCode.RetryCount += 1;
                     userOtpCode = _userOtpCodeRepository.Update(userOtpCode);
                 }
