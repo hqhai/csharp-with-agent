@@ -101,7 +101,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
             students.ForEach(student =>
             {
                 var userId = student.UserId ?? default;
-                var overallFeatureAccessTime = overallFeatureAccessTimes.FirstOrDefault(x => x.UserId == userId);
+                var overallFeatureAccessTime = overallFeatureAccessTimes.FirstOrDefault(x => x.UserId == userId && x.CourseId == student.CourseId);
                 var studentAssiduity = new StudentAssiduityModel
                 {
                     StudentId = student.Id,
