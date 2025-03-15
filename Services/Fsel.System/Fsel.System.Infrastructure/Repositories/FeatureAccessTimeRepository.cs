@@ -30,9 +30,10 @@ namespace Fsel.System.Infrastructure.Repositories
             {
                 query = query.Where(x => endDate.Value.Date >= (x.UpdatedDate ?? x.CreatedDate).Date);
             }
-            return await query.GroupBy(x => new { x.CourseId, x.CreatedUserId })
+            var overallFeatureAccessTimes = await query.GroupBy(x => new { x.CourseId, x.CreatedUserId })
                                       .Select(x => new OverallFeatureAccessTimeModel
                                       {
+                                          CourseId = x.Key.CourseId ?? Guid.Empty,
                                           UserId = x.Key.CreatedUserId,
                                           TotalTimeVideo = x.Where(x => x.EnumFeature == EnumFeature.VideoLesson).Sum(x => x.AccessTime),
                                           TotalTimeHomeWork = x.Where(x => x.EnumFeature == EnumFeature.HomeWork).Sum(x => x.AccessTime),
@@ -41,6 +42,20 @@ namespace Fsel.System.Infrastructure.Repositories
                                           TotalVisit = x.Sum(x => x.Visit),
                                           CurrentDate = x.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
                                       }).ToListAsync();
+            var result = (from o in overallFeatureAccessTimes
+                          join q in queryModels on new { o.CourseId, o.UserId } equals new { q.CourseId, q.UserId }
+                          select new OverallFeatureAccessTimeModel
+                          {
+                              CourseId = o.CourseId,
+                              UserId = o.UserId,
+                              TotalTimeVideo = o.TotalTimeVideo,
+                              TotalTimeHomeWork = o.TotalTimeHomeWork,
+                              TotalTimeClassForum = o.TotalTimeClassForum,
+                              TotalTime = o.TotalTime,
+                              TotalVisit = o.TotalVisit,
+                              CurrentDate = o.CurrentDate,
+                          }).ToList();
+            return result;
         }
     }
 }
