@@ -4,6 +4,7 @@ namespace Fsel.System.Domain.Models.EntityModels.ManagerReportModels
 {
     public class OverallFeatureAccessTimeModel
     {
+        public Guid CourseId { get; set; }
         public Guid UserId { get; set; }
         public long TotalTimeVideo { get; set; }
         public long TotalTimeHomeWork { get; set; }
