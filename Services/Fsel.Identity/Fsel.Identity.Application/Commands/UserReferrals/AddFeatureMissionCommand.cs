@@ -116,59 +116,58 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                 _userReferralRepository.Update(userReferral);
                 await _userReferralRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
+                var notificationContent = EnumNotificationContent.FriendCompletedExam;
+
                 var tokenMission = EnumTokenMission.FriendCompletePT;
 
-                EnumNotificationContent notificationContent = EnumNotificationContent.FriendCompletedExam; 
                 if (request.FeatureUserReferral == EnumFeatureUserReferral.PT)
                 {
                     tokenMission = EnumTokenMission.FriendCompletePT;
                     notificationContent = EnumNotificationContent.FriendCompletedExam;
-
                 }
                 else if (request.FeatureUserReferral == EnumFeatureUserReferral.DoneUnit1)
                 {
                     tokenMission = EnumTokenMission.FriendCompleteUnit1;
                     notificationContent = EnumNotificationContent.FriendCompleteUnitOne;
-
                 }
                 else if (request.FeatureUserReferral == EnumFeatureUserReferral.Payment)
                 {
                     tokenMission = EnumTokenMission.FriendCompletePayment;
                     notificationContent = EnumNotificationContent.FriendPaymentSuccessfully;
-
                 }
 
-                var tokenHistories = new List<TokenHistoryQueueModel>()
+                if (userReferral.IsCoinRewarded)
                 {
-                     new TokenHistoryQueueModel
-                                {
-                                    VolatileToken = token,
-                                    Type = EnumTokenHistoryType.Recevived,
-                                    Feature = EnumTokenFeature.FriendMission,
-                                    Mission = tokenMission,
-                                    UserId = userReferral.SenderId,
-                                }
-                };
-
-                if (isAddDoneUnit1)
-                {
-                    tokenHistories.Add(new TokenHistoryQueueModel
+                    var tokenHistories = new List<TokenHistoryQueueModel>()
                     {
-                        VolatileToken = _appSetting.UserReferralConfig?.DoneUnit1 ?? 0,
-                        Type = EnumTokenHistoryType.Recevived,
-                        Feature = EnumTokenFeature.FriendMission,
-                        Mission = EnumTokenMission.FriendCompleteUnit1,
-                        UserId = userReferral.SenderId,
-                    });
+                         new TokenHistoryQueueModel
+                                    {
+                                        VolatileToken = token,
+                                        Type = EnumTokenHistoryType.Recevived,
+                                        Feature = EnumTokenFeature.FriendMission,
+                                        Mission = tokenMission,
+                                        UserId = userReferral.SenderId,
+                                    }
+                    };
+
+                    if (isAddDoneUnit1)
+                    {
+                        tokenHistories.Add(new TokenHistoryQueueModel
+                        {
+                            VolatileToken = _appSetting.UserReferralConfig?.DoneUnit1 ?? 0,
+                            Type = EnumTokenHistoryType.Recevived,
+                            Feature = EnumTokenFeature.FriendMission,
+                            Mission = EnumTokenMission.FriendCompleteUnit1,
+                            UserId = userReferral.SenderId,
+                        });
+                    }
+
+                    await _createTokenHistoryPublisher.Publish(tokenHistories, cancellationToken).ConfigureAwait(false);
                 }
 
-                var friendInfomation = await _studentRepository.Queryable.Where(x => x.Human != null && x.Human.UserId == userReferral.ReceiverId).FirstOrDefaultAsync(cancellationToken);
+                var friendInformation = await _studentRepository.Queryable.Where(x => x.Human != null && x.Human.UserId == userReferral.ReceiverId).FirstOrDefaultAsync(cancellationToken);
 
-                await _createTokenHistoryPublisher.Publish(
-                    tokenHistories,
-                cancellationToken).ConfigureAwait(false);
-
-                await SendNotification(friendInfomation?.Human?.FullName ?? string.Empty, token, userReferral.SenderId, userReferral.ReceiverId, notificationContent, cancellationToken);
+                await SendNotification(friendInformation?.Human?.FullName ?? string.Empty, token, userReferral.SenderId, userReferral.ReceiverId, notificationContent, cancellationToken);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
