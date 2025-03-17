@@ -68,6 +68,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     {
         public string? SchoolStudentSheetId { get; set; }
         public string? CreateUsersAndOrders { get; set; }
+        public string? AddCoinSpreadSheetId { get; set; }
     }
 
     public class UserDeletionConfig
