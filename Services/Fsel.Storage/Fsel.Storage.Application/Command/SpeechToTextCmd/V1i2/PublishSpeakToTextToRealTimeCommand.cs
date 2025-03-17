@@ -36,7 +36,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
         private readonly IDeepgramProvider _deepgramProvider;
         private readonly ICognitiveProvider _cognitiveProvider;
         private int _countRetry;
-        private int _intervalRetryTime = 30;
+        private int _intervalRetryTime = 5;
         private DateTime _startDate, _endDate;
 
         public PublishSpeakToTextToRealTimeCommandHandler(IOpenAIService openAIService, IAmazonS3Service amazonS3Service, SpeechToTextPublisher speechToTextPublisher, AppSetting appSetting, ILogger<PublishSpeakToTextToRealTimeCommand> logger, IDeepgramProvider deepgramProvider, ICognitiveProvider cognitiveProvider)
@@ -60,7 +60,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
             }
 
             var pollyRetry = Policy.HandleResult<bool>(result => !result)
-                                .WaitAndRetryAsync(Max_Time_Retry, retryAttempt => TimeSpan.FromMinutes(_intervalRetryTime));
+                                .WaitAndRetryAsync(Max_Time_Retry, retryAttempt => TimeSpan.FromSeconds(_intervalRetryTime));
 
             var retryResult = await pollyRetry.ExecuteAsync(async () =>
             {
