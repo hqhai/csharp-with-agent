@@ -40,6 +40,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly IClassForumDetailResultRepository _classForumDetailResultRepository;
         private readonly ISenderService _senderService;
         private const int Max_Time_Retry = 4;
+        private const int _intervalRetryTime = 30;
         private readonly IUserService _userService;
         private readonly ILogger<SubmitAIResponseCommandHandler> _logger;
 
@@ -97,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             #region Retry
             var retryAI = Policy.HandleResult<UserAiModel>(result => result.ClassForumAIs == null || result.ClassForumAIs.Count == 0 || !result.ConditionRetry)
-                                .WaitAndRetryAsync(Max_Time_Retry, retryAttempt => TimeSpan.FromSeconds(5), async (result, timeSpan, retryCount, context) =>
+                                .WaitAndRetryAsync(Max_Time_Retry, retryAttempt => TimeSpan.FromMinutes(_intervalRetryTime), async (result, timeSpan, retryCount, context) =>
                                 {
                                     classForumDetailResult.RetryTime += 1;
                                 });
