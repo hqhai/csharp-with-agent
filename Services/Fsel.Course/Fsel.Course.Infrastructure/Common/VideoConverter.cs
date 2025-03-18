@@ -4,6 +4,7 @@ namespace Fsel.Course.Infrastructure.Common
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Dynamic.Core;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -38,6 +39,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly IMapper _mapper;
         private readonly IQuestionShuffleRepository _questionShuffleRepository;
+        private readonly IQuestionExplanationErrorRepository _questionExplanationErrorRepository;
         private const int NumberOfQuestion = 1;
 
         public VideoConverter(IVideoRepository videoRepository
@@ -55,7 +57,8 @@ namespace Fsel.Course.Infrastructure.Common
             , LinQHelper linQHelper
             , DateTimeConverter dateTimeConverter
             , IMapper mapper
-            , IQuestionShuffleRepository questionShuffleRepository)
+            , IQuestionShuffleRepository questionShuffleRepository
+            , IQuestionExplanationErrorRepository questionExplanationErrorRepository)
         {
             _videoRepository = videoRepository;
             _questionRepository = questionRepository;
@@ -73,6 +76,7 @@ namespace Fsel.Course.Infrastructure.Common
             _dateTimeConverter = dateTimeConverter;
             _mapper = mapper;
             _questionShuffleRepository = questionShuffleRepository;
+            _questionExplanationErrorRepository = questionExplanationErrorRepository;
         }
 
         public VoidMethodResult AddQuestionToExercise(dynamic newExercise, CreateExerciseCommandModel? exercise)
@@ -509,6 +513,8 @@ namespace Fsel.Course.Infrastructure.Common
             var questions = exerciseQuestions.Select(x => x.Question).ToList();
             var questionIds = questions.Select(x => x!.Id).ToList();
 
+            var questionExplanationErrors = await _questionExplanationErrorRepository.Queryable.WhereBulkContains(questionIds, x => x.QuestionId).Where(x => x.ObjectResultId == videoTimeCodeResult.VideoResultId).ToListAsync();
+
             var questionShuffles = await _questionShuffleRepository.Queryable.Where(x => questionIds.Contains(x.QuestionId) && x.StudentId == videoTimeCodeResult.StudentId).ToListAsync();
             var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable.Where(x => questionIds.Contains(x.QuestionId) && x.VideoTimeCodeResultId == videoTimeCodeResult.Id).ToListAsync();
 
@@ -539,6 +545,7 @@ namespace Fsel.Course.Infrastructure.Common
                         questionModel.Explanation = null;
                     }
                     questionModel.CorrectStatus = GetCorrectStatus(videoTimeCodeAnswer);
+                    questionModel.IsReportExplanation = questionExplanationErrors.Any(x => x.QuestionId == question.Id);
                     questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
 
                     var questionShuffle = questionShuffles.FirstOrDefault(x => x.QuestionId == question.Id);
