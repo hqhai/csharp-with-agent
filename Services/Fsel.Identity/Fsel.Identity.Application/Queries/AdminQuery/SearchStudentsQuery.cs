@@ -9,15 +9,15 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using Fsel.Core.Extensions;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Identity.Domain.Models.QueryModels.Students;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchStudentsQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<StudentSearchAdminModel>>>
+    public class SearchStudentsQuery : SearchStudentsQueryModel, IRequest<MethodResult<PagingItemsModel<StudentSearchAdminModel>>>
     {
-        public string? SchoolName { get; set; }
     }
 
     public class SearchStudentsQueryHandler : IRequestHandler<SearchStudentsQuery, MethodResult<PagingItemsModel<StudentSearchAdminModel>>>
@@ -71,6 +71,14 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 request.SchoolName = request.SchoolName.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
                 query = query.Where(m => m.School != null && m.School.Contains(request.SchoolName));
             }
+            if (request.Grades != null && request.Grades.Count > 0)
+            {
+                query = query.WhereBulkContains(request.Grades, x => x.SchoolGrade);
+            }
+            if (request.Classes != null && request.Classes.Count > 0)
+            {
+                query = query.WhereBulkContains(request.Classes, x => x.SchoolClass);
+            }
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
             {
                 var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
@@ -89,6 +97,9 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 Type = x.CourseLevel.GetEnumCourseType(),
                 SchoolId = x.SchoolId,
                 SchoolName = x.School,
+                Class = x.SchoolClass,
+                Grade = x.SchoolGrade,
+                UserName = x.Human.User!.UserName
             });
             int totalItem = await dataQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await dataQuery
