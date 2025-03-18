@@ -183,23 +183,23 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new QuestionExplanationLogEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionShuffleEntityTypeConfiguration());
 
-            modelBuilder.Ignore<TotalEvaluateInputResultModel>();
-            modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
-            modelBuilder.Ignore<PercentEvaluateInputResultModel>();
-            modelBuilder.Ignore<LevelEvaluateInputResultModel>();
-            modelBuilder.Ignore<SchoolSummaryModel>();
-            modelBuilder.Ignore<TotalLearningProgressModel>();
-            modelBuilder.Ignore<AverageLearningProgressModel>();
-            modelBuilder.Ignore<UnitDoneLearningProgressIeltsModel>();
-            modelBuilder.Ignore<UnitDoneLearningProgressAcademicModel>();
-            modelBuilder.Ignore<LessonDoneLearningProgressIeltsModel>();
-            modelBuilder.Ignore<LessonDoneLearningProgressAcademicModel>();
-            modelBuilder.Ignore<TotalLearningModel>();
-            modelBuilder.Ignore<RateLearningModel>();
-            modelBuilder.Ignore<TotalLearningQualityModel>();
-            modelBuilder.Ignore<TotalDetailLearningQualityModel>();
-            modelBuilder.Ignore<SchoolInfoModel>();
-            modelBuilder.Ignore<CourseCompleteReportModel>();
+            //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
+            //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
+            //modelBuilder.Ignore<PercentEvaluateInputResultModel>();
+            //modelBuilder.Ignore<LevelEvaluateInputResultModel>();
+            //modelBuilder.Ignore<SchoolSummaryModel>();
+            //modelBuilder.Ignore<TotalLearningProgressModel>();
+            //modelBuilder.Ignore<AverageLearningProgressModel>();
+            //modelBuilder.Ignore<UnitDoneLearningProgressIeltsModel>();
+            //modelBuilder.Ignore<UnitDoneLearningProgressAcademicModel>();
+            //modelBuilder.Ignore<LessonDoneLearningProgressIeltsModel>();
+            //modelBuilder.Ignore<LessonDoneLearningProgressAcademicModel>();
+            //modelBuilder.Ignore<TotalLearningModel>();
+            //modelBuilder.Ignore<RateLearningModel>();
+            //modelBuilder.Ignore<TotalLearningQualityModel>();
+            //modelBuilder.Ignore<TotalDetailLearningQualityModel>();
+            //modelBuilder.Ignore<SchoolInfoModel>();
+            //modelBuilder.Ignore<CourseCompleteReportModel>();
 
             base.OnModelCreating(modelBuilder);
         }
