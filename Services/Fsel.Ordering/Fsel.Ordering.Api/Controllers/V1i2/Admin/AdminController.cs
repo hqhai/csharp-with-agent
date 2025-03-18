@@ -15,6 +15,8 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
+    using Microsoft.AspNetCore.Mvc;
+
     [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/admin/order")]
     [ApiController]
@@ -103,6 +105,30 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
                 return queryResult.GetActionResult();
             }
             return File(queryResult.Result, Settings.Excels.ContentType, "export_revenue_report.xlsx");
+        }
+
+        /// <summary>
+        /// Create Order For Students Event
+        /// </summary>
+        [HttpPost("create-order-for-students-event")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateOrderForStudentsEvent([FromBody] CreateOrderForStudentsEventCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// delete Order of Students Event
+        /// </summary>
+        [HttpPost("delete-order-of-students-event")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> DeleteOrderOfStudentsEvent([FromBody] DeleteOrderOfStudentsInEventCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }
