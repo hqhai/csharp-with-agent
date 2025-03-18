@@ -3,11 +3,13 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Shared.Constants;
 using Fsel.System.Domain.Entities;
+using Fsel.System.Domain.Entities.BlindBoxs;
 using Fsel.System.Domain.Entities.ChatBot;
 using Fsel.System.Domain.Entities.Chatbots;
 using Fsel.System.Domain.Entities.Configs;
 using Fsel.System.Domain.Entities.QuestBoards;
 using Fsel.System.Infrastructure.Configs;
+using Fsel.System.Infrastructure.Configs.BlindBoxs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -68,6 +70,10 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new TokenHistoryTranslationEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UserConfigEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new DisplayOrderConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BlindBoxChestConfigEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new BlindBoxChestEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new BlindBoxHistoryEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new BlindBoxUserEntityTypeConfigConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -111,6 +117,11 @@ namespace Fsel.System.Infrastructure
         public DbSet<TokenHistory> TokenHistories { get; set; }
         public DbSet<TokenHistoryTranslation> TokenHistoryTranslations { get; set; }
         public DbSet<FselRating> FselRatings { get; set; }
+        public DbSet<BlindBox> BlindBoxes { get; set; }
+        public DbSet<BlindBoxChest> BlindBoxChests { get; set; }
+        public DbSet<BlindBoxChestConfig> BlindBoxChestConfigs { get; set; }
+        public DbSet<BlindBoxHistory> BlindBoxHistories { get; set; }
+        public DbSet<BlindBoxUser> BlindBoxUsers { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
