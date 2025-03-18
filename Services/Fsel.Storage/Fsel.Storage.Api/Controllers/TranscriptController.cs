@@ -98,7 +98,7 @@ namespace Fsel.Storage.Api.Controllers
         public async Task<IActionResult> PostSpeech([FromBody] UrlRequestModel request)
         {
             MethodResult<string> result = new MethodResult<string>();
-            result.Result = await _cognitiveProvider.GetTranscriptionAsync(request?.Url ?? string.Empty);
+            result.Result = await _deepgramProvider.GetTranscriptionAsync(request?.Url ?? string.Empty, "nova-2");
             return result.GetActionResult();
         }
 

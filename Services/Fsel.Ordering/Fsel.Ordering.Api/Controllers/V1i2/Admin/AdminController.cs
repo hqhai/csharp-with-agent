@@ -15,6 +15,8 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
+    using Microsoft.AspNetCore.Mvc;
+
     [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/admin/order")]
     [ApiController]
@@ -87,6 +89,22 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Expot revenue report
+        /// </summary>
+        [HttpPost("export-revenue-report")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportFile([FromQuery] ExportRevenueReportQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!queryResult.IsOK || queryResult.Result == null)
+            {
+                return queryResult.GetActionResult();
+            }
+            return File(queryResult.Result, Settings.Excels.ContentType, "export_revenue_report.xlsx");
         }
 
         /// <summary>
