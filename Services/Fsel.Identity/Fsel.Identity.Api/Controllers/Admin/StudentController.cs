@@ -214,5 +214,17 @@ namespace Fsel.Identity.Api.Controllers.Admin
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteStudentByUserIdCommand { UserId = userId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Search school grades classes
+        /// </summary>
+        [HttpGet("get-school-grades-classes")]
+        [ProducesResponseType(typeof(MethodResult<StudentSearchAdminModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSchoolGradeClass()
+        {
+            var queryResult = await _mediator.Send(new GetSchoolGradesAndClassesQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
