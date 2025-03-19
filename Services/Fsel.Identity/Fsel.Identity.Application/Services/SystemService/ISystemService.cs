@@ -50,5 +50,8 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Post("/v1/school/get-ids")]
         Task<IApiResponse<MethodResult<IList<Guid>>>> GetSchoolIdsAsync([Body] GetSchoolsQueryModel query);
+
+        [Post("/v1/admin/token-history/survey-reward")]
+        Task<IApiResponse<MethodResult<bool>>> AddCoinSurveyReward([Body] AddCoinSurveyRewardModel query);
     }
 }

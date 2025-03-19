@@ -4,6 +4,7 @@ using Fsel.Notification.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Notification.Infrastructure.Migrations
 {
     [DbContext(typeof(NotificationsDBContext))]
-    partial class NotificationsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250317095047_Create_Content_SurveyReward")]
+    partial class Create_Content_SurveyReward
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -963,20 +966,6 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "",
                             TemplateMessage = "Cảm ơn bạn đã tham gia khảo sát! Chúng tôi trân trọng cảm ơn bạn đã hoàn thành khảo sát Tháng Tự Học Ngoại Ngữ - Hà Nội! Để bày tỏ sự tri ân, bạn đã nhận được {0} FSEL COINS. Chúng tôi sẽ xem xét và đánh giá ý kiến của bạn để không ngừng cải thiện trải nghiệm học tập. Cảm ơn bạn đã đồng hành cùng FSEL!",
-                            Type = "Text"
-                        },
-                        new
-                        {
-                            Id = new Guid("50947e80-1900-4fa5-89d2-f8bd309660da"),
-                            Content = "IllegalCoinRecall",
-                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Icon = "",
-                            IsDeleted = false,
-                            Priority = 1,
-                            TemplateLink = "",
-                            TemplateMessage = "Chúng tôi đã phát hiện một số tài khoản lợi dụng chức năng giới thiệu bạn bè để giành một số coins trái với quy định. Số coins và vật phẩm quy đổi từ đó sẽ bị thu hồi. Hãy tuân thủ quy định để tránh bị cấm tài khoản!",
                             Type = "Text"
                         });
                 });
@@ -2104,39 +2093,6 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Language = "fr-FR",
                             NotificationTypeId = new Guid("3c7f9946-3f95-4a84-b2df-7cffbf36a41c"),
                             TemplateMessage = "Merci d'avoir participé à l'enquête ! Nous vous remercions sincèrement d'avoir complété l'enquête sur le Mois de l'Auto-apprentissage des Langues - Hanoï ! En signe de notre gratitude, vous avez reçu {0} FSEL COINS. Vos retours seront attentivement examinés et évalués afin d'améliorer continuellement l'expérience d'apprentissage. Merci pour votre soutien et votre engagement avec FSEL ! "
-                        },
-                        new
-                        {
-                            Id = new Guid("61d84d68-3be8-46df-a771-a3037cbd86ee"),
-                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "vi-VN",
-                            NotificationTypeId = new Guid("50947e80-1900-4fa5-89d2-f8bd309660da"),
-                            TemplateMessage = "Chúng tôi đã phát hiện một số tài khoản lợi dụng chức năng giới thiệu bạn bè để giành một số coins trái với quy định. Số coins và vật phẩm quy đổi từ đó sẽ bị thu hồi. Hãy tuân thủ quy định để tránh bị cấm tài khoản!"
-                        },
-                        new
-                        {
-                            Id = new Guid("6584662f-04a7-43e7-86d0-d605fd827442"),
-                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "en-US",
-                            NotificationTypeId = new Guid("50947e80-1900-4fa5-89d2-f8bd309660da"),
-                            TemplateMessage = "We have detected that some accounts have exploited the referral function to obtain coins in violation of the rules. The coins and items redeemed from them will be revoked. Please follow the rules to avoid account suspension!"
-                        },
-                        new
-                        {
-                            Id = new Guid("72cba562-2bee-4d33-903c-da9e27e64d48"),
-                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "fr-FR",
-                            NotificationTypeId = new Guid("50947e80-1900-4fa5-89d2-f8bd309660da"),
-                            TemplateMessage = "Nous avons détecté que certains comptes ont abusé de la fonction de parrainage pour obtenir des pièces de manière non conforme aux règles. Les pièces et les objets échangés seront récupérés. Veuillez respecter les règles pour éviter l'interdiction de votre compte !"
                         });
                 });
 

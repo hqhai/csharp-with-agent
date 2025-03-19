@@ -1177,6 +1177,39 @@
       }
     ]
   },
+  {
+    "id": "3C7F9946-3F95-4A84-B2DF-7CFFBF36A41C",
+    "type": "Text",
+    "content": "SurveyReward",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Cảm ơn bạn đã tham gia khảo sát! Chúng tôi trân trọng cảm ơn bạn đã hoàn thành khảo sát Tháng Tự Học Ngoại Ngữ - Hà Nội! Để bày tỏ sự tri ân, bạn đã nhận được {0} FSEL COINS. Chúng tôi sẽ xem xét và đánh giá ý kiến của bạn để không ngừng cải thiện trải nghiệm học tập. Cảm ơn bạn đã đồng hành cùng FSEL!",
+    "templateLink": "",
+    "createdDate": "2025-02-26",
+    "translations": [
+      {
+        "id": "788C4DE6-030B-4866-8E91-3FB0E913F670",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "3C7F9946-3F95-4A84-B2DF-7CFFBF36A41C",
+        "templateMessage": "Cảm ơn bạn đã tham gia khảo sát! Chúng tôi trân trọng cảm ơn bạn đã hoàn thành khảo sát Tháng Tự Học Ngoại Ngữ - Hà Nội! Để bày tỏ sự tri ân, bạn đã nhận được {0} FSEL COINS. Chúng tôi sẽ xem xét và đánh giá ý kiến của bạn để không ngừng cải thiện trải nghiệm học tập. Cảm ơn bạn đã đồng hành cùng FSEL!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "13DD85C7-014C-4A32-9392-92A46440C481",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "3C7F9946-3F95-4A84-B2DF-7CFFBF36A41C",
+        "templateMessage": "Thank you for participating in the survey! We sincerely appreciate your completion of the Self-Study Language Month - Hanoi survey! As a token of our gratitude, you have received {0} FSEL COINS. Your feedback will be carefully reviewed and evaluated to continuously improve the learning experience. Thank you for your support and for being part of FSEL!  ",
+        "language": "en-US"
+      },
+      {
+        "id": "8592527A-E771-4E37-A2E0-E5E5AA5FF667",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "3C7F9946-3F95-4A84-B2DF-7CFFBF36A41C",
+        "templateMessage": "Merci d'avoir participé à l'enquête ! Nous vous remercions sincèrement d'avoir complété l'enquête sur le Mois de l'Auto-apprentissage des Langues - Hanoï ! En signe de notre gratitude, vous avez reçu {0} FSEL COINS. Vos retours seront attentivement examinés et évalués afin d'améliorer continuellement l'expérience d'apprentissage. Merci pour votre soutien et votre engagement avec FSEL ! ",
+        "language": "fr-FR"
+      }
+    ]
+  },
 
   {
     "id": "50947E80-1900-4FA5-89D2-F8BD309660DA",
@@ -1211,5 +1244,4 @@
       }
     ]
   }
-
 ]
