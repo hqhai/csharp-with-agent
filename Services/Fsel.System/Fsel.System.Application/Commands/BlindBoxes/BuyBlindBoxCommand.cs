@@ -73,6 +73,26 @@ namespace Fsel.System.Application.Commands.BlindBoxes
                     return methodResult;
                 }
             }
+            else
+            {
+                if (!blindBoxUser.IsWin)
+                {
+                    var blindBoxChestConfigs = await _blindBoxChestConfigRepository.Queryable.Where(p => p.BlindBoxChestId == blindBoxChestActive.Id && p.ConfigType != Shared.Enums.EnumBlindBoxConfigType.Piece).ToListAsync(cancellationToken);
+                    if (blindBoxChestConfigs == null || blindBoxChestConfigs.Count == 0)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                        return methodResult;
+                    }
+
+                    var blindBoxChestConfig = GetRandomBlindBoxChestConfig(blindBoxChestConfigs);
+                    if (blindBoxChestConfig == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                        return methodResult;
+                    }
+                }
+            }
+
             return methodResult;
         }
 
@@ -83,7 +103,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
             double randomValue = random.NextDouble() * totalWeight;
             double cumulative = 0;
 
-            foreach (var blindBoxChestConfig in blindBoxChestConfigs.ToList())
+            foreach (var blindBoxChestConfig in blindBoxChestConfigs.OrderBy(p => p.Percentage).ToList())
             {
                 cumulative += blindBoxChestConfig.Percentage;
                 if (randomValue < cumulative)
