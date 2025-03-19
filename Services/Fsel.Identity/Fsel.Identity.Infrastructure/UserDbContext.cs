@@ -25,6 +25,10 @@ namespace Fsel.Identity.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(builder);
 
+            builder.Ignore<OverallStudentModel>();
+            builder.Ignore<NumberStudentLearnOnSystemModel>();
+            builder.Ignore<SummaryDataOnCityModel>();
+
             builder.Entity<Role>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<UserToken>().HasQueryFilter(e => !e.IsDeleted);
@@ -97,6 +101,7 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<NumberStudentLearnOnSystemModel> NumberStudentLearnOnSystemResults { get; set; }
 
         public DbSet<SummaryDataOnCityModel> SummaryDataOnCityResults { get; set; }
+
         #endregion Db Set
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
