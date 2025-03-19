@@ -51,17 +51,20 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
             }
 
             int token = 0;
-            if (request.FeatureUserReferral == EnumFeatureUserReferral.PT)
+            if (userReferral.IsCoinRewarded)
             {
-                token = _appSetting.UserReferralConfig?.PT ?? 0;
-            }
-            else if (request.FeatureUserReferral == EnumFeatureUserReferral.DoneUnit1)
-            {
-                token = _appSetting.UserReferralConfig?.DoneUnit1 ?? 0;
-            }
-            else if (request.FeatureUserReferral == EnumFeatureUserReferral.Payment)
-            {
-                token = request.Token ?? 0;
+                if (request.FeatureUserReferral == EnumFeatureUserReferral.PT)
+                {
+                    token = _appSetting.UserReferralConfig?.PT ?? 0;
+                }
+                else if (request.FeatureUserReferral == EnumFeatureUserReferral.DoneUnit1)
+                {
+                    token = _appSetting.UserReferralConfig?.DoneUnit1 ?? 0;
+                }
+                else if (request.FeatureUserReferral == EnumFeatureUserReferral.Payment)
+                {
+                    token = request.Token ?? 0;
+                }
             }
 
             bool isAddDoneUnit1 = false;
@@ -163,11 +166,11 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                     }
 
                     await _createTokenHistoryPublisher.Publish(tokenHistories, cancellationToken).ConfigureAwait(false);
+
+                    var friendInformation = await _studentRepository.Queryable.Where(x => x.Human != null && x.Human.UserId == userReferral.ReceiverId).FirstOrDefaultAsync(cancellationToken);
+
+                    await SendNotification(friendInformation?.Human?.FullName ?? string.Empty, token, userReferral.SenderId, userReferral.ReceiverId, notificationContent, cancellationToken);
                 }
-
-                var friendInformation = await _studentRepository.Queryable.Where(x => x.Human != null && x.Human.UserId == userReferral.ReceiverId).FirstOrDefaultAsync(cancellationToken);
-
-                await SendNotification(friendInformation?.Human?.FullName ?? string.Empty, token, userReferral.SenderId, userReferral.ReceiverId, notificationContent, cancellationToken);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
