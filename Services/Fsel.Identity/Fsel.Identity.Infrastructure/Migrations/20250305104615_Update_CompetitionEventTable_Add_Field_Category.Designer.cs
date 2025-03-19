@@ -4,6 +4,7 @@ using Fsel.Identity.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250305104615_Update_CompetitionEventTable_Add_Field_Category")]
+    partial class Update_CompetitionEventTable_Add_Field_Category
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1867,10 +1870,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
 
-                    b.Property<string>("DefaultPassword")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(109);
@@ -2333,9 +2332,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<string>("FeatureMissionStr")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsCoinRewarded")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")

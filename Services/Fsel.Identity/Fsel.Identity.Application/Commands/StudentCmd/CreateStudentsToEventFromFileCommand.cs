@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Commands.StudentCmd
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Drawing;
     using System.Globalization;
     using System.IO;
@@ -13,12 +14,14 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Common.Models.Excels;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Queues.Publishers;
-    using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.OrderService;
+    using Fsel.Identity.Application.Services.OrderService.Model;
+    using Fsel.Identity.Application.Services.SystemService;
+    using Fsel.Identity.Application.Services.SystemService.QueryModels;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Shared.Constants;
@@ -30,7 +33,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
-    using Microsoft.IdentityModel.Tokens;
     using OfficeOpenXml;
     using OfficeOpenXml.Style;
 
@@ -43,38 +45,40 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly UserManager<User> _userManager;
         private readonly IOrderService _orderService;
         private readonly IPlatformRepository _platformRepository;
-        private readonly IInteractionService _interactionService;
-        private readonly IMediator _mediator;
-        private readonly IHumanRepository _humanRepository;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
-        private readonly IStudentRepository _studentRepository;
         private readonly IServiceProvider _serviceProvider;
         private readonly SendStudentsFromFilePublisher _sendStudentsFromFilePublisher;
-        private readonly ISchoolImportHistoryRepository _schoolImportHistoryRepository;
         private readonly ILogger<CreateStudentsToEventFromFileCommand> _logger;
+        private readonly AuthContext _authContext;
+        private readonly ISystemService _systemService;
 
         private const string ErrorTemplate = "Template bị sai, kiểm tra lại tên cột, bạn cần download template ở nút Tải Template mẫu";
         private const string Success = "Thành công";
         private const string ErrorMessage = "Error Message\n(Thông báo lỗi)";
         private const string FileNull = "File tải lên không có dữ liệu";
         private const string DataError = "Dữ liệu bị trống hoặc sai định dạng";
+        private const string UserDoesNotExist = "Tài khoản không tồn tại";
+        private const string UserDoesNotExistSchool = "Tài khoản chưa được gắn với trường";
+        private const string SchoolDoesNotExist = "Trường học không tồn tại";
+        private const string SchoolDoesNotExistInEvent = "Trường học chưa được gắn vào sự kiện";
+        private const string ExpiredDate = "Đã hết thời gian tạo tài khoản";
 
-        public CreateStudentsToEventFromFileCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IMediator mediator, IHumanRepository humanRepository, ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IStudentRepository studentRepository, IServiceProvider serviceProvider, SendStudentsFromFilePublisher sendStudentsFromFilePublisher, ISchoolImportHistoryRepository schoolImportHistoryRepository, ILogger<CreateStudentsToEventFromFileCommand> logger)
+        private const string DefaultPassword = "Fsel@";
+        private const int StartYear = 1900;
+
+        public CreateStudentsToEventFromFileCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IServiceProvider serviceProvider, SendStudentsFromFilePublisher sendStudentsFromFilePublisher, ILogger<CreateStudentsToEventFromFileCommand> logger, AuthContext authContext, ISystemService systemService)
         {
             _userManager = userManager;
             _orderService = orderService;
             _platformRepository = platformRepository;
-            _interactionService = interactionService;
-            _mediator = mediator;
-            _humanRepository = humanRepository;
             _competitionEventsRepository = competitionEventsRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
-            _studentRepository = studentRepository;
             _serviceProvider = serviceProvider;
             _sendStudentsFromFilePublisher = sendStudentsFromFilePublisher;
-            _schoolImportHistoryRepository = schoolImportHistoryRepository;
             _logger = logger;
+            _authContext = authContext;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<CreateStudentsToEventFromFileModel>> Handle(CreateStudentsToEventFromFileCommand request, CancellationToken cancellationToken)
@@ -90,21 +94,52 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     return methodResult;
                 }
 
-                var emails = new List<string>();
-                var phoneNumbers = new List<string>();
-
-                var competitionEvent = await _competitionEventsRepository.Queryable.Include(x => x.CompetitionEventParent).FirstOrDefaultAsync(p => p.Id == request.DistrictId, cancellationToken);
-                if (competitionEvent == null)
+                var currentUser = await _userManager.Users.Include(p => p.UserSchools).FirstOrDefaultAsync(p => p.Id == _authContext.CurrentUserId, cancellationToken);
+                if (currentUser == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(currentUser));
+                    await SendNotify(request.Key ?? string.Empty, UserDoesNotExist, StatusCodes.Status400BadRequest, 0, null, cancellationToken);
                     return methodResult;
                 }
 
-                // check trường đã thực hiện import chưa
-                var checkImportSchool = (competitionEvent.CompetitionEventParent != null && competitionEvent.CompetitionEventParent.ParentEventId.HasValue && await _schoolImportHistoryRepository.Queryable.AnyAsync(x => x.SchoolId == request.SchoolId && x.CompetitionEventId == competitionEvent.CompetitionEventParent.ParentEventId.Value, cancellationToken));
-                if (checkImportSchool)
+                var schoolId = currentUser.UserSchools.FirstOrDefault()?.SchoolId;
+                if (!schoolId.HasValue)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumUserSchoolErrorCode.SchoolAlreadyImported), nameof(request.SchoolId), request.SchoolId);
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(schoolId));
+                    await SendNotify(request.Key ?? string.Empty, UserDoesNotExistSchool, StatusCodes.Status400BadRequest, 0, null, cancellationToken);
+                    return methodResult;
+                }
+
+                var schoolResult = await _systemService.GetSchoolsAsync(new GetListSchoolQueryModel()
+                {
+                    Ids = new List<Guid>() { schoolId.Value }
+                });
+                var school = schoolResult.Content?.Result?.FirstOrDefault();
+                if (school == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(school));
+                    await SendNotify(request.Key ?? string.Empty, SchoolDoesNotExist, StatusCodes.Status400BadRequest, 0, null, cancellationToken);
+                    return methodResult;
+                }
+
+                var competitionEvents = _competitionEventsRepository.Queryable.ToList();
+                var competitionEvent = competitionEvents.Where(p => p.SchoolIds != null && p.SchoolIds.Contains(schoolId.Value) && p.Category == request.Category).FirstOrDefault();
+                if (competitionEvent == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent));
+                    await SendNotify(request.Key ?? string.Empty, SchoolDoesNotExistInEvent, StatusCodes.Status400BadRequest, 0, null, cancellationToken);
+                    return methodResult;
+                }
+
+                var expiredDate = competitionEvent.EventContent?.PaymentDate;
+
+                var expiredDateImport = competitionEvent.EventContent?.ActionConfigs?.FirstOrDefault(p => p.Action == EnumSchoolEventRuleAction.ImportStudent);
+
+                var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+                if (!expiredDate.HasValue || currentDate >= expiredDate.Value || expiredDateImport == null || !expiredDateImport.EndDate.HasValue || expiredDateImport.EndDate.Value < currentDate)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(expiredDate));
+                    await SendNotify(request.Key ?? string.Empty, ExpiredDate, StatusCodes.Status400BadRequest, 0, null, cancellationToken);
                     return methodResult;
                 }
 
@@ -189,7 +224,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                 var result = formFile.ImportAndValidateExcel(async (CreateStudentToEventFromFileModel x, IList<CreateStudentToEventFromFileModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
                 {
-                    if (!string.IsNullOrEmpty(x.FullName?.Trim()) || !string.IsNullOrEmpty(x.PhoneNumber?.Trim()) || x.DateOfBirth != null || !string.IsNullOrEmpty(x.SchoolGrade?.Trim()) || !string.IsNullOrEmpty(x.SchoolClass?.Trim()))
+                    if (!string.IsNullOrEmpty(x.FullName?.Trim()) || !string.IsNullOrEmpty(x.PhoneNumber?.Trim()) || x.DateOfBirth.HasValue || !string.IsNullOrEmpty(x.SchoolGrade?.Trim()) || !string.IsNullOrEmpty(x.SchoolClass?.Trim()))
                     {
                         if (string.IsNullOrEmpty(x.FullName?.Trim()))
                         {
@@ -203,36 +238,18 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         {
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.InvalidPhoneNumberVN });
                         }
-                        else if (phoneNumbers.Contains(Shared.Helpers.StringHelper.NormalizeToDomesticFormat(x.PhoneNumber?.Trim())))
-                        {
-                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.PhoneNumberAlreadyExistInListVN });
-                        }
-                        else
-                        {
-                            x.PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(x.PhoneNumber?.Trim());
-                            phoneNumbers.Add(x.PhoneNumber.Trim());
-                        }
-
                         if (!string.IsNullOrEmpty(x.Email?.Trim()) && !x.Email.Trim().IsValidEmail())
                         {
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
                         }
-                        else if (!string.IsNullOrEmpty(x.Email?.Trim()) && emails.Contains(x.Email.ToLower(cultureInfo).Trim()))
-                        {
-                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.EmailAlreadyExistInListVN });
-                        }
-                        else if (!string.IsNullOrEmpty(x.Email?.Trim()))
-                        {
-                            emails.Add(x.Email.ToLower(cultureInfo).Trim());
-                        }
-                        if (x.DateOfBirth == null)
+                        if (!x.DateOfBirth.HasValue)
                         {
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.EmptyBirthDayVN });
                         }
-                        //else if (!Shared.Helpers.DateTimeHelper.IsValidDateTime(x.DateOfBirth))
-                        //{
-                        //    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
-                        //}
+                        else if (x.DateOfBirth.HasValue && x.DateOfBirth.Value.Year < StartYear)
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
+                        }
                         if (string.IsNullOrEmpty(x.SchoolGrade?.Trim()))
                         {
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.SchoolGrade), Message = ErrorMassageSetting.EmptyGradeVN });
@@ -242,65 +259,26 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.SchoolClass), Message = ErrorMassageSetting.EmptyClassVN });
                         }
                     }
-
                     return await Task.FromResult(errors.Count == 0);
                 },
-                async (Dictionary<int, CreateStudentToEventFromFileModel> datas, IList<ValidateExcelModel> errors) =>
-                {
-                    var emails = datas.Values.Where(p => p.Email != null && !string.IsNullOrEmpty(p.Email.Trim())).Select(n => n.Email!.Trim());
-                    var phoneNumbers = datas.Values.Where(p => p.PhoneNumber != null && !string.IsNullOrEmpty(p.PhoneNumber.Trim())).Select(n => n.PhoneNumber!.Trim());
-
-                    var emailQuery = _userManager.Users.Where(x => emails.Contains(x.Email));
-                    var phoneQuery = _userManager.Users.Where(x => phoneNumbers.Contains(x.PhoneNumber));
-
-                    var usersExist = await emailQuery
-                        .Union(phoneQuery)
-                        .ToArrayAsync(cancellationToken);
-
-                    usersExist.ForEach(user =>
-                    {
-                        var dataByEmail = datas.Values.Where(x => !x.Email.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user.Email) && x.Email.ToLower() == user.Email.ToLower()) || (!string.IsNullOrEmpty(user.UserName) && x.Email.ToLower() == user.UserName.ToLower()));
-                        if (dataByEmail != null)
-                        {
-                            var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
-                            errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Email), Message = ErrorMassageSetting.EmailAlreadyExistVN });
-                        }
-
-                        var dataByPhoneNumber = datas.Values.Where(x => !x.PhoneNumber.IsNullOrEmpty()).FirstOrDefault(x => x.PhoneNumber == user.PhoneNumber || x.PhoneNumber == user.UserName);
-                        if (dataByPhoneNumber != null)
-                        {
-                            var index = datas.FirstOrDefault(x => x.Value == dataByPhoneNumber).Key;
-                            errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByPhoneNumber.PhoneNumber), Message = ErrorMassageSetting.PhoneNumberAlreadyExistVN });
-                        }
-                    });
-
-                    return await Task.FromResult(errors.Count == 0);
-                },
+                null,
                 defaultHandlerAction,
                 errorHandlerAction,
                 true);
 
                 if (!result.IsValidHeader)
                 {
-                    await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
-                    {
-                        StatusCode = StatusCodes.Status400BadRequest,
-                        Key = request.Key,
-                        Message = ErrorTemplate,
-                    }, cancellationToken);
+                    await SendNotify(request.Key ?? string.Empty, ErrorTemplate, StatusCodes.Status400BadRequest, 0, null, cancellationToken);
+
                     return methodResult;
                 }
 
                 if (result.Stream != null)
                 {
                     var file = ConvertHelper.StreamToByteArray(result.Stream);
-                    await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
-                    {
-                        StatusCode = StatusCodes.Status400BadRequest,
-                        File = file,
-                        Key = request.Key,
-                        Message = DataError
-                    }, cancellationToken);
+
+                    await SendNotify(request.Key ?? string.Empty, DataError, StatusCodes.Status400BadRequest, 0, file, cancellationToken);
+
                     return methodResult;
                 }
 
@@ -315,17 +293,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 if (students == null || students.Count == 0)
                 {
                     methodResult.AddErrorBadRequest(FileNull);
-                    await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
-                    {
-                        StatusCode = StatusCodes.Status400BadRequest,
-                        Key = request.Key,
-                        Message = FileNull
-                    }, cancellationToken);
+
+                    await SendNotify(request.Key ?? string.Empty, FileNull, StatusCodes.Status400BadRequest, 0, null, cancellationToken);
+
                     return methodResult;
                 }
 
-                var users = new List<User>();
-                var studentIds = new List<Guid>();
+                var studentIds = new ConcurrentBag<Guid>();
+                var studentModels = new ConcurrentBag<CreateOrderForStudentsEventCommandModel>();
+
                 var parallelOptions = new ParallelOptions
                 {
                     MaxDegreeOfParallelism = 50
@@ -339,19 +315,22 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         {
                             using (var scope = _serviceProvider.CreateScope())
                             {
+                                var password = DefaultPassword + Shared.Helpers.StringHelper.GenerateLaterPartPassword(4);
+
                                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
                                 var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
                                 Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
                                 int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.DateOfBirth);
                                 var user = new User()
                                 {
-                                    UserName = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
+                                    UserName = Shared.Helpers.StringHelper.GenerateUsername(student.FullName ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber)),
                                     Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
                                     FullName = student.FullName!.Trim(),
                                     PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
                                     EmailConfirmed = false,
                                     PhoneNumberConfirmed = false,
-                                    Status = EnumUserStatus.Inactive,
+                                    Status = EnumUserStatus.Active,
+                                    DefaultPassword = password,
                                     Human = new Human()
                                     {
                                         FullName = student.FullName.Trim(),
@@ -363,10 +342,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                         {
                                             CreatedByParent = false,
                                             Occupation = nameof(Student),
-                                            School = request.SchoolName,
+                                            School = school.Name,
                                             SchoolClass = student.SchoolClass,
                                             SchoolGrade = student.SchoolGrade,
-                                            SchoolId = request.SchoolId,
+                                            SchoolId = schoolId,
                                             CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
                                         }
                                     },
@@ -383,17 +362,22 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                     }
                                 };
 
-                                var password = Shared.Helpers.StringHelper.GeneratePassword(8);
-
                                 identityStudentResult = await userManager.CreateAsync(user, password);
                                 if (identityStudentResult.Succeeded)
                                 {
                                     await userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
 
-                                    lock (studentIds)
+                                    studentIds.Add(user.Human.Student.Id);
+
+                                    studentModels.Add(new CreateOrderForStudentsEventCommandModel()
                                     {
-                                        studentIds.Add(user.Human.Student.Id);
-                                    }
+                                        UserId = user.Id,
+                                        StudentId = user.Human.Student.Id,
+                                        Email = user.Email,
+                                        PhoneNumber = user.PhoneNumber,
+                                        FullName = user.FullName,
+                                        StudentCode = user.Human.Code
+                                    });
                                 }
                             }
                         }
@@ -413,38 +397,42 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         CompetitionEventId = competitionEvent.Id,
                     });
                 });
+
+                if (studentCompetitionEvents.Count == 0)
+                {
+                    methodResult.AddErrorBadRequest(FileNull);
+
+                    await SendNotify(request.Key ?? string.Empty, FileNull, StatusCodes.Status400BadRequest, 0, null, cancellationToken);
+
+                    return methodResult;
+                }
+
                 await _studentCompetitionEventsRepository.ExecuteTransactionAsync(async () =>
                 {
                     await _studentCompetitionEventsRepository.AddList(studentCompetitionEvents);
                     await _studentCompetitionEventsRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     return methodResult;
                 });
+
+                var createOrdersResult = await _orderService.CreateOrderForStudentsEvent(new CreateOrderForStudentsEventCommandModels()
+                {
+                    Students = studentModels.ToList(),
+                    ExpiredDate = expiredDate.Value
+                });
+
                 methodResult.Result = new CreateStudentsToEventFromFileModel() { NumberOfStudent = studentIds.Count };
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
-                {
-                    StatusCode = StatusCodes.Status200OK,
-                    Key = request.Key,
-                    Message = Success,
-                    NumberOfStudent = studentIds.Count,
-                }, cancellationToken);
 
-                if (competitionEvent.CompetitionEventParent != null && competitionEvent.CompetitionEventParent.ParentEventId.HasValue)
-                {
-                    await CreateSchoolImportHistory(request.SchoolId, competitionEvent.CompetitionEventParent.ParentEventId.Value);
-                }
+                await SendNotify(request.Key ?? string.Empty, Success, StatusCodes.Status200OK, studentIds.Count, null, cancellationToken);
 
                 return methodResult;
             }
             catch (Exception ex)
             {
                 methodResult.AddErrorBadRequest(ex.Message);
-                await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
-                {
-                    StatusCode = StatusCodes.Status400BadRequest,
-                    Key = request.Key,
-                    Message = ErrorTemplate
-                }, cancellationToken);
+
+                await SendNotify(request.Key ?? string.Empty, ErrorTemplate, StatusCodes.Status400BadRequest, 0, null, cancellationToken);
+
                 _logger.LogError(ex, "CreateStudentsToEventFromFileCommandHandler error");
             }
 
@@ -463,16 +451,16 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             return code;
         }
 
-        private async Task CreateSchoolImportHistory(Guid schoolId, Guid competitionEventId)
+        private async Task SendNotify(string key, string message, int statusCodes, int numberOfStudent, byte[]? file, CancellationToken cancellationToken)
         {
-            var schoolImportHistory = new SchoolImportHistory
+            await _sendStudentsFromFilePublisher.Publish(new CreateStudentsToEventFromFileModel()
             {
-                SchoolId = schoolId,
-                CompetitionEventId = competitionEventId
-            };
-
-            _schoolImportHistoryRepository.Add(schoolImportHistory);
-            await _schoolImportHistoryRepository.UnitOfWork.SaveChangesAsync();
+                StatusCode = statusCodes,
+                Key = key,
+                Message = message,
+                NumberOfStudent = numberOfStudent,
+                File = file
+            }, cancellationToken);
         }
     }
 }
