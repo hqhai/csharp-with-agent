@@ -11,6 +11,7 @@ namespace Fsel.System.Domain.Models.EntityModels
     public class BlindBoxChestModel : BaseModel
     {
         public string? Name { get; set; }
+        public int? MaxOpenCount { get; set; }
         public string? ImagePath { get; set; }
         public int OpenPrice { get; set; }
         public int Index { get; set; }

@@ -166,5 +166,12 @@ namespace Fsel.Shared.Enums
         FselStore,
         UrBox
         #endregion
+
+        #region Blind Box
+
+        [Description("Mua túi mù")]
+        BuyBlindBox,
+
+        #endregion
     }
 }
