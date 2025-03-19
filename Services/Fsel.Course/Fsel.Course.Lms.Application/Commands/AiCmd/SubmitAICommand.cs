@@ -56,7 +56,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             var result = response.Content?.Choices?.Select(x => x.Message?.Content).FirstOrDefault();
             string requestLog = ConvertHelper.Serialize(request);
-            _logger.LogCritical($"ChatGPT response : {result}, RequestLog : {requestLog}");
+            string responseLog = ConvertHelper.Serialize(response);
+            _logger.LogCritical($"ChatGPT response : {responseLog}, RequestLog : {requestLog}");
             return result;
         }
     }
