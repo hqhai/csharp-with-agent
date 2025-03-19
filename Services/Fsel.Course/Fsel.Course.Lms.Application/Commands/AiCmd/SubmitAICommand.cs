@@ -5,10 +5,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Models.CommandModels.Ais;
     using Fsel.Course.Lms.Application.Services.AiService;
     using Fsel.Course.Lms.Application.Services.AIService.Models;
     using MediatR;
+    using Microsoft.Extensions.Logging;
 
     public class SubmitAICommand : SubmitAICommandModel, IRequest<string?>
     {
@@ -17,10 +19,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     public class SubmitAICommandHandler : IRequestHandler<SubmitAICommand, string?>
     {
         private readonly IOpenAIService _openAIService;
+        private readonly ILogger<SubmitAICommandHandler> _logger;
 
-        public SubmitAICommandHandler(IOpenAIService openAIService)
+        public SubmitAICommandHandler(IOpenAIService openAIService, ILogger<SubmitAICommandHandler> logger)
         {
             _openAIService = openAIService;
+            _logger = logger;
         }
 
         public async Task<string?> Handle(SubmitAICommand request, CancellationToken cancellationToken)
@@ -51,6 +55,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             });
 
             var result = response.Content?.Choices?.Select(x => x.Message?.Content).FirstOrDefault();
+            _logger.LogCritical("ChatGPT response : ", ConvertHelper.Serialize(request), result);
             return result;
         }
     }
