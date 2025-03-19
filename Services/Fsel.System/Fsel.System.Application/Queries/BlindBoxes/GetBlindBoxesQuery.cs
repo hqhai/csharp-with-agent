@@ -5,7 +5,6 @@ namespace Fsel.System.Application.Queries.BlindBoxes
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
-    using Fsel.System.Domain.Entities.BlindBoxs;
     using Fsel.System.Domain.IRepositories.BlindBoxes;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
@@ -70,6 +69,7 @@ namespace Fsel.System.Application.Queries.BlindBoxes
 
             foreach (var item in blindBoxModel.BlindBoxChests.OrderBy(p => p.Index).ToList())
             {
+                item.ImagePath = null;
                 var blindBoxChestConfig = blindBoxChestConfigs.FirstOrDefault(p => p.BlindBoxChestId == item.Id && p.ConfigType == EnumBlindBoxConfigType.Piece);
                 if (blindBoxChestConfig != null && !blindBoxHistories.Any(p => p.BlindBoxChestConfigId == blindBoxChestConfig.Id))
                 {
@@ -78,6 +78,7 @@ namespace Fsel.System.Application.Queries.BlindBoxes
                 }
                 else
                 {
+                    item.ImagePath = blindBoxChestConfig?.ImagePath;
                     item.IsActive = false;
                 }
             }
