@@ -4,6 +4,7 @@ using Fsel.Notification.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Notification.Infrastructure.Migrations
 {
     [DbContext(typeof(NotificationsDBContext))]
-    partial class NotificationsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250318035101_Create_Content_IllegalCoinRecall")]
+    partial class Create_Content_IllegalCoinRecall
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -949,20 +952,6 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "",
                             TemplateMessage = "Chúng tôi đã phát hiện một số tài khoản lợi dụng lỗi hệ thống khi làm khảo sát đầu vào (survey) để giành một số coins trái với quy định. Số coins và vật phẩm quy đổi từ đó sẽ bị thu hồi. Hãy tuân thủ quy định để tránh bị cấm tài khoản!",
-                            Type = "Text"
-                        },
-                        new
-                        {
-                            Id = new Guid("3c7f9946-3f95-4a84-b2df-7cffbf36a41c"),
-                            Content = "SurveyReward",
-                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Icon = "",
-                            IsDeleted = false,
-                            Priority = 1,
-                            TemplateLink = "",
-                            TemplateMessage = "Cảm ơn bạn đã tham gia khảo sát! Chúng tôi trân trọng cảm ơn bạn đã hoàn thành khảo sát Tháng Tự Học Ngoại Ngữ - Hà Nội! Để bày tỏ sự tri ân, bạn đã nhận được {0} FSEL COINS. Chúng tôi sẽ xem xét và đánh giá ý kiến của bạn để không ngừng cải thiện trải nghiệm học tập. Cảm ơn bạn đã đồng hành cùng FSEL!",
                             Type = "Text"
                         },
                         new
@@ -2071,39 +2060,6 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Language = "fr-FR",
                             NotificationTypeId = new Guid("46540fc5-a4fd-4dac-bb8f-ef86698528dc"),
                             TemplateMessage = "Nous avons détecté certains comptes exploitant une erreur du système lors du sondage d'entrée pour obtenir des pièces en violation des règles. Les pièces et les objets échangés de cette manière seront annulés. Veuillez respecter les règlements afin d’éviter la suspension de votre compte !"
-                        },
-                        new
-                        {
-                            Id = new Guid("788c4de6-030b-4866-8e91-3fb0e913f670"),
-                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "vi-VN",
-                            NotificationTypeId = new Guid("3c7f9946-3f95-4a84-b2df-7cffbf36a41c"),
-                            TemplateMessage = "Cảm ơn bạn đã tham gia khảo sát! Chúng tôi trân trọng cảm ơn bạn đã hoàn thành khảo sát Tháng Tự Học Ngoại Ngữ - Hà Nội! Để bày tỏ sự tri ân, bạn đã nhận được {0} FSEL COINS. Chúng tôi sẽ xem xét và đánh giá ý kiến của bạn để không ngừng cải thiện trải nghiệm học tập. Cảm ơn bạn đã đồng hành cùng FSEL!"
-                        },
-                        new
-                        {
-                            Id = new Guid("13dd85c7-014c-4a32-9392-92a46440c481"),
-                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "en-US",
-                            NotificationTypeId = new Guid("3c7f9946-3f95-4a84-b2df-7cffbf36a41c"),
-                            TemplateMessage = "Thank you for participating in the survey! We sincerely appreciate your completion of the Self-Study Language Month - Hanoi survey! As a token of our gratitude, you have received {0} FSEL COINS. Your feedback will be carefully reviewed and evaluated to continuously improve the learning experience. Thank you for your support and for being part of FSEL!  "
-                        },
-                        new
-                        {
-                            Id = new Guid("8592527a-e771-4e37-a2e0-e5e5aa5ff667"),
-                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "fr-FR",
-                            NotificationTypeId = new Guid("3c7f9946-3f95-4a84-b2df-7cffbf36a41c"),
-                            TemplateMessage = "Merci d'avoir participé à l'enquête ! Nous vous remercions sincèrement d'avoir complété l'enquête sur le Mois de l'Auto-apprentissage des Langues - Hanoï ! En signe de notre gratitude, vous avez reçu {0} FSEL COINS. Vos retours seront attentivement examinés et évalués afin d'améliorer continuellement l'expérience d'apprentissage. Merci pour votre soutien et votre engagement avec FSEL ! "
                         },
                         new
                         {
