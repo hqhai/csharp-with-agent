@@ -150,6 +150,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                                         Feature = EnumTokenFeature.FriendMission,
                                         Mission = tokenMission,
                                         UserId = userReferral.SenderId,
+                                        ObjectId = userReferral.ReceiverId
                                     }
                     };
 
@@ -162,6 +163,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                             Feature = EnumTokenFeature.FriendMission,
                             Mission = EnumTokenMission.FriendCompleteUnit1,
                             UserId = userReferral.SenderId,
+                            ObjectId = userReferral.ReceiverId
                         });
                     }
 
