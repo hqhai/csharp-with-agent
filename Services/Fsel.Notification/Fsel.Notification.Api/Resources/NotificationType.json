@@ -1209,5 +1209,39 @@
         "language": "fr-FR"
       }
     ]
+  },
+
+  {
+    "id": "50947E80-1900-4FA5-89D2-F8BD309660DA",
+    "type": "Text",
+    "content": "IllegalCoinRecall",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Chúng tôi đã phát hiện một số tài khoản lợi dụng chức năng giới thiệu bạn bè để giành một số coins trái với quy định. Số coins và vật phẩm quy đổi từ đó sẽ bị thu hồi. Hãy tuân thủ quy định để tránh bị cấm tài khoản!",
+    "templateLink": "",
+    "createdDate": "2025-02-26",
+    "translations": [
+      {
+        "id": "61D84D68-3BE8-46DF-A771-A3037CBD86EE",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "50947E80-1900-4FA5-89D2-F8BD309660DA",
+        "templateMessage": "Chúng tôi đã phát hiện một số tài khoản lợi dụng chức năng giới thiệu bạn bè để giành một số coins trái với quy định. Số coins và vật phẩm quy đổi từ đó sẽ bị thu hồi. Hãy tuân thủ quy định để tránh bị cấm tài khoản!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "6584662F-04A7-43E7-86D0-D605FD827442",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "50947E80-1900-4FA5-89D2-F8BD309660DA",
+        "templateMessage": "We have detected that some accounts have exploited the referral function to obtain coins in violation of the rules. The coins and items redeemed from them will be revoked. Please follow the rules to avoid account suspension!",
+        "language": "en-US"
+      },
+      {
+        "id": "72CBA562-2BEE-4D33-903C-DA9E27E64D48",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "50947E80-1900-4FA5-89D2-F8BD309660DA",
+        "templateMessage": "Nous avons détecté que certains comptes ont abusé de la fonction de parrainage pour obtenir des pièces de manière non conforme aux règles. Les pièces et les objets échangés seront récupérés. Veuillez respecter les règles pour éviter l'interdiction de votre compte !",
+        "language": "fr-FR"
+      }
+    ]
   }
 ]
