@@ -5,6 +5,7 @@ namespace Fsel.System.Application.Queries.BlindBoxes
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
+    using Fsel.System.Domain.Entities.BlindBoxs;
     using Fsel.System.Domain.IRepositories.BlindBoxes;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
@@ -40,7 +41,9 @@ namespace Fsel.System.Application.Queries.BlindBoxes
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<BlindBoxModel>();
 
-            var blindBoxUser = await _blindBoxUserRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == _authContext.CurrentUserId, cancellationToken);
+            var blindBoxUsers = _blindBoxUserRepository.Queryable;
+
+            var blindBoxUser = blindBoxUsers.FirstOrDefault(p => p.UserId == _authContext.CurrentUserId);
             if (blindBoxUser == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(blindBoxUser), _authContext.CurrentUserId);
@@ -69,17 +72,42 @@ namespace Fsel.System.Application.Queries.BlindBoxes
 
             foreach (var item in blindBoxModel.BlindBoxChests.OrderBy(p => p.Index).ToList())
             {
-                item.ImagePath = null;
                 var blindBoxChestConfig = blindBoxChestConfigs.FirstOrDefault(p => p.BlindBoxChestId == item.Id && p.ConfigType == EnumBlindBoxConfigType.Piece);
-                if (blindBoxChestConfig != null && !blindBoxHistories.Any(p => p.BlindBoxChestConfigId == blindBoxChestConfig.Id))
+
+                if (!item.IsLast)
                 {
-                    item.IsActive = true;
-                    break;
+                    item.ImagePath = null;
+
+                    if (blindBoxChestConfig != null && !blindBoxHistories.Any(p => p.BlindBoxChestConfigId == blindBoxChestConfig.Id))
+                    {
+                        item.IsActive = true;
+                        break;
+                    }
+                    else
+                    {
+                        item.ImagePath = blindBoxChestConfig?.ImagePath;
+                        item.IsActive = false;
+                    }
                 }
                 else
                 {
-                    item.ImagePath = blindBoxChestConfig?.ImagePath;
-                    item.IsActive = false;
+                    if (blindBox.MileStone > blindBoxUsers.Count())
+                    {
+                        item.IsActive = false;
+                    }
+                    else
+                    {
+                        if (blindBoxChestConfig != null && !blindBoxHistories.Any(p => p.BlindBoxChestConfigId == blindBoxChestConfig.Id))
+                        {
+                            item.IsActive = true;
+                            break;
+                        }
+                        else
+                        {
+                            item.ImagePath = blindBoxChestConfig?.ImagePath;
+                            item.IsActive = false;
+                        }
+                    }
                 }
             }
 

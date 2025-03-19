@@ -66,13 +66,13 @@ namespace Fsel.System.Application.Commands.BlindBoxes
             }
             if (!blindBoxChestActive.IsLast)
             {
-                await BuyBlindBox(methodResult, null, null, blindBoxChestActive, cancellationToken);
+                await BuyBlindBox(methodResult, null, null, blindBoxChestActive, null, cancellationToken);
             }
             else
             {
                 if (!blindBoxUser.IsWin)
                 {
-                    await BuyBlindBox(methodResult, null, null, blindBoxChestActive, cancellationToken);
+                    await BuyBlindBox(methodResult, null, null, blindBoxChestActive, null, cancellationToken);
                 }
                 else
                 {
@@ -90,10 +90,12 @@ namespace Fsel.System.Application.Commands.BlindBoxes
 
                     if (blindBoxHistories.Count < blindBoxUser.NumberOpen - 1)
                     {
-                        await BuyBlindBox(methodResult, blindBoxChestConfigs, blindBoxHistories, blindBoxChestActive, cancellationToken);
+                        await BuyBlindBox(methodResult, blindBoxChestConfigs, blindBoxHistories, blindBoxChestActive, null, cancellationToken);
                     }
                     else
                     {
+                        var blindBoxChestConfig = blindBoxChestConfigs.FirstOrDefault(p => p.ConfigType == EnumBlindBoxConfigType.Coin);
+                        await BuyBlindBox(methodResult, blindBoxChestConfigs, blindBoxHistories, blindBoxChestActive, blindBoxChestConfig, cancellationToken);
                     }
                 }
             }
@@ -101,7 +103,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
             return methodResult;
         }
 
-        private async Task BuyBlindBox(MethodResult<bool> methodResult, List<BlindBoxChestConfig>? blindBoxChestConfigs, List<BlindBoxHistory>? blindBoxHistories, BlindBoxChestModel blindBoxChest, CancellationToken cancellationToken)
+        private async Task BuyBlindBox(MethodResult<bool> methodResult, List<BlindBoxChestConfig>? blindBoxChestConfigs, List<BlindBoxHistory>? blindBoxHistories, BlindBoxChestModel blindBoxChest, BlindBoxChestConfig? blindBoxChestConfig, CancellationToken cancellationToken)
         {
             if (blindBoxChestConfigs == null || blindBoxChestConfigs.Count == 0)
             {
@@ -126,11 +128,14 @@ namespace Fsel.System.Application.Commands.BlindBoxes
                .ToListAsync(cancellationToken);
             }
 
-            var blindBoxChestConfig = blindBoxChest.IsLast
-                ? GetRandomBlindBoxChestConfig(blindBoxChestConfigs.Where(p => p.ConfigType != EnumBlindBoxConfigType.Piece).ToList())
-                : (blindBoxChest.MaxOpenCount.HasValue && blindBoxHistories.Count == (blindBoxChest.MaxOpenCount - 1))
-                ? blindBoxChestConfigs.FirstOrDefault(p => p.ConfigType == EnumBlindBoxConfigType.Piece)
-                : GetRandomBlindBoxChestConfig(blindBoxChestConfigs);
+            if (blindBoxChestConfig == null)
+            {
+                blindBoxChestConfig = blindBoxChest.IsLast
+                                      ? GetRandomBlindBoxChestConfig(blindBoxChestConfigs.Where(p => p.ConfigType != EnumBlindBoxConfigType.Piece).ToList())
+                                      : (blindBoxChest.MaxOpenCount.HasValue && blindBoxHistories.Count == (blindBoxChest.MaxOpenCount - 1))
+                                      ? blindBoxChestConfigs.FirstOrDefault(p => p.ConfigType == EnumBlindBoxConfigType.Piece)
+                                      : GetRandomBlindBoxChestConfig(blindBoxChestConfigs);
+            }
 
             if (blindBoxChestConfig == null)
             {
@@ -142,7 +147,8 @@ namespace Fsel.System.Application.Commands.BlindBoxes
             {
                 BlindBoxChestConfigId = blindBoxChestConfig.Id,
                 IsPiece = blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.Piece,
-                Coin = blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.Coin ? blindBoxChestConfig.Coin : null
+                Coin = blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.Coin ? blindBoxChestConfig.Coin : null,
+                Code = blindBoxChest.IsLast ? "ABC" : null
             };
 
             await _blindBoxHistoryRepository.ExecuteTransactionAsync(async () =>
