@@ -98,8 +98,13 @@ namespace Fsel.System.Application.Commands.BlindBoxes
 
         public static BlindBoxChestConfig? GetRandomBlindBoxChestConfig(IList<BlindBoxChestConfig> blindBoxChestConfigs)
         {
+            ArgumentNullException.ThrowIfNull(blindBoxChestConfigs);
             Random random = new Random();
             double totalWeight = blindBoxChestConfigs.Sum(g => g.Percentage);
+            if (totalWeight < 100)
+            {
+                NormalizeGiftProbabilities(blindBoxChestConfigs);
+            }
             double randomValue = random.NextDouble() * totalWeight;
             double cumulative = 0;
 
@@ -112,6 +117,28 @@ namespace Fsel.System.Application.Commands.BlindBoxes
                 }
             }
             return null;
+        }
+
+        public static void NormalizeGiftProbabilities(IList<BlindBoxChestConfig> blindBoxChestConfigs)
+        {
+            ArgumentNullException.ThrowIfNull(blindBoxChestConfigs);
+            int totalWeight = blindBoxChestConfigs.Sum(g => g.Percentage);
+            if (totalWeight < 100)
+            {
+                int missingWeight = 100 - totalWeight;
+                int additionalWeightPerGift = missingWeight / blindBoxChestConfigs.Count;
+                int remainder = missingWeight % blindBoxChestConfigs.Count;
+
+                for (int i = 0; i < blindBoxChestConfigs.Count; i++)
+                {
+                    blindBoxChestConfigs[i].Percentage += additionalWeightPerGift;
+                    if (remainder > 0)
+                    {
+                        blindBoxChestConfigs[i].Percentage += 1;
+                        remainder--;
+                    }
+                }
+            }
         }
     }
 }
