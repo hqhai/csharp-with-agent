@@ -100,7 +100,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                     featureMissions.Add(new UserReferralToken
                     {
                         FeatureUserReferral = EnumFeatureUserReferral.DoneUnit1,
-                        Token = _appSetting.UserReferralConfig?.DoneUnit1 ?? 0,
+                        Token = userReferral.IsCoinRewarded ? _appSetting.UserReferralConfig?.DoneUnit1 ?? 0 : 0,
                         CreatedDate = DateTime.UtcNow,
                         PackageId = request.PackageId,
                     });
