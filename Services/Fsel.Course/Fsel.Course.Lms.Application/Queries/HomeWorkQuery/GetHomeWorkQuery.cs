@@ -108,7 +108,8 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
 
             var questionShuffles = await _questionShuffleRepository.Queryable.WhereBulkContains(questionIds, x => x.QuestionId)
                                                                              .Where(x => x.StudentId == homeWorkResult.StudentId).ToListAsync();
-            var questionExplanationErrors = await _questionExplanationErrorRepository.Queryable.WhereBulkContains(questionIds, x => x.QuestionId).Where(x => x.ObjectResultId == homeWorkResult.Id).ToListAsync();
+            var questionExplanationErrors = await _questionExplanationErrorRepository.Queryable.WhereBulkContains(questionIds, x => x.QuestionId)
+                                                                                               .Where(x => x.Status == EnumProcessedStatus.NotProcessed && x.ObjectResultId == homeWorkResult.Id).ToListAsync();
 
             foreach (var homeWorkQuestion in homeWorkQuestions)
             {
