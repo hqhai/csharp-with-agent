@@ -14,6 +14,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Identity.Application.Services.SystemService.CommandModels;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -24,11 +25,17 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
     public class ExcelUserBlindBagEventModel
     {
-        [EpplusTableColumn(Header = "Username (mỗi dòng chỉ điền 1 username)")]
-        public string? UserName { get; set; }
+        [EpplusTableColumn(Header = "StudentId (mỗi dòng chỉ điền 1 StudentId)")]
+        public string? StudentId { get; set; }
 
         [EpplusTableColumn(Header = "Mã lỗi (hệ thống tự trả, không được điền)")]
         public string? Status { get; set; }
+    }
+
+    public class StudentUserModel
+    {
+        public Guid StudentId { get; set; }
+        public Guid UserId { get; set; }
     }
 
     public class ImportUsersToBlindBagEventCommand : BaseImportCommandModel, IRequest<MethodResult<CreateStudentsToEventFromFileModel>>
@@ -40,15 +47,21 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private readonly Microsoft.AspNetCore.Identity.UserManager<User> _userManager;
         private readonly IOrderService _orderService;
         private readonly ISystemService _systemService;
+        private readonly IHumanRepository _humanRepository;
+        private readonly IStudentRepository _studentRepository;
 
         public ImportUsersToBlindBagEventCommandHandler(
             Microsoft.AspNetCore.Identity.UserManager<User> userManager,
             IOrderService orderService,
-            ISystemService systemService)
+            ISystemService systemService,
+            IHumanRepository humanRepository,
+            IStudentRepository studentRepository)
         {
             _userManager = userManager;
             _orderService = orderService;
             _systemService = systemService;
+            _humanRepository = humanRepository;
+            _studentRepository = studentRepository;
         }
 
         public async Task<MethodResult<CreateStudentsToEventFromFileModel>> Handle(ImportUsersToBlindBagEventCommand request, CancellationToken cancellationToken)
@@ -125,49 +138,61 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             }
             var blindBox = blindBoxResult.Content?.Result;
 
-            var userNames = resultData.Datas.Select(x => x.UserName).ToList();
-            var users = await _userManager.Users.WhereBulkContains(userNames, x => x.UserName).ToListAsync(cancellationToken);
+            var studentIds = resultData.Datas.Where(x => !string.IsNullOrEmpty(x.StudentId)).Select(x => new Guid(x.StudentId!)).ToList();
+            var studentUsers = new List<StudentUserModel>();
+            if (studentIds.Any())
+            {
+                studentUsers = await (from baseQ in _studentRepository.Queryable.WhereBulkContains(studentIds, x => x.Id)
+                                      join human in _humanRepository.Queryable on baseQ.HumanId equals human.Id
+                                      join user in _userManager.Users on human.UserId equals user.Id
+                                      select new StudentUserModel
+                                      {
+                                          StudentId = baseQ.Id,
+                                          UserId = user.Id
+                                      }).ToListAsync(cancellationToken);
+            }
 
+            var userIds = studentUsers.Select(x => x.UserId).ToList();
             var userBlindBoxResults = await _systemService.GetBlindBoxesByUserIdsAsync(new GetBlindBoxesByUserIdsQueryModel
             {
-                UserIds = users.Select(x => x.Id).ToList()
+                UserIds = userIds
             });
 
             var userBlindBoxIds = userBlindBoxResults.Content?.Result;
 
             var orderResults = await _orderService.GetRecentOrdersAsync(new GetRecentOrdersToUserIdsQueryModel
             {
-                UserIds = users.Select(x => x.Id).ToList(),
+                UserIds = userIds,
                 StartDate = blindBox?.StartDate ?? DateTime.UtcNow,
             });
             var orders = orderResults.Content?.Result;
 
             var result = request.FormFile.ImportAndValidateExcel(async (ExcelUserBlindBagEventModel x, IList<ExcelUserBlindBagEventModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
-                var user = users.FirstOrDefault(y => y.UserName == x.UserName);
-                var order = orders?.FirstOrDefault(y => user != null && y.UserId == user.Id);
-
-                if (string.IsNullOrEmpty(x.UserName))
+                if (string.IsNullOrEmpty(x.StudentId))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"{nameof(x.UserName)} không được để trống" });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"StudentId không được để trống" });
                 }
                 else
                 {
-                    if (models.Count(y => y.UserName == x.UserName) > 1)
+                    var studentUser = studentUsers.FirstOrDefault(y => y.StudentId.ToString() == x.StudentId);
+                    var order = orders?.FirstOrDefault(y => studentUser != null && y.UserId == studentUser.UserId);
+
+                    if (models.Count(y => y.StudentId == x.StudentId) > 1)
                     {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"{nameof(x.UserName)} bị trùng với username đã có trong danh sách" });
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"StudentId bị trùng với StudentId đã có trong danh sách" });
                     }
-                    else if (user == null)
+                    else if (studentUser == null)
                     {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"{nameof(x.UserName)} không tồn tại" });
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"User không tồn tại" });
                     }
                     else if (order == null)
                     {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"{nameof(x.UserName)} chưa mua gói học 12 tháng hoặc 24 tháng (tính từ thời điểm sự kiện túi mù bắt đầu)" });
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"User chưa mua gói học 12 tháng hoặc 24 tháng (tính từ thời điểm sự kiện túi mù bắt đầu)" });
                     }
-                    else if (userBlindBoxIds != null && userBlindBoxIds.Any(y => user != null && y == user.Id))
+                    else if (userBlindBoxIds != null && userBlindBoxIds.Any(y => studentUser != null && y == studentUser.UserId))
                     {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"{nameof(x.UserName)} đã được thêm vào sự kiện túi mù" });
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"User đã được thêm vào sự kiện túi mù" });
                     }
                 }
                 return await Task.FromResult(errors.Count == 0);
@@ -188,7 +213,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
             var blindBoxsResult = await _systemService.CreateBlindBoxesAsync(new CreateBlindBoxesCommandModel
             {
-                UserIds = users.Select(x => x.Id).ToList()
+                UserIds = userIds
             });
             methodResult.Result = new CreateStudentsToEventFromFileModel() { NumberOfStudent = blindBoxsResult.Content?.Result };
             methodResult.StatusCode = StatusCodes.Status200OK;
