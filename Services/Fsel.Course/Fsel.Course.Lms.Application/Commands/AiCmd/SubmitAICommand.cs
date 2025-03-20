@@ -57,19 +57,19 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             var result = response.Content?.Choices?.Select(x => x.Message?.Content).FirstOrDefault();
             string requestLog = ConvertHelper.Serialize(request);
             string responseLog = "";
-            if (response.Content != null)
+            if (!response.IsSuccessStatusCode)
             {
                 try
                 {
-                    responseLog = ConvertHelper.Serialize(response.Content);
+                    responseLog = ConvertHelper.Serialize(response.RequestMessage);
                 }
                 catch (Exception ex)
                 {
                     responseLog = result + " - Error convert json: " + ex.Message;
 
                 }
+                _logger.LogCritical($"ChatGPT response : {responseLog}, RequestLog : {requestLog}");
             }
-            _logger.LogCritical($"ChatGPT response : {responseLog}, RequestLog : {requestLog}");
             return result;
         }
     }
