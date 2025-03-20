@@ -164,7 +164,7 @@ namespace Fsel.Shared.Enums
 
         #region
         FselStore,
-        UrBox
+        UrBox,
         #endregion
 
         #region Blind Box
