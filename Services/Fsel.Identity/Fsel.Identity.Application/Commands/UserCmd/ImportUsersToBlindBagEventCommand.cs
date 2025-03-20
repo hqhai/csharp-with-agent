@@ -138,7 +138,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             }
             var blindBox = blindBoxResult.Content?.Result;
 
-            var studentIds = resultData.Datas.Where(x => !string.IsNullOrEmpty(x.StudentId)).Select(x => new Guid(x.StudentId!)).ToList();
+            var studentIds = resultData.Datas.Where(x => !string.IsNullOrEmpty(x.StudentId) && Guid.TryParse(x.StudentId, out Guid studentId)).Select(x => new Guid(x.StudentId!)).ToList();
             var studentUsers = new List<StudentUserModel>();
             if (studentIds.Any())
             {
@@ -173,9 +173,13 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"StudentId không được để trống" });
                 }
+                else if (!Guid.TryParse(x.StudentId, out Guid studentId))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"StudentId không đúng định dạng" });
+                }
                 else
                 {
-                    var studentUser = studentUsers.FirstOrDefault(y => y.StudentId.ToString() == x.StudentId);
+                    var studentUser = studentUsers.FirstOrDefault(y => y.StudentId.ToString() == x.StudentId.ToLower(System.Globalization.CultureInfo.CurrentCulture));
                     var order = orders?.FirstOrDefault(y => studentUser != null && y.UserId == studentUser.UserId);
 
                     if (models.Count(y => y.StudentId == x.StudentId) > 1)
