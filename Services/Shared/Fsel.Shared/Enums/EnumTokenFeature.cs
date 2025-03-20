@@ -16,6 +16,7 @@ namespace Fsel.Shared.Enums
         FriendMission,
         FselEvent,
         ReclaimGift,
-        RecallCoinBug
+        RecallCoinBug,
+        BlindBox
     }
 }
