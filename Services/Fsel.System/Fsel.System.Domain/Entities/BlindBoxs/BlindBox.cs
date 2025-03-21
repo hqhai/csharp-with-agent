@@ -6,6 +6,8 @@ namespace Fsel.System.Domain.Entities.BlindBoxs
     {
         public string? Name { get; set; }
         public int MileStone { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
         public ICollection<BlindBoxUser> BlindBoxUsers { get; set; } = new List<BlindBoxUser>();
         public ICollection<BlindBoxChest> BlindBoxChests { get; set; } = new List<BlindBoxChest>();
     }

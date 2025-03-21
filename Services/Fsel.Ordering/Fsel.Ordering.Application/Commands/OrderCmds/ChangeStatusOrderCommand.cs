@@ -25,7 +25,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
-    using Fsel.Ordering.Infrastructure.Repositories;
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -246,6 +245,18 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         }
                     }
                     await ResetUserVoucherLockAsync(order.UserId, cancellationToken).ConfigureAwait(false);
+
+                    var blindBoxPackages = _appSetting.BlindBoxConfigs;
+
+                    if (order.RevenueType == EnumPaymentRevenueType.Revenue && blindBoxPackages != null && blindBoxPackages.Packages != null && blindBoxPackages.Packages.Contains(package.MonthNumber))
+                    {
+                        await _systemService.AddUserIntoBlindBoxEvent(new AddUserIntoBlindBoxCommandModel()
+                        {
+                            UserId = order.UserId,
+                            IsWin = false,
+                            NumberOpen = 0
+                        });
+                    }
                 }
 
                 #endregion Gửi mail thanh toán

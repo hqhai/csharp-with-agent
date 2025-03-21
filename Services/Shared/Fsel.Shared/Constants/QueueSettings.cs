@@ -143,6 +143,8 @@ namespace Fsel.Shared.Constants
                 public const string NoticeAccessTime = $"{KeyQueue}_NoticeAccessTime";
                 public const string Techie = $"{KeyQueue}_Techie";
                 public const string CreateLuckyTicket = $"{KeyQueue}_CreateLuckyTicket";
+                public const string BuyBlindBox = $"{KeyQueue}_BuyBlindBox";
+                public const string SendNotifyBuyBlindBox = $"{KeyQueue}_SendNotifyBuyBlindBox";
             }
         }
 

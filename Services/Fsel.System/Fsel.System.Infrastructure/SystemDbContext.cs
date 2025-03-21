@@ -33,6 +33,7 @@ namespace Fsel.System.Infrastructure
             SeedTechieConfig(modelBuilder);
             SeedTechieActionsConfig(modelBuilder);
             SeedDisplayOrderConfig(modelBuilder);
+            SeedBlindBox(modelBuilder);
             modelBuilder.ApplyConfiguration(new TeachingCostEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ReferralDiscountConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardConfigConfiguration());
@@ -207,6 +208,23 @@ namespace Fsel.System.Infrastructure
             var displayOrderConfigs = ConvertHelper.DeserializeFromFilePath<IList<DisplayOrderConfig>>(path);
             ArgumentNullException.ThrowIfNull(displayOrderConfigs);
             builder.Entity<DisplayOrderConfig>().HasData(displayOrderConfigs);
+        }
+
+        private static void SeedBlindBox(ModelBuilder builder)
+        {
+            var blindBoxPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.BlindBox);
+            var blindBoxChestPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.BlindBoxChest);
+            var blindBoxChestConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.BlindBoxChestConfig);
+            var blindBoxes = ConvertHelper.DeserializeFromFilePath<IList<BlindBox>>(blindBoxPath);
+            var blindBoxChests = ConvertHelper.DeserializeFromFilePath<IList<BlindBoxChest>>(blindBoxChestPath);
+            var blindBoxChestConfigs = ConvertHelper.DeserializeFromFilePath<IList<BlindBoxChestConfig>>(blindBoxChestConfigPath);
+            ArgumentNullException.ThrowIfNull(blindBoxes);
+            ArgumentNullException.ThrowIfNull(blindBoxChests);
+            ArgumentNullException.ThrowIfNull(blindBoxChestConfigs);
+
+            builder.Entity<BlindBox>().HasData(blindBoxes);
+            builder.Entity<BlindBoxChest>().HasData(blindBoxChests);
+            builder.Entity<BlindBoxChestConfig>().HasData(blindBoxChestConfigs);
         }
 
         //private static void SeedTechieActionsConfig(ModelBuilder builder)
