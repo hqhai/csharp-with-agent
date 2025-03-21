@@ -6,6 +6,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using Fsel.Common.ActionResults;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -22,13 +23,17 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
         private readonly IOrderRepository _orderRepository;
         private readonly IMapper _mapper;
         private readonly IPackageRepository _packageRepository;
+        private readonly AppSetting _appSetting;
 
-        public GetRecentOrdersToUserIdsQueryHandler(IOrderRepository orderRepository, IMapper mapper,
-            IPackageRepository packageRepository)
+        public GetRecentOrdersToUserIdsQueryHandler(IOrderRepository orderRepository,
+            IMapper mapper,
+            IPackageRepository packageRepository,
+            AppSetting appSetting)
         {
             _orderRepository = orderRepository;
             _mapper = mapper;
             _packageRepository = packageRepository;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<IList<OrderModel>>> Handle(GetRecentOrdersToUserIdsQuery request, CancellationToken cancellationToken)
@@ -39,16 +44,17 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             {
                 return methodResult;
             }
-
-            var orders = (await (from baseQ in _orderRepository.Queryable.WhereBulkContains(request.UserIds, x => x.UserId)
+            var packages = _appSetting.BlindBoxConfigs?.Packages ?? new List<int> { ExtendMonth.TwentyFourMonth, ExtendMonth.TwelveMonth };
+            var query = from baseQ in _orderRepository.Queryable.WhereBulkContains(request.UserIds, x => x.UserId)
                                                                          .Where(x => x.Status == EnumOrderStatus.Payment)
                                                                          .Where(x => !request.StartDate.HasValue || (x.UpdatedDate ?? x.CreatedDate) >= request.StartDate)
-                                 join p in _packageRepository.Queryable on baseQ.PackageId equals p.Id
-                                 where p.MonthNumber == ExtendMonth.TwentyFourMonth || p.MonthNumber == ExtendMonth.TwelveMonth
-                                 select baseQ).ToListAsync(cancellationToken))
-                                .GroupBy(x => x.UserId)
-                                .Select(x => x.OrderByDescending(x => x.CreatedDate).FirstOrDefault())
-                                .ToList();
+                        join p in _packageRepository.Queryable.WhereBulkContains(packages, x => x.MonthNumber) on baseQ.PackageId equals p.Id
+                        select baseQ;
+
+            var orders = (await query.ToListAsync(cancellationToken))
+                               .GroupBy(x => x.UserId)
+                               .Select(x => x.OrderByDescending(x => x.CreatedDate).FirstOrDefault())
+                               .ToList();
 
             methodResult.Result = _mapper.Map<IList<OrderModel>>(orders);
             return methodResult;
