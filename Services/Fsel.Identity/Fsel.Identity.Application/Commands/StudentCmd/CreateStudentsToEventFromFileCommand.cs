@@ -323,7 +323,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.DateOfBirth);
                                 var user = new User()
                                 {
-                                    UserName = Shared.Helpers.StringHelper.GenerateUsername(student.FullName ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber)),
+                                    UserName = Shared.Helpers.StringHelper.GenerateUsername(student.FullName ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim())),
                                     Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
                                     FullName = student.FullName!.Trim(),
                                     PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
