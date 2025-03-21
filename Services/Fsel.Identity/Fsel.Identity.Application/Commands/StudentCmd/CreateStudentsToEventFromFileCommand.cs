@@ -459,10 +459,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             string initials = string.Join("", newFullName.Split(' ').Where(s => s.Length > 0).Select(s => s[0])).ToUpper(cultureInfo);
 
-            char randomLetter = letters[s_random.Next(letters.Length)];
+            char randomLetter1 = letters[s_random.Next(letters.Length)];
+            char randomLetter2 = letters[s_random.Next(letters.Length)];
             char randomDigit = digits[s_random.Next(digits.Length)];
 
-            return $"{initials}_{phoneNumber}_{randomLetter}{randomDigit}";
+            return $"{initials}_{phoneNumber}_{randomLetter1}{randomLetter2}{randomDigit}";
         }
 
         public static string RemoveDiacritics(string text)
