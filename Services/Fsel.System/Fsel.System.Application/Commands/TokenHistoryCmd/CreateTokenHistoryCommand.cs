@@ -31,15 +31,13 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
         private readonly ITokenHistoryRepository _tokenHistoryRepository;
         private readonly IUserService _userService;
         private readonly ITokenConfigRepository _tokenConfigRepository;
-        private readonly ILogger<CreateTokenHistoryCommand> _logger;
 
-        public CreateTokenHistoryCommandHandler(IMapper mapper, ITokenHistoryRepository tokenHistoryRepository, IUserService userService, ITokenConfigRepository tokenConfigRepository, ILogger<CreateTokenHistoryCommand> logger)
+        public CreateTokenHistoryCommandHandler(IMapper mapper, ITokenHistoryRepository tokenHistoryRepository, IUserService userService, ITokenConfigRepository tokenConfigRepository)
         {
             _mapper = mapper;
             _tokenHistoryRepository = tokenHistoryRepository;
             _userService = userService;
             _tokenConfigRepository = tokenConfigRepository;
-            _logger = logger;
         }
 
         public async Task<MethodResult<IList<TokenHistoryModel>>> Handle(CreateTokenHistoryCommand request, CancellationToken cancellationToken)
@@ -47,11 +45,8 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<TokenHistoryModel>> methodResult = new MethodResult<IList<TokenHistoryModel>>();
 
-            _logger.LogError("Start create token histories");
-
             if (request.TokenHistorys == null || request.TokenHistorys.Count == 0)
             {
-                _logger.LogError("TokenHistorys null");
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -104,7 +99,6 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                         tokenHistory.TokenConfigId = tokenConfig.Id;
                         if (!tokenHistory.IsValid())
                         {
-                            _logger.LogError("TokenHistory invalid");
                             methodResult.AddErrorBadRequest(tokenHistory.ErrorMessages);
                             return methodResult;
                         }
@@ -139,7 +133,6 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                 methodResult.Result = _mapper.Map<IList<TokenHistoryModel>>(tokenHistorys);
                 return methodResult;
             });
-            _logger.LogError("End create token histories");
             return methodResult;
         }
     }
