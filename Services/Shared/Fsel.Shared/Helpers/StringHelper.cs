@@ -324,7 +324,8 @@ namespace Fsel.Shared.Helpers
 
             phoneNumber = phoneNumber.Replace(" ", "", StringComparison.InvariantCultureIgnoreCase);
 
-            string pattern = @"^(0\d{9})$|^(84\d{9})$|^\+84\d{9}$|^\d{9}$";
+            string pattern = @"^(0\d{9})$|^(84\d{9})$|^\+84\d{9}$|^[1-9]\d{8}$";
+
             Regex regex = new Regex(pattern);
 
             return regex.IsMatch(phoneNumber);
