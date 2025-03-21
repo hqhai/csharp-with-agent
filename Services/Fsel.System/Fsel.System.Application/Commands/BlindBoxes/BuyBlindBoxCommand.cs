@@ -1,12 +1,17 @@
 namespace Fsel.System.Application.Commands.BlindBoxes
 {
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Application.Commands.TokenHistoryCmd;
     using Fsel.System.Application.Queries.BlindBoxes;
+    using Fsel.System.Application.Queues.Publisher;
+    using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities.BlindBoxs;
     using Fsel.System.Domain.IRepositories.BlindBoxes;
     using Fsel.System.Domain.Models.CommandModels.BlindBoxes;
@@ -14,6 +19,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
     using global::System;
     using global::System.Threading;
     using MediatR;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
     public class BuyBlindBoxCommand : BuyBlindBoxCommandModel, IRequest<MethodResult<bool>>
@@ -27,14 +33,20 @@ namespace Fsel.System.Application.Commands.BlindBoxes
         private readonly AuthContext _authContext;
         private readonly IBlindBoxChestConfigRepository _blindBoxChestConfigRepository;
         private readonly IBlindBoxHistoryRepository _blindBoxHistoryRepository;
+        private readonly IUserService _userService;
+        private readonly IMapper _mapper;
+        private readonly SendNotifyBuyBlindBoxPublisher _sendNotifyBuyBlindBox;
 
-        public BuyBlindBoxCommandHandler(IMediator mediator, IBlindBoxUserRepository blindBoxUserRepository, AuthContext authContext, IBlindBoxChestConfigRepository blindBoxChestConfigRepository, IBlindBoxHistoryRepository blindBoxHistoryRepository)
+        public BuyBlindBoxCommandHandler(IMediator mediator, IBlindBoxUserRepository blindBoxUserRepository, AuthContext authContext, IBlindBoxChestConfigRepository blindBoxChestConfigRepository, IBlindBoxHistoryRepository blindBoxHistoryRepository, IUserService userService, IMapper mapper, SendNotifyBuyBlindBoxPublisher sendNotifyBuyBlindBox)
         {
             _mediator = mediator;
             _blindBoxUserRepository = blindBoxUserRepository;
             _authContext = authContext;
             _blindBoxChestConfigRepository = blindBoxChestConfigRepository;
             _blindBoxHistoryRepository = blindBoxHistoryRepository;
+            _userService = userService;
+            _mapper = mapper;
+            _sendNotifyBuyBlindBox = sendNotifyBuyBlindBox;
         }
 
         public async Task<MethodResult<bool>> Handle(BuyBlindBoxCommand request, CancellationToken cancellationToken)
@@ -46,13 +58,15 @@ namespace Fsel.System.Application.Commands.BlindBoxes
 
             if (blindBoxUser == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                await SendNotify(StatusCodes.Status400BadRequest, EnumBuyBlindBoxErrorCode.NotIncludedInTheEvent.ToString(), null, null, null, cancellationToken);
+                methodResult.AddErrorBadRequest(nameof(EnumBuyBlindBoxErrorCode.NotIncludedInTheEvent));
                 return methodResult;
             }
 
-            var blindBoxResult = await _mediator.Send(new GetBlindBoxesQuery(), cancellationToken);
+            var blindBoxResult = await _mediator.Send(new GetBlindBoxByUserQuery(), cancellationToken);
             if (!blindBoxResult.IsOK)
             {
+                await SendNotify(StatusCodes.Status400BadRequest, EnumBuyBlindBoxErrorCode.DataNotExist.ToString(), null, null, null, cancellationToken);
                 methodResult.AddError(blindBoxResult.ErrorMessages);
                 return methodResult;
             }
@@ -61,18 +75,35 @@ namespace Fsel.System.Application.Commands.BlindBoxes
             var blindBoxChestActive = blindBox?.BlindBoxChests?.FirstOrDefault(p => p.IsActive);
             if (blindBoxChestActive == null || blindBoxChestActive.Id != request.BlindBoxChestId)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                await SendNotify(StatusCodes.Status400BadRequest, EnumBuyBlindBoxErrorCode.WrongChestReceived.ToString(), null, null, null, cancellationToken);
+                methodResult.AddErrorBadRequest(nameof(EnumBuyBlindBoxErrorCode.WrongChestReceived));
                 return methodResult;
             }
+
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(studentResult.Error);
+                return methodResult;
+            }
+
+            var student = studentResult.Content?.Result;
+            if (student?.NumberOfToken < blindBoxChestActive.OpenPrice)
+            {
+                await SendNotify(StatusCodes.Status400BadRequest, EnumBuyBlindBoxErrorCode.NotEnoughTokens.ToString(), null, null, null, cancellationToken);
+                methodResult.AddErrorBadRequest(nameof(EnumBuyBlindBoxErrorCode.NotEnoughTokens));
+                return methodResult;
+            }
+
             if (!blindBoxChestActive.IsLast)
             {
-                await BuyBlindBox(methodResult, null, null, blindBoxChestActive, cancellationToken);
+                await BuyBlindBox(methodResult, null, null, blindBoxChestActive, null, cancellationToken);
             }
             else
             {
                 if (!blindBoxUser.IsWin)
                 {
-                    await BuyBlindBox(methodResult, null, null, blindBoxChestActive, cancellationToken);
+                    await BuyBlindBox(methodResult, null, null, blindBoxChestActive, null, cancellationToken);
                 }
                 else
                 {
@@ -88,12 +119,17 @@ namespace Fsel.System.Application.Commands.BlindBoxes
                         .Where(p => p.CreatedUserId == _authContext.CurrentUserId)
                         .ToListAsync(cancellationToken);
 
+                    var blindBoxChestConfigModels = _mapper.Map<List<BlindBoxChestConfigModel>>(blindBoxChestConfigs);
+
                     if (blindBoxHistories.Count < blindBoxUser.NumberOpen - 1)
                     {
-                        await BuyBlindBox(methodResult, blindBoxChestConfigs, blindBoxHistories, blindBoxChestActive, cancellationToken);
+                        await BuyBlindBox(methodResult, blindBoxChestConfigModels, blindBoxHistories, blindBoxChestActive, null, cancellationToken);
                     }
                     else
                     {
+                        var blindBoxChestConfig = blindBoxChestConfigs.FirstOrDefault(p => p.ConfigType == EnumBlindBoxConfigType.Piece);
+                        var blindBoxChestConfigModel = _mapper.Map<BlindBoxChestConfigModel>(blindBoxChestConfig);
+                        await BuyBlindBox(methodResult, blindBoxChestConfigModels, blindBoxHistories, blindBoxChestActive, blindBoxChestConfigModel, cancellationToken);
                     }
                 }
             }
@@ -101,17 +137,19 @@ namespace Fsel.System.Application.Commands.BlindBoxes
             return methodResult;
         }
 
-        private async Task BuyBlindBox(MethodResult<bool> methodResult, List<BlindBoxChestConfig>? blindBoxChestConfigs, List<BlindBoxHistory>? blindBoxHistories, BlindBoxChestModel blindBoxChest, CancellationToken cancellationToken)
+        private async Task BuyBlindBox(MethodResult<bool> methodResult, List<BlindBoxChestConfigModel>? blindBoxChestConfigs, List<BlindBoxHistory>? blindBoxHistories, BlindBoxChestModel blindBoxChest, BlindBoxChestConfigModel? blindBoxChestConfig, CancellationToken cancellationToken)
         {
             if (blindBoxChestConfigs == null || blindBoxChestConfigs.Count == 0)
             {
-                blindBoxChestConfigs = await _blindBoxChestConfigRepository.Queryable
-              .Where(p => p.BlindBoxChestId == blindBoxChest.Id)
-              .ToListAsync(cancellationToken);
+                var blindBoxChestConfigEntities = await _blindBoxChestConfigRepository.Queryable
+               .Where(p => p.BlindBoxChestId == blindBoxChest.Id)
+               .ToListAsync(cancellationToken);
+                blindBoxChestConfigs = _mapper.Map<List<BlindBoxChestConfigModel>>(blindBoxChestConfigEntities);
             }
 
             if (!blindBoxChestConfigs.Any())
             {
+                await SendNotify(StatusCodes.Status400BadRequest, EnumBuyBlindBoxErrorCode.DataNotExist.ToString(), null, null, null, cancellationToken);
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return;
             }
@@ -126,14 +164,18 @@ namespace Fsel.System.Application.Commands.BlindBoxes
                .ToListAsync(cancellationToken);
             }
 
-            var blindBoxChestConfig = blindBoxChest.IsLast
-                ? GetRandomBlindBoxChestConfig(blindBoxChestConfigs.Where(p => p.ConfigType != EnumBlindBoxConfigType.Piece).ToList())
-                : (blindBoxChest.MaxOpenCount.HasValue && blindBoxHistories.Count == (blindBoxChest.MaxOpenCount - 1))
-                ? blindBoxChestConfigs.FirstOrDefault(p => p.ConfigType == EnumBlindBoxConfigType.Piece)
-                : GetRandomBlindBoxChestConfig(blindBoxChestConfigs);
+            if (blindBoxChestConfig == null)
+            {
+                blindBoxChestConfig = blindBoxChest.IsLast
+                                      ? GetRandomBlindBoxChestConfig(blindBoxChestConfigs.Where(p => p.ConfigType != EnumBlindBoxConfigType.Piece).ToList())
+                                      : (blindBoxChest.MaxOpenCount.HasValue && blindBoxHistories.Count == (blindBoxChest.MaxOpenCount - 1))
+                                      ? blindBoxChestConfigs.FirstOrDefault(p => p.ConfigType == EnumBlindBoxConfigType.Piece)
+                                      : GetRandomBlindBoxChestConfig(blindBoxChestConfigs);
+            }
 
             if (blindBoxChestConfig == null)
             {
+                await SendNotify(StatusCodes.Status400BadRequest, EnumBuyBlindBoxErrorCode.DataNotExist.ToString(), null, null, null, cancellationToken);
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return;
             }
@@ -142,7 +184,8 @@ namespace Fsel.System.Application.Commands.BlindBoxes
             {
                 BlindBoxChestConfigId = blindBoxChestConfig.Id,
                 IsPiece = blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.Piece,
-                Coin = blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.Coin ? blindBoxChestConfig.Coin : null
+                Coin = blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.Coin ? blindBoxChestConfig.Coin : null,
+                Code = blindBoxChest.IsLast && blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.Piece ? NumberHelper.GenerateCode(8) : null
             };
 
             await _blindBoxHistoryRepository.ExecuteTransactionAsync(async () =>
@@ -152,32 +195,104 @@ namespace Fsel.System.Application.Commands.BlindBoxes
 
                 if (blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.Coin)
                 {
-                    var updateTokenStudent = await _mediator.Send(new CreateTokenHistoryCommand
-                    {
-                        TokenHistorys = new List<TokenHistoryQueueModel>
-                                        {
-                                            new TokenHistoryQueueModel
-                                            {
-                                                VolatileToken = blindBoxChestConfig.Coin ?? 0,
-                                                Feature = EnumTokenFeature.BlindBox,
-                                                Mission = EnumTokenMission.BuyBlindBox,
-                                                UserId = _authContext.CurrentUserId,
-                                                Type = EnumTokenHistoryType.Recevived,
-                                                ObjectId = blindBoxChestConfig.Id
-                                            }
-                                        }
-                    });
+                    var plusTokens = await ProcessTokenTransactionAsync(methodResult, blindBoxChestConfig.Coin ?? 0, blindBoxChestConfig.Id, EnumTokenMission.OpenChestCoins, EnumTokenHistoryType.Recevived);
 
-                    if (!updateTokenStudent.IsOK)
+                    if (!plusTokens)
                     {
-                        methodResult.AddError(updateTokenStudent.ErrorMessages);
+                        return methodResult;
                     }
                 }
+
+                var minusTokens = await ProcessTokenTransactionAsync(methodResult, blindBoxChest.OpenPrice, blindBoxChest.Id, GetEnumMission(blindBoxChest), EnumTokenHistoryType.Exchanged);
+
+                if (!minusTokens)
+                {
+                    return methodResult;
+                }
+
+                if (blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.Coin)
+                {
+                    await SendNotify(StatusCodes.Status200OK, null, EnumBlindBoxConfigType.Coin.ToString(), null, blindBoxChestConfig.Coin ?? 0, cancellationToken);
+                }
+                else if (blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.GoodLuck)
+                {
+                    await SendNotify(StatusCodes.Status200OK, null, EnumBlindBoxConfigType.GoodLuck.ToString(), null, null, cancellationToken);
+                }
+                else if (blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.Piece)
+                {
+                    await SendNotify(StatusCodes.Status200OK, null, EnumBlindBoxConfigType.Piece.ToString(), blindBoxChestConfig.ImagePath, null, cancellationToken);
+                }
+
                 return methodResult;
             });
         }
 
-        public static BlindBoxChestConfig? GetRandomBlindBoxChestConfig(IList<BlindBoxChestConfig> blindBoxChestConfigs)
+        private static EnumTokenMission GetEnumMission(BlindBoxChestModel blindBoxChest)
+        {
+            if (blindBoxChest.Index == 1)
+            {
+                return EnumTokenMission.PurchaseChest1;
+            }
+            else if (blindBoxChest.Index == 2)
+            {
+                return EnumTokenMission.PurchaseChest2;
+            }
+            else if (blindBoxChest.Index == 3)
+            {
+                return EnumTokenMission.PurchaseChest3;
+            }
+            else if (blindBoxChest.Index == 4)
+            {
+                return EnumTokenMission.PurchaseChest4;
+            }
+            else if (blindBoxChest.Index == 5)
+            {
+                return EnumTokenMission.PurchaseChest5;
+            }
+            else
+            {
+                return EnumTokenMission.PurchaseChest6;
+            }
+        }
+
+        private async Task SendNotify(int statusCode, string? errorCode, string? configType, string? imagePath, int? coin, CancellationToken cancellationToken)
+        {
+            await _sendNotifyBuyBlindBox.Publish(new SendNotifyBuyBlindBoxModel
+            {
+                StatusCode = statusCode,
+                ErrorCode = errorCode,
+                ConfigType = configType,
+                ImagePath = imagePath,
+                Coin = coin
+            }, cancellationToken);
+        }
+
+        private async Task<bool> ProcessTokenTransactionAsync(MethodResult<bool> methodResult, int tokens, Guid objectId, EnumTokenMission mission, EnumTokenHistoryType historyType)
+        {
+            var result = await _mediator.Send(new CreateTokenHistoryCommand
+            {
+                TokenHistorys = new List<TokenHistoryQueueModel>
+                                        {
+                                            new TokenHistoryQueueModel
+                                            {
+                                                VolatileToken = tokens,
+                                                Feature = EnumTokenFeature.BlindBox,
+                                                Mission = mission,
+                                                UserId = _authContext.CurrentUserId,
+                                                Type = historyType,
+                                                ObjectId = objectId
+                                            }
+                                        }
+            });
+            if (!result.IsOK)
+            {
+                methodResult.AddError(result.ErrorMessages);
+                return false;
+            }
+            return true;
+        }
+
+        public static BlindBoxChestConfigModel? GetRandomBlindBoxChestConfig(IList<BlindBoxChestConfigModel> blindBoxChestConfigs)
         {
             ArgumentNullException.ThrowIfNull(blindBoxChestConfigs);
             Random random = new Random();
@@ -186,7 +301,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
             {
                 NormalizeGiftProbabilities(blindBoxChestConfigs);
             }
-            int randomValue = random.Next() * totalWeight;
+            int randomValue = random.Next(0, totalWeight);
             int cumulative = 0;
 
             foreach (var blindBoxChestConfig in blindBoxChestConfigs.OrderBy(p => p.Percentage).ToList())
@@ -200,7 +315,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
             return null;
         }
 
-        public static void NormalizeGiftProbabilities(IList<BlindBoxChestConfig> blindBoxChestConfigs)
+        public static void NormalizeGiftProbabilities(IList<BlindBoxChestConfigModel> blindBoxChestConfigs)
         {
             ArgumentNullException.ThrowIfNull(blindBoxChestConfigs);
             int totalWeight = blindBoxChestConfigs.Sum(g => g.Percentage);

@@ -6,19 +6,19 @@ using Fsel.Common.Constants;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using Fsel.System.Application.Commands.BlindBoxes;
+using Fsel.System.Application.Commands.CourseSuggestConfigCmd;
 using Fsel.System.Application.Queries.BlindBoxes;
 using Fsel.System.Domain.Models.EntityModels;
-using global::System.Net;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Fsel.System.Api.Controllers.Admins
+namespace Fsel.System.Api.Controllers
 {
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
-    [Route(Settings.APIDefaultRoute + "/admin/blind-box")]
+    [Route(Settings.APIDefaultRoute + "/blind-box")]
     [ApiController]
-    [Permission(role: nameof(EnumRole.Admin))]
+    [Permission(role: nameof(EnumRole.Student))]
     public class BlindBoxController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -29,49 +29,50 @@ namespace Fsel.System.Api.Controllers.Admins
         }
 
         /// <summary>
-        /// add user into blind box
-        /// </summary>
-        [HttpPost("add-user-into-blind-box")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> AddUserIntoBlindBox([FromBody] AddUserIntoBlindBoxCommand command)
-        {
-            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// Get Blind Box
+        /// Get blind box by student
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<BlindBoxModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetBlindBox()
         {
-            MethodResult<BlindBoxModel> commandResult = await _mediator.Send(new GetBlindBoxQuery()).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(new GetBlindBoxByUserQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
         /// <summary>
-        /// Get Blind Boxes By UserIds
+        /// Get blind box by student
         /// </summary>
-        [HttpPost("get-by-user-ids")]
-        [ProducesResponseType(typeof(MethodResult<IList<Guid>>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-blind-box-by-user")]
+        [ProducesResponseType(typeof(MethodResult<BlindBoxModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetBlindBoxesByUserIds([FromBody] GetBlindBoxesByUserIdsQuery query)
+        public async Task<IActionResult> GetBlindBoxByStudent()
         {
-            MethodResult<IList<Guid>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(new GetBlindBoxByUserQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
         /// <summary>
-        /// Create list Blind Box
+        /// buy blind box
         /// </summary>
-        [HttpPost("create-multiple")]
-        [ProducesResponseType(typeof(MethodResult<int>), (int)HttpStatusCode.OK)]
+        [HttpPost("buy-blind-box")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateBlindBoxes([FromBody] CreateBlindBoxesCommand command)
+        public async Task<IActionResult> BuyBlindBox([FromBody] BuyBlindBoxConsumerCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get most recent winner
+        /// </summary>
+        [HttpGet("get-most-recent-winner")]
+        [ProducesResponseType(typeof(MethodResult<BlindBoxModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetMostRecentWinner()
+        {
+            var commandResult = await _mediator.Send(new GetMostRecentWinnerQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

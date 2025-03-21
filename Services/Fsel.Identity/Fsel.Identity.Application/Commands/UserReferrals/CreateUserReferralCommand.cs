@@ -24,6 +24,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
         private readonly IUserReferralRepository _userReferralRepository;
         private readonly UserManager<User> _userManager;
         private readonly AuthContext _authContext;
+        private const int MaxUserCoinRewarded = 10;
 
         public CreateUserReferralCommandHandler(IUserReferralRepository userReferralRepository, UserManager<User> userManager, AuthContext authContext)
         {
@@ -67,13 +68,16 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                 return methodResult;
             }
 
+            var contuseReferral = await _userReferralRepository.Queryable.Where(p => p.SenderId == sender.Id).CountAsync(cancellationToken);
+
             await _userReferralRepository.ExecuteTransactionAsync(async () =>
             {
                 _userReferralRepository.Add(new UserReferral()
                 {
                     SenderId = sender.Id,
                     ReceiverId = receiverId,
-                    Type = request.UserReferralType
+                    Type = request.UserReferralType,
+                    IsCoinRewarded = contuseReferral < MaxUserCoinRewarded
                 });
                 await _userReferralRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;

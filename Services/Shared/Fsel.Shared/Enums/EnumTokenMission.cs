@@ -169,8 +169,26 @@ namespace Fsel.Shared.Enums
 
         #region Blind Box
 
-        [Description("Mua túi mù")]
-        BuyBlindBox,
+        [Description("Mở rương mảnh ghép số 1")]
+        PurchaseChest1,
+
+        [Description("Mở rương mảnh ghép số 2")]
+        PurchaseChest2,
+
+        [Description("Mở rương mảnh ghép số 3")]
+        PurchaseChest3,
+
+        [Description("Mở rương mảnh ghép số 4")]
+        PurchaseChest4,
+
+        [Description("Mở rương mảnh ghép số 5")]
+        PurchaseChest5,
+
+        [Description("Mở rương mảnh ghép số 6")]
+        PurchaseChest6,
+
+        [Description("Mở rương nhận Fsel coins")]
+        OpenChestCoins
 
         #endregion
     }

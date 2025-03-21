@@ -4,6 +4,9 @@ namespace Fsel.System.Application.Queries.BlindBoxes
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
+    using Fsel.Core.Base;
+    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories.BlindBoxes;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
@@ -28,8 +31,20 @@ namespace Fsel.System.Application.Queries.BlindBoxes
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<BlindBoxModel>();
-            var blindBox = await _blindBoxRepository.Queryable.FirstOrDefaultAsync(cancellationToken);
-            methodResult.Result = _mapper.Map<BlindBoxModel>(blindBox);
+
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+            var blindBox = await _blindBoxRepository.Queryable.Include(p => p.BlindBoxChests).FirstOrDefaultAsync(p => p.StartDate <= currentDate && p.EndDate >= currentDate, cancellationToken);
+
+            if (blindBox == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumBuyBlindBoxErrorCode.EventHasExpired), nameof(blindBox));
+                return methodResult;
+            }
+
+            var blindBoxModel = _mapper.Map<BlindBoxModel>(blindBox);
+
+            methodResult.Result = blindBoxModel;
             return methodResult;
         }
     }
