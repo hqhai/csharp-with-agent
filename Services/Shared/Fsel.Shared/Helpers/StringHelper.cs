@@ -8,8 +8,6 @@ namespace Fsel.Shared.Helpers
     using System.Text;
     using System.Text.RegularExpressions;
     using Fsel.Shared.Constants;
-    using Microsoft.IdentityModel.Tokens;
-    using Nest;
 
     public static class StringHelper
     {
@@ -365,55 +363,6 @@ namespace Fsel.Shared.Helpers
         {
             string objStr = data?.ToString() ?? string.Empty;
             return string.Format(objStr, param ?? Array.Empty<object>());
-        }
-
-        public static string GenerateUsername(string fullName, string phoneNumber)
-        {
-            if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(phoneNumber))
-            {
-                throw new ArgumentException("Full name and phone number cannot be empty.");
-            }
-
-            Random random = new Random();
-            string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            string digits = "0123456789";
-
-            CultureInfo cultureInfo = CultureInfo.InvariantCulture;
-
-            var newFullName = RemoveDiacritics(fullName);
-
-            string initials = string.Join("", newFullName.Split(' ').Where(s => s.Length > 0).Select(s => s[0])).ToUpper(cultureInfo);
-
-            char randomLetter = letters[random.Next(letters.Length)];
-            char randomDigit = digits[random.Next(digits.Length)];
-
-            return $"{initials}_{phoneNumber}_{randomLetter}{randomDigit}";
-        }
-
-        public static string RemoveDiacritics(string text)
-        {
-            if (text.IsNullOrEmpty())
-            {
-                return string.Empty;
-            }
-            var normalizedString = text.Normalize(NormalizationForm.FormD);
-            var stringBuilder = new StringBuilder(capacity: normalizedString.Length);
-
-            for (int i = 0; i < normalizedString.Length; i++)
-            {
-                char c = normalizedString[i];
-                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
-                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
-                {
-                    stringBuilder.Append(c);
-                }
-            }
-
-            StringComparison stringComparison = StringComparison.InvariantCultureIgnoreCase;
-
-            return stringBuilder
-                .ToString().Replace("Đ", "D", stringComparison).Replace("đ", "d", stringComparison)
-                .Normalize(NormalizationForm.FormC);
         }
     }
 }
