@@ -55,14 +55,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             });
 
             var result = response.Content?.Choices?.Select(x => x.Message?.Content).FirstOrDefault();
+
             string requestLog = ConvertHelper.Serialize(request);
             string responseLog = "";
             try
             {
-                if (response.RequestMessage != null)
-                {
-                    responseLog = responseLog + " RequestMessage: " + ConvertHelper.Serialize(response.RequestMessage);
-                }
+                responseLog = responseLog + " StatusCode: " + response.StatusCode.ToString();
                 if (response.Content != null)
                 {
                     responseLog = responseLog + " Content: " + ConvertHelper.Serialize(response.Content);
