@@ -59,6 +59,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             string responseLog = "";
             try
             {
+                responseLog = responseLog + " StatusCode: " + ConvertHelper.Serialize(response.StatusCode);
                 if (response.RequestMessage != null)
                 {
                     responseLog = responseLog + " RequestMessage: " + ConvertHelper.Serialize(response.RequestMessage);
