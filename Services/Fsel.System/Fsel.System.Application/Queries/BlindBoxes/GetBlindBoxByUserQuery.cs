@@ -81,23 +81,17 @@ namespace Fsel.System.Application.Queries.BlindBoxes
 
                 if (item.IsLast)
                 {
-                    item.IsActive = blindBox.MileStone <= blindBoxUsers.Count() && hasHistory;
+                    item.IsActive = blindBox.MileStone <= blindBoxUsers.Count() && !hasHistory;
+                    item.ImagePath = blindBox.MileStone <= blindBoxUsers.Count() && hasHistory ? blindBoxChestConfig?.ImagePath : null;
                 }
                 else
                 {
-                    item.ImagePath = null;
-                    item.IsActive = hasHistory;
+                    item.ImagePath = hasHistory ? blindBoxChestConfig?.ImagePath : null;
+                    item.IsActive = !hasHistory;
                 }
 
                 var blindBoxChestConfigIds = blindBoxChestConfigs.Where(p => p.BlindBoxChestId == item.Id).Select(p => p.Id).ToList();
                 item.OpenCount = blindBoxHistories.Where(p => blindBoxChestConfigIds.Contains(p.BlindBoxChestConfigId)).Count();
-
-                if (item.IsActive)
-                {
-                    break;
-                }
-
-                item.ImagePath = blindBoxChestConfig?.ImagePath;
             }
 
             var lastBlindBoxChest = blindBoxModel.BlindBoxChests.FirstOrDefault(p => p.IsLast);
