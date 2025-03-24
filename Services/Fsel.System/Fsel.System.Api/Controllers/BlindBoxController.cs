@@ -36,7 +36,7 @@ namespace Fsel.System.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetBlindBox()
         {
-            var commandResult = await _mediator.Send(new GetBlindBoxByUserQuery()).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(new GetBlindBoxQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -68,7 +68,7 @@ namespace Fsel.System.Api.Controllers
         /// get most recent winner
         /// </summary>
         [HttpGet("get-most-recent-winner")]
-        [ProducesResponseType(typeof(MethodResult<BlindBoxModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<string?>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetMostRecentWinner()
         {
