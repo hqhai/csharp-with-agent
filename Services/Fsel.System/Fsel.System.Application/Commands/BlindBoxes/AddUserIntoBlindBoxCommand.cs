@@ -4,15 +4,9 @@ namespace Fsel.System.Application.Commands.BlindBoxes
     using Fsel.Common.Helpers;
     using Fsel.System.Domain.Entities.BlindBoxs;
     using Fsel.System.Domain.IRepositories.BlindBoxes;
+    using Fsel.System.Domain.Models.CommandModels.BlindBoxes;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
-
-    public class AddUserIntoBlindBoxCommandModel
-    {
-        public Guid UserId { get; set; }
-        public bool IsWin { get; set; }
-        public int NumberOpen { get; set; }
-    }
 
     public class AddUserIntoBlindBoxCommand : AddUserIntoBlindBoxCommandModel, IRequest<MethodResult<bool>>
     {
@@ -54,7 +48,8 @@ namespace Fsel.System.Application.Commands.BlindBoxes
                         BlindBoxId = blindBox.Id,
                         UserId = request.UserId,
                         NumberOpen = request.NumberOpen,
-                        IsWin = request.IsWin
+                        IsWin = request.IsWin,
+                        IsShowPopUp = true
                     });
                     await _blindBoxUserRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     return methodResult;

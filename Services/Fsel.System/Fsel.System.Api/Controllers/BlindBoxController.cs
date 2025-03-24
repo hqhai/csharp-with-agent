@@ -75,5 +75,29 @@ namespace Fsel.System.Api.Controllers
             var commandResult = await _mediator.Send(new GetMostRecentWinnerQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// off popup
+        /// </summary>
+        [HttpPost("off-popup")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> OffPopUp()
+        {
+            var commandResult = await _mediator.Send(new OffPopUpBlindBoxByUserCommand()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// receive blind box
+        /// </summary>
+        [HttpPost("receive-blind-box")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ReceiveBlindBox()
+        {
+            var commandResult = await _mediator.Send(new ReceiveBlindBoxCommand()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
