@@ -210,8 +210,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     await result.Stream.CopyToAsync(memoryStream, cancellationToken);
                     fileBytes = memoryStream.ToArray();
                 }
-                methodResult.Result = new CreateStudentsToEventFromFileModel() { File = fileBytes };
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.Result = new CreateStudentsToEventFromFileModel() { File = fileBytes, StatusCode = StatusCodes.Status400BadRequest };
                 return methodResult;
             }
 
@@ -219,7 +218,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             {
                 UserIds = userIds
             });
-            methodResult.Result = new CreateStudentsToEventFromFileModel() { NumberOfStudent = blindBoxsResult.Content?.Result };
+            methodResult.Result = new CreateStudentsToEventFromFileModel() { NumberOfStudent = blindBoxsResult.Content?.Result, StatusCode = StatusCodes.Status200OK };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
