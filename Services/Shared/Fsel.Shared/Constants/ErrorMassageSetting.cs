@@ -5,6 +5,7 @@ namespace Fsel.Shared.Constants
     public static class ErrorMassageSetting
     {
         public const string EmptyFullNameVN = "Chưa nhập họ và tên";
+        public const string InvalidFullNameVN = "Họ và tên không đúng định dạng";
         public const string EmptyPhoneNumberVN = "Chưa nhập số điện thoại";
         public const string EmptyEmailVN = "Chưa nhập email";
         public const string EmptyBirthDayVN = "Chưa nhập ngày sinh hoặc ngày sinh sai định dạng";

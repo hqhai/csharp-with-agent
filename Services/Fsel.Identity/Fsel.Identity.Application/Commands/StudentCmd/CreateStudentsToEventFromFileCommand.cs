@@ -234,6 +234,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         {
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.EmptyFullNameVN });
                         }
+                        else if (Shared.Helpers.StringHelper.ContainsSpecialChars(x.FullName.Trim()))
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.InvalidFullNameVN });
+                        }
                         if (string.IsNullOrEmpty(x.PhoneNumber?.Trim()))
                         {
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.EmptyPhoneNumberVN });
@@ -327,18 +331,18 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.DateOfBirth);
                                 var user = new User()
                                 {
-                                    UserName = GenerateUsername(student.FullName ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim())),
+                                    UserName = GenerateUsername(student.FullName?.Trim() ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim())),
                                     Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
-                                    FullName = student.FullName!.Trim(),
-                                    PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
+                                    FullName = student.FullName?.Trim() ?? string.Empty,
+                                    PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()),
                                     EmailConfirmed = false,
                                     PhoneNumberConfirmed = false,
                                     Status = EnumUserStatus.Active,
                                     DefaultPassword = password,
                                     Human = new Human()
                                     {
-                                        FullName = student.FullName.Trim(),
-                                        PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
+                                        FullName = student.FullName?.Trim(),
+                                        PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()),
                                         Birthday = student.DateOfBirth,
                                         Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
                                         Code = GeneratorCodeAsync(studentRepository, student.DateOfBirth ?? DateTime.MinValue, null),
@@ -382,6 +386,28 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                         FullName = user.FullName,
                                         StudentCode = user.Human.Code
                                     });
+                                }
+                                else
+                                {
+                                    user.UserName = GenerateUsername(student.FullName ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()));
+                                    identityStudentResult = await userManager.CreateAsync(user, password);
+
+                                    if (identityStudentResult.Succeeded)
+                                    {
+                                        await userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
+
+                                        studentIds.Add(user.Human.Student.Id);
+
+                                        studentModels.Add(new CreateOrderForStudentsEventCommandModel()
+                                        {
+                                            UserId = user.Id,
+                                            StudentId = user.Human.Student.Id,
+                                            Email = user.Email,
+                                            PhoneNumber = user.PhoneNumber,
+                                            FullName = user.FullName,
+                                            StudentCode = user.Human.Code
+                                        });
+                                    }
                                 }
                             }
                         }
