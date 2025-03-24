@@ -4,6 +4,7 @@ using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Domain.Models.EntityModels.ExportEventModels;
 using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
 using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
 using Fsel.Course.Infrastructure.Configs;
@@ -108,6 +109,10 @@ namespace Fsel.Course.Infrastructure
         public DbSet<TotalDetailLearningQualityModel> TotalDetailLearningQualitys { get; set; }
         public DbSet<SchoolInfoModel> SchoolInfos { get; set; }
         public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
+
+        public DbSet<ExportStudentEventModel> ExportStudentEvents { get; set; }
+        public DbSet<ExportDistrictEventModel> ExportDistrictEvents { get; set; }
+        public DbSet<ExportSchoolEventModel> ExportSchoolEvents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

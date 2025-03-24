@@ -101,5 +101,9 @@ namespace Fsel.Shared.Constants
         public const string ReportSurveyQuestionEventSchool = "Resources//ExportExcelTemplates//SurveyQuestionReportSchool.xlsx";
 
         public const string RevenueReport = "Resources//ExportExcelTemplates//TemplateRevenueReport.xlsx";
+
+        public const string ReportDistrictSchool = "Resources//ExportExcelTemplates//Report_District_School.xlsx";
+        public const string ReportDoetSelfstudy = "Resources//ExportExcelTemplates//Report_Doet_Selfstudy.xlsx";
+        public const string ReportSchoolStudent = "Resources//ExportExcelTemplates//Report_School_Student.xlsx";
     }
 }
