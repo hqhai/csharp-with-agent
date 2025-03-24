@@ -6,17 +6,14 @@ namespace Fsel.Identity.Application.Queues.Publishers
     using Fsel.Core.Base.Interfaces;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels;
-    using Microsoft.Extensions.Logging;
 
     public class CreateTokenHistoryPublisher
     {
         private readonly IQueueProvider _queueProvider;
-        private readonly ILogger<CreateTokenHistoryPublisher> _logger;
 
-        public CreateTokenHistoryPublisher(IQueueProvider queueProvider, ILogger<CreateTokenHistoryPublisher> logger)
+        public CreateTokenHistoryPublisher(IQueueProvider queueProvider)
         {
             _queueProvider = queueProvider;
-            _logger = logger;
         }
 
         public async Task Publish(IList<TokenHistoryQueueModel>? request, CancellationToken cancellationToken)
@@ -25,7 +22,6 @@ namespace Fsel.Identity.Application.Queues.Publishers
             {
                 return;
             }
-            _logger.LogError("CreateTokenHistory");
             await _queueProvider.Publish(QueueSettings.UserQueue.NameQueue.CreateTokenHistory, new TokenHistoryQueuesModel { TokenHistories = request }, cancellationToken);
         }
     }
