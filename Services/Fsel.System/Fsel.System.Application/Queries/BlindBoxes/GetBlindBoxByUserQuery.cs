@@ -58,6 +58,7 @@ namespace Fsel.System.Application.Queries.BlindBoxes
 
             var blindBoxModel = _mapper.Map<BlindBoxModel>(blindBox);
             blindBoxModel.TotalUser = blindBoxUsers.Count();
+            blindBoxModel.IsShowPopUp = blindBoxUser.IsShowPopUp;
             var blindBoxHistories = await _blindBoxHistoryRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId).ToListAsync(cancellationToken);
 
             var blindBoxChestConfigs = blindBox.BlindBoxChests.SelectMany(p => p.BlindBoxChestConfigs).ToList();
@@ -76,25 +77,28 @@ namespace Fsel.System.Application.Queries.BlindBoxes
                     .FirstOrDefault(p => p.BlindBoxChestId == item.Id && p.ConfigType == EnumBlindBoxConfigType.Piece);
 
                 bool hasHistory = blindBoxChestConfig != null &&
-                                  !blindBoxHistories.Any(p => p.BlindBoxChestConfigId == blindBoxChestConfig.Id);
+                                  blindBoxHistories.Any(p => p.BlindBoxChestConfigId == blindBoxChestConfig.Id);
 
                 if (item.IsLast)
                 {
-                    item.IsActive = blindBox.MileStone <= blindBoxUsers.Count() && hasHistory;
+                    item.IsActive = blindBox.MileStone <= blindBoxUsers.Count() && !hasHistory;
+                    item.ImagePath = blindBox.MileStone <= blindBoxUsers.Count() && hasHistory ? blindBoxChestConfig?.ImagePath : null;
                 }
                 else
                 {
-                    item.ImagePath = null;
-                    item.IsActive = hasHistory;
+                    item.ImagePath = hasHistory ? blindBoxChestConfig?.ImagePath : null;
+                    item.IsActive = !hasHistory;
                 }
 
-                if (item.IsActive)
-                {
-                    break;
-                }
-
-                item.ImagePath = blindBoxChestConfig?.ImagePath;
+                var blindBoxChestConfigIds = blindBoxChestConfigs.Where(p => p.BlindBoxChestId == item.Id).Select(p => p.Id).ToList();
+                item.OpenCount = blindBoxHistories.Where(p => blindBoxChestConfigIds.Contains(p.BlindBoxChestConfigId)).Count();
             }
+
+            var lastBlindBoxChest = blindBoxModel.BlindBoxChests.FirstOrDefault(p => p.IsLast);
+            var blindBoxChestConfigPiece = blindBoxChestConfigs.FirstOrDefault(p => p.BlindBoxChestId == lastBlindBoxChest?.Id && p.ConfigType == EnumBlindBoxConfigType.Piece);
+            var lastBlindBoxChestHistory = blindBoxHistories.FirstOrDefault(p => p.BlindBoxChestConfigId == blindBoxChestConfigPiece?.Id && p.IsPiece && !string.IsNullOrEmpty(p.Code));
+
+            blindBoxModel.IsReceived = lastBlindBoxChestHistory != null;
 
             methodResult.Result = blindBoxModel;
 

@@ -8,6 +8,7 @@ namespace Fsel.System.Domain.Entities.BlindBoxs
         public Guid UserId { get; set; }
         public int NumberOpen { get; set; }
         public bool IsWin { get; set; }
+        public bool IsShowPopUp { get; set; } = true;
         public BlindBox? BlindBox { get; set; }
     }
 }

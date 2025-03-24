@@ -9,6 +9,8 @@ namespace Fsel.System.Domain.Models.EntityModels
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int? TotalUser { get; set; }
+        public bool IsShowPopUp { get; set; }
+        public bool IsReceived { get; set; }
         public IList<BlindBoxChestModel>? BlindBoxChests { get; set; }
     }
 }

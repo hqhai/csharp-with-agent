@@ -6,6 +6,7 @@ namespace Fsel.System.Domain.Models.EntityModels
     {
         public string? Name { get; set; }
         public int? MaxOpenCount { get; set; }
+        public int OpenCount { get; set; }
         public string? ImagePath { get; set; }
         public int OpenPrice { get; set; }
         public int Index { get; set; }

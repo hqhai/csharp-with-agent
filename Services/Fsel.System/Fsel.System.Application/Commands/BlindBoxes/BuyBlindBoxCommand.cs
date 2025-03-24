@@ -36,6 +36,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly SendNotifyBuyBlindBoxPublisher _sendNotifyBuyBlindBox;
+        private const int MaxPercent = 100;
 
         public BuyBlindBoxCommandHandler(IMediator mediator, IBlindBoxUserRepository blindBoxUserRepository, AuthContext authContext, IBlindBoxChestConfigRepository blindBoxChestConfigRepository, IBlindBoxHistoryRepository blindBoxHistoryRepository, IUserService userService, IMapper mapper, SendNotifyBuyBlindBoxPublisher sendNotifyBuyBlindBox)
         {
@@ -184,8 +185,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
             {
                 BlindBoxChestConfigId = blindBoxChestConfig.Id,
                 IsPiece = blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.Piece,
-                Coin = blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.Coin ? blindBoxChestConfig.Coin : null,
-                Code = blindBoxChest.IsLast && blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.Piece ? NumberHelper.GenerateCode(8) : null
+                Coin = blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.Coin ? blindBoxChestConfig.Coin : null
             };
 
             await _blindBoxHistoryRepository.ExecuteTransactionAsync(async () =>
@@ -231,27 +231,27 @@ namespace Fsel.System.Application.Commands.BlindBoxes
         {
             if (blindBoxChest.Index == 1)
             {
-                return EnumTokenMission.PurchaseChest1;
+                return EnumTokenMission.PurchaseChestFirst;
             }
             else if (blindBoxChest.Index == 2)
             {
-                return EnumTokenMission.PurchaseChest2;
+                return EnumTokenMission.PurchaseChestSecond;
             }
             else if (blindBoxChest.Index == 3)
             {
-                return EnumTokenMission.PurchaseChest3;
+                return EnumTokenMission.PurchaseChestThird;
             }
             else if (blindBoxChest.Index == 4)
             {
-                return EnumTokenMission.PurchaseChest4;
+                return EnumTokenMission.PurchaseChestFourth;
             }
             else if (blindBoxChest.Index == 5)
             {
-                return EnumTokenMission.PurchaseChest5;
+                return EnumTokenMission.PurchaseChestFifth;
             }
             else
             {
-                return EnumTokenMission.PurchaseChest6;
+                return EnumTokenMission.PurchaseChestSixth;
             }
         }
 
@@ -297,7 +297,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
             ArgumentNullException.ThrowIfNull(blindBoxChestConfigs);
             Random random = new Random();
             int totalWeight = blindBoxChestConfigs.Sum(g => g.Percentage);
-            if (totalWeight < 100)
+            if (totalWeight < MaxPercent)
             {
                 NormalizeGiftProbabilities(blindBoxChestConfigs);
             }
@@ -319,9 +319,9 @@ namespace Fsel.System.Application.Commands.BlindBoxes
         {
             ArgumentNullException.ThrowIfNull(blindBoxChestConfigs);
             int totalWeight = blindBoxChestConfigs.Sum(g => g.Percentage);
-            if (totalWeight < 100)
+            if (totalWeight < MaxPercent)
             {
-                int missingWeight = 100 - totalWeight;
+                int missingWeight = MaxPercent - totalWeight;
                 int additionalWeightPerGift = missingWeight / blindBoxChestConfigs.Count;
                 int remainder = missingWeight % blindBoxChestConfigs.Count;
 
