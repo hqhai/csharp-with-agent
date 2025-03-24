@@ -77,7 +77,7 @@ namespace Fsel.System.Application.Queries.BlindBoxes
                     .FirstOrDefault(p => p.BlindBoxChestId == item.Id && p.ConfigType == EnumBlindBoxConfigType.Piece);
 
                 bool hasHistory = blindBoxChestConfig != null &&
-                                  !blindBoxHistories.Any(p => p.BlindBoxChestConfigId == blindBoxChestConfig.Id);
+                                  blindBoxHistories.Any(p => p.BlindBoxChestConfigId == blindBoxChestConfig.Id);
 
                 if (item.IsLast)
                 {
