@@ -53,5 +53,8 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Post("/v1/admin/token-history/survey-reward")]
         Task<IApiResponse<MethodResult<bool>>> AddCoinSurveyReward([Body] AddCoinSurveyRewardModel query);
+
+        [Get("/v1/location/{localId}")]
+        Task<IApiResponse<MethodResult<SchoolModel>>> GetLocationByLocalId([FromRoute] string localId);
     }
 }
