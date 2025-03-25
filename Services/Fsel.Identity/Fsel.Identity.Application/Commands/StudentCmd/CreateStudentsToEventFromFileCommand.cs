@@ -234,7 +234,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         {
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.EmptyFullNameVN });
                         }
-                        else if (Shared.Helpers.StringHelper.ContainsSpecialChars(x.FullName.Trim()))
+                        else if (!Shared.Helpers.StringHelper.ContainsSpecialChars(x.FullName.Trim()))
                         {
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.InvalidFullNameVN });
                         }
