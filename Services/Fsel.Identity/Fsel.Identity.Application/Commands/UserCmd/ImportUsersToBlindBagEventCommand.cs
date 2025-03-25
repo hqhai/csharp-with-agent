@@ -26,7 +26,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     public class ExcelUserBlindBagEventModel
     {
         [EpplusTableColumn(Header = "StudentId (mỗi dòng chỉ điền 1 StudentId)")]
-        public string? StudentId { get; set; }
+        public string? HumanCode { get; set; }
 
         [EpplusTableColumn(Header = "Mã lỗi (hệ thống tự trả, không được điền)")]
         public string? Status { get; set; }
@@ -34,7 +34,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
     public class StudentUserModel
     {
-        public Guid StudentId { get; set; }
+        public string? HumanCode { get; set; }
         public Guid UserId { get; set; }
     }
 
@@ -48,30 +48,45 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private readonly IOrderService _orderService;
         private readonly ISystemService _systemService;
         private readonly IHumanRepository _humanRepository;
-        private readonly IStudentRepository _studentRepository;
+        private const string ErrorTemplate = "Định dạng File tải lên không hợp lệ\nVui lòng tải lại file template mẫu và thử lại.";
+        private const string Success = "Thành công";
+        private const string DataError = "Dữ liệu bị trống hoặc sai định dạng";
+        private const string FileNull = "File tải lên không có dữ liệu\nVui lòng tải file template mẫu và thử lại.";
+        private const string FileSizeExceededMessage = "Dung lượng File vượt quá 1MB";
 
         public ImportUsersToBlindBagEventCommandHandler(
             Microsoft.AspNetCore.Identity.UserManager<User> userManager,
             IOrderService orderService,
             ISystemService systemService,
-            IHumanRepository humanRepository,
-            IStudentRepository studentRepository)
+            IHumanRepository humanRepository)
         {
             _userManager = userManager;
             _orderService = orderService;
             _systemService = systemService;
             _humanRepository = humanRepository;
-            _studentRepository = studentRepository;
         }
 
         public async Task<MethodResult<CreateStudentsToEventFromFileModel>> Handle(ImportUsersToBlindBagEventCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<CreateStudentsToEventFromFileModel>();
-
+            string allowedContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             if (request.FormFile == null)
             {
-                methodResult.AddError(nameof(EnumSystemErrorCode.ImportFileRequired));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.ImportFileRequired), nameof(request.FormFile));
+                return methodResult;
+            }
+
+            long maxFileSize = 1 * 1024 * 1024; // 1MB
+            if (request.FormFile.Length > maxFileSize)
+            {
+                methodResult.Result = new CreateStudentsToEventFromFileModel() { Message = FileSizeExceededMessage, StatusCode = StatusCodes.Status400BadRequest };
+                return methodResult;
+            }
+
+            if (request.FormFile.ContentType != allowedContentType)
+            {
+                methodResult.Result = new CreateStudentsToEventFromFileModel() { Message = ErrorTemplate, StatusCode = StatusCodes.Status400BadRequest };
                 return methodResult;
             }
 
@@ -138,16 +153,15 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             }
             var blindBox = blindBoxResult.Content?.Result;
 
-            var studentIds = resultData.Datas.Where(x => !string.IsNullOrEmpty(x.StudentId) && Guid.TryParse(x.StudentId, out Guid studentId)).Select(x => new Guid(x.StudentId!)).ToList();
+            var humanCodes = resultData.Datas.Where(x => !string.IsNullOrEmpty(x.HumanCode)).Select(x => x.HumanCode!.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture)).ToList();
             var studentUsers = new List<StudentUserModel>();
-            if (studentIds.Any())
+            if (humanCodes.Any())
             {
-                studentUsers = await (from baseQ in _studentRepository.Queryable.WhereBulkContains(studentIds, x => x.Id)
-                                      join human in _humanRepository.Queryable on baseQ.HumanId equals human.Id
-                                      join user in _userManager.Users on human.UserId equals user.Id
+                studentUsers = await (from baseQ in _humanRepository.Queryable.WhereBulkContains(humanCodes, x => x.Code)
+                                      join user in _userManager.Users on baseQ.UserId equals user.Id
                                       select new StudentUserModel
                                       {
-                                          StudentId = baseQ.Id,
+                                          HumanCode = baseQ.Code,
                                           UserId = user.Id
                                       }).ToListAsync(cancellationToken);
             }
@@ -169,22 +183,19 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
             var result = request.FormFile.ImportAndValidateExcel(async (ExcelUserBlindBagEventModel x, IList<ExcelUserBlindBagEventModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
-                if (string.IsNullOrEmpty(x.StudentId))
+                if (string.IsNullOrEmpty(x.HumanCode))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"StudentId không được để trống" });
-                }
-                else if (!Guid.TryParse(x.StudentId, out Guid studentId))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"StudentId không đúng định dạng" });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"Student ID không được để trống" });
                 }
                 else
                 {
-                    var studentUser = studentUsers.FirstOrDefault(y => y.StudentId.ToString() == x.StudentId.ToLower(System.Globalization.CultureInfo.CurrentCulture));
+                    string humanCode = x.HumanCode.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+                    var studentUser = studentUsers.FirstOrDefault(y => y.HumanCode != null && y.HumanCode.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture) == humanCode);
                     var order = orders?.FirstOrDefault(y => studentUser != null && y.UserId == studentUser.UserId);
 
-                    if (models.Count(y => y.StudentId == x.StudentId) > 1)
+                    if (models.Count(y => y.HumanCode != null && y.HumanCode.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture) == humanCode) > 1)
                     {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"StudentId bị trùng với StudentId đã có trong danh sách" });
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"Student ID bị trùng với Student ID đã có trong danh sách" });
                     }
                     else if (studentUser == null)
                     {
@@ -199,18 +210,39 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                         errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"User đã được thêm vào sự kiện túi mù" });
                     }
                 }
+
                 return await Task.FromResult(errors.Count == 0);
             }, errorHandlerAction: errorHandlerAction);
 
-            if (result.Stream != null)
+            byte[] fileBytes;
+            using (var memoryStream = new MemoryStream())
             {
-                byte[] fileBytes;
-                using (var memoryStream = new MemoryStream())
+                if (result.Stream != null)
                 {
                     await result.Stream.CopyToAsync(memoryStream, cancellationToken);
-                    fileBytes = memoryStream.ToArray();
                 }
-                methodResult.Result = new CreateStudentsToEventFromFileModel() { File = fileBytes, Message = nameof(EnumSystemErrorCode.InValidFormat), StatusCode = StatusCodes.Status400BadRequest };
+                else
+                {
+                    await request.FormFile.CopyToAsync(memoryStream, cancellationToken);
+                }
+
+                fileBytes = memoryStream.ToArray();
+            }
+
+            if (!result.IsValidHeader)
+            {
+                methodResult.Result = new CreateStudentsToEventFromFileModel() { File = fileBytes, Message = ErrorTemplate, StatusCode = StatusCodes.Status400BadRequest };
+                return methodResult;
+            }
+            if (result.Stream != null)
+            {
+                methodResult.Result = new CreateStudentsToEventFromFileModel() { File = fileBytes, Message = DataError, StatusCode = StatusCodes.Status400BadRequest };
+                return methodResult;
+            }
+
+            if (!humanCodes.Any())
+            {
+                methodResult.Result = new CreateStudentsToEventFromFileModel() { File = fileBytes, Message = FileNull, StatusCode = StatusCodes.Status400BadRequest };
                 return methodResult;
             }
 
@@ -218,7 +250,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             {
                 UserIds = userIds
             });
-            methodResult.Result = new CreateStudentsToEventFromFileModel() { NumberOfStudent = blindBoxsResult.Content?.Result, StatusCode = StatusCodes.Status200OK };
+            methodResult.Result = new CreateStudentsToEventFromFileModel() { NumberOfStudent = blindBoxsResult.Content?.Result, Message = Success, StatusCode = StatusCodes.Status200OK };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
