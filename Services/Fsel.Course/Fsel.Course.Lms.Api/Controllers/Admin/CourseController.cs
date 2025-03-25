@@ -8,10 +8,10 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.CourseQuery;
+    using Fsel.Shared.Attributes;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Shared.Constants;
-    using Fsel.Shared.Attributes;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/admin/course")]

@@ -122,7 +122,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             }
             else
             {
-                var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+                var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
                 if (!studentResult.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
@@ -193,6 +193,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     }
                     sectionGroupResult = answerResult.Result;
                 }
+                if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && sectionGroupResult != null)
+                {
+                    await _sectionGroupResultRepository.BulkMergeAsync(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+                    {
+                        bulk.ColumnInputExpression = entity => new { entity.CurrentSectionTimeCodeId };
+                    });
+                }
                 sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit, mockTestResult.MockTest?.Version ?? (int)EnumVersion.V1);
                 return methodResult;
             });
@@ -201,23 +208,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             {
                 return methodResult;
             };
-            try
-            {
-                if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && sectionGroup.Sections.Any() && request.IsSubmit)
-                {
-                    // await _speakingAIService.EvaluationSpeakingAI(request.MockTestResultId, request.SectionGroupId, cancellationToken);
-
-                    SpeakingAIEvaluationModel speakingEvaluationModel = new SpeakingAIEvaluationModel()
-                    {
-                        MockTestResultId = request.MockTestResultId,
-                        SectionGroupId = request.SectionGroupId,
-                    };
-                    await _submitSpeakingAIPublisher.Publish(speakingEvaluationModel, cancellationToken);
-                }
-            }
-            catch
-            {
-            }
 
             try
             {
@@ -259,6 +249,23 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
             sectionGroupResultDto.IsTestDone = mockTestResult.Status == EnumResultStatus.Done;
 
+            try
+            {
+                if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && sectionGroup.Sections.Any() && request.IsSubmit)
+                {
+                    // await _speakingAIService.EvaluationSpeakingAI(request.MockTestResultId, request.SectionGroupId, cancellationToken);
+
+                    SpeakingAIEvaluationModel speakingEvaluationModel = new SpeakingAIEvaluationModel()
+                    {
+                        MockTestResultId = request.MockTestResultId,
+                        SectionGroupId = request.SectionGroupId,
+                    };
+                    await _submitSpeakingAIPublisher.Publish(speakingEvaluationModel, cancellationToken);
+                }
+            }
+            catch
+            {
+            }
             methodResult.Result = sectionGroupResultDto;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
@@ -284,7 +291,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 mockTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
                 mockTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
                 mockTestResult = GetMockTestResult(sectionGroupResults, mockTestResult);
-                _mockTestResultRepository.Update(mockTestResult);
+                _mockTestResultRepository.Update(mockTestResult, false, x => x.CourseId, x => x.UnitId, x => x.MockTestId, x => x.StudentId);
                 if (mockTestResult.Status == EnumResultStatus.Done)
                 {
                     await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -346,18 +353,20 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 return methodResult;
             }
             var (createMockTestAnswers, updateMockTestAnswers) = anserResult.Result;
-            if (createMockTestAnswers != null && createMockTestAnswers.Any())
-            {
-                await _mockTestAnswerRepository.AddList(createMockTestAnswers);
-            }
-            if (updateMockTestAnswers != null && updateMockTestAnswers.Any())
-            {
-                _mockTestAnswerRepository.UpdateList(updateMockTestAnswers);
-            }
 
             try
             {
-                await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                if (createMockTestAnswers != null && createMockTestAnswers.Any())
+                {
+                    await _mockTestAnswerRepository.BulkMergeAsync(createMockTestAnswers);
+                }
+                if (updateMockTestAnswers != null && updateMockTestAnswers.Any())
+                {
+                    await _mockTestAnswerRepository.BulkMergeAsync(updateMockTestAnswers, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = entity => new { entity.MockTestResultId, entity.SectionGroupResultId, entity.SectionQuestionId, entity.SectionId, entity.SectionTimeCodeId };
+                    });
+                }
             }
             catch (Exception ex)
             {

@@ -13,5 +13,10 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public EnumCourseType Type { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
         public Guid? SchoolId { get; set; }
+        public string? SchoolName { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? Grade { get; set; }
+        public string? Class { get; set; }
+        public string? UserName { get; set; }
     }
 }

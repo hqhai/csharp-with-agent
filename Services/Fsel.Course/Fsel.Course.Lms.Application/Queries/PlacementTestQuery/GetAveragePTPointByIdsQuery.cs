@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
 {
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -30,26 +31,24 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<List<AveragePTPointModel>>();
-            List<AveragePTPointModel> average = new List<AveragePTPointModel>();
+            List<Guid> studentIds = request.PointByIdQueryModels.Where(x => x.StudentIds != null && x.StudentIds.Any()).SelectMany(x => x.StudentIds!).ToList();
 
-            List<Guid>? studentIds = request.PointByIdQueryModels.SelectMany(x => x.StudentIds!).ToList();
+            var ptResult = await (from baseQ in _placementTestResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId).Where(x => x.Status == Domain.Enums.EnumResultStatus.Done)
+                                  group baseQ by baseQ.StudentId into g
+                                  select g.OrderByDescending(x => x.CreatedDate).FirstOrDefault()).ToListAsync(cancellationToken);
 
-            var ptResult = await _placementTestResultRepository.Queryable.Where(x => studentIds.Contains(x.StudentId)).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
+            var average = request.PointByIdQueryModels
+                                 .Select(item => new AveragePTPointModel
+                                 {
+                                     ClassId = item.ClassId,
+                                     AveragePTPoint = item.StudentIds != null && item.StudentIds.Any()
+                                            ? (from studentId in item.StudentIds
+                                               join pt in ptResult on studentId equals pt.StudentId into joinedPts
+                                               from pt in joinedPts.DefaultIfEmpty()
+                                               select pt?.Percent ?? 0).Sum() / item.StudentIds.Count
+                                            : 0
+                                 }).ToList();
 
-            foreach (var item in request.PointByIdQueryModels)
-            {
-                var averagePT = new AveragePTPointModel();
-                averagePT.ClassId = item.ClassId;
-
-                double percent = 0;
-                foreach (var student in item.StudentIds!)
-                {
-                    var pt = ptResult.FirstOrDefault(p => p.StudentId == student)!;
-                    percent += pt?.Percent ?? default;
-                }
-                averagePT.AveragePTPoint = item.StudentIds.Count == 0 ? 0 : percent / item.StudentIds.Count;
-                average.Add(averagePT);
-            }
             methodResult.Result = average;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

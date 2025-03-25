@@ -8,6 +8,7 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Course.Lms.Application.Commands.TestCmd;
 using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
+using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
 using Fsel.Shared.Attributes;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
@@ -135,20 +136,6 @@ namespace Fsel.Course.Lms.Api.Controllers
                 return commandResult.GetActionResult();
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "Export_File_Template_ModuleProgess.xlsx");
-        }
-
-        /// <summary>
-        /// Delete Video Time Code Answers
-        /// </summary>
-        [HttpPost("queue-test/{queueName}/{queueTopic}")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public IActionResult QueueTest([FromRoute] string queueName, [FromRoute] string queueTopic, [FromBody] QueueTestModel data)
-        {
-            _queueProvider.Publish(queueName, queueTopic, data?.Data);
-
-            MethodResult<bool> queryResult = new MethodResult<bool>();
-            return queryResult.GetActionResult();
         }
 
         /// <summary>

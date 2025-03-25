@@ -98,7 +98,7 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                 UpdatedFullName = x.UpdatedFullName,
                 UpdatedUserId = x.UpdatedUserId,
                 CourseId = x.CourseId,
-                Stars = x.StudentReviewDetails.Average(x => x.VoteStars)
+                Stars = x.StudentReviewDetails.Any() ? x.StudentReviewDetails.Average(x => x.VoteStars) : default
             };
         }
     }

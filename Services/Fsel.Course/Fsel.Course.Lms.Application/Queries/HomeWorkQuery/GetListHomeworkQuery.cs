@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<LessonHomeWorkResultModel>>();
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var student = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
@@ -72,13 +72,24 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             }
             var homeWorks = await _homeWorkRepository.GetListAsync(lessonResult);
             var homeWorkResultIds = homeWorks.SelectMany(x => x.HomeWorkResults).Select(x => x.Id).ToList();
-            var homeWorkResultAnswers = await _homeWorkAnswerRepository.Queryable.Where(x => homeWorkResultIds.Contains(x.HomeWorkResultId) && x.IsCorrect.HasValue)
-                .GroupBy(x => x.HomeWorkResultId)
-                .Select(x => new
-                {
-                    HomeWorkResultId = x.Key,
-                    QuestionCompleted = x.Select(x => x).Where(x => x.IsCorrect.HasValue).Count()
-                }).ToListAsync(cancellationToken);
+
+            List<HomeWorkAnswer> homeWorkResultAnswerQuerys = new List<HomeWorkAnswer>();
+
+            if (homeWorkResultIds != null)
+            {
+                homeWorkResultAnswerQuerys = await _homeWorkAnswerRepository.Queryable
+                                                                            .WhereBulkContains(homeWorkResultIds, x => x.HomeWorkResultId)
+                                                                            .Where(x => x.IsCorrect.HasValue)
+                                                                            .ToListAsync(cancellationToken);
+            }
+
+            var homeWorkResultAnswers = homeWorkResultAnswerQuerys.GroupBy(x => x.HomeWorkResultId)
+                                                                  .Select(x => new
+                                                                  {
+                                                                      HomeWorkResultId = x.Key,
+                                                                      QuestionCompleted = x.Select(x => x).Where(x => x.IsCorrect.HasValue).Count()
+                                                                  }).ToList();
+
             methodResult.Result = homeWorks.Select(x =>
             {
                 var homeWorkResult = x.HomeWorkResults.FirstOrDefault();

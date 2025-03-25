@@ -3,9 +3,12 @@
 namespace Fsel.Identity.Application.Services.SystemService
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Services.SystemService.Model;
+    using Fsel.Identity.Application.Services.SystemService.QueryModels;
     using Fsel.Identity.Domain.Models.CommandModels.LandingPages;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels;
     using Microsoft.AspNetCore.Mvc;
 
@@ -23,6 +26,7 @@ namespace Fsel.Identity.Application.Services.SystemService
         [Delete("/v1/admin/student/delete-student/{id}")]
         Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
 
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
         [Get("/v1/school/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<SchoolModel>>>> ExecuteListSchoolQueryAsync([Query] BaseQueryModel query);
 
@@ -37,5 +41,17 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Post("/v1/google-sheet/register-student-for-event")]
         Task<IApiResponse<MethodResult<bool>>> RegisterStudentForEvent([Body] RegisterStudentForEventCommandModel model);
+
+        [Get("/v1/location/get-by-ids")]
+        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetLocationByIdsAsync([Query] GetLocationsByIdsQueryModel query);
+
+        [Post("/v1/school/gets")]
+        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolsAsync([Body] GetListSchoolQueryModel query);
+
+        [Post("/v1/school/get-ids")]
+        Task<IApiResponse<MethodResult<IList<Guid>>>> GetSchoolIdsAsync([Body] GetSchoolsQueryModel query);
+
+        [Post("/v1/admin/token-history/survey-reward")]
+        Task<IApiResponse<MethodResult<bool>>> AddCoinSurveyReward([Body] AddCoinSurveyRewardModel query);
     }
 }

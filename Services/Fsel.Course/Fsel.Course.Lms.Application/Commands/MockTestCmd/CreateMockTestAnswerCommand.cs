@@ -213,11 +213,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             {
                 if (mockTestAnswers.Count > 0)
                 {
-                    await _mockTestAnswerRepository.AddList(mockTestAnswers);
-                    await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _mockTestAnswerRepository.BulkMergeAsync(mockTestAnswers);
                 }
 
-                _mockTestResultRepository.Update(mockTestResult);
+                _mockTestResultRepository.Update(mockTestResult, false, x => x.CourseId, x => x.UnitId, x => x.MockTestId, x => x.StudentId);
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

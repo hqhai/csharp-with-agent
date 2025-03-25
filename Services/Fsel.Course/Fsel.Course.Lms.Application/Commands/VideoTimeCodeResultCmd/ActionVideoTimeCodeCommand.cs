@@ -67,7 +67,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeResultCmd
             if (videoTimeCodeResult == null)
             {
                 videoResult.CurrentVideoTimeCodeId = request.VideoTimeCodeId;
-                videoResult = _videoResultRepository.Update(videoResult);
+                videoResult = _videoResultRepository.Update(videoResult, false, x => x.StudentId, x => x.VideoId, x => x.LessonResultId);
                 await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             methodResult.Result = _mapper.Map<VideoResultModel>(videoResult);

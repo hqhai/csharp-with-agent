@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.LessonNoteQuery
 {
     using System;
+    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -36,9 +37,17 @@ namespace Fsel.Course.Lms.Application.Queries.LessonNoteQuery
 
             var query = _lessonNoteRepository.Queryable.Include(x => x.LessonResult).Where(x => x.CreatedUserId == _authContext.CurrentUserId).OrderByDescending(x => x.CreatedDate).AsQueryable();
 
+            request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    query = query.Where(m => m.Id == guid);
+                }
+                else
+                {
+                    query = query.Where(m => m.Name!.Contains(request.Keyword));
+                }
             }
 
             if (request.UnitId != null)

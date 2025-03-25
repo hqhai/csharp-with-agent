@@ -1,0 +1,39 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Shared.Models.ShareModels.EntityModels
+{
+    public class ReportCompetitionEventModel
+    {
+        public Guid LocationId { get; set; }
+        public string? DistrictName { get; set; }
+
+        /// <summary>
+        /// Số trường đăng ký tham gia
+        /// </summary>
+        public int NumberRegisteredSchool { get; set; }
+
+        /// <summary>
+        /// Số trường tham gia thực tế
+        /// </summary>
+        public int NumberActualParticipatingSchool { get; set; }
+
+        /// <summary>
+        /// Số học sinh đăng ký tài khoản hợp lệ (Import)
+        /// </summary>
+        public int NumberValidStudentAccount { get; set; }
+
+        /// <summary>
+        /// Số học sinh đăng ký tài khoản hợp lệ (LandingPage)
+        /// </summary>
+        public int NumberStudentAccountRegister { get; set; }
+
+        /// <summary>
+        /// Số học sinh xác minh thành công
+        /// </summary>
+        public int NumberStudentCompleteVerify { get; set; }
+
+        public IList<Guid> StudentIds { get; set; } = new List<Guid>();
+        public IList<Guid> UserIds { get; set; } = new List<Guid>();
+        public IList<ReportCompetitionEventSchoolModel> ReportCompetitionEventSchools { get; set; } = new List<ReportCompetitionEventSchoolModel>();
+    }
+}
