@@ -52,7 +52,9 @@ namespace Fsel.System.Application.Commands.BlindBoxes
 
             var blindBoxChestConfigPieceIds = blindBox.BlindBoxChests.SelectMany(p => p.BlindBoxChestConfigs).Where(p => p.ConfigType == Shared.Enums.EnumBlindBoxConfigType.Piece).Select(p => p.Id).ToList();
 
-            var blindBoxHistories = await _blindBoxHistoryRepository.Queryable.WhereBulkContains(blindBoxChestConfigPieceIds, p => p.BlindBoxChestConfigId).Where(p => p.CreatedUserId == _authContext.CurrentUserId && p.IsPiece).DistinctBy(p => p.BlindBoxChestConfigId).ToListAsync(cancellationToken);
+            var blindBoxHistories = await _blindBoxHistoryRepository.Queryable.WhereBulkContains(blindBoxChestConfigPieceIds, p => p.BlindBoxChestConfigId).Where(p => p.CreatedUserId == _authContext.CurrentUserId && p.IsPiece).ToListAsync(cancellationToken);
+
+            blindBoxHistories = blindBoxHistories.DistinctBy(p => p.BlindBoxChestConfigId).ToList();
 
             if (blindBoxHistories == null || blindBoxHistories.Count != blindBoxChestConfigPieceIds.Count)
             {
