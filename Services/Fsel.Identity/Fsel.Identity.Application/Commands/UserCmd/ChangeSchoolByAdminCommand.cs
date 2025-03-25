@@ -4,11 +4,13 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -46,7 +48,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             ArgumentNullException.ThrowIfNull(request.LocalId);
             ArgumentNullException.ThrowIfNull(request.EventCode);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            Guid? competitionEventId = null;
 
             var student = await _studentRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.StudentId, cancellationToken);
             if (student == null)
@@ -80,19 +81,15 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
             if (competitionEvent.SchoolIds == null || !competitionEvent.SchoolIds.Any(x => x == location.Id))
             {
-                var parentEventId = await ParentEventAsync(competitionEvent.ParentEventId ?? Guid.Empty, cancellationToken);
-                var checkSchoolInEvent = await CheckSchoolInEvent(location.Id, new List<Guid> { parentEventId == Guid.Empty ? competitionEvent.Id : parentEventId }, cancellationToken);
-                if (checkSchoolInEvent == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.SchoolNotInEvent), nameof(request.LocalId), request.LocalId);
-                    return methodResult;
-                }
-
-                competitionEventId = checkSchoolInEvent.Value;
+                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.SchoolNotIncludeEvent), nameof(location), location);
+                return methodResult;
             }
-            else if (competitionEvent.SchoolIds.Any(x => x == location.Id))
+
+            var checkEvent = await CheckEventMatchingWithCurrentEvent(studentCompetitionEvent.CompetitionEventId, competitionEvent.Id, cancellationToken);
+            if (!checkEvent.Result)
             {
-                competitionEventId = competitionEvent.Id;
+                methodResult.AddErrorBadRequest(checkEvent.ErrorMessages.ToList());
+                return methodResult;
             }
 
             await _studentRepository.ExecuteTransactionAsync(async () =>
@@ -108,12 +105,9 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 return methodResult;
             });
 
-            if (competitionEventId.HasValue)
-            {
-                studentCompetitionEvent.CompetitionEventId = competitionEventId.Value;
-                _studentCompetitionEventsRepository.Update(studentCompetitionEvent);
-                await _studentCompetitionEventsRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            }
+            studentCompetitionEvent.CompetitionEventId = competitionEvent.Id;
+            _studentCompetitionEventsRepository.Update(studentCompetitionEvent);
+            await _studentCompetitionEventsRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             return methodResult;
         }
@@ -133,27 +127,19 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             return parentEventId;
         }
 
-        private async Task<Guid?> CheckSchoolInEvent(Guid schoolId, IList<Guid> eventIds, CancellationToken cancellationToken)
+        private async Task<MethodResult<bool>> CheckEventMatchingWithCurrentEvent(Guid currentEventId, Guid requestEventId, CancellationToken cancellationToken)
         {
-            var competitionEvents = await _competitionEventsRepository.Queryable
-                                                                      .Where(x => x.ParentEventId.HasValue && eventIds.Contains(x.ParentEventId.Value))
-                                                                      .ToListAsync(cancellationToken);
-
-            var competitionEvent = competitionEvents.FirstOrDefault(x => x.SchoolIds != null && x.SchoolIds.Any(c => c == schoolId));
-            if (competitionEvent != null)
+            MethodResult<bool> methodResult = new MethodResult<bool>();
+            var parentCurrentEventId = await ParentEventAsync(currentEventId, cancellationToken);
+            var parentRequestEventId = await ParentEventAsync(requestEventId, cancellationToken);
+            if (parentCurrentEventId != parentRequestEventId)
             {
-                return competitionEvent.Id;
-            }
-            else
-            {
-                var competitionEventIds = competitionEvents.Select(x => x.Id).ToList();
-                if (competitionEventIds != null && competitionEventIds.Any())
-                {
-                    await CheckSchoolInEvent(schoolId, competitionEventIds, cancellationToken);
-                }
+                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.EventNotMatchingWithCurrentEvent), nameof(requestEventId), requestEventId);
+                return methodResult;
             }
 
-            return null;
+            methodResult.Result = true;
+            return methodResult;
         }
     }
 }
