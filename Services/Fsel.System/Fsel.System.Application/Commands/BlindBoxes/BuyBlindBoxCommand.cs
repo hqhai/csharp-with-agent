@@ -73,8 +73,8 @@ namespace Fsel.System.Application.Commands.BlindBoxes
             }
 
             var blindBox = blindBoxResult.Result;
-            var blindBoxChestActive = blindBox?.BlindBoxChests?.FirstOrDefault(p => p.IsActive);
-            if (blindBoxChestActive == null || blindBoxChestActive.Id != request.BlindBoxChestId)
+            var blindBoxChestActive = blindBox?.BlindBoxChests?.FirstOrDefault(p => p.IsActive && p.Id == request.BlindBoxChestId);
+            if (blindBoxChestActive == null)
             {
                 await SendNotify(StatusCodes.Status400BadRequest, EnumBuyBlindBoxErrorCode.WrongChestReceived.ToString(), null, null, null, cancellationToken);
                 methodResult.AddErrorBadRequest(nameof(EnumBuyBlindBoxErrorCode.WrongChestReceived));
