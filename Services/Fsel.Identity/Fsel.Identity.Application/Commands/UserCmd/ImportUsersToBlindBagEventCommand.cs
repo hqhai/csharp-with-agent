@@ -210,7 +210,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     await result.Stream.CopyToAsync(memoryStream, cancellationToken);
                     fileBytes = memoryStream.ToArray();
                 }
-                methodResult.Result = new CreateStudentsToEventFromFileModel() { File = fileBytes, StatusCode = StatusCodes.Status400BadRequest };
+                methodResult.Result = new CreateStudentsToEventFromFileModel() { File = fileBytes, Message = nameof(EnumSystemErrorCode.InValidFormat), StatusCode = StatusCodes.Status400BadRequest };
                 return methodResult;
             }
 
