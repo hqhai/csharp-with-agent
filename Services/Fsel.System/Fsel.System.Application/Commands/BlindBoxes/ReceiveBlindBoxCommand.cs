@@ -58,7 +58,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
                 return methodResult;
             }
 
-            var blindBoxHistory = await _blindBoxHistoryRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId && p.BlindBoxChestConfigId == lastChestConfigs.Id && p.IsPiece && !string.IsNullOrEmpty(p.Code)).FirstOrDefaultAsync(cancellationToken);
+            var blindBoxHistory = await _blindBoxHistoryRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId && p.BlindBoxChestConfigId == lastChestConfigs.Id && p.IsPiece && string.IsNullOrEmpty(p.Code)).FirstOrDefaultAsync(cancellationToken);
 
             if (blindBoxHistory == null)
             {

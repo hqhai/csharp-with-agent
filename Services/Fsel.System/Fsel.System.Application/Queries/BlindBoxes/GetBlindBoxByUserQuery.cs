@@ -6,8 +6,10 @@ namespace Fsel.System.Application.Queries.BlindBoxes
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.System.Domain.Entities.BlindBoxs;
     using Fsel.System.Domain.IRepositories.BlindBoxes;
     using Fsel.System.Domain.Models.EntityModels;
+    using global::System.Threading;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -100,9 +102,24 @@ namespace Fsel.System.Application.Queries.BlindBoxes
 
             blindBoxModel.IsReceived = lastBlindBoxChestHistory != null;
 
-            methodResult.Result = blindBoxModel;
+            if (blindBoxUser.IsShowPopUp)
+            {
+                await UpdateBlindBoxUser(blindBoxUser, cancellationToken);
+            }
 
+            methodResult.Result = blindBoxModel;
             return methodResult;
+        }
+
+        private async Task UpdateBlindBoxUser(BlindBoxUser blindBoxUser, CancellationToken cancellationToken)
+        {
+            await _blindBoxHistoryRepository.ExecuteTransactionAsync(async () =>
+            {
+                blindBoxUser.IsShowPopUp = false;
+                _blindBoxUserRepository.Update(blindBoxUser);
+                await _blindBoxUserRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                return new MethodResult<bool>();
+            });
         }
     }
 }
