@@ -25,9 +25,10 @@ namespace Fsel.Identity.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            builder.Ignore<OverallStudentModel>();
-            builder.Ignore<NumberStudentLearnOnSystemModel>();
-            builder.Ignore<SummaryDataOnCityModel>();
+            //Dùng khi tạo migration, comment lại sau khi tạo xong
+            //builder.Ignore<OverallStudentModel>();
+            //builder.Ignore<NumberStudentLearnOnSystemModel>();
+            //builder.Ignore<SummaryDataOnCityModel>();
 
             builder.Entity<Role>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
