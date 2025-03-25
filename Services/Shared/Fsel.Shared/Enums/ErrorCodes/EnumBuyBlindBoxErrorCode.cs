@@ -7,6 +7,7 @@ namespace Fsel.Shared.Enums.ErrorCodes
         PieceReceived,
         NotEnoughTokens,
         WrongChestReceived,
-        EventHasExpired
+        EventHasExpired,
+        NotReceivedEnoughPieces
     }
 }
