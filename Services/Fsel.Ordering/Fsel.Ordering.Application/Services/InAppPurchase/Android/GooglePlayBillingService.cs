@@ -24,7 +24,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Android
             _service = new AndroidPublisherService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential,
-                ApplicationName = "Your Application Name",
+                ApplicationName = "FSEL- Learning English",
             });
         }
 

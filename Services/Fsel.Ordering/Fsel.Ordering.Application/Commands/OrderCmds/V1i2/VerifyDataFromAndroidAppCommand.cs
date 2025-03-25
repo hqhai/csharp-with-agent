@@ -67,7 +67,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             _logger.LogInformation(subscriptionPurchaseJson);
             await _mediator.Send(new OrderCmds.ChangeStatusOrderCommand()
             {
-                OrderId = new Guid(subscriptionPurchase.OrderId),
+                OrderId = new Guid(subscriptionPurchase.DeveloperPayload),
                 OrderStatus = EnumOrderStatus.Payment,
                 Type = EnumOrderTransactionType.GooglePlay,
                 Receipt = subscriptionPurchaseJson,
