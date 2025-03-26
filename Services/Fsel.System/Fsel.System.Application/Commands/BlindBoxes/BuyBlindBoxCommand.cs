@@ -201,7 +201,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
                 {
                     try
                     {
-                        var plusTokens = await ProcessTokenTransactionAsync(methodResult, blindBoxChestConfig.Coin ?? 0, blindBoxChestConfig.Id, EnumTokenMission.OpenChestCoins, EnumTokenHistoryType.Recevived);
+                        var plusTokens = await ProcessTokenTransactionAsync(methodResult, blindBoxChestConfig.Coin ?? 0, blindBoxChestConfig.Id, EnumTokenMission.OpenChestCoins, EnumTokenHistoryType.Recevived, cancellationToken);
 
                         if (!plusTokens)
                         {
@@ -216,7 +216,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
 
                 try
                 {
-                    var minusTokens = await ProcessTokenTransactionAsync(methodResult, blindBoxChest.OpenPrice, blindBoxChest.Id, GetEnumMission(blindBoxChest), EnumTokenHistoryType.Exchanged);
+                    var minusTokens = await ProcessTokenTransactionAsync(methodResult, blindBoxChest.OpenPrice, blindBoxChest.Id, GetEnumMission(blindBoxChest), EnumTokenHistoryType.Exchanged, cancellationToken);
 
                     if (!minusTokens)
                     {
@@ -285,7 +285,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
             }, cancellationToken);
         }
 
-        private async Task<bool> ProcessTokenTransactionAsync(MethodResult<bool> methodResult, int tokens, Guid objectId, EnumTokenMission mission, EnumTokenHistoryType historyType)
+        private async Task<bool> ProcessTokenTransactionAsync(MethodResult<bool> methodResult, int tokens, Guid objectId, EnumTokenMission mission, EnumTokenHistoryType historyType, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new CreateTokenHistoryCommand
             {
@@ -301,7 +301,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
                                                 ObjectId = objectId
                                             }
                                         }
-            });
+            }, cancellationToken);
             if (!result.IsOK)
             {
                 _logger.LogError(result.ErrorMessages.Serialize());
