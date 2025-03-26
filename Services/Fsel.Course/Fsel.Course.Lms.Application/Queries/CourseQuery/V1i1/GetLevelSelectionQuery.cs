@@ -9,7 +9,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -24,6 +23,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
     public class GetLevelSelectionQuery : IRequest<MethodResult<IList<LevelDtoModel>>>
     {
         public EnumCourseType CourseType { get; set; }
+
+        public Guid? UserId { get; set; }
     }
 
     public class GetLevelSelectionQueryHandler : IRequestHandler<GetLevelSelectionQuery, MethodResult<IList<LevelDtoModel>>>
@@ -54,7 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
             }
             var userCourseSettings = userCourseSettingResults?.Content?.Result;
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId ?? _authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
