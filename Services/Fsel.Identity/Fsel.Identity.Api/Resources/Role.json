@@ -61,5 +61,19 @@
     "normalizedName": "Guest",
     "createdDate": "2023-07-21",
     "createdFullName": ""
+  },
+  {
+    "id": "CAA21B08-7DDB-4951-9F2D-6A7FA256775C",
+    "name": "EducationDepartment",
+    "normalizedName": "EducationDepartment",
+    "createdDate": "2023-07-21",
+    "createdFullName": ""
+  },
+  {
+    "id": "73CD33E9-2F40-453A-B153-4AB59EAA6B73",
+    "name": "EducationDivision",
+    "normalizedName": "EducationDivision",
+    "createdDate": "2023-07-21",
+    "createdFullName": ""
   }
 ]
