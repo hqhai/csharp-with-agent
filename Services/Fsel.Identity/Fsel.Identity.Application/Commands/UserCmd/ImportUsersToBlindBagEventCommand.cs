@@ -48,10 +48,10 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private readonly IOrderService _orderService;
         private readonly ISystemService _systemService;
         private readonly IHumanRepository _humanRepository;
-        private const string ErrorTemplate = "Định dạng File tải lên không hợp lệ\nVui lòng tải lại file template mẫu và thử lại.";
+        private const string ErrorTemplate = "Định dạng File tải lên không hợp lệ. Vui lòng tải lại file template mẫu và thử lại.";
         private const string Success = "Thành công";
         private const string DataError = "Dữ liệu bị trống hoặc sai định dạng";
-        private const string FileNull = "File tải lên không có dữ liệu\nVui lòng tải file template mẫu và thử lại.";
+        private const string FileNull = "File tải lên không có dữ liệu. Vui lòng tải file template mẫu và thử lại.";
         private const string FileSizeExceededMessage = "Dung lượng File vượt quá 1MB";
 
         public ImportUsersToBlindBagEventCommandHandler(
