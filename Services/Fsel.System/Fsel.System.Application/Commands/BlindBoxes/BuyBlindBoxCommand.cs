@@ -3,6 +3,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -21,6 +22,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class BuyBlindBoxCommand : BuyBlindBoxCommandModel, IRequest<MethodResult<bool>>
     {
@@ -37,8 +39,9 @@ namespace Fsel.System.Application.Commands.BlindBoxes
         private readonly IMapper _mapper;
         private readonly SendNotifyBuyBlindBoxPublisher _sendNotifyBuyBlindBox;
         private const int MaxPercent = 100;
+        private readonly ILogger<BuyBlindBoxCommand> _logger;
 
-        public BuyBlindBoxCommandHandler(IMediator mediator, IBlindBoxUserRepository blindBoxUserRepository, AuthContext authContext, IBlindBoxChestConfigRepository blindBoxChestConfigRepository, IBlindBoxHistoryRepository blindBoxHistoryRepository, IUserService userService, IMapper mapper, SendNotifyBuyBlindBoxPublisher sendNotifyBuyBlindBox)
+        public BuyBlindBoxCommandHandler(IMediator mediator, IBlindBoxUserRepository blindBoxUserRepository, AuthContext authContext, IBlindBoxChestConfigRepository blindBoxChestConfigRepository, IBlindBoxHistoryRepository blindBoxHistoryRepository, IUserService userService, IMapper mapper, SendNotifyBuyBlindBoxPublisher sendNotifyBuyBlindBox, ILogger<BuyBlindBoxCommand> logger)
         {
             _mediator = mediator;
             _blindBoxUserRepository = blindBoxUserRepository;
@@ -48,6 +51,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
             _userService = userService;
             _mapper = mapper;
             _sendNotifyBuyBlindBox = sendNotifyBuyBlindBox;
+            _logger = logger;
         }
 
         public async Task<MethodResult<bool>> Handle(BuyBlindBoxCommand request, CancellationToken cancellationToken)
@@ -195,19 +199,33 @@ namespace Fsel.System.Application.Commands.BlindBoxes
 
                 if (blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.Coin)
                 {
-                    var plusTokens = await ProcessTokenTransactionAsync(methodResult, blindBoxChestConfig.Coin ?? 0, blindBoxChestConfig.Id, EnumTokenMission.OpenChestCoins, EnumTokenHistoryType.Recevived);
+                    try
+                    {
+                        var plusTokens = await ProcessTokenTransactionAsync(methodResult, blindBoxChestConfig.Coin ?? 0, blindBoxChestConfig.Id, EnumTokenMission.OpenChestCoins, EnumTokenHistoryType.Recevived);
 
-                    if (!plusTokens)
+                        if (!plusTokens)
+                        {
+                            return methodResult;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex.Message);
+                    }
+                }
+
+                try
+                {
+                    var minusTokens = await ProcessTokenTransactionAsync(methodResult, blindBoxChest.OpenPrice, blindBoxChest.Id, GetEnumMission(blindBoxChest), EnumTokenHistoryType.Exchanged);
+
+                    if (!minusTokens)
                     {
                         return methodResult;
                     }
                 }
-
-                var minusTokens = await ProcessTokenTransactionAsync(methodResult, blindBoxChest.OpenPrice, blindBoxChest.Id, GetEnumMission(blindBoxChest), EnumTokenHistoryType.Exchanged);
-
-                if (!minusTokens)
+                catch (Exception ex)
                 {
-                    return methodResult;
+                    _logger.LogError(ex.Message);
                 }
 
                 if (blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.Coin)
@@ -286,6 +304,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
             });
             if (!result.IsOK)
             {
+                _logger.LogError(result.ErrorMessages.Serialize());
                 methodResult.AddError(result.ErrorMessages);
                 return false;
             }
