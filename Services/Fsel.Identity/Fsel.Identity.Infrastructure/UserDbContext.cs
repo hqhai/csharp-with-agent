@@ -66,6 +66,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new StudentDailyStreakEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserSchoolEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserTokenEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserGroupMemberShipEntityTypeConfiguration());
         }
 
         #region Db Set
@@ -98,6 +99,8 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<UserDeletion> UserDeletions { get; set; }
         public DbSet<UserSchool> UserSchools { get; set; }
         public DbSet<SchoolImportHistory> SchoolImportHistorys { get; set; }
+        public DbSet<UserGroup> UserGroups { get; set; }
+        public DbSet<UserGroupMemberShip> UserGroupMemberShips { get; set; }
 
         //public DbSet<OverallStudentModel> OverallStudentResults { get; set; }
 
