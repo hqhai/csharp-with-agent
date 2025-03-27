@@ -248,15 +248,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
                     var blindBoxPackages = _appSetting.BlindBoxConfigs;
 
-                    if (order.RevenueType == EnumPaymentRevenueType.Revenue && blindBoxPackages != null && blindBoxPackages.Packages != null && blindBoxPackages.Packages.Contains(package.MonthNumber))
-                    {
-                        await _systemService.AddUserIntoBlindBoxEvent(new AddUserIntoBlindBoxCommandModel()
-                        {
-                            UserId = order.UserId,
-                            IsWin = false,
-                            NumberOpen = 0
-                        });
-                    }
+                    //if (order.RevenueType == EnumPaymentRevenueType.Revenue && blindBoxPackages != null && blindBoxPackages.Packages != null && blindBoxPackages.Packages.Contains(package.MonthNumber))
+                    //{
+                    //    await _systemService.AddUserIntoBlindBoxEvent(new AddUserIntoBlindBoxCommandModel()
+                    //    {
+                    //        UserId = order.UserId,
+                    //        IsWin = false,
+                    //        NumberOpen = 0
+                    //    });
+                    //}
                 }
 
                 #endregion Gửi mail thanh toán
