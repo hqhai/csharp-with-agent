@@ -4,6 +4,7 @@ using Fsel.Notification.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Notification.Infrastructure.Migrations
 {
     [DbContext(typeof(NotificationsDBContext))]
-    partial class NotificationsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241128100000_UpdateNotificationTypeV17")]
+    partial class UpdateNotificationTypeV17
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -101,8 +104,6 @@ namespace Fsel.Notification.Infrastructure.Migrations
                     b.HasIndex("NotificationTypeId");
 
                     b.HasIndex("IsDeleted", "UserId");
-
-                    b.HasIndex("IsDeleted", "UserId", "SenderId");
 
                     b.HasIndex("IsDeleted", "UserId", "Status");
 
@@ -906,7 +907,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Priority = 1,
                             TemplateLink = "",
-                            TemplateMessage = "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được {1} xu, nhấn để xem chi tiết",
+                            TemplateMessage = "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được 100 xu, nhấn để xem chi tiết",
                             Type = "LinkPage"
                         },
                         new
@@ -920,7 +921,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Priority = 1,
                             TemplateLink = "",
-                            TemplateMessage = "{0} đã hoàn thành unit 1,bạn vừa nhận được {1} xu, nhấn để xem chi tiết ",
+                            TemplateMessage = "{0} đã hoàn thành unit 1,bạn vừa nhận được 500 xu, nhấn để xem chi tiết ",
                             Type = "LinkPage"
                         },
                         new
@@ -934,50 +935,134 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Priority = 1,
                             TemplateLink = "",
-                            TemplateMessage = "{0} đã đăng kí thành công gói học FSEL,bạn vừa nhận được {1} xu, nhấn để xem chi tiết ",
+                            TemplateMessage = "{0} đã đăng kí thành công gói học FSEL,bạn vừa nhận được {1}🟡, nhấn để xem chi tiết ",
                             Type = "LinkPage"
                         },
                         new
                         {
-                            Id = new Guid("46540fc5-a4fd-4dac-bb8f-ef86698528dc"),
-                            Content = "RecallCoinSurvey",
-                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Id = new Guid("342445d7-6c52-4e6d-8d22-cefb2b80442e"),
+                            Content = "SetCourseTarget",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
                             TemplateLink = "",
-                            TemplateMessage = "Chúng tôi đã phát hiện một số tài khoản lợi dụng lỗi hệ thống khi làm khảo sát đầu vào (survey) để giành một số coins trái với quy định. Số coins và vật phẩm quy đổi từ đó sẽ bị thu hồi. Hãy tuân thủ quy định để tránh bị cấm tài khoản!",
-                            Type = "Text"
+                            TemplateMessage = "Bạn đã thiết lập mục tiêu khóa học thành công rồi! Thời gian cần hoàn thành Bài học {0} (Unit {1}) là {2} giờ. Sẵn sàng chưa? Bắt đầu ngay thôi nào!",
+                            Type = "LinkPage"
                         },
                         new
                         {
-                            Id = new Guid("3c7f9946-3f95-4a84-b2df-7cffbf36a41c"),
-                            Content = "SurveyReward",
-                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Id = new Guid("b16a3099-5ccd-4d2b-9240-12c6a1aafe93"),
+                            Content = "DelayCourseTarget",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
                             TemplateLink = "",
-                            TemplateMessage = "Cảm ơn bạn đã tham gia khảo sát! Chúng tôi trân trọng cảm ơn bạn đã hoàn thành khảo sát Tháng Tự Học Ngoại Ngữ - Hà Nội! Để bày tỏ sự tri ân, bạn đã nhận được {0} FSEL COINS. Chúng tôi sẽ xem xét và đánh giá ý kiến của bạn để không ngừng cải thiện trải nghiệm học tập. Cảm ơn bạn đã đồng hành cùng FSEL!",
-                            Type = "Text"
+                            TemplateMessage = "Oops! Thời điểm này đáng lẽ bạn đã hoàn thành bài học rồi! Không sao, hãy nhanh chóng truy cập để hoàn bài học nha! Chúng ta cùng nhau học tập và tiến bộ mỗi ngày, hãy bắt đầu ngay bây giờ!",
+                            Type = "LinkPage"
                         },
                         new
                         {
-                            Id = new Guid("50947e80-1900-4fa5-89d2-f8bd309660da"),
-                            Content = "IllegalCoinRecall",
-                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Id = new Guid("8fcf057c-d493-47c2-9637-6aa7d80c606a"),
+                            Content = "CourseTargetNotMet",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
                             TemplateLink = "",
-                            TemplateMessage = "Chúng tôi đã phát hiện một số tài khoản lợi dụng chức năng giới thiệu bạn bè để giành một số coins trái với quy định. Số coins và vật phẩm quy đổi từ đó sẽ bị thu hồi. Hãy tuân thủ quy định để tránh bị cấm tài khoản!",
-                            Type = "Text"
+                            TemplateMessage = "Thời gian hoạt động trung bình trong tuần này của bạn là {0} giờ {1} phút. Số bài học đã hoàn thành: {2} (Mục tiêu: {3}). Bạn gần đạt rồi! Chỉ cần thêm chút nỗ lực nữa là hoàn thành mục tiêu thôi!",
+                            Type = "LinkPage"
+                        },
+                        new
+                        {
+                            Id = new Guid("fcbad5de-b837-480e-8fc7-3605dd9e6d69"),
+                            Content = "CourseTargetMet",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "",
+                            TemplateMessage = "Thời gian hoạt động trung bình trong tuần này của bạn là {0} giờ {1} phút. Số bài học đã hoàn thành: {2} (Mục tiêu: {3}). Tuyệt vời! Bạn đã hoàn thành mục tiêu của mình tuần này. Tiếp tục cố gắng nhé!",
+                            Type = "LinkPage"
+                        },
+                        new
+                        {
+                            Id = new Guid("2c7a75fb-e821-4a24-ba08-2771128696ec"),
+                            Content = "CourseTargetExceeded",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "",
+                            TemplateMessage = "Thời gian hoạt động trung bình trong tuần này của bạn là {0} giờ {1} phút. Số bài học đã hoàn thành: {2} (Mục tiêu: {3}). Xuất sắc! Bạn đã vượt xa mục tiêu tuần này. Tiếp tục phong độ ấn tượng này nhé!",
+                            Type = "LinkPage"
+                        },
+                        new
+                        {
+                            Id = new Guid("fd8e354f-4a3a-48ea-bf45-6b20cde149ff"),
+                            Content = "LessonAlmostOver",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "",
+                            TemplateMessage = "Chú ý! Chỉ còn {0} giờ để hoàn thành Bài học {1} (Unit {2}). Hãy cố gắng để không bỏ lỡ mục tiêu tuần này nhé!",
+                            Type = "LinkPage"
+                        },
+                        new
+                        {
+                            Id = new Guid("36e8ef96-ffa6-43a4-a05b-17a8c6582fbf"),
+                            Content = "TimeForLesson",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "",
+                            TemplateMessage = "Chào {0}! Đã đến giờ học! Hãy chuẩn bị sẵn sàng và truy cập FSEL ngay để bắt đầu học nhé!",
+                            Type = "LinkPage"
+                        },
+                        new
+                        {
+                            Id = new Guid("26b75c2d-ddfe-4305-8014-dba721460afb"),
+                            Content = "TimeForLesson",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "",
+                            TemplateMessage = "Lại là Techie đây! Tôi muốn nhắc nhở bạn rằng đã đến giờ học. Hãy truy cập FSEL ngay để không bỏ lỡ bất kỳ nội dung học quan trọng nào!",
+                            Type = "LinkPage"
+                        },
+                        new
+                        {
+                            Id = new Guid("0f4e33bb-bd14-4f46-a2b8-294e76c3692c"),
+                            Content = "TimeForLesson",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "",
+                            TemplateMessage = "Thời gian học đã đến! Hãy bật FSEL lên và bắt đầu học ngay bây giờ. Chúc bạn có một buổi học hiệu quả!",
+                            Type = "LinkPage"
                         });
                 });
 
@@ -1949,7 +2034,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "vi-VN",
                             NotificationTypeId = new Guid("5e7e39f8-750a-4709-82b2-12805fc9e2e9"),
-                            TemplateMessage = "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được {1} xu, nhấn để xem chi tiết"
+                            TemplateMessage = "{0} đã hoàn thành bài kiểm tra,bạn vừa nhận được 100 xu, nhấn để xem chi tiết"
                         },
                         new
                         {
@@ -1960,7 +2045,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "en-US",
                             NotificationTypeId = new Guid("5e7e39f8-750a-4709-82b2-12805fc9e2e9"),
-                            TemplateMessage = "{0} has completed the placement test, and you have just received {1} xu. Tap to see details."
+                            TemplateMessage = "{0} has completed the placement test, and you have just received 100 xu. Tap to see details."
                         },
                         new
                         {
@@ -1971,7 +2056,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "fr-FR",
                             NotificationTypeId = new Guid("5e7e39f8-750a-4709-82b2-12805fc9e2e9"),
-                            TemplateMessage = "{0} a terminé le test de positionnement, et vous venez de recevoir {1} xu. Appuyez pour voir les détails."
+                            TemplateMessage = "{0} a terminé le test de positionnement, et vous venez de recevoir 100 xu. Appuyez pour voir les détails."
                         },
                         new
                         {
@@ -1982,7 +2067,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "vi-VN",
                             NotificationTypeId = new Guid("a3d6129b-9844-448d-aa1c-d6155b89ce6b"),
-                            TemplateMessage = "{0} đã hoàn thành unit 1,bạn vừa nhận được {1} xu, nhấn để xem chi tiết "
+                            TemplateMessage = "{0} đã hoàn thành unit 1,bạn vừa nhận được 500 xu, nhấn để xem chi tiết "
                         },
                         new
                         {
@@ -1993,7 +2078,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "en-US",
                             NotificationTypeId = new Guid("a3d6129b-9844-448d-aa1c-d6155b89ce6b"),
-                            TemplateMessage = "{0} has completed Unit 1, and you have just received {1} xu. Tap to see details"
+                            TemplateMessage = "{0} has completed Unit 1, and you have just received 500 xu. Tap to see details"
                         },
                         new
                         {
@@ -2004,7 +2089,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "fr-FR",
                             NotificationTypeId = new Guid("a3d6129b-9844-448d-aa1c-d6155b89ce6b"),
-                            TemplateMessage = "{0} a terminé l'Unité 1, et vous venez de recevoir {1} xu. Appuyez pour voir les détails."
+                            TemplateMessage = "{0} a terminé l'Unité 1, et vous venez de recevoir 500 xu. Appuyez pour voir les détails."
                         },
                         new
                         {
@@ -2041,102 +2126,201 @@ namespace Fsel.Notification.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("9ac2883d-b2ad-4d94-a724-91494c1e5b5f"),
+                            Id = new Guid("0faebec3-1cf2-449a-98c4-e95f7bd225ca"),
                             CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
                             Language = "vi-VN",
-                            NotificationTypeId = new Guid("46540fc5-a4fd-4dac-bb8f-ef86698528dc"),
-                            TemplateMessage = "Chúng tôi đã phát hiện một số tài khoản lợi dụng lỗi hệ thống khi làm khảo sát đầu vào (survey) để giành một số coins trái với quy định. Số coins và vật phẩm quy đổi từ đó sẽ bị thu hồi. Hãy tuân thủ quy định để tránh bị cấm tài khoản!"
+                            NotificationTypeId = new Guid("342445d7-6c52-4e6d-8d22-cefb2b80442e"),
+                            TemplateMessage = "Bạn đã thiết lập mục tiêu khóa học thành công rồi! Thời gian cần hoàn thành Bài học {0} (Unit {1}) là {2} giờ. Sẵn sàng chưa? Bắt đầu ngay thôi nào!"
                         },
                         new
                         {
-                            Id = new Guid("1867ebca-aa7d-4fbc-9de9-8e432bb3b87a"),
-                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Id = new Guid("e4526d6e-1fad-4b2b-83fa-30a64917bd2a"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
                             Language = "en-US",
-                            NotificationTypeId = new Guid("46540fc5-a4fd-4dac-bb8f-ef86698528dc"),
-                            TemplateMessage = "We have detected some accounts exploiting a system error in the entry survey to gain coins in violation of the regulations. The coins and any redeemed items obtained through this method will be revoked. Please follow the regulations to avoid account suspension!"
+                            NotificationTypeId = new Guid("342445d7-6c52-4e6d-8d22-cefb2b80442e"),
+                            TemplateMessage = "You’ve successfully set your course goal! The time to complete Lesson {0} (Unit {1}) is {2} hours. Ready to start? Let’s get going!"
                         },
                         new
                         {
-                            Id = new Guid("f6943cc3-15c1-4849-a852-309be6d17eb4"),
-                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "fr-FR",
-                            NotificationTypeId = new Guid("46540fc5-a4fd-4dac-bb8f-ef86698528dc"),
-                            TemplateMessage = "Nous avons détecté certains comptes exploitant une erreur du système lors du sondage d'entrée pour obtenir des pièces en violation des règles. Les pièces et les objets échangés de cette manière seront annulés. Veuillez respecter les règlements afin d’éviter la suspension de votre compte !"
-                        },
-                        new
-                        {
-                            Id = new Guid("788c4de6-030b-4866-8e91-3fb0e913f670"),
+                            Id = new Guid("1f8e3690-f47f-4ae6-8a01-230db9eb340b"),
                             CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
                             Language = "vi-VN",
-                            NotificationTypeId = new Guid("3c7f9946-3f95-4a84-b2df-7cffbf36a41c"),
-                            TemplateMessage = "Cảm ơn bạn đã tham gia khảo sát! Chúng tôi trân trọng cảm ơn bạn đã hoàn thành khảo sát Tháng Tự Học Ngoại Ngữ - Hà Nội! Để bày tỏ sự tri ân, bạn đã nhận được {0} FSEL COINS. Chúng tôi sẽ xem xét và đánh giá ý kiến của bạn để không ngừng cải thiện trải nghiệm học tập. Cảm ơn bạn đã đồng hành cùng FSEL!"
+                            NotificationTypeId = new Guid("b16a3099-5ccd-4d2b-9240-12c6a1aafe93"),
+                            TemplateMessage = "Oops! Thời điểm này đáng lẽ bạn đã hoàn thành bài học rồi! Không sao, hãy nhanh chóng truy cập để hoàn bài học nha! Chúng ta cùng nhau học tập và tiến bộ mỗi ngày, hãy bắt đầu ngay bây giờ!"
                         },
                         new
                         {
-                            Id = new Guid("13dd85c7-014c-4a32-9392-92a46440c481"),
-                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Id = new Guid("32a14a34-09eb-4cc1-a1f5-9f39db68479d"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
                             Language = "en-US",
-                            NotificationTypeId = new Guid("3c7f9946-3f95-4a84-b2df-7cffbf36a41c"),
-                            TemplateMessage = "Thank you for participating in the survey! We sincerely appreciate your completion of the Self-Study Language Month - Hanoi survey! As a token of our gratitude, you have received {0} FSEL COINS. Your feedback will be carefully reviewed and evaluated to continuously improve the learning experience. Thank you for your support and for being part of FSEL!  "
+                            NotificationTypeId = new Guid("b16a3099-5ccd-4d2b-9240-12c6a1aafe93"),
+                            TemplateMessage = "Oops! It's time you should have completed your lesson! No worries, quickly log in to finish up! Let's learn and improve together every day, starting now!"
                         },
                         new
                         {
-                            Id = new Guid("8592527a-e771-4e37-a2e0-e5e5aa5ff667"),
-                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Language = "fr-FR",
-                            NotificationTypeId = new Guid("3c7f9946-3f95-4a84-b2df-7cffbf36a41c"),
-                            TemplateMessage = "Merci d'avoir participé à l'enquête ! Nous vous remercions sincèrement d'avoir complété l'enquête sur le Mois de l'Auto-apprentissage des Langues - Hanoï ! En signe de notre gratitude, vous avez reçu {0} FSEL COINS. Vos retours seront attentivement examinés et évalués afin d'améliorer continuellement l'expérience d'apprentissage. Merci pour votre soutien et votre engagement avec FSEL ! "
-                        },
-                        new
-                        {
-                            Id = new Guid("61d84d68-3be8-46df-a771-a3037cbd86ee"),
+                            Id = new Guid("b87759ed-53df-4873-8bb8-9373fb1f1316"),
                             CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
                             Language = "vi-VN",
-                            NotificationTypeId = new Guid("50947e80-1900-4fa5-89d2-f8bd309660da"),
-                            TemplateMessage = "Chúng tôi đã phát hiện một số tài khoản lợi dụng chức năng giới thiệu bạn bè để giành một số coins trái với quy định. Số coins và vật phẩm quy đổi từ đó sẽ bị thu hồi. Hãy tuân thủ quy định để tránh bị cấm tài khoản!"
+                            NotificationTypeId = new Guid("8fcf057c-d493-47c2-9637-6aa7d80c606a"),
+                            TemplateMessage = "Thời gian hoạt động trung bình trong tuần này của bạn là {0} giờ {1} phút. Số bài học đã hoàn thành: {2} (Mục tiêu: {3}). Bạn gần đạt rồi! Chỉ cần thêm chút nỗ lực nữa là hoàn thành mục tiêu thôi!"
                         },
                         new
                         {
-                            Id = new Guid("6584662f-04a7-43e7-86d0-d605fd827442"),
-                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Id = new Guid("3816180b-eda4-4085-8cb5-f259d9244f2b"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
                             Language = "en-US",
-                            NotificationTypeId = new Guid("50947e80-1900-4fa5-89d2-f8bd309660da"),
-                            TemplateMessage = "We have detected that some accounts have exploited the referral function to obtain coins in violation of the rules. The coins and items redeemed from them will be revoked. Please follow the rules to avoid account suspension!"
+                            NotificationTypeId = new Guid("8fcf057c-d493-47c2-9637-6aa7d80c606a"),
+                            TemplateMessage = "Your average activity time this week is {0} hours and {1} minutes. You’ve completed {2} lessons (Goal: {3}). You’re almost there! Just a little more effort and you’ll hit your target!"
                         },
                         new
                         {
-                            Id = new Guid("72cba562-2bee-4d33-903c-da9e27e64d48"),
-                            CreatedDate = new DateTime(2025, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Id = new Guid("fd098986-649c-4243-9260-9a4eaf824bc3"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            Language = "fr-FR",
-                            NotificationTypeId = new Guid("50947e80-1900-4fa5-89d2-f8bd309660da"),
-                            TemplateMessage = "Nous avons détecté que certains comptes ont abusé de la fonction de parrainage pour obtenir des pièces de manière non conforme aux règles. Les pièces et les objets échangés seront récupérés. Veuillez respecter les règles pour éviter l'interdiction de votre compte !"
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("fcbad5de-b837-480e-8fc7-3605dd9e6d69"),
+                            TemplateMessage = "Thời gian hoạt động trung bình trong tuần này của bạn là {0} giờ {1} phút. Số bài học đã hoàn thành: {2} (Mục tiêu: {3}). Tuyệt vời! Bạn đã hoàn thành mục tiêu của mình tuần này. Tiếp tục cố gắng nhé!"
+                        },
+                        new
+                        {
+                            Id = new Guid("91fa59fe-340f-4538-9fa6-75b356d3f194"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("fcbad5de-b837-480e-8fc7-3605dd9e6d69"),
+                            TemplateMessage = "Your average activity time this week is {0} hours and {1} minutes. You’ve completed {2} lessons (Goal: {3}). Great job! You’ve reached your goal for the week. Keep up the good work!"
+                        },
+                        new
+                        {
+                            Id = new Guid("5b9add39-f470-4d2d-a614-b1caa9e1e23c"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("2c7a75fb-e821-4a24-ba08-2771128696ec"),
+                            TemplateMessage = "Thời gian hoạt động trung bình trong tuần này của bạn là {0} giờ {1} phút. Số bài học đã hoàn thành: {2} (Mục tiêu: {3}). Xuất sắc! Bạn đã vượt xa mục tiêu tuần này. Tiếp tục phong độ ấn tượng này nhé!"
+                        },
+                        new
+                        {
+                            Id = new Guid("7f4fc539-db77-4148-b09c-e9eef9aee7b9"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("2c7a75fb-e821-4a24-ba08-2771128696ec"),
+                            TemplateMessage = "Your average activity time this week is {0} hours and {1} minutes. You’ve completed {2} lessons (Goal: {3}). Fantastic! You’ve gone above and beyond your goal this week. Keep up the amazing momentum!"
+                        },
+                        new
+                        {
+                            Id = new Guid("f3b70917-8454-43a5-bdd3-8e8ed55a6e19"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("fd8e354f-4a3a-48ea-bf45-6b20cde149ff"),
+                            TemplateMessage = "Chú ý! Chỉ còn {0} giờ để hoàn thành Bài học {1} (Unit {2}). Hãy cố gắng để không bỏ lỡ mục tiêu tuần này nhé!"
+                        },
+                        new
+                        {
+                            Id = new Guid("f25fe807-48e7-48c9-9451-c2e2719612d9"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("fd8e354f-4a3a-48ea-bf45-6b20cde149ff"),
+                            TemplateMessage = "Attention! Only {0} hours left to complete Lesson {1} (Unit {2}). Hurry up, don’t miss your goal for this week!"
+                        },
+                        new
+                        {
+                            Id = new Guid("96b4a18d-4c4e-4a16-8cf5-c0caca0559a6"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("36e8ef96-ffa6-43a4-a05b-17a8c6582fbf"),
+                            TemplateMessage = "Chào {0}! Đã đến giờ học! Hãy chuẩn bị sẵn sàng và truy cập FSEL ngay để bắt đầu học nhé!"
+                        },
+                        new
+                        {
+                            Id = new Guid("16fbd6e1-aa39-441f-b145-4a65f23309c5"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("36e8ef96-ffa6-43a4-a05b-17a8c6582fbf"),
+                            TemplateMessage = "Hello {0}! It's study time! Get ready and log into FSEL to start learning now!"
+                        },
+                        new
+                        {
+                            Id = new Guid("6ef23ed2-5e2e-43b8-bb5d-6eff4b526025"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("26b75c2d-ddfe-4305-8014-dba721460afb"),
+                            TemplateMessage = "Lại là Techie đây! Tôi muốn nhắc nhở bạn rằng đã đến giờ học. Hãy truy cập FSEL ngay để không bỏ lỡ bất kỳ nội dung học quan trọng nào!"
+                        },
+                        new
+                        {
+                            Id = new Guid("356c1cfe-ca40-4b1f-93f0-bcd319170d00"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("26b75c2d-ddfe-4305-8014-dba721460afb"),
+                            TemplateMessage = "It's Techie again! Just a reminder that it's time to study. Log into FSEL now to make sure you don't miss any important learning content!"
+                        },
+                        new
+                        {
+                            Id = new Guid("ffe6d0d4-3014-4152-87d4-bf5de737eb1d"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("0f4e33bb-bd14-4f46-a2b8-294e76c3692c"),
+                            TemplateMessage = "Thời gian học đã đến! Hãy bật FSEL lên và bắt đầu học ngay bây giờ. Chúc bạn có một buổi học hiệu quả!"
+                        },
+                        new
+                        {
+                            Id = new Guid("fc91e1f6-d7b9-4d69-a048-ae2cbc047d9f"),
+                            CreatedDate = new DateTime(2024, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("0f4e33bb-bd14-4f46-a2b8-294e76c3692c"),
+                            TemplateMessage = "Study Alert! Access FSEL immediately to start your next lesson. Keep diving deep into your knowledge!"
                         });
                 });
 
