@@ -127,6 +127,7 @@ namespace Fsel.Shared.Constants
                 public const string ExportExcelStudentLearningProcess = $"{KeyQueue}_ExportExcelStudentLearningProcess";
                 public const string SavePlacementTestAnswers = $"{KeyQueue}_SavePlacementTestAnswers";
                 public const string ErrorExplainGgSheet = $"{KeyQueue}_ErrorEplainGgSheet";
+                public const string ExportExcelSchoolLearningProcess = $"{KeyQueue}_ExportExcelSchoolLearningProcess";
             }
         }
 
