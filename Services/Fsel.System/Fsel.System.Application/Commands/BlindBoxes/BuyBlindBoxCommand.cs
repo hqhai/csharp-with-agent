@@ -201,7 +201,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
                 {
                     try
                     {
-                        var plusTokens = await ProcessTokenTransactionAsync(methodResult, blindBoxChestConfig.Coin ?? 0, blindBoxHistory.Id, EnumTokenMission.OpenChestCoins, EnumTokenHistoryType.Recevived, cancellationToken);
+                        var plusTokens = await ProcessTokenTransactionAsync(methodResult, EnumTokenFeature.ReceiveTokensBlindBox, blindBoxChestConfig.Coin ?? 0, blindBoxHistory.Id, EnumTokenMission.OpenChestCoins, EnumTokenHistoryType.Recevived, cancellationToken);
 
                         if (!plusTokens)
                         {
@@ -216,7 +216,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
 
                 try
                 {
-                    var minusTokens = await ProcessTokenTransactionAsync(methodResult, blindBoxChest.OpenPrice, blindBoxHistory.Id, GetEnumMission(blindBoxChest), EnumTokenHistoryType.Exchanged, cancellationToken);
+                    var minusTokens = await ProcessTokenTransactionAsync(methodResult, EnumTokenFeature.BuyBlindBox, blindBoxChest.OpenPrice, blindBoxHistory.Id, GetEnumMission(blindBoxChest), EnumTokenHistoryType.Exchanged, cancellationToken);
 
                     if (!minusTokens)
                     {
@@ -285,7 +285,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
             }, cancellationToken);
         }
 
-        private async Task<bool> ProcessTokenTransactionAsync(MethodResult<bool> methodResult, int tokens, Guid objectId, EnumTokenMission mission, EnumTokenHistoryType historyType, CancellationToken cancellationToken)
+        private async Task<bool> ProcessTokenTransactionAsync(MethodResult<bool> methodResult, EnumTokenFeature tokenFeature, int tokens, Guid objectId, EnumTokenMission mission, EnumTokenHistoryType historyType, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new CreateTokenHistoryCommand
             {
@@ -294,7 +294,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
                                             new TokenHistoryQueueModel
                                             {
                                                 VolatileToken = tokens,
-                                                Feature = EnumTokenFeature.BlindBox,
+                                                Feature = tokenFeature,
                                                 Mission = mission,
                                                 UserId = _authContext.CurrentUserId,
                                                 Type = historyType,
