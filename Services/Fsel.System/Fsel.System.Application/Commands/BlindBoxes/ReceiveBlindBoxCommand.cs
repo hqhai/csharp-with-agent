@@ -50,6 +50,18 @@ namespace Fsel.System.Application.Commands.BlindBoxes
                 return methodResult;
             }
 
+            var blindBoxChestConfigPieceIds = blindBox.BlindBoxChests.SelectMany(p => p.BlindBoxChestConfigs).Where(p => p.ConfigType == Shared.Enums.EnumBlindBoxConfigType.Piece).Select(p => p.Id).ToList();
+
+            var blindBoxHistories = await _blindBoxHistoryRepository.Queryable.WhereBulkContains(blindBoxChestConfigPieceIds, p => p.BlindBoxChestConfigId).Where(p => p.CreatedUserId == _authContext.CurrentUserId && p.IsPiece).ToListAsync(cancellationToken);
+
+            blindBoxHistories = blindBoxHistories.DistinctBy(p => p.BlindBoxChestConfigId).ToList();
+
+            if (blindBoxHistories == null || blindBoxHistories.Count != blindBoxChestConfigPieceIds.Count)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumBuyBlindBoxErrorCode.NotReceivedEnoughPieces), nameof(blindBox), _authContext.CurrentUserId);
+                return methodResult;
+            }
+
             var lastChestConfigs = blindBox.BlindBoxChests.FirstOrDefault(p => p.IsLast)?.BlindBoxChestConfigs.FirstOrDefault(p => p.ConfigType == Shared.Enums.EnumBlindBoxConfigType.Piece);
 
             if (lastChestConfigs == null)
@@ -58,7 +70,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
                 return methodResult;
             }
 
-            var blindBoxHistory = await _blindBoxHistoryRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId && p.BlindBoxChestConfigId == lastChestConfigs.Id && p.IsPiece && !string.IsNullOrEmpty(p.Code)).FirstOrDefaultAsync(cancellationToken);
+            var blindBoxHistory = blindBoxHistories.FirstOrDefault(p => p.BlindBoxChestConfigId == lastChestConfigs.Id && string.IsNullOrEmpty(p.Code));
 
             if (blindBoxHistory == null)
             {

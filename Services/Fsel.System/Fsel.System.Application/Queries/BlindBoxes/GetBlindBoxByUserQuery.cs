@@ -6,8 +6,10 @@ namespace Fsel.System.Application.Queries.BlindBoxes
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.System.Domain.Entities.BlindBoxs;
     using Fsel.System.Domain.IRepositories.BlindBoxes;
     using Fsel.System.Domain.Models.EntityModels;
+    using global::System.Threading;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -71,6 +73,8 @@ namespace Fsel.System.Application.Queries.BlindBoxes
 
             blindBoxModel.BlindBoxChests = blindBoxModel.BlindBoxChests.OrderBy(p => p.Index).ToList();
 
+            bool isReceived = true;
+
             foreach (var item in blindBoxModel.BlindBoxChests)
             {
                 var blindBoxChestConfig = blindBoxChestConfigs
@@ -90,6 +94,11 @@ namespace Fsel.System.Application.Queries.BlindBoxes
                     item.IsActive = !hasHistory;
                 }
 
+                if (item.IsActive)
+                {
+                    isReceived = false;
+                }
+
                 var blindBoxChestConfigIds = blindBoxChestConfigs.Where(p => p.BlindBoxChestId == item.Id).Select(p => p.Id).ToList();
                 item.OpenCount = blindBoxHistories.Where(p => blindBoxChestConfigIds.Contains(p.BlindBoxChestConfigId)).Count();
             }
@@ -98,11 +107,26 @@ namespace Fsel.System.Application.Queries.BlindBoxes
             var blindBoxChestConfigPiece = blindBoxChestConfigs.FirstOrDefault(p => p.BlindBoxChestId == lastBlindBoxChest?.Id && p.ConfigType == EnumBlindBoxConfigType.Piece);
             var lastBlindBoxChestHistory = blindBoxHistories.FirstOrDefault(p => p.BlindBoxChestConfigId == blindBoxChestConfigPiece?.Id && p.IsPiece && !string.IsNullOrEmpty(p.Code));
 
-            blindBoxModel.IsReceived = lastBlindBoxChestHistory != null;
+            blindBoxModel.IsReceived = isReceived && lastBlindBoxChestHistory != null;
+
+            if (blindBoxUser.IsShowPopUp)
+            {
+                await UpdateBlindBoxUser(blindBoxUser, cancellationToken);
+            }
 
             methodResult.Result = blindBoxModel;
-
             return methodResult;
+        }
+
+        private async Task UpdateBlindBoxUser(BlindBoxUser blindBoxUser, CancellationToken cancellationToken)
+        {
+            await _blindBoxHistoryRepository.ExecuteTransactionAsync(async () =>
+            {
+                blindBoxUser.IsShowPopUp = false;
+                _blindBoxUserRepository.Update(blindBoxUser);
+                await _blindBoxUserRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                return new MethodResult<bool>();
+            });
         }
     }
 }
