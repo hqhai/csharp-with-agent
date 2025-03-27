@@ -6,6 +6,9 @@ using Fsel.Common.Constants;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using Fsel.System.Application.Commands.BlindBoxes;
+using Fsel.System.Application.Queries.BlindBoxes;
+using Fsel.System.Domain.Models.EntityModels;
+using global::System.Net;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,6 +35,41 @@ namespace Fsel.System.Api.Controllers.Admins
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> AddUserIntoBlindBox([FromBody] AddUserIntoBlindBoxCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// Get Blind Box
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<BlindBoxModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get()
+        {
+            MethodResult<BlindBoxModel> commandResult = await _mediator.Send(new GetBlindBoxQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Blind Boxes By UserIds
+        /// </summary>
+        [HttpPost("get-by-user-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<Guid>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetBlindBoxesByUserIds([FromBody] GetBlindBoxesByUserIdsQuery query)
+        {
+            MethodResult<IList<Guid>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create list Blind Box
+        /// </summary>
+        [HttpPost("create-multiple")]
+        [ProducesResponseType(typeof(MethodResult<int>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateBlindBoxes([FromBody] CreateBlindBoxesCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

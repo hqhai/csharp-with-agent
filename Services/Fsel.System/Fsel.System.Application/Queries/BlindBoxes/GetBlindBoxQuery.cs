@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 namespace Fsel.System.Application.Queries.BlindBoxes
 {
     using AutoMapper;
