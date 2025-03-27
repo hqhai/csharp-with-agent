@@ -75,5 +75,12 @@
     "normalizedName": "EducationDivision",
     "createdDate": "2023-07-21",
     "createdFullName": ""
+  },
+  {
+    "id": "E8FC0D37-1AAE-4AE6-9DC0-1FFE864BEF45",
+    "name": "DepartmentAdmin",
+    "normalizedName": "DepartmentAdmin",
+    "createdDate": "2023-07-21",
+    "createdFullName": ""
   }
 ]
