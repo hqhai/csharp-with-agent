@@ -179,5 +179,14 @@ namespace Fsel.Identity.Api.Controllers
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        [HttpGet("get-tree-events")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEvent>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetTreeCompetitionEvent()
+        {
+            var queryResult = await _mediator.Send(new GetTreeCompetitionEventQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
