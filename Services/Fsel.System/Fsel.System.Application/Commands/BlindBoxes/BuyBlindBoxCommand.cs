@@ -194,14 +194,14 @@ namespace Fsel.System.Application.Commands.BlindBoxes
 
             await _blindBoxHistoryRepository.ExecuteTransactionAsync(async () =>
             {
-                _blindBoxHistoryRepository.Add(blindBoxHistory);
+                blindBoxHistory = _blindBoxHistoryRepository.Add(blindBoxHistory);
                 await _blindBoxHistoryRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 if (blindBoxChestConfig.ConfigType == EnumBlindBoxConfigType.Coin)
                 {
                     try
                     {
-                        var plusTokens = await ProcessTokenTransactionAsync(methodResult, blindBoxChestConfig.Coin ?? 0, blindBoxChestConfig.Id, EnumTokenMission.OpenChestCoins, EnumTokenHistoryType.Recevived, cancellationToken);
+                        var plusTokens = await ProcessTokenTransactionAsync(methodResult, blindBoxChestConfig.Coin ?? 0, blindBoxHistory.Id, EnumTokenMission.OpenChestCoins, EnumTokenHistoryType.Recevived, cancellationToken);
 
                         if (!plusTokens)
                         {
@@ -216,7 +216,7 @@ namespace Fsel.System.Application.Commands.BlindBoxes
 
                 try
                 {
-                    var minusTokens = await ProcessTokenTransactionAsync(methodResult, blindBoxChest.OpenPrice, blindBoxChest.Id, GetEnumMission(blindBoxChest), EnumTokenHistoryType.Exchanged, cancellationToken);
+                    var minusTokens = await ProcessTokenTransactionAsync(methodResult, blindBoxChest.OpenPrice, blindBoxHistory.Id, GetEnumMission(blindBoxChest), EnumTokenHistoryType.Exchanged, cancellationToken);
 
                     if (!minusTokens)
                     {
