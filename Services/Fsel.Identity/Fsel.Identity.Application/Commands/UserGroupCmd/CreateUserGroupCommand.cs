@@ -46,7 +46,7 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
                     .ToListAsync(cancellationToken);
 
                 // Nếu DisplayOrder chưa được chỉ định hoặc là 0, tự động đặt là lớn nhất + 1
-                if (request != null && (request.DisplayOrder == null || request.DisplayOrder <= 0))
+                if (request.DisplayOrder <= 0)
                 {
                     var maxDisplayOrder = allGroups.Any() ? allGroups.Max(x => x.DisplayOrder) : 0;
                     request.DisplayOrder = maxDisplayOrder + 1;
@@ -54,7 +54,7 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
                 else
                 {
                     // Các nhóm có thứ tự hiển thị >= request.DisplayOrder sẽ bị đẩy xuống 1 bậc
-                    var groupsToUpdate = allGroups.Where(x => x.DisplayOrder >= (request?.DisplayOrder ?? 0)).ToList();
+                    var groupsToUpdate = allGroups.Where(x => x.DisplayOrder >= request.DisplayOrder).ToList();
 
                     foreach (var group in groupsToUpdate)
                     {
