@@ -23,6 +23,9 @@ namespace Fsel.Shared.Constants
         public const string PackageFileName = "Resources//Packages.json";
         public const string TechieActionFileName = "Resources//TechieAction.json";
         public const string TechieFileName = "Resources//Techie.json";
+        public const string BlindBox = "Resources//BlindBoxes//BlindBox.json";
+        public const string BlindBoxChest = "Resources//BlindBoxes//BlindBoxChest.json";
+        public const string BlindBoxChestConfig = "Resources//BlindBoxes//BlindBoxChestConfig.json";
 
         public const string EventFileName = "Resources//Events.json";
         public const string WheelOfBuffType = "Resources//WheelOfBuffConfig.json";

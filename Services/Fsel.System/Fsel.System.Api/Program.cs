@@ -13,9 +13,11 @@ using Fsel.System.Application.Services.SenderServices;
 using Fsel.System.Application.Services.StorageServices;
 using Fsel.System.Application.Services.UserServices;
 using Fsel.System.Domain.IRepositories;
+using Fsel.System.Domain.IRepositories.BlindBoxes;
 using Fsel.System.Infrastructure;
 using Fsel.System.Infrastructure.Common;
 using Fsel.System.Infrastructure.Repositories;
+using Fsel.System.Infrastructure.Repositories.BlindBoxes;
 using Fsel.System.Infrastructure.ValueSettings;
 using Microsoft.EntityFrameworkCore;
 using Refit;
@@ -72,6 +74,11 @@ builder.Services.AddScoped<IBannerStudentRepository, BannerStudentRepository>();
 builder.Services.AddScoped<IBannerScopeRepository, BannerScopeRepository>();
 builder.Services.AddScoped<IBannerImageRepository, BannerImageRepository>();
 builder.Services.AddScoped<ISharePointService, SharePointService>();
+builder.Services.AddScoped<IBlindBoxRepository, BlindBoxRepository>();
+builder.Services.AddScoped<IBlindBoxChestRepository, BlindBoxChestRepository>();
+builder.Services.AddScoped<IBlindBoxChestConfigRepository, BlindBoxChestConfigRepository>();
+builder.Services.AddScoped<IBlindBoxHistoryRepository, BlindBoxHistoryRepository>();
+builder.Services.AddScoped<IBlindBoxUserRepository, BlindBoxUserRepository>();
 
 builder.Services.AddScoped<IFselRatingRepository, FselRatingRepository>();
 builder.Services.AddScoped<IDisplayOrderConfigRepository, DisplayOrderConfigRepository>();
@@ -83,6 +90,8 @@ builder.Services.AddScoped<ChatBotPublisher>();
 builder.Services.AddScoped<TechieSendMessagePublisher>();
 builder.Services.AddScoped<BannerConverter>();
 builder.Services.AddScoped<BannerPublisher>();
+builder.Services.AddScoped<BuyBlindBoxPublisher>();
+builder.Services.AddScoped<SendNotifyBuyBlindBoxPublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
@@ -113,7 +122,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.SystemQueue.NameQueue.CreateLuckyTicket, typeof(CreateLuckyTicketConsumer) },
     { QueueSettings.SystemQueue.NameQueue.NoticeAccessTime, typeof(NoticeAccessFeatureConsumer) },
     { QueueSettings.InteractionQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.Banner, typeof(BannerConsumer) }
+    { QueueSettings.RealtimeQueue.NameQueue.Banner, typeof(BannerConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.BuyBlindBox, typeof(BuyBlindBoxConsumer) }
 });
 
 var app = builder.Build();
