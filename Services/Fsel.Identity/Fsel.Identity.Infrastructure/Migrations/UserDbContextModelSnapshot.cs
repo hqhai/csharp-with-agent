@@ -109,17 +109,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi.NumberStudentLearnOnSystemModel", b =>
-                {
-                    b.Property<string>("ActiveDate")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ActiveStudentCount")
-                        .HasColumnType("int");
-
-                    b.ToTable("NumberStudentLearnOnSystemResults");
-                });
-
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.CSO", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2856,46 +2845,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasIndex("IsDeleted", "RefreshToken");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("Fsel.Identity.Domain.Models.EntityModels.ReportEventHaNoi.OverallStudentModel", b =>
-                {
-                    b.Property<int?>("ActiveStudentsToday")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ActiveStudentsYesterday")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("RegisteredStudentsYesterday")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TotalStudents")
-                        .HasColumnType("int");
-
-                    b.ToTable("OverallStudentResults");
-                });
-
-            modelBuilder.Entity("Fsel.Identity.Domain.Models.EntityModels.ReportEventHaNoi.SummaryDataOnCityModel", b =>
-                {
-                    b.Property<int?>("ActiveCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("DistrictName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("GroupName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("PercentageActive")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("PercentageChange")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("SchoolName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToTable("SummaryDataOnCityResults");
                 });
 
             modelBuilder.Entity("Fsel.Core.Entities.RoleClaimEntity", b =>

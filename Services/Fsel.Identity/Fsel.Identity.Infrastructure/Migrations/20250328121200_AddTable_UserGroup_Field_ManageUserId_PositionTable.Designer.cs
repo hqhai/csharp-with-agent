@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20250327124004_AddTable_UserGroup")]
-    partial class AddTable_UserGroup
+    [Migration("20250328121200_AddTable_UserGroup_Field_ManageUserId_PositionTable")]
+    partial class AddTable_UserGroup_Field_ManageUserId_PositionTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -110,17 +110,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
-                });
-
-            modelBuilder.Entity("Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi.NumberStudentLearnOnSystemModel", b =>
-                {
-                    b.Property<string>("ActiveDate")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ActiveStudentCount")
-                        .HasColumnType("int");
-
-                    b.ToTable("NumberStudentLearnOnSystemResults");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.CSO", b =>
@@ -236,6 +225,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<Guid>("CreatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
+
+                    b.Property<string>("DashboardEventConfigStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
@@ -505,9 +497,16 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
+                    b.Property<Guid?>("ManageUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Position")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -959,6 +958,36 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             IsDeleted = false,
                             Name = "Guest",
                             NormalizedName = "Guest"
+                        },
+                        new
+                        {
+                            Id = new Guid("caa21b08-7ddb-4951-9f2d-6a7fa256775c"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "EducationDepartment",
+                            NormalizedName = "EducationDepartment"
+                        },
+                        new
+                        {
+                            Id = new Guid("73cd33e9-2f40-453a-b153-4ab59eaa6b73"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "EducationDivision",
+                            NormalizedName = "EducationDivision"
+                        },
+                        new
+                        {
+                            Id = new Guid("e8fc0d37-1aae-4ae6-9dc0-1ffe864bef45"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "DepartmentAdmin",
+                            NormalizedName = "DepartmentAdmin"
                         });
                 });
 
@@ -2645,6 +2674,12 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
+                    b.Property<bool>("NotifiCourseTarget")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NotifiDelayCourseTarget")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("NotifiEmail")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -2660,6 +2695,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("NotifiLesson")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NotifiTimeCourseTarget")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -2759,46 +2797,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasIndex("IsDeleted", "RefreshToken");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("Fsel.Identity.Domain.Models.EntityModels.ReportEventHaNoi.OverallStudentModel", b =>
-                {
-                    b.Property<int?>("ActiveStudentsToday")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ActiveStudentsYesterday")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("RegisteredStudentsYesterday")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TotalStudents")
-                        .HasColumnType("int");
-
-                    b.ToTable("OverallStudentResults");
-                });
-
-            modelBuilder.Entity("Fsel.Identity.Domain.Models.EntityModels.ReportEventHaNoi.SummaryDataOnCityModel", b =>
-                {
-                    b.Property<int?>("ActiveCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("DistrictName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("GroupName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("PercentageActive")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("PercentageChange")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("SchoolName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToTable("SummaryDataOnCityResults");
                 });
 
             modelBuilder.Entity("Fsel.Core.Entities.RoleClaimEntity", b =>

@@ -6,50 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddTable_UserGroup : Migration
+    public partial class AddTable_UserGroup_Field_ManageUserId_PositionTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "NumberStudentLearnOnSystemResults",
-                columns: table => new
-                {
-                    ActiveDate = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ActiveStudentCount = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                });
-
-            migrationBuilder.CreateTable(
-                name: "OverallStudentResults",
-                columns: table => new
-                {
-                    TotalStudents = table.Column<int>(type: "int", nullable: true),
-                    ActiveStudentsToday = table.Column<int>(type: "int", nullable: true),
-                    ActiveStudentsYesterday = table.Column<int>(type: "int", nullable: true),
-                    RegisteredStudentsYesterday = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SummaryDataOnCityResults",
-                columns: table => new
-                {
-                    GroupName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DistrictName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SchoolName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ActiveCount = table.Column<int>(type: "int", nullable: true),
-                    PercentageActive = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    PercentageChange = table.Column<decimal>(type: "decimal(18,2)", nullable: true)
-                },
-                constraints: table =>
-                {
-                });
-
             migrationBuilder.CreateTable(
                 name: "UserGroups",
                 columns: table => new
@@ -136,15 +97,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "NumberStudentLearnOnSystemResults");
-
-            migrationBuilder.DropTable(
-                name: "OverallStudentResults");
-
-            migrationBuilder.DropTable(
-                name: "SummaryDataOnCityResults");
-
             migrationBuilder.DropTable(
                 name: "UserGroupMemberShips");
 
