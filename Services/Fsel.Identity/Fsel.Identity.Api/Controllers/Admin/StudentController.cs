@@ -322,9 +322,21 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("get-user-manage")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UserManageModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateProfileUser([FromQuery] GetUsersByRolesQuery query)
+        public async Task<IActionResult> UpdateProfileUser([FromQuery] GetUserManagesByRoleQuery query)
         {
             MethodResult<PagingItemsModel<UserManageModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Profile User Manage
+        /// </summary>
+        [HttpGet("users-by-roles")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UserModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUsersByRoles([FromQuery] GetUsersByRolesQuery query)
+        {
+            MethodResult<PagingItemsModel<UserModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
