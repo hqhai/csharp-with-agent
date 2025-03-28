@@ -35,6 +35,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<object>();
 
+            var requestStr = request.Serialize();
+            _logger.LogError($"Request: {requestStr}");
+
             if (string.IsNullOrEmpty(request.PackageName) || string.IsNullOrEmpty(request.Token) || string.IsNullOrEmpty(request.SubscriptionId))
             {
                 _logger.LogError($"DataNotExist: {request.PackageName} {request.Token} {request.SubscriptionId}");
