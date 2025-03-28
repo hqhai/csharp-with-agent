@@ -10,7 +10,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? FullName { get; set; }
         public DateTime? Birthday { get; set; }
         public string? Email { get; set; }
-        public EnumCourseType Type { get; set; }
+        public EnumCourseType? Type { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
         public Guid? SchoolId { get; set; }
         public string? SchoolName { get; set; }
@@ -18,5 +18,17 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? Grade { get; set; }
         public string? Class { get; set; }
         public string? UserName { get; set; }
+        public string? Object { get; set; }
+        public string? Status { get; set; }
+        public string? Event { get; set; }
+        public Guid? StudentId { get; set; }
+        public Guid? CourseId { get; set; }
+        public Guid? ProvinceId { get; set; }
+        public Guid? DistrictId { get; set; }
+        public DateTime? ExpiredDate { get; set; }
+        public int? TotalLesson { get; set; }
+        public int? TotalLessonDone { get; set; }
+        public bool? EmailConfirm { get; set; }
+        public bool? IsDeleted { get; set; }
     }
 }
