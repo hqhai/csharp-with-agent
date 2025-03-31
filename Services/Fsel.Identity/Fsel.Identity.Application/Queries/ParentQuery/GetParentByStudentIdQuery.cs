@@ -40,15 +40,17 @@ namespace Fsel.Identity.Application.Queries.ParentQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
-            var parent = from u in _userManager.Users
-                         join h in _humanRepository.Queryable on u.Id equals h.UserId
+            var parent = from h in _humanRepository.Queryable
                          join p in _parentRepository.Queryable on h.Id equals p.HumanId
                          where p.Id == parentStudent.ParentId
                          select new ParentProfileModel
                          {
-                             FullName = u.FullName,
-                             Email = u.Email,
-                             PhoneNumber = u.PhoneNumber
+                             Id = p.Id,
+                             FullName = h.FullName,
+                             Email = h.Email,
+                             PhoneNumber = h.PhoneNumber,
+                             Birthday = h.Birthday,
+                             Occupation = p.Occupation
                          };
             methodResult.Result = await parent.FirstOrDefaultAsync(cancellationToken);
             return methodResult;
