@@ -3,7 +3,9 @@
 namespace Fsel.Identity.Infrastructure.Configs
 {
     using System;
+    using Fsel.Common.Helpers;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -17,6 +19,12 @@ namespace Fsel.Identity.Infrastructure.Configs
                 .WithMany(b => b.CompetitionEvents)
                 .HasForeignKey(p => p.ParentEventId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Property(e => e.Category)
+               .HasMaxLength(100)
+               .HasConversion(
+                  v => v.HasValue ? v.ToString() : null,
+                  v => v.EnumParse<EnumCompetitionEventCategory>());
         }
     }
 }
