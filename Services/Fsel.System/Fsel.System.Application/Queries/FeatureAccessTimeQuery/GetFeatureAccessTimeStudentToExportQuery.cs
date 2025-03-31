@@ -8,6 +8,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetFeatureAccessTimeStudentToExportQuery : GetFeatureAccessTimeToExportQueryModel, IRequest<MethodResult<IList<FeatureAccessTimeModel>>>
     {
@@ -38,18 +39,19 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                    EnumFeature = f.EnumFeature.GetValueOrDefault(),
                }).ToList();
 
-            var featureAccessTimeEnumFeatures = (from baseQ in _featureAccessTimeRepository.Queryable.AsEnumerable()
-                                                 join fe in featureAccessTimeRequestEnumFeatures.AsEnumerable() on new { CreatedUserId = baseQ.CreatedUserId, EnumFeature = baseQ.EnumFeature }
-                                                 equals new { CreatedUserId = fe.UserId, fe.EnumFeature }
-                                                 group baseQ by new { baseQ.EnumFeature, baseQ.CreatedUserId } into g
-                                                 select new FeatureAccessTimeModel
-                                                 {
-                                                     CreatedUserId = g.Key.CreatedUserId,
-                                                     EnumFeature = g.Key.EnumFeature,
-                                                     AccessTime = g.Sum(x => x.AccessTime),
-                                                     Visit = g.Sum(x => x.Visit),
-                                                     LastVisited = g.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
-                                                 }).ToList();
+            var userIdEnums = featureAccessTimeRequestEnumFeatures.Select(x => x.UserId).Distinct().ToList();
+            var featureEnums = featureAccessTimeRequestEnumFeatures.Select(x => x.EnumFeature).Distinct().ToList();
+
+            var featureAccessTimeEnumFeatures = await (from baseQ in _featureAccessTimeRepository.Queryable.WhereBulkContains(userIdEnums, x => x.CreatedUserId).Where(x => featureEnums.Contains(x.EnumFeature))
+                                                       group baseQ by new { baseQ.EnumFeature, baseQ.CreatedUserId } into g
+                                                       select new FeatureAccessTimeModel
+                                                       {
+                                                           CreatedUserId = g.Key.CreatedUserId,
+                                                           EnumFeature = g.Key.EnumFeature,
+                                                           AccessTime = g.Sum(x => x.AccessTime),
+                                                           Visit = g.Sum(x => x.Visit),
+                                                           LastVisited = g.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
+                                                       }).ToListAsync(cancellationToken);
 
             var featureAccessTimeRequestFeatures = request.FeatureAccessTimes.Where(x => x.EnumFeature.HasValue && x.CourseId.HasValue)
                 .Select(f => new
@@ -59,47 +61,56 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                     EnumFeature = f.EnumFeature.GetValueOrDefault(),
                 }).ToList();
 
-            var featureAccessTimeFeatures = (from baseQ in _featureAccessTimeRepository.Queryable.AsEnumerable()
-                                             join fe in featureAccessTimeRequestFeatures.AsEnumerable() on new { CreatedUserId = baseQ.CreatedUserId, CourseId = baseQ.CourseId, EnumFeature = baseQ.EnumFeature }
-                                             equals new { CreatedUserId = fe.UserId, CourseId = (Guid?)fe.CourseId, fe.EnumFeature }
-                                             group baseQ by new { baseQ.EnumFeature, baseQ.CourseId, baseQ.CreatedUserId } into g
-                                             select new FeatureAccessTimeModel
-                                             {
-                                                 CreatedUserId = g.Key.CreatedUserId,
-                                                 EnumFeature = g.Key.EnumFeature,
-                                                 CourseId = g.Key.CourseId,
-                                                 AccessTime = g.Sum(x => x.AccessTime),
-                                                 Visit = g.Sum(x => x.Visit),
-                                                 LastVisited = g.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
-                                             }).ToList();
+            var userRequestIds = featureAccessTimeRequestFeatures.Select(x => x.UserId).Distinct().ToList();
+            var featureRequests = featureAccessTimeRequestFeatures.Select(x => x.EnumFeature).Distinct().ToList();
+            var courseIdRequests = featureAccessTimeRequestFeatures.Select(x => x.CourseId).Distinct().ToList();
+
+            var featureAccessTimeFeatures = await (from baseQ in _featureAccessTimeRepository.Queryable.WhereBulkContains(courseIdRequests, x => x.CourseId)
+                                                   .Where(x => featureRequests.Contains(x.EnumFeature))
+                                                   .WhereBulkContains(userRequestIds, x => x.CreatedUserId)
+                                                   group baseQ by new { baseQ.EnumFeature, baseQ.CourseId, baseQ.CreatedUserId } into g
+                                                   select new FeatureAccessTimeModel
+                                                   {
+                                                       CreatedUserId = g.Key.CreatedUserId,
+                                                       EnumFeature = g.Key.EnumFeature,
+                                                       CourseId = g.Key.CourseId,
+                                                       AccessTime = g.Sum(x => x.AccessTime),
+                                                       Visit = g.Sum(x => x.Visit),
+                                                       LastVisited = g.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
+                                                   }).ToListAsync(cancellationToken);
 
             var featureAccessTimeCourseRequests = request.FeatureAccessTimes.Where(x => !x.EnumFeature.HasValue && x.CourseId.HasValue).ToList();
-            var featureAccessTimeCourses = (from baseQ in _featureAccessTimeRepository.Queryable.AsEnumerable()
-                                            join fe in featureAccessTimeCourseRequests.AsEnumerable() on new { CreatedUserId = baseQ.CreatedUserId, CourseId = baseQ.CourseId }
-                                            equals new { CreatedUserId = fe.UserId, CourseId = fe.CourseId }
-                                            where baseQ.EnumFeature != Shared.Enums.EnumFeature.Other && baseQ.CourseId.HasValue
-                                            group baseQ by new { baseQ.CourseId, baseQ.CreatedUserId } into g
+
+            var userRequesteCourseIds = featureAccessTimeCourseRequests.Select(x => x.UserId).ToList();
+            var courseIdRequesteCourses = featureAccessTimeCourseRequests.Select(x => x.EnumFeature).ToList();
+
+            var featureAccessTimeCourses = await (from baseQ in _featureAccessTimeRepository.Queryable.WhereBulkContains(courseIdRequesteCourses, x => x.CourseId)
+                                                                                                      .WhereBulkContains(userRequesteCourseIds, x => x.CreatedUserId)
+                                                  where baseQ.EnumFeature != Shared.Enums.EnumFeature.Other && baseQ.CourseId.HasValue
+                                                  group baseQ by new { baseQ.CourseId, baseQ.CreatedUserId } into g
+                                                  select new FeatureAccessTimeModel
+                                                  {
+                                                      CreatedUserId = g.Key.CreatedUserId,
+                                                      CourseId = g.Key.CourseId,
+                                                      AccessTime = g.Sum(x => x.AccessTime),
+                                                      Visit = g.Sum(x => x.Visit),
+                                                      LastVisited = g.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
+                                                  }).ToListAsync(cancellationToken);
+
+            var featureAccessTimeRequests = request.FeatureAccessTimes.Where(x => !x.EnumFeature.HasValue && !x.CourseId.HasValue).ToList();
+
+            var userIds = featureAccessTimeRequests.Select(x => x.UserId).ToList();
+
+            var featureAccessTimes = await (from baseQ in _featureAccessTimeRepository.Queryable.WhereBulkContains(userIds, x => x.CreatedUserId)
+                                            group baseQ by new { baseQ.CreatedUserId } into g
                                             select new FeatureAccessTimeModel
                                             {
                                                 CreatedUserId = g.Key.CreatedUserId,
-                                                CourseId = g.Key.CourseId,
                                                 AccessTime = g.Sum(x => x.AccessTime),
                                                 Visit = g.Sum(x => x.Visit),
                                                 LastVisited = g.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
-                                            }).ToList();
-
-            var featureAccessTimeRequests = request.FeatureAccessTimes.Where(x => !x.EnumFeature.HasValue && !x.CourseId.HasValue).ToList();
-            var featureAccessTimes = (from baseQ in _featureAccessTimeRepository.Queryable.AsEnumerable()
-                                      join fe in featureAccessTimeRequests.AsEnumerable() on baseQ.CreatedUserId equals fe.UserId
-                                      group baseQ by new { baseQ.CreatedUserId } into g
-                                      select new FeatureAccessTimeModel
-                                      {
-                                          CreatedUserId = g.Key.CreatedUserId,
-                                          AccessTime = g.Sum(x => x.AccessTime),
-                                          Visit = g.Sum(x => x.Visit),
-                                          LastVisited = g.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
-                                          LearnLastVisited = g.Where(x => x.CourseId.HasValue).Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
-                                      }).ToList();
+                                                LearnLastVisited = g.Where(x => x.CourseId.HasValue).Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
+                                            }).ToListAsync(cancellationToken);
 
             featureAccessTimeFeatures.AddRange(featureAccessTimeCourses ?? new List<FeatureAccessTimeModel>());
             featureAccessTimeFeatures.AddRange(featureAccessTimes ?? new List<FeatureAccessTimeModel>());

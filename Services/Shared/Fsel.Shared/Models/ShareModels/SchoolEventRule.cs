@@ -74,7 +74,8 @@ namespace Fsel.Shared.Models.ShareModels
         ShowStoreFSEL,
         RegisterAndCreateUser,
         DisableLeaderBoard,
-        DisableLevelChangeSelection
+        DisableLevelChangeSelection,
+        ImportStudent
     }
 
     public enum EnumByPassPaymentType

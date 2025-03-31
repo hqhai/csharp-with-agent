@@ -3,6 +3,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using EFCore.BulkExtensions;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.OrderService;
@@ -10,6 +11,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -59,9 +61,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
 
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
             var competitionEvents = _competitionEventsRepository.Queryable.ToList();
             var competitionEvent = competitionEvents.Where(p => p.SchoolIds != null && p.SchoolIds.Contains(schoolId.Value) && p.Category == request.Category).FirstOrDefault();
-            if (competitionEvent == null)
+
+            if (competitionEvent == null || competitionEvent.EventContent == null || competitionEvent.EventContent.ActionConfigs == null || competitionEvent.EventContent.ActionConfigs.Any(p => p.Action == EnumSchoolEventRuleAction.ImportStudent && p.EndDate.HasValue && p.EndDate.Value < currentDate))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvent));
                 return methodResult;
@@ -75,10 +80,18 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                   where s.SchoolId == schoolId.Value && ce.Id == competitionEvent.Id
                                   select new { User = u, Human = h, Student = s, StudentCompetitionEvent = sce };
 
-            var users = await studentEntities.Select(p => p.User).ToListAsync(cancellationToken);
-            var humans = studentEntities.Select(p => p.Human);
-            var students = studentEntities.Select(p => p.Student);
-            var studentCompetitionEvents = studentEntities.Select(p => p.StudentCompetitionEvent);
+            var query = await studentEntities.ToListAsync(cancellationToken);
+
+            var users = query.Select(p => p.User).ToList();
+            if (users == null || users.Count == 0)
+            {
+                methodResult.Result = true;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var humans = query.Select(p => p.Human).ToList();
+            var students = query.Select(p => p.Student).ToList();
+            var studentCompetitionEvents = query.Select(p => p.StudentCompetitionEvent).ToList();
 
             var userIds = users.Select(p => p.Id).ToList();
 

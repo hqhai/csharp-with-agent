@@ -72,7 +72,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
             var datas = students.Select(student =>
             {
                 var userId = student.UserId ?? default;
-                var overallFeatureAccessTime = overallFeatureAccessTimes.FirstOrDefault(x => x.UserId == userId);
+                var overallFeatureAccessTime = overallFeatureAccessTimes.FirstOrDefault(x => x.UserId == userId && x.CourseId == student.CourseId);
                 var studentAssiduity = new StudentAssiduityModel
                 {
                     FullName = student.FullName,

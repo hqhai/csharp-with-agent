@@ -90,6 +90,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 var actionConfigs = @events?.Select(p => p.EventContent).Where(p => p != null && p.ActionConfigs != null && p.ActionConfigs.Count > 0).SelectMany(p => p.ActionConfigs!).ToList();
                 settingStudentModel.Actions = actions;
                 settingStudentModel.ActionConfigs = actionConfigs;
+                settingStudentModel.IsActivedAccount = DateTime.UtcNow >= (@events?.FirstOrDefault()?.EventContent?.StartDate ?? default);
 
                 var surveyEvent = await _interactionService.CheckSurveyBySurveyFormType(new CheckSurveyBySurveyFormTypeModel { SurveyFormType = EnumSurveyFormType.Event, CompetitionEventId = events?.FirstOrDefault()?.Id });
                 if (surveyEvent.IsSuccessStatusCode)
