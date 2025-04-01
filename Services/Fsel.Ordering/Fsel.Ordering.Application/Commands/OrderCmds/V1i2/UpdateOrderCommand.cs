@@ -48,16 +48,16 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
 
             _mapper.Map(request.Request, request.Order);
 
-            var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = request.StudentCode }, cancellationToken).ConfigureAwait(false);
-            string code = codeSend.Result ?? string.Empty;
+            //var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = request.StudentCode }, cancellationToken).ConfigureAwait(false);
+            //string code = codeSend.Result ?? string.Empty;
 
-            if (string.IsNullOrEmpty(code) || await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(code));
-                return methodResult;
-            }
+            //if (string.IsNullOrEmpty(code) || await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken))
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(code));
+            //    return methodResult;
+            //}
 
-            request.Order.Code = code;
+            request.Order.Code = request.Order.Code;
             request.Order.DiscountPrice = request.DiscountPrice;
             request.Order.DiscountPercent = request.DiscountPercent;
             request.Order.TotalPrice = request.TotalPrice;
