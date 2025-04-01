@@ -82,6 +82,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 Level = student.CourseLevel,
                 BaseCourseLevel = student.BaseCourseLevel,
                 ClassId = student.ClassId,
+                EmailConfirmed = student.Human?.User?.EmailConfirmed ?? default,
                 TurnOnTouchpoint = _appSetting.TouchpointConfig?.TurnOnTouchpoint ?? false
             };
 
