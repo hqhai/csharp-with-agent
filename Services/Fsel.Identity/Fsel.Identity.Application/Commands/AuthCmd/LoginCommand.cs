@@ -54,9 +54,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         public async Task<MethodResult<TokenModel>> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-
+            request.Username = request.Username?.Trim();
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
-            if (request.Username == null || request.Password == null)
+
+            if ((request.Username == null || string.IsNullOrWhiteSpace(request.Username)) || request.Password == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserNameAndPasswordNotEmpty), new Error(nameof(request.Username)), new Error(nameof(request.Password)));
                 return methodResult;
