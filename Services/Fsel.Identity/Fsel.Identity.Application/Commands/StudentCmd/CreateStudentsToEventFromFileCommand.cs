@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -66,6 +67,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private const string ExpiredDate = "Đã hết thời gian tạo tài khoản";
 
         private const string DefaultPassword = "Fsel@";
+        private const int StartYear = 1900;
+
+        private static readonly Random s_random = new Random();
 
         public CreateStudentsToEventFromFileCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IServiceProvider serviceProvider, SendStudentsFromFilePublisher sendStudentsFromFilePublisher, ILogger<CreateStudentsToEventFromFileCommand> logger, AuthContext authContext, ISystemService systemService)
         {
@@ -132,8 +136,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 }
 
                 var expiredDate = competitionEvent.EventContent?.PaymentDate;
+
+                var expiredDateImport = competitionEvent.EventContent?.ActionConfigs?.FirstOrDefault(p => p.Action == EnumSchoolEventRuleAction.ImportStudent);
+
                 var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
-                if (!expiredDate.HasValue || currentDate >= expiredDate.Value)
+                if (!expiredDate.HasValue || currentDate >= expiredDate.Value || expiredDateImport == null || !expiredDateImport.EndDate.HasValue || expiredDateImport.EndDate.Value < currentDate)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(expiredDate));
                     await SendNotify(request.Key ?? string.Empty, ExpiredDate, StatusCodes.Status400BadRequest, 0, null, cancellationToken);
@@ -221,11 +228,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                 var result = formFile.ImportAndValidateExcel(async (CreateStudentToEventFromFileModel x, IList<CreateStudentToEventFromFileModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
                 {
-                    if (!string.IsNullOrEmpty(x.FullName?.Trim()) || !string.IsNullOrEmpty(x.PhoneNumber?.Trim()) || x.DateOfBirth != null || !string.IsNullOrEmpty(x.SchoolGrade?.Trim()) || !string.IsNullOrEmpty(x.SchoolClass?.Trim()))
+                    if (!string.IsNullOrEmpty(x.FullName?.Trim()) || !string.IsNullOrEmpty(x.PhoneNumber?.Trim()) || x.DateOfBirth.HasValue || !string.IsNullOrEmpty(x.SchoolGrade?.Trim()) || !string.IsNullOrEmpty(x.SchoolClass?.Trim()))
                     {
                         if (string.IsNullOrEmpty(x.FullName?.Trim()))
                         {
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.EmptyFullNameVN });
+                        }
+                        else if (!Shared.Helpers.StringHelper.ContainsSpecialChars(x.FullName.Trim()))
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.InvalidFullNameVN });
                         }
                         if (string.IsNullOrEmpty(x.PhoneNumber?.Trim()))
                         {
@@ -239,9 +250,13 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         {
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
                         }
-                        if (x.DateOfBirth == null)
+                        if (!x.DateOfBirth.HasValue)
                         {
                             errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.EmptyBirthDayVN });
+                        }
+                        else if (x.DateOfBirth.HasValue && x.DateOfBirth.Value.Year < StartYear)
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
                         }
                         if (string.IsNullOrEmpty(x.SchoolGrade?.Trim()))
                         {
@@ -316,18 +331,18 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.DateOfBirth);
                                 var user = new User()
                                 {
-                                    UserName = Shared.Helpers.StringHelper.GenerateUsername(student.FullName ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber)),
+                                    UserName = GenerateUsername(student.FullName?.Trim() ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim())),
                                     Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
-                                    FullName = student.FullName!.Trim(),
-                                    PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
+                                    FullName = student.FullName?.Trim() ?? string.Empty,
+                                    PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()),
                                     EmailConfirmed = false,
                                     PhoneNumberConfirmed = false,
                                     Status = EnumUserStatus.Active,
                                     DefaultPassword = password,
                                     Human = new Human()
                                     {
-                                        FullName = student.FullName.Trim(),
-                                        PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber),
+                                        FullName = student.FullName?.Trim(),
+                                        PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()),
                                         Birthday = student.DateOfBirth,
                                         Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
                                         Code = GeneratorCodeAsync(studentRepository, student.DateOfBirth ?? DateTime.MinValue, null),
@@ -372,6 +387,28 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                         StudentCode = user.Human.Code
                                     });
                                 }
+                                else
+                                {
+                                    user.UserName = GenerateUsername(student.FullName ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()));
+                                    identityStudentResult = await userManager.CreateAsync(user, password);
+
+                                    if (identityStudentResult.Succeeded)
+                                    {
+                                        await userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
+
+                                        studentIds.Add(user.Human.Student.Id);
+
+                                        studentModels.Add(new CreateOrderForStudentsEventCommandModel()
+                                        {
+                                            UserId = user.Id,
+                                            StudentId = user.Human.Student.Id,
+                                            Email = user.Email,
+                                            PhoneNumber = user.PhoneNumber,
+                                            FullName = user.FullName,
+                                            StudentCode = user.Human.Code
+                                        });
+                                    }
+                                }
                             }
                         }
                         catch (Exception ex)
@@ -390,6 +427,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         CompetitionEventId = competitionEvent.Id,
                     });
                 });
+
+                if (studentCompetitionEvents.Count == 0)
+                {
+                    methodResult.AddErrorBadRequest(FileNull);
+
+                    await SendNotify(request.Key ?? string.Empty, FileNull, StatusCodes.Status400BadRequest, 0, null, cancellationToken);
+
+                    return methodResult;
+                }
 
                 await _studentCompetitionEventsRepository.ExecuteTransactionAsync(async () =>
                 {
@@ -421,6 +467,55 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             }
 
             return methodResult;
+        }
+
+        public static string GenerateUsername(string fullName, string phoneNumber)
+        {
+            if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(phoneNumber))
+            {
+                throw new ArgumentException("Full name and phone number cannot be empty.");
+            }
+
+            string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            string digits = "0123456789";
+
+            CultureInfo cultureInfo = CultureInfo.InvariantCulture;
+
+            var newFullName = RemoveDiacritics(fullName);
+
+            string initials = string.Join("", newFullName.Split(' ').Where(s => s.Length > 0).Select(s => s[0])).ToUpper(cultureInfo);
+
+            char randomLetter1 = letters[s_random.Next(letters.Length)];
+            char randomLetter2 = letters[s_random.Next(letters.Length)];
+            char randomDigit = digits[s_random.Next(digits.Length)];
+
+            return $"{initials}_{phoneNumber}_{randomLetter1}{randomLetter2}{randomDigit}";
+        }
+
+        public static string RemoveDiacritics(string text)
+        {
+            if (text.IsNullOrEmpty())
+            {
+                return string.Empty;
+            }
+            var normalizedString = text.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder(capacity: normalizedString.Length);
+
+            for (int i = 0; i < normalizedString.Length; i++)
+            {
+                char c = normalizedString[i];
+                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            StringComparison stringComparison = StringComparison.InvariantCultureIgnoreCase;
+
+            return stringBuilder
+                .ToString().Replace("Đ", "D", stringComparison).Replace("đ", "d", stringComparison)
+                .Normalize(NormalizationForm.FormC);
         }
 
         private static string GeneratorCodeAsync(IStudentRepository studentRepository, DateTime birthDay, EnumGender? gender)

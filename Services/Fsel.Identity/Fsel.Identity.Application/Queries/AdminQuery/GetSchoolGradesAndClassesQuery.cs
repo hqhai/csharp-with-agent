@@ -5,12 +5,14 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -94,10 +96,14 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 Classes = new List<string>() { Teacher }
             });
 
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
             methodResult.Result = new SchoolGradeClassModel()
             {
-                IsHaveConfigStudent = userCompetitionEvents.Any(p => p.Category == EnumCompetitionEventCategory.Student),
-                IsHaveConfigTeacher = userCompetitionEvents.Any(p => p.Category == EnumCompetitionEventCategory.Teacher),
+                IsHaveConfigStudent = userCompetitionEvents.Any(p => p.Category == EnumCompetitionEventCategory.Student && p.EventContent != null && p.EventContent.ActionConfigs != null && p.EventContent.ActionConfigs.Any(x => x.Action == EnumSchoolEventRuleAction.ImportStudent && x.EndDate.HasValue && x.EndDate.Value > currentDate)),
+
+                IsHaveConfigTeacher = userCompetitionEvents.Any(p => p.Category == EnumCompetitionEventCategory.Teacher && p.EventContent != null && p.EventContent.ActionConfigs != null && p.EventContent.ActionConfigs.Any(x => x.Action == EnumSchoolEventRuleAction.ImportStudent && x.EndDate.HasValue && x.EndDate.Value > currentDate)),
+
                 GradesAndClasses = gradeClassList.OrderBy(p => p.Grade).ToList()
             };
             return methodResult;

@@ -8,7 +8,6 @@ namespace Fsel.Shared.Helpers
     using System.Text;
     using System.Text.RegularExpressions;
     using Fsel.Shared.Constants;
-    using Nest;
 
     public static class StringHelper
     {
@@ -323,7 +322,8 @@ namespace Fsel.Shared.Helpers
 
             phoneNumber = phoneNumber.Replace(" ", "", StringComparison.InvariantCultureIgnoreCase);
 
-            string pattern = @"^(0\d{9})$|^(84\d{9})$|^\+84\d{9}$|^\d{9}$";
+            string pattern = @"^(0\d{9})$|^(84\d{9})$|^\+84\d{9}$|^[1-9]\d{8}$";
+
             Regex regex = new Regex(pattern);
 
             return regex.IsMatch(phoneNumber);
@@ -365,25 +365,9 @@ namespace Fsel.Shared.Helpers
             return string.Format(objStr, param ?? Array.Empty<object>());
         }
 
-        public static string GenerateUsername(string fullName, string phoneNumber)
+        public static bool ContainsSpecialChars(string input)
         {
-            if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(phoneNumber))
-            {
-                throw new ArgumentException("Full name and phone number cannot be empty.");
-            }
-
-            Random random = new Random();
-            string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            string digits = "0123456789";
-
-            CultureInfo cultureInfo = CultureInfo.InvariantCulture;
-
-            string initials = string.Join("", fullName.Split(' ').Where(s => s.Length > 0).Select(s => s[0])).ToUpper(cultureInfo);
-
-            char randomLetter = letters[random.Next(letters.Length)];
-            char randomDigit = digits[random.Next(digits.Length)];
-
-            return $"{initials}_{phoneNumber}_{randomLetter}{randomDigit}";
+            return Regex.IsMatch(input, @"^[\p{L}\s]+$");
         }
     }
 }

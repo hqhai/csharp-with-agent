@@ -107,7 +107,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id && x.WorkingStatus == EnumWorkingStatus.Active, cancellationToken);
             var course = await _courseRepository.Queryable
                  .Include(x => x.CourseResults.Where(x => courseResult != null && x.Id == courseResult.Id))
-                 .Include(x => x.CourseUnitMockTests)
+                 .Include(x => x.CourseUnitMockTests).AsNoTracking()
                  .FirstOrDefaultAsync(x => courseResult != null && x.Id == courseResult.CourseId, cancellationToken);
 
             if (course == null)
@@ -115,6 +115,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 course = await _courseRepository.Queryable
                          .Include(x => x.CourseResults.Where(x => x.StudentId == student.Id && x.CourseId == @class.CourseId))
                          .Include(x => x.CourseUnitMockTests)
+                         .AsNoTracking()
                          .FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
             }
 
