@@ -75,7 +75,8 @@ namespace Fsel.Shared.Models.ShareModels
         RegisterAndCreateUser,
         DisableLeaderBoard,
         DisableLevelChangeSelection,
-        ImportStudent
+        ImportStudent,
+        ExportAccount
     }
 
     public enum EnumByPassPaymentType
@@ -129,6 +130,8 @@ namespace Fsel.Shared.Models.ShareModels
         public StopAtLevelSelectionConfig? StopAtLevelSelectionConfig { get; set; }
         public EnumSenderTemplate? MailRegister { get; set; }
         public string? SubjectMailRegister { get; set; }
+        public long? StartTime { get; set; }
+        public long? EndTime { get; set; }
     }
 
     public class StopAtLevelSelectionConfig
