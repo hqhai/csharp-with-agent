@@ -143,14 +143,17 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                         SystemRoleAlConfig = request.SystemRoleAlConfig,
                         UserAIConfig = userAiConfig,
                     }, cancellationToken).ConfigureAwait(false);
+
                     aIResponse = Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
+                    var doc = JsonDocument.Parse(aIResponse);
+                    var items = doc.RootElement.GetProperty("schema").GetProperty("items");
 
                     _logger.LogCritical($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} userAiConfig: {userAiConfig}");
 
                     _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} userAiConfig: {userAiConfig}");
                     _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} aIResponse: {aIResponse}");
 
-                    var classForumAIs = GetClassForumAIs(ConvertHelper.Deserialize<List<ClassForumAIModel>?>(aIResponse));
+                    var classForumAIs = GetClassForumAIs(ConvertHelper.Deserialize<List<ClassForumAIModel>?>(items));
 
                     _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumAIs: {classForumAIs.Serialize()}");
 
