@@ -7,6 +7,7 @@ namespace Fsel.Identity.Api.Controllers.AdminSchool
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Identity.Application.Commands.StudentCmd;
+    using Fsel.Identity.Application.Queries.AdminQuery;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
@@ -92,6 +93,22 @@ namespace Fsel.Identity.Api.Controllers.AdminSchool
         {
             var commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Export students
+        /// </summary>
+        [HttpGet("export-students")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportStudents([FromQuery] ExportStudentsByAdminSchoolQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!queryResult.IsOK || queryResult.Result == null)
+            {
+                return queryResult.GetActionResult();
+            }
+            return File(queryResult.Result, Settings.Excels.ContentType, "students_report.xlsx");
         }
     }
 }

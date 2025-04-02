@@ -100,16 +100,18 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 var eventStudentIdsSet = reportCompetitionEvent.StudentIds?.ToHashSet() ?? new HashSet<Guid>();
                 var numberStudentsCompletedPT = placementTestResultGroups.Where(x => eventStudentIdsSet.Contains(x.StudentId)).Select(x => x.StudentId).Distinct().Count();
-                var numberStudentToLearn = courseStudentResults.Where(x => eventStudentIdsSet.Contains(x)).Distinct().Count();
+                var studentDistrictIds = courseStudentResults.Where(x => eventStudentIdsSet.Contains(x)).Distinct().ToList();
                 var reportPlacementTestEvent = new ReportPlacementTestEventModel
                 {
                     LocationName = reportCompetitionEvent.DistrictName,
+                    NumberStudentAccountRegister = reportCompetitionEvent.NumberStudentAccountRegister,
+                    NumberStudentCompleteVerify = reportCompetitionEvent.NumberStudentCompleteVerify,
                     NumberRegisteredSchool = reportCompetitionEvent.NumberRegisteredSchool,
                     NumberActualParticipatingSchool = reportCompetitionEvent.NumberActualParticipatingSchool,
                     NumberValidStudentAccount = reportCompetitionEvent.NumberValidStudentAccount,
                     NumberStudentsCompletedPT = numberStudentsCompletedPT,
-                    NumberStudentToLearn = numberStudentToLearn,
-                    LearningProgressLearns = await GetStudyPositionAsync(request.CourseType, eventStudentIdsSet.ToList()),
+                    NumberStudentToLearn = studentDistrictIds.Count,
+                    LearningProgressLearns = await GetStudyPositionAsync(request.CourseType, studentDistrictIds),
                 };
                 reportPlacementTestEvents.Add(reportPlacementTestEvent);
             };
@@ -262,7 +264,10 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         public async Task<IList<LearningProgressLearnModel>> GetStudyPositionAsync(EnumCourseType courseType, IList<Guid> studentIds)
         {
             var listLearningProcess = new List<LearningProgressLearnModel>();
-
+            if (!studentIds.Any())
+            {
+                return listLearningProcess;
+            }
             using (var scope = _serviceProvider.CreateScope())
             {
                 var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
