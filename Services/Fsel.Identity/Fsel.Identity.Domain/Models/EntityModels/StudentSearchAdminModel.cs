@@ -18,5 +18,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? Grade { get; set; }
         public string? Class { get; set; }
         public string? UserName { get; set; }
+        public string? PasswordDefault { get; set; }
     }
 }
