@@ -8,9 +8,11 @@ namespace Fsel.Identity.Domain.Models.EntityModels
     public class StudentSearchAdminModel : BaseModel
     {
         public string? FullName { get; set; }
+        public string? StudentCode { get; set; }
         public DateTime? Birthday { get; set; }
         public string? Email { get; set; }
         public EnumCourseType? Type { get; set; }
+        public EnumGender? Gender { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
         public Guid? SchoolId { get; set; }
         public string? SchoolName { get; set; }

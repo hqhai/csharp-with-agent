@@ -73,11 +73,11 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
 
             var users = from u in _userDbContext.Users.IgnoreQueryFilters()
 
-                        join h in _humanRepository.Queryable
+                        join h in _humanRepository.Queryable.IgnoreQueryFilters()
                         on u.Id equals h.UserId into humanGroup
                         from human in humanGroup.DefaultIfEmpty()
 
-                        join s in _studentRepository.Queryable
+                        join s in _studentRepository.Queryable.IgnoreQueryFilters()
                         on human.Id equals s.HumanId into studentGroup
                         from student in studentGroup.DefaultIfEmpty()
 
@@ -90,6 +90,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                             PhoneNumber = u.PhoneNumber,
                             Email = human.Email,
                             Birthday = human.Birthday,
+                            StudentCode = human.Code,
+                            Gender = human.Gender,
                             SchoolName = student.School,
                             Class = student.SchoolClass,
                             Grade = student.SchoolGrade,
