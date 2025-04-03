@@ -428,6 +428,13 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
                 return methodResult;
             }
+            var homeWorkIds = questions.SelectMany(x => x.HomeWorkQuestions).Select(x => x.HomeWorkId).Distinct().ToList();
+            if (!homeWorkIds.Any(x => x == homeWork.Id))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(questions), nameof(homeWork));
+                return methodResult;
+            }
+
             methodResult.Result = (questions, homeWorkResult);
             return methodResult;
         }

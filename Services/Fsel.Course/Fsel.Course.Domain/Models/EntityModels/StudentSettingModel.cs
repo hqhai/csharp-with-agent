@@ -26,5 +26,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public bool IsSurveyEvent { get; set; }
         public bool EmailConfirmed { get; set; }
         public bool IsActivedAccount { get; set; } = true;
+        public bool TurnOnTouchpoint { get; set; }
     }
 }

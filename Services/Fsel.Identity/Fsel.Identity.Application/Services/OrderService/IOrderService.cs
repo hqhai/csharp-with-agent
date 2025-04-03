@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Services.OrderService
     using Fsel.Common.ActionResults;
     using Fsel.Identity.Application.Services.OrderService.CommandModels;
     using Fsel.Identity.Application.Services.OrderService.Model;
+    using Fsel.Identity.Application.Services.OrderService.QueryModels;
     using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -49,5 +50,8 @@ namespace Fsel.Identity.Application.Services.OrderService
 
         [Post("/v1.2/admin/order/delete-order-of-students-event")]
         Task<IApiResponse<MethodResult<bool>>> DeleteOrderOfStudentEvent([Body] DeleteOrderOfStudentsInEventCommandModel model);
+
+        [Post("/v1/order/get-orders-blind-bag-event")]
+        Task<IApiResponse<MethodResult<IList<OrderModel>>>> GetRecentOrdersAsync([Body] GetRecentOrdersToUserIdsQueryModel query);
     }
 }

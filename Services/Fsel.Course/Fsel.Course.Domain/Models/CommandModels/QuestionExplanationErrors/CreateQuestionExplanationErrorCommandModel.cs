@@ -9,6 +9,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.QuestionExplanationErrors
         public string? Feedback { get; set; }
         public EnumFeedbackExplanation FeedbackExplanation { get; set; }
         public Guid QuestionId { get; set; }
-        public Guid VideoResultId { get; set; }
+        public EnumFeatureExplanationType ExplanationType { get; set; }
+        public Guid ObjectResultId { get; set; }
     }
 }
