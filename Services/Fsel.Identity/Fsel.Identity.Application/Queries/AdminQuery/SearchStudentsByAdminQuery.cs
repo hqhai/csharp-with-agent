@@ -124,7 +124,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 }
                 else
                 {
-                    users = users.Where(m => (m.FullName != null && m.FullName.Contains(request.Keyword)) || (m.UserName != null && m.UserName.Contains(request.Keyword)));
+                    users = users.Where(m => (m.FullName != null && m.FullName.Contains(request.Keyword)) || (m.UserName != null && m.UserName.Contains(request.Keyword)) || (m.SchoolName != null && m.SchoolName.Contains(request.Keyword)));
                 }
             }
 
