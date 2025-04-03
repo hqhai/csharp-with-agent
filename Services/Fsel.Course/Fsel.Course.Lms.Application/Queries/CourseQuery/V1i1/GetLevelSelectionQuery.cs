@@ -47,7 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<LevelDtoModel>>();
-            var userCourseSettingResults = await _userService.GetUserCourseSettingsAsync();
+            var userCourseSettingResults = await _userService.GetUserCourseSettingsAsync(_authContext.CurrentUserId);
             if (!userCourseSettingResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(userCourseSettingResults));
@@ -70,6 +70,12 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
             if (!student.BaseCourseLevel.HasValue)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.BaseCourseLevel));
+                return methodResult;
+            }
+
+            if (!student.ExpiredDate.HasValue)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.ExpiredDate));
                 return methodResult;
             }
 
