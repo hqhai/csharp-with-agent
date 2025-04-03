@@ -238,7 +238,10 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             else
             {
                 user.Object = Leads;
-                if (user.ExpiredDate.HasValue && user.CourseId.HasValue)
+
+                var order = orders?.OrderByDescending(p => p.CreatedDate).FirstOrDefault();
+
+                if (user.ExpiredDate.HasValue && user.CourseId.HasValue && order != null && !order.IsTrial)
                 {
                     TimeSpan difference = user.ExpiredDate.Value - currentDate;
                     int minutesDifference = (int)difference.TotalMinutes;
@@ -254,8 +257,6 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                     user.Status = WaitingForApproval;
                     return;
                 }
-
-                var order = orders?.OrderByDescending(p => p.CreatedDate).FirstOrDefault();
 
                 if (user.ExpiredDate.HasValue && user.CourseId.HasValue && order != null && !order.IsTrial)
                 {
