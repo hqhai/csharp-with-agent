@@ -280,6 +280,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                     return;
                 }
 
+                user.CourseLevel = null;
+
                 if (user.StudentId.HasValue)
                 {
                     if (dataStudent != null && dataStudent.PTStatus == PTDone)
