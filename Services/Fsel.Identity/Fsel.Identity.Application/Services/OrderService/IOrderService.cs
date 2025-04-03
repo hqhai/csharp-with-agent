@@ -53,5 +53,8 @@ namespace Fsel.Identity.Application.Services.OrderService
 
         [Post("/v1/order/get-orders-blind-bag-event")]
         Task<IApiResponse<MethodResult<IList<OrderModel>>>> GetRecentOrdersAsync([Body] GetRecentOrdersToUserIdsQueryModel query);
+
+        [Post("/v1/admin/order/create-order-students-event")]
+        Task<IApiResponse<MethodResult<bool>>> CreateOrderEventByStudent([Body] CreateOrderForStudentEventCommandModel command);
     }
 }
