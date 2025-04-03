@@ -241,6 +241,19 @@ namespace Fsel.Identity.Api.Controllers.Admin
         }
 
         /// <summary>
+        /// Tính năng này mới chỉ dùng để cập nhật thời gian export
+        /// </summary>
+        [HttpPut("update-event-content")]
+        [ProducesResponseType(typeof(MethodResult<StudentSearchAdminModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        //[Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin) })]
+        public async Task<IActionResult> UpdateEventContentTime([FromBody] UpdateEventExportTimeCommand cmd)
+        {
+            var queryResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get parent by student id
         /// </summary>
         [HttpGet("get-parent-by-student-id/{studentId}")]

@@ -4,6 +4,16 @@ namespace Fsel.Shared.Constants
 {
     public static class RealtimeSettings
     {
+        public static class SendNotifyBuyBlindBoxHub
+        {
+            public const string Pattern = $"/buy-blind-box";
+
+            public static class Methods
+            {
+                public const string BuyBlindBox = $"BuyBlindBox";
+            }
+        }
+
         public static class SendStudentsFromFileHub
         {
             public const string Pattern = $"/send-students-from-file";

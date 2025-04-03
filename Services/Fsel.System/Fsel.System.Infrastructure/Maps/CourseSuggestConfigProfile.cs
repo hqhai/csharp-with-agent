@@ -15,6 +15,7 @@ namespace Fsel.System.Infrastructure.Maps
             CreateMap<CourseSuggestConfig, CourseSuggestConfigModel>().IgnoreAllNonExisting();
             CreateMap<CreateCourseSuggestConfigCommandModel, CourseSuggestConfig>().IgnoreAllNonExisting();
             CreateMap<UpdateCourseSuggestConfigCommandModel, CourseSuggestConfig>().IgnoreAllNonExisting();
+            CreateMap<CourseSuggestConfig, CourseSuggestConfigStudentModel>().IgnoreAllNonExisting();
         }
     }
 }

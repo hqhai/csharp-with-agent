@@ -4,6 +4,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
     {
         public bool IsHaveConfigStudent { get; set; }
         public bool IsHaveConfigTeacher { get; set; }
+        public bool IsExportAllowed { get; set; }
         public IList<SchoolGradeClass>? GradesAndClasses { get; set; }
     }
 
