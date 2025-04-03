@@ -271,11 +271,23 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                             SectionGroupResultId = sectionGroupResult.Id,
                             SectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default,
                         };
-                        createPlacementTestAnswers.Add(GetPlacementTestAnswer(placementTestAnswer, answerConfig, correctCount, isAnswered, questionItem));
+                        placementTestAnswer = GetPlacementTestAnswer(placementTestAnswer, answerConfig, correctCount, isAnswered, questionItem);
+                        if (!placementTestAnswer.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(placementTestAnswer.ErrorMessages);
+                            return methodResult;
+                        }
+                        createPlacementTestAnswers.Add(placementTestAnswer);
                     }
                     else
                     {
-                        updatePlacementTestAnswers.Add(GetPlacementTestAnswer(placementTestAnswer, answerConfig, correctCount, isAnswered, questionItem));
+                        placementTestAnswer = GetPlacementTestAnswer(placementTestAnswer, answerConfig, correctCount, isAnswered, questionItem);
+                        if (!placementTestAnswer.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(placementTestAnswer.ErrorMessages);
+                            return methodResult;
+                        }
+                        updatePlacementTestAnswers.Add(placementTestAnswer);
                     }
                 }
             }
@@ -284,7 +296,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             return methodResult;
         }
 
-        private static PlacementTestAnswer GetPlacementTestAnswer(PlacementTestAnswer placementTestAnswer, object? answer, int correctCount, bool isAnswered, Question questionItem)
+        private static PlacementTestAnswer GetPlacementTestAnswer(PlacementTestAnswer placementTestAnswer, object? answer, short correctCount, bool isAnswered, Question questionItem)
         {
             placementTestAnswer.Answer = answer;
             placementTestAnswer.CorrectCount = correctCount;

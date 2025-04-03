@@ -169,5 +169,11 @@ namespace Fsel.Shared.Constants
         {
             public const string PreA1 = "Pre-A1";
         }
+
+        public static class AnswerLength
+        {
+            public const int ShortAnswerMaxLength = 255;    // Giới hạn câu trả lời ngắn
+            public const int LongAnswerMaxLength = 10000;   // Giới hạn câu trả lời dài
+        }
     }
 }
