@@ -12,6 +12,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Fsel.Identity.Application.Queries.AdminQuery;
     using Fsel.Identity.Application.Queries.ManagerReportQuery;
     using Fsel.Identity.Application.Queries.StudentQuery;
+    using Fsel.Identity.Application.Queries.UserOtpCodeQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -228,6 +229,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         }
 
         /// <summary>
+        /// get otp for student
+        /// </summary>
+        [HttpGet("get-otp-for-student")]
+        [ProducesResponseType(typeof(MethodResult<OTPModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetOTPForStudent([FromQuery] GetOTPForStudentQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Tính năng này mới chỉ dùng để cập nhật thời gian export
         /// </summary>
         [HttpPut("update-event-content")]
@@ -238,6 +251,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         {
             var queryResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search school grades classes
+        /// </summary>
+        [HttpPost("add-student-event")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddStudentToEvent([FromBody] AddStudentToEventCommand command)
+        {
+            var methodResult = await _mediator.Send(command).ConfigureAwait(false);
+            return methodResult.GetActionResult();
         }
     }
 }
