@@ -105,7 +105,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                             FullName = u.FullName,
                             UserName = u.UserName,
                             PhoneNumber = u.PhoneNumber,
-                            Email = human.Email,
+                            Email = u.Email,
                             Birthday = human.Birthday,
                             StudentCode = human.Code,
                             Gender = human.Gender,
