@@ -28,12 +28,12 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
                 return methodResult;
             }
-            //var methodValidate = _answerTypeConverter.ValidateAnswerLength(answer, question);
-            //if (!methodValidate.IsOK)
-            //{
-            //    methodResult.AddErrorBadRequest(methodValidate.ErrorMessages);
-            //    return methodResult;
-            //}
+            var methodValidate = _answerTypeConverter.ValidateAnswerLength(answer, question);
+            if (!methodValidate.IsOK)
+            {
+                methodResult.AddErrorBadRequest(methodValidate.ErrorMessages);
+                return methodResult;
+            }
 
             var (answerConfig, correctCount, isAnswerMissing, isAnswered) = _answerTypeConverter.GetTotalCorrectByAnswerType(answer, oldAnswer, question, isTryAgain, isSubmit, isMandatoryAnswer);
             if (answerConfig == null && !string.IsNullOrEmpty(answer?.ToString()))
