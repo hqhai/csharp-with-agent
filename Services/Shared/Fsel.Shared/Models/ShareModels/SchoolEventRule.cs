@@ -38,10 +38,10 @@ namespace Fsel.Shared.Models.ShareModels
         public string? FormDescription { get; set; }
         public string? AwardPromotional { get; set; }
         public IList<string>? AwardPromotionalImage { get; set; }
-
+        public bool IsByPassPayment { get; set; }
         public IList<ActionConfig>? ActionConfigs { get; set; }
         public EnumByPassPaymentType ByPassPaymentType { get; set; }
-        public bool IsByPassPayment { get; set; }
+        public bool IsByPassEmailComfirm { get; set; }
         public DateTime? RegisterStartDate { get; set; }
         public DateTime? RegisterEndDate { get; set; }
         public DateTime? StartDate => WeekEvents?.FirstOrDefault()?.StartDate;
@@ -74,7 +74,9 @@ namespace Fsel.Shared.Models.ShareModels
         ShowStoreFSEL,
         RegisterAndCreateUser,
         DisableLeaderBoard,
-        DisableLevelChangeSelection
+        DisableLevelChangeSelection,
+        ImportStudent,
+        ExportAccount
     }
 
     public enum EnumByPassPaymentType
@@ -128,6 +130,8 @@ namespace Fsel.Shared.Models.ShareModels
         public StopAtLevelSelectionConfig? StopAtLevelSelectionConfig { get; set; }
         public EnumSenderTemplate? MailRegister { get; set; }
         public string? SubjectMailRegister { get; set; }
+        public long? StartTime { get; set; }
+        public long? EndTime { get; set; }
     }
 
     public class StopAtLevelSelectionConfig

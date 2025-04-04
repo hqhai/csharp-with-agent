@@ -2,18 +2,21 @@
 
 namespace Fsel.Identity.Api.Controllers.Admin
 {
+    using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
+    using Fsel.Common.Constants;
+    using Fsel.Identity.Application.Commands.OtherCmd;
+    using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Queries.CompetitionEventsQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.Shared.Models.ShareModels.EntityModels;
-    using System.Net;
-    using Microsoft.AspNetCore.Mvc;
     using MediatR;
-    using Fsel.Common.Constants;
+    using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -74,6 +77,30 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> Get([FromQuery] GetStudentEventRegistrationsQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Add Coin By Sheet
+        /// </summary>
+        [HttpPost("add-coin-sheet")]
+        [ProducesResponseType(typeof(MethodResult<IList<EventRegistrationModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddCoinBySheet([FromBody] AddCoinBySheetCommand query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Import Users To Blind Bag Event
+        /// </summary>
+        [HttpPost("import-users-to-blind-bag-event")]
+        [ProducesResponseType(typeof(MethodResult<CreateStudentsToEventFromFileModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ImportUsers([FromQuery] ImportUsersToBlindBagEventCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

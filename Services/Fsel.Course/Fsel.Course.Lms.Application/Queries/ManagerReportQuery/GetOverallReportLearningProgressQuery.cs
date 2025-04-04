@@ -35,7 +35,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OverallReportLearningProgressModel>();
-
             var userResults = await _mediator.Send(new GetStudentReportQuery
             {
                 ListDistrict = request.ListDistrict,
@@ -56,12 +55,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var students = userResults?.Result;
-            var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType);
-
             var overallReport = new OverallReportLearningProgressModel
             {
                 TotalStudent = students?.Count ?? default,
-                CourseLevelProgresses = courseLevels.Select(item => new CourseLevelProgressModel
+                CourseLevelProgresses = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType).Select(item => new CourseLevelProgressModel
                 {
                     CourseLevel = item,
                     TotalStudent = students?.Where(x => x.CourseLevel == item).Count() ?? default
@@ -69,6 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             };
 
             await SetAverageProgress(overallReport, request, students);
+
             methodResult.Result = overallReport;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
@@ -83,6 +81,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             }
             var courseResults = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
             var countProgress = await _managerProgressHelper.GetOverallCompleteAsync(courseResults, request.EndDate);
+
             var totalProgress = await _managerProgressHelper.GetTotalCompleteCourseAsync(courseResults);
             overallReport.ContentAverageProgress = $"{countProgress} / {totalProgress}";
         }

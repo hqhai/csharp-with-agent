@@ -205,6 +205,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<string>("Category")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
@@ -1863,6 +1867,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
 
+                    b.Property<string>("DefaultPassword")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(109);
@@ -2325,6 +2333,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<string>("FeatureMissionStr")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsCoinRewarded")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")

@@ -25,11 +25,9 @@ namespace Fsel.Identity.Application.Queues.Consumers
 
             var result = new CreateStudentsToEventFromFileCommand
             {
-                DistrictId = message.DistrictId,
-                SchoolId = message.SchoolId,
+                Category = message.Category,
                 File = message.File,
-                SchoolName = message.SchoolName,
-                Key = message.Key,
+                Key = message.Key
             };
             await _mediator.Send(result).ConfigureAwait(false);
         }
