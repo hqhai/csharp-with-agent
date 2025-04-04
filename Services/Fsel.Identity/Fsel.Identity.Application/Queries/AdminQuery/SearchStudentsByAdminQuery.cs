@@ -299,6 +299,9 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                     return;
                 }
 
+                user.TotalLesson = null;
+                user.TotalLessonDone = null;
+
                 if (user.StudentId.HasValue)
                 {
                     if (dataStudent != null && dataStudent.PTStatus == PTDone)
