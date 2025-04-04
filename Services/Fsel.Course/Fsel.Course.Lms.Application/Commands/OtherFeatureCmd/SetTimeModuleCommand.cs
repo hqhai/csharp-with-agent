@@ -3,11 +3,9 @@
 namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 {
     using AutoMapper;
-    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -67,12 +65,6 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             {
                 return;
             }
-            var requestInfo = new
-            {
-                VideoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult),
-                VideoTimeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode)
-            }.Serialize();
-            _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync : {requestInfo}");
 
             if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
             {
@@ -89,56 +81,25 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                     videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.RetryWorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
                 }
             }
-            var requestInfoUpdate = new
-            {
-                VideoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult),
-                VideoTimeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode)
-            }.Serialize();
-            _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync_1 : {requestInfoUpdate}");
 
-            await _videoTimeCodeResultRepository.BulkMergeAsync(new List<VideoTimeCodeResult> { videoTimeCodeResult }, bulk =>
+            await _videoTimeCodeResultRepository.BulkUpdateList(new List<VideoTimeCodeResult> { videoTimeCodeResult }, bulk =>
             {
                 bulk.ColumnInputExpression = entity => new { entity.WorkingTime, entity.RetryWorkingTime };
             });
-
-            var requestInfoUpdate2 = new
-            {
-                VideoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult),
-                VideoTimeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode)
-            }.Serialize();
-            _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync_2 : {requestInfoUpdate2}");
         }
 
         private async Task UpdateSectionGroupResultAsync(SetTimeModuleCommand request)
         {
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == request.ObjectId);
 
-            var requestInfo = new
-            {
-                sectionGroupResult = _mapper.Map<SectionGroupResultModel>(sectionGroupResult),
-            }.Serialize();
-            _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync: {requestInfo}");
-
             if (sectionGroupResult != null && sectionGroupResult.SectionGroup != null)
             {
                 sectionGroupResult.WorkingTime = _dateTimeConverter.SetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, sectionGroupResult.SectionGroup.ExecutionTime);
 
-                var requestInfoUpdate = new
-                {
-                    sectionGroupResult = _mapper.Map<SectionGroupResultModel>(sectionGroupResult),
-                }.Serialize();
-                _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync_1 : {requestInfoUpdate}");
-
-                await _sectionGroupResultRepository.BulkMergeAsync(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+                await _sectionGroupResultRepository.BulkUpdateList(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
                 {
                     bulk.ColumnInputExpression = entity => new { entity.WorkingTime };
                 });
-
-                var requestInfoUpdate2 = new
-                {
-                    sectionGroupResult = _mapper.Map<SectionGroupResultModel>(sectionGroupResult),
-                }.Serialize();
-                _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync_2 : {requestInfoUpdate2}");
             }
         }
     }

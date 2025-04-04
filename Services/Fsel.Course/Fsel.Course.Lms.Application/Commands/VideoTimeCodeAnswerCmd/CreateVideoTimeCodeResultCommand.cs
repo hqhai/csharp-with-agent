@@ -100,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private async Task UpdateVideoResult(VideoResult videoResult, Guid videoTimeCodeId)
         {
             videoResult.CurrentVideoTimeCodeId = videoTimeCodeId;
-            await _videoResultRepository.BulkMergeAsync(new List<VideoResult> { videoResult }, bulk =>
+            await _videoResultRepository.BulkUpdateList(new List<VideoResult> { videoResult }, bulk =>
             {
                 bulk.IgnoreOnUpdateExpression = entity => new { entity.LessonResultId, entity.StudentId, entity.VideoId };
             });
