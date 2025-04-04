@@ -4,6 +4,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -74,6 +75,12 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<StudentSearchAdminModel>>();
+
+            if (request.PageSize >= 100)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.PageSize), request.PageSize);
+                return methodResult;
+            }
 
             var users = from u in _userDbContext.Users.IgnoreQueryFilters()
 
