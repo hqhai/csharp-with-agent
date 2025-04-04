@@ -80,9 +80,6 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
                 return;
             }
 
-            // đảm bảo api trên đã convert thành công
-            await Task.Delay(100, cancellationToken);
-
             var jobConvertResult = await _fFmpegServices.Status(ffmpegConvert.Content?.JobId ?? Guid.Empty);
             if (!jobConvertResult.IsSuccessStatusCode)
             {
