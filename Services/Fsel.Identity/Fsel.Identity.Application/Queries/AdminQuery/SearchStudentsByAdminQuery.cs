@@ -299,8 +299,6 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                     return;
                 }
 
-                user.CourseLevel = null;
-
                 if (user.StudentId.HasValue)
                 {
                     if (dataStudent != null && dataStudent.PTStatus == PTDone)
@@ -311,9 +309,12 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                     else if (dataStudent != null && dataStudent.PTStatus == PTProcess)
                     {
                         user.Status = WorkingPT;
+                        user.CourseLevel = null;
                         return;
                     }
                 }
+
+                user.CourseLevel = null;
 
                 if (user.EmailConfirm.HasValue && user.EmailConfirm.Value)
                 {
