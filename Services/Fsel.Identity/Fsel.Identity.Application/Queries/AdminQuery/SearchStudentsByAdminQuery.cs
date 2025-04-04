@@ -53,8 +53,10 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
         private const string NotConfirmOTP = "Chưa confirm OTP";
         private const int NumberOfMinutes = 10080;
         private readonly UserDbContext _userDbContext;
+        private readonly IUserRoleRepository _userRoleRepository;
+        private readonly RoleManager<Role> _roleManager;
 
-        public SearchStudentsByAdminQueryHandler(UserManager<User> userManager, IHumanRepository humanRepository, IStudentRepository studentRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, ICompetitionEventsRepository competitionEventsRepository, ILmsCourseService lmsCourseService, IOrderService orderService, UserDbContext userDbContext)
+        public SearchStudentsByAdminQueryHandler(UserManager<User> userManager, IHumanRepository humanRepository, IStudentRepository studentRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, ICompetitionEventsRepository competitionEventsRepository, ILmsCourseService lmsCourseService, IOrderService orderService, UserDbContext userDbContext, IUserRoleRepository userRoleRepository, RoleManager<Role> roleManager)
         {
             _userManager = userManager;
             _humanRepository = humanRepository;
@@ -64,6 +66,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             _lmsCourseService = lmsCourseService;
             _orderService = orderService;
             _userDbContext = userDbContext;
+            _userRoleRepository = userRoleRepository;
+            _roleManager = roleManager;
         }
 
         public async Task<MethodResult<PagingItemsModel<StudentSearchAdminModel>>> Handle(SearchStudentsByAdminQuery request, CancellationToken cancellationToken)
@@ -73,13 +77,19 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
 
             var users = from u in _userDbContext.Users.IgnoreQueryFilters()
 
-                        join h in _humanRepository.Queryable
+                        join ur in _userRoleRepository.GetQuery() on u.Id equals ur.UserId
+
+                        join r in _roleManager.Roles on ur.RoleId equals r.Id
+
+                        join h in _humanRepository.Queryable.IgnoreQueryFilters()
                         on u.Id equals h.UserId into humanGroup
                         from human in humanGroup.DefaultIfEmpty()
 
-                        join s in _studentRepository.Queryable
+                        join s in _studentRepository.Queryable.IgnoreQueryFilters()
                         on human.Id equals s.HumanId into studentGroup
                         from student in studentGroup.DefaultIfEmpty()
+
+                        where r.Name == EnumRole.Student.ToString()
 
                         select new StudentSearchAdminModel
                         {
@@ -90,6 +100,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                             PhoneNumber = u.PhoneNumber,
                             Email = human.Email,
                             Birthday = human.Birthday,
+                            StudentCode = human.Code,
+                            Gender = human.Gender,
                             SchoolName = student.School,
                             Class = student.SchoolClass,
                             Grade = student.SchoolGrade,

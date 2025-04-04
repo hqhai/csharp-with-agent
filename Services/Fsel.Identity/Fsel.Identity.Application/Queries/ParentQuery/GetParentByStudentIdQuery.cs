@@ -5,6 +5,7 @@ using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Identity.Application.Queries.ParentQuery
@@ -37,7 +38,7 @@ namespace Fsel.Identity.Application.Queries.ParentQuery
             var parentStudent = await _parentStudentRepository.Queryable.FirstOrDefaultAsync(p => p.StudentId == request.StudentId, cancellationToken);
             if (parentStudent == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                methodResult.StatusCode = StatusCodes.Status204NoContent;
                 return methodResult;
             }
             var parent = from h in _humanRepository.Queryable
