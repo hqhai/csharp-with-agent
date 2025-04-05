@@ -12,6 +12,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Queries.AdminQuery;
     using Fsel.Identity.Application.Queries.ManagerReportQuery;
+    using Fsel.Identity.Application.Queries.ParentQuery;
     using Fsel.Identity.Application.Queries.StudentQuery;
     using Fsel.Identity.Application.Queries.UserOtpCodeQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -33,6 +34,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public StudentController(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        /// <summary>
+        /// Search Students
+        /// </summary>
+        [HttpGet("search-students")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentSearchAdminModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchStudent([FromQuery] SearchStudentsByAdminQuery query)
+        {
+            MethodResult<PagingItemsModel<StudentSearchAdminModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>
@@ -263,6 +276,30 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> ChangeSchoolByAdmin([FromBody] ChangeSchoolByAdminCommand command)
         {
             MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get parent by student id
+        /// </summary>
+        [HttpGet("get-parent-by-student-id/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<ParentProfileModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetParentByStudentId([FromRoute] Guid studentId)
+        {
+            var queryResult = await _mediator.Send(new GetParentByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Restore deleted account
+        /// </summary>
+        [HttpPost("restore-deleted-account")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RestoreDeletedAccount([FromBody] RestoreDeleteAccountCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
