@@ -369,5 +369,45 @@ namespace Fsel.Shared.Helpers
         {
             return Regex.IsMatch(input, @"^[\p{L}\s]+$");
         }
+
+        public static class TextCleaner
+        {
+            // Hàm chuẩn hóa chuỗi: trim, lowercase, chuẩn hóa khoảng trắng
+            private static string NormalizeWhitespaceAndCase(string input)
+            {
+                return Regex.Replace(input.Trim().ToLowerInvariant(), @"\s+", " ");
+            }
+
+            // Hàm loại bỏ toàn bộ dấu câu
+            public static string RemovePunctuation(string input)
+            {
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    return string.Empty;
+                }
+                return Regex.Replace(input, @"[^\w\s]", "");
+            }
+
+            // Hàm chuẩn hóa + loại bỏ dấu câu cho một chuỗi
+            public static string CleanText(string input)
+            {
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    return string.Empty;
+                }
+                string noPunctuation = RemovePunctuation(input);
+                return NormalizeWhitespaceAndCase(noPunctuation);
+            }
+
+            // Hàm xử lý danh sách đáp án
+            public static IList<string> CleanAnswers(IList<string>? answers)
+            {
+                if (answers == null || answers.Count == 0)
+                {
+                    return answers ?? new List<string>();
+                }
+                return answers.Select(ans => CleanText(ans)).ToList();
+            }
+        }
     }
 }
