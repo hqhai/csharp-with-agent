@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Shared.Constants;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Enums;
+    using Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/student-progress")]
@@ -157,6 +158,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         {
             MethodResult<VideoStudentProgressModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Manage Courses
+        /// </summary>
+        [HttpGet("level-selection")]
+        [ProducesResponseType(typeof(MethodResult<IList<LevelDtoModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetLevelSelection([FromQuery] GetLevelSelectionQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

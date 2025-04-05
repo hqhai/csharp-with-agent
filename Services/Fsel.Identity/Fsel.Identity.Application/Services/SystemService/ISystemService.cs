@@ -63,5 +63,8 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Post("/v1/admin/blind-box/get-by-user-ids")]
         Task<IApiResponse<MethodResult<IList<Guid>>>> GetBlindBoxesByUserIdsAsync([Body] GetBlindBoxesByUserIdsQueryModel query);
+
+        [Get("/v1/location/{localId}")]
+        Task<IApiResponse<MethodResult<SchoolModel>>> GetLocationByLocalId([FromRoute] string localId);
     }
 }
