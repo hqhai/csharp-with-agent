@@ -28,12 +28,12 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Get User Course settings
         /// </summary>
-        [HttpGet]
+        [HttpGet("{userId}")]
         [ProducesResponseType(typeof(MethodResult<IList<UserCourseSettingModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetUserCourseSettings()
+        public async Task<IActionResult> GetUserCourseSettings([FromRoute] Guid? userId)
         {
-            MethodResult<IList<UserCourseSettingModel>> commandResult = await _mediator.Send(new GetUserCourseSettingsQuery()).ConfigureAwait(false);
+            MethodResult<IList<UserCourseSettingModel>> commandResult = await _mediator.Send(new GetUserCourseSettingsQuery { UserId = userId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

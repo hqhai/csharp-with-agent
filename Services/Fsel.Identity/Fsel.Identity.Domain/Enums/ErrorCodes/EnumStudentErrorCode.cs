@@ -27,6 +27,16 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// <summary>
         /// Student Already Another Event
         /// </summary>
-        StudentAlreadyAnotherEvent
+        StudentAlreadyAnotherEvent,
+
+        /// <summary>
+        /// Event Not Matching With Current Event
+        /// </summary>
+        EventNotMatchingWithCurrentEvent,
+
+        /// <summary>
+        /// School Not Include Event
+        /// </summary>
+        SchoolNotIncludeEvent
     }
 }
