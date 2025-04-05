@@ -189,7 +189,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
         private async Task SaveCourseSettingAsync(Course course, Guid? userId, CancellationToken cancellationToken)
         {
-            var userCourseSettingResults = await _userService.GetUserCourseSettingsAsync();
+            var userCourseSettingResults = await _userService.GetUserCourseSettingsAsync(userId ?? _authContext.CurrentUserId);
             if (!userCourseSettingResults.IsSuccessStatusCode)
             {
                 return;

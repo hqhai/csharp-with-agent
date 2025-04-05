@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.CourseResultCmd;
     using Fsel.Course.Lms.Application.Queries.CourseQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
@@ -70,6 +71,30 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         public async Task<IActionResult> GetCourseById([FromRoute] Guid id)
         {
             MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseLevelQuery { CourseId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Active Manage Courses
+        /// </summary>
+        [HttpPost("change-course-level")]
+        [ProducesResponseType(typeof(MethodResult<IList<LevelDtoModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ChangeCourseLevel([FromBody] ChangeCourseLevelCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Retake Manage Courses
+        /// </summary>
+        [HttpPost("retake-course")]
+        [ProducesResponseType(typeof(MethodResult<CourseResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RetakeCourse([FromBody] RetakeCourseResultCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
