@@ -30,6 +30,8 @@ namespace Fsel.System.Domain.Enums.ErrorCodes
         CustomFrequencyRequiresDisplayDate,
         DisplayStartDateGreaterThanDisplayEndDate,
         CompetitionEventIdsRequired,
-        StartDateLowerThanDateTimeNow
+        StartDateLowerThanDateTimeNow,
+        MaximumBannerPerDay,
+        NotTimeDisplayBanner
     }
 }
