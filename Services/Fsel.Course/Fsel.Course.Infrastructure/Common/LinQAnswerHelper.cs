@@ -79,9 +79,9 @@ namespace Fsel.Course.Infrastructure.Common
             string cleanedWord = TextCleaner.CleanText(word);
             string cleanedTarget = words[index];
 
-            if (!cleanedTarget.Contains('|', StringComparison.CurrentCulture) && TextCleaner.CleanText(cleanedTarget) == cleanedWord)
+            if (!cleanedTarget.Contains('|', StringComparison.CurrentCulture))
             {
-                return true;
+                return TextCleaner.CleanText(cleanedTarget) == cleanedWord;
             }
             else
             {
