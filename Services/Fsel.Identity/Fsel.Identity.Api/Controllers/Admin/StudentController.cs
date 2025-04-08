@@ -14,6 +14,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Fsel.Identity.Application.Queries.ManagerReportQuery;
     using Fsel.Identity.Application.Queries.ParentQuery;
     using Fsel.Identity.Application.Queries.StudentQuery;
+    using Fsel.Identity.Application.Queries.UserOtpCodeQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -275,6 +276,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> RestoreDeletedAccount([FromBody] RestoreDeleteAccountCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get otp for student
+        /// </summary>
+        [HttpGet("get-otp-for-student")]
+        [ProducesResponseType(typeof(MethodResult<OTPModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetOTPForStudent([FromQuery] GetOTPForStudentQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
