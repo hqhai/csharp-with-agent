@@ -6,18 +6,18 @@ namespace Fsel.Hangfire.Application.Queues.Publishers
     using Fsel.Core.Base.Interfaces;
     using Fsel.Shared.Constants;
 
-    public class WeeklyReportPublisher
+    public class AggregateDataWeeklyReportPublisher
     {
         private readonly IQueueProvider _queueProvider;
 
-        public WeeklyReportPublisher(IQueueProvider queueProvider)
+        public AggregateDataWeeklyReportPublisher(IQueueProvider queueProvider)
         {
             _queueProvider = queueProvider;
         }
 
         public async Task Publish(CancellationToken cancellationToken)
         {
-            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.WeeklyReport, new BaseQueueModel { QueueId = Guid.NewGuid().ToString() }, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.AggregateDataWeeklyReport, new BaseQueueModel { QueueId = Guid.NewGuid().ToString() }, cancellationToken);
         }
     }
 }

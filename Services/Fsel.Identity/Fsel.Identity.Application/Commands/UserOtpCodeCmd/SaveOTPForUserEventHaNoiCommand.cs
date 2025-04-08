@@ -11,6 +11,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Domain.Models.CommandModels.UserOtpCodes;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -18,19 +19,6 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-
-    public enum EnumActionSaveOTPForEventHaNoi
-    {
-        Success,
-        UpdateInFo,
-        LMS
-    }
-
-    public class SaveOTPForUserEventHaNoiCommandModel
-    {
-        public EnumActionSaveOTPForEventHaNoi Action { get; set; }
-        public int CountOTP { get; set; }
-    }
 
     public class SaveOTPForUserEventHaNoiCommand : IRequest<MethodResult<SaveOTPForUserEventHaNoiCommandModel>>
     {
@@ -128,6 +116,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     Template = EnumSendSMSTemplate.SendOTP,
                     Params = new
                     {
+                        CountOTP = lastOTP.RetryCount,
                         OTP = lastOTP.OTPCode,
                     },
                     IsCheckDuplicate = false,

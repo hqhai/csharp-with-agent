@@ -17,8 +17,10 @@ namespace Fsel.Identity.Application.Services.OrderService.Model
         public double DiscountPercent { get; set; }
         public double DiscountPrice { get; set; }
         public double TotalPrice { get; set; }
+        public bool IsTrial { get; set; }
         public Guid CourseId { get; set; }
         public PackageModel? Package { get; set; }
         public Guid UserId { get; set; }
+        public EnumPaymentRevenueType? RevenueType { get; set; }
     }
 }

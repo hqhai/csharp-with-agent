@@ -12,6 +12,75 @@ namespace Fsel.Shared.Helpers
         private const string Yellow = "#FFAE46";
         private const string Green = "#53BF65";
 
+        private const string A1Photo = "https://s3-sgn10.fptcloud.com/fsel/Files/Think_A1_4324_1735023758585.png";
+        private const string A2Photo = "https://s3-sgn10.fptcloud.com/fsel/Files/Think_A2_2658_1735023780035.png";
+        private const string B1Photo = "https://s3-sgn10.fptcloud.com/fsel/Files/Think_B1_5428_1735023796461.png";
+        private const string B1PlusPhoto = "https://s3-sgn10.fptcloud.com/fsel/Files/Think_B1_921_1735023814871.png";
+        private const string B2Photo = "https://s3-sgn10.fptcloud.com/fsel/Files/Think_B2_287_1735023829638.png";
+        private const string C1Photo = "https://s3-sgn10.fptcloud.com/fsel/Files/Think_C1_3521_1735023849169.png";
+        private const string MS1Photo = "https://s3-sgn10.fptcloud.com/fsel/Files/Mindset_1_7122_1735023868318.png";
+        private const string MS2Photo = "https://s3-sgn10.fptcloud.com/fsel/Files/Mindset_2_3741_1735023880462.png";
+        private const string MS3Photo = "https://s3-sgn10.fptcloud.com/fsel/Files/Mindset_3_3451_1735023897739.png";
+        private const string EFA1Photo = "https://s3-sgn10.fptcloud.com/fsel/Files/English_Foundation__A1_1890_1735023912951.png";
+        private const string EFA2Photo = "https://s3-sgn10.fptcloud.com/fsel/Files/English_Foundation__A2_4452_1735023923766.png";
+        private const string EFB1Photo = "https://s3-sgn10.fptcloud.com/fsel/Files/English_Foundation__B1_4392_1735023939310.png";
+
+        public static string GetCoursePhoto(EnumCourseLevel courseLevel)
+        {
+            if (courseLevel == EnumCourseLevel.A1)
+            {
+                return A1Photo;
+            }
+            else if (courseLevel == EnumCourseLevel.A2)
+            {
+                return A2Photo;
+            }
+            else if (courseLevel == EnumCourseLevel.B1)
+            {
+                return B1Photo;
+            }
+            else if (courseLevel == EnumCourseLevel.B1Plus)
+            {
+                return B1PlusPhoto;
+            }
+            else if (courseLevel == EnumCourseLevel.B2)
+            {
+                return B2Photo;
+            }
+            else if (courseLevel == EnumCourseLevel.C1)
+            {
+                return C1Photo;
+            }
+            else if (courseLevel == EnumCourseLevel.MS1)
+            {
+                return MS1Photo;
+            }
+            else if (courseLevel == EnumCourseLevel.MS2)
+            {
+                return MS2Photo;
+            }
+            else if (courseLevel == EnumCourseLevel.MS3)
+            {
+                return MS3Photo;
+            }
+            else if (courseLevel == EnumCourseLevel.EFA1)
+            {
+                return EFA1Photo;
+            }
+            else if (courseLevel == EnumCourseLevel.EFA2)
+            {
+                return EFA2Photo;
+            }
+            else if (courseLevel == EnumCourseLevel.EFB1)
+            {
+                return EFB1Photo;
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+
         public static string GetColorText(long value1, long value2)
         {
             if (value1 > value2)
@@ -75,13 +144,33 @@ namespace Fsel.Shared.Helpers
 
         public static string GetInfoCourse(EnumCourseType currentValue)
         {
-            if (currentValue == EnumCourseType.Academic)
+            if (currentValue == EnumCourseType.EnglishFoundation)
+            {
+                return SendMailSetting.EnglishFoundation;
+            }
+            else if (currentValue == EnumCourseType.Academic)
             {
                 return SendMailSetting.AcademicInfo;
             }
             else
             {
                 return SendMailSetting.IELTInfo;
+            }
+        }
+
+        public static string GetCourseTitle(EnumCourseType currentValue)
+        {
+            if (currentValue == EnumCourseType.EnglishFoundation)
+            {
+                return "English Foundation (16+)";
+            }
+            else if (currentValue == EnumCourseType.Academic)
+            {
+                return "Academic";
+            }
+            else
+            {
+                return "IELTS";
             }
         }
 
