@@ -17,32 +17,30 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
     using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
 
-    public class TotalDetailEvaluateInputResultQuery : IRequest<MethodResult<IList<TotalDetailEvaluateInputResultModel>>>
+    public class InputEvaluationTotalLevelQuery : IRequest<MethodResult<IList<LevelEvaluateInputResultModel>>>
     {
-        public int Target { get; set; } = 1;
-
-        public int GroupByType { get; set; } = 1;
-
         public IList<string>? DistrictIds { get; set; }
 
-        public IList<string>? GroupIds { get; set; }
+        public IList<string>? GradeLevels { get; set; }
 
         public IList<string>? SchoolIds { get; set; }
+
+        public int? TargetGroup { get; set; }
 
         public DateTime? Date { get; set; }
     }
 
-    public class TotalDetailEvaluateInputResultQueryHandler : IRequestHandler<TotalDetailEvaluateInputResultQuery, MethodResult<IList<TotalDetailEvaluateInputResultModel>>>
+    public class InputEvaluationTotalLevelQueryHandler : IRequestHandler<InputEvaluationTotalLevelQuery, MethodResult<IList<LevelEvaluateInputResultModel>>>
     {
         private readonly CourseDbContext _courseDbContext;
-        private readonly ICacheService<IList<TotalDetailEvaluateInputResultModel>> _cacheService;
+        private readonly ICacheService<IList<LevelEvaluateInputResultModel>> _cacheService;
         private readonly AppSetting _appSetting;
         private readonly AuthContext _authContext;
 
-        public TotalDetailEvaluateInputResultQueryHandler(CourseDbContext courseDbContext,
-                                                         ICacheService<IList<TotalDetailEvaluateInputResultModel>> cacheService,
-                                                         AppSetting appSetting,
-                                                         AuthContext authContext)
+        public InputEvaluationTotalLevelQueryHandler(CourseDbContext courseDbContext,
+                                                    ICacheService<IList<LevelEvaluateInputResultModel>> cacheService,
+                                                    AppSetting appSetting,
+                                                    AuthContext authContext)
         {
             _courseDbContext = courseDbContext;
             _cacheService = cacheService;
@@ -50,12 +48,12 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<IList<TotalDetailEvaluateInputResultModel>>> Handle(TotalDetailEvaluateInputResultQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<LevelEvaluateInputResultModel>>> Handle(InputEvaluationTotalLevelQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<IList<TotalDetailEvaluateInputResultModel>>();
+            var methodResult = new MethodResult<IList<LevelEvaluateInputResultModel>>();
 
-            var keyCache = $"TotalDetailEvaluateInputResults_{ConvertHelper.Serialize(request)}";
+            var keyCache = $"InputEvaluationTotalLevel_{ConvertHelper.Serialize(request)}";
             var data = await _cacheService.GetAsync(keyCache);
             if (data != null && _appSetting.CacheConfig != null && _appSetting.CacheConfig.TurnOnCaching)
             {
@@ -78,20 +76,20 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
             }
             var districtIdsParam = sbDistrict.Length > 0 ? sbDistrict.ToString() : (object)DBNull.Value;
 
-            StringBuilder sbGroup = new StringBuilder();
-            if (request.GroupIds != null)
+            StringBuilder sbGradeLevel = new StringBuilder();
+            if (request.GradeLevels != null)
             {
-                foreach (var id in request.GroupIds)
+                foreach (var gradeLevel in request.GradeLevels)
                 {
-                    if (sbGroup.Length > 0)
+                    if (sbGradeLevel.Length > 0)
                     {
-                        sbGroup.Append(",");
+                        sbGradeLevel.Append(",");
                     }
 
-                    sbGroup.Append(id);
+                    sbGradeLevel.Append(gradeLevel);
                 }
             }
-            var groupIdsParam = sbGroup.Length > 0 ? sbGroup.ToString() : (object)DBNull.Value;
+            var gradeLevelsParam = sbGradeLevel.Length > 0 ? sbGradeLevel.ToString() : (object)DBNull.Value;
 
             StringBuilder sbSchool = new StringBuilder();
             if (request.SchoolIds != null)
@@ -107,22 +105,24 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
                 }
             }
             var schoolIdsParam = sbSchool.Length > 0 ? sbSchool.ToString() : (object)DBNull.Value;
+
             var date = request.Date != null ? request.Date : (object)DBNull.Value;
 
-            var totalDetail = await _courseDbContext.Database.SqlQueryRaw<TotalDetailEvaluateInputResultModel>("EXEC TotalDetailEvaluateInputResults @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @Date",
-                                                        new SqlParameter("@Target", request.Target),
-                                                        new SqlParameter("@GroupByType", request.GroupByType),
-                                                        new SqlParameter("@DistrictIds", districtIdsParam),
-                                                        new SqlParameter("@GroupIds", groupIdsParam),
-                                                        new SqlParameter("@SchoolIds", schoolIdsParam),
-                                                        new SqlParameter("@Date", date))
-                                                    .AsNoTracking()
-                                                    .ToListAsync(cancellationToken);
+            var level = await _courseDbContext.Set<LevelEvaluateInputResultModel>()
+                                              .FromSqlRaw("EXEC InputEvaluationTotalLevel @UserId, @DistrictIds, @GradeLevel, @SchoolIds, @TargetGroup, @Date",
+                                                   new SqlParameter("@UserId", _authContext.CurrentUserId),
+                                                   new SqlParameter("@DistrictIds", districtIdsParam),
+                                                   new SqlParameter("@GradeLevel", gradeLevelsParam),
+                                                   new SqlParameter("@SchoolIds", schoolIdsParam),
+                                                   new SqlParameter("@TargetGroup", request.TargetGroup),
+                                                   new SqlParameter("@Date", date))
+                                              .AsNoTracking()
+                                              .ToListAsync(cancellationToken);
 
-            methodResult.Result = totalDetail;
+            methodResult.Result = level;
             if (_appSetting.CacheConfig != null && _appSetting.CacheConfig.TurnOnCaching)
             {
-                await _cacheService.SetAsync(keyCache, totalDetail, TimeSpan.FromSeconds(_appSetting.CacheConfig.CachingDuration));
+                await _cacheService.SetAsync(keyCache, level, TimeSpan.FromSeconds(_appSetting.CacheConfig.CachingDuration));
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

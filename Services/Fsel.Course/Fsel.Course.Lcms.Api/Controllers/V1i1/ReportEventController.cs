@@ -6,14 +6,15 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
-    using Fsel.Course.Application.Queries.ReportEventHaNoiQuery;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Application.Queries.V1i1.ReportEvent;
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersions(ApiSettings.APIVersion1)]
+    [ApiVersions(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/report-event")]
     [ApiController]
     [Permission]
@@ -30,60 +31,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// Get 
         /// </summary>
         [ServerCache(CacheSettings.TimeCache.ThreeHour)]
-        [HttpPost("evaluat-input-result")]
-        [ProducesResponseType(typeof(MethodResult<IList<TotalEvaluateInputResultModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> TotalEvaluateInputResultQuery([FromBody] TotalEvaluateInputResultQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get 
-        /// </summary>
-        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
-        [HttpPost("evaluat-detail-input-result")]
-        [ProducesResponseType(typeof(MethodResult<IList<TotalDetailEvaluateInputResultModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> TotalDetailEvaluateInputResult([FromBody] TotalDetailEvaluateInputResultQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get 
-        /// </summary>
-        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
-        [HttpPost("percent-evaluat-input-result")]
-        [ProducesResponseType(typeof(MethodResult<IList<PercentEvaluateInputResultModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> PercentEvaluateInputResult([FromBody] PercentEvaluateInputResultQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get 
-        /// </summary>
-        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
-        [HttpPost("level-input-result")]
-        [ProducesResponseType(typeof(MethodResult<IList<LevelEvaluateInputResultModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> LevelEvaluateInputResultQuery([FromBody] LevelEvaluateInputResultQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get 
-        /// </summary>
-        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
         [HttpPost("school-summary")]
-        [ProducesResponseType(typeof(MethodResult<EvaluateInputResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<SchoolSummaryModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SchoolSummary([FromBody] SchoolSummaryQuery query)
         {
@@ -95,10 +44,10 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// Get 
         /// </summary>
         [ServerCache(CacheSettings.TimeCache.ThreeHour)]
-        [HttpPost("total-learning-progress")]
-        [ProducesResponseType(typeof(MethodResult<IList<TotalLearningProgressModel>>), (int)HttpStatusCode.OK)]
+        [HttpPost("input-evaluation-summary")]
+        [ProducesResponseType(typeof(MethodResult<IList<TotalEvaluateInputResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> TotalLearningProgress([FromBody] TotalLearningProgressQuery query)
+        public async Task<IActionResult> InputEvaluationSummary([FromBody] InputEvaluationSummaryQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -108,10 +57,10 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// Get 
         /// </summary>
         [ServerCache(CacheSettings.TimeCache.ThreeHour)]
-        [HttpPost("average-learning-progress")]
-        [ProducesResponseType(typeof(MethodResult<IList<AverageLearningProgressModel>>), (int)HttpStatusCode.OK)]
+        [HttpPost("input-evaluation-detail")]
+        [ProducesResponseType(typeof(MethodResult<IList<TotalDetailEvaluateInputResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> AverageLearningProgres([FromBody] AverageLearningProgresQuery query)
+        public async Task<IActionResult> InputEvaluationDetail([FromBody] InputEvaluationDetailQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -121,10 +70,10 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// Get 
         /// </summary>
         [ServerCache(CacheSettings.TimeCache.ThreeHour)]
-        [HttpPost("unit-aca-learning-progress")]
-        [ProducesResponseType(typeof(MethodResult<IList<UnitDoneLearningProgressAcademicModel>>), (int)HttpStatusCode.OK)]
+        [HttpPost("input-evaluation-percent")]
+        [ProducesResponseType(typeof(MethodResult<IList<PercentEvaluateInputResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UnitDoneLearningProgressAcademic([FromBody] UnitDoneLearningProgressAcademicQuery query)
+        public async Task<IActionResult> InputEvaluationPercent([FromBody] InputEvaluationPercentQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -134,10 +83,10 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// Get 
         /// </summary>
         [ServerCache(CacheSettings.TimeCache.ThreeHour)]
-        [HttpPost("unit-ielts-learning-progress")]
-        [ProducesResponseType(typeof(MethodResult<IList<UnitDoneLearningProgressIeltsModel>>), (int)HttpStatusCode.OK)]
+        [HttpPost("input-evaluation-total-level")]
+        [ProducesResponseType(typeof(MethodResult<IList<LevelEvaluateInputResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UnitDoneLearningProgressIelts([FromBody] UnitDoneLearningProgressIeltsQuery query)
+        public async Task<IActionResult> InputEvaluationTotalLevel([FromBody] InputEvaluationTotalLevelQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -146,88 +95,22 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get 
         /// </summary>
-        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
-        [HttpPost("lesson-ielts-learning-progress")]
-        [ProducesResponseType(typeof(MethodResult<IList<LessonDoneLearningProgressIeltsModel>>), (int)HttpStatusCode.OK)]
+        [HttpPost("district-info-filter")]
+        [ProducesResponseType(typeof(MethodResult<IList<DistrictInfoModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> LessonDoneLearningProgressIeltsQuery([FromBody] LessonDoneLearningProgressIeltsQuery query)
+        public async Task<IActionResult> GetDistrictInfo()
         {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(new GetDistrictInfoQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
         /// Get 
         /// </summary>
-        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
-        [HttpPost("lesson-aca-learning-progress")]
-        [ProducesResponseType(typeof(MethodResult<IList<LessonDoneLearningProgressAcademicModel>>), (int)HttpStatusCode.OK)]
+        [HttpPost("school-info-filter")]
+        [ProducesResponseType(typeof(MethodResult<IList<SchoolInfoFilterModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> LessonDoneLearningProgressAcademic([FromBody] LessonDoneLearningProgressAcademicQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get 
-        /// </summary>
-        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
-        [HttpPost("total-learning-quality")]
-        [ProducesResponseType(typeof(MethodResult<IList<TotalLearningModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> LearningQuality([FromBody] TotalLearningQualityQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get 
-        /// </summary>
-        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
-        [HttpPost("rate-learning-quality")]
-        [ProducesResponseType(typeof(MethodResult<IList<RateLearningModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> RateLearningQuality([FromBody] RateLearningQualityQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get 
-        /// </summary>
-        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
-        [HttpPost("chart-learning-quality")]
-        [ProducesResponseType(typeof(MethodResult<IList<TotalLearningQualityModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> TotalLearningQualityChart([FromBody] TotalLearningQualityChartQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get 
-        /// </summary>
-        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
-        [HttpPost("total-detail-learning-quality")]
-        [ProducesResponseType(typeof(MethodResult<IList<TotalDetailLearningQualityModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> TotalDetailLearningQuality([FromBody] TotalDetailLearningQualityQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get 
-        /// </summary>
-        [HttpPost("school-info")]
-        [ProducesResponseType(typeof(MethodResult<IList<SchoolInfoModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetSchoolInfo([FromBody] GetSchoolInfoQuery query)
+        public async Task<IActionResult> GetSchoolInfoFilter([FromBody] GetSchoolInfoFilterQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
