@@ -302,5 +302,17 @@ namespace Fsel.Identity.Api.Controllers.Admin
             MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Search school grades classes
+        /// </summary>
+        [HttpPost("add-student-event")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddStudentToEvent([FromBody] AddStudentToEventCommand command)
+        {
+            var methodResult = await _mediator.Send(command).ConfigureAwait(false);
+            return methodResult.GetActionResult();
+        }
     }
 }

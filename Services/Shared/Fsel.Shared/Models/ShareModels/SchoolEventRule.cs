@@ -8,6 +8,10 @@ namespace Fsel.Shared.Models.ShareModels
     {
         public bool LuckySpin { get; set; }
         public int? PaymentMonth { get; set; }
+
+        /// <summary>
+        /// ngày kết thúc gói tự học của học sinh
+        /// </summary>
         public DateTime? PaymentDate { get; set; }
 
         private IList<EnumSchoolEventRuleAction>? _actions;

@@ -56,5 +56,8 @@ namespace Fsel.Identity.Application.Services.OrderService
 
         [Post("/v1.2/admin/order/get-orders-by-user-ids")]
         Task<IApiResponse<MethodResult<OrdersByUserIdsModels>>> GetOrdersByUserIds([Body] GetOrdersByUserIdsQueryModel model);
+
+        [Post("/v1/admin/order/create-order-students-event")]
+        Task<IApiResponse<MethodResult<bool>>> CreateOrderEventByStudent([Body] CreateOrderForStudentEventCommandModel command);
     }
 }
