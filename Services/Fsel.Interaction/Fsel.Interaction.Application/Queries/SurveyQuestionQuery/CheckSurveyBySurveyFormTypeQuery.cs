@@ -46,7 +46,6 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
             var parentEventResult = await _userService.GetParentEventId(request.CompetitionEventId);
             var eventId = parentEventResult?.Content?.Result;
 
-
             var surveyQuestions = await _surveyQuestionRepository.Queryable.Where(x => x.IsPilot == false && x.SurveyFormType == request.SurveyFormType).ToListAsync(cancellationToken);
             if (request.SurveyFormType == EnumSurveyFormType.Event && eventId.HasValue)
             {
@@ -85,8 +84,6 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
 
         public async Task<Guid> CheckParent(Guid? competitionEventId)
         {
-
-
             return Guid.Empty;
         }
 
