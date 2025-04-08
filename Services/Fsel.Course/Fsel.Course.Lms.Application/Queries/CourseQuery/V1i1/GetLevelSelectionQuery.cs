@@ -19,6 +19,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class GetLevelSelectionQuery : IRequest<MethodResult<IList<LevelDtoModel>>>
     {
@@ -34,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private const int MaxAgeIELST = 14;
+        private const int MaxAgeEnglishFoundation = 16;
 
         public GetLevelSelectionQueryHandler(ICourseResultRepository courseResultRepository, ChangeCourseHelper changeCourseHelper, AuthContext authContext, IUserService userService)
         {
@@ -80,7 +82,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
             }
 
             int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
-            if (request.CourseType == EnumCourseType.Ielts && age < MaxAgeIELST)
+            if ((request.CourseType == EnumCourseType.Ielts && age < AgeMilestone.StudentAge) || (request.CourseType == EnumCourseType.EnglishFoundation && age < AgeMilestone.TeenagersAge))
             {
                 methodResult.Result = new List<LevelDtoModel>();
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -94,6 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 return methodResult;
             }
             var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => x.StudentId == student.Id && x.WorkingStatus != EnumWorkingStatus.NotWorking).ToListAsync(cancellationToken);
+
             var isStudentsAchieveScore = await _changeCourseHelper.IsStudentsAchieveScoresAsync(student.Id, student.BaseCourseLevel);
             var levelDtos = ConvertHelper.Deserialize<List<LevelDtoModel>>(request.CourseType.GetListCourseLevels(student.BaseCourseLevel.Value, isStudentsAchieveScore));
 
