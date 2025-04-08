@@ -1,1 +1,1 @@
-[FselEdu] Mã OTP xác thực số điện thoại của bạn là [OTP]. Vui lòng không chia sẻ thông tin này.
+[FselEdu] Mã OTP xác thực số điện thoại lần [CountOTP] của bạn là [OTP]. Vui lòng không chia sẻ thông tin này.

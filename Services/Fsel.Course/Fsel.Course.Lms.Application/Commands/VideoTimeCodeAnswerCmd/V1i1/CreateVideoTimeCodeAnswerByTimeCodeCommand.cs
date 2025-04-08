@@ -618,16 +618,16 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             var questions = new List<Question>();
             if (questionIds.Any())
             {
-                questions = await _questionRepository.GetListAsync(request.Answers.Select(x => x.QuestionId).ToList());
+                questions = await _questionRepository.GetListAsync(questionIds);
                 if (questions == null || !questions.Any())
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
                     return methodResult;
                 }
-                var timeCodeId = questions.SelectMany(x => x.ExerciseQuestions).Select(x => x.Exercise).SelectMany(x => x!.TimeCodeExercises).Select(x => x.VideoTimeCodeId).FirstOrDefault();
-                if (timeCodeId != videoTimeCode.Id)
+                var videoTimeCodeIds = questions.SelectMany(x => x.ExerciseQuestions.Select(x => x.Exercise)).SelectMany(x => x!.TimeCodeExercises.Select(x => x.VideoTimeCodeId).Distinct()).ToList();
+                if (!videoTimeCodeIds.Any(x => x == videoTimeCode.Id))
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.VideoTimeCodeId));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(questions), nameof(request.VideoTimeCodeId));
                     return methodResult;
                 }
             }

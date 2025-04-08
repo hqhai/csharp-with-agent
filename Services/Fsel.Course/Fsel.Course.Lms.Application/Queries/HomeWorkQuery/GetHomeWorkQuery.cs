@@ -40,6 +40,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IUserService _userService;
         private readonly IQuestionShuffleRepository _questionShuffleRepository;
+        private readonly IQuestionExplanationErrorRepository _questionExplanationErrorRepository;
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
 
         public GetHomeWorkQueryHandler(IMapper mapper
@@ -49,7 +50,8 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             , AnswerTypeConverter answerTypeConverter
             , IHomeWorkResultRepository homeWorkResult
             , IUserService userService
-            , IQuestionShuffleRepository questionShuffleRepository)
+            , IQuestionShuffleRepository questionShuffleRepository
+            , IQuestionExplanationErrorRepository questionExplanationErrorRepository)
         {
             _mapper = mapper;
             _homeWorkRepository = homeWorkRepository;
@@ -58,6 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             _answerTypeConverter = answerTypeConverter;
             _userService = userService;
             _questionShuffleRepository = questionShuffleRepository;
+            _questionExplanationErrorRepository = questionExplanationErrorRepository;
             _homeWorkResultRepository = homeWorkResult;
         }
 
@@ -101,8 +104,13 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             var homeWorkModel = _mapper.Map<HomeWorkModel>(homeWork);
             var listQuestionShuffle = new List<QuestionShuffle>();
             var homeWorkQuestions = homeWork.HomeWorkQuestions.OrderBy(x => x!.CreatedDate).ToList();
+            var questionIds = homeWorkQuestions.Select(x => x!.QuestionId).ToList();
 
-            var questionShuffles = await _questionShuffleRepository.Queryable.Where(x => homeWorkQuestions.Select(x => x!.QuestionId).Contains(x.QuestionId) && x.StudentId == homeWorkResult.StudentId).ToListAsync();
+            var questionShuffles = await _questionShuffleRepository.Queryable.WhereBulkContains(questionIds, x => x.QuestionId)
+                                                                             .Where(x => x.StudentId == homeWorkResult.StudentId).ToListAsync();
+            var questionExplanationErrors = await _questionExplanationErrorRepository.Queryable.WhereBulkContains(questionIds, x => x.QuestionId)
+                                                                                               .Where(x => x.Status == EnumProcessedStatus.NotProcessed && x.ObjectResultId == homeWorkResult.Id).ToListAsync();
+
             foreach (var homeWorkQuestion in homeWorkQuestions)
             {
                 var question = homeWorkQuestion.Question;
@@ -116,6 +124,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
 
                 var questionModel = _mapper.Map<QuestionModel>(question);
                 questionModel.CorrectStatus = GetCorrectStatus(homeWorkAnswer);
+                questionModel.IsReportExplanation = questionExplanationErrors.Any(x => x.QuestionId == question.Id);
                 questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
                 (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, questionShuffle?.ShuffleConfigs);
                 if (!string.IsNullOrEmpty(questionShuffleStr) && (questionShuffle == null || questionShuffle.ShuffleConfigStr != questionShuffleStr))

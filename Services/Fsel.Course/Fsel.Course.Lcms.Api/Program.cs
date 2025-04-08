@@ -76,6 +76,8 @@ builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRe
 builder.Services.AddScoped<IMockTestAISettingRepository, MockTestAISettingRepository>();
 builder.Services.AddScoped<IStudentFeedbackRepository, StudentFeedbackRepository>();
 builder.Services.AddScoped<IQuestionShuffleRepository, QuestionShuffleRepository>();
+builder.Services.AddScoped<IQuestionExplanationLogRepository, QuestionExplanationLogRepository>();
+builder.Services.AddScoped<IQuestionExplanationErrorRepository, QuestionExplanationErrorRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();
