@@ -99,7 +99,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 SchoolName = x.School,
                 Class = x.SchoolClass,
                 Grade = x.SchoolGrade,
-                UserName = x.Human.User!.UserName
+                UserName = x.Human.User!.UserName,
+                PasswordDefault = x.Human.User.DefaultPassword
             });
             int totalItem = await dataQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await dataQuery

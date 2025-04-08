@@ -104,10 +104,9 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             ArgumentNullException.ThrowIfNull(request);
 
             _logger.LoggerRequest(request);
+            var methodResult = new MethodResult<SectionGroupResultModel>();
 
             #region Validate
-
-            var methodResult = new MethodResult<SectionGroupResultModel>();
 
             StudentModel? student;
             if (request.StudentId.HasValue)
@@ -132,6 +131,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             }
             if (student == null)
             {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
 
@@ -324,28 +324,63 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             if (sectionGroup.CourseSkill == EnumCourseSkill.Listening || sectionGroup.CourseSkill == EnumCourseSkill.Reading)
             {
                 var questionIds = request.Answers.Where(x => x.QuestionId.HasValue).Select(x => x.QuestionId!.Value).ToList();
-                var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
-                if (questions == null)
+                var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds, mockTestResult.MockTest?.Version);
+                if (questions == null || questions.Count == 0)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
                     return methodResult;
                 }
+                var sectionQuestions = questions.SelectMany(x => x.SectionQuestions);
+                var sectionGroupIds = new List<Guid?>();
+                if (sectionQuestions.Select(x => x.SectionPart).Any())
+                {
+                    sectionGroupIds = sectionQuestions.Select(x => x.SectionPart?.Section?.SectionGroupId).Distinct().ToList();
+                }
+                else
+                {
+                    sectionGroupIds = sectionQuestions.Select(x => x.Section?.SectionGroupId).Distinct().ToList();
+                }
+                if (!sectionGroupIds.Any(x => x == sectionGroup.Id))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(questions), nameof(request.SectionGroupId));
+                    return methodResult;
+                }
+
                 anserResult = await SaveAnswer(request, questions, sectionGroupResult, mockTestResult);
             }
             else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing)
             {
                 var sectionIds = request.Answers.Where(x => x.SectionId.HasValue).Select(x => x.SectionId!.Value).ToList();
                 var sections = await _sectionRepository.Queryable.Where(x => sectionIds.Contains(x.Id)).ToListAsync();
-                if (sections == null)
+                if (sections == null || !sections.Any())
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sections));
+                    return methodResult;
+                }
+
+                if (!sections.Any(x => x.SectionGroupId == sectionGroup.Id))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(sections), nameof(request.SectionGroupId));
                     return methodResult;
                 }
                 anserResult = await SaveAnswer(request, sections, sectionGroupResult);
             }
             else
             {
-                anserResult = await SaveAnswer(request, sectionGroupResult);
+                var sectionTimeCodeIds = request.Answers.Where(x => x.SectionTimeCodeId.HasValue).Select(x => x.SectionTimeCodeId!.Value).ToList();
+                var sectionTimeCodes = await _sectionTimeCodeRepository.Queryable.Include(x => x.Section).WhereBulkContains(sectionTimeCodeIds, x => x.Id).ToListAsync();
+                if (sectionTimeCodes == null || !sectionTimeCodes.Any())
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionTimeCodes));
+                    return methodResult;
+                }
+
+                if (!sectionTimeCodes.Select(x => x.Section).Any(x => x != null && x.SectionGroupId == sectionGroup.Id))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(sectionTimeCodes), nameof(request.SectionGroupId));
+                    return methodResult;
+                }
+                anserResult = await SaveAnswer(request, sectionTimeCodes.ToList(), sectionGroupResult);
             }
             if (!anserResult.IsOK)
             {
@@ -446,16 +481,11 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return methodResult;
         }
 
-        private async Task<MethodResult<(IList<MockTestAnswer>, IList<MockTestAnswer>)>> SaveAnswer(CreateMockTestAnswerBySectionGroupCommand request, SectionGroupResult sectionGroupResult)
+        private async Task<MethodResult<(IList<MockTestAnswer>, IList<MockTestAnswer>)>> SaveAnswer(CreateMockTestAnswerBySectionGroupCommand request, IList<SectionTimeCode> sectionTimeCodes, SectionGroupResult sectionGroupResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             var methodResult = new MethodResult<(IList<MockTestAnswer>, IList<MockTestAnswer>)>();
-            var sectionTimeCodes = await _sectionTimeCodeRepository.GetByIdsAsync(request.Answers.Where(x => x.SectionTimeCodeId.HasValue).Select(x => x.SectionTimeCodeId!.Value).ToList());
-            if (sectionTimeCodes == null || !sectionTimeCodes.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionTimeCodes));
-                return methodResult;
-            }
+
             if (sectionGroupResult.CurrentSectionTimeCodeId.HasValue)
             {
                 var currentSectionTimeCode = await _sectionTimeCodeRepository.GetByIdAsync(sectionGroupResult.CurrentSectionTimeCodeId.Value);
