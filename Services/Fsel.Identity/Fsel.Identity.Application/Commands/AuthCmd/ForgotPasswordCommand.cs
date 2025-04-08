@@ -99,7 +99,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            if (!user.PhoneNumberConfirmed && !user.EmailConfirmed)
+            if (!user.EmailConfirmed)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
@@ -127,7 +127,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     return methodResult;
                 }
             }
-
             else if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
                 var otp = await _saveOtpCodeConverter.SaveOTpCodeBySmsCommand(lastOtp, user.Id, cancellationToken);
