@@ -4,6 +4,7 @@ using Fsel.Identity.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250326075107_Add_Field_DashboardEventConfig_And_Role_EducationDepartment_EducationDivision")]
+    partial class Add_Field_DashboardEventConfig_And_Role_EducationDepartment_EducationDivision
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -968,16 +971,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             IsDeleted = false,
                             Name = "EducationDivision",
                             NormalizedName = "EducationDivision"
-                        },
-                        new
-                        {
-                            Id = new Guid("e8fc0d37-1aae-4ae6-9dc0-1ffe864bef45"),
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Name = "DepartmentAdmin",
-                            NormalizedName = "DepartmentAdmin"
                         });
                 });
 

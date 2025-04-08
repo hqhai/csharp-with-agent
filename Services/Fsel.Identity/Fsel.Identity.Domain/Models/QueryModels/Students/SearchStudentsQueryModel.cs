@@ -5,9 +5,12 @@ namespace Fsel.Identity.Domain.Models.QueryModels.Students
 
     public class SearchStudentsQueryModel : BaseQueryModel
     {
+        public Guid? SchoolId { get; set; }
         public string? SchoolName { get; set; }
         public string? ListSchoolGrade { get; set; }
         public string? ListSchoolClass { get; set; }
+
+        public bool IsDelete { get; set; }
 
         [BindNever]
         public IList<string>? Grades

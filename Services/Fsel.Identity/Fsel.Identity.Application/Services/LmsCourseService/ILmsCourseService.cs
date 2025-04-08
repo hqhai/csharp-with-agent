@@ -73,5 +73,8 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Post("/v1.1/admin/other/param-beginner-guide")]
         Task<IApiResponse<MethodResult<IList<ParamBeginnerGuideModel>>>> GetParamBeginnerGuide([FromBody] IList<Guid> studentIds);
+
+        [Post("/v1/admin/student/aggregate-data-students")]
+        Task<IApiResponse<MethodResult<AggregateDataStudentsByAdminModels>>> AggregateDataStudents([FromBody] AggregateDataStudentsByAdminQueryModels students);
     }
 }
