@@ -16,7 +16,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/report-event")]
-    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.EducationDepartment), nameof(EnumRole.EducationDivision) })]
+    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.EducationDepartment), nameof(EnumRole.EducationDivision), nameof(EnumRole.DepartmentAdmin) })]
     [ApiController]
     public class ReportEventController : ControllerBase
     {
