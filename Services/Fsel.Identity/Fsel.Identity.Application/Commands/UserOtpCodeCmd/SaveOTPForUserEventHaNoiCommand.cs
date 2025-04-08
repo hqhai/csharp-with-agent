@@ -116,6 +116,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     Template = EnumSendSMSTemplate.SendOTP,
                     Params = new
                     {
+                        CountOTP = lastOTP.RetryCount,
                         OTP = lastOTP.OTPCode,
                     },
                     IsCheckDuplicate = false,

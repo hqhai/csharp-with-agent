@@ -95,6 +95,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     Params = new
                     {
                         OTP = userOtpCode.OTPCode,
+                        CountOTP = userOtpCode.RetryCount
                     },
                     IsCheckDuplicate = false,
                 });
