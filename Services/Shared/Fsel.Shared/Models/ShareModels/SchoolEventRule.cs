@@ -80,7 +80,9 @@ namespace Fsel.Shared.Models.ShareModels
         DisableLeaderBoard,
         DisableLevelChangeSelection,
         ImportStudent,
-        ExportAccount
+        ExportAccount,
+        EventGuideScreen,
+        WarningScreen
     }
 
     public enum EnumByPassPaymentType
@@ -132,6 +134,7 @@ namespace Fsel.Shared.Models.ShareModels
         public EnumSchoolEventRuleAction Action { get; set; }
         public DateTime? EndDate { get; set; }
         public StopAtLevelSelectionConfig? StopAtLevelSelectionConfig { get; set; }
+        public IList<StopAtLevelSelectionConfig>? Contents { get; set; }
         public EnumSenderTemplate? MailRegister { get; set; }
         public string? SubjectMailRegister { get; set; }
         public long? StartTime { get; set; }
@@ -144,6 +147,7 @@ namespace Fsel.Shared.Models.ShareModels
         public string? Title { get; set; }
         public IList<string>? Content { get; set; }
         public IList<string>? Footer { get; set; }
+        public int? Index { get; set; }
     }
 
     #region Prize
