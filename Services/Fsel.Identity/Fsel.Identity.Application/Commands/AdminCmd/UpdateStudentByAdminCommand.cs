@@ -104,12 +104,15 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             #region Save Parent
 
-            var humanParent = student?.ParentStudents.FirstOrDefault()?.Parent?.Human;
-            var userResult = await SaveParent(request, student, humanParent, cancellationToken);
-            if (!userResult.IsOK)
+            if (request.Parent != null && !string.IsNullOrEmpty(request.Parent.FullName))
             {
-                methodResult.AddErrorBadRequest(userResult.ErrorMessages);
-                return methodResult;
+                var humanParent = student?.ParentStudents.FirstOrDefault()?.Parent?.Human;
+                var userResult = await SaveParent(request, student, humanParent, cancellationToken);
+                if (!userResult.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(userResult.ErrorMessages);
+                    return methodResult;
+                }
             }
 
             #endregion Save Parent
