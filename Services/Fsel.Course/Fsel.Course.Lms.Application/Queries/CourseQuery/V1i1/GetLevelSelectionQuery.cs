@@ -24,6 +24,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
     public class GetLevelSelectionQuery : IRequest<MethodResult<IList<LevelDtoModel>>>
     {
         public EnumCourseType CourseType { get; set; }
+
+        public Guid? UserId { get; set; }
     }
 
     public class GetLevelSelectionQueryHandler : IRequestHandler<GetLevelSelectionQuery, MethodResult<IList<LevelDtoModel>>>
@@ -47,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<LevelDtoModel>>();
-            var userCourseSettingResults = await _userService.GetUserCourseSettingsAsync();
+            var userCourseSettingResults = await _userService.GetUserCourseSettingsAsync(_authContext.CurrentUserId);
             if (!userCourseSettingResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(userCourseSettingResults));
@@ -55,7 +57,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
             }
             var userCourseSettings = userCourseSettingResults?.Content?.Result;
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId ?? _authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
@@ -70,6 +72,12 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
             if (!student.BaseCourseLevel.HasValue)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.BaseCourseLevel));
+                return methodResult;
+            }
+
+            if (!student.ExpiredDate.HasValue)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.ExpiredDate));
                 return methodResult;
             }
 

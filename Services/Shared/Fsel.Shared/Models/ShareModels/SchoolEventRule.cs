@@ -76,7 +76,7 @@ namespace Fsel.Shared.Models.ShareModels
         DisableLeaderBoard,
         DisableLevelChangeSelection,
         ImportStudent,
-        ExportAccount
+        ExportAccount,
         EventGuideScreen,
         WarningScreen
     }

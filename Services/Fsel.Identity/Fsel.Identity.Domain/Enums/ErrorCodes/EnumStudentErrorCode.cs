@@ -22,6 +22,16 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// <summary>
         /// User Not EnoughTime
         /// </summary>
-        UserNotEnoughTime
+        UserNotEnoughTime,
+
+        /// <summary>
+        /// Event Not Matching With Current Event
+        /// </summary>
+        EventNotMatchingWithCurrentEvent,
+
+        /// <summary>
+        /// School Not Include Event
+        /// </summary>
+        SchoolNotIncludeEvent
     }
 }
