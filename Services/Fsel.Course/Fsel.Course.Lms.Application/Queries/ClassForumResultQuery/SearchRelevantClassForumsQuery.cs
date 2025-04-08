@@ -70,10 +70,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             }
 
             var classForumResult = await _classForumResultRepository.Queryable
-                .Include(x => x.ClassForumDetailResults)
+                .Include(x => x.ClassForumDetailResults).Include(x => x.LessonResult)
                 .FirstOrDefaultAsync(x => x.Id == request.ClassForumResultId, cancellationToken);
 
-            if (classForumResult == null)
+            var lessonResult = classForumResult?.LessonResult;
+            if (classForumResult == null || lessonResult == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
@@ -90,7 +91,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                         where cfr.Status == EnumClassForumResultStatus.Graded
                             && cfr.ClassForumId == classForumResult.ClassForumId
                             && cfr.Id != request.ClassForumResultId
-                            && lr.CourseId == student.CourseId
+                            && lr.CourseId == lessonResult.CourseId
+                            && lr.UnitId == lessonResult.UnitId
                         select cfr;
 
             int totalItem = await query.CountAsync(cancellationToken).ConfigureAwait(false);
