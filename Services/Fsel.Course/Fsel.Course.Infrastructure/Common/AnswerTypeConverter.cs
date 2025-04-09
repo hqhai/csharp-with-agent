@@ -558,7 +558,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return (default, isAnswerMissing, false);
             }
-            if (dataQuestion.Content.Any(p => _linQAnswerHelper.IsShortAnswer(p, dataAnswer.Answers)))
+            if (dataQuestion.Content.Any(p => _linQAnswerHelper.IsQuestionContainedInAnswer(p, dataAnswer.Answers)))
             {
                 dataAnswer.IsExact = true;
                 number++;
@@ -590,7 +590,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
                 if (question?.Words != null && item.Answer?.Any() == true)
                 {
-                    item.IsExacts = item.Answer.Select((word, index) => _linQAnswerHelper.CheckAnswer(question.Words, word, index)).ToList();
+                    item.IsExacts = item.Answer.Select((word, index) => _linQAnswerHelper.IsWordMatchAtIndex(question.Words, word, index)).ToList();
                     if (item.IsExacts.Count(x => x == true) == item.IsExacts.Count)
                     {
                         number++;
@@ -638,7 +638,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
                 if (question != null && question.Words != null && question.Words.Any() && item.Answer != null && item.Answer.Any())
                 {
-                    item.IsExacts = item.Answer.Select((word, index) => _linQAnswerHelper.CheckAnswer(question.Words, word, index)).ToList();
+                    item.IsExacts = item.Answer.Select((word, index) => _linQAnswerHelper.IsWordMatchAtIndex(question.Words, word, index)).ToList();
                     number += item.IsExacts.Count(x => x == true);
                     if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                     {
