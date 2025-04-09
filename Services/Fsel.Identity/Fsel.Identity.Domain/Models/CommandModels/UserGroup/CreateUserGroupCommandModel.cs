@@ -14,7 +14,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.UserGroup
         [MaxLength(100, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string GroupName { get; set; } = string.Empty;
 
-        public int DisplayOrder { get; set; }
+        public int? DisplayOrder { get; set; }
 
         public string? Description { get; set; }
 
