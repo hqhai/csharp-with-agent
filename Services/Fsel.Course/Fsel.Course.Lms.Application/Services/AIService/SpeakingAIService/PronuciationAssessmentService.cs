@@ -5,6 +5,7 @@ using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface
 using Fsel.Course.Infrastructure.ValueSettings;
 using Fsel.Shared.Enums;
 using Fsel.Course.Domain.Models.EntityModels;
+using System.Text;
 
 namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 {
@@ -38,7 +39,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             if (string.IsNullOrEmpty(referenceText))
                 throw new ArgumentNullException(nameof(referenceText), "Văn bản tham chiếu không được để trống");
 
-            var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Word\"}}");
+            var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Word\",\"enableSyllableLevelAssessment\":true,\"enablePhonemeLevelAssessment\":true,\"enableProsodyAssessment\":true}}");
 
             using var audioConfig = AudioConfig.FromDefaultMicrophoneInput();
             using var recognizer = new SpeechRecognizer(_speechConfig, audioConfig);
@@ -94,7 +95,9 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
                 try
                 {
-                    var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Word\"}}");
+                    //var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Phoneme\",\"enableSyllableLevelAssessment\":true,\"enablePhonemeLevelAssessment\":true,\"enableProsodyAssessment\":true,\"enableMiscue\":\"true\"}}");
+
+                    var pronunciationConfig = new PronunciationAssessmentConfig("", GradingSystem.HundredMark, Granularity.Phoneme, false);
 
                     using var audioConfig = AudioConfig.FromWavFileInput(localFilePath);
                     using var recognizer = new SpeechRecognizer(_speechConfig, audioConfig);
@@ -130,7 +133,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         /// <param name="result">Kết quả nhận dạng giọng nói</param>
         /// <param name="referenceText">Văn bản tham chiếu</param>
         /// <returns>Kết quả đánh giá phát âm</returns>
-        private static Task<PronunciationAssessmentModel> ProcessPronunciationResult(SpeechRecognitionResult result)
+        private async Task<PronunciationAssessmentModel> ProcessPronunciationResult(SpeechRecognitionResult result)
         {
             var response = new PronunciationAssessmentModel
             {
@@ -149,17 +152,14 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 // Tính điểm tổng hợp
                 if (response.FluencyScore == 0)
                 {
-                    // Thiếu Fluency
                     response.PronunciationScore = (int)((0.65 * response.AccuracyScore) + (0.35 * response.ProsodyScore));
                 }
                 else if (response.ProsodyScore == 0)
                 {
-                    // Thiếu Prosody
                     response.PronunciationScore = (int)((0.60 * response.AccuracyScore) + (0.40 * response.FluencyScore));
                 }
                 else if (response.AccuracyScore != 0 && response.FluencyScore != 0 && response.ProsodyScore != 0)
                 {
-                    // Tính bình thường khi cả Fluency và Prosody đều có
                     response.PronunciationScore = (int)(response.AccuracyScore * 0.5 + response.FluencyScore * 0.3 + response.ProsodyScore * 0.2);
                 }
 
@@ -172,7 +172,43 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                         Word = word.Word,
                         AccuracyScore = word.AccuracyScore,
                         Color = word.AccuracyScore < 60 ? EnumSyllableMarked.Red : (word.AccuracyScore < 80 ? EnumSyllableMarked.Yellow : EnumSyllableMarked.Green),
+                        Syllables = new List<SyllableInfo>()
                     };
+
+                    // Thêm thông tin syllables
+                    if (word.Syllables != null)
+                    {
+                        foreach (var syllable in word.Syllables)
+                        {
+                            var syllableInfo = new SyllableInfo
+                            {
+                                Syllable = syllable.Syllable,
+                                IPASyllable = ConvertToIPA(syllable.Syllable),
+                                AccuracyScore = syllable.AccuracyScore,
+                                Offset = syllable.Offset,
+                                Duration = syllable.Duration
+                            };
+                            wordImprovement.Syllables.Add(syllableInfo);
+                        }
+                    }
+
+                    // Thêm thông tin phonemes
+                    if (word.Phonemes != null)
+                    {
+                        wordImprovement.Phonemes = new List<PhonemeInfo>();
+                        foreach (var phoneme in word.Phonemes)
+                        {
+                            var phonemeInfo = new PhonemeInfo
+                            {
+                                Phoneme = phoneme.Phoneme,
+                                AccuracyScore = phoneme.AccuracyScore,
+                                Offset = phoneme.Offset,
+                                Duration = phoneme.Duration
+                            };
+                            wordImprovement.Phonemes.Add(phonemeInfo);
+                        }
+                    }
+
                     response.SpokenWords.Add(wordImprovement);
                 }
             }
@@ -181,7 +217,34 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 response.ErrorMessage = $"Không thể nhận dạng giọng nói: {result.Reason}";
             }
 
-            return Task.FromResult(response);
+            return response;
+        }
+
+        private static string ConvertToIPA(string syllable)
+        {
+            var ipaMap = new Dictionary<string, string>
+            {
+                {"a", "æ"}, {"b", "b"}, {"c", "k"}, {"d", "d"}, {"e", "ɛ"},
+                {"f", "f"}, {"g", "ɡ"}, {"h", "h"}, {"i", "ɪ"}, {"j", "dʒ"},
+                {"k", "k"}, {"l", "l"}, {"m", "m"}, {"n", "n"}, {"o", "ɒ"},
+                {"p", "p"}, {"q", "kw"}, {"r", "r"}, {"s", "s"}, {"t", "t"},
+                {"u", "ʌ"}, {"v", "v"}, {"w", "w"}, {"x", "ks"}, {"y", "j"},
+                {"z", "z"}
+            };
+
+            var result = new StringBuilder();
+            foreach (var c in syllable.ToLower())
+            {
+                if (ipaMap.TryGetValue(c.ToString(), out var ipa))
+                {
+                    result.Append(ipa);
+                }
+                else
+                {
+                    result.Append(c);
+                }
+            }
+            return result.ToString();
         }
     }
 }

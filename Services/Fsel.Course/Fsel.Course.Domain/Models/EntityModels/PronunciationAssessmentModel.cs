@@ -83,5 +83,25 @@ namespace Fsel.Course.Domain.Models.EntityModels
         /// Mã màu hiển thị (đỏ, vàng, xanh)
         /// </summary>
         public EnumSyllableMarked? Color { get; set; }
+
+        public IList<SyllableInfo>? Syllables { get; set; }
+        public IList<PhonemeInfo>? Phonemes { get; set; }
+    }
+
+    public class SyllableInfo
+    {
+        public string? Syllable { get; set; }
+        public string? IPASyllable { get; set; }
+        public double AccuracyScore { get; set; }
+        public long Offset { get; set; }
+        public long Duration { get; set; }
+    }
+
+    public class PhonemeInfo
+    {
+        public string? Phoneme { get; set; }
+        public double AccuracyScore { get; set; }
+        public long Offset { get; set; }
+        public long Duration { get; set; }
     }
 }
