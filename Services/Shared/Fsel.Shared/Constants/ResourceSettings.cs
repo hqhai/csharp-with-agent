@@ -101,5 +101,7 @@ namespace Fsel.Shared.Constants
         public const string ReportSurveyQuestionEventSchool = "Resources//ExportExcelTemplates//SurveyQuestionReportSchool.xlsx";
 
         public const string RevenueReport = "Resources//ExportExcelTemplates//TemplateRevenueReport.xlsx";
+
+        public const string SuccessCriteriaSchema = "Resources//AIPrompt//JsonSchemas//SuccessCriteriaSchema.json";
     }
 }
