@@ -13,7 +13,6 @@ using Fsel.Identity.Application.Queries.RoleClaimQuery;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Models.EntityModels.Permissions;
 using Fsel.Shared.Constants;
-using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -70,6 +69,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("search-permission-group")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<PermissionGroupModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(PermissionGroupManagement.View)]
         public async Task<IActionResult> ChangeStatusPermissionGroup([FromQuery] SearchPermissionGroupQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -82,6 +82,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("change-status-permission-group")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(PermissionGroupManagement.Update)]
         public async Task<IActionResult> ChangeStatusPermissionGroup([FromBody] ChangeStatusPermissionGroupCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -94,6 +95,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("delete-permission-group")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(PermissionGroupManagement.Delete)]
         public async Task<IActionResult> DeletePermissionGroup([FromBody] DeletePermissionGroupCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -106,6 +108,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("save-permission-group")]
         [ProducesResponseType(typeof(MethodResult<PermissionGroupModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(new[] { PermissionGroupManagement.Add, PermissionGroupManagement.Update })]
         public async Task<IActionResult> SavePermissionGroup([FromBody] SavePermissionGroupCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -122,6 +125,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("search-permission")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<PermissionGroupModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(PermissionManagement.View)]
         public async Task<IActionResult> ChangeStatusPermission([FromQuery] SearchPermissionQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -134,6 +138,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("change-status-permission")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(PermissionManagement.Update)]
         public async Task<IActionResult> ChangeStatusPermission([FromBody] ChangeStatusPermissionCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -146,6 +151,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("delete-permission")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(PermissionManagement.Delete)]
         public async Task<IActionResult> DeletePermission([FromBody] DeletePermissionCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -158,6 +164,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("save-permission")]
         [ProducesResponseType(typeof(MethodResult<PermissionModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(new[] { PermissionManagement.Add, PermissionManagement.Update })]
         public async Task<IActionResult> SavePermission([FromBody] SavePermissionCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);

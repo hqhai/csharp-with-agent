@@ -61,6 +61,7 @@ namespace Fsel.Shared.Constants
     public static class StudentManagement
     {
         public const string ClaimType = nameof(StudentManagement);
+        public const string Add = $"{ClaimType}.Add";
         public const string View = $"{ClaimType}.View";
         public const string Update = $"{ClaimType}.Update";
         public const string Export = $"{ClaimType}.Export";
@@ -157,6 +158,15 @@ namespace Fsel.Shared.Constants
     public static class PermissionManagement
     {
         public const string ClaimType = nameof(PermissionManagement);
+        public const string View = $"{ClaimType}.View";
+        public const string Update = $"{ClaimType}.Update";
+        public const string Add = $"{ClaimType}.Add";
+        public const string Delete = $"{ClaimType}.Delete";
+    }
+
+    public static class PermissionGroupManagement
+    {
+        public const string ClaimType = nameof(PermissionGroupManagement);
         public const string View = $"{ClaimType}.View";
         public const string Update = $"{ClaimType}.Update";
         public const string Add = $"{ClaimType}.Add";

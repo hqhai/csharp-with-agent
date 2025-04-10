@@ -1,10 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Domain.Models.CommandModels.Users
+namespace Fsel.Identity.Domain.Models.CommandModels.Students
 {
     using System;
 
-    public class CreateUserByAdminCommandModel
+    public class CreateStudentByAdminCommandModel
     {
         public string? FullName { get; set; }
         public string? Email { get; set; }
