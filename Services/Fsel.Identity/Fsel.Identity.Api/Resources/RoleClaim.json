@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "claimType": "AuthorizationManagement",
+    "claimValue": "AuthorizationManagement.View",
+    "status": true,
+    "permissionGroupId": "f9142961-5fe0-4015-8d01-9e12d202a7ae",
+    "permissionId": "89b2e2df-df40-4cb9-9f86-7a7fa315a112",
+    "roleId": "69976022-5DBB-4292-BAB6-E94B6701061E",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": 2,
+    "claimType": "AuthorizationManagement",
+    "claimValue": "AuthorizationManagement.Update",
+    "status": true,
+    "permissionGroupId": "f9142961-5fe0-4015-8d01-9e12d202a7ae",
+    "permissionId": "19b8e2df-d240-4cb6-9f86-7a7fa315a186",
+    "roleId": "69976022-5DBB-4292-BAB6-E94B6701061E",
+    "createdDate": "2025-04-09"
+  }
+]
