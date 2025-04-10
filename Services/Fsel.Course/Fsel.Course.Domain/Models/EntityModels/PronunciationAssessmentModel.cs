@@ -48,7 +48,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
                     {
                         Word = word.Word,
                         AccuracyScore = word.AccuracyScore,
-                        Color = word.Color,
+                        Syllables = word.Syllables,
+                        Phonemes = word.Phonemes
                     }).ToList();
                 }
                 else
@@ -80,28 +81,75 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double AccuracyScore { get; set; }
 
         /// <summary>
-        /// Mã màu hiển thị (đỏ, vàng, xanh)
+        /// Danh sách các syllable trong từ
         /// </summary>
-        public EnumSyllableMarked? Color { get; set; }
-
         public IList<SyllableInfo>? Syllables { get; set; }
+
+        /// <summary>
+        /// Danh sách các phoneme trong từ
+        /// </summary>
         public IList<PhonemeInfo>? Phonemes { get; set; }
     }
 
+    /// <summary>
+    /// Thông tin syllable
+    /// </summary>
     public class SyllableInfo
     {
+        /// <summary>
+        /// Âm tiết
+        /// </summary>
         public string? Syllable { get; set; }
+
+        /// <summary>
+        /// Âm tiết theo ký hiệu IPA
+        /// </summary>
         public string? IPASyllable { get; set; }
+
+        /// <summary>
+        /// Điểm chính xác
+        /// </summary>
         public double AccuracyScore { get; set; }
+
+        /// <summary>
+        /// Vị trí bắt đầu của âm tiết trong audio
+        /// </summary>
         public long Offset { get; set; }
+
+        /// <summary>
+        /// Thời lượng của âm tiết
+        /// </summary>
         public long Duration { get; set; }
     }
 
+    /// <summary>
+    /// Thông tin phoneme
+    /// </summary>
     public class PhonemeInfo
     {
+        /// <summary>
+        /// Âm vị
+        /// </summary>
         public string? Phoneme { get; set; }
+
+        /// <summary>
+        /// Điểm chính xác
+        /// </summary>
         public double AccuracyScore { get; set; }
+
+        /// <summary>
+        /// Vị trí bắt đầu của âm vị trong audio
+        /// </summary>
         public long Offset { get; set; }
+
+        /// <summary>
+        /// Thời lượng của âm vị
+        /// </summary>
         public long Duration { get; set; }
+
+        /// <summary>
+        /// Mã màu hiển thị (đỏ, vàng, xanh) dựa trên điểm chính xác
+        /// </summary>
+        public EnumSyllableMarked Color { get; set; }
     }
 }

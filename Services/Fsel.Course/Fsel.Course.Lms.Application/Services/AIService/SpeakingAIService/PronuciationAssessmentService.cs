@@ -5,7 +5,6 @@ using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface
 using Fsel.Course.Infrastructure.ValueSettings;
 using Fsel.Shared.Enums;
 using Fsel.Course.Domain.Models.EntityModels;
-using System.Text;
 
 namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 {
@@ -16,6 +15,8 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
     {
         private SpeechConfig _speechConfig;
         private readonly AppSetting _appSetting;
+        private const int LowAccuracyScore = 60;
+        private const int MediumAccuracyScore = 80;
 
         /// <summary>
         /// Khởi tạo dịch vụ đánh giá phát âm với Azure
@@ -95,9 +96,10 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
                 try
                 {
-                    //var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Phoneme\",\"enableSyllableLevelAssessment\":true,\"enablePhonemeLevelAssessment\":true,\"enableProsodyAssessment\":true,\"enableMiscue\":\"true\"}}");
+                    var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Phoneme\",\"enableSyllableLevelAssessment\":true,\"enablePhonemeLevelAssessment\":true,\"enableProsodyAssessment\":true,\"enableMiscue\":\"true\"}}");
+                    pronunciationConfig.PhonemeAlphabet = "IPA";
 
-                    var pronunciationConfig = new PronunciationAssessmentConfig("", GradingSystem.HundredMark, Granularity.Phoneme, false);
+                    // var pronunciationConfig = new PronunciationAssessmentConfig(referenceText, GradingSystem.HundredMark, Granularity.Phoneme, true);
 
                     using var audioConfig = AudioConfig.FromWavFileInput(localFilePath);
                     using var recognizer = new SpeechRecognizer(_speechConfig, audioConfig);
@@ -131,7 +133,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         /// Xử lý kết quả đánh giá phát âm
         /// </summary>
         /// <param name="result">Kết quả nhận dạng giọng nói</param>
-        /// <param name="referenceText">Văn bản tham chiếu</param>
         /// <returns>Kết quả đánh giá phát âm</returns>
         private async Task<PronunciationAssessmentModel> ProcessPronunciationResult(SpeechRecognitionResult result)
         {
@@ -163,7 +164,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                     response.PronunciationScore = (int)(response.AccuracyScore * 0.5 + response.FluencyScore * 0.3 + response.ProsodyScore * 0.2);
                 }
 
-                // Tìm các từ cần cải thiện (điểm < 60)
+                // Xử lý từng từ
                 var words = pronunciationResult.Words;
                 foreach (var word in words)
                 {
@@ -171,7 +172,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                     {
                         Word = word.Word,
                         AccuracyScore = word.AccuracyScore,
-                        Color = word.AccuracyScore < 60 ? EnumSyllableMarked.Red : (word.AccuracyScore < 80 ? EnumSyllableMarked.Yellow : EnumSyllableMarked.Green),
                         Syllables = new List<SyllableInfo>()
                     };
 
@@ -183,7 +183,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                             var syllableInfo = new SyllableInfo
                             {
                                 Syllable = syllable.Syllable,
-                                IPASyllable = ConvertToIPA(syllable.Syllable),
+                                IPASyllable = syllable.Syllable,
                                 AccuracyScore = syllable.AccuracyScore,
                                 Offset = syllable.Offset,
                                 Duration = syllable.Duration
@@ -192,18 +192,22 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                         }
                     }
 
-                    // Thêm thông tin phonemes
+                    // Thêm thông tin phonemes với màu sắc dựa trên điểm chính xác
                     if (word.Phonemes != null)
                     {
                         wordImprovement.Phonemes = new List<PhonemeInfo>();
                         foreach (var phoneme in word.Phonemes)
                         {
+                            var accuracyScore = phoneme.AccuracyScore;
+                            var color = GetColorBasedOnAccuracy(accuracyScore);
+
                             var phonemeInfo = new PhonemeInfo
                             {
                                 Phoneme = phoneme.Phoneme,
-                                AccuracyScore = phoneme.AccuracyScore,
+                                AccuracyScore = accuracyScore,
                                 Offset = phoneme.Offset,
-                                Duration = phoneme.Duration
+                                Duration = phoneme.Duration,
+                                Color = color
                             };
                             wordImprovement.Phonemes.Add(phonemeInfo);
                         }
@@ -220,31 +224,25 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             return response;
         }
 
-        private static string ConvertToIPA(string syllable)
+        /// <summary>
+        /// Xác định màu dựa trên điểm chính xác
+        /// </summary>
+        /// <param name="accuracyScore">Điểm chính xác</param>
+        /// <returns>Màu tương ứng</returns>
+        private static EnumSyllableMarked GetColorBasedOnAccuracy(double accuracyScore)
         {
-            var ipaMap = new Dictionary<string, string>
+            if (accuracyScore < LowAccuracyScore)
             {
-                {"a", "æ"}, {"b", "b"}, {"c", "k"}, {"d", "d"}, {"e", "ɛ"},
-                {"f", "f"}, {"g", "ɡ"}, {"h", "h"}, {"i", "ɪ"}, {"j", "dʒ"},
-                {"k", "k"}, {"l", "l"}, {"m", "m"}, {"n", "n"}, {"o", "ɒ"},
-                {"p", "p"}, {"q", "kw"}, {"r", "r"}, {"s", "s"}, {"t", "t"},
-                {"u", "ʌ"}, {"v", "v"}, {"w", "w"}, {"x", "ks"}, {"y", "j"},
-                {"z", "z"}
-            };
-
-            var result = new StringBuilder();
-            foreach (var c in syllable.ToLower())
-            {
-                if (ipaMap.TryGetValue(c.ToString(), out var ipa))
-                {
-                    result.Append(ipa);
-                }
-                else
-                {
-                    result.Append(c);
-                }
+                return EnumSyllableMarked.Red;
             }
-            return result.ToString();
+            else if (accuracyScore < MediumAccuracyScore)
+            {
+                return EnumSyllableMarked.Yellow;
+            }
+            else
+            {
+                return EnumSyllableMarked.Green;
+            }
         }
     }
 }
