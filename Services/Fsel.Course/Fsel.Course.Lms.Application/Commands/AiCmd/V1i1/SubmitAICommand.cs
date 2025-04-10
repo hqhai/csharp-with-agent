@@ -31,9 +31,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            var response = await _openAIService.SubmitAIResponsesAsync(new RequestResponsesAIModel
+            var response = await _openAIService.SubmitAIResponsesAsync(new RequestSchemaAIModel
             {
-                Model = "gpt-4o-mini",
+                Model = request.SettingModel,
                 Input = new List<object>
                 {
                     new
