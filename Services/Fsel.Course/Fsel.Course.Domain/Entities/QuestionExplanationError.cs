@@ -16,8 +16,8 @@ namespace Fsel.Course.Domain.Entities
         public EnumProcessedStatus Status { get; set; }
         public Question? Question { get; set; }
         public Guid QuestionId { get; set; }
-        public VideoResult? VideoResult { get; set; }
-        public Guid? VideoResultId { get; set; }
+        public EnumFeatureExplanationType ExplanationType { get; set; }
+        public Guid? ObjectResultId { get; set; }
         public Guid StudentId { get; set; }
     }
 }
