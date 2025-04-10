@@ -9,8 +9,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
     public class LoginCommandModel
     {
         [Required]
-        [MaxLength(254, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        [MinLength(6, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public string? Username { get; set; }
 
         [Required]
