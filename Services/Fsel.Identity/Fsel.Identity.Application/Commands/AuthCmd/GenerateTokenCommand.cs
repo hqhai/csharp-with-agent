@@ -98,7 +98,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 authClaims.Add(new Claim(JwtClaimNames.Role, userRole));
             }
 
-            var role = await _roleManager.Roles.FirstOrDefaultAsync(p => p.Name == userRoles.FirstOrDefault(), cancellationToken);
+            var role = await _roleManager.FindByNameAsync(userRoles.FirstOrDefault() ?? string.Empty);
             if (role == null)
             {
                 methodResult.StatusCode = StatusCodes.Status401Unauthorized;
