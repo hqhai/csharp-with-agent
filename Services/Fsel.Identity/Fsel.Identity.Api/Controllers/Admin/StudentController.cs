@@ -243,18 +243,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
         }
 
         /// <summary>
-        /// get otp for student
-        /// </summary>
-        [HttpGet("get-otp-for-student")]
-        [ProducesResponseType(typeof(MethodResult<OTPModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetOTPForStudent([FromQuery] GetOTPForStudentQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Tính năng này mới chỉ dùng để cập nhật thời gian export
         /// </summary>
         [HttpPut("update-event-content")]
@@ -292,14 +280,14 @@ namespace Fsel.Identity.Api.Controllers.Admin
         }
 
         /// <summary>
-        /// Restore deleted account
+        /// get otp for student
         /// </summary>
-        [HttpPost("restore-deleted-account")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-otp-for-student")]
+        [ProducesResponseType(typeof(MethodResult<OTPModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> RestoreDeletedAccount([FromBody] RestoreDeleteAccountCommand command)
+        public async Task<IActionResult> GetOTPForStudent([FromQuery] GetOTPForStudentQuery query)
         {
-            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -313,6 +301,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         {
             var methodResult = await _mediator.Send(command).ConfigureAwait(false);
             return methodResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Restore deleted account
+        /// </summary>
+        [HttpPost("restore-deleted-account")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RestoreDeletedAccount([FromBody] RestoreDeleteAccountCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }
