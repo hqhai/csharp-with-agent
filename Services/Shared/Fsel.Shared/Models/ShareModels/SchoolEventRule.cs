@@ -80,9 +80,9 @@ namespace Fsel.Shared.Models.ShareModels
         DisableLeaderBoard,
         DisableLevelChangeSelection,
         ImportStudent,
+        ExportAccount,
         EventGuideScreen,
-        WarningScreen,
-        ExportAccount
+        WarningScreen
     }
 
     public enum EnumByPassPaymentType
