@@ -5,7 +5,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.Models
     using System.Text.Json.Serialization;
     using Refit;
 
-    public class RequestResponsesAIModel
+    public class RequestSchemaAIModel
     {
         [AliasAs("model")]
         [JsonPropertyName("model")]
