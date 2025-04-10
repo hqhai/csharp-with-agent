@@ -40,6 +40,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("get-role-claims-by-role-id")]
         [ProducesResponseType(typeof(MethodResult<IList<RoleClaimModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(AuthorizationManagement.View)]
         public async Task<IActionResult> GetRoleClaimByRoleId([FromQuery] GetRoleClaimsByRoleIdQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -52,6 +53,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("save-role-claims")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(AuthorizationManagement.Update)]
         public async Task<IActionResult> SaveRoleClaims([FromBody] SaveRoleClaimsCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);

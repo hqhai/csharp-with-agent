@@ -45,8 +45,10 @@ namespace Fsel.Shared.Constants
     public static class ReportManagement
     {
         public const string ClaimType = nameof(ReportManagement);
-        public const string View = $"{ClaimType}.View";
-        public const string Update = $"{ClaimType}.Update";
+        public const string ViewPTResultsReport = $"{ClaimType}.ViewPTResultsReport";
+        public const string ViewLearningProgressReport = $"{ClaimType}.ViewLearningProgressReport";
+        public const string ViewLearningResultsReport = $"{ClaimType}.ViewLearningResultsReport";
+        public const string ViewAttendanceReport = $"{ClaimType}.ViewAttendanceReport";
     }
 
     public static class ErrorReportManagement

@@ -15,8 +15,6 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    using Microsoft.AspNetCore.Mvc;
-
     [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/admin/order")]
     [ApiController]
