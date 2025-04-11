@@ -1,0 +1,57 @@
+{
+  "type": "object",
+  "properties": {
+    "parameters": {
+      "type": "array",
+      "description": "An array of success and encouragement criteria items.",
+      "items": {
+        "type": "object",
+        "required": [
+          "successCriteriaItem",
+          "successCriteriaItemDetermination",
+          "successCriteriaItemEvidence",
+          "successCriteriaItemFix",
+          "encouragementCriteriaItem"
+        ],
+        "properties": {
+          "successCriteriaItem": {
+            "type": "string",
+            "description": "A string representing the success criteria item."
+          },
+          "successCriteriaItemDetermination": {
+            "type": "string",
+            "description": "A string representing the determination for the success criteria item.",
+            "enum": [
+              "YES",
+              "PARTIAL",
+              "NO"
+            ]
+          },
+          "successCriteriaItemEvidence": {
+            "type": "array",
+            "description": "An array of evidence items related to the success criteria item.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "successCriteriaItemFix": {
+            "type": "array",
+            "description": "An array of suggested fixes related to the success criteria item. If only one suggestion is needed, wrap it in an array. For example: [\n'No fix needed\n'] or [\n'Consider using a more formal tone.\n']",
+            "items": {
+              "type": "string"
+            }
+          },
+          "encouragementCriteriaItem": {
+            "type": "string",
+            "description": "A string providing encouragement related to the success criteria."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "parameters"
+  ],
+  "additionalProperties": false
+}

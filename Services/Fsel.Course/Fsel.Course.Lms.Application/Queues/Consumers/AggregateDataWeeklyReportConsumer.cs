@@ -8,18 +8,18 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
     using Fsel.Course.Lms.Application.Commands.WeeklyReportCommand;
     using MediatR;
 
-    public class WeeklyReportConsumer : BaseConsumer<BaseQueueModel>
+    public class AggregateDataWeeklyReportConsumer : BaseConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public WeeklyReportConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
+        public AggregateDataWeeklyReportConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }
 
         public override async Task ConsumeQueue(BaseQueueModel? message)
         {
-            await _mediator.Send(new WeeklyReportCommand()).ConfigureAwait(false);
+            await _mediator.Send(new AggregateDataWeeklyReportCommand()).ConfigureAwait(false);
         }
     }
 }

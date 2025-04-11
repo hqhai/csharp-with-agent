@@ -7,7 +7,7 @@ namespace Fsel.System.Application.Services.UserServices.Models
     public class HumanModel : BaseModel
     {
         public string? FullName { get; set; }
-        public string? Birthday { get; set; }
+        public DateTime? Birthday { get; set; }
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Code { get; set; }

@@ -36,8 +36,6 @@ namespace Fsel.System.Application.Queries.BannerQuery
             }
 
             var query = _bannerRepository.Queryable
-                                         .Include(x => x.BannerScopes)
-                                         .Include(x => x.BannerImages)
                                          .AsQueryable();
 
             if (!string.IsNullOrEmpty(request.Keyword))
