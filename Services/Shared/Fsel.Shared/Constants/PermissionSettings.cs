@@ -164,9 +164,9 @@ namespace Fsel.Shared.Constants
         public const string Delete = $"{ClaimType}.Delete";
     }
 
-    public static class PermissionGroupManagement
+    public static class RoleGroupManagement
     {
-        public const string ClaimType = nameof(PermissionGroupManagement);
+        public const string ClaimType = nameof(RoleGroupManagement);
         public const string View = $"{ClaimType}.View";
         public const string Update = $"{ClaimType}.Update";
         public const string Add = $"{ClaimType}.Add";

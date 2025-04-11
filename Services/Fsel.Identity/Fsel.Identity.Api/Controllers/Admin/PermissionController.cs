@@ -84,7 +84,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("search-permission-group")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<PermissionGroupModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(PermissionGroupManagement.View)]
+        [Permission(RoleGroupManagement.View)]
         public async Task<IActionResult> ChangeStatusPermissionGroup([FromQuery] SearchPermissionGroupQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -97,7 +97,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("change-status-permission-group")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(PermissionGroupManagement.Update)]
+        [Permission(RoleGroupManagement.Update)]
         public async Task<IActionResult> ChangeStatusPermissionGroup([FromBody] ChangeStatusPermissionGroupCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -110,7 +110,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("delete-permission-group")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(PermissionGroupManagement.Delete)]
+        [Permission(RoleGroupManagement.Delete)]
         public async Task<IActionResult> DeletePermissionGroup([FromBody] DeletePermissionGroupCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -123,7 +123,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("save-permission-group")]
         [ProducesResponseType(typeof(MethodResult<PermissionGroupModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(new[] { PermissionGroupManagement.Add, PermissionGroupManagement.Update })]
+        [Permission(new[] { RoleGroupManagement.Add, RoleGroupManagement.Update })]
         public async Task<IActionResult> SavePermissionGroup([FromBody] SavePermissionGroupCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
