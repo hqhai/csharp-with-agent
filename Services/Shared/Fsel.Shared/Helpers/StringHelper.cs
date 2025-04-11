@@ -286,8 +286,8 @@ namespace Fsel.Shared.Helpers
 
             Random random = new Random();
 
-            const string Letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-            const string Digits = "0123456789";
+            const string Letters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+            const string Digits = "123456789";
 
             StringBuilder sb = new StringBuilder();
             sb.Append(Digits[random.Next(Digits.Length)]);
