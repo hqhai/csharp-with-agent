@@ -7,10 +7,12 @@ using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.PermissionCmd;
 using Fsel.Identity.Application.Commands.PermissionGroupCmd;
 using Fsel.Identity.Application.Commands.RoleClaimCmd;
+using Fsel.Identity.Application.Queries.AuthQuery;
 using Fsel.Identity.Application.Queries.PermissionGroupQuery;
 using Fsel.Identity.Application.Queries.PermissionQuery;
 using Fsel.Identity.Application.Queries.RoleClaimQuery;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Domain.Models.EntityModels.Permissions;
 using Fsel.Shared.Constants;
 using MediatR;
@@ -56,6 +58,19 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> SaveRoleClaims([FromBody] SaveRoleClaimsCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get roles
+        /// </summary>
+        [HttpGet("get-roles")]
+        [ProducesResponseType(typeof(MethodResult<IList<RoleModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(AuthorizationManagement.View)]
+        public async Task<IActionResult> GetRoles([FromQuery] GetRolesQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
