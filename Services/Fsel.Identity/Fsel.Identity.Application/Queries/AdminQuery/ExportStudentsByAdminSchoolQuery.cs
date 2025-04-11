@@ -85,7 +85,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                     item.Grade ?? string.Empty,
                     item.Class ?? string.Empty,
                     item.UserName ?? string.Empty,
-                    item.PasswordDefault ?? string.Empty
+                    item.PasswordDefault ?? string.Empty,
+                    !item.CreatedDate.HasValue ? string.Empty : item.CreatedDate.Value.AddHours(7).ToString("dd/MM/yyyy HH:ss", CultureInfo.InvariantCulture)
                 };
 
                 // Lưu dữ liệu vào ConcurrentBag (thay vì ghi vào Excel ngay)
