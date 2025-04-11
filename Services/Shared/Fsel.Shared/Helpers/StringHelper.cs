@@ -286,8 +286,8 @@ namespace Fsel.Shared.Helpers
 
             Random random = new Random();
 
-            const string Letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-            const string Digits = "0123456789";
+            const string Letters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+            const string Digits = "123456789";
 
             StringBuilder sb = new StringBuilder();
             sb.Append(Digits[random.Next(Digits.Length)]);
@@ -385,7 +385,44 @@ namespace Fsel.Shared.Helpers
                 {
                     return string.Empty;
                 }
+                input = DecodeEscapesSmart(input);
                 return Regex.Replace(input, @"[^\w\s]", "");
+            }
+
+            public static string DecodeEscapesSmart(string input)
+            {
+                if (string.IsNullOrEmpty(input))
+                {
+                    return input;
+                }
+                string result = input;
+                string pattern = @"\\[nrtbfv0\\'""]";
+                bool changed = true;
+
+                while (changed)
+                {
+                    string replaced = Regex.Replace(result, pattern, match =>
+                    {
+                        return match.Value switch
+                        {
+                            "\\n" => "\n",
+                            "\\t" => "\t",
+                            "\\r" => "\r",
+                            "\\b" => "\b",
+                            "\\f" => "\f",
+                            "\\v" => "\v",
+                            "\\0" => "\0",
+                            "\\\\" => "\\",
+                            "\\\"" => "\"",
+                            "\\\'" => "'",
+                            _ => match.Value
+                        };
+                    });
+
+                    changed = replaced != result;
+                    result = replaced;
+                }
+                return result;
             }
 
             // Hàm chuẩn hóa + loại bỏ dấu câu cho một chuỗi
