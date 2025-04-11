@@ -39,7 +39,7 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [RefitCache(CacheSettings.TimeCache.OneHour)]
         [Get("/v1/forbidden-word/get-list-forbidden-word")]
-        Task<IApiResponse<MethodResult<IList<string>>>> CheckContainForbiddenWord([FromQuery] string word);
+        Task<IApiResponse<MethodResult<IList<string>>>> CheckContainForbiddenWord([FromQuery] string Word);
 
         [RefitCache(CacheSettings.TimeCache.TenMinutes)]
         [Get("/v1/token-config/get-token")]
