@@ -54,10 +54,10 @@ namespace Fsel.Identity.Application.Commands.RoleClaimCmd
                 return methodResult;
             }
 
-            var permissionGroupIds = request.RoleClaims.Select(p => p.PermissionGroupId).ToList();
+            var permissionGroupIds = request.RoleClaims.Select(p => p.PermissionGroupId).Distinct().ToList();
 
             var permissionGroups = await _permissionGroupRepository.Queryable.Include(p => p.Permissions).WhereBulkContains(permissionGroupIds, p => p.Id).ToListAsync(cancellationToken);
-            if (permissionGroups.Count != request.RoleClaims.Count)
+            if (permissionGroups.Count != permissionGroupIds.Count)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
