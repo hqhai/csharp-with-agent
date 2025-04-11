@@ -47,6 +47,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = true;
+            return methodResult;
+
             var currentUser = await _userManager.Users.Include(p => p.UserSchools).FirstOrDefaultAsync(p => p.Id == _authContext.CurrentUserId, cancellationToken);
             if (currentUser == null)
             {
