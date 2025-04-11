@@ -33,11 +33,13 @@ builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (
 builder.Services.AddScoped<IAmazonS3Service, AmazonS3Service>();
 builder.Services.AddScoped<SpeechToTextPublisher>();
 builder.Services.AddScoped<SpeechToTextAiPublisher>();
+builder.Services.AddScoped<ResponseSpeechToTextPendingPublisher>();
 
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-  { QueueSettings.StorageQueue.NameQueue.SpeechToTextAi, typeof(SpeechToTextAiConsumer) }
+  { QueueSettings.StorageQueue.NameQueue.SpeechToTextAi, typeof(SpeechToTextAiConsumer) },
+  { QueueSettings.LmsQueue.NameQueue.SpeechToTextPendingAi, typeof(SpeechToTextPendingAiConsumer) },
 });
 
 var app = builder.Build();

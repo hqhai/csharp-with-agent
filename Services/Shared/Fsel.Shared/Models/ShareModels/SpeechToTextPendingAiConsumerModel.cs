@@ -2,9 +2,9 @@
 
 namespace Fsel.Shared.Models.ShareModels
 {
-    public class SpeechToTextPendingAiConsumerModel
+    public class SpeechToTextAiConsumerModel
     {
-        public Guid ClassForumDetailResultId { get; set; }
+        public Guid UserId { get; set; }
 
         public string FileName { get; set; } = string.Empty;
 

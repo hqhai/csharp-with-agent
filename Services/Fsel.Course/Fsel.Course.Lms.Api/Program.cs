@@ -172,6 +172,7 @@ builder.Services.AddScoped<ExportFileExcelStudentLearningProcessPublisher>();
 builder.Services.AddScoped<SavePlacementTestAnswersPublisher>();
 builder.Services.AddScoped<ErrorExplainPublisher>();
 builder.Services.AddScoped<ExportFileExcelSchoolLearningProcessPublisher>();
+builder.Services.AddScoped<SpeechToTextPendingAiPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -214,6 +215,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.ExportExcelSchoolLearningProcess, typeof(ExportExcelSchoolLearningProcessConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SavePlacementTestAnswers, typeof(SavePlacementTestAnswersConsumer) },
     { QueueSettings.LmsQueue.NameQueue.ErrorExplainGgSheet, typeof(ErrorExplainConsumer) },
+    { QueueSettings.StorageQueue.NameQueue.ResponseSpeechToTextPendingAi, typeof(ResponseSpeechToTextPendingAiConsumer) },
 });
 
 var app = builder.Build();
