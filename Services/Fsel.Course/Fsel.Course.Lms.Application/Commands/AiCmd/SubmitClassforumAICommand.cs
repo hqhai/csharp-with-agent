@@ -132,7 +132,10 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
                     var userAiConfig = request!.UserAIConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
 
-                    var aIResponse = await _mediator.Send(new SubmitAICommand
+                    var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.SuccessCriteriaSchema);
+                    var successCriteriaSchema = ConvertHelper.DeserializeFromFilePath<object>(path);
+
+                    var aIResponse = await _mediator.Send(new V1i1.SubmitAICommand
                     {
                         SettingModel = request.SettingModel,
                         SettingTemperature = request.SettingTemperature,
@@ -142,15 +145,19 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                         SettingTopP = request.SettingTopP,
                         SystemRoleAlConfig = request.SystemRoleAlConfig,
                         UserAIConfig = userAiConfig,
+                        Text = successCriteriaSchema
                     }, cancellationToken).ConfigureAwait(false);
+
                     aIResponse = Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
+                    var doc = JsonDocument.Parse(aIResponse);
+                    var items = doc.RootElement.GetProperty("parameters");
 
                     _logger.LogCritical($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} userAiConfig: {userAiConfig}");
 
                     _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} userAiConfig: {userAiConfig}");
                     _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} aIResponse: {aIResponse}");
 
-                    var classForumAIs = GetClassForumAIs(ConvertHelper.Deserialize<List<ClassForumAIModel>?>(aIResponse));
+                    var classForumAIs = GetClassForumAIs(ConvertHelper.Deserialize<List<ClassForumAIModel>?>(items));
 
                     _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumAIs: {classForumAIs.Serialize()}");
 

@@ -10,5 +10,8 @@ namespace Fsel.Course.Lms.Application.Services.AiService
     {
         [Post("/v1/chat/completions")]
         Task<IApiResponse<AIResponseModel>> SubmitAICompletionsAsync([Body] RequestAIModel command);
+
+        [Post("/v1/responses")]
+        Task<IApiResponse<ResponsesAIModel>> SubmitAIResponsesAsync([Body] RequestSchemaAIModel command);
     }
 }
