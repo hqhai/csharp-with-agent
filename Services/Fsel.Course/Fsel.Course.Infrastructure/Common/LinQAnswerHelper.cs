@@ -8,6 +8,7 @@ namespace Fsel.Course.Infrastructure.Common
     using System.Linq;
     using Fsel.Common.Helpers;
     using Fsel.Shared.Helpers;
+    using static Fsel.Shared.Helpers.StringHelper;
 
     public class LinQAnswerHelper
     {
@@ -69,6 +70,26 @@ namespace Fsel.Course.Infrastructure.Common
             return true;
         }
 
+        public bool? IsWordMatchAtIndex(IList<string>? words, string? word, int index = 0)
+        {
+            if (words == null || words.Count == 0 || string.IsNullOrEmpty(word) || index < 0 || index >= words.Count)
+            {
+                return false;
+            }
+            string cleanedWord = TextCleaner.CleanText(word);
+            string cleanedTarget = words[index];
+
+            if (!cleanedTarget.Contains('|', StringComparison.CurrentCulture))
+            {
+                return TextCleaner.CleanText(cleanedTarget) == cleanedWord;
+            }
+            else
+            {
+                string[] options = cleanedTarget.Split('|');
+                return options.Any(x => TextCleaner.CleanText(x) == cleanedWord);
+            }
+        }
+
         public bool? CheckAnswer(IList<string>? words, string? word, int index = default)
         {
             if (words != null && words.Any() && !string.IsNullOrEmpty(word))
@@ -121,6 +142,20 @@ namespace Fsel.Course.Infrastructure.Common
             string q = " " + question.ReplaceWord() + " ";
             string a = " " + answer.ReplaceWord() + " ";
             return a.Contains(q, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public bool IsQuestionContainedInAnswer(string? question, string? answer)
+        {
+            if (string.IsNullOrWhiteSpace(question) || string.IsNullOrWhiteSpace(answer))
+            {
+                return false;
+            }
+            // Dùng TextCleaner để làm sạch input
+            string cleanedQuestion = " " + TextCleaner.CleanText(question) + " ";
+            string cleanedAnswer = " " + TextCleaner.CleanText(answer) + " ";
+
+            // So sánh phần chứa
+            return cleanedAnswer.Contains(cleanedQuestion, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
