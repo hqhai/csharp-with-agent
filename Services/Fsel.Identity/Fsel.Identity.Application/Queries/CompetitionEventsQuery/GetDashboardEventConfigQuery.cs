@@ -61,10 +61,8 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             }
             else
             {
-                await ParentEventAsync(competitionEvent.ParentEventId.Value, cancellationToken);
+                return await ParentEventAsync(competitionEvent.ParentEventId.Value, cancellationToken);
             }
-
-            return competitionEvent?.DashboardEventConfig;
         }
 
     }
