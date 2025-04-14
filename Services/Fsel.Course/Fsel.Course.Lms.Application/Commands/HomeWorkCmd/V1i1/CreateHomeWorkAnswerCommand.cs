@@ -175,24 +175,11 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 if (homeWorkAnswer == null)
                 {
                     homeWorkAnswer = new HomeWorkAnswer { HomeWorkQuestionId = homeWorkQuestion.Id, HomeWorkResultId = homeWorkResult.Id };
-                    homeWorkAnswer = GetHomeWorkAnswer(homeWorkAnswer, answerConfig, isAnswered, correctCount, questionItem.CorrectTotal);
-                    if (!homeWorkAnswer.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(homeWorkAnswer.ErrorMessages);
-                        return methodResult;
-                    }
-                    createHomeWorkAnswers.Add(homeWorkAnswer);
+                    createHomeWorkAnswers.Add(GetHomeWorkAnswer(homeWorkAnswer, answerConfig, isAnswered, correctCount, questionItem.CorrectTotal));
                 }
                 else if (homeWorkAnswer.Status != EnumAnswerStatus.Done)
                 {
-                    homeWorkAnswer = GetHomeWorkAnswer(homeWorkAnswer, answerConfig, isAnswered, correctCount, questionItem.CorrectTotal);
-                    if (!homeWorkAnswer.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(homeWorkAnswer.ErrorMessages);
-                        return methodResult;
-                    }
-
-                    updateHomeWorkAnswers.Add(homeWorkAnswer);
+                    updateHomeWorkAnswers.Add(GetHomeWorkAnswer(homeWorkAnswer, answerConfig, isAnswered, correctCount, questionItem.CorrectTotal));
                 }
             }
 
@@ -234,12 +221,12 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             return tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
         }
 
-        private static HomeWorkAnswer GetHomeWorkAnswer(HomeWorkAnswer homeWorkAnswer, object? answerConfig, bool isAnswered, short correctCount, int correctTotal)
+        private static HomeWorkAnswer GetHomeWorkAnswer(HomeWorkAnswer homeWorkAnswer, object? answerConfig, bool isAnswered, int correctCount, int correctCTotal)
         {
             homeWorkAnswer.Status = EnumAnswerStatus.Process;
             homeWorkAnswer.Answer = answerConfig;
             homeWorkAnswer.CorrectCount = correctCount;
-            homeWorkAnswer.IsCorrect = isAnswered ? correctCount == correctTotal : null;
+            homeWorkAnswer.IsCorrect = isAnswered ? correctCount == correctCTotal : null;
             return homeWorkAnswer;
         }
 
