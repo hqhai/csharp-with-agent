@@ -437,23 +437,11 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     if (mockTestAnswer == null)
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, questionItem);
-                        mockTestAnswer = GetMockTestAnswer(mockTestAnswer, answerConfig, questionItem, isAnswered, item.SpeechTextAnswer, correctCount);
-                        if (!mockTestAnswer.IsValid())
-                        {
-                            methodResult.AddErrorBadRequest(mockTestAnswer.ErrorMessages);
-                            return methodResult;
-                        }
-                        createMockTestAnswers.Add(mockTestAnswer);
+                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, answerConfig, questionItem, isAnswered, item.SpeechTextAnswer, correctCount));
                     }
                     else
                     {
-                        mockTestAnswer = GetMockTestAnswer(mockTestAnswer, answerConfig, questionItem, isAnswered, item.SpeechTextAnswer, correctCount);
-                        if (!mockTestAnswer.IsValid())
-                        {
-                            methodResult.AddErrorBadRequest(mockTestAnswer.ErrorMessages);
-                            return methodResult;
-                        }
-                        updateMockTestAnswers.Add(mockTestAnswer);
+                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, answerConfig, questionItem, isAnswered, item.SpeechTextAnswer, correctCount));
                     }
                 }
             }
@@ -481,23 +469,11 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     if (mockTestAnswer == null)
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, section.Id);
-                        mockTestAnswer = GetMockTestAnswer(mockTestAnswer, item.Answer, item.SpeechTextAnswer, 0);
-                        if (!mockTestAnswer.IsValid())
-                        {
-                            methodResult.AddErrorBadRequest(mockTestAnswer.ErrorMessages);
-                            return methodResult;
-                        }
-                        createMockTestAnswers.Add(mockTestAnswer);
+                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, item.Answer, item.SpeechTextAnswer, 0));
                     }
                     else
                     {
-                        mockTestAnswer = GetMockTestAnswer(mockTestAnswer, item.Answer, item.SpeechTextAnswer, 0);
-                        if (!mockTestAnswer.IsValid())
-                        {
-                            methodResult.AddErrorBadRequest(mockTestAnswer.ErrorMessages);
-                            return methodResult;
-                        }
-                        updateMockTestAnswers.Add(mockTestAnswer);
+                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, item.Answer, item.SpeechTextAnswer, 0));
                     }
                 }
             }
@@ -540,26 +516,12 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, null, sectionTimeCode.Id);
                         double pronScore = await _evaluationAIService.EvaluationSpeaking(sectionTimeCode.Name, item?.Answer?.ToString() ?? default);
-
-                        mockTestAnswer = GetMockTestAnswer(mockTestAnswer, item?.Answer, item?.SpeechTextAnswer, pronScore);
-                        if (!mockTestAnswer.IsValid())
-                        {
-                            methodResult.AddErrorBadRequest(mockTestAnswer.ErrorMessages);
-                            return methodResult;
-                        }
-                        createMockTestAnswers.Add(mockTestAnswer);
+                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, item?.Answer, item?.SpeechTextAnswer, pronScore));
                     }
                     else
                     {
                         double pronScore = await _evaluationAIService.EvaluationSpeaking(sectionTimeCode.Name, item?.Answer?.ToString() ?? default);
-
-                        mockTestAnswer = GetMockTestAnswer(mockTestAnswer, item?.Answer, item?.SpeechTextAnswer, pronScore);
-                        if (!mockTestAnswer.IsValid())
-                        {
-                            methodResult.AddErrorBadRequest(mockTestAnswer.ErrorMessages);
-                            return methodResult;
-                        }
-                        updateMockTestAnswers.Add(mockTestAnswer);
+                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, item?.Answer, item?.SpeechTextAnswer, pronScore));
                     }
                 }
             }
@@ -592,14 +554,14 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             };
         }
 
-        private static MockTestAnswer GetMockTestAnswer(MockTestAnswer mockTestAnswer, object? answer, Question questionItem, bool isAnswered, string? speechText, short correctCount = default)
+        private static MockTestAnswer GetMockTestAnswer(MockTestAnswer mockTestAnswer, object? answer, Question questionItem, bool isAnswered, string? speechText, int correctCount = default)
         {
             mockTestAnswer = GetMockTestAnswer(mockTestAnswer, answer, speechText, 0, correctCount);
             mockTestAnswer.IsCorrect = isAnswered ? (questionItem == null || questionItem.CorrectTotal == correctCount) : null;
             return mockTestAnswer;
         }
 
-        private static MockTestAnswer GetMockTestAnswer(MockTestAnswer mockTestAnswer, object? answer, string? speechText, double pronsScore, short correctCount = default)
+        private static MockTestAnswer GetMockTestAnswer(MockTestAnswer mockTestAnswer, object? answer, string? speechText, double pronsScore, int correctCount = default)
         {
             mockTestAnswer.Answer = answer;
             mockTestAnswer.SpeechTextAnswer = speechText;
