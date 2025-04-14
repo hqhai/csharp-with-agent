@@ -12,6 +12,7 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
     using Fsel.Core.Caching;
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Course.Infrastructure;
+    using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -33,6 +34,8 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
         public int PageNumber { get; set; } = 1;
 
         public int PageSize { get; set; } = 10;
+
+        public int CheckByGroup { get; set; }
     }
 
     public class SchoolSummaryQueryHandler : IRequestHandler<SchoolSummaryQuery, MethodResult<PagingItemsModel<SchoolSummaryModel>>>
@@ -40,14 +43,17 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
         private readonly CourseDbContext _courseDbContext;
         private readonly ICacheService<PagingItemsModel<SchoolSummaryModel>> _cacheService;
         private readonly AuthContext _authContext;
+        private readonly AppSetting _appSetting;
 
         public SchoolSummaryQueryHandler(CourseDbContext courseDbContext,
                                          ICacheService<PagingItemsModel<SchoolSummaryModel>> cacheService,
-                                         AuthContext authContext)
+                                         AuthContext authContext,
+                                         AppSetting appSetting)
         {
             _courseDbContext = courseDbContext;
             _cacheService = cacheService;
             _authContext = authContext;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<PagingItemsModel<SchoolSummaryModel>>> Handle(SchoolSummaryQuery request, CancellationToken cancellationToken)
@@ -57,7 +63,7 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
 
             var keyCache = $"SchoolSummaryReport_{ConvertHelper.Serialize(request)}";
             var data = await _cacheService.GetAsync(keyCache);
-            if (data != null)
+            if (data != null && _appSetting.CacheConfig != null && _appSetting.CacheConfig.TurnOnCaching)
             {
                 methodResult.Result = data;
                 return methodResult;
@@ -111,7 +117,7 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
             var date = request.Date != null ? request.Date : (object)DBNull.Value;
 
             var result = await _courseDbContext.Set<SchoolSummaryModel>()
-                                               .FromSqlRaw("EXEC SchoolSummaryReport  @UserId, @DistrictIds, @GradeLevel, @SchoolIds, @TargetGroup, @Date, @PageNumber, @PageSize",
+                                               .FromSqlRaw("EXEC SchoolSummaryReport  @UserId, @DistrictIds, @GradeLevel, @SchoolIds, @TargetGroup, @Date, @PageNumber, @PageSize, @CheckByGroup",
                                                    new SqlParameter("@UserId", _authContext.CurrentUserId),
                                                    new SqlParameter("@DistrictIds", districtIdsParam),
                                                    new SqlParameter("@GradeLevel", gradeLevelsParam),
@@ -119,7 +125,8 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
                                                    new SqlParameter("@TargetGroup", request.TargetGroup),
                                                    new SqlParameter("@Date", date),
                                                    new SqlParameter("@PageNumber", request.PageNumber),
-                                                   new SqlParameter("@PageSize", request.PageSize))
+                                                   new SqlParameter("@PageSize", request.PageSize),
+                                                   new SqlParameter("@CheckByGroup", request.CheckByGroup))
                                                .AsNoTracking()
                                                .ToListAsync(cancellationToken);
 
@@ -130,7 +137,10 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
             };
 
             methodResult.Result = dataResult;
-            await _cacheService.SetAsync(keyCache, dataResult, TimeSpan.FromSeconds(CacheSettings.TimeCache.ThreeHour));
+            if (_appSetting.CacheConfig != null && _appSetting.CacheConfig.TurnOnCaching)
+            {
+                await _cacheService.SetAsync(keyCache, dataResult, TimeSpan.FromSeconds(_appSetting.CacheConfig.CachingDuration));
+            }
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
