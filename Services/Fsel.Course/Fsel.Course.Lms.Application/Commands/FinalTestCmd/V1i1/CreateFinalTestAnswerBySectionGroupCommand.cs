@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
@@ -351,11 +352,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                     finalTestAnswer.CorrectCount = correctCount;
                     finalTestAnswer.IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null;
                     finalTestAnswer.Status = questionItem.CorrectTotal == correctCount ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
-                    if (!finalTestAnswer.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(finalTestAnswer.ErrorMessages);
-                        return methodResult;
-                    }
                 }
             }
             methodResult.Result = (createFinalTestAnswers, updateFinalTestAnswers);
