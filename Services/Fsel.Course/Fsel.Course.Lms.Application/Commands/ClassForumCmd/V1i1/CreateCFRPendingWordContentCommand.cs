@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
 {
+    using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -14,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults.V1i1;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.StorageServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
@@ -24,6 +26,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Hosting;
+    using Refit;
 
     public class CreateCFRPendingWordContentCommand : CreateCFRPendingWordContentCommandModel, IRequest<MethodResult<bool>>
     {
@@ -40,6 +43,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
         private readonly AuthContext _authContext;
         private readonly ISystemService _systemService;
         private readonly SpeechToTextPendingAiPublisher _speechToTextPendingAiPublisher;
+        private readonly IStorageService _storageService;
         private const int MaxClassForumDetailResultRecord = 2;
         private const int MaxPendingSpeechToText = 2;
         private const int TimeStartJobTest = 10;
@@ -53,7 +57,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                                                          IHostEnvironment hostEnvironment,
                                                          AuthContext authContext,
                                                          ISystemService systemService,
-                                                         SpeechToTextPendingAiPublisher speechToTextPendingAiPublisher)
+                                                         SpeechToTextPendingAiPublisher speechToTextPendingAiPublisher,
+                                                         IStorageService storageService)
         {
             _userService = userService;
             _classForumResultRepository = classForumResultRepository;
@@ -64,6 +69,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
             _authContext = authContext;
             _systemService = systemService;
             _speechToTextPendingAiPublisher = speechToTextPendingAiPublisher;
+            _storageService = storageService;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateCFRPendingWordContentCommand request, CancellationToken cancellationToken)
@@ -165,11 +171,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                 if (classForumResult == null)
                 {
                     var newClassForumResult = await CreateClassForumResultAsync(request.LessonResultId, classForum.Id, studentId, cancellationToken);
-                    classForumDetailResult = await CreateClassForumDetailResultAsync(newClassForumResult.Id, EnumSubmissionCount.FirstSubmit, request.Content ?? string.Empty, cancellationToken);
+                    classForumDetailResult = await CreateClassForumDetailResultAsync(newClassForumResult.Id, EnumSubmissionCount.FirstSubmit, request.Content ?? string.Empty, request.FormFile, cancellationToken);
                 }
                 else
                 {
-                    classForumDetailResult = await CreateClassForumDetailResultAsync(classForumResult.Id, EnumSubmissionCount.SecondSubmit, request.Content ?? string.Empty, cancellationToken);
+                    classForumDetailResult = await CreateClassForumDetailResultAsync(classForumResult.Id, EnumSubmissionCount.SecondSubmit, request.Content ?? string.Empty, request.FormFile, cancellationToken);
                     await UpdateClassForumResult(classForumResult, cancellationToken);
                 }
 
@@ -209,14 +215,20 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
             return classForumResult;
         }
 
-        private async Task<ClassForumDetailResult> CreateClassForumDetailResultAsync(Guid classForumResultId, EnumSubmissionCount submissionCount, string content, CancellationToken cancellationToken)
+        private async Task<ClassForumDetailResult> CreateClassForumDetailResultAsync(Guid classForumResultId, EnumSubmissionCount submissionCount, string content, IFormFile formFile, CancellationToken cancellationToken)
         {
+            var stream = formFile.OpenReadStream();
+            var streamPart = new StreamPart(stream, formFile.FileName, formFile.ContentType);
+
+            var filePart = await _storageService.UpLoadFile(EnumFolderType.Images, EnumBucketType.FselPublic, streamPart);
+
             var classForumDetailResult = new ClassForumDetailResult
             {
                 Content = content,
                 Status = EnumClassForumResultStatus.PendingSpeechToText,
                 SubmissionCount = submissionCount,
                 ClassForumResultId = classForumResultId,
+                ClassForumResultFiles = new List<ClassForumResultFile> { new ClassForumResultFile { FilePath = filePart.Content?.Result } }
             };
 
             _classForumDetailResultRepository.Add(classForumDetailResult);

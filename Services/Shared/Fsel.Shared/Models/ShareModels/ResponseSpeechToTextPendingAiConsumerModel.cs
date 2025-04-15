@@ -7,7 +7,5 @@ namespace Fsel.Shared.Models.ShareModels
         public Guid ClassForumDetailResultId { get; set; }
 
         public string? WordContent { get; set; }
-
-        public IList<string>? FilePaths { get; set; }
     }
 }

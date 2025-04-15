@@ -28,8 +28,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
             await _mediator.Send(new UpdateCFRPendingWordContentCommand
             {
                 ClassForumDetailResultId = message.ClassForumDetailResultId,
-                WordContent = message.WordContent,
-                FilePaths = message.FilePaths
+                WordContent = message.WordContent
             });
         }
     }

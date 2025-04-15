@@ -79,13 +79,13 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
             }
 
             // Check từ khoá cấm
-            var listForbiddenWordResultWordContent = await _systemService.CheckContainForbiddenWord(request.WordContent ?? string.Empty);
-            var containsForbiddenWord = (listForbiddenWordResultWordContent.Content?.Result ?? Enumerable.Empty<string>()).Distinct().ToList();
-            if (containsForbiddenWord.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ContainsForbiddenKeywords), string.Join(", ", containsForbiddenWord));
-                return methodResult;
-            }
+            //var listForbiddenWordResultWordContent = await _systemService.CheckContainForbiddenWord(request.WordContent ?? string.Empty);
+            //var containsForbiddenWord = (listForbiddenWordResultWordContent.Content?.Result ?? Enumerable.Empty<string>()).Distinct().ToList();
+            //if (containsForbiddenWord.Any())
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ContainsForbiddenKeywords), string.Join(", ", containsForbiddenWord));
+            //    return methodResult;
+            //}
 
             var classForumDetailResult = await _classForumDetailResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.ClassForumDetailResultId, cancellationToken);
             if (classForumDetailResult == null)
@@ -131,10 +131,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
             await _classForumDetailResultRepository.ExecuteTransactionAsync(async () =>
             {
                 classForumDetailResult.WordContent = request.WordContent;
-                classForumDetailResult.ClassForumResultFiles = request.FilePaths?.Select(x => new ClassForumResultFile
-                {
-                    FilePath = x
-                }).ToList() ?? new List<ClassForumResultFile>();
                 classForumDetailResult.ProcessDate = isFirst ? DateTime.UtcNow : null;
                 classForumDetailResult.MediaType = MediaHelper.GetMediaType(classForumDetailResult.ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
                 classForumDetailResult.Status = string.IsNullOrEmpty(request.WordContent) ? EnumClassForumResultStatus.ErrorSpeechToText : EnumClassForumResultStatus.Pending;

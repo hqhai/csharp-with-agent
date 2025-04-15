@@ -132,12 +132,9 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
 
         private async Task SendResponseSpeechToText(IFormFile formFile, Guid classForumDetailResultId, string? contentText, CancellationToken cancellationToken)
         {
-            var fileInfomation = await UpLoadFileAsync(formFile);
-
             await _responseSpeechToTextPendingPublisher.Publish(new ResponseSpeechToTextPendingAiConsumerModel
             {
                 ClassForumDetailResultId = classForumDetailResultId,
-                FilePaths = new List<string> { fileInfomation.Result ?? string.Empty },
                 WordContent = contentText
             }, cancellationToken);
         }
