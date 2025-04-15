@@ -13,7 +13,6 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.ValueSettings;
-    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Data.SqlClient;
@@ -61,7 +60,7 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<SchoolSummaryModel>>();
 
-            var keyCache = $"SchoolSummaryReport_{ConvertHelper.Serialize(request)}";
+            var keyCache = $"SchoolSummaryReport_{ConvertHelper.Serialize(request)}_{_authContext.CurrentUserId}";
             var data = await _cacheService.GetAsync(keyCache);
             if (data != null && _appSetting.CacheConfig != null && _appSetting.CacheConfig.TurnOnCaching)
             {
