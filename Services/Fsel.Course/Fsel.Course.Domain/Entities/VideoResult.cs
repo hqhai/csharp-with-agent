@@ -66,6 +66,5 @@ namespace Fsel.Course.Domain.Entities
         public EnumPlaybackSpeed PlaybackSpeed { get; set; } = EnumPlaybackSpeed.Normal;
         public ICollection<VideoTimeCodeResult> VideoTimeCodeResults { get; set; } = new List<VideoTimeCodeResult>();
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
-        public ICollection<QuestionExplanationError> QuestionExplanationErrors { get; set; } = new List<QuestionExplanationError>();
     }
 }
