@@ -120,14 +120,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 else
                 {
                     var queryUserName = query.Where(m => (m.User.UserName != null && m.User.UserName == request.Keyword));
-                    if (queryUserName.Any())
-                    {
-                        query = queryUserName;
-                    }
-                    else
-                    {
-                        query = query.Where(m => m.User.FullName != null && EF.Functions.Contains(m.User.FullName, $"\"{request.Keyword}\"") && m.User.FullName.Contains(request.Keyword));
-                    }
+                    var queryFullName = query.Where(m => m.User.FullName != null && EF.Functions.Contains(m.User.FullName, $"\"{request.Keyword}\"") && m.User.FullName.Contains(request.Keyword));
+                    query = queryUserName.Union(queryFullName);
                 }
             }
 
