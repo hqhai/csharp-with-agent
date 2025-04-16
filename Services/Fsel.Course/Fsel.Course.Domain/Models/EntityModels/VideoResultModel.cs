@@ -5,6 +5,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using System;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.IEntities;
+    using Fsel.Shared.Enums;
 
     public class VideoResultModel : BaseResultModel, ITokenResult
     {
@@ -17,6 +18,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? CurrentVideoTimeCodeId { get; set; }
         public int? HighestStreak { get; set; }
         public int? TimeCodeHighestStreak { get; set; }
+        public EnumPlaybackSpeed PlaybackSpeed { get; set; }
         public IList<VideoSkillScores>? VideoSkillScores { get; set; }
     }
 }
