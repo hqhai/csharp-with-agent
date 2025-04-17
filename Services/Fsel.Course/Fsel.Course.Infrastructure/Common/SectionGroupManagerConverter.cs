@@ -169,23 +169,23 @@ namespace Fsel.Course.Infrastructure.Common
                             return methodResult;
                         }
 
-                        var correctCount = newSection.SectionQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal);
-                        if (type == EnumCourseType.Ielts && !SectionValidation.IsCheckSection(sectionGroup.CourseSkill, index, correctCount))
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.ExceededValidScore), new Error[]{
-                                new Error
-                                {
-                                    FieldName = nameof(index),
-                                    ErrorValues = new List<object>{ index }
-                                },
-                                new Error
-                                {
-                                    FieldName = nameof(sectionGroup.CourseSkill),
-                                    ErrorValues = new List<object>{ correctCount }
-                                }
-                            });
-                            return methodResult;
-                        }
+                        //var correctCount = newSection.SectionQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                        //if (type == EnumCourseType.Ielts && !SectionValidation.IsCheckSection(sectionGroup.CourseSkill, index, correctCount))
+                        //{
+                        //    methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.ExceededValidScore), new Error[]{
+                        //        new Error
+                        //        {
+                        //            FieldName = nameof(index),
+                        //            ErrorValues = new List<object>{ index }
+                        //        },
+                        //        new Error
+                        //        {
+                        //            FieldName = nameof(sectionGroup.CourseSkill),
+                        //            ErrorValues = new List<object>{ correctCount }
+                        //        }
+                        //    });
+                        //    return methodResult;
+                        //}
                     }
                 }
                 else if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
