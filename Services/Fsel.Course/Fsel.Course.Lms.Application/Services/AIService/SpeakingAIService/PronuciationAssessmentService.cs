@@ -168,11 +168,14 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 var words = pronunciationResult.Words;
                 foreach (var word in words)
                 {
+                    var accuracyScoreWord = word.AccuracyScore;
+                    var colorWord = GetColorBasedOnAccuracy(accuracyScoreWord);
                     var wordImprovement = new SpokenWord
                     {
                         Word = word.Word,
-                        AccuracyScore = word.AccuracyScore,
-                        Syllables = new List<SyllableInfo>()
+                        AccuracyScore = accuracyScoreWord,
+                        Syllables = new List<SyllableInfo>(),
+                        Color = colorWord
                     };
 
                     // Thêm thông tin syllables
@@ -180,13 +183,19 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                     {
                         foreach (var syllable in word.Syllables)
                         {
+
+                            var accuracyScore = syllable.AccuracyScore;
+                            var color = GetColorBasedOnAccuracy(accuracyScore);
+
                             var syllableInfo = new SyllableInfo
                             {
                                 Syllable = syllable.Syllable,
                                 IPASyllable = syllable.Syllable,
                                 AccuracyScore = syllable.AccuracyScore,
                                 Offset = syllable.Offset,
-                                Duration = syllable.Duration
+                                Duration = syllable.Duration,
+                                Grapheme = syllable.Grapheme,
+                                Color = color,
                             };
                             wordImprovement.Syllables.Add(syllableInfo);
                         }
@@ -198,16 +207,12 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                         wordImprovement.Phonemes = new List<PhonemeInfo>();
                         foreach (var phoneme in word.Phonemes)
                         {
-                            var accuracyScore = phoneme.AccuracyScore;
-                            var color = GetColorBasedOnAccuracy(accuracyScore);
-
                             var phonemeInfo = new PhonemeInfo
                             {
                                 Phoneme = phoneme.Phoneme,
-                                AccuracyScore = accuracyScore,
+                                AccuracyScore = phoneme.AccuracyScore,
                                 Offset = phoneme.Offset,
                                 Duration = phoneme.Duration,
-                                Color = color
                             };
                             wordImprovement.Phonemes.Add(phonemeInfo);
                         }

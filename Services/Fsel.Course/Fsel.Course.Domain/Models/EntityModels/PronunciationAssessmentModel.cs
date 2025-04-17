@@ -49,6 +49,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
                         Word = word.Word,
                         AccuracyScore = word.AccuracyScore,
                         Syllables = word.Syllables,
+                        Color = word.Color,
                         Phonemes = word.Phonemes
                     }).ToList();
                 }
@@ -89,6 +90,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
         /// Danh sách các phoneme trong từ
         /// </summary>
         public IList<PhonemeInfo>? Phonemes { get; set; }
+
+        /// <summary>
+        /// Mã màu hiển thị (đỏ, vàng, xanh) dựa trên điểm chính xác
+        /// </summary>
+        public EnumSyllableMarked Color { get; set; }
     }
 
     /// <summary>
@@ -120,6 +126,16 @@ namespace Fsel.Course.Domain.Models.EntityModels
         /// Thời lượng của âm tiết
         /// </summary>
         public long Duration { get; set; }
+
+        /// <summary>
+        /// Từ của âm
+        /// </summary>
+        public string? Grapheme { get; set; }
+
+        /// <summary>
+        /// Mã màu hiển thị (đỏ, vàng, xanh) dựa trên điểm chính xác
+        /// </summary>
+        public EnumSyllableMarked Color { get; set; }
     }
 
     /// <summary>
@@ -147,9 +163,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         /// </summary>
         public long Duration { get; set; }
 
-        /// <summary>
-        /// Mã màu hiển thị (đỏ, vàng, xanh) dựa trên điểm chính xác
-        /// </summary>
-        public EnumSyllableMarked Color { get; set; }
     }
 }
