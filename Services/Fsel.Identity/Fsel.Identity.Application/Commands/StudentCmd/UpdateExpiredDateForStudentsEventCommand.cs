@@ -54,6 +54,17 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 item.ExpiredDate = request.ExpiredDate;
             }
 
+            foreach (var item in students)
+            {
+                if (item.ExpiredDate == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentHasNotExpiredDate));
+                    methodResult.Result = false;
+                    return methodResult;
+                }
+                item.ExpiredDate = request.ExpiredDate;
+            }
+
             await _studentRepository.BulkMergeAsync(students);
 
             methodResult.Result = true;
