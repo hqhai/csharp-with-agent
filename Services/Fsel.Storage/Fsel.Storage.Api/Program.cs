@@ -6,6 +6,7 @@ using Fsel.Shared.Constants;
 using Fsel.Storage.Application.Queues.Consumers;
 using Fsel.Storage.Application.Queues.Publisher;
 using Fsel.Storage.Application.Services.AmazonS3Services;
+using Fsel.Storage.Application.Services.FFmpegServices;
 using Fsel.Storage.Application.Services.OpenAIServices;
 using Fsel.Storage.Application.Services.SenderServices;
 using Fsel.Storage.Infrastructure.ValueSettings;
@@ -19,6 +20,7 @@ builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
+builder.AddRefitClients(typeof(IFFmpegServices), appSetting?.Services?.FFmpegApiUrl);
 builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
 {
     httpClient.BaseAddress = new Uri(appSetting?.OpenAiConfig?.Uri ?? string.Empty);
