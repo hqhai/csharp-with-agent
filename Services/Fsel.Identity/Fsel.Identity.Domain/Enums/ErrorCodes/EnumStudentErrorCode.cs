@@ -42,6 +42,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// <summary>
         /// Student hasn't not expired Date
         /// </summary>
+        StudentAlreadyAnotherEvent,
+
+        /// <summary>
+        /// Student hasn't not expired Date
+        /// </summary>
         StudentHasNotExpiredDate
     }
 }
