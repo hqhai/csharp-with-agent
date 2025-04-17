@@ -110,7 +110,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
 
             // check đã quá số lần tối đa được phép pending speech to text
             var pendingSpeechToText = await _classForumResultRepository.Queryable
-                                                                       .Where(x => x.StudentId == studentId && x.Status == EnumClassForumResultStatus.PendingSpeechToText)
+                                                                       .Where(x => x.StudentId == studentId && x.IsPendingSpeechToText)
                                                                        .CountAsync(cancellationToken);
             if (pendingSpeechToText >= MaxPendingSpeechToText)
             {
@@ -207,7 +207,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                 LessonResultId = lessonResultId,
                 ClassForumId = classForumId,
                 SubmissionCount = EnumSubmissionCount.FirstSubmit,
-                Status = EnumClassForumResultStatus.PendingSpeechToText
+                IsPendingSpeechToText = true
             };
 
             classForumResult = _classForumResultRepository.Add(classForumResult);
@@ -217,10 +217,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
 
         private async Task<ClassForumDetailResult> CreateClassForumDetailResultAsync(Guid classForumResultId, EnumSubmissionCount submissionCount, string content, IFormFile formFile, CancellationToken cancellationToken)
         {
-            var stream = formFile.OpenReadStream();
+            using var stream = formFile.OpenReadStream();
             var streamPart = new StreamPart(stream, formFile.FileName, formFile.ContentType);
-
-            var filePart = await _storageService.UpLoadFile(EnumFolderType.Images, EnumBucketType.FselPublic, streamPart);
+            var filePart = await _storageService.ConvertWav(streamPart);
 
             var classForumDetailResult = new ClassForumDetailResult
             {
@@ -238,7 +237,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
 
         private async Task UpdateClassForumResult(ClassForumResult classForumResult, CancellationToken cancellationToken)
         {
-            classForumResult.Status = EnumClassForumResultStatus.PendingSpeechToText;
+            classForumResult.IsPendingSpeechToText = true;
             _classForumResultRepository.Update(classForumResult);
             await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         }

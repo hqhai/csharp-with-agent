@@ -13,5 +13,9 @@ namespace Fsel.Course.Lms.Application.Services.StorageServices
         [Multipart]
         [Post("/v1/file/{folderType}")]
         Task<IApiResponse<MethodResult<string?>>> UpLoadFile([FromRoute] EnumFolderType folderType, [Query] EnumBucketType? bucketType, StreamPart file, [Query] bool isResize = false, [Query] bool isValidEmpty = false, [Query] bool isAddSuffix = true);
+
+        [Multipart]
+        [Post("/v1/transcript/convert-wav")]
+        Task<IApiResponse<MethodResult<string?>>> ConvertWav([AliasAs("file")] StreamPart file);
     }
 }

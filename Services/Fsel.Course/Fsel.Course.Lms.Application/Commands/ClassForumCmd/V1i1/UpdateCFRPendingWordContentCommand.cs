@@ -168,7 +168,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
         private async Task UpdateClassForumResult(ClassForumResult classForumResult, int? token, CancellationToken cancellationToken)
         {
             classForumResult.TokenFirstTime = token;
-            classForumResult.Status = null;
+            classForumResult.IsPendingSpeechToText = false;
             _classForumResultRepository.Update(classForumResult);
             await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         }
