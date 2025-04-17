@@ -3,6 +3,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using MediatR;
@@ -29,6 +31,17 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var students = await _studentRepository.Queryable.WhereBulkContains(request.StudentIds, n => n.Id).ToListAsync(cancellationToken);
 
             students.ForEach(p => p.ExpiredDate = request.ExpiredDate);
+
+            foreach (var item in students)
+            {
+                if (item.ExpiredDate == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentHasNotExpiredDate));
+                    methodResult.Result = false;
+                    return methodResult;
+                }
+                item.ExpiredDate = request.ExpiredDate;
+            }
 
             await _studentRepository.BulkMergeAsync(students);
 
