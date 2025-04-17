@@ -21,18 +21,15 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
     {
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
         private readonly AuthContext _authContext;
-        private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
-        private readonly IStudentRepository _studentRepository;
+        private readonly IEventManagerRepository _eventManagerRepository;
 
         public GetDashboardEventConfigQueryHandler(ICompetitionEventsRepository competitionEventsRepository,
                                                    AuthContext authContext,
-                                                   IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
-                                                   IStudentRepository studentRepository)
+                                                   IEventManagerRepository eventManagerRepository)
         {
             _competitionEventsRepository = competitionEventsRepository;
             _authContext = authContext;
-            _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
-            _studentRepository = studentRepository;
+            _eventManagerRepository = eventManagerRepository;
         }
 
         public async Task<MethodResult<DashboardEventConfig>> Handle(GetDashboardEventConfigQuery request, CancellationToken cancellationToken)
@@ -40,22 +37,15 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<DashboardEventConfig> methodResult = new MethodResult<DashboardEventConfig>();
 
-            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(x => x.Human != null && x.Human.UserId == _authContext.CurrentUserId, cancellationToken);
-            if (student == null)
+            var eventManager = await _eventManagerRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == _authContext.CurrentUserId, cancellationToken);
+            if (eventManager == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), student);
-                return methodResult;
-            }
-
-            var studentCompetitionEvent = await _studentCompetitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id, cancellationToken);
-            if (studentCompetitionEvent == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentCompetitionEvent), studentCompetitionEvent);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(eventManager));
                 return methodResult;
             }
 
             // lấy config ở event to nhất
-            var dashboardEventConfig = await ParentEventAsync(studentCompetitionEvent.CompetitionEventId, cancellationToken);
+            var dashboardEventConfig = await ParentEventAsync(eventManager.CompetitionEventId, cancellationToken);
 
             methodResult.Result = dashboardEventConfig;
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -71,10 +61,8 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             }
             else
             {
-                await ParentEventAsync(competitionEvent.ParentEventId.Value, cancellationToken);
+                return await ParentEventAsync(competitionEvent.ParentEventId.Value, cancellationToken);
             }
-
-            return competitionEvent?.DashboardEventConfig;
         }
 
     }
