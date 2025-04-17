@@ -117,7 +117,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     FullName = student?.Human?.FullName,
                     Email = student?.Human?.Email,
                     Level = courseResult.CourseLevel ?? default,
-                    CourseType = courseResult.CourseType ?? default,
+                    CourseType = courseResult.CourseLevel.GetEnumCourseType(),
                     CourseId = courseResult.CourseId,
                     CreatedDate = courseResult.CreatedDate ?? default,
                     UpdatedDate = courseResult.UpdatedDate ?? default,
