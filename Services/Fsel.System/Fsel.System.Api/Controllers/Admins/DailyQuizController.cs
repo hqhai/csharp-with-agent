@@ -14,7 +14,6 @@ namespace Fsel.System.Api.Controllers.Admins
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/daily-quiz")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class DailyQuizController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -49,6 +48,18 @@ namespace Fsel.System.Api.Controllers.Admins
                 return commandResult.GetActionResult();
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "Import_Questions_Error.xlsx");
+        }
+
+        /// <summary>
+        /// choose winners
+        /// </summary>
+        [HttpPost("choose-winners")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ChooseWinners()
+        {
+            var commandResult = await _mediator.Send(new ChooseDailyQuizWinnersCommand()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

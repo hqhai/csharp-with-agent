@@ -37,7 +37,7 @@ namespace Fsel.System.Application.Commands.DailyQuiz
                 return methodResult;
             }
 
-            var currentDate = DateTime.UtcNow.ConvertTimeToUtc(EnumCountryKey.Vietnam).Date;
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
             var dailyQuizWinners = await _dailyQuizWinnerRepository.Queryable
                 .Where(p => p.IsWin)
@@ -48,7 +48,7 @@ namespace Fsel.System.Application.Commands.DailyQuiz
             var userIdSet = new HashSet<Guid>(dailyQuizWinners.Select(p => p.CreatedUserId));
 
             var dailyQuizWinnersInDay = await _dailyQuizWinnerRepository.Queryable
-                .Where(p => !p.IsWin && p.CreatedDate.AddHours(7).Date == currentDate)
+                .Where(p => !p.IsWin && p.CreatedDate.AddHours(7).Date == currentDate.Date)
                 .ToListAsync(cancellationToken);
 
             if (dailyQuizWinnersInDay.Count > numberWinner.Value)
@@ -67,14 +67,17 @@ namespace Fsel.System.Application.Commands.DailyQuiz
                 dailyQuizWinnersInDay = filtered.Take(numberWinner.Value).ToList();
             }
 
-            await _dailyQuizWinnerRepository.ExecuteTransactionAsync(async () =>
+            if (dailyQuizWinnersInDay.Any())
             {
-                dailyQuizWinnersInDay.ForEach(p => p.IsWin = true);
-                _dailyQuizWinnerRepository.UpdateList(dailyQuizWinnersInDay);
-                await _dailyQuizWinnerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                return methodResult;
-            });
+                await _dailyQuizWinnerRepository.ExecuteTransactionAsync(async () =>
+                {
+                    dailyQuizWinnersInDay.ForEach(p => p.IsWin = true);
+                    _dailyQuizWinnerRepository.UpdateList(dailyQuizWinnersInDay);
+                    await _dailyQuizWinnerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    methodResult.StatusCode = StatusCodes.Status201Created;
+                    return methodResult;
+                });
+            }
 
             return methodResult;
         }
