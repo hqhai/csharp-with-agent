@@ -54,7 +54,7 @@ namespace Fsel.System.Api.Controllers
         /// get questions
         /// </summary>
         [HttpGet("get-daily-quiz")]
-        [ProducesResponseType(typeof(MethodResult<IList<DailyQuizQuestionModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<DailyQuizModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get()
         {
