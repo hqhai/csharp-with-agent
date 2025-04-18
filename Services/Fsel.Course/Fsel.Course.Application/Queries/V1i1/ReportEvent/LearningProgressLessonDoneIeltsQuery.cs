@@ -17,29 +17,27 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
     using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
 
-    public class LessonDoneLearningProgressIeltsQuery : IRequest<MethodResult<IList<LessonDoneLearningProgressIeltsModel>>>
+    public class LearningProgressLessonDoneIeltsQuery : IRequest<MethodResult<IList<LessonDoneLearningProgressIeltsModel>>>
     {
-        public int Target { get; set; } = 1;
-
-        public int GroupByType { get; set; } = 1;
-
         public IList<string>? DistrictIds { get; set; }
 
-        public IList<string>? GroupIds { get; set; }
+        public IList<string>? GradeLevels { get; set; }
 
         public IList<string>? SchoolIds { get; set; }
+
+        public int? TargetGroup { get; set; }
 
         public DateTime? Date { get; set; }
     }
 
-    public class LessonDoneLearningProgressIeltsQueryHandler : IRequestHandler<LessonDoneLearningProgressIeltsQuery, MethodResult<IList<LessonDoneLearningProgressIeltsModel>>>
+    public class LearningProgressLessonDoneIeltsQueryHandler : IRequestHandler<LearningProgressLessonDoneIeltsQuery, MethodResult<IList<LessonDoneLearningProgressIeltsModel>>>
     {
         private readonly CourseDbContext _courseDbContext;
         private readonly ICacheService<IList<LessonDoneLearningProgressIeltsModel>> _cacheService;
         private readonly AppSetting _appSetting;
         private readonly AuthContext _authContext;
 
-        public LessonDoneLearningProgressIeltsQueryHandler(CourseDbContext courseDbContext,
+        public LearningProgressLessonDoneIeltsQueryHandler(CourseDbContext courseDbContext,
                                                            ICacheService<IList<LessonDoneLearningProgressIeltsModel>> cacheService,
                                                            AppSetting appSetting,
                                                            AuthContext authContext)
@@ -50,12 +48,12 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<IList<LessonDoneLearningProgressIeltsModel>>> Handle(LessonDoneLearningProgressIeltsQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<LessonDoneLearningProgressIeltsModel>>> Handle(LearningProgressLessonDoneIeltsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<LessonDoneLearningProgressIeltsModel>>();
 
-            var keyCache = $"LessonDoneLearningProgressIelts_{ConvertHelper.Serialize(request)}";
+            var keyCache = $"LearningProgressLessonDoneIeltsQueryHandler_{ConvertHelper.Serialize(request)}_{_authContext.CurrentUserId}";
             var data = await _cacheService.GetAsync(keyCache);
             if (data != null && _appSetting.CacheConfig != null && _appSetting.CacheConfig.TurnOnCaching)
             {
@@ -78,20 +76,20 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
             }
             var districtIdsParam = sbDistrict.Length > 0 ? sbDistrict.ToString() : (object)DBNull.Value;
 
-            StringBuilder sbGroup = new StringBuilder();
-            if (request.GroupIds != null)
+            StringBuilder sbGradeLevel = new StringBuilder();
+            if (request.GradeLevels != null)
             {
-                foreach (var id in request.GroupIds)
+                foreach (var gradeLevel in request.GradeLevels)
                 {
-                    if (sbGroup.Length > 0)
+                    if (sbGradeLevel.Length > 0)
                     {
-                        sbGroup.Append(",");
+                        sbGradeLevel.Append(",");
                     }
 
-                    sbGroup.Append(id);
+                    sbGradeLevel.Append(gradeLevel);
                 }
             }
-            var groupIdsParam = sbGroup.Length > 0 ? sbGroup.ToString() : (object)DBNull.Value;
+            var gradeLevelsParam = sbGradeLevel.Length > 0 ? sbGradeLevel.ToString() : (object)DBNull.Value;
 
             StringBuilder sbSchool = new StringBuilder();
             if (request.SchoolIds != null)
@@ -107,22 +105,24 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
                 }
             }
             var schoolIdsParam = sbSchool.Length > 0 ? sbSchool.ToString() : (object)DBNull.Value;
+
             var date = request.Date != null ? request.Date : (object)DBNull.Value;
 
-            var lessonDoneIelts = await _courseDbContext.Database.SqlQueryRaw<LessonDoneLearningProgressIeltsModel>("EXEC LessonDoneLearningProgressIelts @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @Date",
-                                                             new SqlParameter("@Target", request.Target),
-                                                             new SqlParameter("@GroupByType", request.GroupByType),
-                                                             new SqlParameter("@DistrictIds", districtIdsParam),
-                                                             new SqlParameter("@GroupIds", groupIdsParam),
-                                                             new SqlParameter("@SchoolIds", schoolIdsParam),
-                                                             new SqlParameter("@Date", date))
-                                                        .AsNoTracking()
-                                                        .ToListAsync(cancellationToken);
+            var level = await _courseDbContext.Set<LessonDoneLearningProgressIeltsModel>()
+                                              .FromSqlRaw("EXEC LearningProgressLessonDoneIelts @UserId, @DistrictIds, @GradeLevel, @SchoolIds, @TargetGroup, @Date",
+                                                   new SqlParameter("@UserId", _authContext.CurrentUserId),
+                                                   new SqlParameter("@DistrictIds", districtIdsParam),
+                                                   new SqlParameter("@GradeLevel", gradeLevelsParam),
+                                                   new SqlParameter("@SchoolIds", schoolIdsParam),
+                                                   new SqlParameter("@TargetGroup", request.TargetGroup),
+                                                   new SqlParameter("@Date", date))
+                                              .AsNoTracking()
+                                              .ToListAsync(cancellationToken);
 
-            methodResult.Result = lessonDoneIelts;
+            methodResult.Result = level;
             if (_appSetting.CacheConfig != null && _appSetting.CacheConfig.TurnOnCaching)
             {
-                await _cacheService.SetAsync(keyCache, lessonDoneIelts, TimeSpan.FromSeconds(_appSetting.CacheConfig.CachingDuration));
+                await _cacheService.SetAsync(keyCache, level, TimeSpan.FromSeconds(_appSetting.CacheConfig.CachingDuration));
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
