@@ -75,6 +75,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new BlindBoxChestEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new BlindBoxHistoryEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new BlindBoxUserEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new DictionaryEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -123,6 +124,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<BlindBoxChestConfig> BlindBoxChestConfigs { get; set; }
         public DbSet<BlindBoxHistory> BlindBoxHistories { get; set; }
         public DbSet<BlindBoxUser> BlindBoxUsers { get; set; }
+        public DbSet<Dictionary> Dictionaries { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

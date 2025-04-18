@@ -58,6 +58,7 @@ namespace Fsel.Shared.Constants
                 public const string Banner = $"{KeyQueue}_Banner";
                 public const string BannerRealTime = $"{KeyQueue}_BannerRealTime";
                 public const string SpeechToTextRealTime = $"{KeyQueue}_SpeechToTextRealTime";
+                public const string DictionaryRealTime = $"{KeyQueue}_DictionaryRealTime";
             }
         }
 
@@ -147,6 +148,7 @@ namespace Fsel.Shared.Constants
                 public const string CreateLuckyTicket = $"{KeyQueue}_CreateLuckyTicket";
                 public const string BuyBlindBox = $"{KeyQueue}_BuyBlindBox";
                 public const string SendNotifyBuyBlindBox = $"{KeyQueue}_SendNotifyBuyBlindBox";
+                public const string SendDictionary = $"{KeyQueue}_SendDictionary";
             }
         }
 

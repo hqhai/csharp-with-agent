@@ -79,6 +79,7 @@ builder.Services.AddScoped<IBlindBoxChestRepository, BlindBoxChestRepository>();
 builder.Services.AddScoped<IBlindBoxChestConfigRepository, BlindBoxChestConfigRepository>();
 builder.Services.AddScoped<IBlindBoxHistoryRepository, BlindBoxHistoryRepository>();
 builder.Services.AddScoped<IBlindBoxUserRepository, BlindBoxUserRepository>();
+builder.Services.AddScoped<IDictionaryRepository, DictionaryRepository>();
 
 builder.Services.AddScoped<IFselRatingRepository, FselRatingRepository>();
 builder.Services.AddScoped<IDisplayOrderConfigRepository, DisplayOrderConfigRepository>();
@@ -92,6 +93,7 @@ builder.Services.AddScoped<BannerConverter>();
 builder.Services.AddScoped<BannerPublisher>();
 builder.Services.AddScoped<BuyBlindBoxPublisher>();
 builder.Services.AddScoped<SendNotifyBuyBlindBoxPublisher>();
+builder.Services.AddScoped<DictionaryPublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
@@ -123,7 +125,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.SystemQueue.NameQueue.NoticeAccessTime, typeof(NoticeAccessFeatureConsumer) },
     { QueueSettings.InteractionQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.Banner, typeof(BannerConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.BuyBlindBox, typeof(BuyBlindBoxConsumer) }
+    { QueueSettings.SystemQueue.NameQueue.BuyBlindBox, typeof(BuyBlindBoxConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.DictionaryRealTime, typeof(DictionaryConsumer) }
 });
 
 var app = builder.Build();
