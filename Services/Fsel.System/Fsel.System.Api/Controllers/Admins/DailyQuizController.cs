@@ -1,6 +1,7 @@
 using System.Net;
 using Asp.Versioning;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
@@ -14,6 +15,7 @@ namespace Fsel.System.Api.Controllers.Admins
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/daily-quiz")]
     [ApiController]
+    [Permission(role: nameof(EnumRole.Admin))]
     public class DailyQuizController : ControllerBase
     {
         private readonly IMediator _mediator;
