@@ -9,14 +9,17 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.CourseResultCmd;
     using Fsel.Course.Lms.Application.Queries.CourseQuery;
+    using Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/admin/course")]
     [ApiController]
+    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
     public class CourseController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -95,6 +98,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         public async Task<IActionResult> RetakeCourse([FromBody] RetakeCourseResultCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get course ids by class forum result ids
+        /// </summary>
+        [HttpPost("get-course-ids-by-class-forum-result-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseClassForumResultModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCourseIdsByClassForumResultIds([FromBody] GetCourseIdsByClassForumResultIdsQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
