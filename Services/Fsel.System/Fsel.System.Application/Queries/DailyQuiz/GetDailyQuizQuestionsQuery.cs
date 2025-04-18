@@ -57,7 +57,7 @@ namespace Fsel.System.Application.Queries.DailyQuiz
             }
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
-            if (currentDate.Date < startDate || currentDate > endDate)
+            if (currentDate.Date < startDate.Value.Date || currentDate.Date > endDate.Value.Date)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumDailyQuizErrorCode.EventExpiredOrNotYetOccurred), nameof(EnumDailyQuizErrorCode.EventExpiredOrNotYetOccurred), EnumDailyQuizErrorCode.EventExpiredOrNotYetOccurred.GetDescription());
                 return methodResult;

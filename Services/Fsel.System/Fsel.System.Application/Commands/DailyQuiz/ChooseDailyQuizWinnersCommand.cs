@@ -30,14 +30,20 @@ namespace Fsel.System.Application.Commands.DailyQuiz
             var methodResult = new MethodResult<bool>();
 
             var numberWinner = _appSetting.DailyQuizConfig?.NumberWinner;
+            var startDate = _appSetting.DailyQuizConfig?.StartDate;
+            var endDate = _appSetting.DailyQuizConfig?.EndDate;
 
-            if (!numberWinner.HasValue)
+            if (!numberWinner.HasValue || !startDate.HasValue || !endDate.HasValue)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumDailyQuizErrorCode.MissingEventConfiguration), nameof(EnumDailyQuizErrorCode.MissingEventConfiguration), EnumDailyQuizErrorCode.MissingEventConfiguration.GetDescription());
                 return methodResult;
             }
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+            if (currentDate.Date < startDate.Value.Date || currentDate.Date > endDate.Value.Date)
+            {
+                return methodResult;
+            }
 
             var dailyQuizWinners = await _dailyQuizWinnerRepository.Queryable
                 .Where(p => p.IsWin)
