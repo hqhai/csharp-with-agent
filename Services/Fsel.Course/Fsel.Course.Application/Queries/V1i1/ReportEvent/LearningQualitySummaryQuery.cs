@@ -7,40 +7,38 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
-    using Fsel.Core.Base;
     using Fsel.Core.Caching;
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.ValueSettings;
+    using Fsel.Core.Base;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
 
-    public class AverageLearningProgresQuery : IRequest<MethodResult<IList<AverageLearningProgressModel>>>
+    public class LearningQualitySummaryQuery : IRequest<MethodResult<IList<TotalLearningModel>>>
     {
-        public int Target { get; set; } = 1;
-
-        public int GroupByType { get; set; } = 1;
-
         public IList<string>? DistrictIds { get; set; }
 
-        public IList<string>? GroupIds { get; set; }
+        public IList<string>? GradeLevels { get; set; }
 
         public IList<string>? SchoolIds { get; set; }
+
+        public int? TargetGroup { get; set; }
 
         public DateTime? Date { get; set; }
     }
 
-    public class AverageLearningProgresQueryHandler : IRequestHandler<AverageLearningProgresQuery, MethodResult<IList<AverageLearningProgressModel>>>
+    public class LearningQualitySummaryQueryHandler : IRequestHandler<LearningQualitySummaryQuery, MethodResult<IList<TotalLearningModel>>>
     {
         private readonly CourseDbContext _courseDbContext;
-        private readonly ICacheService<IList<AverageLearningProgressModel>> _cacheService;
+        private readonly ICacheService<IList<TotalLearningModel>> _cacheService;
         private readonly AppSetting _appSetting;
         private readonly AuthContext _authContext;
 
-        public AverageLearningProgresQueryHandler(CourseDbContext courseDbContext,
-                                                  ICacheService<IList<AverageLearningProgressModel>> cacheService,
+        public LearningQualitySummaryQueryHandler(CourseDbContext courseDbContext,
+                                                  ICacheService<IList<TotalLearningModel>> cacheService,
                                                   AppSetting appSetting,
                                                   AuthContext authContext)
         {
@@ -50,13 +48,12 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<IList<AverageLearningProgressModel>>> Handle(AverageLearningProgresQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<TotalLearningModel>>> Handle(LearningQualitySummaryQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<IList<AverageLearningProgressModel>>();
+            var methodResult = new MethodResult<IList<TotalLearningModel>>();
 
-            var keyCache = $"AverageLearningProgress_{ConvertHelper.Serialize(request)}";
-
+            var keyCache = $"LearningQualitySummaryQuery_{ConvertHelper.Serialize(request)}_{_authContext.CurrentUserId}";
             var data = await _cacheService.GetAsync(keyCache);
             if (data != null && _appSetting.CacheConfig != null && _appSetting.CacheConfig.TurnOnCaching)
             {
@@ -79,20 +76,20 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
             }
             var districtIdsParam = sbDistrict.Length > 0 ? sbDistrict.ToString() : (object)DBNull.Value;
 
-            StringBuilder sbGroup = new StringBuilder();
-            if (request.GroupIds != null)
+            StringBuilder sbGradeLevel = new StringBuilder();
+            if (request.GradeLevels != null)
             {
-                foreach (var id in request.GroupIds)
+                foreach (var gradeLevel in request.GradeLevels)
                 {
-                    if (sbGroup.Length > 0)
+                    if (sbGradeLevel.Length > 0)
                     {
-                        sbGroup.Append(",");
+                        sbGradeLevel.Append(",");
                     }
 
-                    sbGroup.Append(id);
+                    sbGradeLevel.Append(gradeLevel);
                 }
             }
-            var groupIdsParam = sbGroup.Length > 0 ? sbGroup.ToString() : (object)DBNull.Value;
+            var gradeLevelsParam = sbGradeLevel.Length > 0 ? sbGradeLevel.ToString() : (object)DBNull.Value;
 
             StringBuilder sbSchool = new StringBuilder();
             if (request.SchoolIds != null)
@@ -111,20 +108,21 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
 
             var date = request.Date != null ? request.Date : (object)DBNull.Value;
 
-            var average = await _courseDbContext.Database.SqlQueryRaw<AverageLearningProgressModel>("EXEC AverageLearningProgress @Target, @GroupByType, @DistrictIds, @GroupIds, @SchoolIds, @Date",
-                                                    new SqlParameter("@Target", request.Target),
-                                                    new SqlParameter("@GroupByType", request.GroupByType),
-                                                    new SqlParameter("@DistrictIds", districtIdsParam),
-                                                    new SqlParameter("@GroupIds", groupIdsParam),
-                                                    new SqlParameter("@SchoolIds", schoolIdsParam),
-                                                    new SqlParameter("@Date", date))
-                                                .AsNoTracking()
-                                                .ToListAsync(cancellationToken);
+            var level = await _courseDbContext.Set<TotalLearningModel>()
+                                              .FromSqlRaw("EXEC LearningQualitySummary @UserId, @DistrictIds, @GradeLevel, @SchoolIds, @TargetGroup, @Date",
+                                                   new SqlParameter("@UserId", _authContext.CurrentUserId),
+                                                   new SqlParameter("@DistrictIds", districtIdsParam),
+                                                   new SqlParameter("@GradeLevel", gradeLevelsParam),
+                                                   new SqlParameter("@SchoolIds", schoolIdsParam),
+                                                   new SqlParameter("@TargetGroup", request.TargetGroup),
+                                                   new SqlParameter("@Date", date))
+                                              .AsNoTracking()
+                                              .ToListAsync(cancellationToken);
 
-            methodResult.Result = average;
+            methodResult.Result = level;
             if (_appSetting.CacheConfig != null && _appSetting.CacheConfig.TurnOnCaching)
             {
-                await _cacheService.SetAsync(keyCache, average, TimeSpan.FromSeconds(_appSetting.CacheConfig.CachingDuration));
+                await _cacheService.SetAsync(keyCache, level, TimeSpan.FromSeconds(_appSetting.CacheConfig.CachingDuration));
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
