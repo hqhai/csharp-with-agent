@@ -5,19 +5,21 @@ namespace Fsel.System.Application.Queries.DailyQuiz
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.System.Application.Services.UserServices;
+    using Fsel.System.Domain.Entities.DailyQuiz;
     using Fsel.System.Domain.Enums;
     using Fsel.System.Domain.IRepositories.DailyQuizs;
     using Fsel.System.Domain.Models.EntityModels;
     using Fsel.System.Infrastructure.ValueSettings;
     using global::System.Linq;
+    using global::System.Threading;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetDailyQuizQuestionsQuery : IRequest<MethodResult<IList<DailyQuizQuestionModel>>>
+    public class GetDailyQuizQuestionsQuery : IRequest<MethodResult<DailyQuizModel>>
     {
     }
 
-    public class GetDailyQuizQuestionsQueryHandler : IRequestHandler<GetDailyQuizQuestionsQuery, MethodResult<IList<DailyQuizQuestionModel>>>
+    public class GetDailyQuizQuestionsQueryHandler : IRequestHandler<GetDailyQuizQuestionsQuery, MethodResult<DailyQuizModel>>
     {
         private readonly IDailyQuizQuestionRepository _dailyQuizQuestionRepository;
         private readonly IDailyQuizAnswerRepository _dailyQuizAnswerRepository;
@@ -38,10 +40,10 @@ namespace Fsel.System.Application.Queries.DailyQuiz
             _userService = userService;
         }
 
-        public async Task<MethodResult<IList<DailyQuizQuestionModel>>> Handle(GetDailyQuizQuestionsQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<DailyQuizModel>> Handle(GetDailyQuizQuestionsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<IList<DailyQuizQuestionModel>>();
+            var methodResult = new MethodResult<DailyQuizModel>();
 
             var numberQuestion = _appSetting.DailyQuizConfig?.NumberQuestion;
             var startDate = _appSetting.DailyQuizConfig?.StartDate;
@@ -97,9 +99,18 @@ namespace Fsel.System.Application.Queries.DailyQuiz
 
             var histories = await _dailyQuizHistoryRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId).ToListAsync(cancellationToken);
 
-            if (histories.Any(p => p.CreatedDate.Date == currentDate.Date))
+            var historiesInDay = histories.Where(p => p.CreatedDate.Date == currentDate.Date).ToList();
+
+            var result = new DailyQuizModel()
             {
-                methodResult.AddErrorBadRequest(nameof(EnumDailyQuizErrorCode.CompletedDailyQuizToday), nameof(EnumDailyQuizErrorCode.CompletedDailyQuizToday), EnumDailyQuizErrorCode.CompletedDailyQuizToday.GetDescription());
+                Code = null,
+                NumberQuestion = numberQuestion.Value,
+                NumberCorrect = 0
+            };
+
+            if (historiesInDay != null && historiesInDay.Count > 0)
+            {
+                methodResult = await GetQuestionHistory(historiesInDay, result, methodResult, cancellationToken);
                 return methodResult;
             }
 
@@ -130,7 +141,75 @@ namespace Fsel.System.Application.Queries.DailyQuiz
                 p.DailyQuizAnswers = answerModels.Where(x => x.DailyQuizQuestionId == p.Id).ToList();
             });
 
-            methodResult.Result = questionModels;
+            result.DailyQuizQuestions = questionModels;
+
+            methodResult.Result = result;
+            return methodResult;
+        }
+
+        private async Task<MethodResult<DailyQuizModel>> GetQuestionHistory(IList<DailyQuizHistory> historiesInDay, DailyQuizModel result, MethodResult<DailyQuizModel> methodResult, CancellationToken cancellationToken)
+        {
+            var questionIds = historiesInDay.Select(p => p.DailyQuizQuestionId).ToList();
+            var answerIds = historiesInDay.Select(p => p.DailyQuizQuestionId).ToList();
+
+            var questionEntities = await _dailyQuizQuestionRepository.Queryable.WhereBulkContains(questionIds, p => p.Id).ToListAsync(cancellationToken);
+            var answerEntities = await _dailyQuizAnswerRepository.Queryable.WhereBulkContains(questionIds, p => p.DailyQuizQuestionId).ToListAsync(cancellationToken);
+
+            var questionDict = questionEntities.ToDictionary(q => q.Id);
+            var answerLookup = answerEntities.ToLookup(a => a.DailyQuizQuestionId);
+
+            int correctCount = 0;
+
+            var dailyQuizQuestionModels = new List<DailyQuizQuestionModel>();
+
+            foreach (var item in historiesInDay)
+            {
+                if (!questionDict.TryGetValue(item.DailyQuizQuestionId, out var question))
+                {
+                    methodResult.AddErrorBadRequest(
+                        nameof(EnumDailyQuizErrorCode.QuestionDoesNotExist),
+                        nameof(EnumDailyQuizErrorCode.QuestionDoesNotExist),
+                        EnumDailyQuizErrorCode.QuestionDoesNotExist.GetDescription());
+                    return methodResult;
+                }
+
+                var dailyQuizAnswers = answerLookup[item.DailyQuizQuestionId];
+                var answer = dailyQuizAnswers.FirstOrDefault(a => a.Id == item.DailyQuizAnswerId);
+
+                if (answer == null)
+                {
+                    methodResult.AddErrorBadRequest(
+                        nameof(EnumDailyQuizErrorCode.AnswerDoesNotExist),
+                        nameof(EnumDailyQuizErrorCode.AnswerDoesNotExist),
+                        EnumDailyQuizErrorCode.AnswerDoesNotExist.GetDescription());
+                    return methodResult;
+                }
+
+                if (answer.IsCorrect)
+                {
+                    correctCount++;
+                }
+
+                var dailyQuizAnswerModels = _mapper.Map<IList<DailyQuizAnswerModel>>(dailyQuizAnswers);
+                foreach (var ansModel in dailyQuizAnswerModels)
+                {
+                    if (ansModel.Id == answer.Id)
+                    {
+                        ansModel.IsChoice = true;
+                        break;
+                    }
+                }
+
+                var questionModel = _mapper.Map<DailyQuizQuestionModel>(question);
+                questionModel.DailyQuizAnswers = dailyQuizAnswerModels;
+                dailyQuizQuestionModels.Add(questionModel);
+            }
+
+            result.IsDone = true;
+            result.NumberCorrect = correctCount;
+            result.DailyQuizQuestions = dailyQuizQuestionModels;
+
+            methodResult.Result = result;
             return methodResult;
         }
     }

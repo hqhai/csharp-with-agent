@@ -4,14 +4,12 @@ namespace Fsel.System.Application.Commands.DailyQuiz
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
-    using Fsel.Shared.Enums;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities.DailyQuiz;
     using Fsel.System.Domain.Enums;
     using Fsel.System.Domain.IRepositories.DailyQuizs;
     using Fsel.System.Domain.Models.CommandModels.DailyQuiz;
     using Fsel.System.Domain.Models.EntityModels;
-    using Fsel.System.Infrastructure.Repositories.DailyQuizs;
     using Fsel.System.Infrastructure.ValueSettings;
     using MediatR;
     using Microsoft.AspNetCore.Http;

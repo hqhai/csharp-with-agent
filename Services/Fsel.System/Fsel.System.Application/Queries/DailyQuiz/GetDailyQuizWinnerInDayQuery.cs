@@ -2,41 +2,45 @@ namespace Fsel.System.Application.Queries.DailyQuiz
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Base;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.IRepositories.DailyQuizs;
     using Fsel.System.Domain.Models.EntityModels;
-    using Fsel.System.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetDailyQuizWinnerInDayQuery : IRequest<MethodResult<IList<DailyQuizWinnerModel>>>
+    public class GetDailyQuizWinnerInDayQuery : IRequest<MethodResult<DailyQuizWinnerModels>>
     {
     }
 
-    public class GetDailyQuizWinnerInDayQueryHandler : IRequestHandler<GetDailyQuizWinnerInDayQuery, MethodResult<IList<DailyQuizWinnerModel>>>
+    public class GetDailyQuizWinnerInDayQueryHandler : IRequestHandler<GetDailyQuizWinnerInDayQuery, MethodResult<DailyQuizWinnerModels>>
     {
         private readonly IDailyQuizWinnerRepository _dailyQuizWinnerRepository;
         private readonly IUserService _userService;
         private readonly ICrmLocationRepository _crmLocationRepository;
+        private readonly AuthContext _authContext;
 
-        public GetDailyQuizWinnerInDayQueryHandler(IDailyQuizWinnerRepository dailyQuizWinnerRepository, IUserService userService, ICrmLocationRepository crmLocationRepository)
+        public GetDailyQuizWinnerInDayQueryHandler(IDailyQuizWinnerRepository dailyQuizWinnerRepository, IUserService userService, ICrmLocationRepository crmLocationRepository, AuthContext authContext)
         {
             _dailyQuizWinnerRepository = dailyQuizWinnerRepository;
             _userService = userService;
             _crmLocationRepository = crmLocationRepository;
+            _authContext = authContext;
         }
 
-        public async Task<MethodResult<IList<DailyQuizWinnerModel>>> Handle(GetDailyQuizWinnerInDayQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<DailyQuizWinnerModels>> Handle(GetDailyQuizWinnerInDayQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<IList<DailyQuizWinnerModel>>();
+            var methodResult = new MethodResult<DailyQuizWinnerModels>();
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
             var winners = await _dailyQuizWinnerRepository.Queryable.Where(p => p.CreatedDate.Date == currentDate.Date && p.IsWin).ToListAsync(cancellationToken);
 
             var userIds = winners.Select(p => p.CreatedUserId).ToList();
+
+            var result = new DailyQuizWinnerModels();
 
             var studentModels = new List<DailyQuizWinnerModel>();
 
@@ -57,14 +61,18 @@ namespace Fsel.System.Application.Queries.DailyQuiz
                         var school = schools.FirstOrDefault(x => x.GlobalId == winner.SchoolId);
                         studentModels.Add(new DailyQuizWinnerModel()
                         {
+                            UserId = winner.CreatedUserId,
                             FullName = p.Human?.FullName,
                             School = school?.Name,
                             Code = winner.Code
                         });
                     }
                 });
+
+                result.Code = studentModels.FirstOrDefault(p => p.UserId == _authContext.CurrentUserId)?.Code;
+                result.Winner = studentModels;
             }
-            methodResult.Result = studentModels;
+            methodResult.Result = result;
             return methodResult;
         }
     }
