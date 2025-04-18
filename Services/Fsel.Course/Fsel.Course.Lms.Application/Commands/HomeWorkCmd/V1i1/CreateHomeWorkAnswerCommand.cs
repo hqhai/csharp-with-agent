@@ -204,7 +204,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 }
                 if (updateHomeWorkAnswers.Any())
                 {
-                    await _homeWorkAnswerRepository.BulkMergeAsync(updateHomeWorkAnswers, bulk =>
+                    await _homeWorkAnswerRepository.BulkUpdateList(updateHomeWorkAnswers, bulk =>
                     {
                         bulk.IgnoreOnUpdateExpression = entity => new { entity.HomeWorkResultId, entity.HomeWorkQuestionId };
                     });
@@ -451,7 +451,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     x.Status = (x.CorrectCount == correctTotal || isDone) ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
                     x.IsCorrect = x.IsCorrect.HasValue ? x.CorrectCount == correctTotal : null;
                 });
-                await _homeWorkAnswerRepository.BulkMergeAsync(homeWorkAnswers, bulk =>
+                await _homeWorkAnswerRepository.BulkUpdateList(homeWorkAnswers, bulk =>
                 {
                     bulk.IgnoreOnUpdateExpression = entity => new { entity.HomeWorkResultId, entity.HomeWorkQuestionId };
                 });
