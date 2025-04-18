@@ -161,7 +161,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                 }
                 else if (updateExtraPracticeAnswers.Count > 0)
                 {
-                    await _extraPracticeAnswerRepository.BulkMergeAsync(updateExtraPracticeAnswers);
+                    await _extraPracticeAnswerRepository.BulkUpdateList(updateExtraPracticeAnswers);
                 }
 
                 _extraPracticeResultRepository.Update(extraPracticeResult);
