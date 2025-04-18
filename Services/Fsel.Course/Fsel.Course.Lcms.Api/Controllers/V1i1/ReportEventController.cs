@@ -204,7 +204,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// Get 
         /// </summary>
         [HttpPost("learning-progress-unit-done-academic")]
-        [ProducesResponseType(typeof(MethodResult<IList<LessonDoneLearningProgressIeltsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<UnitDoneLearningProgressAcademicModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> LearningProgressUnitDoneAcademic([FromBody] LearningProgressUnitDoneAcademicQuery query)
         {
@@ -216,9 +216,21 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// Get 
         /// </summary>
         [HttpPost("learning-progress-unit-done-ielts")]
-        [ProducesResponseType(typeof(MethodResult<IList<LessonDoneLearningProgressIeltsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<UnitDoneLearningProgressIeltsModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> LearningProgressUnitDoneIelts([FromBody] LearningProgressUnitDoneIeltsQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [HttpPost("learning-progress-summary")]
+        [ProducesResponseType(typeof(MethodResult<IList<TotalLearningProgressModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> LearningProgressSummary([FromBody] LearningProgressSummaryQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
