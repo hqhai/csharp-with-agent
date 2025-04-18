@@ -82,7 +82,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 return methodResult;
             }
 
-            var users = from u in _userDbContext.Users.IgnoreQueryFilters()
+            var query = from u in _userDbContext.Users.IgnoreQueryFilters()
 
                         join ur in _userRoleRepository.GetQuery() on u.Id equals ur.UserId
 
@@ -98,69 +98,79 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
 
                         where r.Name == EnumRole.Student.ToString()
 
-                        select new StudentSearchAdminModel
-                        {
-                            Id = u.Id,
-                            IsDeleted = u.IsDeleted,
-                            FullName = u.FullName,
-                            UserName = u.UserName,
-                            PhoneNumber = u.PhoneNumber,
-                            Email = u.Email,
-                            Birthday = human.Birthday,
-                            StudentCode = human.Code,
-                            Gender = human.Gender,
-                            SchoolName = student.School,
-                            Class = student.SchoolClass,
-                            Grade = student.SchoolGrade,
-                            ExpiredDate = student.ExpiredDate,
-                            CourseLevel = student.CourseLevel,
-                            Type = student.CourseLevel.HasValue ? student.CourseLevel.GetEnumCourseType() : null,
-                            SchoolId = student.SchoolId,
-                            CreatedDate = u.CreatedDate,
-                            EmailConfirm = u.EmailConfirmed,
-                            StudentId = student.Id,
-                            CourseId = student.CourseId,
-                            ProvinceId = student.ProvinceId,
-                            DistrictId = student.DistrictId
-                        };
+                        select new { User = u, Human = human, Student = student };
 
-            users = users.Where(p => p.IsDeleted == request.IsDelete);
+            query = query.Where(p => p.User.IsDeleted == request.IsDelete);
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
                 if (request.Keyword.IsValidEmail())
                 {
-                    users = users.Where(m => m.Email != null && m.Email.Contains(request.Keyword));
+                    query = query.Where(m => m.User.Email != null && m.User.Email == request.Keyword);
                 }
                 else if (request.Keyword.IsValidPhoneNumber())
                 {
-                    users = users.Where(m => m.PhoneNumber != null && m.PhoneNumber == request.Keyword);
+                    query = query.Where(m => m.User.PhoneNumber != null && m.User.PhoneNumber == request.Keyword);
                 }
                 else if (Guid.TryParse(request.Keyword, out var guid))
                 {
-                    users = users.Where(m => m.Id == guid);
+                    query = query.Where(m => m.User.Id == guid);
                 }
                 else
                 {
-                    users = users.Where(m => (m.FullName != null && m.FullName.Contains(request.Keyword)) || (m.UserName != null && m.UserName.Contains(request.Keyword)) || (m.SchoolName != null && m.SchoolName.Contains(request.Keyword)));
+                    var queryUserName = query.Where(m => (m.User.UserName != null && m.User.UserName == request.Keyword));
+                    var queryFullName = query.Where(m => m.User.FullName != null && EF.Functions.Contains(m.User.FullName, $"\"{request.Keyword}\"") && m.User.FullName.Contains(request.Keyword));
+                    query = queryUserName.Union(queryFullName);
                 }
             }
 
             if (request.SchoolId.HasValue)
             {
-                users = users.Where(m => m.SchoolId.HasValue && m.SchoolId == request.SchoolId);
+                query = query.Where(m => m.Student.SchoolId.HasValue && m.Student.SchoolId == request.SchoolId);
             }
             if (request.Grades != null && request.Grades.Count > 0)
             {
-                users = users.WhereBulkContains(request.Grades, x => x.Grade);
+                query = query.WhereBulkContains(request.Grades, x => x.Student.SchoolGrade);
             }
             if (request.Classes != null && request.Classes.Count > 0)
             {
-                users = users.WhereBulkContains(request.Classes, x => x.Class);
+                query = query.WhereBulkContains(request.Classes, x => x.Student.SchoolGrade);
             }
 
+            var users = query.Select(p => new StudentSearchAdminModel
+            {
+                Id = p.User.Id,
+                IsDeleted = p.User.IsDeleted,
+                FullName = p.User.FullName,
+                UserName = p.User.UserName,
+                PhoneNumber = p.User.PhoneNumber,
+                Email = p.User.Email,
+                CreatedDate = p.User.CreatedDate,
+                EmailConfirm = p.User.EmailConfirmed,
+                PasswordDefault = p.User.DefaultPassword,
+                Birthday = p.Human.Birthday,
+                StudentCode = p.Human.Code,
+                Gender = p.Human.Gender,
+                SchoolName = p.Student.School,
+                Class = p.Student.SchoolClass,
+                Grade = p.Student.SchoolGrade,
+                ExpiredDate = p.Student.ExpiredDate,
+                CourseLevel = p.Student.CourseLevel,
+                Type = p.Student.CourseLevel.HasValue ? p.Student.CourseLevel.GetEnumCourseType() : null,
+                SchoolId = p.Student.SchoolId,
+                StudentId = p.Student.Id,
+                CourseId = p.Student.CourseId,
+                ProvinceId = p.Student.ProvinceId,
+                DistrictId = p.Student.DistrictId,
+            });
+
             int totalItem = await users.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            var a = users
+                    .ApplySortAndPaging(request)
+                    .AsNoTracking();
+
             var lists = await users
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
