@@ -809,7 +809,7 @@ namespace Fsel.Course.Infrastructure.Common
                                    join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
                                    where baseQ.Id == videoTimeCodeResult.VideoTimeCodeId
                                    select q).ToListAsync();
-            var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id).ToListAsync();
+            var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable.Include(x => x.Question).Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id).ToListAsync();
 
             var questionCompleteIds = videoTimeCodeAnswers.Select(x => x.QuestionId).ToList();
             var unansweredQuestionIds = questions.Select(x => x!.Id).Except(questionCompleteIds).ToList();
@@ -823,16 +823,22 @@ namespace Fsel.Course.Infrastructure.Common
             var videoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
             if (questions != null && questions.Any())
             {
-                videoTimeCodeAnswers = questions.Select(x => new VideoTimeCodeAnswer
+                var exerciseQuestions = await _exerciseQuestionRepository.Queryable.WhereBulkContains(questions.Select(x => x.Id), x => x.QuestionId).ToListAsync();
+
+                videoTimeCodeAnswers = questions.Select(question =>
                 {
-                    Answer = _answerTypeConverter.GetConfigEmpty(x.QuestionType),
-                    QuestionId = x.Id,
-                    VideoResultId = videoTimeCodeResult.VideoResultId,
-                    VideoTimeCodeResultId = videoTimeCodeResult.Id,
-                    VideoTimeCodeId = videoTimeCodeResult.VideoTimeCodeId,
-                    ExerciseId = x.ExerciseQuestions.FirstOrDefault()?.ExerciseId ?? default,
-                    Status = isDone ? EnumAnswerStatus.Done : EnumAnswerStatus.Process,
-                    IsCorrect = null
+                    Guid exerciseId = exerciseQuestions.FirstOrDefault(x => x.QuestionId == question.Id)?.ExerciseId ?? default;
+                    return new VideoTimeCodeAnswer
+                    {
+                        Answer = _answerTypeConverter.GetConfigEmpty(question.QuestionType),
+                        QuestionId = question.Id,
+                        VideoResultId = videoTimeCodeResult.VideoResultId,
+                        VideoTimeCodeResultId = videoTimeCodeResult.Id,
+                        VideoTimeCodeId = videoTimeCodeResult.VideoTimeCodeId,
+                        ExerciseId = exerciseId,
+                        Status = isDone ? EnumAnswerStatus.Done : EnumAnswerStatus.Process,
+                        IsCorrect = null
+                    };
                 }).ToList();
 
                 await _videoTimeCodeAnswerRepository.BulkMergeAsync(videoTimeCodeAnswers);
