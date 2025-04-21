@@ -45,6 +45,8 @@ namespace Fsel.System.Application.Commands.DailyQuiz
                 return methodResult;
             }
 
+            var minCreatedDate = currentDate.Date.AddHours(-7);
+
             var dailyQuizWinners = await _dailyQuizWinnerRepository.Queryable
                 .Where(p => p.IsWin)
                 .Select(p => new { p.SchoolId, p.CreatedUserId })
@@ -54,7 +56,7 @@ namespace Fsel.System.Application.Commands.DailyQuiz
             var userIdSet = new HashSet<Guid>(dailyQuizWinners.Select(p => p.CreatedUserId));
 
             var dailyQuizWinnersInDay = await _dailyQuizWinnerRepository.Queryable
-                .Where(p => !p.IsWin && p.CreatedDate.AddHours(7).Date == currentDate.Date)
+                .Where(p => !p.IsWin && p.CreatedDate >= minCreatedDate)
                 .ToListAsync(cancellationToken);
 
             if (dailyQuizWinnersInDay.Count > numberWinner.Value)

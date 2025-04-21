@@ -4,6 +4,7 @@ namespace Fsel.System.Application.Queries.DailyQuiz
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities.DailyQuiz;
     using Fsel.System.Domain.Enums;
@@ -79,7 +80,7 @@ namespace Fsel.System.Application.Queries.DailyQuiz
             }
 
             var @event = eventResults.Content?.Result?.FirstOrDefault();
-            if (@event == null)
+            if (@event == null || @event.EventContent == null || @event.EventContent.Actions == null || !@event.EventContent.Actions.Any(p => p == EnumSchoolEventRuleAction.DailyQuiz))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumDailyQuizErrorCode.NotPartOfTheEvent), nameof(EnumDailyQuizErrorCode.NotPartOfTheEvent), EnumDailyQuizErrorCode.NotPartOfTheEvent.GetDescription());
                 return methodResult;
@@ -101,7 +102,9 @@ namespace Fsel.System.Application.Queries.DailyQuiz
 
             var histories = await _dailyQuizHistoryRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId).ToListAsync(cancellationToken);
 
-            var historiesInDay = histories.Where(p => p.CreatedDate.Date == currentDate.Date).ToList();
+            var minCreatedDate = currentDate.Date.AddHours(-7);
+
+            var historiesInDay = histories.Where(p => p.CreatedDate >= minCreatedDate).ToList();
 
             var result = new DailyQuizModel()
             {
@@ -112,7 +115,7 @@ namespace Fsel.System.Application.Queries.DailyQuiz
 
             if (historiesInDay != null && historiesInDay.Count > 0)
             {
-                methodResult = await GetQuestionHistory(historiesInDay, result, methodResult, currentDate, cancellationToken);
+                methodResult = await GetQuestionHistory(historiesInDay, result, methodResult, minCreatedDate, cancellationToken);
                 return methodResult;
             }
 
@@ -207,7 +210,7 @@ namespace Fsel.System.Application.Queries.DailyQuiz
                 dailyQuizQuestionModels.Add(questionModel);
             }
 
-            var winner = await _dailyQuizWinnerRepository.Queryable.FirstOrDefaultAsync(p => p.CreatedDate.Date == currentDate.Date, cancellationToken);
+            var winner = await _dailyQuizWinnerRepository.Queryable.FirstOrDefaultAsync(p => p.CreatedDate >= currentDate && p.CreatedUserId == _authContext.CurrentUserId, cancellationToken);
 
             result.Code = winner?.Code;
             result.IsDone = true;

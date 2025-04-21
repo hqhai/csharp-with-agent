@@ -36,7 +36,9 @@ namespace Fsel.System.Application.Queries.DailyQuiz
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
-            var winners = await _dailyQuizWinnerRepository.Queryable.Where(p => p.CreatedDate.Date == currentDate.Date && p.IsWin).ToListAsync(cancellationToken);
+            var minCreatedDate = currentDate.Date.AddHours(-7);
+
+            var winners = await _dailyQuizWinnerRepository.Queryable.Where(p => p.CreatedDate >= minCreatedDate && p.IsWin).ToListAsync(cancellationToken);
 
             var userIds = winners.Select(p => p.CreatedUserId).ToList();
 

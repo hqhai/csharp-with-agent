@@ -4,6 +4,7 @@ namespace Fsel.System.Application.Commands.DailyQuiz
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities.DailyQuiz;
     using Fsel.System.Domain.Enums;
@@ -85,6 +86,29 @@ namespace Fsel.System.Application.Commands.DailyQuiz
                 return methodResult;
             }
 
+            var historiesByUser = await _dailyQuizHistoryRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId).ToListAsync(cancellationToken);
+
+            var minCreatedDate = currentDate.Date.AddHours(-7);
+
+            var historiesInDay = historiesByUser.Where(p => p.CreatedDate >= minCreatedDate).ToList();
+
+            if (historiesInDay != null && historiesByUser.Count > 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumDailyQuizErrorCode.CompletedDailyQuizToday), nameof(EnumDailyQuizErrorCode.CompletedDailyQuizToday), EnumDailyQuizErrorCode.CompletedDailyQuizToday.GetDescription());
+                return methodResult;
+            }
+
+            var questionIds = request.DailyQuizzes.Select(p => p.DailyQuizQuestionId).ToList();
+            var answerIds = request.DailyQuizzes.Select(p => p.DailyQuizQuestionId).ToList();
+
+            var histories = historiesByUser.Where(p => questionIds.Contains(p.DailyQuizQuestionId)).ToList();
+
+            if (histories.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumDailyQuizErrorCode.AnsweredThisQuestion), nameof(EnumDailyQuizErrorCode.AnsweredThisQuestion), EnumDailyQuizErrorCode.AnsweredThisQuestion.GetDescription());
+                return methodResult;
+            }
+
             var eventResults = await _userService.GetEventsByUserId(null);
             if (!eventResults.IsSuccessStatusCode)
             {
@@ -93,7 +117,7 @@ namespace Fsel.System.Application.Commands.DailyQuiz
             }
 
             var @event = eventResults.Content?.Result?.FirstOrDefault();
-            if (@event == null)
+            if (@event == null || @event.EventContent == null || @event.EventContent.Actions == null || !@event.EventContent.Actions.Any(p => p == EnumSchoolEventRuleAction.DailyQuiz))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumDailyQuizErrorCode.NotPartOfTheEvent), nameof(EnumDailyQuizErrorCode.NotPartOfTheEvent), EnumDailyQuizErrorCode.NotPartOfTheEvent.GetDescription());
                 return methodResult;
@@ -110,17 +134,6 @@ namespace Fsel.System.Application.Commands.DailyQuiz
             if (student == null || !student.SchoolId.HasValue)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumDailyQuizErrorCode.NotPartOfTheEvent), nameof(EnumDailyQuizErrorCode.NotPartOfTheEvent), EnumDailyQuizErrorCode.NotPartOfTheEvent.GetDescription());
-                return methodResult;
-            }
-
-            var questionIds = request.DailyQuizzes.Select(p => p.DailyQuizQuestionId).ToList();
-            var answerIds = request.DailyQuizzes.Select(p => p.DailyQuizQuestionId).ToList();
-
-            var histories = await _dailyQuizHistoryRepository.Queryable.WhereBulkContains(questionIds, p => p.DailyQuizQuestionId).ToListAsync(cancellationToken);
-
-            if (histories.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumDailyQuizErrorCode.AnsweredThisQuestion), nameof(EnumDailyQuizErrorCode.AnsweredThisQuestion), EnumDailyQuizErrorCode.AnsweredThisQuestion.GetDescription());
                 return methodResult;
             }
 
