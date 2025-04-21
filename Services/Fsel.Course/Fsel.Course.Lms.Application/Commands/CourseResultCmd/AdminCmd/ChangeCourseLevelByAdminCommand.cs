@@ -100,6 +100,12 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
                 return methodResult;
             }
 
+            if (!student.CourseId.HasValue)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.CourseId), student.CourseId);
+                return methodResult;
+            }
+
             var courseResult = await _courseResultRepository.Queryable.Include(x => x.Course)
                                     .Where(x => x.Course != null && x.Course.CourseLevel == request.CourseLevel)
                                     .FirstOrDefaultAsync(x => x.WorkingStatus != EnumWorkingStatus.NotWorking && x.StudentId == student.Id, cancellationToken);

@@ -105,6 +105,12 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
                 return methodResult;
             }
 
+            if (!student.CourseId.HasValue)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.CourseId), student.CourseId);
+                return methodResult;
+            }
+
             var userCourseSettingsResult = await _userService.GetUserCourseSettingsAsync(_authContext.CurrentUserId);
             if (!userCourseSettingsResult.IsSuccessStatusCode)
             {
