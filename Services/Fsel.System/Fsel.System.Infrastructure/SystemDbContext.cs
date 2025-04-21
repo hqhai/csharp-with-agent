@@ -125,6 +125,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<BlindBoxHistory> BlindBoxHistories { get; set; }
         public DbSet<BlindBoxUser> BlindBoxUsers { get; set; }
         public DbSet<Dictionary> Dictionaries { get; set; }
+        public DbSet<UnknownWord> UnknownWords { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

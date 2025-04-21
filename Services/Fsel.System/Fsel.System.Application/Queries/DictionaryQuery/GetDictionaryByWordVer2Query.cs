@@ -24,12 +24,14 @@ namespace Fsel.System.Application.Queries.DictionaryQuery
         private readonly IDictionaryRepository _dictionaryRepository;
         private readonly IDictionaryService _dictionaryService;
         private readonly DictionaryPublisher _dictionaryPublisher;
+        private readonly CrawDictionaryDataPublisher _crawDictionaryDataPublisher;
 
-        public GetDictionaryByWordVer2QueryHandler(IDictionaryRepository dictionaryRepository, DictionaryPublisher dictionaryPublisher, IDictionaryService dictionaryService)
+        public GetDictionaryByWordVer2QueryHandler(IDictionaryRepository dictionaryRepository, DictionaryPublisher dictionaryPublisher, IDictionaryService dictionaryService, CrawDictionaryDataPublisher crawDictionaryDataPublisher)
         {
             _dictionaryRepository = dictionaryRepository;
             _dictionaryPublisher = dictionaryPublisher;
             _dictionaryService = dictionaryService;
+            _crawDictionaryDataPublisher = crawDictionaryDataPublisher;
         }
 
         public async Task<MethodResult<IList<DictionaryQueueItemModel>>> Handle(GetDictionaryByWordVer2Query request, CancellationToken cancellationToken)
@@ -60,6 +62,11 @@ namespace Fsel.System.Application.Queries.DictionaryQuery
                 var dictionaryOfWordVnModel = GetVnDictionary(dictionaryOfWord, synonyms, antonyms, phonetic, dictionaryOfWord.FirstOrDefault()?.Phonetic);
                 dictionaryOfWordModels.Add(dictionaryOfWordVnModel);
             }
+            else
+            {
+                // Nếu không có từ điển Anh - Việt thì tự động craw lại từ đó
+                await _crawDictionaryDataPublisher.Publish(request.Word, cancellationToken);
+            }
 
             // Lấy từ điển Anh - Anh
             if (result != null)
@@ -68,6 +75,7 @@ namespace Fsel.System.Application.Queries.DictionaryQuery
                 dictionaryOfWordModels.Add(dictionaryOfWordEnModel);
             }
 
+            // Gửi dữ liệu realtime
             await _dictionaryPublisher.Publish(new DictionaryQueueModel
             {
                 Dictionary = dictionaryOfWordModels
@@ -97,7 +105,7 @@ namespace Fsel.System.Application.Queries.DictionaryQuery
                     Definitions = x.Definitions?.Select(d => new Shared.Models.ShareModels.DefinitionsModel()
                     {
                         Definition = d.Definition,
-                        Examples = new List<Example>()
+                        Examples = string.IsNullOrWhiteSpace(d.Example) ? null : new List<Example>()
                         {
                             new Example{ ExampleEn = d.Example }
                         }
