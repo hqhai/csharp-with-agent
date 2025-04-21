@@ -19,6 +19,8 @@ namespace Fsel.System.Application.Commands.DictionaryCmd
 
     public class ImportDictionaryCommandHandler : IRequestHandler<ImportDictionaryCommand, MethodResult<bool>>
     {
+        private const int MAX_COUNT_TO_INSERT = 20000; // Số lượng tối đa để insert 1 lần
+        private const int BATCH_SIZE = 10000; // Số lượng bản ghi được insert đồng thời trong 1 lần lặp
         private readonly IDictionaryRepository _dictionaryRepository;
         private readonly IMapper _mapper;
 
@@ -48,9 +50,13 @@ namespace Fsel.System.Application.Commands.DictionaryCmd
 
             await _dictionaryRepository.ExecuteTransactionAsync(async () =>
             {
-                if (dictionary.Count >= 20000)
+                // Nếu số lượng bản ghi lớn hơn MAX_COUNT_TO_INSERT thì chia thành các chunk nhỏ hơn
+                if (dictionary.Count >= MAX_COUNT_TO_INSERT)
                 {
-                    var dictionaryListChunk = dictionary.Chunk(10000);
+                    // Chia thành các chunk nhỏ hơn MAX_COUNT_TO_INSERT
+                    var dictionaryListChunk = dictionary.Chunk(BATCH_SIZE);
+
+                    // Lặp qua từng chunk và thêm vào cơ sở dữ liệu
                     foreach (var chunk in dictionaryListChunk)
                     {
                         await _dictionaryRepository.AddList(chunk);
