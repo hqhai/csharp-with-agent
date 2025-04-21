@@ -56,7 +56,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             foreach (var item in students)
             {
-                if (item.ExpiredDate == null)
+                if (item.ExpiredDate == null || !item.ExpiredDate.HasValue)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentHasNotExpiredDate));
                     methodResult.Result = false;
