@@ -24,12 +24,13 @@ namespace Fsel.System.Application.Queries.DailyQuiz
         private readonly IDailyQuizQuestionRepository _dailyQuizQuestionRepository;
         private readonly IDailyQuizAnswerRepository _dailyQuizAnswerRepository;
         private readonly IDailyQuizHistoryRepository _dailyQuizHistoryRepository;
+        private readonly IDailyQuizWinnerRepository _dailyQuizWinnerRepository;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
         private readonly AppSetting _appSetting;
         private readonly IUserService _userService;
 
-        public GetDailyQuizQuestionsQueryHandler(IDailyQuizQuestionRepository dailyQuizQuestionRepository, IDailyQuizAnswerRepository dailyQuizAnswerRepository, IDailyQuizHistoryRepository dailyQuizHistoryRepository, IMapper mapper, AuthContext authContext, AppSetting appSetting, IUserService userService)
+        public GetDailyQuizQuestionsQueryHandler(IDailyQuizQuestionRepository dailyQuizQuestionRepository, IDailyQuizAnswerRepository dailyQuizAnswerRepository, IDailyQuizHistoryRepository dailyQuizHistoryRepository, IMapper mapper, AuthContext authContext, AppSetting appSetting, IUserService userService, IDailyQuizWinnerRepository dailyQuizWinnerRepository)
         {
             _dailyQuizQuestionRepository = dailyQuizQuestionRepository;
             _dailyQuizAnswerRepository = dailyQuizAnswerRepository;
@@ -38,6 +39,7 @@ namespace Fsel.System.Application.Queries.DailyQuiz
             _authContext = authContext;
             _appSetting = appSetting;
             _userService = userService;
+            _dailyQuizWinnerRepository = dailyQuizWinnerRepository;
         }
 
         public async Task<MethodResult<DailyQuizModel>> Handle(GetDailyQuizQuestionsQuery request, CancellationToken cancellationToken)
@@ -110,7 +112,7 @@ namespace Fsel.System.Application.Queries.DailyQuiz
 
             if (historiesInDay != null && historiesInDay.Count > 0)
             {
-                methodResult = await GetQuestionHistory(historiesInDay, result, methodResult, cancellationToken);
+                methodResult = await GetQuestionHistory(historiesInDay, result, methodResult, currentDate, cancellationToken);
                 return methodResult;
             }
 
@@ -147,7 +149,7 @@ namespace Fsel.System.Application.Queries.DailyQuiz
             return methodResult;
         }
 
-        private async Task<MethodResult<DailyQuizModel>> GetQuestionHistory(IList<DailyQuizHistory> historiesInDay, DailyQuizModel result, MethodResult<DailyQuizModel> methodResult, CancellationToken cancellationToken)
+        private async Task<MethodResult<DailyQuizModel>> GetQuestionHistory(IList<DailyQuizHistory> historiesInDay, DailyQuizModel result, MethodResult<DailyQuizModel> methodResult, DateTime currentDate, CancellationToken cancellationToken)
         {
             var questionIds = historiesInDay.Select(p => p.DailyQuizQuestionId).ToList();
             var answerIds = historiesInDay.Select(p => p.DailyQuizQuestionId).ToList();
@@ -205,6 +207,9 @@ namespace Fsel.System.Application.Queries.DailyQuiz
                 dailyQuizQuestionModels.Add(questionModel);
             }
 
+            var winner = await _dailyQuizWinnerRepository.Queryable.FirstOrDefaultAsync(p => p.CreatedDate.Date == currentDate.Date, cancellationToken);
+
+            result.Code = winner?.Code;
             result.IsDone = true;
             result.NumberCorrect = correctCount;
             result.DailyQuizQuestions = dailyQuizQuestionModels;
