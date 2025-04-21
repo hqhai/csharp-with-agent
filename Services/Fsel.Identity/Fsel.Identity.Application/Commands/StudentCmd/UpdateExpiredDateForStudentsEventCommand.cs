@@ -32,20 +32,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
           //  students.ForEach(p => p.ExpiredDate = request.ExpiredDate);
 
-            foreach (var item in students)
-            {
-                if (item.ExpiredDate == null || !item.ExpiredDate.HasValue)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentHasNotExpiredDate));
-                    methodResult.Result = false;
-                    return methodResult;
-                }
-                item.ExpiredDate = request.ExpiredDate;
-            }
+
 
             foreach (var item in students)
             {
-                if (item.ExpiredDate == null)
+                if (item.ExpiredDate == null || !item.ExpiredDate.HasValue)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentHasNotExpiredDate));
                     methodResult.Result = false;
