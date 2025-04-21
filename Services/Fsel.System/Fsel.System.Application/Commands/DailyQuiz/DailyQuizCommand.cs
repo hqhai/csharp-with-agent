@@ -215,7 +215,8 @@ namespace Fsel.System.Application.Commands.DailyQuiz
                 Code = code,
                 NumberQuestion = numberQuestion.Value,
                 NumberCorrect = correctCount,
-                DailyQuizQuestions = questionModels
+                DailyQuizQuestions = questionModels,
+                IsDone = true
             };
 
             methodResult.Result = result;
