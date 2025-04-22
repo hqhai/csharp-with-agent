@@ -205,6 +205,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<string>("Category")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
@@ -218,6 +222,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<Guid>("CreatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
+
+                    b.Property<string>("DashboardEventConfigStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
@@ -275,6 +282,73 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasIndex("ParentEventId");
 
                     b.ToTable("CompetitionEvents");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.EventManager", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<Guid>("CompetitionEventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompetitionEventId");
+
+                    b.HasIndex("UserId", "CompetitionEventId")
+                        .IsUnique();
+
+                    b.ToTable("EventManagers");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.EventRegistration", b =>
@@ -941,6 +1015,36 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             IsDeleted = false,
                             Name = "Guest",
                             NormalizedName = "Guest"
+                        },
+                        new
+                        {
+                            Id = new Guid("caa21b08-7ddb-4951-9f2d-6a7fa256775c"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "EducationDepartment",
+                            NormalizedName = "EducationDepartment"
+                        },
+                        new
+                        {
+                            Id = new Guid("73cd33e9-2f40-453a-b153-4ab59eaa6b73"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "EducationDivision",
+                            NormalizedName = "EducationDivision"
+                        },
+                        new
+                        {
+                            Id = new Guid("e8fc0d37-1aae-4ae6-9dc0-1ffe864bef45"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "DepartmentAdmin",
+                            NormalizedName = "DepartmentAdmin"
                         });
                 });
 
@@ -1863,6 +1967,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
 
+                    b.Property<string>("DefaultPassword")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(109);
@@ -2326,6 +2434,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<bool>("IsCoinRewarded")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -2651,6 +2762,25 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("CompetitionEventParent");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.EventManager", b =>
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.CompetitionEvent", "CompetitionEvent")
+                        .WithMany()
+                        .HasForeignKey("CompetitionEventId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("CompetitionEvent");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.EventRegistration", b =>

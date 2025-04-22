@@ -55,6 +55,7 @@ namespace Fsel.Shared.Enums
         FriendCompleteUnitOne,
         FriendPaymentSuccessfully,
         RecallCoinSurvey,
-        SurveyReward
+        SurveyReward,
+        IllegalCoinRecall
     }
 }

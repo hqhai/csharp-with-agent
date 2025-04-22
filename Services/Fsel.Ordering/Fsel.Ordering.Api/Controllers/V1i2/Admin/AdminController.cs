@@ -9,10 +9,13 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
     using Fsel.Ordering.Application.Commands.OrderCmds.V1i2;
     using Fsel.Ordering.Application.Queries.OrderQuery.V1i2;
     using Fsel.Ordering.Domain.Models.EntityModels.V1i2;
+    using Fsel.Ordering.Domain.Models.QueryModels.Oders.V1i2;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
+    using Microsoft.AspNetCore.Mvc;
+
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersions(ApiSettings.APIVersion1i2)]
@@ -103,6 +106,42 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
                 return queryResult.GetActionResult();
             }
             return File(queryResult.Result, Settings.Excels.ContentType, "export_revenue_report.xlsx");
+        }
+
+        /// <summary>
+        /// Create Order For Students Event
+        /// </summary>
+        [HttpPost("create-order-for-students-event")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateOrderForStudentsEvent([FromBody] CreateOrderForStudentsEventCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        ///// <summary>
+        ///// delete Order of Students Event
+        ///// </summary>
+        //[HttpPost("delete-order-of-students-event")]
+        //[ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        //[ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        //public async Task<IActionResult> DeleteOrderOfStudentsEvent([FromBody] DeleteOrderOfStudentsInEventCommand command)
+        //{
+        //    var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+        //    return queryResult.GetActionResult();
+        //}
+
+        /// <summary>
+        /// get orders by userids
+        /// </summary>
+        [HttpPost("get-orders-by-user-ids")]
+        [ProducesResponseType(typeof(MethodResult<OrdersByUserIdsModels>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetOrderByUserIds([FromBody] GetOrdersByUserIdsQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }
