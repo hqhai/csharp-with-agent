@@ -30,7 +30,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             var students = await _studentRepository.Queryable.WhereBulkContains(request.StudentIds, n => n.Id).ToListAsync(cancellationToken);
 
-            students.ForEach(p => p.ExpiredDate = request.ExpiredDate);
+          //  students.ForEach(p => p.ExpiredDate = request.ExpiredDate);
 
             foreach (var item in students)
             {
