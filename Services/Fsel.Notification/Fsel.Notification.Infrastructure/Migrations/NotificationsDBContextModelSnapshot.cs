@@ -2103,7 +2103,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "fr-FR",
                             NotificationTypeId = new Guid("3c7f9946-3f95-4a84-b2df-7cffbf36a41c"),
-                            TemplateMessage = "Merci d'avoir attribué 5 étoiles à FSEL ! FSEL a crédité {0} pièces sur votre compte. Continuez à travailler dur !"
+                            TemplateMessage = "Merci d'avoir participé à l'enquête ! Nous vous remercions sincèrement d'avoir complété l'enquête sur le Mois de l'Auto-apprentissage des Langues - Hanoï ! En signe de notre gratitude, vous avez reçu {0} FSEL COINS. Vos retours seront attentivement examinés et évalués afin d'améliorer continuellement l'expérience d'apprentissage. Merci pour votre soutien et votre engagement avec FSEL ! "
                         },
                         new
                         {
