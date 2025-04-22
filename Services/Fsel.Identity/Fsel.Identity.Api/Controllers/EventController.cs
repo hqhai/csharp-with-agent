@@ -3,18 +3,17 @@
 using System.Net;
 using Asp.Versioning;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.CompetitionEventsCmd;
+using Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd;
 using Fsel.Identity.Application.Queries.CompetitionEventsQuery;
 using Fsel.Identity.Application.Services.SystemService.Model;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
-using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,7 +23,6 @@ namespace Fsel.Identity.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/event")]
     [ApiController]
-    [Permission]
     public class EventController : BaseController
     {
         private readonly IMediator _mediator;
@@ -180,6 +178,18 @@ namespace Fsel.Identity.Api.Controllers
         {
             ArgumentException.ThrowIfNullOrEmpty(nameof(query));
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// aggregate data students in event
+        /// </summary>
+        [HttpPost("aggregate-data-students-in-event")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AggregateDataStudentsInEvent()
+        {
+            var commandResult = await _mediator.Send(new AggregateDataStudentsInEventCommand()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

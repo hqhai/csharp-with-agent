@@ -26,9 +26,9 @@ namespace Fsel.Identity.Infrastructure
             ArgumentNullException.ThrowIfNull(builder);
 
             //Dùng khi tạo migration, comment lại sau khi tạo xong
-            //builder.Ignore<OverallStudentModel>();
-            //builder.Ignore<NumberStudentLearnOnSystemModel>();
-            //builder.Ignore<SummaryDataOnCityModel>();
+            builder.Ignore<OverallStudentModel>();
+            builder.Ignore<NumberStudentLearnOnSystemModel>();
+            builder.Ignore<SummaryDataOnCityModel>();
 
             builder.Entity<Role>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
@@ -98,12 +98,13 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<UserDeletion> UserDeletions { get; set; }
         public DbSet<UserSchool> UserSchools { get; set; }
         public DbSet<SchoolImportHistory> SchoolImportHistorys { get; set; }
+        public DbSet<StudentEventLearningRecord> StudentEventLearningRecords { get; set; }
 
-        //public DbSet<OverallStudentModel> OverallStudentResults { get; set; }
+        public DbSet<OverallStudentModel> OverallStudentResults { get; set; }
 
-        //public DbSet<NumberStudentLearnOnSystemModel> NumberStudentLearnOnSystemResults { get; set; }
+        public DbSet<NumberStudentLearnOnSystemModel> NumberStudentLearnOnSystemResults { get; set; }
 
-        //public DbSet<SummaryDataOnCityModel> SummaryDataOnCityResults { get; set; }
+        public DbSet<SummaryDataOnCityModel> SummaryDataOnCityResults { get; set; }
 
         #endregion Db Set
 
