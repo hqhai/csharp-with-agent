@@ -38,8 +38,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly IInteractionService _interactionService;
         private readonly AuthContext _authContext;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly IClassForumResultFileRepository _classForumResultFileRepository;
 
-        public SearchRelevantClassForumsQueryHandler(IMapper mapper, IClassForumResultRepository classForumResultRepository, IUserService userService, INotificationService notificationService, IInteractionService interactionService, AuthContext authContext, ILessonResultRepository lessonResultRepository)
+        public SearchRelevantClassForumsQueryHandler(IMapper mapper, IClassForumResultRepository classForumResultRepository, IUserService userService, INotificationService notificationService, IInteractionService interactionService, AuthContext authContext, ILessonResultRepository lessonResultRepository, IClassForumResultFileRepository classForumResultFileRepository)
         {
             _mapper = mapper;
             _classForumResultRepository = classForumResultRepository;
@@ -48,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             _interactionService = interactionService;
             _authContext = authContext;
             _lessonResultRepository = lessonResultRepository;
+            _classForumResultFileRepository = classForumResultFileRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<ClassForumResultModel>>> Handle(SearchRelevantClassForumsQuery request, CancellationToken cancellationToken)
@@ -86,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 return methodResult;
             }
 
-            var query = from cfr in _classForumResultRepository.Queryable.Include(x => x.ClassForumResultFiles)
+            var query = from cfr in _classForumResultRepository.Queryable
                         join lr in _lessonResultRepository.Queryable on cfr.LessonResultId equals lr.Id
                         where cfr.Status == EnumClassForumResultStatus.Graded
                             && cfr.ClassForumId == classForumResult.ClassForumId
@@ -102,6 +104,17 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 .ConfigureAwait(false);
 
             var classForumResultIds = lists.Select(x => x.Id).ToList();
+
+            if (lists.Any())
+            {
+                var classForumResultFileEntities = await _classForumResultFileRepository.Queryable.WhereBulkContains(classForumResultIds, p => p.ClassForumResultId).ToListAsync(cancellationToken);
+
+                lists.ForEach(p =>
+                {
+                    var classForumResultFiles = classForumResultFileEntities.Where(x => x.ClassForumResultId == p.Id).ToList();
+                    p.ClassForumResultFiles = classForumResultFiles;
+                });
+            }
 
             var actionsTask = _interactionService.GetsActionAsync(new InteractionActionCommandModel
             {
