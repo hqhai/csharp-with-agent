@@ -1,11 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi
+namespace Fsel.Identity.Domain.Models.EntityModels.ReportEventHaNoi
 {
     using Microsoft.EntityFrameworkCore;
 
     [Keyless]
-
     public class NumberStudentLearnOnSystemModel
     {
         public string? ActiveDate { get; set; }
