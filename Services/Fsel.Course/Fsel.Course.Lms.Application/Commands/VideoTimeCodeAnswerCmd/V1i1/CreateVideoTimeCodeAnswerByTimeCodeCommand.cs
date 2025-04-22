@@ -17,7 +17,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodeAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Commands.VideoResultCmd;
     using Fsel.Course.Lms.Application.Queries.VideoQuery;
@@ -42,7 +41,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
     public class CreateVideoTimeCodeAnswerByTimeCodeCommandHandler : IRequestHandler<CreateVideoTimeCodeAnswerByTimeCodeCommand, MethodResult<VideoTimeCodeModel>>
     {
-        private readonly CourseDbContext _dbContext;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly DisconnectSocketCalculateTimePublisher _disconnectSocketCalculateTimePublisher;
         private readonly IVideoResultRepository _videoResultRepository;
@@ -55,12 +53,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         private readonly AuthContext _authContext;
         private readonly IMediator _mediator;
         private readonly ICourseRepository _courseRepository;
-        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly QuestionConverter _questionConverter;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly ILogger<CreateVideoTimeCodeAnswerByTimeCodeCommand> _logger;
-        private readonly CourseDbContext _courseDbContext;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly TechieActionPublisher _techieActionPublisher;
         private readonly ICourseResultRepository _courseResultRepository;
@@ -70,7 +66,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         public CreateVideoTimeCodeAnswerByTimeCodeCommandHandler(QuestBoardPublisher questBoardPublisher,
             IMapper mapper,
             ICourseResultRepository courseResultRepository,
-            CourseDbContext dbContext,
             IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository,
             DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher,
             IVideoResultRepository videoResultRepository,
@@ -83,16 +78,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             AuthContext authContext,
             IMediator mediator,
             ICourseRepository courseRepository,
-            ILessonResultRepository lessonResultRepository,
             IQuestionRepository questionRepository,
             QuestionConverter questionConverter,
             CreateTokenHistoryPublisher createTokenHistoryPublisher,
             TechieActionPublisher techieActionPublisher,
             RankedStudentPublisher rankedStudentPublisher,
-            ILogger<CreateVideoTimeCodeAnswerByTimeCodeCommand> logger,
-            CourseDbContext courseDbContext)
+            ILogger<CreateVideoTimeCodeAnswerByTimeCodeCommand> logger)
         {
-            _dbContext = dbContext;
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _disconnectSocketCalculateTimePublisher = disconnectSocketCalculateTimePublisher;
             _videoResultRepository = videoResultRepository;
@@ -105,12 +97,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             _authContext = authContext;
             _mediator = mediator;
             _courseRepository = courseRepository;
-            _lessonResultRepository = lessonResultRepository;
             _questionRepository = questionRepository;
             _questionConverter = questionConverter;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
             _logger = logger;
-            _courseDbContext = courseDbContext;
             _questBoardPublisher = questBoardPublisher;
             _techieActionPublisher = techieActionPublisher;
             _courseResultRepository = courseResultRepository;
@@ -355,10 +345,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
         private async Task UpdateVideoResultAsync(VideoResult videoResult, CancellationToken cancellationToken)
         {
-            var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id)).Where(x => x.VideoId == videoResult.VideoId).ToListAsync(cancellationToken);
-            var videoTimeCodeResults = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Where(x => x.VideoResultId == videoResult.Id && x.Status == EnumResultStatus.Done).ToList();
-
-            if (videoTimeCodes.Count == videoTimeCodeResults.Count)
+            var videoTimeCodeCount = await _videoTimeCodeRepository.Queryable.Where(x => x.VideoId == videoResult.VideoId).CountAsync(cancellationToken);
+            var videoTimeCodeResultCount = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoResultId == videoResult.Id && x.Status == EnumResultStatus.Done).CountAsync(cancellationToken);
+            if (videoTimeCodeCount == videoTimeCodeResultCount)
             {
                 await _mediator.Send(new ReviewLessonVideoCommand { LessonResultId = videoResult.LessonResultId }, cancellationToken).ConfigureAwait(false);
             }
