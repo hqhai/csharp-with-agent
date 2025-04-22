@@ -42,8 +42,43 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                         VolatileToken = request.Coin,
                         UserId = userId,
                         Feature = EnumTokenFeature.FselEvent,
-                        Mission = EnumTokenMission.SurveyReward,
-                        Type = EnumTokenHistoryType.Recevived
+                        Type = EnumTokenHistoryType.Recevived,
+                        TokenHistoryTranslations = new List<TokenHistoryTranslationModel>
+                        {
+                            new TokenHistoryTranslationModel
+                            {
+                                Language = "vi-VN",
+                                Config = new List<object>
+                                {
+                                    new
+                                    {
+                                         Title = "đánh giá FSEL 5 sao"
+                                    }
+                                }
+                            },
+                            new TokenHistoryTranslationModel
+                            {
+                                Language = "en-US",
+                                Config = new List<object>
+                                {
+                                    new
+                                    {
+                                         Title = "rating FSEL 5 stars"
+                                    }
+                                }
+                            },
+                            new TokenHistoryTranslationModel
+                            {
+                                Language = "fr-FR",
+                                Config = new List<object>
+                                {
+                                    new
+                                    {
+                                         Title = "Évaluez FSEL 5 étoiles"
+                                    }
+                                }
+                            }
+                        }
                     }
                 };
 
