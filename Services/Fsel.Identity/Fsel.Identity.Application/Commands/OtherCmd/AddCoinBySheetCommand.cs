@@ -58,7 +58,7 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
                 return methodResult;
             }
 
-            var users = await _userManager.Users.Where(x => dataResults.Contains(x.UserName)).ToListAsync(cancellationToken);
+            var users = await _userManager.Users.Where(x => dataResults.Contains(x.Email) || dataResults.Contains(x.PhoneNumber)).ToListAsync(cancellationToken);
             var userIds = users.DistinctBy(x => x.Id).Select(x => x.Id).ToList();
             if (userIds == null)
             {
