@@ -115,5 +115,125 @@ namespace Fsel.Course.Lcms.Api.Controllers
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [HttpPost("learning-quality-summary")]
+        [ProducesResponseType(typeof(MethodResult<IList<TotalLearningModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> LearningQualitySummary([FromBody] LearningQualitySummaryQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [HttpPost("learning-quality-percent")]
+        [ProducesResponseType(typeof(MethodResult<IList<RateLearningModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> LearningQualityPercent([FromBody] LearningQualityPercentQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [HttpPost("learning-quality-chart")]
+        [ProducesResponseType(typeof(MethodResult<IList<TotalLearningQualityModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> LearningQualityChart([FromBody] LearningQualityChartQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [HttpPost("learning-quality-detail")]
+        [ProducesResponseType(typeof(MethodResult<IList<TotalDetailLearningQualityModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> LearningQualityDetail([FromBody] LearningQualityDetailQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [HttpPost("learning-progress-average-detail")]
+        [ProducesResponseType(typeof(MethodResult<IList<AverageLearningProgressModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> LearningProgressAverageDetail([FromBody] LearningProgressAverageDetailQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [HttpPost("learning-progress-lesson-done-academic")]
+        [ProducesResponseType(typeof(MethodResult<IList<LessonDoneLearningProgressAcademicModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> LearningProgressLessonDoneAcademic([FromBody] LearningProgressLessonDoneAcademicQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [HttpPost("learning-progress-lesson-done-ielts")]
+        [ProducesResponseType(typeof(MethodResult<IList<LessonDoneLearningProgressIeltsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> LearningProgressLessonDoneIelts([FromBody] LearningProgressLessonDoneIeltsQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [HttpPost("learning-progress-unit-done-academic")]
+        [ProducesResponseType(typeof(MethodResult<IList<UnitDoneLearningProgressAcademicModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> LearningProgressUnitDoneAcademic([FromBody] LearningProgressUnitDoneAcademicQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [HttpPost("learning-progress-unit-done-ielts")]
+        [ProducesResponseType(typeof(MethodResult<IList<UnitDoneLearningProgressIeltsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> LearningProgressUnitDoneIelts([FromBody] LearningProgressUnitDoneIeltsQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [HttpPost("learning-progress-summary")]
+        [ProducesResponseType(typeof(MethodResult<IList<TotalLearningProgressModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> LearningProgressSummary([FromBody] LearningProgressSummaryQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
