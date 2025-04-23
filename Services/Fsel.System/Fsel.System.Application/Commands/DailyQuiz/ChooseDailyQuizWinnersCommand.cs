@@ -1,6 +1,5 @@
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
-using Fsel.System.Domain.Enums;
 using Fsel.System.Domain.IRepositories.DailyQuizs;
 using Fsel.System.Infrastructure.ValueSettings;
 using MediatR;
@@ -70,6 +69,28 @@ namespace Fsel.System.Application.Commands.DailyQuiz
                     filtered = filtered
                         .Where(p => !userIdSet.Contains(p.CreatedUserId))
                         .ToList();
+                }
+
+                if (filtered.Count < numberWinner.Value)
+                {
+                    var existingIds = filtered.Select(p => p.Id).ToHashSet();
+                    var additional = dailyQuizWinnersInDay
+                        .Where(p => !existingIds.Contains(p.Id) && !userIdSet.Contains(p.CreatedUserId))
+                        .Take(numberWinner.Value - filtered.Count)
+                        .ToList();
+
+                    filtered.AddRange(additional);
+
+                    if (filtered.Count < numberWinner.Value)
+                    {
+                        existingIds = filtered.Select(p => p.Id).ToHashSet();
+                        additional = dailyQuizWinnersInDay
+                           .Where(p => !existingIds.Contains(p.Id))
+                           .Take(numberWinner.Value - filtered.Count)
+                           .ToList();
+
+                        filtered.AddRange(additional);
+                    }
                 }
 
                 dailyQuizWinnersInDay = filtered.Take(numberWinner.Value).ToList();
