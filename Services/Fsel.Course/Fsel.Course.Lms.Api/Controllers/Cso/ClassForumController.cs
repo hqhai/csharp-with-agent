@@ -11,10 +11,13 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
     using Microsoft.AspNetCore.Mvc;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Attributes;
+    using Fsel.Common.Attributes;
+    using Fsel.Shared.Enums;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/class-forum")]
     [ApiController]
+    [Permission(role: nameof(EnumRole.CSO))]
     public class ClassForumController : ControllerBase
     {
         private readonly IMediator _mediator;
