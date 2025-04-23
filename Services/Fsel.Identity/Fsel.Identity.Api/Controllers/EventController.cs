@@ -9,6 +9,7 @@ using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.CompetitionEventsCmd;
 using Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd;
 using Fsel.Identity.Application.Queries.CompetitionEventsQuery;
+using Fsel.Identity.Application.Queries.EventQuery;
 using Fsel.Identity.Application.Services.SystemService.Model;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
@@ -190,6 +191,19 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> AggregateDataStudentsInEvent()
         {
             var commandResult = await _mediator.Send(new AggregateDataStudentsInEventCommand()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get student event learning record
+        /// </summary>
+        [HttpGet("get-student-event-learning-record")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentEventLearningRecord([FromQuery] GetStudentEventLearningRecordQuery query)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(nameof(query));
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
