@@ -64,7 +64,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                                            QuestBoardPublisher questBoardPublisher,
                                            IPostRepository postRepository,
                                            IMediator mediator,
-                                           AppSetting appSetting )
+                                           AppSetting appSetting)
         {
             _mapper = mapper;
             _commentRepository = commentRepository;
@@ -91,6 +91,9 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 return methodResult;
             }
 
+            var userResult = await _userService.GetUserByIdAsync(_authContext.CurrentUserId.ToString());
+            var user = userResult.Content?.Result;
+
             Comment comment = new Comment();
             if (request.IsUpdate)
             {
@@ -108,6 +111,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             {
                 comment = _mapper.Map<Comment>(request);
                 comment.UserId = _authContext.CurrentUserId;
+                comment.CourseId = user?.CourseId;
             }
 
             if (!comment.IsValid())
@@ -176,7 +180,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 
                         var moduleResult = await _courseService.GetModuleModel(query);
                         var featureModuleModel = moduleResult?.Content?.Result;
-
 
                         paramLinksValue = new List<object>
                                      {
@@ -261,7 +264,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             var moduleResultReply = await _courseService.GetModuleModel(queryReply);
                             var featureModuleReplyModel = moduleResultReply?.Content?.Result;
 
-
                             paramLinksValue = new List<object>
                                      {
                                         featureModuleReplyModel?.CourseId ?? default,
@@ -276,8 +278,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 }
 
                 var commentModel = _mapper.Map<CommentModel>(comment);
-                var userResult = await _userService.GetUserByIdAsync(_authContext.CurrentUserId.ToString());
-                commentModel.FullName = userResult.Content?.Result?.FullName;
+
+                commentModel.FullName = user?.FullName;
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = commentModel;
