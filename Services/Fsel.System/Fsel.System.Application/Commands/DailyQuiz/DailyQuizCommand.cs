@@ -30,6 +30,7 @@ namespace Fsel.System.Application.Commands.DailyQuiz
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
+        private const string DefaultAcceptLanguage = "en-US";
 
         public DailyQuizCommandHandler(IDailyQuizHistoryRepository dailyQuizHistoryRepository, IDailyQuizAnswerRepository dailyQuizAnswerRepository, IDailyQuizQuestionRepository dailyQuizQuestionRepository, IDailyQuizWinnerRepository dailyQuizWinnerRepository, AppSetting appSetting, IUserService userService, AuthContext authContext, IMapper mapper)
         {
@@ -53,6 +54,8 @@ namespace Fsel.System.Application.Commands.DailyQuiz
             var startDate = _appSetting.DailyQuizConfig?.StartDate;
             var endDate = _appSetting.DailyQuizConfig?.EndDate;
             var endHour = _appSetting.DailyQuizConfig?.EndHour;
+
+            _authContext.AcceptLanguage = DefaultAcceptLanguage;
 
             if (!numberQuestion.HasValue || !startDate.HasValue || !endDate.HasValue || !numberCorrect.HasValue || !endHour.HasValue)
             {
@@ -186,7 +189,7 @@ namespace Fsel.System.Application.Commands.DailyQuiz
                 }
 
                 var questionModel = _mapper.Map<DailyQuizQuestionModel>(question);
-                questionModel.DailyQuizAnswers = answerModels;
+                questionModel.DailyQuizAnswers = answerModels.OrderBy(p => p.Content).ToList();
                 questionModels.Add(questionModel);
             }
 
@@ -228,7 +231,7 @@ namespace Fsel.System.Application.Commands.DailyQuiz
                 Code = code,
                 NumberQuestion = numberQuestion.Value,
                 NumberCorrect = correctCount,
-                DailyQuizQuestions = questionModels,
+                DailyQuizQuestions = questionModels.OrderBy(p => p.Content).ToList(),
                 IsDone = true
             };
 

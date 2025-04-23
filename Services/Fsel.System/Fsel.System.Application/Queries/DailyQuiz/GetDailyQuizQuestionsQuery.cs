@@ -30,6 +30,7 @@ namespace Fsel.System.Application.Queries.DailyQuiz
         private readonly AuthContext _authContext;
         private readonly AppSetting _appSetting;
         private readonly IUserService _userService;
+        private const string DefaultAcceptLanguage = "en-US";
 
         public GetDailyQuizQuestionsQueryHandler(IDailyQuizQuestionRepository dailyQuizQuestionRepository, IDailyQuizAnswerRepository dailyQuizAnswerRepository, IDailyQuizHistoryRepository dailyQuizHistoryRepository, IMapper mapper, AuthContext authContext, AppSetting appSetting, IUserService userService, IDailyQuizWinnerRepository dailyQuizWinnerRepository)
         {
@@ -52,6 +53,8 @@ namespace Fsel.System.Application.Queries.DailyQuiz
             var startDate = _appSetting.DailyQuizConfig?.StartDate;
             var endDate = _appSetting.DailyQuizConfig?.EndDate;
             var endHour = _appSetting.DailyQuizConfig?.EndHour;
+
+            _authContext.AcceptLanguage = DefaultAcceptLanguage;
 
             if (!numberQuestion.HasValue || !startDate.HasValue || !endDate.HasValue || !endHour.HasValue)
             {
@@ -143,10 +146,10 @@ namespace Fsel.System.Application.Queries.DailyQuiz
             questionModels.ForEach(p =>
             {
                 p.Explanation = null;
-                p.DailyQuizAnswers = answerModels.Where(x => x.DailyQuizQuestionId == p.Id).ToList();
+                p.DailyQuizAnswers = answerModels.Where(x => x.DailyQuizQuestionId == p.Id).OrderBy(p => p.Content).ToList();
             });
 
-            result.DailyQuizQuestions = questionModels;
+            result.DailyQuizQuestions = questionModels.OrderBy(p => p.Content).ToList();
 
             methodResult.Result = result;
             return methodResult;
@@ -206,7 +209,7 @@ namespace Fsel.System.Application.Queries.DailyQuiz
                 }
 
                 var questionModel = _mapper.Map<DailyQuizQuestionModel>(question);
-                questionModel.DailyQuizAnswers = dailyQuizAnswerModels;
+                questionModel.DailyQuizAnswers = dailyQuizAnswerModels.OrderBy(p => p.Content).ToList();
                 dailyQuizQuestionModels.Add(questionModel);
             }
 
@@ -215,7 +218,7 @@ namespace Fsel.System.Application.Queries.DailyQuiz
             result.Code = winner?.Code;
             result.IsDone = true;
             result.NumberCorrect = correctCount;
-            result.DailyQuizQuestions = dailyQuizQuestionModels;
+            result.DailyQuizQuestions = dailyQuizQuestionModels.OrderBy(p => p.Content).ToList();
 
             methodResult.Result = result;
             return methodResult;
