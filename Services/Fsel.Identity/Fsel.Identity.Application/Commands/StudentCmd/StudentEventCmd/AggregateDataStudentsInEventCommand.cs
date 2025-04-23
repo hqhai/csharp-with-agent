@@ -9,6 +9,7 @@ using Fsel.Identity.Application.Services.SystemService.Model;
 using Fsel.Identity.Application.Services.SystemService.QueryModels;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
+using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -16,13 +17,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
 {
-    public class AggregateDataStudentsInEventCommandModel
-    {
-        public Guid StudentId { get; set; }
-        public Guid UserId { get; set; }
-        public Guid CompetitionEventId { get; set; }
-    }
-
     public class AggregateDataStudentsInEventCommand : IRequest<MethodResult<bool>>
     {
     }
@@ -57,7 +51,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date.AddDays(-1);
 
             var competitionEvents = await _competitionEventsRepository.Queryable.ToListAsync(cancellationToken);
 
@@ -85,7 +79,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
                                   join h in _humanRepository.Queryable on s.HumanId equals h.Id
                                   join u in _userManager.Users on h.UserId equals u.Id
                                   join sce in _studentCompetitionEventsRepository.Queryable on s.Id equals sce.StudentId
-                                  select new AggregateDataStudentsInEventCommandModel
+                                  select new StudentCompetitionEventModel
                                   {
                                       StudentId = s.Id,
                                       UserId = u.Id,
@@ -184,7 +178,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
             return methodResult;
         }
 
-        private List<List<AggregateDataStudentsInEventCommandModel>> ChunkList(List<AggregateDataStudentsInEventCommandModel> source, int chunkSize)
+        private static List<List<StudentCompetitionEventModel>> ChunkList(List<StudentCompetitionEventModel> source, int chunkSize)
         {
             return source
                 .Select((x, i) => new { Index = i, Value = x })

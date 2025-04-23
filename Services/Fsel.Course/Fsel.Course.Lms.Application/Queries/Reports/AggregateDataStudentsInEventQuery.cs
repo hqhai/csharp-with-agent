@@ -82,9 +82,9 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 var totalWriting = classForumResults.Where(p => p.SkillScores != null && p.SkillScores.Any()).SelectMany(p => p.SkillScores!).Where(p => p.Skill == EnumCourseSkill.Writing).Count();
                 var totalSpeaking = classForumResults.Where(p => p.SkillScores != null && p.SkillScores.Any()).SelectMany(p => p.SkillScores!).Where(p => p.Skill == EnumCourseSkill.Speaking).Count();
 
-                var totalVocabulary = unitChatbotConfigs?.Where(p => p.ChatbotSkillConfigs != null && p.ChatbotSkillConfigs.Any()).SelectMany(p => p.ChatbotSkillConfigs!).Where(p => p.Skill == EnumCourseSkill.Vocabulary).Select(p => p.Configs).Count();
+                var totalVocabulary = unitChatbotConfigs?.Where(p => p.ChatbotSkillConfigs != null && p.ChatbotSkillConfigs.Any()).SelectMany(p => p.ChatbotSkillConfigs!).Where(p => p.Skill == EnumCourseSkill.Vocabulary).Select(p => p.Configs).SelectMany(p => p).Count();
 
-                var totalGrammar = unitChatbotConfigs?.Where(p => p.ChatbotSkillConfigs != null && p.ChatbotSkillConfigs.Any()).SelectMany(p => p.ChatbotSkillConfigs!).Where(p => p.Skill == EnumCourseSkill.Grammar).Select(p => p.Configs).Count();
+                var totalGrammar = unitChatbotConfigs?.Where(p => p.ChatbotSkillConfigs != null && p.ChatbotSkillConfigs.Any()).SelectMany(p => p.ChatbotSkillConfigs!).Where(p => p.Skill == EnumCourseSkill.Grammar).Select(p => p.Configs).SelectMany(p => p).Count();
 
                 students.Add(new AggregateDataStudentsInEventModel()
                 {

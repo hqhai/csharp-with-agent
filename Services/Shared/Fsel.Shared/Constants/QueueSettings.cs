@@ -33,6 +33,7 @@ namespace Fsel.Shared.Constants
                 public const string JobRunEvents = $"{KeyQueue}_JobRunEvents";
                 public const string CheckUserDeletion = $"{KeyQueue}_CheckUserDeletion";
                 public const string CreateStudentsFromFile = $"{KeyQueue}_CreateStudentsFromFile";
+                public const string AggregateDataStudentsInEvent = $"{KeyQueue}_AggregateDataStudentsInEvent";
             }
         }
 
