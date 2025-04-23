@@ -12,13 +12,12 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Microsoft.AspNetCore.Mvc;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Attributes;
-    using Fsel.Common.Attributes;
     using Fsel.Shared.Enums;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/admin/class-forum-result")]
     [ApiController]
-    [Permission(role: nameof(EnumRole.Admin))]
+    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
     public class ClassForumResultController : ControllerBase
     {
         private readonly IMediator _mediator;

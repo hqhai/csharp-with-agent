@@ -87,8 +87,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
 
             var query = from bastQ in _videoTimeCodeResultRepository.Queryable
                         where bastQ.VideoTimeCodeId == videoTimeCodeResult.VideoTimeCodeId &&
-                              bastQ.VideoResult!.Status == EnumResultStatus.Done &&
-                              bastQ.VideoResult.LessonResult!.CourseId == lessonResult.CourseId &&
+                              bastQ.Status == EnumResultStatus.Done &&
+                              bastQ.VideoResult!.LessonResult!.CourseId == lessonResult.CourseId &&
                               bastQ.VideoResult.LessonResult.UnitId == lessonResult.UnitId &&
                               bastQ.VideoResult.LessonResult.LessonId == lessonResult.LessonId
                         select new TestResultRankingModel

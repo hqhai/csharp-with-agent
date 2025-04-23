@@ -4,7 +4,6 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
 {
     using System.Net;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels.BaseChartModels;
     using Fsel.Course.Domain.Models.QueryModels.ReportDashboard;
@@ -17,8 +16,8 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/admin/report-dashboard")]
-    [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool) })]
     [ApiController]
+    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
     public class ReportDashboard : ControllerBase
     {
         private readonly IMediator _mediator;

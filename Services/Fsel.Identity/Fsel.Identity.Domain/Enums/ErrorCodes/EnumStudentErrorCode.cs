@@ -34,9 +34,16 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// </summary>
         SchoolNotIncludeEvent,
 
+
+
         /// <summary>
-        /// Student Already Another Event
+        /// Student hasn't not expired Date
         /// </summary>
-        StudentAlreadyAnotherEvent
+        StudentAlreadyAnotherEvent,
+
+        /// <summary>
+        /// Student hasn't not expired Date
+        /// </summary>
+        StudentHasNotExpiredDate
     }
 }
