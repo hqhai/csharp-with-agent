@@ -7,13 +7,13 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1;
     using Fsel.Course.Lms.Application.Queries.StudentProgressQuery;
+    using Fsel.Shared.Attributes;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Shared.Constants;
-    using Fsel.Shared.Attributes;
-    using Fsel.Shared.Enums;
-    using Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/student-progress")]

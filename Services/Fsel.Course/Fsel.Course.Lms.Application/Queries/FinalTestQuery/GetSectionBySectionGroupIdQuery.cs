@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -35,8 +36,16 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
         private readonly IUserService _userService;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly ILogger<GetSectionBySectionGroupIdQuery> _logger;
+        private readonly IFinalTestSectionRepository _finalTestSectionRepository;
 
-        public GetSectionBySectionGroupIdQueryHandler(SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IFinalTestResultRepository finalTestResultRepository, AuthContext authContext, IUserService userService, ISectionGroupRepository sectionGroupRepository, ILogger<GetSectionBySectionGroupIdQuery> logger)
+        public GetSectionBySectionGroupIdQueryHandler(SectionGroupConverter sectionGroupConverter,
+            ISectionGroupResultRepository sectionGroupResultRepository,
+            IFinalTestResultRepository finalTestResultRepository,
+            AuthContext authContext,
+            IUserService userService,
+            ISectionGroupRepository sectionGroupRepository,
+            ILogger<GetSectionBySectionGroupIdQuery> logger,
+            IFinalTestSectionRepository finalTestSectionRepository)
         {
             _sectionGroupConverter = sectionGroupConverter;
             _sectionGroupResultRepository = sectionGroupResultRepository;
@@ -45,20 +54,21 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             _userService = userService;
             _sectionGroupRepository = sectionGroupRepository;
             _logger = logger;
+            _finalTestSectionRepository = finalTestSectionRepository;
         }
 
         public async Task<MethodResult<SectionGroupDtoModel>> Handle(GetSectionBySectionGroupIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<SectionGroupDtoModel>();
-            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
-                return methodResult;
-            }
-            var student = studentResult?.Content?.Result;
-            var studentId = student?.Id ?? default;
+            //var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
+            //if (!studentResult.IsSuccessStatusCode)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+            //    return methodResult;
+            //}
+            //var student = studentResult?.Content?.Result;
+            //var studentId = student?.Id ?? default;
 
             var finalTestResult = await _finalTestResultRepository.GetByIdAsync(request.FinalTestResultId);
             if (finalTestResult == null)
@@ -71,18 +81,27 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished), nameof(finalTestResult));
                 return methodResult;
             }
-            if (finalTestResult.Status == EnumResultStatus.New)
-            {
-                await UpdateFinalTestResult(finalTestResult);
-            }
             var sectionGroup = await _sectionGroupRepository.GetByIdAsync(request.SectionGroupId);
             if (sectionGroup == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                 return methodResult;
             }
+            var isNotInModule = !await (from baseQ in _sectionGroupRepository.Queryable
+                                        join fsg in _finalTestSectionRepository.Queryable on baseQ.Id equals fsg.SectionGroupId
+                                        where baseQ.Id == request.SectionGroupId && fsg.FinalTestId == finalTestResult.FinalTestId
+                                        select baseQ).AnyAsync(cancellationToken);
+            if (isNotInModule)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isNotInModule), request.SectionGroupId);
+                return methodResult;
+            }
+            if (finalTestResult.Status == EnumResultStatus.New)
+            {
+                await UpdateFinalTestResult(finalTestResult);
+            }
 
-            var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId);
+            var sectionGroupResult = await GetAndAddSectionGroupResult(request, finalTestResult.StudentId);
             methodResult.Result = await _sectionGroupConverter.GetSectionGroupDto(sectionGroup, sectionGroupResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
