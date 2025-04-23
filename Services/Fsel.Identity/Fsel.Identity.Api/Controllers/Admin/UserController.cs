@@ -9,6 +9,7 @@ using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.AdminCmd;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Application.Commands.UserCmd;
+using Fsel.Identity.Application.Queries.AdminQuery;
 using Fsel.Identity.Application.Queries.UserQuery;
 using Fsel.Identity.Application.Queries.UserReferrals;
 using Fsel.Identity.Domain.Models.EntityModels;
@@ -43,6 +44,19 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> Create([FromBody] CreateUserCommand command)
         {
             MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create User to LMS Admin platform
+        /// </summary>
+        [HttpPost("create-user/lms-admin")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> CreateToLmsAdminPlat([FromBody] CreateUserToLmsAdminPlatCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -84,6 +98,19 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> SearchUser([FromQuery] SearchUserQuery query)
         {
             MethodResult<PagingItemsModel<UserSearchModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search User
+        /// </summary>
+        [HttpGet("search-user/lms-admin")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UserSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> SearchUserInLmsPlat([FromQuery] SearchUsersQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
