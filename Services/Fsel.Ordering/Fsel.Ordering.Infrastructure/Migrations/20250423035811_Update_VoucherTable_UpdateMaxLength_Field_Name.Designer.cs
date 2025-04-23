@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingDbContext))]
-    [Migration("20250422113338_Update_VoucherTable_UpdateMaxLength_Field_Name")]
+    [Migration("20250423035811_Update_VoucherTable_UpdateMaxLength_Field_Name")]
     partial class Update_VoucherTable_UpdateMaxLength_Field_Name
     {
         /// <inheritdoc />
