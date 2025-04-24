@@ -322,14 +322,10 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPut("update-expired-date-for-students")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
-
-        public async Task<IActionResult> UpdateCompetitionEvents([FromBody] UpdateExpiredDateForStudentsEventCommand cmd)
+        public async Task<IActionResult> UpdateCompetitionEvents([FromBody] UpdateExpiredDateStudentHasValueCommand cmd)
         {
             var commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
-
     }
 }
