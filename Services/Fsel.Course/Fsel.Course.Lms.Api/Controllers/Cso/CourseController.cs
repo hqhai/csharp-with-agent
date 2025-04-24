@@ -19,7 +19,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/cso/course")]
     [ApiController]
-    [Permission(role: nameof(EnumRole.CSO))]
+    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
     public class CourseController : ControllerBase
     {
         private readonly IMediator _mediator;
