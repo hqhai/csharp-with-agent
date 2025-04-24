@@ -14,10 +14,12 @@ using Fsel.System.Application.Services.StorageServices;
 using Fsel.System.Application.Services.UserServices;
 using Fsel.System.Domain.IRepositories;
 using Fsel.System.Domain.IRepositories.BlindBoxes;
+using Fsel.System.Domain.IRepositories.DailyQuizs;
 using Fsel.System.Infrastructure;
 using Fsel.System.Infrastructure.Common;
 using Fsel.System.Infrastructure.Repositories;
 using Fsel.System.Infrastructure.Repositories.BlindBoxes;
+using Fsel.System.Infrastructure.Repositories.DailyQuizs;
 using Fsel.System.Infrastructure.ValueSettings;
 using Microsoft.EntityFrameworkCore;
 using Refit;
@@ -83,6 +85,11 @@ builder.Services.AddScoped<IBlindBoxUserRepository, BlindBoxUserRepository>();
 builder.Services.AddScoped<IFselRatingRepository, FselRatingRepository>();
 builder.Services.AddScoped<IDisplayOrderConfigRepository, DisplayOrderConfigRepository>();
 
+builder.Services.AddScoped<IDailyQuizAnswerRepository, DailyQuizAnswerRepository>();
+builder.Services.AddScoped<IDailyQuizHistoryRepository, DailyQuizHistoryRepository>();
+builder.Services.AddScoped<IDailyQuizQuestionRepository, DailyQuizQuestionRepository>();
+builder.Services.AddScoped<IDailyQuizWinnerRepository, DailyQuizWinnerRepository>();
+
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
@@ -123,7 +130,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.SystemQueue.NameQueue.NoticeAccessTime, typeof(NoticeAccessFeatureConsumer) },
     { QueueSettings.InteractionQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.Banner, typeof(BannerConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.BuyBlindBox, typeof(BuyBlindBoxConsumer) }
+    { QueueSettings.SystemQueue.NameQueue.BuyBlindBox, typeof(BuyBlindBoxConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.ChooseDailyQuizWinners, typeof(ChooseDailyQuizWinnersConsumer) }
 });
 
 var app = builder.Build();
