@@ -127,7 +127,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         Task<IApiResponse<MethodResult<PagingItemStudentRankingModel>>> GetLeaderBoardDataAsync([FromQuery] GetStudentCompetitionByEventCodeQueryModel query);
 
         [Get("/v1/admin/student/management")]
-        Task<IApiResponse<MethodResult<PagingItemsModel<StudentSearchAdminModel>>>> SearchStudentAsync([FromQuery] BaseQueryModel query);
+        Task<IApiResponse<MethodResult<PagingItemsModel<StudentSearchAdminModel>>>> SearchStudentAsync([FromQuery] SearchStudentsQueryModel query);
 
         [Post("/v1/admin/student/search")]
         Task<IApiResponse<MethodResult<PagingItemsModel<StudentDtoModel>>>> SearchStudentSchoolAsync([FromBody] SearchStudentSchoolQueryModel query);
