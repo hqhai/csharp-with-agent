@@ -16,5 +16,6 @@ namespace Fsel.Identity.Domain.Models
         public int TotalGrammar { get; set; }
         public int TotalWriting { get; set; }
         public int TotalSpeaking { get; set; }
+        public bool IsView { get; set; }
     }
 }

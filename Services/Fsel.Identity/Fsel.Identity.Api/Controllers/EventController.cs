@@ -3,6 +3,7 @@
 using System.Net;
 using Asp.Versioning;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Core.Base.BaseModels;
@@ -13,6 +14,7 @@ using Fsel.Identity.Application.Queries.EventQuery;
 using Fsel.Identity.Application.Services.SystemService.Model;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
+using Fsel.Identity.Domain.Models;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
 using MediatR;
@@ -24,6 +26,7 @@ namespace Fsel.Identity.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/event")]
     [ApiController]
+    [Permission]
     public class EventController : BaseController
     {
         private readonly IMediator _mediator;
@@ -198,12 +201,24 @@ namespace Fsel.Identity.Api.Controllers
         /// get student event learning record
         /// </summary>
         [HttpGet("get-student-event-learning-record")]
-        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<StudentEventLearningRecordModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetStudentEventLearningRecord([FromQuery] GetStudentEventLearningRecordQuery query)
         {
             ArgumentException.ThrowIfNullOrEmpty(nameof(query));
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// update student event learning record
+        /// </summary>
+        [HttpPost("student-event-view-learning-record")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateStudentEventLearningRecord([FromBody] StudentEventViewLearningRecordCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
