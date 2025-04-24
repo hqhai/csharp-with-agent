@@ -147,6 +147,7 @@ namespace Fsel.Shared.Constants
                 public const string CreateLuckyTicket = $"{KeyQueue}_CreateLuckyTicket";
                 public const string BuyBlindBox = $"{KeyQueue}_BuyBlindBox";
                 public const string SendNotifyBuyBlindBox = $"{KeyQueue}_SendNotifyBuyBlindBox";
+                public const string ChooseDailyQuizWinners = $"{KeyQueue}_ChooseDailyQuizWinners";
             }
         }
 
