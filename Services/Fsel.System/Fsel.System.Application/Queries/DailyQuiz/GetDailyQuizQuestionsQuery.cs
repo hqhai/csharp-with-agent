@@ -110,6 +110,10 @@ namespace Fsel.System.Application.Queries.DailyQuiz
             var historiesInDay = histories.Where(p => p.CreatedDate >= minCreatedDate).ToList();
 
             var utcNow = DateTime.UtcNow;
+            if (utcNow.Hour >= endHour.Value)
+            {
+                utcNow = currentDate;
+            }
             var todayUtcCustom = new DateTime(utcNow.Year, utcNow.Month, utcNow.Day, endHour.Value - 7, 0, 0, DateTimeKind.Utc);
 
             var result = new DailyQuizModel()
