@@ -226,13 +226,17 @@ namespace Fsel.System.Application.Commands.DailyQuiz
                 return methodResult;
             });
 
+            var utcNow = DateTime.UtcNow;
+            var todayUtcCustom = new DateTime(utcNow.Year, utcNow.Month, utcNow.Day, endHour.Value - 7, 0, 0, DateTimeKind.Utc);
+
             var result = new DailyQuizModel()
             {
                 Code = code,
                 NumberQuestion = numberQuestion.Value,
                 NumberCorrect = correctCount,
                 DailyQuizQuestions = questionModels.OrderBy(p => p.Content).ToList(),
-                IsDone = true
+                IsDone = true,
+                SpinTime = todayUtcCustom
             };
 
             methodResult.Result = result;
