@@ -139,7 +139,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             }
 
             var courseOveralls = await _courseDbContext.Set<ReportLearningResultModel>()
-                                   .FromSqlRaw("EXEC DashBoardStudentResult @CourseLevels, @SchoolId, @EndDate, @SchoolClasses",
+                                   .FromSqlRaw("EXEC DashBoardStudentResult @SchoolId, @EndDate, @CourseLevels, @SchoolClasses",
                                         new SqlParameter("@CourseLevels", courseLevelsParam),
                                         new SqlParameter("@SchoolId", schoolId),
                                         new SqlParameter("@SchoolClasses", schoolClasses),
