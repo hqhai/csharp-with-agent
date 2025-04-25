@@ -14,6 +14,7 @@ using Fsel.Course.Lms.Application.Services.AiService;
 using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
+using Fsel.Course.Lms.Application.Services.FFmpegServices;
 using Fsel.Course.Lms.Application.Services.InteractionService;
 using Fsel.Course.Lms.Application.Services.NotificationServices;
 using Fsel.Course.Lms.Application.Services.OrderServices;
@@ -173,6 +174,7 @@ builder.Services.AddScoped<ExportFileExcelStudentLearningProcessPublisher>();
 builder.Services.AddScoped<SavePlacementTestAnswersPublisher>();
 builder.Services.AddScoped<ErrorExplainPublisher>();
 builder.Services.AddScoped<ExportFileExcelSchoolLearningProcessPublisher>();
+builder.Services.AddScoped<SpeechToTextPendingAiPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -183,6 +185,7 @@ builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(INotificationService), appSetting?.Services?.NotificationApiUrl);
 builder.AddRefitClients(typeof(IStorageService), appSetting?.Services?.StorageApiUrl);
+builder.AddRefitClients(typeof(IFFmpegServices), appSetting?.Services?.FFmpegApiUrl);
 builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
 {
     httpClient.BaseAddress = new Uri(appSetting?.OpenAiConfig?.Uri ?? string.Empty);
@@ -215,6 +218,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.ExportExcelSchoolLearningProcess, typeof(ExportExcelSchoolLearningProcessConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SavePlacementTestAnswers, typeof(SavePlacementTestAnswersConsumer) },
     { QueueSettings.LmsQueue.NameQueue.ErrorExplainGgSheet, typeof(ErrorExplainConsumer) },
+    { QueueSettings.StorageQueue.NameQueue.ResponseSpeechToTextPendingAi, typeof(ResponseSpeechToTextPendingAiConsumer) },
 });
 
 var app = builder.Build();

@@ -13,6 +13,7 @@ namespace Fsel.Storage.Infrastructure.ValueSettings
 
     public class Services : BaseServices
     {
+        public string? FFmpegApiUrl { get; set; }
     }
 
     public class OpenAiConfig
