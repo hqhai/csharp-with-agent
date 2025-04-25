@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 {
+    using System.Text;
     using System.Text.Json.Serialization;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
@@ -126,8 +127,20 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             var schoolId = schoolIdResult.Content?.Result ?? Guid.NewGuid();
             var schoolClasses = request.SchoolClassStr ?? (object)DBNull.Value;
             var endDate = request.EndDate ?? (object)DBNull.Value;
+
+            object? courseLevelsParam = null;
+            if (courseLevels.Any())
+            {
+                courseLevelsParam = new StringBuilder().AppendJoin(",", courseLevels).ToString();
+            }
+            else
+            {
+                courseLevelsParam = DBNull.Value;
+            }
+
             var courseOveralls = await _courseDbContext.Set<ReportLearningResultModel>()
-                                   .FromSqlRaw("EXEC DashBoardStudentResult @SchoolId, @EndDate, @SchoolClasses",
+                                   .FromSqlRaw("EXEC DashBoardStudentResult @CourseLevels, @SchoolId, @EndDate, @SchoolClasses",
+                                        new SqlParameter("@CourseLevels", courseLevelsParam),
                                         new SqlParameter("@SchoolId", schoolId),
                                         new SqlParameter("@SchoolClasses", schoolClasses),
                                         new SqlParameter("@EndDate", endDate))
