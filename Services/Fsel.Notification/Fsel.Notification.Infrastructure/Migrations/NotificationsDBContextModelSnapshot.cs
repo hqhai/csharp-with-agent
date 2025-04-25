@@ -667,7 +667,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/account?setting=mySubscription",
+                            TemplateLink = "/account/mySubscription",
                             TemplateMessage = "Khóa học của bạn sẽ kết thúc trong 2 tuần tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
                             Type = "LinkPage"
                         },
@@ -681,7 +681,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/account?setting=mySubscription",
+                            TemplateLink = "/account/mySubscription",
                             TemplateMessage = "Khóa học của bạn sẽ kết thúc trong 2 ngày tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
                             Type = "LinkPage"
                         },
@@ -751,7 +751,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/change-level",
+                            TemplateLink = "/account/mySubscription",
                             TemplateMessage = "Việc học liên tục có thể giúp cải thiện các kỹ năng của bạn nhanh gấp 3 lần so với các bạn học dừng lại. Nhấn để nâng cấp ngay nào!",
                             Type = "LinkPage"
                         },
@@ -765,7 +765,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/account?setting=mySubscription",
+                            TemplateLink = "/account/mySubscription",
                             TemplateMessage = "Các nội dung học thuật có thể bị khoá lại sau 7 ngày nữa. Cơ hội cuối, gia hạn gói ngay nào!",
                             Type = "LinkPage"
                         },
@@ -962,7 +962,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Priority = 1,
                             TemplateLink = "",
-                            TemplateMessage = "Cảm ơn bạn đã tham gia khảo sát! Chúng tôi trân trọng cảm ơn bạn đã hoàn thành khảo sát Tháng Tự Học Ngoại Ngữ - Hà Nội! Để bày tỏ sự tri ân, bạn đã nhận được {0} FSEL COINS. Chúng tôi sẽ xem xét và đánh giá ý kiến của bạn để không ngừng cải thiện trải nghiệm học tập. Cảm ơn bạn đã đồng hành cùng FSEL!",
+                            TemplateMessage = "Cảm ơn bạn đã đánh giá FSEL 5 sao! FSEL đã gửi tặng {0} xu vào tài khoản của bạn. Tiếp tục học tập chăm chỉ nhé!",
                             Type = "Text"
                         },
                         new
@@ -2081,7 +2081,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "vi-VN",
                             NotificationTypeId = new Guid("3c7f9946-3f95-4a84-b2df-7cffbf36a41c"),
-                            TemplateMessage = "Cảm ơn bạn đã tham gia khảo sát! Chúng tôi trân trọng cảm ơn bạn đã hoàn thành khảo sát Tháng Tự Học Ngoại Ngữ - Hà Nội! Để bày tỏ sự tri ân, bạn đã nhận được {0} FSEL COINS. Chúng tôi sẽ xem xét và đánh giá ý kiến của bạn để không ngừng cải thiện trải nghiệm học tập. Cảm ơn bạn đã đồng hành cùng FSEL!"
+                            TemplateMessage = "Cảm ơn bạn đã đánh giá FSEL 5 sao! FSEL đã gửi tặng {0} xu vào tài khoản của bạn. Tiếp tục học tập chăm chỉ nhé!"
                         },
                         new
                         {
@@ -2092,7 +2092,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "en-US",
                             NotificationTypeId = new Guid("3c7f9946-3f95-4a84-b2df-7cffbf36a41c"),
-                            TemplateMessage = "Thank you for participating in the survey! We sincerely appreciate your completion of the Self-Study Language Month - Hanoi survey! As a token of our gratitude, you have received {0} FSEL COINS. Your feedback will be carefully reviewed and evaluated to continuously improve the learning experience. Thank you for your support and for being part of FSEL!  "
+                            TemplateMessage = "Thank you for rating FSEL 5 stars! FSEL has credited {0} coins to your account. Keep up the hard work! "
                         },
                         new
                         {
