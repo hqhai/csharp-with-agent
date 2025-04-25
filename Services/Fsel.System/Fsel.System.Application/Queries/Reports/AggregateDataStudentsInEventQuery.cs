@@ -17,12 +17,16 @@ namespace Fsel.System.Application.Queries.Reports
         private readonly IQuestBoardStudentRepository _questBoardStudentRepository;
         private readonly IQuestBoardOverallStudentRepository _questBoardOverallStudentRepository;
         private readonly ITokenHistoryRepository _tokenHistoryRepository;
+        private readonly IQuestBoardRepository _questBoardRepository;
+        private readonly IQuestBoardOverallRepository _questBoardOverallRepository;
 
-        public AggregateDataStudentsInEventQueryHandler(IQuestBoardStudentRepository questBoardStudentRepository, IQuestBoardOverallStudentRepository questBoardOverallStudentRepository, ITokenHistoryRepository tokenHistoryRepository)
+        public AggregateDataStudentsInEventQueryHandler(IQuestBoardStudentRepository questBoardStudentRepository, IQuestBoardOverallStudentRepository questBoardOverallStudentRepository, ITokenHistoryRepository tokenHistoryRepository, IQuestBoardRepository questBoardRepository, IQuestBoardOverallRepository questBoardOverallRepository)
         {
             _questBoardStudentRepository = questBoardStudentRepository;
             _questBoardOverallStudentRepository = questBoardOverallStudentRepository;
             _tokenHistoryRepository = tokenHistoryRepository;
+            _questBoardRepository = questBoardRepository;
+            _questBoardOverallRepository = questBoardOverallRepository;
         }
 
         public async Task<MethodResult<IList<AggregateDataStudentsInEventModel>>> Handle(AggregateDataStudentsInEventQuery request, CancellationToken cancellationToken)
@@ -37,9 +41,25 @@ namespace Fsel.System.Application.Queries.Reports
                 return methodResult;
             }
 
-            var questBoardEntities = await _questBoardStudentRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId).Where(p => p.Status == EnumQuestBoardStudentStatus.Received && p.CreatedDate >= request.StartDate && p.CreatedDate <= request.EndDate).ToListAsync(cancellationToken);
+            var questBoardDict = await _questBoardRepository.Queryable
+                .ToDictionaryAsync(x => x.Id, cancellationToken);
 
-            var questBoardOverallEntities = await _questBoardOverallStudentRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId).Where(p => p.Status == EnumQuestBoardOverallStudentStatus.Received && p.CreatedDate >= request.StartDate && p.CreatedDate <= request.EndDate).ToListAsync(cancellationToken);
+            var questBoardOverallDict = await _questBoardOverallRepository.Queryable
+                .ToDictionaryAsync(x => x.Id, cancellationToken);
+
+            var questBoardStudents = await _questBoardStudentRepository.Queryable
+                .WhereBulkContains(studentIds, p => p.StudentId)
+                .Where(p => p.CreatedDate >= request.StartDate && p.CreatedDate <= request.EndDate)
+                .Where(p => questBoardDict.ContainsKey(p.QuestBoardId) &&
+                            questBoardDict[p.QuestBoardId].TargetValue <= p.CurrentValue)
+                .ToListAsync(cancellationToken);
+
+            var questBoardOverallStudents = await _questBoardOverallStudentRepository.Queryable
+                .WhereBulkContains(studentIds, p => p.StudentId)
+                .Where(p => p.CreatedDate >= request.StartDate && p.CreatedDate <= request.EndDate)
+                .Where(p => questBoardOverallDict.ContainsKey(p.QuestBoardOverallId) &&
+                            questBoardOverallDict[p.QuestBoardOverallId].TargetValue <= p.CurrentValue)
+                .ToListAsync(cancellationToken);
 
             var tokenHistoryEntities = await _tokenHistoryRepository.Queryable.WhereBulkContains(userIds, p => p.UserId).Where(p => p.Type == EnumTokenHistoryType.Recevived && p.CreatedDate >= request.StartDate && p.CreatedDate <= request.EndDate).ToListAsync(cancellationToken);
 
@@ -47,8 +67,8 @@ namespace Fsel.System.Application.Queries.Reports
 
             request.Students.ForEach(p =>
             {
-                var questBoards = questBoardEntities.Where(x => x.StudentId == p.StudentId).Count();
-                var questBoardOveralls = questBoardOverallEntities.Where(x => x.StudentId == p.StudentId).Count();
+                var questBoards = questBoardStudents.Where(x => x.StudentId == p.StudentId).Count();
+                var questBoardOveralls = questBoardOverallStudents.Where(x => x.StudentId == p.StudentId).Count();
                 var totalToken = tokenHistoryEntities.Where(x => x.UserId == p.UserId).Sum(p => p.VolatileToken);
 
                 students.Add(new AggregateDataStudentsInEventModel()
