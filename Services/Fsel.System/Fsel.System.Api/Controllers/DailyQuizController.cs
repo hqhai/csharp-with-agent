@@ -61,5 +61,17 @@ namespace Fsel.System.Api.Controllers
             var queryResult = await _mediator.Send(new GetDailyQuizQuestionsQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get questions
+        /// </summary>
+        [HttpGet("get-remaining-time")]
+        [ProducesResponseType(typeof(MethodResult<int>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetRemainingTime()
+        {
+            var queryResult = await _mediator.Send(new GetRemainingTimeQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
