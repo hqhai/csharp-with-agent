@@ -86,6 +86,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
                                       CompetitionEventId = sce.CompetitionEventId
                                   }).ToListAsync(cancellationToken);
 
+            students = students.DistinctBy(p => p.StudentId).ToList();
+
             int chunkSize = 10000;
             var chunks = ChunkList(students, chunkSize);
 

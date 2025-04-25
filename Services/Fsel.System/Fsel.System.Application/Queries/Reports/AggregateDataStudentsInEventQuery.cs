@@ -42,24 +42,30 @@ namespace Fsel.System.Application.Queries.Reports
             }
 
             var questBoardDict = await _questBoardRepository.Queryable
-                .ToDictionaryAsync(x => x.Id, cancellationToken);
+                 .ToDictionaryAsync(x => x.Id, cancellationToken);
 
             var questBoardOverallDict = await _questBoardOverallRepository.Queryable
                 .ToDictionaryAsync(x => x.Id, cancellationToken);
 
-            var questBoardStudents = await _questBoardStudentRepository.Queryable
+            var questBoardStudentEntities = await _questBoardStudentRepository.Queryable
                 .WhereBulkContains(studentIds, p => p.StudentId)
                 .Where(p => p.CreatedDate >= request.StartDate && p.CreatedDate <= request.EndDate)
-                .Where(p => questBoardDict.ContainsKey(p.QuestBoardId) &&
-                            questBoardDict[p.QuestBoardId].TargetValue <= p.CurrentValue)
                 .ToListAsync(cancellationToken);
 
-            var questBoardOverallStudents = await _questBoardOverallStudentRepository.Queryable
+            var questBoardStudents = questBoardStudentEntities
+                .Where(p => questBoardDict.TryGetValue(p.QuestBoardId, out var questBoard) &&
+                            questBoard.TargetValue <= p.CurrentValue)
+                .ToList();
+
+            var questBoardOverallStudentEntities = await _questBoardOverallStudentRepository.Queryable
                 .WhereBulkContains(studentIds, p => p.StudentId)
                 .Where(p => p.CreatedDate >= request.StartDate && p.CreatedDate <= request.EndDate)
-                .Where(p => questBoardOverallDict.ContainsKey(p.QuestBoardOverallId) &&
-                            questBoardOverallDict[p.QuestBoardOverallId].TargetValue <= p.CurrentValue)
                 .ToListAsync(cancellationToken);
+
+            var questBoardOverallStudents = questBoardOverallStudentEntities
+                .Where(p => questBoardOverallDict.TryGetValue(p.QuestBoardOverallId, out var questBoardOverall) &&
+                            questBoardOverall.TargetValue <= p.CurrentValue)
+                .ToList();
 
             var tokenHistoryEntities = await _tokenHistoryRepository.Queryable.WhereBulkContains(userIds, p => p.UserId).Where(p => p.Type == EnumTokenHistoryType.Recevived && p.CreatedDate >= request.StartDate && p.CreatedDate <= request.EndDate).ToListAsync(cancellationToken);
 
