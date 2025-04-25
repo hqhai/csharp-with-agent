@@ -152,7 +152,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
 
         private async Task PublishTextToSocket(SpeechToTextAiConsumerModel message, string? convertContent, string? filePath)
         {
-            await _speechToTextPublisher.Publish(new SpeechToTextConsumerModel { UserId = message.UserId, TranscriptFile = new Shared.Models.ShareModels.TranscriptFileModel { Content = convertContent, FilePath = filePath } }, CancellationToken.None);
+            await _speechToTextPublisher.Publish(new SpeechToTextConsumerModel { UserId = message.UserId, TranscriptFile = new Shared.Models.ShareModels.TranscriptFileModel { Content = convertContent, FilePath = filePath, DateTime = message.CurrentDate } }, CancellationToken.None);
         }
     }
 }
