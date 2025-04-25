@@ -19,6 +19,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     using MediatR;
     using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
     using Unit = Domain.Entities.Unit;
 
     public class GetReportLearningProgressQuery : IRequest<MethodResult<DashBoardLearningProgressModel>>
@@ -201,11 +202,12 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 reportLearningProgress.OverallLearningProgress = new BaseChartResultModel
                 {
                     Type = EnumChartType.LineChart,
-                    DataCharts = dataUnitOverall.OrderBy(x => x.Key).Select(item => new DataChartModel
-                    {
-                        Label = $"{item.Key}",
-                        Value = item.Value
-                    }).ToList()
+                    DataCharts = Enumerable.Range(1, CourseProgressValue.CountUnitAca).Select(item =>
+                        new DataChartModel
+                        {
+                            Label = $"{item}",
+                            Value = dataUnitOverall.TryGetValue(item, out var totalDone) ? totalDone : 0
+                        }).ToList()
                 };
             }
             if (request.Type == nameof(Lesson))
@@ -219,7 +221,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                                                                  new SqlParameter("@DisplayOrderUnit", request.DisplayOrderUnit))
                                                                .AsNoTracking()
                                                                .ToListAsync(cancellationToken);
-                var dataLessonOverall = lessonOverallsDict.ToDictionary(x => x.DisplayOrder, x => x.TotalUnitDone);
+                var dataLessonOverall = lessonOverallsDict.ToDictionary(x => x.DisplayOrder, x => x.TotalLessonDone);
                 //var lessonOverallsDict = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                 //                                join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
                 //                                join cum in _courseUnitMockTestRepository.Queryable on c.Id equals cum.CourseId
@@ -243,11 +245,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 reportLearningProgress.OverallLearningProgress = new BaseChartResultModel
                 {
                     Type = EnumChartType.LineChart,
-                    DataCharts = dataLessonOverall.OrderBy(x => x.Key).Select(item =>
+                    DataCharts = Enumerable.Range(1, CourseProgressValue.CountLessonAca).Select(item =>
                         new DataChartModel
                         {
-                            Label = $"{item.Key}",
-                            Value = item.Value
+                            Label = $"{item}",
+                            Value = dataLessonOverall.TryGetValue(item, out var totalDone) ? totalDone : 0
                         }).ToList()
                 };
             }
