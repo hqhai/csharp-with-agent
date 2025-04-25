@@ -111,7 +111,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<SchoolInfoFilterModel> SchoolInfoFilters { get; set; }
         public DbSet<DistrictInfoModel> DistrictInfos { get; set; }
 
-        #endregion
+        #endregion Report
 
         public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
@@ -210,6 +210,8 @@ namespace Fsel.Course.Infrastructure
             //modelBuilder.Ignore<TotalDetailLearningQualityModel>();
             //modelBuilder.Ignore<SchoolInfoModel>();
             //modelBuilder.Ignore<CourseCompleteReportModel>();
+            //modelBuilder.Ignore<SchoolInfoFilterModel>();
+            //modelBuilder.Ignore<DistrictInfoModel>();
 
             base.OnModelCreating(modelBuilder);
         }

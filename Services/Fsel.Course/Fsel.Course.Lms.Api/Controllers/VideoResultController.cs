@@ -49,5 +49,17 @@ namespace Fsel.Course.Lms.Api.Controllers
             MethodResult<bool> commandResult = await _mediator.Send(new UpdateShowTokenVideoResultCommand { LessonResultId = lessonResultId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Review lesson video
+        /// </summary>
+        [HttpPut("playback-speed")]
+        [ProducesResponseType(typeof(MethodResult<VideoResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SetPlaybackSpeed([FromBody] UpdatePlaybackSpeedCommand command)
+        {
+            MethodResult<VideoResultModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
