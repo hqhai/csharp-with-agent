@@ -26,6 +26,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         }
 
         public Guid? UserId { get; set; }
+        public Guid? CourseId { get; set; }
         public TeacherModel? Teacher { get; set; }
         public CSOModel? CSO { get; set; }
         public StudentModel? Student { get; set; }

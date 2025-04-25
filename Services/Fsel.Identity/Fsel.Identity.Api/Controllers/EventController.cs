@@ -3,6 +3,7 @@
 using System.Net;
 using Asp.Versioning;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Core.Base.BaseModels;
@@ -13,6 +14,7 @@ using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,6 +24,7 @@ namespace Fsel.Identity.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/event")]
     [ApiController]
+    [Permission]
     public class EventController : BaseController
     {
         private readonly IMediator _mediator;

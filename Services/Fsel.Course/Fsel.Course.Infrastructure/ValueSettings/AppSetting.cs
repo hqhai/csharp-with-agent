@@ -17,6 +17,10 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public CustomerSupportConfig? CustomerSupportConfig { get; set; }
 
         public GoogleSheetConfig? GoogleSheetConfig { get; set; }
+
+        public CacheConfig? CacheConfig { get; set; }
+
+        public TouchpointConfig? TouchpointConfig { get; set; }
     }
 
     public class ConstantUrl
@@ -80,5 +84,16 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public int Port { get; set; }
         public string? Username { get; set; }
         public string? Password { get; set; }
+    }
+
+    public class CacheConfig
+    {
+        public bool TurnOnCaching { get; set; }
+        public int CachingDuration { get; set; }
+    }
+
+    public class TouchpointConfig
+    {
+        public bool TurnOnTouchpoint { get; set; }
     }
 }

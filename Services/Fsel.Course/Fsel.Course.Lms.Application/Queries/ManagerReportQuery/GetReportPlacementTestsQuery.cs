@@ -58,7 +58,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var students = userResults?.Result;
-            if (students == null)
+            if (students == null || !students.Any())
             {
                 return methodResult;
             }
@@ -85,7 +85,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     SchoolName = item.School,
                     Status = GetStatus(placementTestGroupResult),
                     ChooseLevel = placementTestGroupResult?.ChooseLevel,
-                    CurrentLevel = placementTestGroupResult?.CurrentLevel,
+                    CurrentLevel = placementTestGroupResult?.SuggetLevel,
                     ExpiredPTDate = placementTestResult?.UpdatedDate ?? placementTestResult?.CreatedDate,
                 });
             }

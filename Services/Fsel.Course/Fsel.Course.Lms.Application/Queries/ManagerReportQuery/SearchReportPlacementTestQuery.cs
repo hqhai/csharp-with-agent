@@ -104,7 +104,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     Status = x.Status,
                     ChooseLevel = x.ChooseLevel,
                     CompletionLevel = x.CompletionLevel,
-                    CurrentLevel = x.CurrentLevel,
+                    CurrentLevel = x.SuggetLevel,
                 })
                 .ToListAsync(cancellationToken);
 

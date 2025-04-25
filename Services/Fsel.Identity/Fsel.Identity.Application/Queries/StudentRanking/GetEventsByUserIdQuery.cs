@@ -56,7 +56,6 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             ((!x.CompetitionEvents.EventContent.StartDate.HasValue && !x.CompetitionEvents.EventContent.EndDate.HasValue) ||
             (x.CompetitionEvents.EventContent.StartDate.HasValue &&
             x.CompetitionEvents.EventContent.EndDate.HasValue &&
-            x.CompetitionEvents.EventContent.StartDate.Value.Date <= currentDate.Date &&
             x.CompetitionEvents.EventContent.EndDate.Value.Date >= currentDate.Date)))
                 .Select(x => x.CompetitionEvents);
 

@@ -5,7 +5,6 @@ namespace Fsel.Interaction.Application.Queries.InterationActionQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.InterationActions;
@@ -44,56 +43,33 @@ namespace Fsel.Interaction.Application.Queries.InterationActionQuery
         {
             int numberLike = 0;
 
-            numberLike = await _interactionActionRepository.Queryable.Where(p => request.ClassForumResultIds != null && request.ClassForumResultIds.Contains(p.ObjectId) && p.Type == EnumInteractionActionType.Like).CountAsync(cancellationToken);
+            numberLike = await _interactionActionRepository.Queryable.WhereBulkContains(request.ClassForumResultIds, p => (p.ObjectId)).Where(p => p.Type == EnumInteractionActionType.Like).CountAsync(cancellationToken);
 
-            var comments = await _commentRepository.Queryable.Where(p => request.ClassForumResultIds != null && request.ClassForumResultIds.Contains(p.ObjectId) && p.Type == EnumInteractionType.ClassForum).ToListAsync(cancellationToken);
+            var comments = await _commentRepository.Queryable.WhereBulkContains(request.ClassForumResultIds, p => (p.ObjectId)).Where(p => p.Type == EnumInteractionType.ClassForum && p.Status == EnumCommentStatus.Approver).ToListAsync(cancellationToken);
 
-            var replyComments = await _commentRepository.Queryable.Where(p => comments != null && comments.Select(x => x.Id).Contains(p.ObjectId) && p.Type == EnumInteractionType.ReplyComment).ToListAsync(cancellationToken);
+            var commentIds = comments.Select(p => p.Id).ToList();
 
-            var commentsByUser = comments.Where(n => n.UserId == request.UserId).Select(x => x.Id).ToList();
-            var replyCommentsByUser = replyComments.Where(n => n.UserId == request.UserId).Select(x => x.Id).ToList();
+            var replyComments = await _commentRepository.Queryable.WhereBulkContains(commentIds, p => (p.ObjectId)).Where(p => p.Type == EnumInteractionType.ReplyComment && p.Status == EnumCommentStatus.Approver).ToListAsync(cancellationToken);
 
-            numberLike += await _interactionActionRepository.Queryable.Where(p => commentsByUser != null && commentsByUser.Contains(p.ObjectId) && p.Type == EnumInteractionActionType.Like).CountAsync(cancellationToken);
+            var commentsByOwner = comments.Where(n => n.UserId == request.UserId).Select(x => x.Id).ToList();
+            var replyCommentsByOwner = replyComments.Where(n => n.UserId == request.UserId).Select(x => x.Id).ToList();
 
-            numberLike += await _interactionActionRepository.Queryable.Where(p => replyCommentsByUser != null && replyCommentsByUser.Contains(p.ObjectId) && p.Type == EnumInteractionActionType.Like).CountAsync(cancellationToken);
+            var listCommentByOwner = commentsByOwner.Union(replyCommentsByOwner).ToList();
 
-            int numberComment = 0;
-
-            var commentIds = await _commentRepository.Queryable.Where(p => request.ClassForumResultIds != null && request.ClassForumResultIds.Contains(p.ObjectId) && p.Type == EnumInteractionType.ClassForum).ToListAsync(cancellationToken);
-            numberComment += commentIds.Count;
-
-            var numberReplyComment = await _commentRepository.Queryable.Where(p => commentIds != null && commentIds.Select(x => x.Id).Contains(p.ObjectId) && p.Type == EnumInteractionType.ReplyComment).CountAsync(cancellationToken);
-            numberComment += numberReplyComment;
+            numberLike += await _interactionActionRepository.Queryable.WhereBulkContains(listCommentByOwner, p => (p.ObjectId)).Where(p => p.Type == EnumInteractionActionType.Like).CountAsync(cancellationToken);
 
             aggregateNumberOfLikes.Receive = new AggregateNumberOfLikesAndCommentsModel
             {
-                NumberComment = numberComment,
+                NumberComment = comments.Count + replyComments.Count,
                 NumberLike = numberLike,
             };
         }
 
         private async Task Give(AggregateNumberOfLikesAndCommentsQueryModel request, AggregateNumberOfLikesAndCommentsModels aggregateNumberOfLikes, CancellationToken cancellationToken)
         {
-            int numberComment = 0;
+            var numberComment = await _commentRepository.Queryable.WhereBulkNotContains(request.ClassForumResultIds, p => p.ObjectId).Where(p => p.UserId == request.UserId && p.CourseId == request.CourseId && p.Status == EnumCommentStatus.Approver).CountAsync(cancellationToken);
 
-            var comments = await _commentRepository.Queryable.Where(p => request.ClassForumResultIds != null && !request.ClassForumResultIds.Contains(p.ObjectId) && request.CourseClassForumResultIds != null && request.CourseClassForumResultIds.Contains(p.ObjectId) && p.Type == EnumInteractionType.ClassForum).ToListAsync(cancellationToken);
-
-            var replyComment = await _commentRepository.Queryable.Where(p => comments != null && comments.Select(x => x.Id).Contains(p.ObjectId) && p.Type == EnumInteractionType.ReplyComment).ToListAsync(cancellationToken);
-
-            numberComment += comments.Where(p => p.UserId == request.UserId).Count();
-            numberComment += replyComment.Where(p => p.UserId == request.UserId).Count();
-
-            int numberLike = 0;
-
-            var actionLikes = await _interactionActionRepository.Queryable.Where(p => p.Type == EnumInteractionActionType.Like && p.UserId == request.UserId).ToListAsync(cancellationToken);
-
-            numberLike += actionLikes.Where(p => request.ClassForumResultIds != null && !request.ClassForumResultIds.Contains(p.ObjectId) && request.CourseClassForumResultIds != null && request.CourseClassForumResultIds.Contains(p.ObjectId)).Count();
-
-            comments = comments.Where(p => p.UserId != request.UserId).ToList();
-            replyComment = replyComment.Where(p => p.UserId != request.UserId).ToList();
-
-            numberLike += actionLikes.Where(p => comments.Select(x => x.Id).Contains(p.ObjectId)).Count();
-            numberLike += actionLikes.Where(p => replyComment.Select(x => x.Id).Contains(p.ObjectId)).Count();
+            var numberLike = await _interactionActionRepository.Queryable.WhereBulkNotContains(request.ClassForumResultIds, p => p.ObjectId).Where(p => p.Type == EnumInteractionActionType.Like && p.UserId == request.UserId && p.CourseId == request.CourseId).CountAsync(cancellationToken);
 
             aggregateNumberOfLikes.Give = new AggregateNumberOfLikesAndCommentsModel
             {

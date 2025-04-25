@@ -97,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 return methodResult;
             }
 
-            var userCourseSettingResults = await _userService.GetUserCourseSettingsAsync();
+            var userCourseSettingResults = await _userService.GetUserCourseSettingsAsync(_authContext.CurrentUserId);
             if (!userCourseSettingResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(userCourseSettingResults));
@@ -176,7 +176,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                                                                                   .ThenByDescending(x => x.UpdatedDate)
                                                                                   .FirstOrDefaultAsync(cancellationToken);
                     var mockTestResultModel = _mapper.Map<MockTestResultModel>(mockTestResult);
-                    courseManager.BandScores = mockTestResultModel.Scores;
+                    courseManager.BandScores = mockTestResultModel?.Scores ?? default;
                     courseManager.TargetBandScores = courseManager.CourseLevel.Value.GetBandScore();
                 }
                 courseManager.IsCheckPercentColor = await IsColorToPercentAsync(courseResult);
@@ -269,7 +269,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                     }
                 }
             }
-            else if (courseManager.CourseType == EnumCourseType.Academic)
+            else if (courseManager.CourseType == EnumCourseType.Academic || courseManager.CourseType == EnumCourseType.EnglishFoundation)
             {
                 var finalTestResult = await _finalTestResultRepository.Queryable.Include(x => x.FinalTest).ThenInclude(x => x.CourseUnitMockTests.Where(x => x.CourseId == courseResult.CourseId))
                     .Where(x => x.CourseId == courseResult.CourseId && x.StudentId == courseResult.StudentId && x.Status != EnumResultStatus.Unfinished)

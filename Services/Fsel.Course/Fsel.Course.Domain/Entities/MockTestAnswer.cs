@@ -5,10 +5,13 @@ namespace Fsel.Course.Domain.Entities
     using System;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using Fsel.Common.ActionResults;
+    using System.Reflection;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Shared.Helpers;
     using StringHelper = Shared.Helpers.StringHelper;
+    using Newtonsoft.Json;
 
     public class MockTestAnswer : BaseAnswer
     {
@@ -25,6 +28,7 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         private string? _answerStr;
 
+        [MaxLength(11000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public override string? AnswerStr
         {
             get { return _answerStr; }
@@ -80,5 +84,42 @@ namespace Fsel.Course.Domain.Entities
         public double? PronunciationScore { get; set; }
 
         public int RetryTime { get; set; }
+
+        public override bool IsValid()
+        {
+            ValidationContext validationContext = new ValidationContext(this, null, null);
+            List<ValidationResult> list = new List<ValidationResult>();
+            if (!Validator.TryValidateObject(this, validationContext, list, validateAllProperties: true))
+            {
+                foreach (ValidationResult item in list)
+                {
+                    ErrorResult errorResult = new ErrorResult
+                    {
+                        ErrorCode = item.ErrorMessage
+                    };
+                    foreach (string memberName in item.MemberNames)
+                    {
+                        PropertyInfo property = validationContext.ObjectType.GetProperty(memberName);
+                        object obj = property?.GetValue(validationContext.ObjectInstance, null);
+                        if (obj != null)
+                        {
+                            List<object> errorValues = new List<object> { obj };
+                            List<object> exactValues = ((property?.GetCustomAttributesData())?.FirstOrDefault((CustomAttributeData x) => x.NamedArguments.Select((CustomAttributeNamedArgument n) => n.TypedValue.Value).Contains(item.ErrorMessage)))?.ConstructorArguments.Select((CustomAttributeTypedArgument x) => x.Value).Cast<object>().ToList();
+                            errorResult.Errors.Add(new Error(memberName, errorValues, exactValues));
+                        }
+                        else
+                        {
+                            errorResult.Errors.Add(new Error(memberName));
+                        }
+                    }
+
+                    AddErrorResults(errorResult);
+                }
+
+                _errorMessages.RemoveAll(err => err.ErrorCode == nameof(Required) && err.Errors.Any(e => e.FieldName == nameof(BaseAnswer.AnswerStr)));
+            }
+
+            return _errorMessages.Count == 0;
+        }
     }
 }
