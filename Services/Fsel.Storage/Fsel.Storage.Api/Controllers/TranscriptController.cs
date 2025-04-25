@@ -118,5 +118,20 @@ namespace Fsel.Storage.Api.Controllers
             var methodResult = await _mediator.Send(request);
             return methodResult.GetActionResult();
         }
+
+        /// <summary>
+        /// convert wav
+        /// </summary>
+        [DisableFormValueModelBinding]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [HttpPost("convert-wav")]
+        public async Task<IActionResult> ConvertFileToWav(IFormFile file)
+        {
+            var methodResult = await _mediator.Send(new ConvertFileToWAVCommand { FormFile = file });
+            return methodResult.GetActionResult();
+        }
     }
 }
