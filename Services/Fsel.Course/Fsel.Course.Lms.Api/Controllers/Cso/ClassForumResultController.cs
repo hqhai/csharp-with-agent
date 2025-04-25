@@ -20,7 +20,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/cso/class-forum-result")]
     [ApiController]
-    [Permission(role: nameof(EnumRole.CSO))]
+    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
     public class ClassForumResultController : ControllerBase
     {
         private readonly IMediator _mediator;

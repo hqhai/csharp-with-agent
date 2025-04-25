@@ -13,5 +13,6 @@ namespace Fsel.Shared.Models.ShareModels
     {
         public string? FilePath { get; set; }
         public string? Content { get; set; }
+        public string? DateTime { get; set; }
     }
 }

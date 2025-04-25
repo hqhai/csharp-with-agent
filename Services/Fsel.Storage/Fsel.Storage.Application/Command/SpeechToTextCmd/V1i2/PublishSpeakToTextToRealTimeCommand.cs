@@ -19,6 +19,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
     using Refit;
     using Newtonsoft.Json;
     using Fsel.Storage.Domain.Models.EntityModels;
+    using Fsel.Storage.Application.Services.FFmpegServices;
 
     public class PublishSpeakToTextToRealTimeCommand : SpeechToTextAiConsumerModel, INotification
     {
@@ -35,11 +36,19 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
         private const int Retry_GPT_Time = 2;
         private readonly IDeepgramProvider _deepgramProvider;
         private readonly ICognitiveProvider _cognitiveProvider;
+        private readonly IFFmpegServices _fFmpegServices;
         private int _countRetry;
         private int _intervalRetryTime = 5;
         private DateTime _startDate, _endDate;
 
-        public PublishSpeakToTextToRealTimeCommandHandler(IOpenAIService openAIService, IAmazonS3Service amazonS3Service, SpeechToTextPublisher speechToTextPublisher, AppSetting appSetting, ILogger<PublishSpeakToTextToRealTimeCommand> logger, IDeepgramProvider deepgramProvider, ICognitiveProvider cognitiveProvider)
+        public PublishSpeakToTextToRealTimeCommandHandler(IOpenAIService openAIService,
+                                                          IAmazonS3Service amazonS3Service,
+                                                          SpeechToTextPublisher speechToTextPublisher,
+                                                          AppSetting appSetting,
+                                                          ILogger<PublishSpeakToTextToRealTimeCommand> logger,
+                                                          IDeepgramProvider deepgramProvider,
+                                                          ICognitiveProvider cognitiveProvider,
+                                                          IFFmpegServices fFmpegServices)
         {
             _openAIService = openAIService;
             _amazonS3Service = amazonS3Service;
@@ -48,16 +57,47 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
             _logger = logger;
             _deepgramProvider = deepgramProvider;
             _cognitiveProvider = cognitiveProvider;
+            _fFmpegServices = fFmpegServices;
         }
 
         public async Task Handle(PublishSpeakToTextToRealTimeCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            IFormFile formFile = ConvertToIFormFile(request.FileData, request.FileName, request.ContentType);
+
+            #region Convert file ffmpeg
+            IFormFile formFileDefault = ConvertToIFormFile(request.FileData, request.FileName, request.ContentType);
+            if (formFileDefault == null)
+            {
+                return;
+            }
+
+            await using var stream = formFileDefault.OpenReadStream();
+            var filePart = new StreamPart(stream, formFileDefault.FileName, formFileDefault.ContentType);
+
+            var ffmpegConvert = await _fFmpegServices.Convert(filePart);
+            if (!ffmpegConvert.IsSuccessStatusCode)
+            {
+                return;
+            }
+
+            var jobConvertResult = await _fFmpegServices.Status(ffmpegConvert.Content?.JobId ?? Guid.Empty);
+            if (!jobConvertResult.IsSuccessStatusCode)
+            {
+                return;
+            }
+            var jobConvert = jobConvertResult.Content;
+            if (jobConvert == null || jobConvert.FileData == null || jobConvert.FileName == null || jobConvert.ContentType == null)
+            {
+                return;
+            }
+
+            byte[] byteArray = Convert.FromBase64String(jobConvert.FileData);
+            IFormFile formFile = ConvertToIFormFile(byteArray, jobConvert.FileName, jobConvert.ContentType);
             if (formFile == null)
             {
                 return;
             }
+            #endregion
 
             var pollyRetry = Policy.HandleResult<bool>(result => !result)
                                 .WaitAndRetryAsync(Max_Time_Retry, retryAttempt => TimeSpan.FromSeconds(_intervalRetryTime));
@@ -152,7 +192,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
 
         private async Task PublishTextToSocket(SpeechToTextAiConsumerModel message, string? convertContent, string? filePath)
         {
-            await _speechToTextPublisher.Publish(new SpeechToTextConsumerModel { UserId = message.UserId, TranscriptFile = new Shared.Models.ShareModels.TranscriptFileModel { Content = convertContent, FilePath = filePath } }, CancellationToken.None);
+            await _speechToTextPublisher.Publish(new SpeechToTextConsumerModel { UserId = message.UserId, TranscriptFile = new Shared.Models.ShareModels.TranscriptFileModel { Content = convertContent, FilePath = filePath, DateTime = message.CurrentDate } }, CancellationToken.None);
         }
     }
 }

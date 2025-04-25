@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Application.Commands.StudentCmd
 {
+    using System.Drawing;
     using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
@@ -11,18 +12,18 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Common.Models.Excels;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
-    using Fsel.Identity.Application.Commands.UserCmd;
-    using Fsel.Identity.Application.Commands.UserReferrals;
-    using Fsel.Identity.Application.Services.InteractionService;
-    using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Kros.Extensions;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using EnumAuthUserErrorCode = Domain.Enums.ErrorCodes.EnumAuthUserErrorCode;
+    using Microsoft.Extensions.DependencyInjection;
+    using OfficeOpenXml;
+    using OfficeOpenXml.Style;
 
     public class ImportStudentsIntoPlatformCommand : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
@@ -31,21 +32,18 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     public class ImportStudentsIntoPlatformCommandHandler : IRequestHandler<ImportStudentsIntoPlatformCommand, MethodResult<Stream>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly IOrderService _orderService;
         private readonly IPlatformRepository _platformRepository;
-        private const string DefaultPassword = "Fsel@2024";
-        private readonly IInteractionService _interactionService;
-        private readonly IMediator _mediator;
-        private readonly IHumanRepository _humanRepository;
+        private readonly IServiceProvider _serviceProvider;
+        private const string ErrorMessage = "Thông báo lỗi";
+        private const string FileNull = "File tải lên không có dữ liệu";
 
-        public ImportStudentsIntoPlatformCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IMediator mediator, IHumanRepository humanRepository)
+        private const int StartYear = 1900;
+
+        public ImportStudentsIntoPlatformCommandHandler(UserManager<User> userManager, IPlatformRepository platformRepository, IServiceProvider serviceProvider)
         {
             _userManager = userManager;
-            _orderService = orderService;
             _platformRepository = platformRepository;
-            _interactionService = interactionService;
-            _mediator = mediator;
-            _humanRepository = humanRepository;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<MethodResult<Stream>> Handle(ImportStudentsIntoPlatformCommand request, CancellationToken cancellationToken)
@@ -53,182 +51,253 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<Stream>();
 
-            if (request.FormFile == null)
-            {
-                methodResult.AddError(nameof(EnumSystemErrorCode.ImportFileRequired));
-                return methodResult;
-            }
-
-            var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentToPlatformModel x, IList<ImportStudentToPlatformModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
-            {
-                if (string.IsNullOrEmpty(x.FullName))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = "Full Name is null" });
-                }
-                if (string.IsNullOrEmpty(x.Email) || !x.Email.IsValidEmail())
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null or malformed" });
-                }
-                else if (_userManager.Users.Any(p => (p.Email == x.Email) && !p.EmailConfirmed))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email not confirmed email" });
-                }
-                else if (_userManager.Users.Any(p => p.Email == x.Email))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email Already exist" });
-                }
-                if (!string.IsNullOrEmpty(x.ParentEmail) && !x.ParentEmail.IsValidEmail())
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.ParentEmail), Message = "Parent Email is null or malformed" });
-                }
-                if (string.IsNullOrEmpty(x.DateOfBirth) || (!string.IsNullOrEmpty(x.DateOfBirth) && !DateTime.TryParse(x.DateOfBirth, out DateTime dob)))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = "Date of birth is null or malformed" });
-                }
-                if (!string.IsNullOrEmpty(x.ReferralCode) && !await _humanRepository.Queryable.AnyAsync(p => p.Code == x.ReferralCode))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.ReferralCode), Message = "Referral code not exist" });
-                }
-                return await Task.FromResult(errors.Count == 0);
-            });
-
-            var duplicateEmails = result.Datas.GroupBy(user => user.Email).Where(group => group.Count() > 1).Select(group => group.Key);
-
-            if (duplicateEmails.Any())
-            {
-                methodResult.AddErrorBadRequest("Duplicate Emails");
-                return methodResult;
-            }
-
-            if (result.Stream != null)
-            {
-                methodResult.Result = result.Stream;
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                return methodResult;
-            }
-
-            var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
-            if (platform == null)
-            {
-                methodResult.AddErrorBadRequest("Platform null");
-                return methodResult;
-            }
-            var users = new List<User>();
-
             try
             {
-                foreach (var student in result.Datas.ToList())
+                if (request.FormFile == null)
                 {
-                    Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
-                    Microsoft.AspNetCore.Identity.IdentityResult identityParentResult;
-                    var user = new User()
-                    {
-                        UserName = student.Email,
-                        Email = student.Email,
-                        FullName = student.FullName,
-                        PhoneNumber = student.PhoneNumber,
-                        EmailConfirmed = true,
-                        Human = new Human()
-                        {
-                            FullName = student.FullName,
-                            PhoneNumber = student.PhoneNumber,
-                            Birthday = Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture),
-                            Email = student.Email,
-                            Student = new Student()
-                            {
-                                CreatedByParent = false,
-                                Occupation = "Student",
-                                School = student.School,
-                                SchoolClass = student.SchoolClass,
-                                SchoolFaculty = student.SchoolFaculty,
-                                SchoolGrade = student.SchoolGrade
-                            }
-                        },
-                        UserPlatforms = new List<UserPlatform>()
-                                            {
-                                                new UserPlatform()
-                                                {
-                                                    PlatformId = platform.Id
-                                                }
-                                            },
-                        UserSettings = new List<UserSetting>()
-                            {
-                                new UserSetting(true)
-                            }
-                    };
-
-                    identityStudentResult = await _userManager.CreateAsync(user, DefaultPassword);
-                    if (!identityStudentResult.Succeeded)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
-                        return methodResult;
-                    }
-                    await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
-                    if (!string.IsNullOrEmpty(student.ParentEmail))
-                    {
-                        var parent = await _userManager.Users.Include(p => p.Human).ThenInclude(p => p.Parent).FirstOrDefaultAsync(p => p.Email == student.ParentEmail, cancellationToken);
-                        if (parent == null)
-                        {
-                            parent = new User()
-                            {
-                                UserName = student.ParentEmail,
-                                Email = student.ParentEmail,
-                                FullName = student.ParentEmail,
-                                EmailConfirmed = true,
-                                Human = new Human()
-                                {
-                                    FullName = student.ParentEmail,
-                                    Email = student.ParentEmail,
-                                    Parent = new Parent()
-                                    {
-                                        Occupation = "Parent",
-                                    }
-                                },
-                                UserPlatforms = new List<UserPlatform>()
-                                {
-                                    new UserPlatform()
-                                    {
-                                        PlatformId = platform.Id
-                                    }
-                                }
-                            };
-
-                            identityParentResult = await _userManager.CreateAsync(parent, DefaultPassword);
-                            if (!identityParentResult.Succeeded)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
-                                return methodResult;
-                            }
-                            await _userManager.AddToRoleAsync(parent, EnumRole.Parent.ToString());
-                        }
-                        if (parent.Human?.Parent != null)
-                        {
-                            user.Human.Student.ParentStudents.Add(new ParentStudent
-                            {
-                                ParentId = parent.Human.Parent.Id,
-                            });
-                            await _userManager.UpdateAsync(user);
-                        }
-                    }
-
-                    var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = user.Human.Birthday, SchoolName = student.School }, cancellationToken);
-                    if (!updateCode.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(updateCode.ErrorMessages);
-                        return methodResult;
-                    }
-
-                    if (!string.IsNullOrEmpty(student.ReferralCode))
-                    {
-                        var updateReferralCodeResult = await _mediator.Send(new CreateUserReferralCommand { ReferralCode = student.ReferralCode, ReceiverId = user.Id }, cancellationToken).ConfigureAwait(false);
-                        if (!updateReferralCodeResult.IsOK)
-                        {
-                            methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);
-                            return methodResult;
-                        }
-                    }
+                    methodResult.AddError(nameof(EnumSystemErrorCode.ImportFileRequired));
+                    return methodResult;
                 }
-                methodResult.StatusCode = StatusCodes.Status200OK;
+
+                Action<ExcelWorksheet, Dictionary<string, int?>?, IList<ValidateExcelModel>> errorHandlerAction = (worksheet, columnIndexes, errors) =>
+                {
+                    worksheet.Cells[1, 9].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                    worksheet.Cells[1, 9].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                    worksheet.Cells[1, 9].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                    worksheet.Cells[1, 9].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                    worksheet.Cells[1, 9].Value = ErrorMessage;
+                    worksheet.Cells[1, 9].Style.Font.Bold = true;
+                    foreach (var error in errors.GroupBy(x => x.RowIndex).Select(x => x).OrderBy(x => x.Key))
+                    {
+                        var row = error.Key;
+
+                        int lastColumn = 9;
+
+                        // Tạo biến lưu trữ dữ liệu dòng hiện tại
+                        List<object?> rowData = new List<object?>();
+                        // Lưu dữ liệu của dòng vào biến rowData
+                        for (int col = 1; col <= worksheet.Dimension.End.Column; col++)
+                        {
+                            rowData.Add(worksheet.Cells[row, col].Value);
+                        }
+
+                        int targetRow = 2;
+                        worksheet.DeleteRow(row, 1);
+                        worksheet.InsertRow(targetRow, 1);
+
+                        // Gắn lại dữ liệu đã lưu vào dòng mới
+                        for (int col = 1; col <= rowData.Count; col++)
+                        {
+                            worksheet.Cells[targetRow, col].Value = rowData[col - 1];
+
+                            // Nếu cần, có thể sao chép cả định dạng
+                            worksheet.Cells[targetRow, col].StyleID = worksheet.Cells[row, col].StyleID;
+                        }
+
+                        var errorMessages = new List<string>();
+
+                        foreach (var errorMessage in error.OrderBy(p => p.RowIndex))
+                        {
+                            var message = errorMessage.Message;
+                            if (!string.IsNullOrEmpty(message))
+                            {
+                                errorMessages.Add(message);
+                                int? num = columnIndexes?[errorMessage.ColumnName ?? string.Empty];
+                                if (num.HasValue)
+                                {
+                                    worksheet.Cells[targetRow, num.Value].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                                    worksheet.Cells[targetRow, num.Value].Style.Fill.BackgroundColor.SetColor(Color.Red);
+                                    worksheet.Cells[targetRow, num.Value].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                                    worksheet.Cells[targetRow, num.Value].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                                    worksheet.Cells[targetRow, num.Value].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                                    worksheet.Cells[targetRow, num.Value].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                                }
+                            }
+                        }
+                        var messages = Shared.Helpers.StringHelper.JoinWithComma(errorMessages.Distinct().ToList());
+                        worksheet.Cells[targetRow, lastColumn].Value = messages;
+                    }
+                };
+
+                Action<ExcelWorksheet, Dictionary<string, int?>?, int, int, ImportStudentToPlatformModel> defaultHandlerAction = (worksheet, columnIndexes, row, num, model) =>
+                {
+                    worksheet.Cells[row, num].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    worksheet.Cells[row, num].Style.Fill.BackgroundColor.SetColor(Color.White);
+                    worksheet.Cells[row, num].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                    worksheet.Cells[row, num].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                    worksheet.Cells[row, num].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                    worksheet.Cells[row, num].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                    if (num == 6)
+                    {
+                        worksheet.Cells[row, num + 1].Value = null;
+                    }
+                };
+
+                var cultureInfo = CultureInfo.InvariantCulture;
+
+                var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentToPlatformModel x, IList<ImportStudentToPlatformModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
+                {
+                    if (!string.IsNullOrEmpty(x.FullName?.Trim()) || x.DateOfBirth.HasValue || !string.IsNullOrEmpty(x.Email?.Trim()))
+                    {
+                        if (string.IsNullOrEmpty(x.FullName?.Trim()))
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.EmptyFullNameVN });
+                        }
+                        else if (!Shared.Helpers.StringHelper.ContainsSpecialChars(x.FullName.Trim()))
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.InvalidFullNameVN });
+                        }
+
+                        if (!string.IsNullOrEmpty(x.PhoneNumber?.Trim()) && !Shared.Helpers.StringHelper.IsValidPhoneNumber(x.PhoneNumber?.Trim()))
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.InvalidPhoneNumberVN });
+                        }
+
+                        if (string.IsNullOrEmpty(x.Email?.Trim()))
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.EmptyEmailVN });
+                        }
+                        else if (!x.Email.Trim().IsValidEmail())
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
+                        }
+
+                        if (!x.DateOfBirth.HasValue)
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.EmptyBirthDayVN });
+                        }
+                        else if (x.DateOfBirth.HasValue && x.DateOfBirth.Value.Year < StartYear)
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
+                        }
+                    }
+                    return await Task.FromResult(errors.Count == 0);
+                },
+                async (Dictionary<int, ImportStudentToPlatformModel> datas, IList<ValidateExcelModel> errors) =>
+                {
+                    var emails = datas.Values.Where(p => p.Email != null && !string.IsNullOrEmpty(p.Email.Trim())).Select(n => n.Email!.Trim());
+
+                    var emailQuery = _userManager.Users.Where(x => emails.Contains(x.Email));
+                    var userNameQuery = _userManager.Users.Where(x => emails.Contains(x.UserName));
+
+                    var usersExist = await emailQuery
+                        .Union(userNameQuery)
+                        .ToArrayAsync(cancellationToken);
+
+                    usersExist.ForEach(user =>
+                    {
+                        var dataByEmail = datas.Values.Where(x => !x.Email.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user.Email) && x.Email.ToLower() == user.Email.ToLower()) || (!string.IsNullOrEmpty(user.UserName) && x.Email.ToLower() == user.UserName.ToLower()));
+                        if (dataByEmail != null)
+                        {
+                            var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
+                            errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Email), Message = ErrorMassageSetting.EmailAlreadyExistVN });
+                        }
+                    });
+
+                    return await Task.FromResult(errors.Count == 0);
+                },
+                defaultHandlerAction,
+                errorHandlerAction,
+                true);
+
+                if (!result.IsValidHeader)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
+                    return methodResult;
+                }
+
+                if (result.Stream != null)
+                {
+                    methodResult.Result = result.Stream;
+                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                    return methodResult;
+                }
+
+                var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
+                if (platform == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                    return methodResult;
+                }
+
+                var students = result.Datas.ToList();
+                if (students == null || students.Count == 0)
+                {
+                    methodResult.AddErrorBadRequest(FileNull);
+                    return methodResult;
+                }
+
+                var parallelOptions = new ParallelOptions
+                {
+                    MaxDegreeOfParallelism = 50
+                };
+
+                var password = $"Fsel@{DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Year}";
+
+                await Parallel.ForEachAsync(students, parallelOptions, async (student, cancellationToken) =>
+                {
+                    if (!string.IsNullOrEmpty(student.Email?.Trim()))
+                    {
+                        try
+                        {
+                            using (var scope = _serviceProvider.CreateScope())
+                            {
+                                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+                                var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
+                                Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
+                                int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.DateOfBirth);
+                                var user = new User()
+                                {
+                                    UserName = student.Email.ToLower(cultureInfo).Trim(),
+                                    Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
+                                    FullName = student.FullName?.Trim() ?? string.Empty,
+                                    PhoneNumber = !string.IsNullOrEmpty(student.PhoneNumber?.Trim()) ? Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()) : null,
+                                    EmailConfirmed = true,
+                                    PhoneNumberConfirmed = false,
+                                    Status = EnumUserStatus.Active,
+                                    DefaultPassword = password,
+                                    Human = new Human()
+                                    {
+                                        FullName = student.FullName?.Trim(),
+                                        PhoneNumber = !string.IsNullOrEmpty(student.PhoneNumber?.Trim()) ? Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()) : null,
+                                        Birthday = student.DateOfBirth,
+                                        Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
+                                        Code = GeneratorCodeAsync(studentRepository, student.DateOfBirth ?? DateTime.MinValue, null),
+                                        Student = new Student()
+                                        {
+                                            CreatedByParent = false,
+                                            Occupation = nameof(Student),
+                                            SchoolClass = student.SchoolClass,
+                                            SchoolGrade = student.SchoolGrade,
+                                            CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
+                                        }
+                                    },
+                                    UserPlatforms = new List<UserPlatform>()
+                                    {
+                                        new UserPlatform()
+                                        {
+                                            PlatformId = platform.Id
+                                        }
+                                    },
+                                    UserSettings = new List<UserSetting>()
+                                    {
+                                        new UserSetting(true)
+                                    }
+                                };
+
+                                identityStudentResult = await userManager.CreateAsync(user, password);
+                                if (identityStudentResult.Succeeded)
+                                {
+                                    await userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
+                                }
+                            }
+                        }
+                        catch
+                        {
+                        }
+                    }
+                });
+
                 return methodResult;
             }
             catch (Exception ex)
@@ -237,6 +306,18 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             }
 
             return methodResult;
+        }
+
+        private static string GeneratorCodeAsync(IStudentRepository studentRepository, DateTime birthDay, EnumGender? gender)
+        {
+            var stt = studentRepository.GetNextSequenceValue<int>(SqlSettings.Sequence.UserSequence);
+            var currentDate = DateTime.UtcNow;
+            var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
+            var lastDigitOfYear = currentDate.Year % 10;
+            var lastOfBirthDay = birthDay.Year % 100;
+            var number = gender == EnumGender.Male ? 0 : gender == EnumGender.Female ? 1 : 2;
+            var code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfBirthDay}{stt:D3}";
+            return code;
         }
     }
 }
