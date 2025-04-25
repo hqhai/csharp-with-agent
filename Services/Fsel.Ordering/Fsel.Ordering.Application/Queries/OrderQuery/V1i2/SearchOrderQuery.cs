@@ -10,6 +10,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Ordering.Application.Services.UserService;
+    using Fsel.Ordering.Application.Services.UserService.Models;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels.V1i2;
     using Fsel.Ordering.Domain.Models.QueryModels.Oders.V1i2;
@@ -17,6 +18,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class SearchOrderQuery : SearchOrderQueryModel, IRequest<MethodResult<PagingItemsModel<SearchOrderModel>>>
     {
@@ -27,12 +29,15 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
         private readonly IOrderRepository _orderRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly ILogger<SearchOrderQuery> _logger;
+        private const int BatchSize = 10000;
 
-        public SearchOrderQueryHandler(IOrderRepository orderRepository, AuthContext authContext, IUserService userService)
+        public SearchOrderQueryHandler(IOrderRepository orderRepository, AuthContext authContext, IUserService userService, ILogger<SearchOrderQuery> logger)
         {
             _orderRepository = orderRepository;
             _authContext = authContext;
             _userService = userService;
+            _logger = logger;
         }
 
         public async Task<MethodResult<PagingItemsModel<SearchOrderModel>>> Handle(SearchOrderQuery request, CancellationToken cancellationToken)
@@ -46,8 +51,9 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 Code = x.Code,
                 Email = x.Email,
                 FullName = x.FullName,
+                PhoneNumber = x.PhoneNumber,
                 UserId = x.UserId,
-                CreatedDate = x.UpdatedDate ?? x.CreatedDate,
+                CreatedDate = x.CreatedDate,
                 UpdatedDate = x.UpdatedDate,
                 CreatedFullName = x.CreatedFullName,
                 Status = x.Status,
@@ -56,6 +62,10 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 MonthNumber = x.Package == null ? null : x.Package.MonthNumber,
                 RevenueType = x.RevenueType,
                 TotalPrice = x.TotalPrice,
+                Price = x.Price,
+                DiscountPrice = x.DiscountPrice,
+                DistrictId = x.DistrictId,
+                ProvinceId = x.ProvinceId
             });
 
             if (request.IsNew.HasValue && request.IsNew == true)
@@ -115,30 +125,60 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                     .ApplySortAndPaging(request)
                     .ToListAsync(cancellationToken);
 
-
             var userIds = lists.Select(l => l.UserId).Distinct().ToList();
             if (userIds.Any())
             {
-                var studentResults = await _userService.GetStudentsByIdsAsync(userIds);
-                var students = studentResults.Content?.Result;
+                var batches = SplitList(userIds, BatchSize);
 
-                // Code sau khi Optimize
-                var studentLookup = students?
-                                    .Where(x => x.Human != null && x.Human.UserId.HasValue)
-                                    .ToDictionary(x => x.Human!.UserId!.Value, x => x.Human);
-                lists.ForEach(p =>
+                var students = new List<StudentModel>();
+                foreach (var batch in batches)
                 {
-                    if (studentLookup != null && studentLookup.TryGetValue(p.UserId, out var human))
+                    var studentResults = await _userService.GetStudentsByIdsAsync(batch);
+                    if (!studentResults.IsSuccessStatusCode)
                     {
-                        p.Email ??= human?.Email;
-                        p.FullName ??= human?.FullName;
+                        methodResult.AddError(studentResults.Error);
+                        return methodResult;
                     }
-                });
+                    else
+                    {
+                        if (studentResults.Content?.Result != null && studentResults.Content.Result.Count > 0)
+                        {
+                            students.AddRange(studentResults.Content.Result.ToList());
+                        }
+                    }
+                }
+
+                var studentDict = students
+                    .Where(x => x.Human != null && x.Human.UserId.HasValue)
+                    .ToDictionary(x => x.Human?.UserId ?? default, x => x);
+
+                if (studentDict != null)
+                {
+                    lists.ForEach(p =>
+                    {
+                        if (studentDict.TryGetValue(p.UserId, out var student))
+                        {
+                            p.StudentCode = student.Human?.Code;
+                            p.StudentPhoneNumber = student.Human?.PhoneNumber;
+                            p.StudentEmail = student.Human?.Email;
+                            p.StudentFullName = student.Human?.FullName;
+                            p.ExpiredDate = student.ExpiredDate;
+                        }
+                    });
+                }
             }
 
             methodResult.Result = new PagingItemsModel<SearchOrderModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private static List<List<Guid>> SplitList(List<Guid> userIds, int batchSize)
+        {
+            return userIds.Select((x, i) => new { Index = i, Value = x })
+                         .GroupBy(x => x.Index / batchSize)
+                         .Select(g => g.Select(x => x.Value).ToList())
+                         .ToList();
         }
     }
 }

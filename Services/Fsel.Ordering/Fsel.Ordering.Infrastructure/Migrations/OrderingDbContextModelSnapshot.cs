@@ -1447,8 +1447,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.Property<int?>("NumberOfChanges")
                         .HasColumnType("int");

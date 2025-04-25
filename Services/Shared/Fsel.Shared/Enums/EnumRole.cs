@@ -13,6 +13,9 @@ namespace Fsel.Shared.Enums
         Moderator,
         TeacherLive,
         Guest,
-        AdminSchool
+        AdminSchool,
+        DepartmentAdmin,
+        EducationDepartment,
+        EducationDivision
     }
 }

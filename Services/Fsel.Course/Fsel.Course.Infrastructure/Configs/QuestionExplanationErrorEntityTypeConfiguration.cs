@@ -26,10 +26,11 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumFeedbackExplanation>());
 
-            builder.HasOne(a => a.VideoResult)
-                  .WithMany(b => b.QuestionExplanationErrors)
-                  .HasForeignKey(b => b.VideoResultId)
-                  .OnDelete(DeleteBehavior.SetNull);
+            builder.Property(e => e.ExplanationType)
+             .HasMaxLength(100)
+             .HasConversion(
+                 v => v.ToString(),
+                 v => v.EnumParse<EnumFeatureExplanationType>());
 
             builder.HasOne(a => a.Question)
                   .WithMany(b => b.QuestionExplanationErrors)

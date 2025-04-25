@@ -14,9 +14,10 @@ namespace Fsel.Shared.Constants
             public const string EndTrialRegistrationJob = "EndTrialRegistrationJob";
             public const string LeaderBoardJob = "LeaderBoardJob";
             public const string CompleteTestWhenTimeOutJob = "CompleteTestWhenTimeOutJob";
-            public const string WeeklyReport = "WeeklyReport";
             public const string TreasureZMatter = "TreasureZMatter";
             public const string EnergyOfPlanet = "EnergyOfPlanet";
+            public const string SendWeeklyReport = "SendWeeklyReport";
+            public const string AggregateDataWeeklyReport = "AggregateDataWeeklyReport";
             public const string WeeklySnapShot = "WeeklySnapShot";
             public const string ReviewFselJob = "ReviewFselJob";
             public const string NoticeAccessTime = "NoticeAccessTime";

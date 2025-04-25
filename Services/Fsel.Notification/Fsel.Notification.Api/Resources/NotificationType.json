@@ -499,7 +499,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Khóa học của bạn sẽ kết thúc trong 2 tuần tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
-    "templateLink": "/account?setting=mySubscription",
+    "templateLink": "/account/mySubscription",
     "createdDate": "2023-08-28",
     "translations": [
       {
@@ -532,7 +532,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Khóa học của bạn sẽ kết thúc trong 2 ngày tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
-    "templateLink": "/account?setting=mySubscription",
+    "templateLink": "/account/mySubscription",
     "createdDate": "2023-08-28",
     "translations": [
       {
@@ -677,7 +677,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Việc học liên tục có thể giúp cải thiện các kỹ năng của bạn nhanh gấp 3 lần so với các bạn học dừng lại. Nhấn để nâng cấp ngay nào!",
-    "templateLink": "/change-level",
+    "templateLink": "/account/mySubscription",
     "createdDate": "2023-08-28",
     "translations": [
       {
@@ -711,7 +711,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Các nội dung học thuật có thể bị khoá lại sau 7 ngày nữa. Cơ hội cuối, gia hạn gói ngay nào!",
-    "templateLink": "/account?setting=mySubscription",
+    "templateLink": "/account/mySubscription",
     "createdDate": "2023-08-28",
     "translations": [
       {
@@ -1176,6 +1176,72 @@
         "language": "fr-FR"
       }
     ]
-  }
+  },
+  {
+    "id": "3C7F9946-3F95-4A84-B2DF-7CFFBF36A41C",
+    "type": "Text",
+    "content": "SurveyReward",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Cảm ơn bạn đã đánh giá FSEL 5 sao! FSEL đã gửi tặng {0} xu vào tài khoản của bạn. Tiếp tục học tập chăm chỉ nhé!",
+    "templateLink": "",
+    "createdDate": "2025-02-26",
+    "translations": [
+      {
+        "id": "788C4DE6-030B-4866-8E91-3FB0E913F670",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "3C7F9946-3F95-4A84-B2DF-7CFFBF36A41C",
+        "templateMessage": "Cảm ơn bạn đã đánh giá FSEL 5 sao! FSEL đã gửi tặng {0} xu vào tài khoản của bạn. Tiếp tục học tập chăm chỉ nhé!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "13DD85C7-014C-4A32-9392-92A46440C481",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "3C7F9946-3F95-4A84-B2DF-7CFFBF36A41C",
+        "templateMessage": "Thank you for rating FSEL 5 stars! FSEL has credited {0} coins to your account. Keep up the hard work! ",
+        "language": "en-US"
+      },
+      {
+        "id": "8592527A-E771-4E37-A2E0-E5E5AA5FF667",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "3C7F9946-3F95-4A84-B2DF-7CFFBF36A41C",
+        "templateMessage": "Merci d'avoir attribué 5 étoiles à FSEL ! FSEL a crédité {0} pièces sur votre compte. Continuez à travailler dur !",
+        "language": "fr-FR"
+      }
+    ]
+  },
 
+  {
+    "id": "50947E80-1900-4FA5-89D2-F8BD309660DA",
+    "type": "Text",
+    "content": "IllegalCoinRecall",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Chúng tôi đã phát hiện một số tài khoản lợi dụng chức năng giới thiệu bạn bè để giành một số coins trái với quy định. Số coins và vật phẩm quy đổi từ đó sẽ bị thu hồi. Hãy tuân thủ quy định để tránh bị cấm tài khoản!",
+    "templateLink": "",
+    "createdDate": "2025-02-26",
+    "translations": [
+      {
+        "id": "61D84D68-3BE8-46DF-A771-A3037CBD86EE",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "50947E80-1900-4FA5-89D2-F8BD309660DA",
+        "templateMessage": "Chúng tôi đã phát hiện một số tài khoản lợi dụng chức năng giới thiệu bạn bè để giành một số coins trái với quy định. Số coins và vật phẩm quy đổi từ đó sẽ bị thu hồi. Hãy tuân thủ quy định để tránh bị cấm tài khoản!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "6584662F-04A7-43E7-86D0-D605FD827442",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "50947E80-1900-4FA5-89D2-F8BD309660DA",
+        "templateMessage": "We have detected that some accounts have exploited the referral function to obtain coins in violation of the rules. The coins and items redeemed from them will be revoked. Please follow the rules to avoid account suspension!",
+        "language": "en-US"
+      },
+      {
+        "id": "72CBA562-2BEE-4D33-903C-DA9E27E64D48",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "50947E80-1900-4FA5-89D2-F8BD309660DA",
+        "templateMessage": "Nous avons détecté que certains comptes ont abusé de la fonction de parrainage pour obtenir des pièces de manière non conforme aux règles. Les pièces et les objets échangés seront récupérés. Veuillez respecter les règles pour éviter l'interdiction de votre compte !",
+        "language": "fr-FR"
+      }
+    ]
+  }
 ]

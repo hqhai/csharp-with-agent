@@ -2,11 +2,11 @@
 
 namespace Fsel.Identity.Domain.Entities
 {
-    using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
-    using Fsel.Core.Entities;
     using System.ComponentModel.DataAnnotations.Schema;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Entities;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
 
@@ -14,8 +14,8 @@ namespace Fsel.Identity.Domain.Entities
     {
         public Guid SenderId { get; set; }
         public Guid ReceiverId { get; set; }
-
         public EnumUserReferralType Type { get; set; }
+        public bool IsCoinRewarded { get; set; } = true;
 
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FeatureMissionStr { get; set; }
