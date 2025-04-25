@@ -5,6 +5,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.AdminCmd;
@@ -25,7 +26,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/student")]
-    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
+    [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
     [ApiController]
     public class StudentController : ControllerBase
     {
@@ -256,6 +257,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         }
 
         /// <summary>
+        /// change school admin
+        /// </summary>
+        [HttpPut("change-school")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ChangeSchoolByAdmin([FromBody] ChangeSchoolByAdminCommand command)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get parent by student id
         /// </summary>
         [HttpGet("get-parent-by-student-id/{studentId}")]
@@ -264,18 +277,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> GetParentByStudentId([FromRoute] Guid studentId)
         {
             var queryResult = await _mediator.Send(new GetParentByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Restore deleted account
-        /// </summary>
-        [HttpPost("restore-deleted-account")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> RestoreDeletedAccount([FromBody] RestoreDeleteAccountCommand command)
-        {
-            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -292,18 +293,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
         }
 
         /// <summary>
-        /// change school admin
-        /// </summary>
-        [HttpPut("change-school")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ChangeSchoolByAdmin([FromBody] ChangeSchoolByAdminCommand command)
-        {
-            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Search school grades classes
         /// </summary>
         [HttpPost("add-student-event")]
@@ -313,6 +302,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         {
             var methodResult = await _mediator.Send(command).ConfigureAwait(false);
             return methodResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Restore deleted account
+        /// </summary>
+        [HttpPost("restore-deleted-account")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RestoreDeletedAccount([FromBody] RestoreDeleteAccountCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>

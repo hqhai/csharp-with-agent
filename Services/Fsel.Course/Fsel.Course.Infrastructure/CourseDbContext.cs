@@ -91,6 +91,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<QuestionShuffle> QuestionShuffles { get; set; }
 
         #region Report
+
         public DbSet<TotalEvaluateInputResultModel> TotalEvaluateInputResults { get; set; }
         public DbSet<TotalDetailEvaluateInputResultModel> TotalDetailEvaluateInputResults { get; set; }
         public DbSet<PercentEvaluateInputResultModel> PercentEvaluateInputResults { get; set; }
@@ -109,10 +110,13 @@ namespace Fsel.Course.Infrastructure
         public DbSet<SchoolInfoModel> SchoolInfos { get; set; }
         public DbSet<SchoolInfoFilterModel> SchoolInfoFilters { get; set; }
         public DbSet<DistrictInfoModel> DistrictInfos { get; set; }
-        #endregion
+
+        #endregion Report
 
         public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
+        public DbSet<ReportLearningProcessModel> ReportLearningProcesses { get; set; }
+        public DbSet<ReportLearningResultModel> ReportLearningResults { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -206,6 +210,8 @@ namespace Fsel.Course.Infrastructure
             //modelBuilder.Ignore<TotalDetailLearningQualityModel>();
             //modelBuilder.Ignore<SchoolInfoModel>();
             //modelBuilder.Ignore<CourseCompleteReportModel>();
+            //modelBuilder.Ignore<SchoolInfoFilterModel>();
+            //modelBuilder.Ignore<DistrictInfoModel>();
 
             base.OnModelCreating(modelBuilder);
         }

@@ -34,6 +34,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// </summary>
         [MapToApiVersion(ApiSettings.APIVersion1)]
         [MapToApiVersion(ApiSettings.APIVersion1i1)]
+        [EncryptResponse]
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<QuestionModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]

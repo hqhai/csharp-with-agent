@@ -77,6 +77,7 @@ namespace Fsel.Shared.Constants
             public static class NameQueue
             {
                 public const string SpeechToTextAi = $"{KeyQueue}_SpeechToTextAi";
+                public const string ResponseSpeechToTextPendingAi = $"{KeyQueue}_ResponseSpeechToTextPendingAi";
             }
         }
 
@@ -128,6 +129,7 @@ namespace Fsel.Shared.Constants
                 public const string SavePlacementTestAnswers = $"{KeyQueue}_SavePlacementTestAnswers";
                 public const string ErrorExplainGgSheet = $"{KeyQueue}_ErrorEplainGgSheet";
                 public const string ExportExcelSchoolLearningProcess = $"{KeyQueue}_ExportExcelSchoolLearningProcess";
+                public const string SpeechToTextPendingAi = $"{KeyQueue}_SpeechToTextPendingAi";
             }
         }
 
@@ -147,6 +149,7 @@ namespace Fsel.Shared.Constants
                 public const string CreateLuckyTicket = $"{KeyQueue}_CreateLuckyTicket";
                 public const string BuyBlindBox = $"{KeyQueue}_BuyBlindBox";
                 public const string SendNotifyBuyBlindBox = $"{KeyQueue}_SendNotifyBuyBlindBox";
+                public const string ChooseDailyQuizWinners = $"{KeyQueue}_ChooseDailyQuizWinners";
             }
         }
 
