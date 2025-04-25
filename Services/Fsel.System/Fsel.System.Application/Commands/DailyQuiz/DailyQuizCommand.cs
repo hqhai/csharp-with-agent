@@ -95,7 +95,7 @@ namespace Fsel.System.Application.Commands.DailyQuiz
 
             var historiesInDay = historiesByUser.Where(p => p.CreatedDate >= minCreatedDate).ToList();
 
-            if (historiesInDay != null && historiesByUser.Count > 0)
+            if (historiesInDay != null && historiesInDay.Count > 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumDailyQuizErrorCode.CompletedDailyQuizToday), nameof(EnumDailyQuizErrorCode.CompletedDailyQuizToday), EnumDailyQuizErrorCode.CompletedDailyQuizToday.GetDescription());
                 return methodResult;
