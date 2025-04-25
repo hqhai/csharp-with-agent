@@ -6,6 +6,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,14 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
     public class GetSchoolClassBySchoolGradeQuery : IRequest<MethodResult<IList<string>>>
     {
         public string? SchoolGrade { get; set; }
+
+        public IList<string>? ListSchoolGrade
+        {
+            get
+            {
+                return SchoolGrade.ToList<string>();
+            }
+        }
     }
 
     public class GetSchoolClassBySchoolGradeQueryHandler : IRequestHandler<GetSchoolClassBySchoolGradeQuery, MethodResult<IList<string>>>
@@ -38,9 +47,9 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             request.SchoolGrade = request.SchoolGrade?.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
             var query = _studentRepository.Queryable.Where(x => !string.IsNullOrEmpty(x.SchoolClass));
 
-            if (!string.IsNullOrEmpty(request.SchoolGrade))
+            if (request.ListSchoolGrade != null && request.ListSchoolGrade.Any())
             {
-                query = query.Where(x => x.SchoolGrade == request.SchoolGrade);
+                query = query.WhereBulkContains(request.ListSchoolGrade, x => x.SchoolGrade);
             }
 
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
