@@ -32,6 +32,19 @@ namespace Fsel.Identity.Api.Controllers.AdminSchool
         }
 
         /// <summary>
+        /// Get SchoolId
+        /// </summary>
+        [HttpGet("schoolId")]
+        [ProducesResponseType(typeof(MethodResult<Guid>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSchoolId()
+        {
+            MethodResult<Guid> methodResult = new MethodResult<Guid>();
+            methodResult.Result = await _userSchoolRepository.GetSchoolIdAsync();
+            return methodResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get Student
         /// </summary>
         [HttpGet]
@@ -74,18 +87,6 @@ namespace Fsel.Identity.Api.Controllers.AdminSchool
         /// <summary>
         /// cập nhật expired date cho students
         /// </summary>
-        [HttpPut("update-expired-date-for-students")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateCompetitionEvents([FromBody] UpdateExpiredDateForStudentsEventCommand cmd)
-        {
-            var commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// cập nhật expired date cho students
-        /// </summary>
         [HttpDelete("delete-students")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -109,6 +110,18 @@ namespace Fsel.Identity.Api.Controllers.AdminSchool
                 return queryResult.GetActionResult();
             }
             return File(queryResult.Result, Settings.Excels.ContentType, "students_report.xlsx");
+        }
+
+        /// <summary>
+        /// cập nhật expired date cho students
+        /// </summary>
+        [HttpPut("update-expired-date-for-students")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateCompetitionEvents([FromBody] UpdateExpiredDateForStudentsEventCommand cmd)
+        {
+            var commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

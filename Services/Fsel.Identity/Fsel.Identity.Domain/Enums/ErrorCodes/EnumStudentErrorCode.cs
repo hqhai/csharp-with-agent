@@ -25,6 +25,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         UserNotEnoughTime,
 
         /// <summary>
+        /// Student Already Another Event
+        /// </summary>
+        StudentAlreadyAnotherEvent,
+
+        /// <summary>
         /// Event Not Matching With Current Event
         /// </summary>
         EventNotMatchingWithCurrentEvent,
@@ -34,9 +39,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// </summary>
         SchoolNotIncludeEvent,
 
+
+
         /// <summary>
-        /// Student Already Another Event
+        /// Student hasn't not expired Date
         /// </summary>
-        StudentAlreadyAnotherEvent
+        StudentHasNotExpiredDate
     }
 }

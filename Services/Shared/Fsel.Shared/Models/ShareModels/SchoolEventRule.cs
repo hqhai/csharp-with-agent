@@ -82,7 +82,8 @@ namespace Fsel.Shared.Models.ShareModels
         ImportStudent,
         ExportAccount,
         EventGuideScreen,
-        WarningScreen
+        WarningScreen,
+        DailyQuiz
     }
 
     public enum EnumByPassPaymentType

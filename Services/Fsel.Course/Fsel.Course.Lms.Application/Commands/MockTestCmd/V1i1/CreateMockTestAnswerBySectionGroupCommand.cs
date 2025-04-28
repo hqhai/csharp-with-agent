@@ -195,7 +195,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 }
                 if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && sectionGroupResult != null)
                 {
-                    await _sectionGroupResultRepository.BulkMergeAsync(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+                    await _sectionGroupResultRepository.BulkUpdateList(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
                     {
                         bulk.ColumnInputExpression = entity => new { entity.CurrentSectionTimeCodeId };
                     });
@@ -397,7 +397,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 }
                 if (updateMockTestAnswers != null && updateMockTestAnswers.Any())
                 {
-                    await _mockTestAnswerRepository.BulkMergeAsync(updateMockTestAnswers, bulk =>
+                    await _mockTestAnswerRepository.BulkUpdateList(updateMockTestAnswers, bulk =>
                     {
                         bulk.IgnoreOnUpdateExpression = entity => new { entity.MockTestResultId, entity.SectionGroupResultId, entity.SectionQuestionId, entity.SectionId, entity.SectionTimeCodeId };
                     });
@@ -437,11 +437,23 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     if (mockTestAnswer == null)
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, questionItem);
-                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, answerConfig, questionItem, isAnswered, item.SpeechTextAnswer, correctCount));
+                        mockTestAnswer = GetMockTestAnswer(mockTestAnswer, answerConfig, questionItem, isAnswered, item.SpeechTextAnswer, correctCount);
+                        if (!mockTestAnswer.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(mockTestAnswer.ErrorMessages);
+                            return methodResult;
+                        }
+                        createMockTestAnswers.Add(mockTestAnswer);
                     }
                     else
                     {
-                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, answerConfig, questionItem, isAnswered, item.SpeechTextAnswer, correctCount));
+                        mockTestAnswer = GetMockTestAnswer(mockTestAnswer, answerConfig, questionItem, isAnswered, item.SpeechTextAnswer, correctCount);
+                        if (!mockTestAnswer.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(mockTestAnswer.ErrorMessages);
+                            return methodResult;
+                        }
+                        updateMockTestAnswers.Add(mockTestAnswer);
                     }
                 }
             }
@@ -469,11 +481,23 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     if (mockTestAnswer == null)
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, section.Id);
-                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, item.Answer, item.SpeechTextAnswer, 0));
+                        mockTestAnswer = GetMockTestAnswer(mockTestAnswer, item.Answer, item.SpeechTextAnswer, 0);
+                        if (!mockTestAnswer.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(mockTestAnswer.ErrorMessages);
+                            return methodResult;
+                        }
+                        createMockTestAnswers.Add(mockTestAnswer);
                     }
                     else
                     {
-                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, item.Answer, item.SpeechTextAnswer, 0));
+                        mockTestAnswer = GetMockTestAnswer(mockTestAnswer, item.Answer, item.SpeechTextAnswer, 0);
+                        if (!mockTestAnswer.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(mockTestAnswer.ErrorMessages);
+                            return methodResult;
+                        }
+                        updateMockTestAnswers.Add(mockTestAnswer);
                     }
                 }
             }
@@ -516,12 +540,26 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, null, sectionTimeCode.Id);
                         double pronScore = await _evaluationAIService.EvaluationSpeaking(sectionTimeCode.Name, item?.Answer?.ToString() ?? default);
-                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, item?.Answer, item?.SpeechTextAnswer, pronScore));
+
+                        mockTestAnswer = GetMockTestAnswer(mockTestAnswer, item?.Answer, item?.SpeechTextAnswer, pronScore);
+                        if (!mockTestAnswer.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(mockTestAnswer.ErrorMessages);
+                            return methodResult;
+                        }
+                        createMockTestAnswers.Add(mockTestAnswer);
                     }
                     else
                     {
                         double pronScore = await _evaluationAIService.EvaluationSpeaking(sectionTimeCode.Name, item?.Answer?.ToString() ?? default);
-                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, item?.Answer, item?.SpeechTextAnswer, pronScore));
+
+                        mockTestAnswer = GetMockTestAnswer(mockTestAnswer, item?.Answer, item?.SpeechTextAnswer, pronScore);
+                        if (!mockTestAnswer.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(mockTestAnswer.ErrorMessages);
+                            return methodResult;
+                        }
+                        updateMockTestAnswers.Add(mockTestAnswer);
                     }
                 }
             }
@@ -554,14 +592,14 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             };
         }
 
-        private static MockTestAnswer GetMockTestAnswer(MockTestAnswer mockTestAnswer, object? answer, Question questionItem, bool isAnswered, string? speechText, int correctCount = default)
+        private static MockTestAnswer GetMockTestAnswer(MockTestAnswer mockTestAnswer, object? answer, Question questionItem, bool isAnswered, string? speechText, short correctCount = default)
         {
             mockTestAnswer = GetMockTestAnswer(mockTestAnswer, answer, speechText, 0, correctCount);
             mockTestAnswer.IsCorrect = isAnswered ? (questionItem == null || questionItem.CorrectTotal == correctCount) : null;
             return mockTestAnswer;
         }
 
-        private static MockTestAnswer GetMockTestAnswer(MockTestAnswer mockTestAnswer, object? answer, string? speechText, double pronsScore, int correctCount = default)
+        private static MockTestAnswer GetMockTestAnswer(MockTestAnswer mockTestAnswer, object? answer, string? speechText, double pronsScore, short correctCount = default)
         {
             mockTestAnswer.Answer = answer;
             mockTestAnswer.SpeechTextAnswer = speechText;

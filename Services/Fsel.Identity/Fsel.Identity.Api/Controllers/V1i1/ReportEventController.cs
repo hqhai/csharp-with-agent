@@ -1,12 +1,11 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Api.Controllers
+namespace Fsel.Identity.Api.Controllers.V1i1
 {
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
-    using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Identity.Application.Queries.ReportEventHaNoiQuery;
     using Fsel.Identity.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Shared.Attributes;
@@ -14,14 +13,15 @@ namespace Fsel.Identity.Api.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersions(ApiSettings.APIVersion1)]
-    [Route(Settings.APIDefaultRoute + "/admin/report-event-hanoi")]
+    [ApiVersions(ApiSettings.APIVersion1i1)]
+    [Route(Settings.APIDefaultRoute + "/admin/report-event")]
     [ApiController]
-    public class ReportEventHaNoiController : ControllerBase
+    [Permission]
+    public class ReportEventController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public ReportEventHaNoiController(IMediator mediator)
+        public ReportEventController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -30,30 +30,36 @@ namespace Fsel.Identity.Api.Controllers
         /// Get 
         /// </summary>
         [ServerCache(CacheSettings.TimeCache.ThreeHour)]
-        [HttpPost("report-attendance-overall")]
-        [ProducesResponseType(typeof(MethodResult<OverallStudentModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ReportAttendanceOverall([FromBody] ReportAttendanceForCityQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
-        [HttpPost("report-attendance-graph")]
-        [ProducesResponseType(typeof(MethodResult<IList<NumberStudentLearnOnSystemModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ReportAttendanceGraph([FromBody] ReportAttendanceGraphQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
-        [HttpPost("report-attendance-table")]
+        [HttpPost("attendance-detail")]
         [ProducesResponseType(typeof(MethodResult<IList<SummaryDataOnCityModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ReportAttendanceTable([FromBody] ReportAttendanceTableQuery query)
+        public async Task<IActionResult> AttendanceDetail([FromBody] AttendanceDetailQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
+        [HttpPost("attendance-summary")]
+        [ProducesResponseType(typeof(MethodResult<IList<SummaryDataOnCityModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AttendanceSummaryQuery([FromBody] AttendanceSummaryQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [ServerCache(CacheSettings.TimeCache.ThreeHour)]
+        [HttpPost("attendance-chart")]
+        [ProducesResponseType(typeof(MethodResult<IList<NumberStudentLearnOnSystemModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AttendanceChart([FromBody] AttendanceChartQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
