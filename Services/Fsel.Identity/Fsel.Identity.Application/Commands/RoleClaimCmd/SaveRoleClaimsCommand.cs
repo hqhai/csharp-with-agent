@@ -34,7 +34,15 @@ namespace Fsel.Identity.Application.Commands.RoleClaimCmd
 
             if (request.RoleClaims == null || !request.RoleClaims.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
+                var removeRoleClaims = await _roleClaimRepository.Queryable.Where(p => p.RoleId == request.RoleId).ToListAsync(cancellationToken);
+                await _permissionGroupRepository.ExecuteTransactionAsync(async () =>
+                {
+                    await _roleClaimRepository.DeleteListAsync(removeRoleClaims);
+                    await _permissionGroupRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                    methodResult.Result = true;
+                    return methodResult;
+                });
                 return methodResult;
             }
 
