@@ -2,25 +2,19 @@
 
 namespace Fsel.Identity.Application.Commands.AdminCmd
 {
-    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
-    using Fsel.Identity.Application.Commands.AuthCmd;
     using Fsel.Identity.Application.Commands.UserGroupCmd;
-    using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Identity.Infrastructure.ValueSettings;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -37,7 +31,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly AppSetting _appSetting;
-        private const string DEFAULT_PASSWORD = "Admin@123";
+        private const string DEFAULT_PASSWORD = "Fsel@2025";
 
         public CreateUserToLmsAdminPlatCommandHandler(UserManager<User> userManager, IPlatformRepository platformRepository, IHumanRepository humanRepository, IMapper mapper, IMediator mediator, AppSetting appSetting)
         {
@@ -55,22 +49,30 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             var methodResult = new MethodResult<UserModel>();
 
             #region Validate user
-            var user = await _userManager.FindByEmailAsync(request.Email!);
-            if (user != null)
+            User? user = null;
+
+            if (!string.IsNullOrWhiteSpace(request.Email))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
-                return methodResult;
+                user = await _userManager.FindByEmailAsync(request.Email);
+                if (user != null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
+                    return methodResult;
+                }
             }
+
             user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
             if (user != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
                 return methodResult;
             }
+
             #endregion
 
             user = new();
             _mapper.Map(request, user);
+            user.EmailConfirmed = true;
 
             // Gắn user vào LMS Admin platform
             var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMSAdmin, cancellationToken);

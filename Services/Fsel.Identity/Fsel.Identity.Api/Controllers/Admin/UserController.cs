@@ -61,6 +61,34 @@ namespace Fsel.Identity.Api.Controllers.Admin
         }
 
         /// <summary>
+        /// Update User in LMS Admin platform
+        /// </summary>
+        [HttpPut("update-user/{id}/lms-admin")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> UpdateInLmsAdminPlat([FromRoute] Guid id, [FromBody] UpdateUserInLmsAdminCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            command.Id = id;
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get user by Id in platform
+        /// </summary>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> GetUserInPlat([FromRoute] Guid id)
+        {
+            var commandResult = await _mediator.Send(new GetUserInPlatformByUserIdQuery() { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Update User
         /// </summary>
         [HttpPut("{id}")]
@@ -85,6 +113,19 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             MethodResult<bool> commandResult = await _mediator.Send(new Application.Commands.AdminCmd.DeleteUserCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Delete List of Users
+        /// </summary>
+        [HttpPost("delete-user")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> DeleteList([FromBody] DeleteListUsersCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

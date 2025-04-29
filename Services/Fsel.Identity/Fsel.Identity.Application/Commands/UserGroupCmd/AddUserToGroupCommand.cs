@@ -72,7 +72,16 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
                             continue;
                         }
 
-                        // Kiểm tra xem user đã thuộc nhóm chưa
+                        // Kiểm tra xem user đã thuộc 1 nhóm khác hay chưa
+                        var existingMembershipOfOtherGroup = await _userGroupMemberShipRepository.Queryable
+                            .FirstOrDefaultAsync(x => x.UserId == userId && x.GroupId != request.GroupId, cancellationToken);
+
+                        // Nếu có thì xóa bản ghi đã tồn tại để thỏa mãn rule 1 user chỉ thuộc 1 nhóm người dùng
+                        if (existingMembershipOfOtherGroup != null)
+                        {
+                            await _userGroupMemberShipRepository.DeleteAsync(existingMembershipOfOtherGroup);
+                        }
+
                         var existingMembership = await _userGroupMemberShipRepository.Queryable
                             .FirstOrDefaultAsync(x => x.UserId == userId && x.GroupId == request.GroupId, cancellationToken);
 

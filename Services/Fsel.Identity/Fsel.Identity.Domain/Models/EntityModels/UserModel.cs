@@ -12,6 +12,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? Address { get; set; }
         public string? School { get; set; }
         public string? SchoolName { get; set; }
+        public Guid? UserGroupId { get; set; }
         public HumanModel? Human { get; set; }
     }
 }
