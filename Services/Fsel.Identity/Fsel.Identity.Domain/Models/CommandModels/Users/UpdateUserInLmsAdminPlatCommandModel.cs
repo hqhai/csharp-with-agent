@@ -12,6 +12,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? FullName { get; set; }
 
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MinLength(6, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public string? UserName { get; set; }
 
@@ -21,6 +22,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
 
         public DateTime Birthday { get; set; }
 
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? PhoneNumber { get; set; }
 
         public Guid? ManageUserId { get; set; }

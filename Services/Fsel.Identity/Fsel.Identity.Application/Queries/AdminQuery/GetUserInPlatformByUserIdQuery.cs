@@ -6,6 +6,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
@@ -39,8 +40,14 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                     .Include(u => u.UserGroups)
                     .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
 
+            if (user == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                return methodResult;
+            }
+
             var userModel = _mapper.Map<UserModel>(user);
-            userModel.UserGroupId = user?.UserGroups?.FirstOrDefault()?.GroupId;
+            userModel.UserGroupId = user.UserGroups?.FirstOrDefault()?.GroupId;
 
             methodResult.Result = userModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

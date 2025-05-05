@@ -61,6 +61,13 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 }
             }
 
+            user = await _userManager.Users.FirstOrDefaultAsync(x => x.UserName == request.UserName, cancellationToken: cancellationToken);
+            if (user != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateUsername), nameof(request.UserName), request.UserName);
+                return methodResult;
+            }
+
             user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
             if (user != null)
             {

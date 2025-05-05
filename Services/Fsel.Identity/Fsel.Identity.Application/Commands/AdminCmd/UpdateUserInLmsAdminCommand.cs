@@ -67,6 +67,14 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 }
             }
 
+            // Kiểm tra tên đăng nhập
+            user = await _userManager.Users.FirstOrDefaultAsync(x => x.UserName == request.UserName, cancellationToken: cancellationToken);
+            if (user != null && user.Id != userEntity.Id)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateUsername), nameof(request.UserName), request.UserName);
+                return methodResult;
+            }
+
             // Kiểm tra SĐT
             user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
             if (user != null && user.Id != userEntity.Id)

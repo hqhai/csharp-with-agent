@@ -156,6 +156,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         }
 
         /// <summary>
+        /// Get Profile User Manage
+        /// </summary>
+        [HttpGet("users-by-roles")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UserModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUsersByRoles([FromQuery] SearchUsersByRolesQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get User
         /// </summary>
         [HttpGet("get-user/{id}")]
