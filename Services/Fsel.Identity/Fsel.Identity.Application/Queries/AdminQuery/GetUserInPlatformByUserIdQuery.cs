@@ -38,6 +38,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             var user = await _userManager.Users
                     .Include(u => u.Human)
                     .Include(u => u.UserGroups)
+                    .ThenInclude(ug => ug.Group)
                     .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
 
             if (user == null)
@@ -48,8 +49,25 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
 
             var userModel = _mapper.Map<UserModel>(user);
             userModel.UserGroupId = user.UserGroups?.FirstOrDefault()?.GroupId;
-
+            userModel.UserGroupName = user.UserGroups?.FirstOrDefault()?.Group?.GroupName;
             methodResult.Result = userModel;
+
+            // Nếu Human null thì không cần lấy thông tin của Người quản lý
+            if (userModel.Human == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+
+            // Lấy thông tin người quản lý
+            var userManager = await _userManager.Users
+                .FirstOrDefaultAsync(u => u.Id == userModel.Human.ManageUserId, cancellationToken);
+
+            if (userManager != null)
+            {
+                userModel.Human.ManageUserName = userManager.FullName;
+            }
+
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
