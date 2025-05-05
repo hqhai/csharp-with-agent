@@ -207,7 +207,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             if (!methodResult.IsOK)
             {
                 return methodResult;
-            };
+            }
+            ;
 
             try
             {
@@ -393,7 +394,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             {
                 if (createMockTestAnswers != null && createMockTestAnswers.Any())
                 {
-                    await _mockTestAnswerRepository.BulkMergeAsync(createMockTestAnswers);
+                    await _mockTestAnswerRepository.BulkMergeAsync(createMockTestAnswers, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionId, entity.SectionTimeCodeId, entity.SectionQuestionId, entity.MockTestResultId };
+                    });
                 }
                 if (updateMockTestAnswers != null && updateMockTestAnswers.Any())
                 {

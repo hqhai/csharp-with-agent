@@ -157,11 +157,17 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             {
                 if (extraPracticeAnswers.Count > 0)
                 {
-                    await _extraPracticeAnswerRepository.BulkMergeAsync(extraPracticeAnswers);
+                    await _extraPracticeAnswerRepository.BulkMergeAsync(extraPracticeAnswers, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.ExtraPracticeResultId, entity.ExtraPracticeExerciseResultId, entity.QuestionId };
+                    });
                 }
                 else if (updateExtraPracticeAnswers.Count > 0)
                 {
-                    await _extraPracticeAnswerRepository.BulkUpdateList(updateExtraPracticeAnswers);
+                    await _extraPracticeAnswerRepository.BulkUpdateList(updateExtraPracticeAnswers, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = entity => new { entity.ExtraPracticeResultId, entity.ExtraPracticeExerciseResultId, entity.QuestionId };
+                    });
                 }
 
                 _extraPracticeResultRepository.Update(extraPracticeResult);

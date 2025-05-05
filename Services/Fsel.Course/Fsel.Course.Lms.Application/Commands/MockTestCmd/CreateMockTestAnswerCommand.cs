@@ -213,7 +213,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             {
                 if (mockTestAnswers.Count > 0)
                 {
-                    await _mockTestAnswerRepository.BulkMergeAsync(mockTestAnswers);
+                    await _mockTestAnswerRepository.BulkMergeAsync(mockTestAnswers, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionId, entity.SectionTimeCodeId, entity.SectionQuestionId, entity.MockTestResultId };
+                    });
                 }
 
                 _mockTestResultRepository.Update(mockTestResult, false, x => x.CourseId, x => x.UnitId, x => x.MockTestId, x => x.StudentId);

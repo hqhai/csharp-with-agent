@@ -293,7 +293,10 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             {
                 if (createFinalTestAnswers != null && createFinalTestAnswers.Any())
                 {
-                    await _finalTestAnswerRepository.BulkMergeAsync(createFinalTestAnswers);
+                    await _finalTestAnswerRepository.BulkMergeAsync(createFinalTestAnswers, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionQuestionId, entity.FinalTestResultId, entity.SectionGroupResultId };
+                    });
                 }
                 if (updateFinalTestAnswers != null && updateFinalTestAnswers.Any())
                 {

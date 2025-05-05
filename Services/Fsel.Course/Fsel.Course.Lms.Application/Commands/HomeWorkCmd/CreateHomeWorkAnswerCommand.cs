@@ -178,7 +178,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             if (homeWorkAnswers.Any())
             {
-                await _homeWorkAnswerRepository.BulkMergeAsync(homeWorkAnswers);
+                await _homeWorkAnswerRepository.BulkMergeAsync(homeWorkAnswers, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.HomeWorkQuestionId, entity.HomeWorkResultId };
+                });
             }
 
             methodResult.StatusCode = StatusCodes.Status201Created;

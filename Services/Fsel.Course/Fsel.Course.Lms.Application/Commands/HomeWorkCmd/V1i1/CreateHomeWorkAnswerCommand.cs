@@ -200,7 +200,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             {
                 if (createHomeWorkAnswers.Any())
                 {
-                    await _homeWorkAnswerRepository.BulkMergeAsync(createHomeWorkAnswers);
+                    await _homeWorkAnswerRepository.BulkMergeAsync(createHomeWorkAnswers, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.HomeWorkQuestionId, entity.HomeWorkResultId };
+                    });
                 }
                 if (updateHomeWorkAnswers.Any())
                 {
