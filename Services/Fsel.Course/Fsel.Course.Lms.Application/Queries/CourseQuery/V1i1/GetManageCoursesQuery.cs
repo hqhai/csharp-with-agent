@@ -176,7 +176,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                                                                                   .ThenByDescending(x => x.UpdatedDate)
                                                                                   .FirstOrDefaultAsync(cancellationToken);
                     var mockTestResultModel = _mapper.Map<MockTestResultModel>(mockTestResult);
-                    courseManager.BandScores = mockTestResultModel.Scores;
+                    courseManager.BandScores = mockTestResultModel?.Scores ?? default;
                     courseManager.TargetBandScores = courseManager.CourseLevel.Value.GetBandScore();
                 }
                 courseManager.IsCheckPercentColor = await IsColorToPercentAsync(courseResult);

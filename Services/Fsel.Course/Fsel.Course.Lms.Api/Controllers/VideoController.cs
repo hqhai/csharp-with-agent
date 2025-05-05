@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
@@ -57,6 +58,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// </summary>
         [MapToApiVersion(ApiSettings.APIVersion1)]
         [MapToApiVersion(ApiSettings.APIVersion1i1)]
+        [EncryptResponse]
         [HttpGet("time-code-detail")]
         [ProducesResponseType(typeof(MethodResult<VideoTimeCodeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]

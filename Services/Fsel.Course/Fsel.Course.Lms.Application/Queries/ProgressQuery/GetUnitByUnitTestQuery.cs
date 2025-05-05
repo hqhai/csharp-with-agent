@@ -33,6 +33,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IUserService _userService;
+        private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
 
         public GetUnitByUnitTestQueryHandler(AuthContext authContext
             , IUnitRepository unitRepository
@@ -40,7 +41,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             , IVideoTimeCodeRepository videoTimeCodeRepository
             , ILessonResultRepository lessonResultRepository
             , IVideoResultRepository videoResultRepository
-            , IUserService userService)
+            , IUserService userService
+            , IVideoTimeCodeResultRepository videoTimeCodeResultRepository)
         {
             _authContext = authContext;
             _unitRepository = unitRepository;
@@ -49,6 +51,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             _lessonResultRepository = lessonResultRepository;
             _videoResultRepository = videoResultRepository;
             _userService = userService;
+            _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
         }
 
         public async Task<MethodResult<OverallScoreReportModel>> Handle(GetUnitByUnitTestQuery request, CancellationToken cancellationToken)
@@ -108,13 +111,31 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private async Task<IList<VideoTimeCodeResult>> GetVideoTimeCodeResultsAsync(GetUnitByUnitTestQuery request, Guid studentId, CancellationToken cancellationToken)
         {
             var lessonResultIds = await GetLessonResultIdsAsync(request, studentId);
+            if (lessonResultIds == null || !lessonResultIds.Any())
+            {
+                return new List<VideoTimeCodeResult>();
+            }
             var videoIds = await GetVideoIdsAsync(request);
-            var videoResultIds = await _videoResultRepository.Queryable.Where(x => x.StudentId == studentId && lessonResultIds.Contains(x.LessonResultId)).Select(x => x.Id).ToListAsync(cancellationToken);
+            if (videoIds == null || !videoIds.Any())
+            {
+                return new List<VideoTimeCodeResult>();
+            }
+            var videoResultIds = await _videoResultRepository.Queryable.WhereBulkContains(lessonResultIds, x => x.LessonResultId).Where(x => x.StudentId == studentId).Select(x => x.Id).ToListAsync(cancellationToken);
+            if (videoResultIds == null || !videoResultIds.Any())
+            {
+                return new List<VideoTimeCodeResult>();
+            }
+            var videoTimeCodeIds = await _videoTimeCodeRepository.Queryable.WhereBulkContains(videoIds, x => x.VideoId).Where(x => x.TimeCodeType == request.Type)
+                                                                         .Select(x => x.Id)
+                                                                         .ToListAsync(cancellationToken);
+            if (videoTimeCodeIds == null || !videoTimeCodeIds.Any())
+            {
+                return new List<VideoTimeCodeResult>();
+            }
 
-            var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeResults.Where(x => videoResultIds.Contains(x.VideoResultId)))
-                                                        .Where(x => x.TimeCodeType == request.Type && videoIds.Contains(x.VideoId))
+            return await _videoTimeCodeResultRepository.Queryable.WhereBulkContains(videoResultIds, x => x.VideoResultId)
+                                                        .WhereBulkContains(videoTimeCodeIds, x => x.VideoTimeCodeId)
                                                         .ToListAsync(cancellationToken);
-            return videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).ToList();
         }
 
         private async Task<IList<Guid>> GetLessonIdsAsync(GetUnitByUnitTestQuery request)

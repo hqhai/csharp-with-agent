@@ -7,6 +7,7 @@ using Fsel.System.Domain.Entities.BlindBoxs;
 using Fsel.System.Domain.Entities.ChatBot;
 using Fsel.System.Domain.Entities.Chatbots;
 using Fsel.System.Domain.Entities.Configs;
+using Fsel.System.Domain.Entities.DailyQuiz;
 using Fsel.System.Domain.Entities.QuestBoards;
 using Fsel.System.Infrastructure.Configs;
 using Fsel.System.Infrastructure.Configs.BlindBoxs;
@@ -75,6 +76,8 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new BlindBoxChestEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new BlindBoxHistoryEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new BlindBoxUserEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new DailyQuizHistoryEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new DailyQuizAnswerEntityTypeConfigConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -123,6 +126,10 @@ namespace Fsel.System.Infrastructure
         public DbSet<BlindBoxChestConfig> BlindBoxChestConfigs { get; set; }
         public DbSet<BlindBoxHistory> BlindBoxHistories { get; set; }
         public DbSet<BlindBoxUser> BlindBoxUsers { get; set; }
+        public DbSet<DailyQuizQuestion> DailyQuizQuestions { get; set; }
+        public DbSet<DailyQuizAnswer> DailyQuizAnswers { get; set; }
+        public DbSet<DailyQuizHistory> DailyQuizHistories { get; set; }
+        public DbSet<DailyQuizWinner> DailyQuizWinners { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

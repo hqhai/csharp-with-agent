@@ -122,6 +122,8 @@ namespace Fsel.Course.Domain.Entities
             set { SkillScoresStr = Common.Helpers.ConvertHelper.Serialize(value); }
         }
 
+        public bool IsPendingSpeechToText { get; set; }
+
         public ICollection<ClassForumScore> ClassForumScores { get; set; } = new List<ClassForumScore>();
 
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();

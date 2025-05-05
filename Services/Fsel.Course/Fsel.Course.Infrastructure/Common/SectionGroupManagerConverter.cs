@@ -22,6 +22,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly ISectionQuestionRepository _sectionQuestionRepository;
         private readonly IQuestionRepository _questionRepository;
         private int NumberQuestion = 0;
+        private static int MaxCorrectTotalSkill = 40;
 
         public SectionGroupManagerConverter(QuestionTypeConverter questionTypeConverter, QuestionConverter questionConverter, IMapper mapper, ISectionGroupRepository sectionGroupRepository, ISectionQuestionRepository sectionQuestionRepository, IQuestionRepository questionRepository)
         {
@@ -100,6 +101,7 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
             IList<Section> sections = sectionGroup.Sections;
+
             foreach (var section in sectionModels)
             {
                 //if (section == null)
@@ -169,23 +171,23 @@ namespace Fsel.Course.Infrastructure.Common
                             return methodResult;
                         }
 
-                        var correctCount = newSection.SectionQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal);
-                        if (type == EnumCourseType.Ielts && !SectionValidation.IsCheckSection(sectionGroup.CourseSkill, index, correctCount))
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.ExceededValidScore), new Error[]{
-                                new Error
-                                {
-                                    FieldName = nameof(index),
-                                    ErrorValues = new List<object>{ index }
-                                },
-                                new Error
-                                {
-                                    FieldName = nameof(sectionGroup.CourseSkill),
-                                    ErrorValues = new List<object>{ correctCount }
-                                }
-                            });
-                            return methodResult;
-                        }
+                        //var correctCount = newSection.SectionQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                        //if (type == EnumCourseType.Ielts && !SectionValidation.IsCheckSection(sectionGroup.CourseSkill, index, correctCount))
+                        //{
+                        //    methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.ExceededValidScore), new Error[]{
+                        //        new Error
+                        //        {
+                        //            FieldName = nameof(index),
+                        //            ErrorValues = new List<object>{ index }
+                        //        },
+                        //        new Error
+                        //        {
+                        //            FieldName = nameof(sectionGroup.CourseSkill),
+                        //            ErrorValues = new List<object>{ correctCount }
+                        //        }
+                        //    });
+                        //    return methodResult;
+                        //}
                     }
                 }
                 else if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
@@ -221,6 +223,17 @@ namespace Fsel.Course.Infrastructure.Common
                 if (!newSection.IsValid())
                 {
                     methodResult.AddErrorBadRequest(newSection.ErrorMessages);
+                    return methodResult;
+                }
+            }
+            var listSkillScore = new List<EnumCourseSkill> { EnumCourseSkill.Reading, EnumCourseSkill.Listening };
+            if (type == EnumCourseType.Ielts && listSkillScore.Any(x => x == sectionGroup.CourseSkill))
+            {
+                var correctTotal = sections.SelectMany(x => x.SectionQuestions).Any() ? sections.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal) :
+                                                                                        sections.SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                if (correctTotal > MaxCorrectTotalSkill)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.BelowOrEqualTo40), nameof(correctTotal), correctTotal);
                     return methodResult;
                 }
             }
