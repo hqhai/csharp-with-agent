@@ -193,7 +193,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         return methodResult;
                     }
                     var course = courseResults.Content?.Result?.FirstOrDefault();
-                    if (course != null && order != null && order.Package != null && (order.Package.MonthNumber == ExtendMonth.TwentyFourMonth ||
+                    if (course != null && order.Package != null && (order.Package.MonthNumber == ExtendMonth.TwentyFourMonth ||
                                                                    order.Package.MonthNumber == ExtendMonth.TwelveMonth ||
                                                                    order.Package.MonthNumber == ExtendMonth.SixMonth ||
                                                                    order.Package.MonthNumber == ExtendMonth.ThreeMonth))
@@ -209,6 +209,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 });
 
                 order.Status = request.OrderStatus;
+                if (!order.IsValid())
+                {
+                    methodResult.AddError(order.ErrorMessages);
+                    return methodResult;
+                }
+
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

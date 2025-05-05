@@ -19,10 +19,12 @@ namespace Fsel.Course.Domain.Entities
         private const int MaxScore = 2;
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(5000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Content { get; set; }
 
         private string? _wordContent;
 
+        [MaxLength(5000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? WordContent
         {
             get { return _wordContent; }

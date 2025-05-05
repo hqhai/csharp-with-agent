@@ -25,7 +25,7 @@ namespace Fsel.Course.Infrastructure.Configs
             builder.HasIndex(x => x.LessonResultId).IsUnique(false);
 
             builder.Property(e => e.Status)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumResultStatus>());

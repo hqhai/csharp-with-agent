@@ -156,7 +156,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 new UserSetting(true)
                             }
                     };
-
+                    if (!user.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(user.ErrorMessages);
+                        return methodResult;
+                    }
                     identityStudentResult = await _userManager.CreateAsync(user, DefaultPassword);
                     if (!identityStudentResult.Succeeded)
                     {
@@ -192,7 +196,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                     }
                                 }
                             };
-
+                            if (!parent.IsValid())
+                            {
+                                methodResult.AddErrorBadRequest(parent.ErrorMessages);
+                                return methodResult;
+                            }
                             identityParentResult = await _userManager.CreateAsync(parent, DefaultPassword);
                             if (!identityParentResult.Succeeded)
                             {
