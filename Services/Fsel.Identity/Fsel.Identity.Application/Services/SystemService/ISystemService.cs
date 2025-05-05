@@ -69,5 +69,8 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Post("/v1/admin/token-history/add-coin-buy-course")]
         Task<IApiResponse<MethodResult<bool>>> AddCoinBuyCourse([Body] AddCoinBuyCourseModel query);
+
+        [Post("/v1/admin/token-history/add-coin-fsel-event-reward")]
+        Task<IApiResponse<MethodResult<bool>>> AddCoinFselEventReward([Body] AddCoinFselEventRewardModel query);
     }
 }
