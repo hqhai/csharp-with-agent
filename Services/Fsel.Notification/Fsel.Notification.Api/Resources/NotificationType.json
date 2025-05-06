@@ -1243,5 +1243,39 @@
         "language": "fr-FR"
       }
     ]
+  },
+
+  {
+    "id": "AC71E737-CA8D-4A05-9C0B-0A83EDF53483",
+    "type": "Text",
+    "content": "AddCoinBuyCourse",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Chúc mừng! Bạn vừa bỏ túi {0} xu nhờ đăng ký thành công khóa học FSEL {1} tháng. Hãy chuẩn bị sẵn sàng cho hành trình học tập trong vòng {1} tháng tới nhé",
+    "templateLink": "",
+    "createdDate": "2025-02-26",
+    "translations": [
+      {
+        "id": "BC54C2ED-5127-491F-AD88-E5BEB78BF2DB",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "AC71E737-CA8D-4A05-9C0B-0A83EDF53483",
+        "templateMessage": "Chúc mừng! Bạn vừa bỏ túi {0} xu nhờ đăng ký thành công khóa học FSEL {1} tháng. Hãy chuẩn bị sẵn sàng cho hành trình học tập trong vòng {1} tháng tới nhé",
+        "language": "vi-VN"
+      },
+      {
+        "id": "F77772C8-9361-49D3-9325-36E8F03476ED",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "AC71E737-CA8D-4A05-9C0B-0A83EDF53483",
+        "templateMessage": "Congratulations! You’ve just earned {0} coins by successfully enrolling in the FSEL {1}-month course. Get ready for an exciting learning journey over the next {1} months!",
+        "language": "en-US"
+      },
+      {
+        "id": "1072C194-D441-49A2-8126-684ABE00BCB5",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "AC71E737-CA8D-4A05-9C0B-0A83EDF53483",
+        "templateMessage": "Félicitations ! Vous venez de gagner {0} pièces en vous inscrivant avec succès au cours FSEL de {1} mois. Préparez-vous pour un voyage d'apprentissage passionnant durant les {1} prochains mois !",
+        "language": "fr-FR"
+      }
+    ]
   }
 ]

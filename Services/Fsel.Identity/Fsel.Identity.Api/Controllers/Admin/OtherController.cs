@@ -87,7 +87,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// Add Coin By Sheet
         /// </summary>
         [HttpPost("add-coin-sheet")]
-        [ProducesResponseType(typeof(MethodResult<IList<EventRegistrationModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> AddCoinBySheet([FromBody] AddCoinBySheetCommand query)
@@ -106,6 +106,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> ImportUsers([FromQuery] ImportUsersToBlindBagEventCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Add Coin By Sheet
+        /// </summary>
+        [HttpPost("add-coin-buy-course")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddCoinBuyCourseBySheet([FromBody] AddCoinBuyCourseBySheetCommand query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
