@@ -8,6 +8,25 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
 
     public class SearchStudentQueryModel : BaseQueryModel
     {
+        public string? ListSchoolGrade { get; set; }
+        public string? ListSchoolClass { get; set; }
+
+        public IList<string>? SchoolClasses
+        {
+            get
+            {
+                return ListSchoolClass.ToList<string>();
+            }
+        }
+
+        public IList<string>? SchoolGrades
+        {
+            get
+            {
+                return ListSchoolGrade.ToList<string>();
+            }
+        }
+
         public string? SchoolGrade { get; set; }
         public string? SchoolClass { get; set; }
         public string? SchoolIdsStr { get; set; }

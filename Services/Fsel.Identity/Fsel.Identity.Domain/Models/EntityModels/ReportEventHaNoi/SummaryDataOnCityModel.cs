@@ -7,12 +7,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels.ReportEventHaNoi
     [Keyless]
     public class SummaryDataOnCityModel
     {
-        public string? GroupName { get; set; }
-        public string? DistrictName { get; set; }
-        public string? SchoolName { get; set; }
+        public string? GroupedValue { get; set; }
         public int? ActiveCount { get; set; }
         public decimal? PercentageActive { get; set; }
-        public decimal? PercentageChange { get; set; }
-
     }
 }

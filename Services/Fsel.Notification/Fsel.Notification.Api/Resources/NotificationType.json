@@ -1183,7 +1183,7 @@
     "content": "SurveyReward",
     "icon": "",
     "priority": 1,
-    "templateMessage": "Cảm ơn bạn đã tham gia khảo sát! Chúng tôi trân trọng cảm ơn bạn đã hoàn thành khảo sát Tháng Tự Học Ngoại Ngữ - Hà Nội! Để bày tỏ sự tri ân, bạn đã nhận được {0} FSEL COINS. Chúng tôi sẽ xem xét và đánh giá ý kiến của bạn để không ngừng cải thiện trải nghiệm học tập. Cảm ơn bạn đã đồng hành cùng FSEL!",
+    "templateMessage": "Cảm ơn bạn đã đánh giá FSEL 5 sao! FSEL đã gửi tặng {0} xu vào tài khoản của bạn. Tiếp tục học tập chăm chỉ nhé!",
     "templateLink": "",
     "createdDate": "2025-02-26",
     "translations": [
@@ -1191,21 +1191,21 @@
         "id": "788C4DE6-030B-4866-8E91-3FB0E913F670",
         "createdDate": "2024-08-28",
         "notificationTypeId": "3C7F9946-3F95-4A84-B2DF-7CFFBF36A41C",
-        "templateMessage": "Cảm ơn bạn đã tham gia khảo sát! Chúng tôi trân trọng cảm ơn bạn đã hoàn thành khảo sát Tháng Tự Học Ngoại Ngữ - Hà Nội! Để bày tỏ sự tri ân, bạn đã nhận được {0} FSEL COINS. Chúng tôi sẽ xem xét và đánh giá ý kiến của bạn để không ngừng cải thiện trải nghiệm học tập. Cảm ơn bạn đã đồng hành cùng FSEL!",
+        "templateMessage": "Cảm ơn bạn đã đánh giá FSEL 5 sao! FSEL đã gửi tặng {0} xu vào tài khoản của bạn. Tiếp tục học tập chăm chỉ nhé!",
         "language": "vi-VN"
       },
       {
         "id": "13DD85C7-014C-4A32-9392-92A46440C481",
         "createdDate": "2025-02-26",
         "notificationTypeId": "3C7F9946-3F95-4A84-B2DF-7CFFBF36A41C",
-        "templateMessage": "Thank you for participating in the survey! We sincerely appreciate your completion of the Self-Study Language Month - Hanoi survey! As a token of our gratitude, you have received {0} FSEL COINS. Your feedback will be carefully reviewed and evaluated to continuously improve the learning experience. Thank you for your support and for being part of FSEL!  ",
+        "templateMessage": "Thank you for rating FSEL 5 stars! FSEL has credited {0} coins to your account. Keep up the hard work! ",
         "language": "en-US"
       },
       {
         "id": "8592527A-E771-4E37-A2E0-E5E5AA5FF667",
         "createdDate": "2025-02-26",
         "notificationTypeId": "3C7F9946-3F95-4A84-B2DF-7CFFBF36A41C",
-        "templateMessage": "Merci d'avoir participé à l'enquête ! Nous vous remercions sincèrement d'avoir complété l'enquête sur le Mois de l'Auto-apprentissage des Langues - Hanoï ! En signe de notre gratitude, vous avez reçu {0} FSEL COINS. Vos retours seront attentivement examinés et évalués afin d'améliorer continuellement l'expérience d'apprentissage. Merci pour votre soutien et votre engagement avec FSEL ! ",
+        "templateMessage": "Merci d'avoir attribué 5 étoiles à FSEL ! FSEL a crédité {0} pièces sur votre compte. Continuez à travailler dur !",
         "language": "fr-FR"
       }
     ]
@@ -1240,6 +1240,40 @@
         "createdDate": "2025-02-26",
         "notificationTypeId": "50947E80-1900-4FA5-89D2-F8BD309660DA",
         "templateMessage": "Nous avons détecté que certains comptes ont abusé de la fonction de parrainage pour obtenir des pièces de manière non conforme aux règles. Les pièces et les objets échangés seront récupérés. Veuillez respecter les règles pour éviter l'interdiction de votre compte !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "AC71E737-CA8D-4A05-9C0B-0A83EDF53483",
+    "type": "Text",
+    "content": "AddCoinBuyCourse",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Chúc mừng! Bạn vừa bỏ túi {0} xu nhờ đăng ký thành công khóa học FSEL {1} tháng. Hãy chuẩn bị sẵn sàng cho hành trình học tập trong vòng {1} tháng tới nhé",
+    "templateLink": "",
+    "createdDate": "2025-02-26",
+    "translations": [
+      {
+        "id": "BC54C2ED-5127-491F-AD88-E5BEB78BF2DB",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "AC71E737-CA8D-4A05-9C0B-0A83EDF53483",
+        "templateMessage": "Chúc mừng! Bạn vừa bỏ túi {0} xu nhờ đăng ký thành công khóa học FSEL {1} tháng. Hãy chuẩn bị sẵn sàng cho hành trình học tập trong vòng {1} tháng tới nhé",
+        "language": "vi-VN"
+      },
+      {
+        "id": "F77772C8-9361-49D3-9325-36E8F03476ED",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "AC71E737-CA8D-4A05-9C0B-0A83EDF53483",
+        "templateMessage": "Congratulations! You’ve just earned {0} coins by successfully enrolling in the FSEL {1}-month course. Get ready for an exciting learning journey over the next {1} months!",
+        "language": "en-US"
+      },
+      {
+        "id": "1072C194-D441-49A2-8126-684ABE00BCB5",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "AC71E737-CA8D-4A05-9C0B-0A83EDF53483",
+        "templateMessage": "Félicitations ! Vous venez de gagner {0} pièces en vous inscrivant avec succès au cours FSEL de {1} mois. Préparez-vous pour un voyage d'apprentissage passionnant durant les {1} prochains mois !",
         "language": "fr-FR"
       }
     ]
