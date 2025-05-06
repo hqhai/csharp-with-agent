@@ -19,9 +19,9 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
     public class CheckFileAndConvertCommandHandler : IRequestHandler<CheckFileAndConvertCommand, MethodResult<IFormFile>>
     {
         private readonly IFFmpegServices _fFmpegServices;
-        private List<string> _codecs = new List<string> { "WebM", "ADTS", "flac" };
-        private List<string> _nameFiles = new List<string> { "AAC", "mp4" };
-        private List<(string, string)> _fileCodecs = new List<(string, string)> { ("WMA", "Windows media") };
+        private List<string> _codecs = new List<string> { "WebM", "ADTS" };
+        private List<string> _nameFiles = new List<string> { "AAC", "mp4", "WMA" };
+        //private List<(string, string)> _fileCodecs = new List<(string, string)> { ("WMA", "Windows media") };
 
         public CheckFileAndConvertCommandHandler(IFFmpegServices fFmpegServices)
         {
@@ -47,8 +47,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
             }
 
             if (_codecs.Any(x => x.ToLower() == checkFile.AudioInfo.Codec.ToLower()) ||
-                _nameFiles.Any(x => x.ToLower() == checkFile.Filename?.Substring(checkFile.Filename.LastIndexOf('.') + 1).ToLower()) ||
-                _fileCodecs.Any(x => x.Item1.ToLower() == checkFile.AudioInfo.Codec.ToLower() && x.Item2.ToLower() == checkFile.Filename?.Substring(checkFile.Filename.LastIndexOf('.') + 1)))
+                _nameFiles.Any(x => x.ToLower() == checkFile.Filename?.Substring(checkFile.Filename.LastIndexOf('.') + 1).ToLower()))
             {
                 var convertWav = await ConvertWav(request.FormFile);
                 if (!convertWav.IsOK)
