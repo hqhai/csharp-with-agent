@@ -123,8 +123,8 @@ builder.Services.AddAuthentication()
         options.ClientId = "3677545940964641090";
         options.ClientSecret = "vqMb7BGNKESCNzTWU389";
         options.CallbackPath = "/signin-zalo";
-        options.AuthorizationEndpoint = "https://oauth.zaloapp.com/v4/permission";
-        options.TokenEndpoint = "https://oauth.zaloapp.com/v4/access_token";
+        options.AuthorizationEndpoint = "https://oauth.zaloapp.com/v4/oa/permission";
+        options.TokenEndpoint = "https://oauth.zaloapp.com/v4/oa/access_token";
         options.UserInformationEndpoint = "https://graph.zalo.me/v2.0/me?fields=id,name,picture,birthday,gender,phone,email";
 
         options.SaveTokens = true;
