@@ -37,7 +37,8 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                     {
                         VolatileToken = value.Coin,
                         UserId = value.UserId,
-                        Feature = EnumTokenFeature.FselEventReward,
+                        Feature = EnumTokenFeature.FselEvent,
+                        Mission = EnumTokenMission.FselEventReward,
                         Type = EnumTokenHistoryType.Recevived,
                         TokenHistoryTranslations = new List<TokenHistoryTranslationModel>
                         {

@@ -19,7 +19,6 @@ namespace Fsel.Shared.Enums
         RecallCoinBug,
         BuyBlindBox,
         ReceiveTokensBlindBox,
-        Payment,
-        FselEventReward
+        Payment
     }
 }
