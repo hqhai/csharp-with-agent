@@ -211,7 +211,9 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 if (videoResult != null && videoResult.Status != EnumResultStatus.Done && videoResult.CurrentVideoTimeCodeId.HasValue)
                 {
                     var videoTimeCode = await _videoTimeCodeRepository.Queryable.FirstOrDefaultAsync(x => x.Id == videoResult.CurrentVideoTimeCodeId.Value);
-                    var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.FirstOrDefaultAsync(x => x.VideoResultId == videoResult.Id && x.VideoTimeCodeId == videoResult.CurrentVideoTimeCodeId.Value);
+                    var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoResultId == videoResult.Id && x.VideoTimeCodeId == videoResult.CurrentVideoTimeCodeId.Value && x.CreatedDate >= videoResult.CreatedDate)
+                                                                                            .Where(x => !(videoResult.Status == EnumResultStatus.Done) || x.UpdatedDate <= videoResult.UpdatedDate)
+                                                                                            .FirstOrDefaultAsync();
 
                     if (videoTimeCode != null && videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone && (videoTimeCodeResult == null || videoTimeCodeResult.Status != EnumResultStatus.Done))
                     {

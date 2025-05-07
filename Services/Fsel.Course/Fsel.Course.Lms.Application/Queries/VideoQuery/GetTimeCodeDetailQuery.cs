@@ -151,7 +151,9 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             if (videoTimeCodes != null)
             {
                 var videoTimeCodePrevios = videoTimeCodes.Where(x => videoTimeCodes.IndexOf(x) < videoTimeCodes.IndexOf(videoTimeCodeRequest)).ToList();
-                var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoResultId == videoResult.Id).ToListAsync();
+                var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoResultId == videoResult.Id && x.CreatedDate >= videoResult.CreatedDate)
+                    .Where(x => !(videoResult.Status == EnumResultStatus.Done) || x.CreatedDate <= videoResult.UpdatedDate)
+                    .ToListAsync();
                 if (videoTimeCodePrevios != null && videoTimeCodePrevios.Any())
                 {
                     foreach (var videoTimeCode in videoTimeCodePrevios)

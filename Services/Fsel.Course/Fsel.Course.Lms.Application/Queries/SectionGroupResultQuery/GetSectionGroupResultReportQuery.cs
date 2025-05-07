@@ -63,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.SectionGroupResultQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
-            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionGroupId == request.SectionGroupId && x.StudentId == studentId, cancellationToken);
+            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionGroupId == request.SectionGroupId && x.StudentId == studentId && x.CreatedDate >= mockTestResult.CreatedDate, cancellationToken);
             if (sectionGroupResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroupResult));

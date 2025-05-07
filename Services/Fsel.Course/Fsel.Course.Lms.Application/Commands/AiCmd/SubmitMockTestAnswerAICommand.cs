@@ -146,7 +146,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             {
                 return true;
             }
-            var sectionGroupResult = _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefault(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId);
+            var sectionGroupResult = _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefault(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId && x.CreatedDate >= mockTestResult.CreatedDate);
             if (sectionGroupResult == null)
             {
                 return true;

@@ -88,6 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             {
                 var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable
                                       .Where(x => x.VideoTimeCode != null && x.VideoTimeCode.TimeCodeType == type && x.VideoResultId == videoResult.Id)
+                                      .Where(x => x.CreatedDate >= videoResult.CreatedDate && x.CreatedDate <= videoResult.UpdatedDate)
                                       .ToListAsync();
 
                 if (videoTimeCodeResults == null || !videoTimeCodeResults.Any())
