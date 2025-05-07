@@ -30,6 +30,7 @@ using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 
@@ -120,17 +121,19 @@ builder.Services.AddAuthentication()
     })
     .AddOAuth<OAuthOptions, ZaloOAuthHandler>("Zalo", options =>
     {
+        options.UsePkce = true;
+        options.SignInScheme = IdentityConstants.ExternalScheme;
         options.ClientId = "3677545940964641090";
         options.ClientSecret = "vqMb7BGNKESCNzTWU389";
         options.CallbackPath = "/signin-zalo";
         options.AuthorizationEndpoint = "https://oauth.zaloapp.com/v4/permission";
         options.TokenEndpoint = "https://oauth.zaloapp.com/v4/access_token";
         options.UserInformationEndpoint = "https://graph.zalo.me/v2.0/me?fields=id,name,picture,birthday,gender,phone,email";
-
         options.SaveTokens = true;
-        options.UsePkce = true;
 
-        //options.Scope.Add("profile");
+        options.Scope.Add("profile");
+        options.Scope.Add("id");
+        options.Scope.Add("name");
 
         options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
         options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
@@ -294,8 +297,8 @@ app.UseLanguages();
 app.UseStaticFiles();
 app.UseIdentityServer();
 app.UseCertificateForwarding();
-app.UseAuthorization();
 app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 app.MapDefaultControllerRoute();
 app.UseHttpsRedirection();

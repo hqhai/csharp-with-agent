@@ -26,9 +26,9 @@ namespace Fsel.Identity.Application.Events
 
             var parameters = new Dictionary<string, string>
             {
-                { "app_id", Options.ClientId }, // Zalo yêu cầu 'app_id' chứ không phải 'client_id'
+                { "app_id", Options.ClientId },
                 { "grant_type", "authorization_code" },
-                { "code", context.Code },
+                { "code", context.Code }
             };
 
             if (context.Properties.Items.TryGetValue("code_verifier", out var codeVerifier) && !string.IsNullOrEmpty(codeVerifier))
@@ -36,11 +36,13 @@ namespace Fsel.Identity.Application.Events
                 parameters.Add("code_verifier", codeVerifier);
             }
 
-            var request = new HttpRequestMessage(HttpMethod.Post, Options.TokenEndpoint);
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            request.Headers.Add("secret_key", Options.ClientSecret); // Gửi secret_key vào header
+            var content = new FormUrlEncodedContent(parameters);
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
-            request.Content = new FormUrlEncodedContent(parameters);
+            var request = new HttpRequestMessage(HttpMethod.Post, Options.TokenEndpoint);
+            request.Content = content;
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Headers.Add("secret_key", Options.ClientSecret); // Gửi secret_key trong header
 
             var response = await Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, Context.RequestAborted);
             if (!response.IsSuccessStatusCode)
