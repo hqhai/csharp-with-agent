@@ -97,6 +97,7 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<UserDeletion> UserDeletions { get; set; }
         public DbSet<UserSchool> UserSchools { get; set; }
         public DbSet<SchoolImportHistory> SchoolImportHistorys { get; set; }
+        public DbSet<StudentEventLearningRecord> StudentEventLearningRecords { get; set; }
 
         #endregion Db Set
 

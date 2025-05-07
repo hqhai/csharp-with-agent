@@ -235,6 +235,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     CourseLevel = item.CourseLevel,
                     ProcessDate = item.CreatedDate,
                     ExpiredDate = item.ExpiredDate,
+                    UserName = item.UserName,
                     OverallPercent = overallPercent,
                     OverallModules = overallModuleReports.OrderBy(x => x.DisplayOrder).ToList(),
                 };

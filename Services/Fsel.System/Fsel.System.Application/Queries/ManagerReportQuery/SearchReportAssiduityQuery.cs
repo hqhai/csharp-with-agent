@@ -115,6 +115,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                     SchoolClass = student.SchoolClass,
                     SchoolGrade = student.SchoolGrade,
                     CourseLevel = student.CourseLevel,
+                    UserName = student.UserName,
                     ExpiredDate = student.ExpiredDate,
                     ProcessDate = student.CreatedDate
                 };
