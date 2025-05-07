@@ -867,6 +867,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             returnUrl ??= string.Empty;
 
             var info = await _signInManager.GetExternalLoginInfoAsync();
+            _logger.LogCritical("Log_ExternalLoginConfirmation: info = {info}", info.Serialize());
             if (info == null)
             {
                 return RedirectToAction(nameof(Login), new { returnUrl });
