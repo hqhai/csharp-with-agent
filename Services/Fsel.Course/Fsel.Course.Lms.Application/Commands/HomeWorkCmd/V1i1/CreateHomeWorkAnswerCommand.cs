@@ -158,7 +158,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
 
             var homeWorkAnswers = await _homeWorkAnswerRepository.Queryable.Where(x => x.HomeWorkResultId == homeWorkResult.Id)
                                                                  .Where(x => x.CreatedDate >= homeWorkResult.CreatedDate)
-                                                                 .Where(x => !homeWorkResult.UpdatedDate.HasValue || x.CreatedDate <= homeWorkResult.UpdatedDate)
                                                                  .ToListAsync(cancellationToken);
 
             foreach (var item in request.Answers)
@@ -450,7 +449,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             ArgumentNullException.ThrowIfNull(homeWorkResult);
             var homeWorkAnswers = await _homeWorkAnswerRepository.Queryable.Include(x => x.HomeWorkQuestion).ThenInclude(x => x!.Question)
                                                                  .Where(x => x.CreatedDate >= homeWorkResult.CreatedDate)
-                                                                 .Where(x => !homeWorkResult.UpdatedDate.HasValue || x.CreatedDate <= homeWorkResult.UpdatedDate)
                                                                  .Where(x => x.HomeWorkResultId == homeWorkResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
             if (homeWorkAnswers != null && homeWorkAnswers.Any())
             {

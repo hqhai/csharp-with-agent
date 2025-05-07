@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 homeWorkResultAnswerQuerys = await _homeWorkAnswerRepository.Queryable
                                                                             .WhereBulkContains(homeWorkResultIds, x => x.HomeWorkResultId)
                                                                             .Where(x => x.CreatedDate >= lessonResult.CreatedDate)
-                                                                            .Where(x => !lessonResult.UpdatedDate.HasValue || x.CreatedDate <= lessonResult.UpdatedDate)
+                                                                            .Where(x => !(lessonResult.UpdatedDate.HasValue && lessonResult.Status == EnumResultStatus.Done) || x.CreatedDate <= lessonResult.UpdatedDate)
                                                                             .Where(x => x.IsCorrect.HasValue)
                                                                             .ToListAsync(cancellationToken);
             }

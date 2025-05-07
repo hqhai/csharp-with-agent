@@ -458,7 +458,6 @@ namespace Fsel.Course.Infrastructure.Common
         {
             var answers = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id)
                                                                 .Where(x => x.CreatedDate >= videoTimeCodeResult.CreatedDate)
-                                                                .Where(x => !videoTimeCodeResult.UpdatedDate.HasValue || x.CreatedDate <= videoTimeCodeResult.UpdatedDate)
                                                                 .OrderBy(x => x.Question!.CreatedDate)
                                                                 .Select(x => x.IsCorrect == true && x.IsFirstSubmit).ToListAsync();
             return _linQHelper.GetHighestStreak(answers);
@@ -524,7 +523,7 @@ namespace Fsel.Course.Infrastructure.Common
 
             var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable.WhereBulkContains(questionIds, x => x.QuestionId)
                                                                            .Where(x => x.CreatedDate >= videoTimeCodeResult.CreatedDate)
-                                                                           .Where(x => !videoTimeCodeResult.UpdatedDate.HasValue || x.CreatedDate <= videoTimeCodeResult.UpdatedDate)
+                                                                           .Where(x => !(videoTimeCodeResult.Status == EnumResultStatus.Done && videoTimeCodeResult.UpdatedDate.HasValue) || x.CreatedDate <= videoTimeCodeResult.UpdatedDate)
                                                                            .Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id)
                                                                            .ToListAsync();
 
@@ -820,7 +819,6 @@ namespace Fsel.Course.Infrastructure.Common
                                    select q).ToListAsync();
             var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable.Include(x => x.Question)
                                                                            .Where(x => x.CreatedDate >= videoTimeCodeResult.CreatedDate)
-                                                                           .Where(x => !videoTimeCodeResult.UpdatedDate.HasValue || x.CreatedDate <= videoTimeCodeResult.UpdatedDate)
                                                                            .Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id).ToListAsync();
 
             var questionCompleteIds = videoTimeCodeAnswers.Select(x => x.QuestionId).ToList();

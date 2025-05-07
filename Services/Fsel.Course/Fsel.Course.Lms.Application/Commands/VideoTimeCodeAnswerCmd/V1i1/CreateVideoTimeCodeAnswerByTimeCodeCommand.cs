@@ -189,7 +189,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
                 var countAnswers = await _videoTimeCodeAnswerRepository.Queryable.Where(p => p.VideoTimeCodeResultId == videoTimeCodeResult.Id)
                     .Where(x => x.CreatedDate >= videoTimeCodeResult.CreatedDate)
-                    .Where(x => !videoTimeCodeResult.UpdatedDate.HasValue || x.CreatedDate <= videoTimeCodeResult.UpdatedDate)
                     .CountAsync(cancellationToken);
 
                 await DoQuestBoard(videoResult.StudentId, EnumQuestBoardCategory.DecodingTheNebula, countAnswers, cancellationToken);
@@ -284,7 +283,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
             var answers = await _videoTimeCodeAnswerRepository.Queryable.WhereBulkContains(request.Answers.Select(x => x.QuestionId), x => x.QuestionId)
                                                               .Where(x => x.CreatedDate >= videoTimeCodeResult.CreatedDate)
-                                                              .Where(x => !videoTimeCodeResult.UpdatedDate.HasValue || x.CreatedDate <= videoTimeCodeResult.UpdatedDate)
                                                               .Where(x => x.VideoResultId == videoTimeCodeResult.VideoResultId && x.VideoTimeCodeId == request.VideoTimeCodeId)
                                                               .ToListAsync(cancellationToken);
             foreach (var item in request.Answers)
@@ -625,7 +623,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         {
             var exerciseIds = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id)
                 .Where(x => x.CreatedDate >= videoTimeCodeResult.CreatedDate)
-                .Where(x => !videoTimeCodeResult.UpdatedDate.HasValue || x.CreatedDate <= videoTimeCodeResult.UpdatedDate)
                 .Select(x => x.ExerciseId).Distinct().ToListAsync(cancellationToken);
             var exercises = await _exerciseRepository.Queryable.Include(x => x.ExerciseQuestions)
                                     .ThenInclude(x => x.Question)

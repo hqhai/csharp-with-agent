@@ -229,7 +229,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     {
                         var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.MockTestResultId == mockTestResult.Id && x.SectionGroupResultId == sectionGroupResult.Id)
                                                                        .Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
-                                                                       .Where(x => !sectionGroupResult.UpdatedDate.HasValue || x.CreatedDate <= sectionGroupResult.UpdatedDate)
                                                                        .ToListAsync(cancellationToken);
                         foreach (var item in mockTestAnswers)
                         {
@@ -424,7 +423,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             if (questions != null && questions.Any())
             {
                 var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
-                                                                     .Where(x => !sectionGroupResult.UpdatedDate.HasValue || x.CreatedDate <= sectionGroupResult.UpdatedDate)
                                                                      .Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
                                                                      .ToListAsync();
 
@@ -476,7 +474,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             if (sections != null && sections.Any())
             {
                 var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
-                                                                   .Where(x => !sectionGroupResult.UpdatedDate.HasValue || x.CreatedDate <= sectionGroupResult.UpdatedDate)
                                                                    .Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
                                                                    .ToListAsync();
 
@@ -543,7 +540,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             var updateMockTestAnswers = new List<MockTestAnswer>();
 
             var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
-                                                                .Where(x => !sectionGroupResult.UpdatedDate.HasValue || x.CreatedDate <= sectionGroupResult.UpdatedDate)
                                                                 .Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
                                                                 .ToListAsync();
 

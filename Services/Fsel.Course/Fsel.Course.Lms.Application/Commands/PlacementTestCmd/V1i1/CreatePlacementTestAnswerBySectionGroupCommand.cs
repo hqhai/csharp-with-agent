@@ -264,7 +264,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             {
                 var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
                                                                                .Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
-                                                                               .Where(x => !sectionGroupResult.UpdatedDate.HasValue || x.CreatedDate <= sectionGroupResult.UpdatedDate)
                                                                                .ToListAsync();
                 foreach (var item in request.Answers)
                 {

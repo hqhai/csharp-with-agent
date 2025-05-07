@@ -323,7 +323,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 var finalTestAnswers = await _finalTestAnswerRepository.Queryable
                                                                      .Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
                                                                      .Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
-                                                                     .Where(x => !sectionGroupResult.UpdatedDate.HasValue || x.CreatedDate <= sectionGroupResult.UpdatedDate)
                                                                      .ToListAsync();
                 foreach (var item in request.Answers)
                 {
