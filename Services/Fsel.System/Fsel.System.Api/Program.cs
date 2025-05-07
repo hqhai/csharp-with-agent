@@ -136,8 +136,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.InteractionQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.Banner, typeof(BannerConsumer) },
     { QueueSettings.SystemQueue.NameQueue.BuyBlindBox, typeof(BuyBlindBoxConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.ChooseDailyQuizWinners, typeof(ChooseDailyQuizWinnersConsumer) }
-    { QueueSettings.SystemQueue.NameQueue.BuyBlindBox, typeof(BuyBlindBoxConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.ChooseDailyQuizWinners, typeof(ChooseDailyQuizWinnersConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.DictionaryRealTime, typeof(DictionaryConsumer) },
     { QueueSettings.SystemQueue.NameQueue.CrawDictionaryData, typeof(CrawDictionaryDataConsumer) }
 });
