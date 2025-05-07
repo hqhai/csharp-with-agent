@@ -848,6 +848,15 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         public IActionResult ExternalLogin(string provider, string? returnUrl = null)
         {
             var redirectUrl = Url.Action(nameof(ExternalLoginConfirmation), "Account", new { returnUrl });
+
+            if (provider == "Zalo")
+            {
+                return Challenge(new AuthenticationProperties
+                {
+                    RedirectUri = redirectUrl
+                }, "Zalo");
+            }
+
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return Challenge(properties, provider);
         }

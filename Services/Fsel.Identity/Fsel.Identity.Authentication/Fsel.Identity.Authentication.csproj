@@ -10,6 +10,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\zalo_verifierPUAYSO3HDoP7vAO2kjiBNrtLs66nemuyEJGq.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\zalo_verifierPUAYSO3HDoP7vAO2kjiBNrtLs66nemuyEJGq.html" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Fsel.Identity.Application\Fsel.Identity.Application.csproj" />
   </ItemGroup>
 

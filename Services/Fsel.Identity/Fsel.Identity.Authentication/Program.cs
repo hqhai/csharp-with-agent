@@ -1,15 +1,14 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Text.Json;
 using AutoMapper;
 using Fsel.Authentication.Infrastructure.Configs;
 using Fsel.Common.Constants;
-using Fsel.Common.Helpers;
 using Fsel.Core.Extensions;
-using Fsel.Core.Localization;
-using Fsel.Core.Middlewares;
 using Fsel.Identity.Application.Events;
 using Fsel.Identity.Application.Queues.Publishers;
-using Fsel.Identity.Application.Services;
 using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Application.Services.LmsCourseService;
 using Fsel.Identity.Application.Services.OrderService;
@@ -25,6 +24,7 @@ using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.DataProtection;
@@ -72,6 +72,7 @@ builder.Services.AddAuthentication()
     .AddGoogle(options =>
     {
         options.UsePkce = true;
+        //options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
         options.ClientId = appSetting?.Authentication?.Google?.ClientId ?? string.Empty;
         options.ClientSecret = appSetting?.Authentication?.Google?.ClientSecret ?? string.Empty;
         options.Events = new OAuthEvents
@@ -115,6 +116,55 @@ builder.Services.AddAuthentication()
         //facebookOptions.Fields.Add("phone");
         //facebookOptions.UserInformationEndpoint = "https://graph.facebook.com/v2.8/me?fields=id,name,email,birthday,gender,phone,avatar_2d_profile_picture";
     })
+    .AddOAuth("Zalo", options =>
+    {
+        options.ClientId = "3677545940964641090";
+        options.ClientSecret = "vqMb7BGNKESCNzTWU389";
+
+        options.CallbackPath = "/signin-zalo";
+
+        options.AuthorizationEndpoint = "https://oauth.zaloapp.com/v4/permission";
+        options.TokenEndpoint = "https://oauth.zaloapp.com/v4/access_token";
+        options.UserInformationEndpoint = "https://graph.zalo.me/v2.0/me?fields=id,name,picture,birthday,gender,phone,email";
+
+        options.SaveTokens = true;
+        options.UsePkce = true;
+
+        options.Scope.Add("profile");
+
+        options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+        options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
+        options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
+        options.ClaimActions.MapJsonKey(ClaimTypes.MobilePhone, "phone");
+        options.ClaimActions.MapJsonKey(ClaimTypes.Gender, "gender");
+        options.ClaimActions.MapJsonKey(ClaimTypes.DateOfBirth, "birthday");
+
+        options.Events = new OAuthEvents
+        {
+            OnCreatingTicket = async context =>
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+
+                var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
+                response.EnsureSuccessStatusCode();
+
+                using var user = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+                context.RunClaimActions(user.RootElement);
+            }
+        };
+    })
+    //.AddOpenIdConnect("oidc", "Zalo", options =>
+    //{
+    //    options.Authority = "https://oauth.zaloapp.com/v4/permission";
+    //    options.ClientId = "implicit";
+
+    //    options.TokenValidationParameters = new TokenValidationParameters
+    //    {
+    //        NameClaimType = "name",
+    //        RoleClaimType = "role"
+    //    };
+    //})
     .AddCookie(options =>
     {
         options.CookieManager = new ChunkingCookieManager();

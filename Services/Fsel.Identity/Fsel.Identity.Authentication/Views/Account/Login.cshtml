@@ -111,6 +111,7 @@
                 <div class="social">
                     <a href="@Url.Action("ExternalLogin", "Account", new { provider = "Google", Model.ReturnUrl})"><img src="/assets/icons/google-icon.svg" alt="google" /></a>
                     <a href="@Url.Action("ExternalLogin", "Account", new { provider = "Facebook", Model.ReturnUrl})"><img src="/assets/icons/facebook-icon.svg" alt="facebook" /></a>
+                    <a href="@Url.Action("ExternalLogin", "Account", new { provider = "Zalo", Model.ReturnUrl})"><img src="/assets/icons/zalo-icon.svg" alt="zalo" /></a>
                 </div>
 
                 <button type="submit" class="btn" id="loginButton">@Localizer["i18nSigninButtonSignIn"]</button>
