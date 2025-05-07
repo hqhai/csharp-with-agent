@@ -147,6 +147,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 CourseId = i.CourseId,
                 UserId = i.Human.UserId,
                 CreatedDate = i.CreatedDate,
+                UserName = i.Human.User!.UserName
             });
             var list = await dataQuery.AsNoTracking().ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             methodResult.Result = list.OrderBy(x => int.TryParse(x.SchoolGrade, out int graded) ? graded : 0).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName).ToList();
