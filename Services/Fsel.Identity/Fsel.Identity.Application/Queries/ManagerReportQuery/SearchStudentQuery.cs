@@ -150,6 +150,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 UserId = i.Human.UserId,
                 CreatedDate = i.CreatedDate,
                 BaseCourseLevel = i.BaseCourseLevel,
+                UserName = i.Human.User!.UserName
             });
             int totalItem = await dataQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = (await dataQuery.ToListAsync(cancellationToken))
