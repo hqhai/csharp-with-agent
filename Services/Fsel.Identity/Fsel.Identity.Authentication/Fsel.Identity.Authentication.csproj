@@ -14,7 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\zalo_verifierPUAYSO3HDoP7vAO2kjiBNrtLs66nemuyEJGq.html" />
+    <None Include="wwwroot\zalo_verifierPUAYSO3HDoP7vAO2kjiBNrtLs66nemuyEJGq.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
