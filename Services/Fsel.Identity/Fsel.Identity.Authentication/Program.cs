@@ -28,7 +28,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -130,7 +132,7 @@ builder.Services.AddAuthentication()
         options.SaveTokens = true;
         options.UsePkce = true;
 
-        options.Scope.Add("profile");
+        //options.Scope.Add("profile");
 
         options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
         options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
@@ -151,6 +153,25 @@ builder.Services.AddAuthentication()
 
                 using var user = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
                 context.RunClaimActions(user.RootElement);
+            },
+            OnRedirectToAuthorizationEndpoint = context =>
+            {
+                var uri = new UriBuilder(context.RedirectUri);
+                var query = QueryHelpers.ParseQuery(uri.Query);
+
+                // Đổi tên client_id => app_id
+                if (query.ContainsKey("client_id"))
+                {
+                    var appId = query["client_id"];
+                    query.Remove("client_id");
+                    query["app_id"] = appId;
+                }
+
+                // Gán lại query string đã chỉnh sửa
+                uri.Query = new QueryBuilder(query.SelectMany(kvp => kvp.Value, (kvp, v) => new KeyValuePair<string, string>(kvp.Key, v))).ToQueryString().ToString();
+
+                context.Response.Redirect(uri.ToString());
+                return Task.CompletedTask;
             }
         };
     })
