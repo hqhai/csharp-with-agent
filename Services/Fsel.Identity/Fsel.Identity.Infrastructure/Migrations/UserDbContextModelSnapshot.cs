@@ -1477,6 +1477,101 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.ToTable("StudentDailyStreak");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentEventLearningRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<Guid>("CompetitionEventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<bool>("IsView")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("TotalGrammar")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalLearningDays")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalLessons")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalListening")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalQuestBoards")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalReading")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalSpeaking")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalTokens")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalVocabulary")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalWriting")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StudentEventLearningRecords");
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentFocusTime", b =>
                 {
                     b.Property<Guid>("Id")

@@ -78,6 +78,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new BlindBoxUserEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new DailyQuizHistoryEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new DailyQuizAnswerEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new DictionaryEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -130,6 +131,8 @@ namespace Fsel.System.Infrastructure
         public DbSet<DailyQuizAnswer> DailyQuizAnswers { get; set; }
         public DbSet<DailyQuizHistory> DailyQuizHistories { get; set; }
         public DbSet<DailyQuizWinner> DailyQuizWinners { get; set; }
+        public DbSet<Dictionary> Dictionaries { get; set; }
+        public DbSet<UnknownWord> UnknownWords { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
