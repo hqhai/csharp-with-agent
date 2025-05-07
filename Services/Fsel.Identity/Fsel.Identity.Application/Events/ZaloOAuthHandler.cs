@@ -31,6 +31,11 @@ namespace Fsel.Identity.Application.Events
                 { "code", context.Code },
             };
 
+            if (context.Properties.Items.TryGetValue("code_verifier", out var codeVerifier) && !string.IsNullOrEmpty(codeVerifier))
+            {
+                parameters.Add("code_verifier", codeVerifier);
+            }
+
             var request = new HttpRequestMessage(HttpMethod.Post, Options.TokenEndpoint);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Headers.Add("secret_key", Options.ClientSecret); // Gửi secret_key vào header
