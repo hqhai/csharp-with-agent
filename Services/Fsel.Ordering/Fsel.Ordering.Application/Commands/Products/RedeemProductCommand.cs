@@ -215,7 +215,7 @@ namespace Fsel.Ordering.Application.Commands.Products
 
                     if (token < product.Price)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotEnoughTokens));
+                        methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotEnoughTokens), nameof(token), token);
                         return methodResult;
                     }
 

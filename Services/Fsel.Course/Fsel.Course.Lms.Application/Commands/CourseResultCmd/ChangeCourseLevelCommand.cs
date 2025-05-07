@@ -31,7 +31,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
     public class ChangeCourseLevelCommand : IRequest<MethodResult<CourseResultModel>>
     {
         public EnumCourseLevel CourseLevel { get; set; }
-
         public Guid? UserId { get; set; }
     }
 
@@ -211,7 +210,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
 
             if (updateResult.IsSuccessStatusCode)
             {
-                await SendNotification(course, courseResult, cancellationToken);
+                await SendNotification(course, courseResult, request.UserId ?? _authContext.CurrentUserId, cancellationToken);
             }
 
             methodResult.Result = _mapper.Map<CourseResultModel>(courseResult);
@@ -219,7 +218,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             return methodResult;
         }
 
-        private async Task SendNotification(Course course, CourseResult? courseResult, CancellationToken cancellationToken)
+        private async Task SendNotification(Course course, CourseResult? courseResult, Guid userId, CancellationToken cancellationToken)
         {
             if (courseResult == null)
             {
@@ -228,7 +227,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
 
             NotificationSendingQueueModel notificationModel = new NotificationSendingQueueModel()
             {
-                UserIds = new List<Guid>() { courseResult.CreatedUserId },
+                UserIds = new List<Guid>() { userId },
                 ParamsMessage = new List<object> { course.Name ?? string.Empty, },
                 Type = EnumNotificationType.LinkPage,
                 Content = EnumNotificationContent.CourseChange,

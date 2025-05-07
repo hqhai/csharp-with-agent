@@ -364,6 +364,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
+                    b.Property<bool>("IsPendingSpeechToText")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsViewed")
                         .HasColumnType("bit");
 
@@ -5361,6 +5364,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<double>("Percent")
                         .HasColumnType("float");
+
+                    b.Property<string>("PlaybackSpeed")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Status")
                         .IsRequired()

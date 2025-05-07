@@ -1,0 +1,12 @@
+using Fsel.Core.Entities;
+
+namespace Fsel.System.Domain.Entities.DailyQuiz
+{
+    public class DailyQuizHistory : Entity
+    {
+        public Guid DailyQuizQuestionId { get; set; }
+        public Guid DailyQuizAnswerId { get; set; }
+        public DailyQuizQuestion? DailyQuizQuestion { get; set; }
+        public DailyQuizAnswer? DailyQuizAnswer { get; set; }
+    }
+}
