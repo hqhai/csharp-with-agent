@@ -118,7 +118,7 @@ builder.Services.AddAuthentication()
         //facebookOptions.Fields.Add("phone");
         //facebookOptions.UserInformationEndpoint = "https://graph.facebook.com/v2.8/me?fields=id,name,email,birthday,gender,phone,avatar_2d_profile_picture";
     })
-    .AddOAuth("Zalo", options =>
+    .AddScheme<OAuthOptions, ZaloOAuthHandler>("Zalo", options =>
     {
         options.ClientId = "3677545940964641090";
         options.ClientSecret = "vqMb7BGNKESCNzTWU389";
@@ -139,10 +139,6 @@ builder.Services.AddAuthentication()
         options.ClaimActions.MapJsonKey(ClaimTypes.Gender, "gender");
         options.ClaimActions.MapJsonKey(ClaimTypes.DateOfBirth, "birthday");
 
-        options.Backchannel = new HttpClient(new ZaloBackchannelHandler())
-        {
-            Timeout = TimeSpan.FromSeconds(30)
-        };
         options.Events = new OAuthEvents
         {
             OnCreatingTicket = async context =>
