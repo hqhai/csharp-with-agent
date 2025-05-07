@@ -26,7 +26,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Hosting;
-    using Refit;
 
     public class CreateCFRPendingWordContentCommand : CreateCFRPendingWordContentCommandModel, IRequest<MethodResult<bool>>
     {
@@ -43,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
         private readonly AuthContext _authContext;
         private readonly ISystemService _systemService;
         private readonly SpeechToTextPendingAiPublisher _speechToTextPendingAiPublisher;
-        private readonly IStorageService _storageService;
+        private readonly IMediator _mediator;
         private const int MaxClassForumDetailResultRecord = 2;
         private const int MaxPendingSpeechToText = 2;
         private const int TimeStartJobTest = 10;
@@ -58,7 +57,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                                                          AuthContext authContext,
                                                          ISystemService systemService,
                                                          SpeechToTextPendingAiPublisher speechToTextPendingAiPublisher,
-                                                         IStorageService storageService)
+                                                         IMediator mediator)
         {
             _userService = userService;
             _classForumResultRepository = classForumResultRepository;
@@ -69,7 +68,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
             _authContext = authContext;
             _systemService = systemService;
             _speechToTextPendingAiPublisher = speechToTextPendingAiPublisher;
-            _storageService = storageService;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateCFRPendingWordContentCommand request, CancellationToken cancellationToken)
@@ -184,6 +183,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                 return methodResult;
             });
 
+            // update filePart classForumDetailResult
+            await _mediator.Publish(new UpdateFilePartClassForumDetailResultCommand { Id = classForumDetailResult.Id, FormFile = request.FormFile }, cancellationToken);
+
             // bắn publish sang xử lý speech to text
             using var memoryStream = new MemoryStream();
             await request.FormFile.CopyToAsync(memoryStream);
@@ -217,17 +219,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
 
         private async Task<ClassForumDetailResult> CreateClassForumDetailResultAsync(Guid classForumResultId, EnumSubmissionCount submissionCount, string content, IFormFile formFile, CancellationToken cancellationToken)
         {
-            using var stream = formFile.OpenReadStream();
-            var streamPart = new StreamPart(stream, formFile.FileName, formFile.ContentType);
-            var filePart = await _storageService.ConvertWav(streamPart);
-
             var classForumDetailResult = new ClassForumDetailResult
             {
                 Content = content,
                 Status = EnumClassForumResultStatus.PendingSpeechToText,
                 SubmissionCount = submissionCount,
-                ClassForumResultId = classForumResultId,
-                ClassForumResultFiles = new List<ClassForumResultFile> { new ClassForumResultFile { FilePath = filePart.Content?.Result } }
+                ClassForumResultId = classForumResultId
             };
 
             _classForumDetailResultRepository.Add(classForumDetailResult);
