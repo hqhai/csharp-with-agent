@@ -73,7 +73,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 
         private async Task<MockTestResultReportModel> GetMockTestReport(MockTestResult mockTestResult, MockTest mockTest)
         {
-            var query = _mockTestAnswerRepository.Queryable.Where(x => x.MockTestResultId == mockTestResult.Id);
             var course = await _courseRepository.GetByIdAsync(mockTestResult.CourseId);
             var mockTestResultDto = _mapper.Map<MockTestResultReportModel>(mockTestResult);
             if (course != null)

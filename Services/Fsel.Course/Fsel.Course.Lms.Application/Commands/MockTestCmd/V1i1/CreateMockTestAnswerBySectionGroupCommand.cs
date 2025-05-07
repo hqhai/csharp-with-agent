@@ -207,7 +207,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             if (!methodResult.IsOK)
             {
                 return methodResult;
-            };
+            }
 
             try
             {
@@ -227,8 +227,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     }
                     else if (request.Answers == null || request.Answers.Count == 0)
                     {
-                        var mockTestAnswers = _mockTestAnswerRepository.Queryable.Where(x => x.MockTestResultId == mockTestResult.Id && x.SectionGroupResultId == sectionGroupResult.Id).ToList();
-
+                        var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.MockTestResultId == mockTestResult.Id && x.SectionGroupResultId == sectionGroupResult.Id)
+                                                                       .Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
+                                                                       .Where(x => !sectionGroupResult.UpdatedDate.HasValue || x.CreatedDate <= sectionGroupResult.UpdatedDate)
+                                                                       .ToListAsync(cancellationToken);
                         foreach (var item in mockTestAnswers)
                         {
                             await SendToChatGpt(item.SectionId ?? default, sectionGroupId, mockTestResult.Id, item.AnswerStr, cancellationToken);
@@ -421,6 +423,11 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             var updateMockTestAnswers = new List<MockTestAnswer>();
             if (questions != null && questions.Any())
             {
+                var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
+                                                                     .Where(x => !sectionGroupResult.UpdatedDate.HasValue || x.CreatedDate <= sectionGroupResult.UpdatedDate)
+                                                                     .Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                                                                     .ToListAsync();
+
                 foreach (var item in request.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
@@ -432,8 +439,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     }
                     var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
                     var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default;
-
-                    var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.SectionGroupResultId == sectionGroupResult.Id && x.SectionQuestionId == sectionQuestionId);
+                    var mockTestAnswer = mockTestAnswers.FirstOrDefault(x => x.SectionGroupResultId == sectionGroupResult.Id && x.SectionQuestionId == sectionQuestionId);
                     if (mockTestAnswer == null)
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, questionItem);
@@ -469,6 +475,11 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             var updateMockTestAnswers = new List<MockTestAnswer>();
             if (sections != null && sections.Any())
             {
+                var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
+                                                                   .Where(x => !sectionGroupResult.UpdatedDate.HasValue || x.CreatedDate <= sectionGroupResult.UpdatedDate)
+                                                                   .Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                                                                   .ToListAsync();
+
                 foreach (var item in request.Answers)
                 {
                     var section = sections.FirstOrDefault(x => x.Id == item.SectionId);
@@ -477,7 +488,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section));
                         return methodResult;
                     }
-                    var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionId == section.Id);
+                    var mockTestAnswer = mockTestAnswers.FirstOrDefault(x => x.SectionGroupResultId == sectionGroupResult.Id && x.SectionId == section.Id);
                     if (mockTestAnswer == null)
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, section.Id);
@@ -530,12 +541,18 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
             var createMockTestAnswers = new List<MockTestAnswer>();
             var updateMockTestAnswers = new List<MockTestAnswer>();
+
+            var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
+                                                                .Where(x => !sectionGroupResult.UpdatedDate.HasValue || x.CreatedDate <= sectionGroupResult.UpdatedDate)
+                                                                .Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                                                                .ToListAsync();
+
             foreach (var item in request.Answers)
             {
                 var sectionTimeCode = sectionTimeCodes.FirstOrDefault(x => x.Id == item.SectionTimeCodeId);
                 if (sectionTimeCode != null)
                 {
-                    var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionTimeCodeId == sectionTimeCode.Id);
+                    var mockTestAnswer = mockTestAnswers.FirstOrDefault(x => x.SectionGroupResultId == sectionGroupResult.Id && x.SectionTimeCodeId == sectionTimeCode.Id);
                     if (mockTestAnswer == null)
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, null, sectionTimeCode.Id);

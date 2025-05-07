@@ -320,6 +320,11 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             var createFinalTestAnswers = new List<FinalTestAnswer>();
             if (questions != null && questions.Any())
             {
+                var finalTestAnswers = await _finalTestAnswerRepository.Queryable
+                                                                     .Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                                                                     .Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
+                                                                     .Where(x => !sectionGroupResult.UpdatedDate.HasValue || x.CreatedDate <= sectionGroupResult.UpdatedDate)
+                                                                     .ToListAsync();
                 foreach (var item in request.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
@@ -331,7 +336,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                     }
                     var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
                     var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default;
-                    var finalTestAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.SectionGroupResultId == sectionGroupResult.Id && x.SectionQuestionId == sectionQuestionId);
+                    var finalTestAnswer = finalTestAnswers.FirstOrDefault(x => x.SectionQuestionId == sectionQuestionId && x.SectionGroupResultId == sectionGroupResult.Id);
                     if (finalTestAnswer == null)
                     {
                         finalTestAnswer = new FinalTestAnswer

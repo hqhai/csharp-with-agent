@@ -177,7 +177,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         break;
 
                     case EnumCourseSkill.Writing:
-                        var mocktestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id).ToListAsync(cancellationToken);
+                        var mocktestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                                                                             .Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
+                                                                             .Where(x => !sectionGroupResult.UpdatedDate.HasValue || x.CreatedDate <= sectionGroupResult.UpdatedDate)
+                                                                             .ToListAsync(cancellationToken);
                         var tokenHistoryWritings = new List<TokenHistoryQueueModel>();
                         var sections = sectionGroupResult.SectionGroup.Sections.ToList();
                         foreach (var section in sections)

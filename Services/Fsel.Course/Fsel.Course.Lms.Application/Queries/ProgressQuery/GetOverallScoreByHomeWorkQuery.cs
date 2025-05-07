@@ -160,7 +160,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private async Task<IList<Guid>> GetHomeWorkResultIdsAsync(GetOverallScoreByHomeWorkQuery request, IList<Guid> homeWorkIds, Guid studentId)
         {
             var lessonResultIds = await GetLessonResultIdsAsync(request, studentId);
-            return await _homeWorkResultRepository.Queryable.Where(x => homeWorkIds.Contains(x.HomeWorkId) && lessonResultIds.Contains(x.LessonResultId)).Select(x => x.Id).ToListAsync();
+            return await _homeWorkResultRepository.Queryable.WhereBulkContains(homeWorkIds, x => x.HomeWorkId).WhereBulkContains(lessonResultIds, x => x.LessonResultId).Select(x => x.Id).ToListAsync();
         }
 
         private async Task<SkillScores> GetSkillScoreHomeWorkAnswerAsync(IList<Guid> homeWorkResultIds, CancellationToken cancellationToken)
