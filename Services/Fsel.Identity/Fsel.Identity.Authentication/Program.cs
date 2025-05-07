@@ -118,13 +118,13 @@ builder.Services.AddAuthentication()
         //facebookOptions.Fields.Add("phone");
         //facebookOptions.UserInformationEndpoint = "https://graph.facebook.com/v2.8/me?fields=id,name,email,birthday,gender,phone,avatar_2d_profile_picture";
     })
-    .AddScheme<OAuthOptions, ZaloOAuthHandler>("Zalo", options =>
+    .AddOAuth<OAuthOptions, ZaloOAuthHandler>("Zalo", options =>
     {
         options.ClientId = "3677545940964641090";
         options.ClientSecret = "vqMb7BGNKESCNzTWU389";
         options.CallbackPath = "/signin-zalo";
-        options.AuthorizationEndpoint = "https://oauth.zaloapp.com/v4/permission";
-        options.TokenEndpoint = "https://oauth.zaloapp.com/v4/access_token";
+        options.AuthorizationEndpoint = "https://oauth.zaloapp.com/v4/oa/permission";
+        options.TokenEndpoint = "https://oauth.zaloapp.com/v4/oa/access_token";
         options.UserInformationEndpoint = "https://graph.zalo.me/v2.0/me?fields=id,name,picture,birthday,gender,phone,email";
 
         options.SaveTokens = true;
