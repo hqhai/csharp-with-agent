@@ -350,12 +350,12 @@ namespace Fsel.Course.Infrastructure.Common
                 var mockTestAnswers = new List<MockTestAnswer>();
                 if (sectionGroup.CourseSkill == EnumCourseSkill.Reading || sectionGroup.CourseSkill == EnumCourseSkill.Listening)
                 {
-                    var questions = await _sectionQuestionRepository.Queryable.WhereBulkContains(questionIds, x => x.QuestionId).Select(x => new
+                    var sectionQuestions = await _sectionQuestionRepository.Queryable.WhereBulkContains(questionIds, x => x.Id).Select(x => new
                     {
                         SectionQuestionId = x.Id,
                         QuestionType = x.Question!.QuestionType
                     }).ToListAsync();
-                    mockTestAnswers = questions.Select(x => new MockTestAnswer
+                    mockTestAnswers = sectionQuestions.Select(x => new MockTestAnswer
                     {
                         Answer = _answerTypeConverter.GetConfigEmpty(x.QuestionType),
                         SectionGroupResultId = sectionGroupResult.Id,
@@ -393,7 +393,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else
             {
-                var questions = await _sectionQuestionRepository.Queryable.WhereBulkContains(questionIds, x => x.QuestionId).Select(x => new
+                var sectionQuestions = await _sectionQuestionRepository.Queryable.WhereBulkContains(questionIds, x => x.Id).Select(x => new
                 {
                     SectionQuestionId = x.Id,
                     QuestionType = x.Question!.QuestionType
@@ -401,7 +401,7 @@ namespace Fsel.Course.Infrastructure.Common
 
                 if (sectionGroupResult.FinalTestResultId.HasValue)
                 {
-                    var finalTestAnswers = questions.Select(x => new FinalTestAnswer
+                    var finalTestAnswers = sectionQuestions.Select(x => new FinalTestAnswer
                     {
                         Answer = _answerTypeConverter.GetConfigEmpty(x.QuestionType),
                         SectionQuestionId = x.SectionQuestionId,
@@ -425,7 +425,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
                 else
                 {
-                    var placementTestAnswers = questions.Select(x => new PlacementTestAnswer
+                    var placementTestAnswers = sectionQuestions.Select(x => new PlacementTestAnswer
                     {
                         Answer = _answerTypeConverter.GetConfigEmpty(x.QuestionType),
                         SectionQuestionId = x.SectionQuestionId,
