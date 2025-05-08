@@ -866,6 +866,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         {
             returnUrl ??= string.Empty;
 
+            _logger.LogError("ExternalLoginConfirmation_Cookies: {cookies}", Request.Headers["Cookie"].ToString());
+
             var info = await _signInManager.GetExternalLoginInfoAsync();
             _logger.LogCritical("Log_ExternalLoginConfirmation: info = {info}", info.Serialize());
             if (info == null)

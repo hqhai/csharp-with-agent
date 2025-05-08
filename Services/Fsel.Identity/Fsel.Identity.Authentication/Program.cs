@@ -23,6 +23,7 @@ using Fsel.Identity.Infrastructure.Providers;
 using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using IdentityServer4.EntityFramework.Mappers;
+using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -144,8 +145,29 @@ builder.Services.AddAuthentication()
 
         options.Events = new OAuthEvents
         {
+            OnAccessDenied = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetService<ILoggerFactory>()?.CreateLogger("OAuthEvents");
+                logger.LogError("OnAccessDenied_Cookies: {cookies}", context.Request.Headers["Cookie"].ToString());
+                return Task.CompletedTask;
+            },
+            OnTicketReceived = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetService<ILoggerFactory>()?.CreateLogger("OAuthEvents");
+                logger.LogError("OnTicketReceived_Cookies: {cookies}", context.Request.Headers["Cookie"].ToString());
+                return Task.CompletedTask;
+            },
+            OnRemoteFailure = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetService<ILoggerFactory>()?.CreateLogger("OAuthEvents");
+                logger.LogError("OnRemoteFailure_Cookies: {cookies}", context.Request.Headers["Cookie"].ToString());
+                return Task.CompletedTask;
+            },
             OnCreatingTicket = async context =>
             {
+                var logger = context.HttpContext.RequestServices.GetService<ILoggerFactory>()?.CreateLogger("OAuthEvents");
+                logger.LogError("OnCreatingTicket_Cookies: {cookies}", context.Request.Headers["Cookie"].ToString());
+
                 var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
 
@@ -157,6 +179,9 @@ builder.Services.AddAuthentication()
             },
             OnRedirectToAuthorizationEndpoint = context =>
             {
+                var logger = context.HttpContext.RequestServices.GetService<ILoggerFactory>()?.CreateLogger("OAuthEvents");
+                logger.LogError("OnRedirectToAuthorizationEndpoint_Cookies: {cookies}", context.Request.Headers["Cookie"].ToString());
+
                 var uri = new UriBuilder(context.RedirectUri);
                 var query = QueryHelpers.ParseQuery(uri.Query);
 
