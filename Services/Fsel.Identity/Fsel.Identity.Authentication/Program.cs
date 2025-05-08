@@ -178,6 +178,11 @@ builder.Services.AddAuthentication()
                 logger?.LogError("OnCreatingTicket_AccessToken: {json}", context.AccessToken);
                 logger?.LogError("OnCreatingTicket_Zalo_UserInfo: {json}", user.RootElement.ToString());
                 context.RunClaimActions(user.RootElement);
+
+                foreach (var claim in context.Principal.Claims)
+                {
+                    logger?.LogError("OnCreatingTicket_Claim: {type} = {value}", claim.Type, claim.Value);
+                }
             },
             OnRedirectToAuthorizationEndpoint = context =>
             {
