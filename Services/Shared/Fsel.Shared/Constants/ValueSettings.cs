@@ -150,6 +150,9 @@ namespace Fsel.Shared.Constants
             public const int SkillFullMocKTest = 4;
             public const int CountLessonAca = 6;
             public const int CountLessonIELTS = 4;
+            public const int CountLessonRFI = 5;
+            public const int CountUnitRFIA1 = 10;
+            public const int CountUnitRFIA2 = 12;
         }
 
         public static class ValueOrderIndex
