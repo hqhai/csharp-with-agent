@@ -34,7 +34,6 @@ using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Core.Caching;
 using Fsel.Identity.Application.Commands.UserReferrals;
-using Microsoft.AspNetCore.Identity;
 
 namespace Fsel.Identity.Authentication.Quickstart.Account
 {
@@ -869,7 +868,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
             _logger.LogError("ExternalLoginConfirmation_Cookies: {cookies}", Request.Headers["Cookie"].ToString());
 
-            var auth = await HttpContext.AuthenticateAsync(IdentityConstants.ExternalScheme);
+            var auth = await HttpContext.AuthenticateAsync(Microsoft.AspNetCore.Identity.IdentityConstants.ExternalScheme);
             _logger.LogCritical("Log_ExternalLoginConfirmation: auth = {auth}", auth.Serialize());
 
             var info = await _signInManager.GetExternalLoginInfoAsync();
