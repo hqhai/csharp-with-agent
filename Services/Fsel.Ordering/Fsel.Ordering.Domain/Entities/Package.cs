@@ -62,7 +62,7 @@ namespace Fsel.Ordering.Domain.Entities
         /// Coin tặng khi mua khóa học
         /// </summary>
         [Range(0, 240000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int BonusCoin { get; set; }
+        public int BonusCoins { get; set; }
 
         public EnumPackageStatus Status { get; set; }
 

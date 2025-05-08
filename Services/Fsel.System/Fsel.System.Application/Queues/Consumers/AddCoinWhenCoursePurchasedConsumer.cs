@@ -24,7 +24,7 @@ namespace Fsel.System.Application.Queues.Consumers
             await _mediator.Send(new AddCoinWhenCoursePurchasedCommand
             {
                 UserIds = message.UserIds,
-                Coin = message.Coin,
+                Coins = message.Coins,
                 Month = message.Month,
                 ObjectId = message.ObjectId
             }).ConfigureAwait(false);

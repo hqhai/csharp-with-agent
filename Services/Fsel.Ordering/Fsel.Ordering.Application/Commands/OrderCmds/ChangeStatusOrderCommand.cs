@@ -265,7 +265,7 @@ AddCoinWhenCoursePurchasedPublisher addCoinWhenCoursePurchasedPublisher)
                     {
                         await _addCoinWhenCoursePurchasedPublisher.Publish(new AddCoinWhenCoursePurchasedCommandModel()
                         {
-                            Coin = package.BonusCoin,
+                            Coins = package.BonusCoins,
                             Month = package.MonthNumber,
                             ObjectId = order.Id,
                             UserIds = new List<Guid>() { order.UserId }

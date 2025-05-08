@@ -16,6 +16,6 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders
         public int MonthNumber { get; set; }
         public string? Description { get; set; }
         public int ReferToken { get; set; }
-        public int BonusCoin { get; set; }
+        public int BonusCoins { get; set; }
     }
 }

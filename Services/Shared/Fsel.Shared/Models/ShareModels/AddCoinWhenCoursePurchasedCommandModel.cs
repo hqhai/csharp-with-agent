@@ -4,7 +4,7 @@ namespace Fsel.Shared.Models.ShareModels
     {
         public IList<Guid>? UserIds { get; set; }
 
-        public double Coin { get; set; }
+        public double Coins { get; set; }
 
         public int Month { get; set; }
 

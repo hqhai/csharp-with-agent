@@ -36,7 +36,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                 {
                     new TokenHistoryQueueModel
                     {
-                        VolatileToken = request.Coin,
+                        VolatileToken = request.Coins,
                         UserId = userId,
                         ObjectId = request.ObjectId,
                         Feature = EnumTokenFeature.Payment,
@@ -90,7 +90,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                 ObjectId = Guid.Empty,
                 Type = EnumNotificationType.Text,
                 Content = EnumNotificationContent.AddCoinBuyCourse,
-                ParamsMessage = new List<object> { request.Coin, request.Month },
+                ParamsMessage = new List<object> { request.Coins, request.Month },
                 SenderId = Guid.Empty,
                 PlatformCode = EnumPlatformCode.LMS
             }, cancellationToken);
