@@ -261,7 +261,7 @@ AddCoinWhenCoursePurchasedPublisher addCoinWhenCoursePurchasedPublisher)
                     //    });
                     //}
 
-                    if (order.RevenueType == EnumPaymentRevenueType.Revenue)
+                    if (order.RevenueType == EnumPaymentRevenueType.Revenue && package.BonusCoins > 0)
                     {
                         await _addCoinWhenCoursePurchasedPublisher.Publish(new AddCoinWhenCoursePurchasedCommandModel()
                         {
