@@ -132,9 +132,9 @@ builder.Services.AddAuthentication()
         options.UserInformationEndpoint = "https://graph.zalo.me/v2.0/me?fields=id,name,picture,birthday,gender,phone,email";
         options.SaveTokens = true;
 
-        options.Scope.Add("profile");
-        options.Scope.Add("id");
-        options.Scope.Add("name");
+        options.Scope.Add("scope.userInfo");
+        options.Scope.Add("scope.userLocation");
+        options.Scope.Add("scope.userPhonenumber");
 
         options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
         options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
@@ -169,7 +169,7 @@ builder.Services.AddAuthentication()
                 logger.LogError("OnCreatingTicket_Cookies: {cookies}", context.Request.Headers["Cookie"].ToString());
 
                 var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+                request.Headers.Add("access_token", context.AccessToken);
 
                 var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
                 response.EnsureSuccessStatusCode();
