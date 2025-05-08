@@ -175,6 +175,7 @@ builder.Services.AddAuthentication()
                 response.EnsureSuccessStatusCode();
 
                 using var user = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+                logger?.LogError("OnCreatingTicket_Zalo_UserInfo: {json}", user.RootElement.ToString());
                 context.RunClaimActions(user.RootElement);
             },
             OnRedirectToAuthorizationEndpoint = context =>
