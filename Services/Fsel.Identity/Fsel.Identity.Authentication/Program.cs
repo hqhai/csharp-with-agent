@@ -137,7 +137,7 @@ builder.Services.AddAuthentication()
         options.Scope.Add("scope.userPhonenumber");
 
         options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
-        options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
+        options.ClaimActions.MapJsonKey(ClaimTypes.GivenName, "name");
         options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
         options.ClaimActions.MapJsonKey(ClaimTypes.MobilePhone, "phone");
         options.ClaimActions.MapJsonKey(ClaimTypes.Gender, "gender");
