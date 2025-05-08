@@ -178,6 +178,7 @@ builder.Services.AddAuthentication()
                 logger?.LogError("OnCreatingTicket_AccessToken: {json}", context.AccessToken);
                 logger?.LogError("OnCreatingTicket_Zalo_UserInfo: {json}", user.RootElement.ToString());
                 context.RunClaimActions(user.RootElement);
+                context.Properties.Items["LoginProvider"] = context.Scheme.ToString();
 
                 foreach (var claim in context.Principal.Claims)
                 {
