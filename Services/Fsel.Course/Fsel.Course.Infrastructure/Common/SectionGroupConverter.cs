@@ -116,7 +116,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
 
-            await _sectionGroupResultRepository.BulkMergeAsync(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+            await _sectionGroupResultRepository.BulkUpdateList(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
             {
                 bulk.IgnoreOnUpdateExpression = entity => new { entity.WorkingTime };
             });
@@ -435,7 +435,7 @@ namespace Fsel.Course.Infrastructure.Common
             if (sectionGroupResult.FinalTestResultId.HasValue)
             {
                 var finalTestAnswers = await _finalTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
-                await _finalTestAnswerRepository.BulkMergeAsync(finalTestAnswers.Select(x =>
+                await _finalTestAnswerRepository.BulkUpdateList(finalTestAnswers.Select(x =>
                 {
                     x.Status = EnumAnswerStatus.Done;
                     return x;
@@ -447,7 +447,7 @@ namespace Fsel.Course.Infrastructure.Common
             else if (sectionGroupResult.PlacementTestResultId.HasValue)
             {
                 var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
-                await _placementTestAnswerRepository.BulkMergeAsync(placementTestAnswers.Select(x =>
+                await _placementTestAnswerRepository.BulkUpdateList(placementTestAnswers.Select(x =>
                 {
                     x.Status = EnumAnswerStatus.Done;
                     return x;
@@ -459,7 +459,7 @@ namespace Fsel.Course.Infrastructure.Common
             else
             {
                 var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
-                await _mockTestAnswerRepository.BulkMergeAsync(mockTestAnswers.Select(x =>
+                await _mockTestAnswerRepository.BulkUpdateList(mockTestAnswers.Select(x =>
                 {
                     x.Status = EnumAnswerStatus.Done;
                     return x;

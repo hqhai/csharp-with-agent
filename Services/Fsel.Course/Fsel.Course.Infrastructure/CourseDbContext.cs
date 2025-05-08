@@ -3,7 +3,6 @@
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Domain.Models.EntityModels.ExportEventModels;
 using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
 using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
@@ -92,6 +91,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<QuestionExplanationLog> QuestionExplanationLogs { get; set; }
         public DbSet<QuestionShuffle> QuestionShuffles { get; set; }
 
+        #region Report
+
         public DbSet<TotalEvaluateInputResultModel> TotalEvaluateInputResults { get; set; }
         public DbSet<TotalDetailEvaluateInputResultModel> TotalDetailEvaluateInputResults { get; set; }
         public DbSet<PercentEvaluateInputResultModel> PercentEvaluateInputResults { get; set; }
@@ -108,7 +109,15 @@ namespace Fsel.Course.Infrastructure
         public DbSet<TotalLearningQualityModel> TotalLearningQualitys { get; set; }
         public DbSet<TotalDetailLearningQualityModel> TotalDetailLearningQualitys { get; set; }
         public DbSet<SchoolInfoModel> SchoolInfos { get; set; }
+        public DbSet<SchoolInfoFilterModel> SchoolInfoFilters { get; set; }
+        public DbSet<DistrictInfoModel> DistrictInfos { get; set; }
+
+        #endregion Report
+
         public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
+        public DbSet<WeeklyReport> WeeklyReports { get; set; }
+        public DbSet<ReportLearningProcessModel> ReportLearningProcesses { get; set; }
+        public DbSet<ReportLearningResultModel> ReportLearningResults { get; set; }
 
         public DbSet<ExportStudentEventModel> ExportStudentEvents { get; set; }
         public DbSet<ExportDistrictEventModel> ExportDistrictEvents { get; set; }
@@ -188,6 +197,27 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new QuestionExplanationErrorEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionExplanationLogEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionShuffleEntityTypeConfiguration());
+
+            //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
+            //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
+            //modelBuilder.Ignore<PercentEvaluateInputResultModel>();
+            //modelBuilder.Ignore<LevelEvaluateInputResultModel>();
+            //modelBuilder.Ignore<SchoolSummaryModel>();
+            //modelBuilder.Ignore<TotalLearningProgressModel>();
+            //modelBuilder.Ignore<AverageLearningProgressModel>();
+            //modelBuilder.Ignore<UnitDoneLearningProgressIeltsModel>();
+            //modelBuilder.Ignore<UnitDoneLearningProgressAcademicModel>();
+            //modelBuilder.Ignore<LessonDoneLearningProgressIeltsModel>();
+            //modelBuilder.Ignore<LessonDoneLearningProgressAcademicModel>();
+            //modelBuilder.Ignore<TotalLearningModel>();
+            //modelBuilder.Ignore<RateLearningModel>();
+            //modelBuilder.Ignore<TotalLearningQualityModel>();
+            //modelBuilder.Ignore<TotalDetailLearningQualityModel>();
+            //modelBuilder.Ignore<SchoolInfoModel>();
+            //modelBuilder.Ignore<CourseCompleteReportModel>();
+            //modelBuilder.Ignore<SchoolInfoFilterModel>();
+            //modelBuilder.Ignore<DistrictInfoModel>();
+
             base.OnModelCreating(modelBuilder);
         }
 

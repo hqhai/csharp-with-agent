@@ -44,6 +44,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListSchool = request.ListSchool,
                 SchoolClass = request.SchoolClass,
                 SchoolGrade = request.SchoolGrade,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
                 Status = request.Status,
@@ -58,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var students = userResults?.Result;
-            if (students == null)
+            if (students == null || !students.Any())
             {
                 return methodResult;
             }
@@ -83,9 +85,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     SchoolClass = item.SchoolClass,
                     SchoolGrade = item.SchoolGrade,
                     SchoolName = item.School,
+                    UserName = item.UserName,
                     Status = GetStatus(placementTestGroupResult),
                     ChooseLevel = placementTestGroupResult?.ChooseLevel,
-                    CurrentLevel = placementTestGroupResult?.CurrentLevel,
+                    CurrentLevel = placementTestGroupResult?.SuggetLevel,
                     ExpiredPTDate = placementTestResult?.UpdatedDate ?? placementTestResult?.CreatedDate,
                 });
             }

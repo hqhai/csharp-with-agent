@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Amazon.Runtime.Internal.Transform;
 using Fsel.Common.Constants;
 using Fsel.Core.Extensions;
 using Fsel.Shared.Constants;
@@ -13,9 +14,13 @@ using Fsel.System.Application.Services.SenderServices;
 using Fsel.System.Application.Services.StorageServices;
 using Fsel.System.Application.Services.UserServices;
 using Fsel.System.Domain.IRepositories;
+using Fsel.System.Domain.IRepositories.BlindBoxes;
+using Fsel.System.Domain.IRepositories.DailyQuizs;
 using Fsel.System.Infrastructure;
 using Fsel.System.Infrastructure.Common;
 using Fsel.System.Infrastructure.Repositories;
+using Fsel.System.Infrastructure.Repositories.BlindBoxes;
+using Fsel.System.Infrastructure.Repositories.DailyQuizs;
 using Fsel.System.Infrastructure.ValueSettings;
 using Microsoft.EntityFrameworkCore;
 using Refit;
@@ -72,9 +77,21 @@ builder.Services.AddScoped<IBannerStudentRepository, BannerStudentRepository>();
 builder.Services.AddScoped<IBannerScopeRepository, BannerScopeRepository>();
 builder.Services.AddScoped<IBannerImageRepository, BannerImageRepository>();
 builder.Services.AddScoped<ISharePointService, SharePointService>();
+builder.Services.AddScoped<IBlindBoxRepository, BlindBoxRepository>();
+builder.Services.AddScoped<IBlindBoxChestRepository, BlindBoxChestRepository>();
+builder.Services.AddScoped<IBlindBoxChestConfigRepository, BlindBoxChestConfigRepository>();
+builder.Services.AddScoped<IBlindBoxHistoryRepository, BlindBoxHistoryRepository>();
+builder.Services.AddScoped<IBlindBoxUserRepository, BlindBoxUserRepository>();
+builder.Services.AddScoped<IDictionaryRepository, DictionaryRepository>();
+builder.Services.AddScoped<IUnknownWordRepository, UnknownWordRepository>();
 
 builder.Services.AddScoped<IFselRatingRepository, FselRatingRepository>();
 builder.Services.AddScoped<IDisplayOrderConfigRepository, DisplayOrderConfigRepository>();
+
+builder.Services.AddScoped<IDailyQuizAnswerRepository, DailyQuizAnswerRepository>();
+builder.Services.AddScoped<IDailyQuizHistoryRepository, DailyQuizHistoryRepository>();
+builder.Services.AddScoped<IDailyQuizQuestionRepository, DailyQuizQuestionRepository>();
+builder.Services.AddScoped<IDailyQuizWinnerRepository, DailyQuizWinnerRepository>();
 
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();
@@ -83,6 +100,10 @@ builder.Services.AddScoped<ChatBotPublisher>();
 builder.Services.AddScoped<TechieSendMessagePublisher>();
 builder.Services.AddScoped<BannerConverter>();
 builder.Services.AddScoped<BannerPublisher>();
+builder.Services.AddScoped<BuyBlindBoxPublisher>();
+builder.Services.AddScoped<SendNotifyBuyBlindBoxPublisher>();
+builder.Services.AddScoped<DictionaryPublisher>();
+builder.Services.AddScoped<CrawDictionaryDataPublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
@@ -113,7 +134,11 @@ queues: new Dictionary<string, Type>
     { QueueSettings.SystemQueue.NameQueue.CreateLuckyTicket, typeof(CreateLuckyTicketConsumer) },
     { QueueSettings.SystemQueue.NameQueue.NoticeAccessTime, typeof(NoticeAccessFeatureConsumer) },
     { QueueSettings.InteractionQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.Banner, typeof(BannerConsumer) }
+    { QueueSettings.RealtimeQueue.NameQueue.Banner, typeof(BannerConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.BuyBlindBox, typeof(BuyBlindBoxConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.ChooseDailyQuizWinners, typeof(ChooseDailyQuizWinnersConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.DictionaryRealTime, typeof(DictionaryConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.CrawDictionaryData, typeof(CrawDictionaryDataConsumer) }
 });
 
 var app = builder.Build();

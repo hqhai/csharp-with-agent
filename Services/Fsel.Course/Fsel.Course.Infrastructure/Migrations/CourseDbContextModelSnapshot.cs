@@ -364,6 +364,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
+                    b.Property<bool>("IsPendingSpeechToText")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsViewed")
                         .HasColumnType("bit");
 
@@ -1274,10 +1277,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<string>("AnswerStr")
                         .IsRequired()
+                        .HasMaxLength(11000)
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CorrectCount")
-                        .HasColumnType("int");
+                    b.Property<short>("CorrectCount")
+                        .HasColumnType("smallint");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -1292,19 +1296,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("CreatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
 
                     b.Property<Guid?>("ExtraPracticeExerciseResultId")
                         .HasColumnType("uniqueidentifier");
@@ -1332,21 +1323,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Status")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<Guid?>("VideoTimeCodeId")
                         .HasColumnType("uniqueidentifier");
@@ -1770,10 +1748,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<string>("AnswerStr")
                         .IsRequired()
+                        .HasMaxLength(11000)
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CorrectCount")
-                        .HasColumnType("int");
+                    b.Property<short>("CorrectCount")
+                        .HasColumnType("smallint");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -1788,19 +1767,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("CreatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
 
                     b.Property<Guid>("FinalTestResultId")
                         .HasColumnType("uniqueidentifier");
@@ -1820,21 +1786,8 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
@@ -2107,10 +2060,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<string>("AnswerStr")
                         .IsRequired()
+                        .HasMaxLength(11000)
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CorrectCount")
-                        .HasColumnType("int");
+                    b.Property<short>("CorrectCount")
+                        .HasColumnType("smallint");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -2125,19 +2079,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("CreatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
 
                     b.Property<Guid>("HomeWorkQuestionId")
                         .HasColumnType("uniqueidentifier");
@@ -2154,21 +2095,8 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
@@ -3115,10 +3043,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnOrder(0);
 
                     b.Property<string>("AnswerStr")
+                        .HasMaxLength(11000)
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CorrectCount")
-                        .HasColumnType("int");
+                    b.Property<short>("CorrectCount")
+                        .HasColumnType("smallint");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -3133,19 +3062,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("CreatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
 
                     b.Property<string>("GradingAlFeedback")
                         .HasColumnType("nvarchar(max)");
@@ -3183,24 +3099,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<int?>("TimeCount")
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
 
                     b.Property<int?>("WordCount")
                         .HasColumnType("int");
@@ -3578,10 +3481,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<string>("AnswerStr")
                         .IsRequired()
+                        .HasMaxLength(11000)
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CorrectCount")
-                        .HasColumnType("int");
+                    b.Property<short>("CorrectCount")
+                        .HasColumnType("smallint");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -3596,19 +3500,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("CreatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
 
                     b.Property<bool?>("IsCorrect")
                         .HasColumnType("bit");
@@ -3628,21 +3519,8 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
@@ -4124,6 +4002,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<string>("ExplanationType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("Feedback")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
@@ -4136,6 +4019,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<Guid?>("ObjectResultId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uniqueidentifier");
@@ -4161,14 +4047,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
-                    b.Property<Guid?>("VideoResultId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("QuestionId");
-
-                    b.HasIndex("VideoResultId");
 
                     b.ToTable("QuestionExplanationErrors");
                 });
@@ -5484,6 +5365,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<double>("Percent")
                         .HasColumnType("float");
 
+                    b.Property<string>("PlaybackSpeed")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -5621,10 +5507,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<string>("AnswerStr")
                         .IsRequired()
+                        .HasMaxLength(11000)
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CorrectCount")
-                        .HasColumnType("int");
+                    b.Property<short>("CorrectCount")
+                        .HasColumnType("smallint");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -5639,19 +5526,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("CreatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
 
                     b.Property<Guid>("ExerciseId")
                         .HasColumnType("uniqueidentifier");
@@ -5671,21 +5545,8 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<Guid?>("VideoResultId")
                         .HasColumnType("uniqueidentifier");
@@ -5833,6 +5694,76 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("VideoTimeCodeResults");
+                });
+
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.WeeklyReport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("ParamStr")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ParentEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WeeklyReports");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForum", b =>
@@ -6570,14 +6501,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Fsel.Course.Domain.Entities.VideoResult", "VideoResult")
-                        .WithMany("QuestionExplanationErrors")
-                        .HasForeignKey("VideoResultId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.Navigation("Question");
-
-                    b.Navigation("VideoResult");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.QuestionExplanationLog", b =>
@@ -7186,8 +7110,6 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.VideoResult", b =>
                 {
-                    b.Navigation("QuestionExplanationErrors");
-
                     b.Navigation("VideoTimeCodeAnswers");
 
                     b.Navigation("VideoTimeCodeResults");

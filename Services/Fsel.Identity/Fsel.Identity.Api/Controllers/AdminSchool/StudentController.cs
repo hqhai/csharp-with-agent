@@ -7,6 +7,7 @@ namespace Fsel.Identity.Api.Controllers.AdminSchool
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Identity.Application.Commands.StudentCmd;
+    using Fsel.Identity.Application.Queries.AdminQuery;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
@@ -28,6 +29,19 @@ namespace Fsel.Identity.Api.Controllers.AdminSchool
         {
             _mediator = mediator;
             _userSchoolRepository = userSchoolRepository;
+        }
+
+        /// <summary>
+        /// Get SchoolId
+        /// </summary>
+        [HttpGet("schoolId")]
+        [ProducesResponseType(typeof(MethodResult<Guid>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSchoolId()
+        {
+            MethodResult<Guid> methodResult = new MethodResult<Guid>();
+            methodResult.Result = await _userSchoolRepository.GetSchoolIdAsync();
+            return methodResult.GetActionResult();
         }
 
         /// <summary>
@@ -73,22 +87,38 @@ namespace Fsel.Identity.Api.Controllers.AdminSchool
         /// <summary>
         /// cập nhật expired date cho students
         /// </summary>
-        [HttpPut("update-expired-date-for-students")]
+        [HttpDelete("delete-students")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateCompetitionEvents([FromBody] UpdateExpiredDateForStudentsEventCommand cmd)
+        public async Task<IActionResult> DeleteStudents([FromBody] DeleteStudentsInEventByAdminSchoolCommand cmd)
         {
             var commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
         /// <summary>
+        /// Export students
+        /// </summary>
+        [HttpGet("export-students")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportStudents([FromQuery] ExportStudentsByAdminSchoolQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!queryResult.IsOK || queryResult.Result == null)
+            {
+                return queryResult.GetActionResult();
+            }
+            return File(queryResult.Result, Settings.Excels.ContentType, "students_report.xlsx");
+        }
+
+        /// <summary>
         /// cập nhật expired date cho students
         /// </summary>
-        [HttpDelete("delete-students")]
+        [HttpPut("update-expired-date-for-students")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> DeleteStudents([FromBody] DeleteStudentsInEventByAdminSchoolCommand cmd)
+        public async Task<IActionResult> UpdateCompetitionEvents([FromBody] UpdateExpiredDateForStudentsEventCommand cmd)
         {
             var commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return commandResult.GetActionResult();

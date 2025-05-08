@@ -6,7 +6,9 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Base.Managers;
     using Fsel.Core.Extensions;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Identity.Domain.Models.QueryModels.Students;
@@ -25,14 +27,20 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
         private readonly IStudentRepository _studentRepository;
         private readonly IUserSchoolRepository _userSchoolRepository;
         private readonly AuthContext _authContext;
+        private readonly UserManager<User> _userManager;
+        private readonly IHumanRepository _humanRepository;
 
         public SearchStudentsQueryHandler(IStudentRepository studentRepository,
             IUserSchoolRepository userSchoolRepository,
-            AuthContext authContext)
+            AuthContext authContext,
+            UserManager<User> userManager,
+            IHumanRepository humanRepository)
         {
             _studentRepository = studentRepository;
             _userSchoolRepository = userSchoolRepository;
             _authContext = authContext;
+            _userManager = userManager;
+            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<StudentSearchAdminModel>>> Handle(SearchStudentsQuery request, CancellationToken cancellationToken)
@@ -44,14 +52,18 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var query = _studentRepository.Queryable;
+
+            var query = from u in _userManager.Users
+                        join h in _humanRepository.Queryable on u.Id equals h.UserId
+                        join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                        select new { User = u, Human = h, Student = s };
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
                 if (request.Keyword.IsValidEmail())
                 {
-                    query = query.Where(m => m.Human != null && m.Human.Email!.Contains(request.Keyword));
+                    query = query.Where(m => m.Human != null && m.Human.Email == request.Keyword);
                 }
                 else if (request.Keyword.IsValidPhoneNumber())
                 {
@@ -59,47 +71,65 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 }
                 else if (Guid.TryParse(request.Keyword, out var guid))
                 {
-                    query = query.Where(m => m.Id == guid);
+                    query = query.Where(m => m.Student.Id == guid);
                 }
                 else
                 {
-                    query = query.Where(m => m.Human != null && m.Human.FullName!.Contains(request.Keyword));
+                    var queryUserName = query.Where(m => (m.User.UserName != null && m.User.UserName == request.Keyword));
+                    var queryFullName = query.Where(m => m.User.FullName != null && EF.Functions.Contains(m.User.FullName, $"\"{request.Keyword}\"") && EF.Functions.Like(m.User.FullName, $"%{request.Keyword}%"));
+                    query = queryUserName.Union(queryFullName);
                 }
             }
             if (!string.IsNullOrEmpty(request.SchoolName))
             {
                 request.SchoolName = request.SchoolName.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.Where(m => m.School != null && m.School.Contains(request.SchoolName));
+                query = query.Where(m => m.Student.School != null && m.Student.School == request.SchoolName);
             }
             if (request.Grades != null && request.Grades.Count > 0)
             {
-                query = query.WhereBulkContains(request.Grades, x => x.SchoolGrade);
+                query = query.WhereBulkContains(request.Grades, x => x.Student.SchoolGrade);
             }
             if (request.Classes != null && request.Classes.Count > 0)
             {
-                query = query.WhereBulkContains(request.Classes, x => x.SchoolClass);
+                query = query.WhereBulkContains(request.Classes, x => x.Student.SchoolClass);
+            }
+            if (request.IsCourseProcess)
+            {
+                query = query.Where(x => x.Student.CourseId.HasValue);
+            }
+            if (request.CourseType.HasValue)
+            {
+                var courseLevels = request.CourseType.GetEnumCourseLevels();
+                query = query.Where(x => x.Student.CourseLevel.HasValue && courseLevels.Contains(x.Student.CourseLevel.Value));
+            }
+            if (request.CourseLevel.HasValue)
+            {
+                query = query.Where(m => m.Student.CourseLevel == request.CourseLevel);
             }
             if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
             {
                 var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
-                query = query.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId);
+                query = query.Where(x => x.Student.SchoolId.HasValue && x.Student.SchoolId == schoolId);
             }
 
             var dataQuery = query.Select(x => new StudentSearchAdminModel
             {
-                Id = x.Id,
-                CreatedDate = x.CreatedDate,
+                Id = x.Student.Id,
+                CreatedDate = x.Student.CreatedDate,
                 Birthday = x.Human!.Birthday,
-                CourseLevel = x.CourseLevel,
+                CourseLevel = x.Student.CourseLevel,
                 PhoneNumber = x.Human.PhoneNumber,
                 Email = x.Human.Email,
                 FullName = x.Human.FullName,
-                Type = x.CourseLevel.GetEnumCourseType(),
-                SchoolId = x.SchoolId,
-                SchoolName = x.School,
-                Class = x.SchoolClass,
-                Grade = x.SchoolGrade,
-                UserName = x.Human.User!.UserName
+                Type = x.Student.CourseLevel.GetEnumCourseType(),
+                CourseId = x.Student.CourseId,
+                SchoolId = x.Student.SchoolId,
+                SchoolName = x.Student.School,
+                Class = x.Student.SchoolClass,
+                Grade = x.Student.SchoolGrade,
+                UserName = x.User.UserName,
+                PasswordDefault = x.User.DefaultPassword,
+                ExpiredDate = x.Student.ExpiredDate
             });
             int totalItem = await dataQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await dataQuery

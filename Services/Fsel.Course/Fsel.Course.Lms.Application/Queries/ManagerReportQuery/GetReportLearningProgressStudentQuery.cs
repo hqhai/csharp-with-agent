@@ -47,6 +47,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListSchool = request.ListSchool,
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
                 LearningStatus = request.LearningStatus,
@@ -62,7 +64,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var students = userResults?.Result;
-            if (students == null)
+            if (students == null || !students.Any())
             {
                 return methodResult;
             }
@@ -78,6 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     SchoolClass = item.SchoolClass,
                     SchoolGrade = item.SchoolGrade,
                     SchoolName = item.School,
+                    UserName = item.UserName,
                     Status = item.ExpiredDate > DateTime.UtcNow ? EnumLearningStatus.InProgress : EnumLearningStatus.Expired,
                     CourseLevel = item.CourseLevel,
                     ContentProgress = $"{courseComplete?.CountComplete} / {courseComplete?.TotalComplete}",

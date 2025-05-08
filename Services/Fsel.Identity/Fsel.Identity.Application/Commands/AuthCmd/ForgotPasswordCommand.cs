@@ -83,7 +83,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
             else if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
-                user = await _userManager.Users.Include(p => p.UserOtpCodes).Include(x => x.Human).FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber.Trim() && x.UserName == request.PhoneNumber.Trim(), cancellationToken);
+                user = await _userManager.Users.Include(p => p.UserOtpCodes).Include(x => x.Human).FirstOrDefaultAsync(x => x.UserName == request.PhoneNumber.Trim(), cancellationToken);
             }
 
             if (user == null)
@@ -99,7 +99,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            if (!user.PhoneNumberConfirmed && !user.EmailConfirmed)
+            if (!user.EmailConfirmed)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
@@ -127,10 +127,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     return methodResult;
                 }
             }
-
             else if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
                 var otp = await _saveOtpCodeConverter.SaveOTpCodeBySmsCommand(lastOtp, user.Id, cancellationToken);
+
+                countOtp = lastOtp == null ? 1 : lastOtp.RetryCount;
 
                 var sendSMSResult = await _senderService.SendSMSAsync(new SendSMSCommandModel()
                 {
@@ -138,11 +139,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     Template = EnumSendSMSTemplate.SendOTP,
                     Params = new
                     {
-                        OTP = otp
+                        OTP = otp,
+                        CountOTP = countOtp
                     }
                 });
-
-                countOtp = lastOtp == null ? 1 : lastOtp.RetryCount;
             }
 
             methodResult.Result = new ForgotPasswordResultModel { IsSuccess = true, CountOTP = countOtp };

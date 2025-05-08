@@ -10,6 +10,7 @@ namespace Fsel.Identity.Api.Controllers
     using Fsel.Identity.Application.Commands.StudentCmd;
     using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Identity.Application.Queries.StudentQuery;
+    using Fsel.Identity.Domain.Models.CommandModels.UserOtpCodes;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -34,7 +35,7 @@ namespace Fsel.Identity.Api.Controllers
         /// send otp
         /// </summary>
         [HttpPost("send-otp")]
-        [ProducesResponseType(typeof(MethodResult<EnumActionSaveOTPForEventHaNoi>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<SaveOTPForUserEventHaNoiCommandModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SendOTP([FromBody] SaveOTPForUserEventHaNoiCommand command)
         {

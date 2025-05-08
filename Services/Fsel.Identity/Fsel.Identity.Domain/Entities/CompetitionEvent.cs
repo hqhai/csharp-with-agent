@@ -17,6 +17,8 @@ namespace Fsel.Identity.Domain.Entities
 
         public string? LBConfigStr { get; set; }
 
+        public string? DashboardEventConfigStr { get; set; }
+
         [NotMapped]
         public SchoolEventRule? LBConfig
         {
@@ -35,6 +37,16 @@ namespace Fsel.Identity.Domain.Entities
                 return Common.Helpers.ConvertHelper.Deserialize<SchoolEventRule>(EventContentStr);
             }
             set { EventContentStr = Common.Helpers.ConvertHelper.Serialize(value); }
+        }
+
+        [NotMapped]
+        public DashboardEventConfig? DashboardEventConfig
+        {
+            get
+            {
+                return Common.Helpers.ConvertHelper.Deserialize<DashboardEventConfig>(DashboardEventConfigStr);
+            }
+            set { DashboardEventConfigStr = Common.Helpers.ConvertHelper.Serialize(value); }
         }
 
         public string? SchoolIdsStr { get; set; }

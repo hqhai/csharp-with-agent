@@ -39,7 +39,8 @@ namespace Fsel.Storage.Application.Queues.Consumers
                     UserId = message.UserId,
                     FileName = message.FileName,
                     ContentType = message.ContentType,
-                    FileData = message.FileData
+                    FileData = message.FileData,
+                    CurrentDate = message.CurrentDate
                 });
             });
 
