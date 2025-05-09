@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Services.StorageServices;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -48,10 +49,14 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
             var filePart = await _storageService.ConvertWav(streamPart);
             if (!filePart.IsSuccessStatusCode)
             {
-                return;
+                var filePartS3 = await _storageService.UpLoadFile(EnumFolderType.Files, EnumBucketType.FselPublic, streamPart);
+                classForumDetailResult.ClassForumResultFiles = new List<ClassForumResultFile> { new ClassForumResultFile { FilePath = filePartS3.Content?.Result } };
+            }
+            else
+            {
+                classForumDetailResult.ClassForumResultFiles = new List<ClassForumResultFile> { new ClassForumResultFile { FilePath = filePart.Content?.Result } };
             }
 
-            classForumDetailResult.ClassForumResultFiles = new List<ClassForumResultFile> { new ClassForumResultFile { FilePath = filePart.Content?.Result } };
             _classForumDetailResultRepository.Update(classForumDetailResult);
             await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return;

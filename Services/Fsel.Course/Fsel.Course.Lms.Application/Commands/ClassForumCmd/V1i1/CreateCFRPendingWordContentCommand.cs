@@ -15,7 +15,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults.V1i1;
     using Fsel.Course.Lms.Application.Queues.Publishers;
-    using Fsel.Course.Lms.Application.Services.StorageServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
@@ -188,7 +187,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
 
             // bắn publish sang xử lý speech to text
             using var memoryStream = new MemoryStream();
-            await request.FormFile.CopyToAsync(memoryStream);
+            await request.FormFile.CopyToAsync(memoryStream, cancellationToken);
 
             await _speechToTextPendingAiPublisher.Publish(new SpeechToTextPendingAiConsumerModel
             {
